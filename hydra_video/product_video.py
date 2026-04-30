@@ -275,8 +275,13 @@ def _ken_burns_clip(
     zoom_start: float = 1.00,
     zoom_end: float = 1.07,
     drift_px: int = 10,
+    drift_y: int = 0,
 ):
-    """Wrap a static image array in a Ken Burns video clip (no audio)."""
+    """Wrap a static image array in a Ken Burns video clip (no audio).
+
+    drift_px controls horizontal sinusoidal micro-movement.
+    drift_y controls vertical sinusoidal micro-movement (pan up/down).
+    """
     from moviepy import ColorClip, CompositeVideoClip, ImageClip
 
     cw, ch = canvas_size
@@ -284,7 +289,8 @@ def _ken_burns_clip(
     src_w, src_h = img.size
 
     fill = max(cw / src_w, ch / src_h)
-    base_scale = fill * zoom_end * 1.01
+    # 1.02 buffer so neither x nor y drift exposes black edges
+    base_scale = fill * zoom_end * 1.02
 
     def _zoom(t: float) -> float:
         progress = t / max(duration, 0.001)
@@ -301,8 +307,9 @@ def _ken_burns_clip(
         scale = base_scale * rel
         w = int(src_w * scale)
         h = int(src_h * scale)
-        drift = drift_px * math.sin(math.pi * progress)
-        return ((cw - w) / 2 + drift, (ch - h) / 2)
+        dx = drift_px * math.sin(math.pi * progress)
+        dy = drift_y  * math.sin(math.pi * progress)
+        return ((cw - w) / 2 + dx, (ch - h) / 2 + dy)
 
     img = img.with_position(_pos)
     bg = ColorClip(size=canvas_size, color=(0, 0, 0)).with_duration(duration)
@@ -413,18 +420,22 @@ def build_slideshow_from_images(
     duration_sec: float,
     video_size: tuple[int, int] = DEFAULT_VIDEO_SIZE,
     fps: int = DEFAULT_FPS,
-    min_clip_sec: float = 2.0,
-    max_clip_sec: float = 4.0,
+    min_clip_sec: float = 1.5,
+    max_clip_sec: float = 2.0,
+    intro_sec: float = 1.2,
     out_path: "Path | None" = None,
 ) -> "Path":
     """Build a real-image Ken Burns slideshow (silent MP4, canvas-sized).
 
-    Each image is fitted to 9:16 with blurred-background fill, then wrapped
-    in a Ken Burns clip. Zoom and drift direction alternate per clip for
-    visual variety. Suitable as avatar_video for compose(skip_fit=True).
+    Starts with a pure-black intro frame (`intro_sec`) so the hook text
+    overlay in compose() appears on full black before any product image.
+    Each image then gets a unique motion pattern from a 6-entry cycle:
+    zoom-in/out × right/left/up/down drift.
+
+    Suitable as avatar_video for compose(skip_fit=True).
     """
     from pathlib import Path as _Path
-    from moviepy import concatenate_videoclips
+    from moviepy import ColorClip, concatenate_videoclips
     from PIL import Image as _PILImage
 
     ensure_dirs()
@@ -437,21 +448,33 @@ def build_slideshow_from_images(
     if n == 0:
         raise ValueError("No images provided to build_slideshow_from_images")
 
-    clip_dur = max(min_clip_sec, min(max_clip_sec, duration_sec / n))
-
-    # Alternating Ken Burns directions for variety
-    _ZOOM_PATTERNS = [
-        (1.00, 1.08, 10),   # zoom in, drift right
-        (1.08, 1.00, -10),  # zoom out, drift left
-        (1.02, 1.09, 8),    # zoom in faster
-        (1.09, 1.02, -8),   # zoom out, drift left
+    # 6-pattern motion cycle: (zoom_start, zoom_end, drift_x, drift_y)
+    # Covers zoom-in, zoom-out, right, left, up, diagonal — never repeats
+    # the same feel on back-to-back clips.
+    _MOTION = [
+        (1.00, 1.09,  13,   0),   # zoom in  → drift right
+        (1.09, 1.00, -11,   0),   # zoom out → drift left
+        (1.00, 1.09,   0, -10),   # zoom in  → pan up
+        (1.09, 1.00,   9,   8),   # zoom out → diagonal down-right
+        (1.00, 1.09,  -9,   0),   # zoom in  → drift left
+        (1.09, 1.00,   0,   9),   # zoom out → pan down
     ]
 
     clips = []
+
+    # Prepend black intro frame for full-screen hook text
+    if intro_sec > 0:
+        clips.append(
+            ColorClip(size=video_size, color=(0, 0, 0)).with_duration(intro_sec)
+        )
+
+    image_duration = max(0.1, duration_sec - intro_sec)
+    clip_dur = max(min_clip_sec, min(max_clip_sec, image_duration / n))
+
     total = 0.0
     idx = 0
-    while total < duration_sec - 0.05:
-        remaining = duration_sec - total
+    while total < image_duration - 0.05:
+        remaining = image_duration - total
         dur = min(clip_dur, remaining)
         if dur < 0.2:
             break
@@ -464,14 +487,15 @@ def build_slideshow_from_images(
             continue
 
         arr = _fit_image_vertical(img, video_size)
-        zs, ze, drift = _ZOOM_PATTERNS[idx % len(_ZOOM_PATTERNS)]
+        zs, ze, dx, dy = _MOTION[idx % len(_MOTION)]
         clips.append(_ken_burns_clip(arr, dur, video_size, fps,
-                                     zoom_start=zs, zoom_end=ze, drift_px=drift))
+                                     zoom_start=zs, zoom_end=ze,
+                                     drift_px=dx, drift_y=dy))
         total += dur
         idx += 1
 
-    if not clips:
-        raise ValueError("No clips generated from images")
+    if len(clips) == 0 or (intro_sec > 0 and len(clips) == 1):
+        raise ValueError("No image clips generated from image paths")
 
     final = concatenate_videoclips(clips, method="compose")
     final.write_videofile(

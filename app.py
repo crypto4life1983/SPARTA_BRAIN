@@ -5235,7 +5235,7 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
 
         ensure_dirs()
         cfg = _hv_settings.load()
-        style_cfg = _resolve_style("clean")
+        style_cfg = _resolve_style("affiliate")
 
         # ── 1. Voice synthesis ────────────────────────────────────────────────
         edge_voice  = cfg.get("edge_voice")  or _hv_voice.DEFAULT_VOICE
@@ -5294,8 +5294,10 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             )
 
         # ── 4. Captions + hook + CTA overlays ────────────────────────────────
-        hook_end   = min(3.5, duration * 0.20)
-        cta_start  = max(duration - 4.0, duration * 0.75)
+        # hook_end matches the black intro frame duration so hook text
+        # shows on full black before any product image appears.
+        hook_end   = 1.2
+        cta_start  = max(duration - 3.5, duration * 0.78)
 
         caption_clips = _hv_captions.make_caption_clips(
             v.word_timings, DEFAULT_VIDEO_SIZE, style=style_cfg,

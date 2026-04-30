@@ -81,7 +81,28 @@ AGGRESSIVE = StyleConfig(
     product_fade_sec=0.25,
 )
 
-PRESETS: dict[str, StyleConfig] = {"clean": CLEAN, "aggressive": AGGRESSIVE}
+AFFILIATE = StyleConfig(
+    name="affiliate",
+    # Bigger captions (×1.18 vs CLEAN at 720px reference)
+    caption_font_size=66,
+    chunk_max_words=3,         # 3 words = fast TikTok pacing
+    caption_fade_sec=0.06,
+    hook_font_size=100,        # full-screen impact
+    hook_max_seconds=1.5,      # short punchy hook
+    hook_fade_sec=0.12,
+    cta_font_size=88,
+    cta_min_seconds=1.8,
+    cta_max_seconds=3.0,
+    cta_fade_sec=0.18,
+    zoom_amount=1.08,
+    drift_px=14,
+    pulse_every_sec=0.0,
+    music_volume_mult=0.18,
+    product_start_sec=1.2,
+    product_fade_sec=0.25,
+)
+
+PRESETS: dict[str, StyleConfig] = {"clean": CLEAN, "aggressive": AGGRESSIVE, "affiliate": AFFILIATE}
 
 
 def resolve(style: str | None) -> StyleConfig:
