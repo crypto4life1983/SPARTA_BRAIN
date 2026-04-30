@@ -1,7 +1,7 @@
 """Final composer for Hydra Video.
 
 Layers (bottom -> top):
-  1. talking-head video (avatar + lipsync output)
+  1. talking-head video (avatar + lipsync output) — scaled to fill canvas
   2. optional product image overlay (bottom-right)
   3. captions
   4. voice audio track (+ optional background music duck)
@@ -11,6 +11,7 @@ Outputs an H.264 / AAC MP4 to outputs/final/.
 
 from __future__ import annotations
 
+import math
 import time
 from pathlib import Path
 
@@ -81,51 +82,53 @@ def _fit_talking_head(
     canvas_size: tuple[int, int],
     duration: float,
     zoom_start: float = 1.00,
-    zoom_end: float = 1.05,
+    zoom_end: float = 1.06,
     face_offset_frac: float = -0.04,
+    drift_px: int = 12,
 ):
-    """Scale a talking-head clip to fill the canvas and add a slow Ken Burns zoom.
+    """Scale talking-head clip to fill the canvas, add Ken Burns zoom + micro-drift.
 
-    Handles the common case where SadTalker/Wav2Lip outputs a video smaller
-    than the target canvas (e.g. 640×896 on a 720×1280 canvas), which would
-    otherwise produce black bars at the right and bottom edges.
+    Handles any input resolution (e.g. SadTalker 640x896 -> 1080x1920 canvas).
+
+    Motion model:
+    - Zoom: zoom_start -> zoom_end using ease-in-out (cosine curve) so the
+      camera movement feels organic rather than mechanical.
+    - Drift: a sinusoidal horizontal micro-movement over the full duration
+      (max drift_px pixels) simulates a handheld lock-off shot.
+    - No vertical drift — would fight the face offset.
 
     Guarantees:
-    - The clip always fills the entire canvas at every frame (no black bars).
-    - A slow zoom from zoom_start to zoom_end over the clip's duration gives
-      the 'live camera' feel without the static-image look.
-    - face_offset_frac shifts the frame upward (negative) so the face sits
-      slightly above dead center — natural portrait framing.
+    - Clip always fills the full canvas — no black edges at any frame.
+    - Face sits slightly above dead center (face_offset_frac = -4%).
     """
     cw, ch = canvas_size
     src_w, src_h = clip.size
 
-    # Cover-fill scale: ensure the clip fills the whole canvas even after
-    # the zoom reaches zoom_end. Add 1% buffer to prevent any single-pixel
-    # black edge from floating-point rounding.
+    # Cover-fill at zoom_end + 1% buffer so edges never go black.
     fill = max(cw / src_w, ch / src_h)
     base_scale = fill * zoom_end * 1.01
 
-    # Face offset in pixels (negative = shift upward)
-    offset_px = int(ch * face_offset_frac)
+    offset_px = int(ch * face_offset_frac)  # negative = shift up
 
-    def _zoom(t: float) -> float:
-        # Normalise zoom_end → zoom_start relative to base_scale so that
-        # at t=0 the effective scale is fill*zoom_start and at t=duration
-        # it is fill*zoom_end.
+    def _ease(t: float) -> float:
         progress = t / max(duration, 0.001)
-        relative = zoom_start / zoom_end + (1.0 - zoom_start / zoom_end) * progress
+        # Cosine ease-in-out: slow start, accelerates mid, slows at end
+        eased = (1.0 - math.cos(math.pi * progress)) / 2.0
+        relative = zoom_start / zoom_end + (1.0 - zoom_start / zoom_end) * eased
         return base_scale * relative
 
-    clip = clip.resized(_zoom)
+    clip = clip.resized(_ease)
 
     def _pos(t: float):
         progress = t / max(duration, 0.001)
-        relative = zoom_start / zoom_end + (1.0 - zoom_start / zoom_end) * progress
+        eased = (1.0 - math.cos(math.pi * progress)) / 2.0
+        relative = zoom_start / zoom_end + (1.0 - zoom_start / zoom_end) * eased
         scale = base_scale * relative
         w = int(src_w * scale)
         h = int(src_h * scale)
-        x = (cw - w) / 2
+        # Horizontal micro-drift: one sine arc across full duration
+        drift = drift_px * math.sin(math.pi * progress)
+        x = (cw - w) / 2 + drift
         y = (ch - h) / 2 + offset_px
         return (x, y)
 
@@ -204,6 +207,7 @@ def compose(
         codec="libx264",
         audio_codec="aac",
         preset="medium",
+        bitrate="6000k",
         threads=4,
         logger=None,
     )
