@@ -5228,7 +5228,10 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
         from hydra_video import settings as _hv_settings
         from hydra_video import music as _hv_music
         from hydra_video.style import resolve as _resolve_style
-        from hydra_video.product_video import generate_product_cards, build_slideshow
+        from hydra_video.product_video import (
+            generate_product_cards, build_slideshow, build_slideshow_from_images,
+        )
+        from hydra_video.image_fetcher import fetch_product_images
 
         ensure_dirs()
         cfg = _hv_settings.load()
@@ -5251,29 +5254,61 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
         )
         duration = v.duration_sec
 
-        # ── 2. Product card slides ────────────────────────────────────────────
-        cards = await _asyncio.get_event_loop().run_in_executor(
+        # ── 2. Fetch real product images (Amazon → Pexels → PIL fallback) ────
+        image_paths = await _asyncio.get_event_loop().run_in_executor(
             None,
-            lambda: generate_product_cards(
+            lambda: fetch_product_images(
                 product=req.product,
                 niche=req.niche,
-                hook=req.viral_hook or req.product,
-                problem=req.problem_solved or "The old way is broken.",
-                cta=req.cta or "Check the link in description.",
                 affiliate_url=req.affiliate_url,
-                size=DEFAULT_VIDEO_SIZE,
+                max_images=6,
             ),
         )
 
-        # ── 3. Build slideshow (silent MP4 at canvas size) ───────────────────
-        slideshow_path = await _asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: build_slideshow(cards, duration, DEFAULT_VIDEO_SIZE),
-        )
+        # ── 3. Build slideshow ────────────────────────────────────────────────
+        if len(image_paths) >= 2:
+            # Real images available — use photo slideshow
+            slideshow_path = await _asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: build_slideshow_from_images(
+                    image_paths, duration, DEFAULT_VIDEO_SIZE,
+                ),
+            )
+        else:
+            # No real images — fall back to styled PIL cards
+            cards = await _asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: generate_product_cards(
+                    product=req.product,
+                    niche=req.niche,
+                    hook=req.viral_hook or req.product,
+                    problem=req.problem_solved or "The old way is broken.",
+                    cta=req.cta or "Check the link in description.",
+                    affiliate_url=req.affiliate_url,
+                    size=DEFAULT_VIDEO_SIZE,
+                ),
+            )
+            slideshow_path = await _asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: build_slideshow(cards, duration, DEFAULT_VIDEO_SIZE),
+            )
 
-        # ── 4. Captions ───────────────────────────────────────────────────────
+        # ── 4. Captions + hook + CTA overlays ────────────────────────────────
+        hook_end   = min(3.5, duration * 0.20)
+        cta_start  = max(duration - 4.0, duration * 0.75)
+
         caption_clips = _hv_captions.make_caption_clips(
             v.word_timings, DEFAULT_VIDEO_SIZE, style=style_cfg,
+            skip_before=hook_end,   # captions start after hook clears
+            skip_after=cta_start,   # captions end before CTA card
+        )
+        hook_clip = _hv_captions.make_hook_clip(
+            req.viral_hook or req.product,
+            DEFAULT_VIDEO_SIZE, start=0.0, end=hook_end, style=style_cfg,
+        )
+        cta_clip = _hv_captions.make_cta_clip(
+            req.cta or "Check the link in description.",
+            DEFAULT_VIDEO_SIZE, start=cta_start, end=duration, style=style_cfg,
         )
 
         # ── 5. Optional background music ─────────────────────────────────────
@@ -5292,6 +5327,8 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
                 video_size=DEFAULT_VIDEO_SIZE,
                 duration_sec=duration,
                 music_path=chosen_music,
+                hook_clip=hook_clip,
+                cta_clip=cta_clip,
                 fps=30,
                 style=style_cfg,
                 skip_fit=True,   # slideshow is already canvas-sized
@@ -5314,6 +5351,8 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             "word_count": len(v.word_timings),
             "product": req.product,
             "niche": req.niche,
+            "image_count": len(image_paths),
+            "visual_mode": "real_images" if len(image_paths) >= 2 else "pil_cards",
             "elapsed_sec": round(_time.time() - started, 2),
         }
 

@@ -368,3 +368,122 @@ def build_slideshow(
         c.close()
     final.close()
     return out_path
+
+
+# ── Real-image slideshow ───────────────────────────────────────────────────────
+
+def _fit_image_vertical(img: "Image.Image", size: tuple[int, int]) -> np.ndarray:
+    """Fit any aspect-ratio image to a 9:16 canvas.
+
+    Strategy: blurred + darkened version fills the canvas; crisp original
+    is scaled to fill the canvas width and composited centered on top.
+    This avoids letterboxing and looks like real TikTok product content.
+    """
+    from PIL import Image as _PILImage
+
+    cw, ch = size
+    img = img.convert("RGB")
+
+    # Background: upscale to canvas, heavy blur, darken
+    bg = img.resize((cw, ch), _PILImage.LANCZOS)
+    bg = bg.filter(ImageFilter.GaussianBlur(radius=24))
+    bg_arr = (np.array(bg) * 0.30).astype(np.uint8)
+    bg = _PILImage.fromarray(bg_arr)
+
+    # Foreground: scale to fill canvas width
+    src_w, src_h = img.size
+    scale = cw / src_w
+    new_h = int(src_h * scale)
+    fg = img.resize((cw, new_h), _PILImage.LANCZOS)
+
+    if new_h >= ch:
+        # Taller than canvas — center-crop vertically
+        y_off = (new_h - ch) // 2
+        fg = fg.crop((0, y_off, cw, y_off + ch))
+        return np.array(fg)
+
+    canvas = bg.copy()
+    y_off = (ch - new_h) // 2
+    canvas.paste(fg, (0, y_off))
+    return np.array(canvas)
+
+
+def build_slideshow_from_images(
+    image_paths: list["Path"],
+    duration_sec: float,
+    video_size: tuple[int, int] = DEFAULT_VIDEO_SIZE,
+    fps: int = DEFAULT_FPS,
+    min_clip_sec: float = 2.0,
+    max_clip_sec: float = 4.0,
+    out_path: "Path | None" = None,
+) -> "Path":
+    """Build a real-image Ken Burns slideshow (silent MP4, canvas-sized).
+
+    Each image is fitted to 9:16 with blurred-background fill, then wrapped
+    in a Ken Burns clip. Zoom and drift direction alternate per clip for
+    visual variety. Suitable as avatar_video for compose(skip_fit=True).
+    """
+    from pathlib import Path as _Path
+    from moviepy import concatenate_videoclips
+    from PIL import Image as _PILImage
+
+    ensure_dirs()
+    if out_path is None:
+        out_path = OUT_RAW_AVATAR / f"product_real_{int(time.time())}.mp4"
+    out_path = _Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    n = len(image_paths)
+    if n == 0:
+        raise ValueError("No images provided to build_slideshow_from_images")
+
+    clip_dur = max(min_clip_sec, min(max_clip_sec, duration_sec / n))
+
+    # Alternating Ken Burns directions for variety
+    _ZOOM_PATTERNS = [
+        (1.00, 1.08, 10),   # zoom in, drift right
+        (1.08, 1.00, -10),  # zoom out, drift left
+        (1.02, 1.09, 8),    # zoom in faster
+        (1.09, 1.02, -8),   # zoom out, drift left
+    ]
+
+    clips = []
+    total = 0.0
+    idx = 0
+    while total < duration_sec - 0.05:
+        remaining = duration_sec - total
+        dur = min(clip_dur, remaining)
+        if dur < 0.2:
+            break
+
+        img_path = image_paths[idx % n]
+        try:
+            img = _PILImage.open(img_path).convert("RGB")
+        except Exception:
+            idx += 1
+            continue
+
+        arr = _fit_image_vertical(img, video_size)
+        zs, ze, drift = _ZOOM_PATTERNS[idx % len(_ZOOM_PATTERNS)]
+        clips.append(_ken_burns_clip(arr, dur, video_size, fps,
+                                     zoom_start=zs, zoom_end=ze, drift_px=drift))
+        total += dur
+        idx += 1
+
+    if not clips:
+        raise ValueError("No clips generated from images")
+
+    final = concatenate_videoclips(clips, method="compose")
+    final.write_videofile(
+        str(out_path),
+        fps=fps,
+        codec="libx264",
+        preset="medium",
+        audio=False,
+        threads=4,
+        logger=None,
+    )
+    for c in clips:
+        c.close()
+    final.close()
+    return out_path

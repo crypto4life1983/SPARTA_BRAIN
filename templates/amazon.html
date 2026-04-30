@@ -189,7 +189,10 @@ function renderToday(today) {
           try { await navigator.clipboard.writeText(p); copyEl.textContent = 'Copied!'; setTimeout(() => { copyEl.textContent = 'Copy Path'; }, 1500); }
           catch { prompt('Copy this path:', p); }
         };
-        metaEl.textContent = `${data.duration_sec}s · ${data.word_count} words · ${data.elapsed_sec}s elapsed`;
+        const modeLabel = data.visual_mode === 'real_images'
+          ? `📸 ${data.image_count} real images`
+          : '🎨 PIL cards (no images found)';
+        metaEl.textContent = `${data.duration_sec}s · ${data.word_count} words · ${modeLabel} · ${data.elapsed_sec}s`;
         statusEl.textContent = 'Done.';
         resultEl.style.display = '';
         resultEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
