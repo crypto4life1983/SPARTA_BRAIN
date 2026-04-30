@@ -258,10 +258,14 @@
         <tbody id="hydra-latest-meta"></tbody>
       </table>
       <div class="row-actions" style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
-        <a id="hydra-download" class="btn btn-sm btn-primary" download>Download</a>
+        <a id="hydra-open-tab" class="btn btn-sm btn-primary" target="_blank" rel="noopener">Open Video</a>
+        <a id="hydra-download" class="btn btn-sm" download>Download</a>
         <button id="hydra-copy-path" type="button" class="btn btn-sm">Copy Path</button>
         <button id="hydra-refresh-btn" type="button" class="btn btn-sm">Refresh</button>
       </div>
+      <p class="hint" style="margin-top:10px; font-size:11px; opacity:0.6;">
+        Output folder: <code style="user-select:all;">C:\SPARTA_BRAIN\hydra_video\outputs\final\</code>
+      </p>
       <p class="hint" id="hydra-meta" style="margin-top:8px;"></p>
     </div>
   </div>
@@ -609,7 +613,8 @@ async function loadHydraHistory() {
           <div class="hint" style="margin-bottom:6px;">${_fmtBytes(v.size_bytes)}</div>
           <div class="hint" style="font-size:11px; word-break:break-all; margin-bottom:8px; opacity:0.6;" title="${_winPath(v.path)}">${_winPath(v.path)}</div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a href="${v.url}" download="${v.filename}" class="btn btn-sm btn-primary" style="font-size:12px; padding:4px 10px;">Download</a>
+            <a href="${v.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary" style="font-size:12px; padding:4px 10px;">Open</a>
+            <a href="${v.url}" download="${v.filename}" class="btn btn-sm" style="font-size:12px; padding:4px 10px;">Download</a>
             <button type="button" class="btn btn-sm" data-copy-path="${v.path}"
                     style="font-size:12px; padding:4px 10px;">Copy Path</button>
           </div>
@@ -653,6 +658,7 @@ loadHydraHistory();
   const preview = $("#hydra-preview");
   const meta = $("#hydra-meta");
   const dl = $("#hydra-download");
+  const openTab = $("#hydra-open-tab");
   const copyPathBtn = $("#hydra-copy-path");
   const refreshBtn = $("#hydra-refresh-btn");
   const btn = $("#hydra-generate");
@@ -671,6 +677,7 @@ loadHydraHistory();
     document.getElementById("hydra-preview-err").style.display = "none";
     preview.src = videoUrl + "?t=" + Date.now();
     dl.href = videoUrl;
+    if (openTab) { openTab.href = videoUrl; }
     dl.download = videoPath ? videoPath.split(/[\\/]/).pop() : "hydra_video.mp4";
     _latestPath = videoPath || "";
 

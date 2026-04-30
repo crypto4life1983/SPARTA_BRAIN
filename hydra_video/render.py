@@ -145,6 +145,7 @@ def compose(
     music_path: Path | None = None,
     hook_clip=None,
     cta_clip=None,
+    skip_fit: bool = False,
     out_path: Path | None = None,
     fps: int = DEFAULT_FPS,
     style: StyleConfig = CLEAN,
@@ -161,7 +162,9 @@ def compose(
     )
 
     _raw_base = VideoFileClip(str(avatar_video)).with_duration(duration_sec)
-    base = _fit_talking_head(_raw_base, video_size, duration_sec)
+    # skip_fit=True for pre-sized product slideshows (already canvas-sized,
+    # already have Ken Burns baked in — no second motion layer needed).
+    base = _raw_base if skip_fit else _fit_talking_head(_raw_base, video_size, duration_sec)
     layers = [base]
 
     # Cinematic lower-third behind captions so text reads on any avatar.

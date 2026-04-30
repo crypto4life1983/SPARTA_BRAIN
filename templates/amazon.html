@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% block title %}Amazon Affiliate Engine - SPARTA BRAIN{% endblock %}
+{% block content %}
+<section>
+  <h1>Amazon Affiliate Engine</h1>
+  <p class="muted">
+    Daily 30-second video pitches for real Amazon products in
+    <strong>productivity, business, AI, work-from-home, content creation</strong>.
+    Each idea ships with the problem it solves, a viral hook, a 30s script,
+    angle, CTA, and link timing. Saved to
+    <code>spartacus/data/amazon/YYYY-MM-DD.json</code> + <code>.md</code>.
+    No fake links - if a product has no registered affiliate URL, the idea
+    runs in <em>CTA-only mode</em>.
+  </p>
+
+  <!-- =============== Generate panel =============== -->
+  <div class="card">
+    <h3>Generate today's brief</h3>
+    <p class="hint">3-5 ideas. Niches default to all 5 allowed.</p>
+
+    <div class="row-actions" style="gap:12px; align-items:flex-end;">
+      <div>
+        <label class="lbl" for="amz-count">Count</label>
+        <select id="amz-count">
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width:280px;">
+        <label class="lbl" for="amz-niches">Niches (Ctrl+click for multi)</label>
+        <select id="amz-niches" multiple size="5" style="min-width:240px;">
+          <option value="productivity">productivity</option>
+          <option value="business">business</option>
+          <option value="ai">AI</option>
+          <option value="work_from_home">work-from-home</option>
+          <option value="content_creation">content creation</option>
+        </select>
+      </div>
+      <button id="amz-gen-btn" class="btn btn-primary big">Generate</button>
+    </div>
+
+    <p id="amz-status" class="hint" style="margin-top:10px;"></p>
+  </div>
+
+  <!-- =============== Affiliate registry =============== -->
+  <div class="card">
+    <h3>Affiliate Links Registry</h3>
+    <p class="hint">
+      Stored at <code>spartacus/data/affiliate_links.json</code>. Only the
+      <strong>exact</strong> URL you save here is ever used. The engine
+      never modifies, varies, or invents links. Products not in this list
+      run in CTA-only mode.
+    </p>
+
+    <div class="row-actions" style="gap:8px; align-items:flex-end;">
+      <div style="flex:1; min-width:240px;">
+        <label class="lbl" for="amz-link-product">Product (exact name)</label>
+        <input type="text" id="amz-link-product" placeholder="e.g. Desk Cable Organizer" />
+      </div>
+      <div style="flex:2; min-width:280px;">
+        <label class="lbl" for="amz-link-url">Affiliate URL</label>
+        <input type="text" id="amz-link-url" placeholder="https://www.amazon.ca/dp/..." />
+      </div>
+      <button id="amz-link-save" class="btn">Save link</button>
+    </div>
+
+    <table id="amz-link-table" style="width:100%; margin-top:14px; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left; border-bottom:1px solid #333; padding:6px;">Product</th>
+          <th style="text-align:left; border-bottom:1px solid #333; padding:6px;">URL</th>
+          <th style="border-bottom:1px solid #333; padding:6px;"></th>
+        </tr>
+      </thead>
+      <tbody id="amz-link-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- =============== Today's ideas =============== -->
+  <div class="card">
+    <h3>Today's brief</h3>
+    <div id="amz-banner" class="hidden" style="padding:10px; background:#3a1a1a; border:1px solid #6b2a2a; border-radius:6px; margin-bottom:10px;"></div>
+    <div id="amz-today"></div>
+  </div>
+
+  <!-- =============== Catalog (read-only) =============== -->
+  <div class="card">
+    <h3>Curated catalog (<span id="amz-cat-count">0</span> products)</h3>
+    <p class="hint">Real products only. To add or change products, edit
+      <code>spartacus/agents/amazon_engine.py::_PRODUCT_CATALOG</code>.</p>
+    <div id="amz-catalog"></div>
+  </div>
+</section>
+
+<script>
+const $ = (q) => document.querySelector(q);
+const escHtml = (s) => (s || "").replace(/[&<>"']/g, c => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+
+async function loadAmazon() {
+  const r = await fetch('/api/amazon/today');
+  const j = await r.json();
+  renderToday(j.today || {});
+  renderCatalog(j.catalog || []);
+  renderLinks(j.affiliate_links || {});
+}
+
+function renderToday(today) {
+  const wrap = $('#amz-today');
+  const banner = $('#amz-banner');
+  if (!today || !today.ideas || !today.ideas.length) {
+    wrap.innerHTML = '<p class="hint">No brief generated yet today. Click <em>Generate</em>.</p>';
+    banner.classList.add('hidden');
+    return;
+  }
+  if (today.any_cta_only_mode) {
+    banner.textContent = today.banner + '  -  one or more ideas have no real affiliate link. Add the link to the registry before publishing.';
+    banner.classList.remove('hidden');
+  } else {
+    banner.classList.add('hidden');
+  }
+  wrap.innerHTML = today.ideas.map((idea, i) => `
+    <div class="card" style="margin-top:10px;" id="amz-idea-card-${i}">
+      <h4>${i+1}. ${escHtml(idea.product)} <span class="muted">(${escHtml(idea.niche)})</span> ${idea.cta_only_mode ? '<span class="nav-badge" style="background:#a33;">CTA-ONLY</span>' : ''}</h4>
+      ${idea.affiliate_url ? `<p><strong>Affiliate URL:</strong> <code>${escHtml(idea.affiliate_url)}</code></p>` : ''}
+      <p><strong>Problem:</strong> ${escHtml(idea.problem_solved)}</p>
+      <p><strong>Hook:</strong> ${escHtml(idea.viral_hook)}</p>
+      <p><strong>Angle:</strong> ${escHtml(idea.content_angle)}</p>
+      <p><strong>30s script:</strong></p>
+      <pre style="white-space:pre-wrap;">${escHtml(idea.script_30s)}</pre>
+      <p><strong>CTA:</strong> ${escHtml(idea.cta)}</p>
+      <p><strong>Link timing:</strong> ${escHtml(idea.link_intro_timing)}</p>
+      ${idea.link_warnings && idea.link_warnings.length ? `<p class="hint">Link guard: ${escHtml(idea.link_warnings.join(', '))}</p>` : ''}
+
+      <div style="margin-top:14px; padding-top:12px; border-top:1px solid #1e293b; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn btn-primary" id="amz-vidgen-btn-${i}">Generate Video</button>
+        <span class="hint" id="amz-vidgen-status-${i}"></span>
+      </div>
+      <div id="amz-vidgen-result-${i}" style="display:none; margin-top:14px;">
+        <video id="amz-vidgen-player-${i}" controls preload="metadata"
+               style="width:100%; max-width:280px; border-radius:10px; background:#000; display:block; margin-bottom:10px;"
+               onerror="this.style.opacity=0.4; this.title='Cannot preview — use Download';">
+        </video>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <a id="amz-vidgen-dl-${i}" class="btn btn-sm btn-primary" download>Download</a>
+          <a id="amz-vidgen-open-${i}" class="btn btn-sm" target="_blank" rel="noopener">Open</a>
+          <button class="btn btn-sm" id="amz-vidgen-copy-${i}">Copy Path</button>
+          <span class="hint" id="amz-vidgen-meta-${i}" style="font-size:11px;"></span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Wire "Generate Video" buttons after the HTML is injected.
+  today.ideas.forEach((idea, i) => {
+    const btn = document.getElementById(`amz-vidgen-btn-${i}`);
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const statusEl  = document.getElementById(`amz-vidgen-status-${i}`);
+      const resultEl  = document.getElementById(`amz-vidgen-result-${i}`);
+      const playerEl  = document.getElementById(`amz-vidgen-player-${i}`);
+      const dlEl      = document.getElementById(`amz-vidgen-dl-${i}`);
+      const openEl    = document.getElementById(`amz-vidgen-open-${i}`);
+      const copyEl    = document.getElementById(`amz-vidgen-copy-${i}`);
+      const metaEl    = document.getElementById(`amz-vidgen-meta-${i}`);
+
+      btn.disabled = true;
+      resultEl.style.display = 'none';
+      statusEl.textContent = 'Generating video… (~30–90s)';
+
+      try {
+        const r = await fetch('/api/hydra/generate_from_idea', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(idea),
+        });
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || 'Generation failed');
+
+        const url = data.video_url + '?t=' + Date.now();
+        playerEl.src = url;
+        dlEl.href = data.video_url;
+        dlEl.download = data.video_path.split(/[\\/]/).pop();
+        openEl.href = data.video_url;
+        copyEl.onclick = async () => {
+          const p = (data.video_path || '').replace(/\//g, '\\');
+          try { await navigator.clipboard.writeText(p); copyEl.textContent = 'Copied!'; setTimeout(() => { copyEl.textContent = 'Copy Path'; }, 1500); }
+          catch { prompt('Copy this path:', p); }
+        };
+        metaEl.textContent = `${data.duration_sec}s · ${data.word_count} words · ${data.elapsed_sec}s elapsed`;
+        statusEl.textContent = 'Done.';
+        resultEl.style.display = '';
+        resultEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      } catch (e) {
+        statusEl.textContent = 'Failed: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+}
+
+function renderCatalog(rows) {
+  $('#amz-cat-count').textContent = rows.length;
+  $('#amz-catalog').innerHTML = '<ul>' + rows.map(r =>
+    `<li><strong>${escHtml(r.product)}</strong> <span class="muted">(${escHtml(r.niche)})</span> - ${escHtml(r.solves)}</li>`
+  ).join('') + '</ul>';
+}
+
+function renderLinks(reg) {
+  const tbody = $('#amz-link-tbody');
+  const keys = Object.keys(reg);
+  if (!keys.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="hint" style="padding:10px;">No affiliate links registered yet. Add one above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = keys.map(k => `
+    <tr>
+      <td style="padding:6px; border-bottom:1px solid #222;">${escHtml(k)}</td>
+      <td style="padding:6px; border-bottom:1px solid #222;"><code style="word-break:break-all;">${escHtml(reg[k].url || '')}</code></td>
+      <td style="padding:6px; border-bottom:1px solid #222; text-align:right;">
+        <button class="btn" data-rm="${escHtml(k)}">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('button[data-rm]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const name = b.getAttribute('data-rm');
+      if (!confirm(`Remove affiliate link for "${name}"?`)) return;
+      const r = await fetch(`/api/amazon/affiliate-links/${encodeURIComponent(name)}`, {method:'DELETE'});
+      const j = await r.json();
+      if (j.ok) renderLinks(j.registry);
+    });
+  });
+}
+
+$('#amz-link-save').addEventListener('click', async () => {
+  const product = $('#amz-link-product').value.trim();
+  const url = $('#amz-link-url').value.trim();
+  if (!product || !url) { alert('Product and URL are both required.'); return; }
+  const r = await fetch('/api/amazon/affiliate-links', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({product, url}),
+  });
+  const j = await r.json();
+  if (j.ok) {
+    $('#amz-link-product').value = '';
+    $('#amz-link-url').value = '';
+    renderLinks(j.registry);
+  } else {
+    alert('Failed to save: ' + (j.detail || 'unknown error'));
+  }
+});
+
+$('#amz-gen-btn').addEventListener('click', async () => {
+  const count = parseInt($('#amz-count').value, 10) || 3;
+  const niches = Array.from($('#amz-niches').selectedOptions).map(o => o.value);
+  const status = $('#amz-status');
+  status.textContent = 'Generating... (this calls the local LLM, ~30-60s)';
+  $('#amz-gen-btn').disabled = true;
+  try {
+    const r = await fetch('/api/amazon/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({count, niches}),
+    });
+    const j = await r.json();
+    if (!j.ok) { status.textContent = 'Failed: ' + (j.detail || 'unknown'); return; }
+    status.textContent = `Generated ${j.payload.count} ideas. Saved to ${j.payload.json_path}`;
+    renderToday(j.payload);
+  } catch (e) {
+    status.textContent = 'Error: ' + e;
+  } finally {
+    $('#amz-gen-btn').disabled = false;
+  }
+});
+
+loadAmazon();
+</script>
+{% endblock %}

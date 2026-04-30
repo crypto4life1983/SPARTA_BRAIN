@@ -5190,6 +5190,137 @@ def api_hydra_outputs(limit: int = 20):
     return {"ok": True, "videos": videos}
 
 
+class HydraIdeaReq(BaseModel):
+    product: str
+    viral_hook: str = ""
+    problem_solved: str = ""
+    script_30s: str = ""
+    cta: str = ""
+    niche: str = "productivity"
+    affiliate_url: str = ""
+
+
+@app.post("/api/hydra/generate_from_idea")
+async def api_hydra_generate_from_idea(req: HydraIdeaReq):
+    """Turn an Amazon affiliate idea into a product slideshow video.
+
+    Uses the existing TTS + captions + render pipeline but replaces the
+    avatar/lipsync stage with a styled product card slideshow.  No avatar,
+    no SadTalker — pure product visuals with Ken Burns motion."""
+    import asyncio as _asyncio
+    import time as _time
+
+    started = _time.time()
+
+    # Build the script from the idea fields.
+    script = (req.script_30s or "").strip()
+    if not script:
+        parts = [req.viral_hook, req.problem_solved, req.cta]
+        script = "  ".join(p for p in parts if p.strip())
+    if not script:
+        script = f"{req.product}.  Check the link in description."
+
+    try:
+        from hydra_video import DEFAULT_VIDEO_SIZE, ensure_dirs
+        from hydra_video import voice as _hv_voice
+        from hydra_video import captions as _hv_captions
+        from hydra_video import render as _hv_render
+        from hydra_video import settings as _hv_settings
+        from hydra_video import music as _hv_music
+        from hydra_video.style import resolve as _resolve_style
+        from hydra_video.product_video import generate_product_cards, build_slideshow
+
+        ensure_dirs()
+        cfg = _hv_settings.load()
+        style_cfg = _resolve_style("clean")
+
+        # ── 1. Voice synthesis ────────────────────────────────────────────────
+        edge_voice  = cfg.get("edge_voice")  or _hv_voice.DEFAULT_VOICE
+        edge_rate   = cfg.get("edge_rate")   or _hv_voice.DEFAULT_RATE
+        edge_pitch  = cfg.get("edge_pitch")  or "+0Hz"
+        edge_volume = cfg.get("edge_volume") or "+0%"
+
+        v = await _asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: _hv_voice.synthesize(
+                script,
+                voice=edge_voice, rate=edge_rate,
+                pitch=edge_pitch, volume=edge_volume,
+                provider=cfg.get("voice_provider", "edge_tts"),
+            ),
+        )
+        duration = v.duration_sec
+
+        # ── 2. Product card slides ────────────────────────────────────────────
+        cards = await _asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: generate_product_cards(
+                product=req.product,
+                niche=req.niche,
+                hook=req.viral_hook or req.product,
+                problem=req.problem_solved or "The old way is broken.",
+                cta=req.cta or "Check the link in description.",
+                affiliate_url=req.affiliate_url,
+                size=DEFAULT_VIDEO_SIZE,
+            ),
+        )
+
+        # ── 3. Build slideshow (silent MP4 at canvas size) ───────────────────
+        slideshow_path = await _asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: build_slideshow(cards, duration, DEFAULT_VIDEO_SIZE),
+        )
+
+        # ── 4. Captions ───────────────────────────────────────────────────────
+        caption_clips = _hv_captions.make_caption_clips(
+            v.word_timings, DEFAULT_VIDEO_SIZE, style=style_cfg,
+        )
+
+        # ── 5. Optional background music ─────────────────────────────────────
+        chosen_music = _hv_music.pick_track()
+
+        # ── 6. Compose ────────────────────────────────────────────────────────
+        from hydra_video import OUT_FINAL
+        out_path = OUT_FINAL / f"hydra_{int(_time.time())}.mp4"
+
+        final_path = await _asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: _hv_render.compose(
+                slideshow_path,
+                v.audio_path,
+                caption_clips,
+                video_size=DEFAULT_VIDEO_SIZE,
+                duration_sec=duration,
+                music_path=chosen_music,
+                fps=30,
+                style=style_cfg,
+                skip_fit=True,   # slideshow is already canvas-sized
+                out_path=out_path,
+            ),
+        )
+
+        final_path = Path(final_path)
+        try:
+            rel = final_path.relative_to(HYDRA_OUT).as_posix()
+            video_url = f"/hydra_outputs/{rel}"
+        except ValueError:
+            video_url = ""
+
+        return {
+            "ok": True,
+            "video_url": video_url,
+            "video_path": str(final_path),
+            "duration_sec": round(duration, 2),
+            "word_count": len(v.word_timings),
+            "product": req.product,
+            "niche": req.niche,
+            "elapsed_sec": round(_time.time() - started, 2),
+        }
+
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+
 # ---------- Amazon Affiliate Engine -----------------------------------------
 
 @app.get("/amazon", response_class=HTMLResponse)
