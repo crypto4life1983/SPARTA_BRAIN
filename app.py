@@ -5208,127 +5208,293 @@ _CTA_ACTION_PHRASES = [
 
 
 # Each entry: (keyword_list, hook_options)
+# hook_options mixes three emotional registers per pattern:
+#   A — outcome/result   ("MY BACK FEELS DIFFERENT NOW")
+#   B — frustration/pain ("MY BACK USED TO HURT DAILY")
+#   C — surprise/relief  ("I DIDN'T EXPECT THIS TO WORK")
+# random.choice picks one per video so the same product feels fresh.
+#
 # Matched against lowercased "{product} {problem_solved}" using whole-word
-# boundaries (\b) so "cord" never false-matches "recording", etc.
-# More specific / narrower patterns must come before broader ones.
+# boundaries (\b) — prevents "cord" matching "recording", etc.
+# More specific patterns come before broader ones.
 _HOOK_PATTERNS: list[tuple[list[str], list[str]]] = [
-    (["back pain", "lower back", "slouch", "posture"],
-     ["THIS FIXED MY BACK PAIN", "MY BACK FEELS DIFFERENT NOW", "I STOPPED SLOUCHING INSTANTLY"]),
+    (["back pain", "lower back", "slouch", "posture"], [
+        "THIS FIXED MY BACK PAIN",         # A outcome
+        "I STOPPED SLOUCHING INSTANTLY",    # A outcome
+        "MY BACK USED TO HURT DAILY",      # B pain
+        "I WAS TIRED OF BACK PAIN",        # B frustration
+        "I DIDN'T EXPECT THIS TO WORK",    # C surprise
+    ]),
 
-    (["eye strain", "glare", "monitor light", "staring"],
-     ["MY EYES STOPPED HURTING", "EYE STRAIN IS GONE NOW", "I CAN WORK LONGER NOW"]),
+    (["eye strain", "glare", "monitor light", "staring"], [
+        "MY EYES STOPPED HURTING",         # A
+        "I CAN WORK LONGER NOW",           # A
+        "EYE STRAIN WAS RUINING MY DAY",   # B
+        "I COULDN'T WORK PAST 3PM",        # B before
+        "THIS ACTUALLY FIXED IT",          # C
+    ]),
 
     # Lighting before webcam — Key Light's description mentions "webcam footage"
-    (["lighting", "dim", "dark footage", "key light", "yellow footage"],
-     ["LIGHTING CHANGED MY CONTENT", "MY VIDEOS LOOK CINEMATIC", "PERFECT LIGHTING EVERY TIME"]),
+    (["lighting", "dim", "dark footage", "key light", "yellow footage"], [
+        "MY VIDEOS LOOK CINEMATIC",        # A
+        "LIGHTING CHANGED MY CONTENT",     # A
+        "MY VIDEOS LOOKED TERRIBLE BEFORE",# B before
+        "BAD LIGHTING KILLED MY VIEWS",    # B pain
+        "I DIDN'T EXPECT THIS DIFFERENCE", # C
+    ]),
 
-    (["webcam", "look on camera", "pixelat", "grainy", "potato"],
-     ["I LOOK BETTER ON CALLS NOW", "MY VIDEO QUALITY CHANGED", "NO MORE BLURRY CALLS"]),
+    (["webcam", "look on camera", "pixelat", "grainy", "potato"], [
+        "I LOOK BETTER ON CALLS NOW",      # A
+        "MY VIDEO QUALITY CHANGED",        # A
+        "I LOOKED TERRIBLE ON ZOOM",       # B pain
+        "POTATO CAM WAS EMBARRASSING",     # B frustration
+        "THIS CHANGED HOW PEOPLE SEE ME",  # C before/after
+    ]),
 
-    (["zoom call", "dropped call", "dead spot", "wi-fi", "mesh wifi"],
-     ["NO MORE DROPPED CALLS", "MY WIFI ACTUALLY WORKS NOW", "ZERO DEAD SPOTS NOW"]),
+    (["zoom call", "dropped call", "dead spot", "wi-fi", "mesh wifi"], [
+        "NO MORE DROPPED CALLS",           # A
+        "ZERO DEAD SPOTS NOW",             # A
+        "DROPPED CALLS RUINED MY MEETINGS",# B
+        "I WAS ALWAYS DISCONNECTING",      # B before
+        "I DIDN'T EXPECT THIS COVERAGE",   # C
+    ]),
 
-    (["standing desk", "stiffness", "sitting all day", "afternoon energy"],
-     ["I STOPPED SITTING ALL DAY", "MY ENERGY IS BACK", "STANDING CHANGED EVERYTHING"]),
+    (["standing desk", "stiffness", "sitting all day", "afternoon energy"], [
+        "I STOPPED SITTING ALL DAY",       # A
+        "MY ENERGY IS BACK",               # A
+        "SITTING ALL DAY WAS KILLING ME",  # B pain
+        "AFTERNOON CRASHES WERE CONSTANT", # B before
+        "STANDING CHANGED EVERYTHING",     # C before/after
+    ]),
 
-    (["noise cancell", "background noise", "open-office", "cafe distraction"],
-     ["FINALLY FOUND MY FOCUS", "I HEAR NOTHING BUT WORK", "DISTRACTIONS ARE GONE"]),
+    (["noise cancell", "background noise", "open-office", "cafe distraction"], [
+        "FINALLY FOUND MY FOCUS",          # A
+        "I HEAR NOTHING BUT WORK",         # A
+        "OFFICE NOISE DESTROYED MY FOCUS", # B
+        "I COULDN'T THINK STRAIGHT",       # B before
+        "SILENCE CHANGED MY OUTPUT",       # C
+    ]),
 
-    (["noise", "distraction", "focus", "concentration"],
-     ["I FINALLY CAN FOCUS", "DISTRACTIONS ARE GONE", "MY FOCUS CAME BACK"]),
+    (["noise", "distraction", "focus", "concentration"], [
+        "I FINALLY CAN FOCUS",             # A
+        "MY FOCUS CAME BACK",              # A
+        "I WAS TIRED OF DISTRACTIONS",     # B
+        "I COULDN'T FOCUS FOR AN HOUR",    # B before
+    ]),
 
     # Scan before print — scanner descriptions often contain "contract"
-    (["scan", "receipt", "paper pile", "bookkeep", "tax season"],
-     ["PAPER CLUTTER IS GONE", "I DIGITIZED EVERYTHING", "NO MORE PAPER PILES"]),
+    (["scan", "receipt", "paper pile", "bookkeep", "tax season"], [
+        "PAPER CLUTTER IS GONE",           # A
+        "I DIGITIZED EVERYTHING",          # A
+        "PAPER PILES WERE OUT OF CONTROL", # B
+        "TAX SEASON USED TO STRESS ME",    # B before
+        "I DIDN'T EXPECT THIS TO BE EASY", # C
+    ]),
 
     # Shipping label before generic print
-    (["shipping label", "etsy", "ecommerce", "hand-writing"],
-     ["MY PACKAGES LOOK PRO NOW", "LABELS IN 10 SECONDS", "I PRINT MY OWN LABELS"]),
+    (["shipping label", "etsy", "ecommerce", "hand-writing"], [
+        "MY PACKAGES LOOK PRO NOW",        # A
+        "LABELS IN 10 SECONDS",            # A
+        "HAND WRITING LABELS WAS AWFUL",   # B
+        "I LOOKED UNPROFESSIONAL BEFORE",  # B before
+        "THIS CHANGED MY SHIPPING GAME",   # C
+    ]),
 
-    (["printer", "invoice", "contract printing"],
-     ["I PRINT FROM HOME NOW", "PRINTING IN SECONDS NOW", "NO MORE PRINT SHOP RUNS"]),
+    (["printer", "invoice", "contract printing"], [
+        "I PRINT FROM HOME NOW",           # A
+        "PRINTING IN SECONDS NOW",         # A
+        "PRINT SHOP RUNS WASTED MY TIME",  # B
+        "PRINTING USED TO SLOW ME DOWN",   # B before
+    ]),
 
     # Stream deck before cable — "recording" contains "cord" as substring
-    (["stream deck", "fumbling", "obs scenes", "livestream", "mid-recording"],
-     ["ONE CLICK CHANGES EVERYTHING", "MY STREAMS ARE SMOOTHER NOW", "STREAMING GOT EASIER"]),
+    (["stream deck", "fumbling", "obs scenes", "livestream", "mid-recording"], [
+        "ONE CLICK CHANGES EVERYTHING",    # A
+        "STREAMING GOT EASIER",            # A
+        "FUMBLING SCENES WAS EMBARRASSING",# B
+        "I LOOKED UNPROFESSIONAL LIVE",    # B before
+        "I DIDN'T EXPECT THIS UPGRADE",    # C
+    ]),
 
-    (["cable", "tangled", "wire clutter", "cords under"],
-     ["MY DESK IS FINALLY CLEAN", "CABLE CHAOS IS OVER", "CLEAN DESK IN 5 MINUTES"]),
+    (["cable", "tangled", "wire clutter", "cords under"], [
+        "MY DESK IS FINALLY CLEAN",        # A
+        "CABLE CHAOS IS OVER",             # A
+        "I WAS TIRED OF THIS MESS",        # B frustration
+        "CABLES DROVE ME CRAZY",           # B pain
+        "DESK BEFORE VS AFTER THIS",       # C before/after
+    ]),
 
-    (["battery", "dying laptop", "power bank", "laptop battery"],
-     ["MY LAPTOP NEVER DIES NOW", "BATTERY ANXIETY IS GONE", "I WORK ANYWHERE NOW"]),
+    (["battery", "dying laptop", "power bank", "laptop battery"], [
+        "MY LAPTOP NEVER DIES NOW",        # A
+        "BATTERY ANXIETY IS GONE",         # A
+        "DYING BATTERY RUINED MEETINGS",   # B
+        "I LOST WORK SO MANY TIMES",       # B before
+        "I DIDN'T EXPECT THIS TO LAST",    # C
+    ]),
 
-    (["microphone", "audio", "sound quality", "tinny", "podcast"],
-     ["MY AUDIO IS CRISP NOW", "PEOPLE HEAR ME CLEARLY NOW", "SOUND QUALITY CHANGED"]),
+    (["microphone", "audio", "sound quality", "tinny", "podcast"], [
+        "MY AUDIO IS CRISP NOW",           # A
+        "PEOPLE HEAR ME CLEARLY NOW",      # A
+        "MY AUDIO SOUNDED TERRIBLE",       # B before
+        "PEOPLE KEPT ASKING ME TO REPEAT", # B frustration
+        "THIS CHANGED HOW I SOUND",        # C
+    ]),
 
-    (["gimbal", "shaky", "stabiliz"],
-     ["NO MORE SHAKY FOOTAGE", "MY VIDEOS LOOK CINEMATIC", "SMOOTH SHOTS EVERY TIME"]),
+    (["gimbal", "shaky", "stabiliz"], [
+        "NO MORE SHAKY FOOTAGE",           # A
+        "SMOOTH SHOTS EVERY TIME",         # A
+        "SHAKY FOOTAGE RUINED MY CONTENT", # B
+        "I DELETED SO MANY CLIPS BEFORE",  # B before
+        "THIS ACTUALLY WORKS",             # C
+    ]),
 
-    (["mouse", "hand fatigue", "wrist pain", "long scrolling"],
-     ["MY WRIST STOPPED HURTING", "NO MORE HAND FATIGUE", "I CAN WORK LONGER NOW"]),
+    (["mouse", "hand fatigue", "wrist pain", "long scrolling"], [
+        "MY WRIST STOPPED HURTING",        # A
+        "NO MORE HAND FATIGUE",            # A
+        "WRIST PAIN WAS CONSTANT",         # B pain
+        "I COULDN'T WORK MORE THAN 2 HRS", # B before
+        "I DIDN'T EXPECT THIS TO HELP",    # C
+    ]),
 
-    (["keyboard", "typing", "cramped laptop"],
-     ["I TYPE FASTER THAN EVER", "MY WRISTS THANK ME", "TYPING IS DIFFERENT NOW"]),
+    (["keyboard", "typing", "cramped laptop"], [
+        "I TYPE FASTER THAN EVER",         # A
+        "TYPING IS DIFFERENT NOW",         # A
+        "LAPTOP KEYBOARD WAS KILLING ME",  # B
+        "CRAMPED KEYS HURT MY HANDS",      # B before
+        "I DIDN'T EXPECT THIS DIFFERENCE", # C
+    ]),
 
-    (["headphone", "headset", "noise-cancell"],
-     ["I FINALLY CAN FOCUS", "I HEAR NOTHING BUT WORK", "DISTRACTIONS ARE GONE"]),
+    (["headphone", "headset", "noise-cancell"], [
+        "I FINALLY CAN FOCUS",             # A
+        "I HEAR NOTHING BUT WORK",         # A
+        "NOISE USED TO RUIN MY DAY",       # B
+        "I COULDN'T WORK IN PUBLIC",       # B before
+    ]),
 
-    (["notebook", "notes", "reusable"],
-     ["NEVER LOSE A NOTE AGAIN", "MY NOTES ARE ORGANIZED NOW", "I STOPPED LOSING IDEAS"]),
+    (["notebook", "notes", "reusable"], [
+        "NEVER LOSE A NOTE AGAIN",         # A
+        "MY NOTES ARE ORGANIZED NOW",      # A
+        "I KEPT LOSING IMPORTANT IDEAS",   # B frustration
+        "MY OLD NOTEBOOKS WERE USELESS",   # B before
+        "I DIDN'T EXPECT THIS TO STICK",   # C
+    ]),
 
-    (["gpu", "local llm", "stable diffusion", "fine-tun", "cloud gpu"],
-     ["RUNNING AI LOCALLY NOW", "NO MORE CLOUD GPU BILLS", "AI ON MY OWN HARDWARE"]),
+    (["gpu", "local llm", "stable diffusion", "fine-tun", "cloud gpu"], [
+        "RUNNING AI LOCALLY NOW",          # A
+        "NO MORE CLOUD GPU BILLS",         # A
+        "CLOUD GPU BILLS WERE KILLING ME", # B
+        "I WAS PAYING $200 A MONTH",       # B before (specific)
+        "I DIDN'T EXPECT THIS SPEED",      # C
+    ]),
 
-    (["raspberry pi", "home automation", "home agent"],
-     ["I AUTOMATED MY HOME SETUP", "HOME AUTOMATION FOR $50", "MY PI RUNS 24/7 NOW"]),
+    (["raspberry pi", "home automation", "home agent"], [
+        "I AUTOMATED MY HOME SETUP",       # A
+        "HOME AUTOMATION FOR $50",         # A
+        "MANUAL TASKS WASTED MY TIME",     # B
+        "I DIDN'T KNOW THIS WAS POSSIBLE", # C surprise
+    ]),
 
-    (["edge tpu", "computer vision", "edge ai"],
-     ["AI WITHOUT INTERNET NOW", "EDGE AI IN MY POCKET", "LOCAL AI UNDER $100"]),
+    (["edge tpu", "computer vision", "edge ai"], [
+        "AI WITHOUT INTERNET NOW",         # A
+        "LOCAL AI UNDER $100",             # A
+        "CLOUD AI COSTS WERE TOO HIGH",    # B
+        "I DIDN'T EXPECT THIS TO RUN LOCAL",# C
+    ]),
 
-    (["speakerphone", "meeting audio", "jabra", "voice assistant"],
-     ["MEETINGS SOUND DIFFERENT NOW", "EVERYONE HEARS ME CLEARLY", "NO MORE BAD CALL AUDIO"]),
+    (["speakerphone", "meeting audio", "jabra", "voice assistant"], [
+        "MEETINGS SOUND DIFFERENT NOW",    # A
+        "EVERYONE HEARS ME CLEARLY",       # A
+        "BAD CALL AUDIO WAS HUMILIATING",  # B
+        "PEOPLE KEPT ASKING ME TO REPEAT", # B before
+        "THIS ACTUALLY WORKS",             # C
+    ]),
 
-    (["nvme", "ssd", "dataset", "load time", "gen5"],
-     ["MY COMPUTER IS FASTER NOW", "LOAD TIMES ARE INSTANT", "AI LOADS IN SECONDS NOW"]),
+    (["nvme", "ssd", "dataset", "load time", "gen5"], [
+        "MY COMPUTER IS FASTER NOW",       # A
+        "LOAD TIMES ARE INSTANT",          # A
+        "SLOW LOADS WASTED HOURS DAILY",   # B
+        "I WAITED MINUTES FOR AI TO LOAD", # B before (specific)
+        "I DIDN'T EXPECT THIS SPEED",      # C
+    ]),
 
-    (["payment", "checkout", "e-transfer", "in-person sale"],
-     ["I NEVER MISS A SALE NOW", "PAYMENTS IN SECONDS NOW", "LOST A SALE BEFORE THIS"]),
+    (["payment", "checkout", "e-transfer", "in-person sale"], [
+        "I NEVER MISS A SALE NOW",         # A
+        "PAYMENTS IN SECONDS NOW",         # A
+        "I LOST SALES WITHOUT THIS",       # B before
+        "CASH ONLY WAS COSTING ME",        # B frustration
+    ]),
 
-    (["360", "action camera", "missed the shot", "re-shooting"],
-     ["I NEVER MISS THE SHOT NOW", "ONE CAMERA GETS EVERYTHING", "NO MORE MISSED MOMENTS"]),
+    (["360", "action camera", "missed the shot", "re-shooting"], [
+        "I NEVER MISS THE SHOT NOW",       # A
+        "ONE CAMERA GETS EVERYTHING",      # A
+        "I KEPT MISSING THE ACTION",       # B frustration
+        "I DELETED SO MANY BAD CLIPS",     # B before
+        "I DIDN'T EXPECT THIS COVERAGE",   # C
+    ]),
 ]
 
-# Niche-specific fallbacks — outcome-based, no generic phrases
+# Niche fallbacks — all three registers mixed in
 _HOOK_NICHE_FALLBACK: dict[str, list[str]] = {
-    "productivity":     ["SAVED AN HOUR TODAY", "I GET MORE DONE NOW", "MY OUTPUT DOUBLED", "THIS PAID FOR ITSELF FAST"],
-    "business":         ["MY WORKFLOW CHANGED OVERNIGHT", "THIS PAID FOR ITSELF", "I SAVED TIME AND MONEY", "BEST $50 I SPENT"],
-    "ai":               ["RUNNING AI FROM HOME NOW", "I DELETED MY CLOUD ACCOUNT", "AI WITHOUT THE MONTHLY FEE", "LOCAL AI FINALLY WORKS"],
-    "work_from_home":   ["MY HOME OFFICE IS NEXT LEVEL", "WFH JUST GOT EASIER", "I WORK BETTER FROM HOME NOW", "BEST HOME OFFICE UPGRADE"],
-    "content_creation": ["MY CONTENT LOOKS DIFFERENT NOW", "VIEWS WENT UP AFTER THIS", "MY PRODUCTION VALUE DOUBLED", "EVERY CREATOR NEEDS THIS"],
+    "productivity": [
+        "SAVED AN HOUR TODAY",             # A
+        "I GET MORE DONE NOW",             # A
+        "I WAS ALWAYS FALLING BEHIND",     # B
+        "THIS PAID FOR ITSELF FAST",       # C
+        "I DIDN'T EXPECT THIS TO HELP",    # C
+    ],
+    "business": [
+        "MY WORKFLOW CHANGED OVERNIGHT",   # A/C
+        "THIS PAID FOR ITSELF",            # A
+        "I WAS WASTING SO MUCH TIME",      # B
+        "BEST $50 I SPENT",                # C
+        "I WISH I HAD THIS SOONER",        # B before
+    ],
+    "ai": [
+        "RUNNING AI FROM HOME NOW",        # A
+        "CLOUD BILLS WERE OUT OF CONTROL", # B
+        "AI WITHOUT THE MONTHLY FEE",      # A
+        "I DIDN'T EXPECT THIS TO WORK",    # C
+        "LOCAL AI FINALLY WORKS",          # A/C
+    ],
+    "work_from_home": [
+        "MY HOME OFFICE IS NEXT LEVEL",    # A
+        "WFH JUST GOT EASIER",             # A
+        "I WAS EMBARRASSED BY MY SETUP",   # B
+        "I WISH I UPGRADED SOONER",        # B before
+        "BEST HOME OFFICE UPGRADE",        # C
+    ],
+    "content_creation": [
+        "MY CONTENT LOOKS DIFFERENT NOW",  # A
+        "MY PRODUCTION VALUE DOUBLED",     # A
+        "MY OLD CONTENT WAS EMBARRASSING", # B
+        "I DIDN'T EXPECT THIS DIFFERENCE", # C
+        "VIEWS WENT UP AFTER THIS",        # A/C
+    ],
 }
 _HOOK_DEFAULT_FALLBACK = [
     "THIS ACTUALLY WORKS",
     "I SAVED $50 WITH THIS",
     "WISH I HAD THIS SOONER",
-    "CHANGED MY DAILY ROUTINE",
+    "I WAS SKEPTICAL AT FIRST",
+    "I DIDN'T EXPECT THIS TO WORK",
     "MY LIFE IS EASIER NOW",
 ]
 
 
 def _video_hook(product: str, niche: str, problem_solved: str = "") -> str:
-    """Return a specific, credible 3-7 word hook based on the product's problem.
+    """Return a specific, emotionally varied 3-7 word hook.
 
-    Uses whole-word boundary matching so "cord" never false-matches "recording",
-    "print" never false-matches "footprint", etc.
-    Falls back to niche-specific outcome hooks, then generic defaults.
+    Matches whole-word boundaries against (product + problem_solved).
+    random.choice ensures different emotional register each generation.
     """
+    import random as _random
     import re as _re
     text = f"{product} {problem_solved}".lower()
     for keywords, hooks in _HOOK_PATTERNS:
         if any(_re.search(r'\b' + _re.escape(kw) + r'\b', text) for kw in keywords):
-            return hooks[abs(hash(product)) % len(hooks)]
+            return _random.choice(hooks)
     niche_hooks = _HOOK_NICHE_FALLBACK.get((niche or "").lower(), _HOOK_DEFAULT_FALLBACK)
-    return niche_hooks[abs(hash(product)) % len(niche_hooks)]
+    return _random.choice(niche_hooks)
 
 
 def _short_cta(cta: str, affiliate_url: str, product: str = "") -> tuple[str, str]:
