@@ -1,0 +1,768 @@
+{% extends "base.html" %}
+{% block title %}Hydra Video - SPARTA BRAIN{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <h1 class="page-title">Hydra Video Studio</h1>
+  <p class="page-sub">
+    Local-first talking-head pipeline. Script in, MP4 out. Falls back to
+    a placeholder avatar when SadTalker/Wav2Lip aren't installed.
+  </p>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Avatar</h2>
+  </div>
+  <p class="hint">Drop a photo here and Hydra Video will use it instead of the placeholder. Saved as <code>hydra_video/assets/avatars/avatar.jpg</code>.</p>
+  <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+    <div>
+      <img id="hydra-avatar-preview" alt="Current avatar"
+           src="/api/hydra/avatar/preview"
+           style="width:160px; height:280px; object-fit:cover; border-radius:12px; background:#0b1020;"
+           onerror="this.style.opacity=0.35; this.alt='No avatar set (placeholder will be used)';" />
+    </div>
+    <form id="hydra-avatar-form" style="flex:1; min-width:240px;">
+      <label class="lbl" for="hydra-avatar-file">Upload new avatar (jpg/png)</label>
+      <input id="hydra-avatar-file" type="file" accept="image/jpeg,image/png,image/webp" />
+      <div class="row-actions" style="margin-top:12px;">
+        <button id="hydra-avatar-upload" type="submit" class="btn btn-primary">Upload Avatar</button>
+        <span id="hydra-avatar-status" class="hint" style="margin-left:12px;"></span>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="panel" id="hydra-voice-panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Voice</h2>
+  </div>
+  <p class="hint">Tune the edge-tts voice before XTTS lands. Test, then save as the default for new renders.</p>
+
+  <div style="display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px;">
+    <div>
+      <label class="lbl" for="hydra-voice-id">Voice</label>
+      <select id="hydra-voice-id"></select>
+    </div>
+    <div>
+      <label class="lbl" for="hydra-voice-rate">Rate</label>
+      <select id="hydra-voice-rate">
+        <option value="-20%">-20%</option>
+        <option value="-10%">-10%</option>
+        <option value="+0%" selected>0%</option>
+        <option value="+10%">+10%</option>
+        <option value="+20%">+20%</option>
+      </select>
+    </div>
+    <div>
+      <label class="lbl" for="hydra-voice-pitch">Pitch</label>
+      <select id="hydra-voice-pitch">
+        <option value="-10Hz">-10 Hz</option>
+        <option value="+0Hz" selected>0 Hz</option>
+        <option value="+10Hz">+10 Hz</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row-actions" style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button id="hydra-voice-test-btn" type="button" class="btn btn-primary">Test Voice</button>
+    <button id="hydra-voice-save-btn" type="button" class="btn">Save as default</button>
+    <span id="hydra-voice-status" class="hint" style="margin-left:8px;"></span>
+  </div>
+
+  <audio id="hydra-voice-audio" controls preload="none"
+         style="margin-top:12px; width:100%; max-width:460px; display:none;"></audio>
+</section>
+
+<section class="panel" id="hydra-xtts-panel">
+  <div class="panel-head">
+    <h2 class="panel-title">XTTS Voice Cloning</h2>
+    <span class="nav-badge" style="font-size:11px; padding:2px 8px;">Optional</span>
+  </div>
+  <p class="hint">
+    Coqui XTTS-v2 clones any voice from a short audio sample — runs fully offline.
+    Install with <code>pip install TTS</code> (~2 GB download on first use).
+    When inactive, Hydra falls back to Edge TTS automatically.
+  </p>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px;">
+    <div>
+      <label class="lbl" for="hydra-voice-provider">Active voice engine</label>
+      <select id="hydra-voice-provider">
+        <option value="edge_tts">Edge TTS (fast, cloud-free)</option>
+        <option value="xtts">XTTS (local voice clone)</option>
+      </select>
+      <p class="hint" style="margin-top:4px;">XTTS falls back to Edge TTS if the model isn't installed.</p>
+    </div>
+    <div>
+      <label class="lbl" for="hydra-xtts-lang">Language</label>
+      <select id="hydra-xtts-lang">
+        <option value="en">English</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="es">Spanish</option>
+        <option value="it">Italian</option>
+        <option value="pt">Portuguese</option>
+        <option value="nl">Dutch</option>
+        <option value="pl">Polish</option>
+        <option value="ru">Russian</option>
+        <option value="tr">Turkish</option>
+        <option value="ja">Japanese</option>
+        <option value="zh-cn">Chinese (Simplified)</option>
+        <option value="ko">Korean</option>
+        <option value="ar">Arabic</option>
+        <option value="hu">Hungarian</option>
+        <option value="cs">Czech</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-bottom:14px;">
+    <label class="lbl">Reference voice sample</label>
+    <p class="hint">Upload 3–30 seconds of clean speech. XTTS clones the speaker's voice. WAV preferred; MP3 works too.</p>
+    <form id="hydra-xtts-ref-form" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <input id="hydra-xtts-ref-file" type="file" accept="audio/*" style="flex:1; min-width:200px;" />
+      <button id="hydra-xtts-ref-upload" type="submit" class="btn btn-primary">Upload reference</button>
+    </form>
+    <p id="hydra-xtts-ref-info" class="hint" style="margin-top:6px;"></p>
+  </div>
+
+  <div style="margin-bottom:14px;">
+    <label class="lbl" for="hydra-xtts-model">XTTS model override (optional)</label>
+    <input id="hydra-xtts-model" type="text"
+           placeholder="tts_models/multilingual/multi-dataset/xtts_v2" />
+    <p class="hint">Leave blank for the default XTTS-v2 model. A local path to a downloaded model also works.</p>
+  </div>
+
+  <div class="row-actions" style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button id="hydra-xtts-save" type="button" class="btn">Save XTTS settings</button>
+    <span id="hydra-xtts-save-status" class="hint" style="margin-left:8px;"></span>
+  </div>
+</section>
+
+<section class="panel" id="hydra-lipsync-panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Lipsync provider</h2>
+  </div>
+  <p class="hint">Placeholder = cinematic still + Ken Burns motion. SadTalker = real talking-face animation. Wav2Lip is an optional post-processor that sharpens mouth sync on top of SadTalker. Each stage falls back silently if its model isn't installed or fails.</p>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+    <div>
+      <label class="lbl" for="hydra-lipsync-provider">Provider</label>
+      <select id="hydra-lipsync-provider">
+        <option value="placeholder">Placeholder (Ken Burns)</option>
+        <option value="sadtalker">SadTalker only</option>
+        <option value="sadtalker+wav2lip">SadTalker + Wav2Lip</option>
+      </select>
+    </div>
+    <div>
+      <label class="lbl" for="hydra-sadtalker-dir">SadTalker checkout path</label>
+      <input id="hydra-sadtalker-dir" type="text"
+             placeholder="C:\SadTalker  (or HYDRA_SADTALKER_DIR env var)" />
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:10px;">
+    <div>
+      <label class="lbl" for="hydra-wav2lip-dir">Wav2Lip checkout path</label>
+      <input id="hydra-wav2lip-dir" type="text"
+             placeholder="C:\Wav2Lip  (needs checkpoints/wav2lip_gan.pth)" />
+    </div>
+    <div>
+      <label class="lbl" for="hydra-sadtalker-python">SadTalker Python (optional override)</label>
+      <input id="hydra-sadtalker-python" type="text"
+             placeholder="Auto-detected from &lt;repo&gt;/venv — only set if custom" />
+    </div>
+  </div>
+  <div style="margin-top:10px;">
+    <label class="lbl" for="hydra-wav2lip-python">Wav2Lip Python (optional override)</label>
+    <input id="hydra-wav2lip-python" type="text"
+           placeholder="Auto-detected from &lt;repo&gt;/venv — only set if custom" />
+  </div>
+  <div class="row-actions" style="margin-top:14px; display:flex; gap:8px;">
+    <button id="hydra-lipsync-save" type="button" class="btn">Save lipsync settings</button>
+    <span id="hydra-lipsync-status" class="hint" style="margin-left:8px;"></span>
+  </div>
+</section>
+
+<section class="panel" id="hydra-status-panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Realism Engine</h2>
+  </div>
+  <p class="hint">Which voice/lipsync providers will actually run on this machine. Heavy models (XTTS / SadTalker / Wav2Lip) are detected, never auto-installed.</p>
+  <ul class="system-list" id="hydra-status-list">
+    <li><span class="sys-name">Voice provider</span><span class="sys-status" data-key="voice_provider" data-state="checking">CHECKING</span></li>
+    <li><span class="sys-name">Lipsync provider</span><span class="sys-status" data-key="lipsync_provider" data-state="checking">CHECKING</span></li>
+    <li><span class="sys-name">Avatar file</span><span class="sys-status" data-key="avatar_exists" data-state="checking">CHECKING</span></li>
+    <li><span class="sys-name">XTTS installed</span><span class="sys-status" data-key="xtts_available" data-state="checking">CHECKING</span></li>
+    <li><span class="sys-name">SadTalker installed</span><span class="sys-status" data-key="sadtalker_available" data-state="checking">CHECKING</span></li>
+    <li><span class="sys-name">Wav2Lip installed</span><span class="sys-status" data-key="wav2lip_available" data-state="checking">CHECKING</span></li>
+  </ul>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Generate</h2>
+  </div>
+
+  <form id="hydra-form" class="form-grid" autocomplete="off">
+    <label class="lbl" for="hydra-script">Script</label>
+    <textarea id="hydra-script" rows="6"
+              placeholder="Paste the script you want the avatar to read..."></textarea>
+
+    <div class="row-split" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <label class="lbl" for="hydra-avatar">Avatar image path</label>
+        <input id="hydra-avatar" type="text"
+               placeholder="hydra_video/assets/avatars/avatar.jpg" />
+        <p class="hint">Leave blank to use the default at <code>assets/avatars/avatar.jpg</code> (or a placeholder if missing).</p>
+      </div>
+      <div>
+        <label class="lbl" for="hydra-product">Product image path (optional)</label>
+        <input id="hydra-product" type="text"
+               placeholder="hydra_video/assets/products/your_product.png" />
+        <p class="hint">Shown bottom-right with a fade in/out.</p>
+      </div>
+    </div>
+
+    <label class="lbl" for="hydra-length">Video length target (seconds, optional)</label>
+    <input id="hydra-length" type="number" step="0.5" min="3" max="180"
+           placeholder="e.g. 30 (soft cap; voice trims if longer)" />
+
+    <label class="lbl" for="hydra-style" style="margin-top:12px;">Style</label>
+    <select id="hydra-style">
+      <option value="clean" selected>Clean (minimal, professional)</option>
+      <option value="aggressive">Aggressive (faster captions, stronger hook, more movement)</option>
+    </select>
+    <p class="hint">Use marker syntax in the script for explicit control: <code>H: hook here. B: body here. C: link in description.</code></p>
+
+    <div class="row-actions" style="margin-top:12px;">
+      <button id="hydra-generate" type="submit" class="btn btn-primary">Generate Video</button>
+      <span id="hydra-status" class="hint" style="margin-left:12px;"></span>
+    </div>
+  </form>
+</section>
+
+<!-- Latest Generated Video -->
+<section class="panel" id="hydra-result-panel" style="display:none;">
+  <div class="panel-head">
+    <h2 class="panel-title">Latest Generated Video</h2>
+  </div>
+  <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;">
+    <video id="hydra-preview" controls preload="metadata"
+           style="width:100%; max-width:360px; border-radius:12px; background:#000; flex-shrink:0;"
+           onerror="document.getElementById('hydra-preview-err').style.display='';">
+    </video>
+    <div style="flex:1; min-width:220px;">
+      <p id="hydra-preview-err" class="hint" style="display:none; color:#f87171;">
+        Browser could not play this video. Use the Download button to open it locally.
+      </p>
+      <table style="border-collapse:collapse; width:100%; font-size:13px;">
+        <tbody id="hydra-latest-meta"></tbody>
+      </table>
+      <div class="row-actions" style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+        <a id="hydra-download" class="btn btn-sm btn-primary" download>Download</a>
+        <button id="hydra-copy-path" type="button" class="btn btn-sm">Copy Path</button>
+        <button id="hydra-refresh-btn" type="button" class="btn btn-sm">Refresh</button>
+      </div>
+      <p class="hint" id="hydra-meta" style="margin-top:8px;"></p>
+    </div>
+  </div>
+</section>
+
+<!-- Generated Videos history -->
+<section class="panel" id="hydra-history-panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Generated Videos</h2>
+    <button id="hydra-history-refresh" type="button" class="btn btn-sm" style="margin-left:auto;">Refresh</button>
+  </div>
+  <div id="hydra-history-body">
+    <p class="hint" style="padding:12px 0;">Loading…</p>
+  </div>
+</section>
+
+<script>
+const setPill = (key, state, label) => {
+  const el = document.querySelector(`[data-key="${key}"]`);
+  if (!el) return;
+  el.dataset.state = state;
+  el.textContent = String(label).toUpperCase();
+};
+
+async function refreshHydraStatus() {
+  try {
+    const r = await fetch("/api/hydra/status", {cache: "no-store"});
+    const s = await r.json();
+    if (!s || !s.ok) throw new Error("status fetch failed");
+    setPill("voice_provider", "online", s.voice_provider);
+    setPill("lipsync_provider",
+            s.lipsync_provider === "placeholder" ? "standby" : "online",
+            s.lipsync_provider);
+    setPill("avatar_exists",
+            s.avatar_exists ? "online" : "standby",
+            s.avatar_exists ? "yes" : "no (placeholder)");
+    setPill("xtts_available",
+            s.xtts_available ? "online" : "offline",
+            s.xtts_available ? "yes" : "no");
+    setPill("sadtalker_available",
+            s.sadtalker_available ? "online" : "offline",
+            s.sadtalker_available ? "yes" : "no");
+    setPill("wav2lip_available",
+            s.wav2lip_available ? "online" : "offline",
+            s.wav2lip_available ? "yes" : "no");
+  } catch {
+    document.querySelectorAll("#hydra-status-list .sys-status")
+      .forEach(el => { el.dataset.state = "offline"; el.textContent = "ERROR"; });
+  }
+}
+
+refreshHydraStatus();
+
+// Voice panel: populate selector, audition + persist tuning.
+(async () => {
+  const sel = document.getElementById("hydra-voice-id");
+  const rateSel = document.getElementById("hydra-voice-rate");
+  const pitchSel = document.getElementById("hydra-voice-pitch");
+  const testBtn = document.getElementById("hydra-voice-test-btn");
+  const saveBtn = document.getElementById("hydra-voice-save-btn");
+  const status = document.getElementById("hydra-voice-status");
+  const audio = document.getElementById("hydra-voice-audio");
+  if (!sel) return;
+
+  let voices = [];
+  try {
+    const vr = await fetch("/api/hydra/voices").then(r => r.json());
+    voices = (vr && vr.voices) || [];
+  } catch {}
+  for (const v of voices) {
+    const opt = document.createElement("option");
+    opt.value = v.id; opt.textContent = v.label;
+    sel.appendChild(opt);
+  }
+
+  // Seed the selectors from the saved config (read-only convenience endpoint).
+  try {
+    const cfg = await fetch("/api/hydra/settings/current", {cache:"no-store"})
+      .then(r => r.ok ? r.json() : null);
+    if (cfg && cfg.ok && cfg.settings) {
+      if (cfg.settings.edge_voice)  sel.value     = cfg.settings.edge_voice;
+      if (cfg.settings.edge_rate)   rateSel.value = cfg.settings.edge_rate;
+      if (cfg.settings.edge_pitch)  pitchSel.value = cfg.settings.edge_pitch;
+    }
+  } catch {}
+
+  testBtn.addEventListener("click", async () => {
+    testBtn.disabled = true;
+    status.textContent = "Synthesizing test clip...";
+    audio.style.display = "none";
+    try {
+      const r = await fetch("/api/hydra/voice/test", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          text: "This is Hydra voice test.",
+          voice: sel.value, rate: rateSel.value, pitch: pitchSel.value,
+        }),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.error || ("HTTP " + r.status));
+      audio.src = d.audio_url + "?t=" + Date.now();
+      audio.style.display = "";
+      audio.play().catch(()=>{});
+      status.textContent = `${d.voice} - ${d.rate} - ${d.pitch}`;
+    } catch (e) {
+      status.textContent = "Test failed: " + e.message;
+    } finally { testBtn.disabled = false; }
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    saveBtn.disabled = true;
+    status.textContent = "Saving...";
+    try {
+      const r = await fetch("/api/hydra/settings", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          edge_voice: sel.value, edge_rate: rateSel.value, edge_pitch: pitchSel.value,
+        }),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.detail || d.error || ("HTTP " + r.status));
+      status.textContent = "Saved as default.";
+    } catch (e) {
+      status.textContent = "Save failed: " + e.message;
+    } finally { saveBtn.disabled = false; }
+  });
+})();
+
+// XTTS Voice Cloning panel.
+(async () => {
+  const providerSel = document.getElementById("hydra-voice-provider");
+  const langSel = document.getElementById("hydra-xtts-lang");
+  const modelInput = document.getElementById("hydra-xtts-model");
+  const refForm = document.getElementById("hydra-xtts-ref-form");
+  const refFile = document.getElementById("hydra-xtts-ref-file");
+  const refUploadBtn = document.getElementById("hydra-xtts-ref-upload");
+  const refInfo = document.getElementById("hydra-xtts-ref-info");
+  const saveBtn = document.getElementById("hydra-xtts-save");
+  const saveStatus = document.getElementById("hydra-xtts-save-status");
+  if (!providerSel) return;
+
+  // Seed from saved settings and reference info.
+  try {
+    const [cfgRes, refRes] = await Promise.all([
+      fetch("/api/hydra/settings/current", {cache:"no-store"}).then(r => r.ok ? r.json() : null),
+      fetch("/api/hydra/xtts/reference/info", {cache:"no-store"}).then(r => r.ok ? r.json() : null),
+    ]);
+    if (cfgRes && cfgRes.ok && cfgRes.settings) {
+      const s = cfgRes.settings;
+      providerSel.value = s.voice_provider || "edge_tts";
+      if (s.xtts_language) langSel.value = s.xtts_language;
+      if (s.xtts_model && s.xtts_model !== "tts_models/multilingual/multi-dataset/xtts_v2")
+        modelInput.value = s.xtts_model;
+    }
+    if (refRes && refRes.ok) _updateRefInfo(refRes);
+  } catch {}
+
+  function _updateRefInfo(info) {
+    if (!info) return;
+    if (info.exists) {
+      const kb = Math.round(info.size_bytes / 1024);
+      refInfo.textContent = `Reference set: ${info.filename} (${kb} KB)`;
+    } else if (info.configured) {
+      refInfo.textContent = `Reference configured but file missing: ${info.path}`;
+    } else {
+      refInfo.textContent = "No reference set — XTTS will use its built-in default speaker.";
+    }
+  }
+
+  refForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = refFile.files && refFile.files[0];
+    if (!f) { refInfo.textContent = "Pick an audio file first."; return; }
+    refUploadBtn.disabled = true;
+    refUploadBtn.textContent = "Uploading...";
+    try {
+      const fd = new FormData();
+      fd.append("file", f);
+      const r = await fetch("/api/hydra/xtts/reference/upload", {method: "POST", body: fd});
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.detail || d.error || ("HTTP " + r.status));
+      const kb = Math.round(d.size_bytes / 1024);
+      refInfo.textContent = `Saved: ${d.filename} (${kb} KB). XTTS will clone this voice.`;
+    } catch (err) {
+      refInfo.textContent = "Upload failed: " + err.message;
+    } finally {
+      refUploadBtn.disabled = false;
+      refUploadBtn.textContent = "Upload reference";
+    }
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    saveBtn.disabled = true;
+    saveStatus.textContent = "Saving...";
+    const payload = {
+      voice_provider: providerSel.value,
+      xtts_language: langSel.value,
+    };
+    const m = modelInput.value.trim();
+    if (m) payload.xtts_model = m;
+    try {
+      const r = await fetch("/api/hydra/settings", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.detail || d.error || ("HTTP " + r.status));
+      saveStatus.textContent = "Saved.";
+      if (typeof refreshHydraStatus === "function") refreshHydraStatus();
+    } catch (err) {
+      saveStatus.textContent = "Save failed: " + err.message;
+    } finally { saveBtn.disabled = false; }
+  });
+})();
+
+// Lipsync provider panel.
+(async () => {
+  const providerSel = document.getElementById("hydra-lipsync-provider");
+  const sadtalkerInput = document.getElementById("hydra-sadtalker-dir");
+  const wav2lipInput = document.getElementById("hydra-wav2lip-dir");
+  const sadPyInput = document.getElementById("hydra-sadtalker-python");
+  const w2lPyInput = document.getElementById("hydra-wav2lip-python");
+  const saveBtn = document.getElementById("hydra-lipsync-save");
+  const status = document.getElementById("hydra-lipsync-status");
+  if (!providerSel) return;
+
+  try {
+    const cfg = await fetch("/api/hydra/settings/current", {cache:"no-store"})
+      .then(r => r.ok ? r.json() : null);
+    if (cfg && cfg.ok && cfg.settings) {
+      const s = cfg.settings;
+      providerSel.value = s.lipsync_provider || "placeholder";
+      sadtalkerInput.value = s.sadtalker_dir || "";
+      wav2lipInput.value = s.wav2lip_dir || "";
+      if (sadPyInput) sadPyInput.value = s.sadtalker_python || "";
+      if (w2lPyInput) w2lPyInput.value = s.wav2lip_python || "";
+    }
+  } catch {}
+
+  saveBtn.addEventListener("click", async () => {
+    saveBtn.disabled = true;
+    status.textContent = "Saving...";
+    const payload = {
+      lipsync_provider: providerSel.value,
+      sadtalker_dir: sadtalkerInput.value.trim(),
+      wav2lip_dir: wav2lipInput.value.trim(),
+    };
+    if (sadPyInput) payload.sadtalker_python = sadPyInput.value.trim();
+    if (w2lPyInput) payload.wav2lip_python = w2lPyInput.value.trim();
+    try {
+      const r = await fetch("/api/hydra/settings", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.detail || d.error || ("HTTP " + r.status));
+      status.textContent = "Saved.";
+      if (typeof refreshHydraStatus === "function") refreshHydraStatus();
+    } catch (e) {
+      status.textContent = "Save failed: " + e.message;
+    } finally { saveBtn.disabled = false; }
+  });
+})();
+
+(() => {
+  const form = document.getElementById("hydra-avatar-form");
+  const fileEl = document.getElementById("hydra-avatar-file");
+  const btn = document.getElementById("hydra-avatar-upload");
+  const status = document.getElementById("hydra-avatar-status");
+  const preview = document.getElementById("hydra-avatar-preview");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) { status.textContent = "Pick an image first."; return; }
+    btn.disabled = true; btn.textContent = "Uploading...";
+    status.textContent = "";
+    try {
+      const fd = new FormData();
+      fd.append("file", f);
+      const r = await fetch("/api/hydra/avatar/upload", {method: "POST", body: fd});
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.detail || data.error || ("HTTP " + r.status));
+      status.textContent = "Avatar saved.";
+      preview.style.opacity = 1;
+      preview.src = "/api/hydra/avatar/preview?t=" + Date.now();
+      await refreshHydraStatus();
+    } catch (err) {
+      status.textContent = "Failed: " + err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = "Upload Avatar";
+    }
+  });
+})();
+
+// ── Utility helpers ──────────────────────────────────────────────────────────
+function _fmtBytes(b) {
+  if (b < 1024) return b + " B";
+  if (b < 1048576) return (b/1024).toFixed(1) + " KB";
+  return (b/1048576).toFixed(1) + " MB";
+}
+function _fmtTs(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts * 1000);
+  return d.toLocaleString();
+}
+function _winPath(p) {
+  // The server sends forward-slash paths on Windows too; normalise for display.
+  return p ? p.replace(/\//g, "\\") : "";
+}
+
+// ── History panel ─────────────────────────────────────────────────────────────
+async function loadHydraHistory() {
+  const body = document.getElementById("hydra-history-body");
+  if (!body) return;
+  body.innerHTML = '<p class="hint" style="padding:12px 0;">Loading…</p>';
+  try {
+    const r = await fetch("/api/hydra/outputs?limit=10", {cache:"no-store"});
+    const d = await r.json();
+    if (!r.ok || !d.ok) throw new Error("fetch failed");
+    const vids = d.videos || [];
+    if (vids.length === 0) {
+      body.innerHTML = '<p class="hint" style="padding:12px 0; color:#94a3b8;">No generated videos yet. Run Hydra first.</p>';
+      return;
+    }
+    body.innerHTML = "";
+    vids.forEach((v, i) => {
+      const card = document.createElement("div");
+      card.style.cssText = "display:flex; gap:16px; align-items:flex-start; padding:14px 0;" +
+        (i < vids.length-1 ? "border-bottom:1px solid #1e293b;" : "");
+      card.innerHTML = `
+        <video src="${v.url}?t=${Date.now()}" preload="metadata" muted playsinline
+               style="width:140px; height:100px; object-fit:cover; border-radius:8px; background:#000; flex-shrink:0; cursor:pointer;"
+               title="Click to preview"
+               onerror="this.style.opacity=0.4; this.title='Cannot preview — use Download';">
+        </video>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:13px; font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${v.filename}">${v.filename}</div>
+          <div class="hint" style="margin-bottom:2px;">${_fmtTs(v.created_ts)}</div>
+          <div class="hint" style="margin-bottom:6px;">${_fmtBytes(v.size_bytes)}</div>
+          <div class="hint" style="font-size:11px; word-break:break-all; margin-bottom:8px; opacity:0.6;" title="${_winPath(v.path)}">${_winPath(v.path)}</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="${v.url}" download="${v.filename}" class="btn btn-sm btn-primary" style="font-size:12px; padding:4px 10px;">Download</a>
+            <button type="button" class="btn btn-sm" data-copy-path="${v.path}"
+                    style="font-size:12px; padding:4px 10px;">Copy Path</button>
+          </div>
+        </div>`;
+      body.appendChild(card);
+    });
+    // wire copy-path buttons inside history
+    body.querySelectorAll("[data-copy-path]").forEach(btn => {
+      btn.addEventListener("click", () => _copyPath(btn.dataset.copyPath, btn));
+    });
+    // click thumbnail → seek to start + play inline
+    body.querySelectorAll("video").forEach(vid => {
+      vid.addEventListener("click", () => { vid.currentTime = 0; vid.play().catch(()=>{}); });
+    });
+  } catch (e) {
+    body.innerHTML = `<p class="hint" style="color:#f87171; padding:12px 0;">Could not load outputs: ${e.message}</p>`;
+  }
+}
+
+async function _copyPath(path, btn) {
+  const win = _winPath(path);
+  try {
+    await navigator.clipboard.writeText(win);
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  } catch {
+    prompt("Copy this path:", win);
+  }
+}
+
+document.getElementById("hydra-history-refresh")?.addEventListener("click", loadHydraHistory);
+loadHydraHistory();
+
+// ── Generate form ─────────────────────────────────────────────────────────────
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const form = $("#hydra-form");
+  const status = $("#hydra-status");
+  const resultPanel = $("#hydra-result-panel");
+  const preview = $("#hydra-preview");
+  const meta = $("#hydra-meta");
+  const dl = $("#hydra-download");
+  const copyPathBtn = $("#hydra-copy-path");
+  const refreshBtn = $("#hydra-refresh-btn");
+  const btn = $("#hydra-generate");
+  const latestMeta = $("#hydra-latest-meta");
+
+  let _latestPath = "";
+
+  function _metaRow(label, value) {
+    return `<tr>
+      <td style="padding:3px 10px 3px 0; color:#94a3b8; white-space:nowrap;">${label}</td>
+      <td style="padding:3px 0; word-break:break-all;">${value}</td>
+    </tr>`;
+  }
+
+  async function showLatestVideo(videoUrl, videoPath, data) {
+    document.getElementById("hydra-preview-err").style.display = "none";
+    preview.src = videoUrl + "?t=" + Date.now();
+    dl.href = videoUrl;
+    dl.download = videoPath ? videoPath.split(/[\\/]/).pop() : "hydra_video.mp4";
+    _latestPath = videoPath || "";
+
+    // fetch fresh file info for size/timestamp
+    let sizeStr = "—", tsStr = "—";
+    try {
+      const out = await fetch("/api/hydra/outputs?limit=1", {cache:"no-store"}).then(r => r.json());
+      if (out.ok && out.videos && out.videos.length) {
+        const v = out.videos[0];
+        sizeStr = _fmtBytes(v.size_bytes);
+        tsStr = _fmtTs(v.created_ts);
+      }
+    } catch {}
+
+    const winP = _winPath(videoPath);
+    latestMeta.innerHTML =
+      _metaRow("Filename", dl.download) +
+      _metaRow("Created", tsStr) +
+      _metaRow("Size", sizeStr) +
+      _metaRow("Path", `<span style="font-size:11px; opacity:0.7;">${winP}</span>`);
+
+    if (data) {
+      meta.textContent =
+        `${data.duration_sec.toFixed(2)}s · ${data.word_count} words · ` +
+        `style=${data.style||"—"} · lipsync=${data.lipsync_mode} · ` +
+        `${data.has_product?"product":"no product"} · ` +
+        `${data.music_track?"music":"no music"} · ` +
+        `elapsed ${data.elapsed_sec}s`;
+    }
+    resultPanel.style.display = "";
+    resultPanel.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  refreshBtn?.addEventListener("click", async () => {
+    const out = await fetch("/api/hydra/outputs?limit=1", {cache:"no-store"}).then(r => r.json()).catch(()=>null);
+    if (out && out.ok && out.videos && out.videos.length) {
+      const v = out.videos[0];
+      await showLatestVideo(v.url, v.path, null);
+      await loadHydraHistory();
+    }
+  });
+
+  copyPathBtn?.addEventListener("click", () => _copyPath(_latestPath, copyPathBtn));
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const script = $("#hydra-script").value.trim();
+    if (!script) { status.textContent = "Paste a script first."; return; }
+
+    btn.disabled = true;
+    const origLabel = btn.textContent;
+    btn.textContent = "Generating...";
+    status.textContent = "Synthesizing voice + rendering. This may take 15–300s depending on lipsync mode.";
+    resultPanel.style.display = "none";
+
+    const body = {
+      script,
+      avatar_path: $("#hydra-avatar").value.trim() || null,
+      product_path: $("#hydra-product").value.trim() || null,
+      length_target_sec: parseFloat($("#hydra-length").value) || null,
+      style: $("#hydra-style").value || null,
+    };
+
+    try {
+      const r = await fetch("/api/hydra/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || ("HTTP " + r.status));
+      status.textContent = "Done.";
+      await showLatestVideo(data.video_url, data.video_path, data);
+      await loadHydraHistory();
+    } catch (err) {
+      status.textContent = "Failed: " + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origLabel;
+    }
+  });
+
+  // On page load: if any videos already exist, show the most recent one.
+  (async () => {
+    try {
+      const out = await fetch("/api/hydra/outputs?limit=1", {cache:"no-store"}).then(r => r.json());
+      if (out.ok && out.videos && out.videos.length) {
+        const v = out.videos[0];
+        await showLatestVideo(v.url, v.path, null);
+      }
+    } catch {}
+  })();
+})();
+</script>
+{% endblock %}
