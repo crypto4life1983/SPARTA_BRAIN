@@ -5207,57 +5207,128 @@ _CTA_ACTION_PHRASES = [
 ]
 
 
-_VIDEO_HOOKS: dict[str, list[str]] = {
-    "productivity": [
-        "THIS CHANGED MY WORKFLOW",
-        "I WORK 2X FASTER NOW",
-        "WISH I KNEW THIS SOONER",
-        "STOP WORKING THE HARD WAY",
-        "EVERYONE IS BUYING THIS",
-    ],
-    "business": [
-        "EVERY BUSINESS NEEDS THIS",
-        "I DIDN'T EXPECT THIS",
-        "THIS IS GOING VIRAL",
-        "STOP WASTING YOUR TIME",
-        "THIS SAVES HOURS WEEKLY",
-    ],
-    "ai": [
-        "THIS IS THE FUTURE",
-        "AI USERS ARE OBSESSED",
-        "I DIDN'T EXPECT THIS",
-        "EVERYONE IS BUYING THIS",
-        "THIS CHANGES EVERYTHING",
-    ],
-    "work_from_home": [
-        "WFH GAME CHANGER",
-        "EVERYONE AT HOME NEEDS THIS",
-        "I WISH I HAD THIS",
-        "THIS IS GOING VIRAL",
-        "STOP WORKING THE HARD WAY",
-    ],
-    "content_creation": [
-        "CREATORS ARE OBSESSED",
-        "THIS CHANGED MY CONTENT",
-        "STOP SLEEPING ON THIS",
-        "EVERYONE IS BUYING THIS",
-        "I DIDN'T EXPECT THIS",
-    ],
+# Each entry: (keyword_list, hook_options)
+# Matched against lowercased "{product} {problem_solved}" using whole-word
+# boundaries (\b) so "cord" never false-matches "recording", etc.
+# More specific / narrower patterns must come before broader ones.
+_HOOK_PATTERNS: list[tuple[list[str], list[str]]] = [
+    (["back pain", "lower back", "slouch", "posture"],
+     ["THIS FIXED MY BACK PAIN", "MY BACK FEELS DIFFERENT NOW", "I STOPPED SLOUCHING INSTANTLY"]),
+
+    (["eye strain", "glare", "monitor light", "staring"],
+     ["MY EYES STOPPED HURTING", "EYE STRAIN IS GONE NOW", "I CAN WORK LONGER NOW"]),
+
+    # Lighting before webcam — Key Light's description mentions "webcam footage"
+    (["lighting", "dim", "dark footage", "key light", "yellow footage"],
+     ["LIGHTING CHANGED MY CONTENT", "MY VIDEOS LOOK CINEMATIC", "PERFECT LIGHTING EVERY TIME"]),
+
+    (["webcam", "look on camera", "pixelat", "grainy", "potato"],
+     ["I LOOK BETTER ON CALLS NOW", "MY VIDEO QUALITY CHANGED", "NO MORE BLURRY CALLS"]),
+
+    (["zoom call", "dropped call", "dead spot", "wi-fi", "mesh wifi"],
+     ["NO MORE DROPPED CALLS", "MY WIFI ACTUALLY WORKS NOW", "ZERO DEAD SPOTS NOW"]),
+
+    (["standing desk", "stiffness", "sitting all day", "afternoon energy"],
+     ["I STOPPED SITTING ALL DAY", "MY ENERGY IS BACK", "STANDING CHANGED EVERYTHING"]),
+
+    (["noise cancell", "background noise", "open-office", "cafe distraction"],
+     ["FINALLY FOUND MY FOCUS", "I HEAR NOTHING BUT WORK", "DISTRACTIONS ARE GONE"]),
+
+    (["noise", "distraction", "focus", "concentration"],
+     ["I FINALLY CAN FOCUS", "DISTRACTIONS ARE GONE", "MY FOCUS CAME BACK"]),
+
+    # Scan before print — scanner descriptions often contain "contract"
+    (["scan", "receipt", "paper pile", "bookkeep", "tax season"],
+     ["PAPER CLUTTER IS GONE", "I DIGITIZED EVERYTHING", "NO MORE PAPER PILES"]),
+
+    # Shipping label before generic print
+    (["shipping label", "etsy", "ecommerce", "hand-writing"],
+     ["MY PACKAGES LOOK PRO NOW", "LABELS IN 10 SECONDS", "I PRINT MY OWN LABELS"]),
+
+    (["printer", "invoice", "contract printing"],
+     ["I PRINT FROM HOME NOW", "PRINTING IN SECONDS NOW", "NO MORE PRINT SHOP RUNS"]),
+
+    # Stream deck before cable — "recording" contains "cord" as substring
+    (["stream deck", "fumbling", "obs scenes", "livestream", "mid-recording"],
+     ["ONE CLICK CHANGES EVERYTHING", "MY STREAMS ARE SMOOTHER NOW", "STREAMING GOT EASIER"]),
+
+    (["cable", "tangled", "wire clutter", "cords under"],
+     ["MY DESK IS FINALLY CLEAN", "CABLE CHAOS IS OVER", "CLEAN DESK IN 5 MINUTES"]),
+
+    (["battery", "dying laptop", "power bank", "laptop battery"],
+     ["MY LAPTOP NEVER DIES NOW", "BATTERY ANXIETY IS GONE", "I WORK ANYWHERE NOW"]),
+
+    (["microphone", "audio", "sound quality", "tinny", "podcast"],
+     ["MY AUDIO IS CRISP NOW", "PEOPLE HEAR ME CLEARLY NOW", "SOUND QUALITY CHANGED"]),
+
+    (["gimbal", "shaky", "stabiliz"],
+     ["NO MORE SHAKY FOOTAGE", "MY VIDEOS LOOK CINEMATIC", "SMOOTH SHOTS EVERY TIME"]),
+
+    (["mouse", "hand fatigue", "wrist pain", "long scrolling"],
+     ["MY WRIST STOPPED HURTING", "NO MORE HAND FATIGUE", "I CAN WORK LONGER NOW"]),
+
+    (["keyboard", "typing", "cramped laptop"],
+     ["I TYPE FASTER THAN EVER", "MY WRISTS THANK ME", "TYPING IS DIFFERENT NOW"]),
+
+    (["headphone", "headset", "noise-cancell"],
+     ["I FINALLY CAN FOCUS", "I HEAR NOTHING BUT WORK", "DISTRACTIONS ARE GONE"]),
+
+    (["notebook", "notes", "reusable"],
+     ["NEVER LOSE A NOTE AGAIN", "MY NOTES ARE ORGANIZED NOW", "I STOPPED LOSING IDEAS"]),
+
+    (["gpu", "local llm", "stable diffusion", "fine-tun", "cloud gpu"],
+     ["RUNNING AI LOCALLY NOW", "NO MORE CLOUD GPU BILLS", "AI ON MY OWN HARDWARE"]),
+
+    (["raspberry pi", "home automation", "home agent"],
+     ["I AUTOMATED MY HOME SETUP", "HOME AUTOMATION FOR $50", "MY PI RUNS 24/7 NOW"]),
+
+    (["edge tpu", "computer vision", "edge ai"],
+     ["AI WITHOUT INTERNET NOW", "EDGE AI IN MY POCKET", "LOCAL AI UNDER $100"]),
+
+    (["speakerphone", "meeting audio", "jabra", "voice assistant"],
+     ["MEETINGS SOUND DIFFERENT NOW", "EVERYONE HEARS ME CLEARLY", "NO MORE BAD CALL AUDIO"]),
+
+    (["nvme", "ssd", "dataset", "load time", "gen5"],
+     ["MY COMPUTER IS FASTER NOW", "LOAD TIMES ARE INSTANT", "AI LOADS IN SECONDS NOW"]),
+
+    (["payment", "checkout", "e-transfer", "in-person sale"],
+     ["I NEVER MISS A SALE NOW", "PAYMENTS IN SECONDS NOW", "LOST A SALE BEFORE THIS"]),
+
+    (["360", "action camera", "missed the shot", "re-shooting"],
+     ["I NEVER MISS THE SHOT NOW", "ONE CAMERA GETS EVERYTHING", "NO MORE MISSED MOMENTS"]),
+]
+
+# Niche-specific fallbacks — outcome-based, no generic phrases
+_HOOK_NICHE_FALLBACK: dict[str, list[str]] = {
+    "productivity":     ["SAVED AN HOUR TODAY", "I GET MORE DONE NOW", "MY OUTPUT DOUBLED", "THIS PAID FOR ITSELF FAST"],
+    "business":         ["MY WORKFLOW CHANGED OVERNIGHT", "THIS PAID FOR ITSELF", "I SAVED TIME AND MONEY", "BEST $50 I SPENT"],
+    "ai":               ["RUNNING AI FROM HOME NOW", "I DELETED MY CLOUD ACCOUNT", "AI WITHOUT THE MONTHLY FEE", "LOCAL AI FINALLY WORKS"],
+    "work_from_home":   ["MY HOME OFFICE IS NEXT LEVEL", "WFH JUST GOT EASIER", "I WORK BETTER FROM HOME NOW", "BEST HOME OFFICE UPGRADE"],
+    "content_creation": ["MY CONTENT LOOKS DIFFERENT NOW", "VIEWS WENT UP AFTER THIS", "MY PRODUCTION VALUE DOUBLED", "EVERY CREATOR NEEDS THIS"],
 }
-_VIDEO_HOOKS_DEFAULT = [
-    "THIS IS GOING VIRAL",
-    "I DIDN'T EXPECT THIS",
-    "EVERYONE IS BUYING THIS",
-    "WISH I KNEW SOONER",
-    "STOP SLEEPING ON THIS",
-    "THIS CHANGES EVERYTHING",
+_HOOK_DEFAULT_FALLBACK = [
+    "THIS ACTUALLY WORKS",
+    "I SAVED $50 WITH THIS",
+    "WISH I HAD THIS SOONER",
+    "CHANGED MY DAILY ROUTINE",
+    "MY LIFE IS EASIER NOW",
 ]
 
 
-def _video_hook(product: str, niche: str) -> str:
-    """Return a short (3–6 word) scroll-stopping hook for the video intro."""
-    bank = _VIDEO_HOOKS.get((niche or "").lower(), _VIDEO_HOOKS_DEFAULT)
-    return bank[abs(hash(product or niche)) % len(bank)]
+def _video_hook(product: str, niche: str, problem_solved: str = "") -> str:
+    """Return a specific, credible 3-7 word hook based on the product's problem.
+
+    Uses whole-word boundary matching so "cord" never false-matches "recording",
+    "print" never false-matches "footprint", etc.
+    Falls back to niche-specific outcome hooks, then generic defaults.
+    """
+    import re as _re
+    text = f"{product} {problem_solved}".lower()
+    for keywords, hooks in _HOOK_PATTERNS:
+        if any(_re.search(r'\b' + _re.escape(kw) + r'\b', text) for kw in keywords):
+            return hooks[abs(hash(product)) % len(hooks)]
+    niche_hooks = _HOOK_NICHE_FALLBACK.get((niche or "").lower(), _HOOK_DEFAULT_FALLBACK)
+    return niche_hooks[abs(hash(product)) % len(niche_hooks)]
 
 
 def _short_cta(cta: str, affiliate_url: str, product: str = "") -> tuple[str, str]:
@@ -5389,7 +5460,7 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             skip_after=cta_start,   # captions end before CTA card
         )
         hook_clip = _hv_captions.make_hook_clip(
-            _video_hook(req.product, req.niche),
+            _video_hook(req.product, req.niche, req.problem_solved),
             DEFAULT_VIDEO_SIZE, start=0.0, end=hook_end, style=style_cfg,
         )
         _cta_primary, _cta_sub = _short_cta(req.cta, req.affiliate_url, req.product)
