@@ -219,27 +219,69 @@ def _render_cta_png(
     canvas_size: tuple[int, int],
     font_size: int,
 ) -> np.ndarray:
-    """Lower-third CTA card: rounded translucent background + big text."""
+    """Lower-third CTA card: rounded translucent background + big text.
+
+    Font auto-reduces until the text block fits inside the card's inner
+    area, so no clipping regardless of input length.
+    """
     scale = max(1.0, canvas_size[0] / 720.0)
-    scaled_font = max(28, int(font_size * scale))
+    # Hard cap: never exceed 5% of canvas height (96px at 1920)
+    scaled_font = min(max(28, int(font_size * scale)), int(canvas_size[1] * 0.05))
     stroke = max(2, int(3 * scale))
     radius = max(16, int(28 * scale))
-    gap = max(10, int(14 * scale))
+    gap = max(8, int(12 * scale))
+    v_pad = max(24, int(36 * scale))  # vertical padding inside card
 
     w, h = canvas_size
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
 
-    # Card backdrop - rounded rectangle behind the text.
+    # Card: positioned in the lower 30% with safe margins from screen edge
     card_w = int(w * 0.86)
     card_x = (w - card_w) // 2
-    card_top_y = int(h * 0.62)
-    card_bot_y = int(h * 0.84)
+    card_top_y = int(h * 0.65)
+    card_bot_y = int(h * 0.90)       # leaves 10% gap at bottom of screen
+    inner_h = card_bot_y - card_top_y - 2 * v_pad
+
+    # Auto-reduce font until text fits within the inner card height.
+    # Uses the same greedy word-wrap as _draw_word_run to measure accurately.
+    probe_img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    probe_draw = ImageDraw.Draw(probe_img)
+    max_text_w = int(card_w * 0.88)
+    for _ in range(6):
+        font = _load_font(scaled_font)
+        space_w = probe_draw.textbbox((0, 0), " ", font=font)[2]
+        words_upper = text.upper().split()
+        lines_acc: list[list[str]] = [[]]
+        cur_w = 0
+        for word in words_upper:
+            bb = probe_draw.textbbox((0, 0), word, font=font)
+            ww = bb[2] - bb[0]
+            cand = ww if not lines_acc[-1] else cur_w + space_w + ww
+            if cand > max_text_w and lines_acc[-1]:
+                lines_acc.append([word])
+                cur_w = ww
+            else:
+                lines_acc[-1].append(word)
+                cur_w = cand
+        line_hs = [
+            max(
+                (probe_draw.textbbox((0, 0), t, font=font)[3]
+                 - probe_draw.textbbox((0, 0), t, font=font)[1])
+                for t in line
+            )
+            for line in lines_acc if line
+        ]
+        total_text_h = sum(line_hs) + gap * max(0, len(line_hs) - 1)
+        if total_text_h <= inner_h:
+            break
+        scaled_font = max(24, int(scaled_font * 0.82))
+
     card = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     card_draw = ImageDraw.Draw(card)
     card_draw.rounded_rectangle(
         [card_x, card_top_y, card_x + card_w, card_bot_y],
         radius=radius,
-        fill=(20, 22, 30, 215),
+        fill=(20, 22, 30, 220),
     )
     img = Image.alpha_composite(img, card)
 
@@ -251,7 +293,7 @@ def _render_cta_png(
                    fill_default=(255, 255, 255, 255),
                    fill_highlight=(255, 220, 70, 255),
                    stroke_width=stroke,
-                   max_width_pct=0.78,
+                   max_width_pct=0.82,
                    line_gap=gap)
     return np.array(img)
 

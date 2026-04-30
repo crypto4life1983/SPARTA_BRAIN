@@ -5200,6 +5200,17 @@ class HydraIdeaReq(BaseModel):
     affiliate_url: str = ""
 
 
+def _short_cta(cta: str, affiliate_url: str) -> str:
+    """Distill a potentially long Amazon CTA into a 2–3 word screen-safe phrase."""
+    has_link = bool((affiliate_url or "").strip())
+    words = (cta or "").split()
+    # Already short enough — use as-is
+    if len(words) <= 5:
+        return cta.upper()
+    # Long sentence → pick a preset based on link availability
+    return "LINK IN DESCRIPTION" if has_link else "FOLLOW FOR MORE"
+
+
 @app.post("/api/hydra/generate_from_idea")
 async def api_hydra_generate_from_idea(req: HydraIdeaReq):
     """Turn an Amazon affiliate idea into a product slideshow video.
@@ -5309,7 +5320,7 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             DEFAULT_VIDEO_SIZE, start=0.0, end=hook_end, style=style_cfg,
         )
         cta_clip = _hv_captions.make_cta_clip(
-            req.cta or "Check the link in description.",
+            _short_cta(req.cta, req.affiliate_url),
             DEFAULT_VIDEO_SIZE, start=cta_start, end=duration, style=style_cfg,
         )
 
