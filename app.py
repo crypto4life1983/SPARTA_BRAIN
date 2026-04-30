@@ -5207,6 +5207,59 @@ _CTA_ACTION_PHRASES = [
 ]
 
 
+_VIDEO_HOOKS: dict[str, list[str]] = {
+    "productivity": [
+        "THIS CHANGED MY WORKFLOW",
+        "I WORK 2X FASTER NOW",
+        "WISH I KNEW THIS SOONER",
+        "STOP WORKING THE HARD WAY",
+        "EVERYONE IS BUYING THIS",
+    ],
+    "business": [
+        "EVERY BUSINESS NEEDS THIS",
+        "I DIDN'T EXPECT THIS",
+        "THIS IS GOING VIRAL",
+        "STOP WASTING YOUR TIME",
+        "THIS SAVES HOURS WEEKLY",
+    ],
+    "ai": [
+        "THIS IS THE FUTURE",
+        "AI USERS ARE OBSESSED",
+        "I DIDN'T EXPECT THIS",
+        "EVERYONE IS BUYING THIS",
+        "THIS CHANGES EVERYTHING",
+    ],
+    "work_from_home": [
+        "WFH GAME CHANGER",
+        "EVERYONE AT HOME NEEDS THIS",
+        "I WISH I HAD THIS",
+        "THIS IS GOING VIRAL",
+        "STOP WORKING THE HARD WAY",
+    ],
+    "content_creation": [
+        "CREATORS ARE OBSESSED",
+        "THIS CHANGED MY CONTENT",
+        "STOP SLEEPING ON THIS",
+        "EVERYONE IS BUYING THIS",
+        "I DIDN'T EXPECT THIS",
+    ],
+}
+_VIDEO_HOOKS_DEFAULT = [
+    "THIS IS GOING VIRAL",
+    "I DIDN'T EXPECT THIS",
+    "EVERYONE IS BUYING THIS",
+    "WISH I KNEW SOONER",
+    "STOP SLEEPING ON THIS",
+    "THIS CHANGES EVERYTHING",
+]
+
+
+def _video_hook(product: str, niche: str) -> str:
+    """Return a short (3–6 word) scroll-stopping hook for the video intro."""
+    bank = _VIDEO_HOOKS.get((niche or "").lower(), _VIDEO_HOOKS_DEFAULT)
+    return bank[abs(hash(product or niche)) % len(bank)]
+
+
 def _short_cta(cta: str, affiliate_url: str, product: str = "") -> tuple[str, str]:
     """Return (primary_text, sub_text) for the CTA card.
 
@@ -5336,7 +5389,7 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             skip_after=cta_start,   # captions end before CTA card
         )
         hook_clip = _hv_captions.make_hook_clip(
-            req.viral_hook or req.product,
+            _video_hook(req.product, req.niche),
             DEFAULT_VIDEO_SIZE, start=0.0, end=hook_end, style=style_cfg,
         )
         _cta_primary, _cta_sub = _short_cta(req.cta, req.affiliate_url, req.product)
