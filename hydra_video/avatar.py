@@ -11,14 +11,72 @@ Swap-point: a future face-detection / framing module can replace
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 from . import (
     AVATARS_DIR, DEFAULT_AVATAR, DEFAULT_VIDEO_SIZE,
     OUT_RAW_AVATAR, ensure_dirs,
 )
+
+
+def _analyze_image(img: Image.Image) -> dict:
+    """Pure-PIL image analysis — no ML, no extra deps.
+
+    Samples four corner patches to gauge background uniformity (very flat
+    corners = likely studio backdrop or AI-generated solid BG) and checks
+    the source aspect ratio to flag close/tight crops where the face
+    already fills most of the frame.
+
+    Both signals feed the crop-window bias in prepare_avatar so the framing
+    adapts to the source rather than always applying the same fixed offset.
+    """
+    w, h = img.size
+    patch = max(4, min(40, w // 6, h // 6))
+    gray = img.convert("L")
+
+    def _stdev(box: tuple) -> float:
+        px = list(gray.crop(box).getdata())
+        if len(px) < 2:
+            return 0.0
+        mean = sum(px) / len(px)
+        return (sum((p - mean) ** 2 for p in px) / len(px)) ** 0.5
+
+    stdevs = [
+        _stdev((0, 0, patch, patch)),
+        _stdev((w - patch, 0, w, patch)),
+        _stdev((0, h - patch, patch, h)),
+        _stdev((w - patch, h - patch, w, h)),
+    ]
+    avg_std = sum(stdevs) / 4
+
+    return {
+        # Flat corners (< 18 greyscale stdev) → probable studio / solid BG
+        "uniform_background": avg_std < 18.0,
+        # Tight crop: source aspect ratio wider than a natural 4:5 portrait
+        "tight_crop": (w / h) > 0.80,
+        "corner_stdev": round(avg_std, 1),
+    }
+
+
+def _soft_enhance(img: Image.Image) -> Image.Image:
+    """Minimal two-step enhancement after the cover-fit resize.
+
+    LANCZOS is the best resize filter but it still softens fine detail,
+    especially on faces.  These two steps recover perceived sharpness and
+    add a touch of micro-contrast without producing halos or artefacts
+    that would look artificial on a talking-head video.
+
+      - 8% contrast lift: adds presence; barely detectable individually
+        but makes the face read as a real photo rather than a flat render.
+      - UnsharpMask(0.8, 55, 4): very conservative radius + low percent
+        so only genuine edges are sharpened, not noise or JPEG artefacts.
+    """
+    img = ImageEnhance.Contrast(img).enhance(1.08)
+    img = img.filter(ImageFilter.UnsharpMask(radius=0.8, percent=55, threshold=4))
+    return img
 
 
 def _generate_placeholder(size: tuple[int, int], out_path: Path) -> Path:
@@ -105,6 +163,17 @@ def prepare_avatar(
         return _generate_placeholder(size, out_path)
 
     img = Image.open(src).convert("RGB")
+
+    # Analyse before resizing — original pixel data gives the cleanest signal.
+    info = _analyze_image(img)
+    notes = []
+    if info["uniform_background"]:
+        notes.append(f"uniform bg (corner_stdev={info['corner_stdev']})")
+    if info["tight_crop"]:
+        notes.append("tight crop")
+    if notes:
+        print(f"[hydra avatar] {src.name}: {', '.join(notes)}", file=sys.stderr)
+
     # Cover-fit into target canvas without stretching
     iw, ih = img.size
     tw, th = size
@@ -117,13 +186,29 @@ def prepare_avatar(
         new_w = tw
         new_h = int(round(new_w / src_ratio))
     img = img.resize((new_w, new_h), Image.LANCZOS)
+
     left = (new_w - tw) // 2
-    # Bias the vertical crop upward by ~8% of canvas height so the face
-    # sits in the upper-center of the frame rather than dead center.
-    # Clamped to [0, new_h - th] so we never crop outside the image.
-    raw_top = (new_h - th) // 2 - int(th * 0.08)
+
+    # Upward face bias: moves the crop window toward the top so the face
+    # sits in the upper-center rather than dead center.
+    #
+    # Bias is tuned to the source image characteristics:
+    #   8%  — natural portrait (default): strong upward shift, forehead visible
+    #   5%  — studio/tight headshot: less shift so we don't cut the top of the head
+    #   6%  — tight but natural background: middle ground
+    if info["uniform_background"] and info["tight_crop"]:
+        face_bias = 0.05
+    elif info["tight_crop"]:
+        face_bias = 0.06
+    else:
+        face_bias = 0.08
+
+    raw_top = (new_h - th) // 2 - int(th * face_bias)
     top = max(0, min(raw_top, new_h - th))
     img = img.crop((left, top, left + tw, top + th))
+
+    # Subtle post-crop enhancement to recover sharpness lost in LANCZOS resize.
+    img = _soft_enhance(img)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(out_path, "PNG")
