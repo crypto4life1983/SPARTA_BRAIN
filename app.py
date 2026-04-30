@@ -5200,15 +5200,35 @@ class HydraIdeaReq(BaseModel):
     affiliate_url: str = ""
 
 
-def _short_cta(cta: str, affiliate_url: str) -> str:
-    """Distill a potentially long Amazon CTA into a 2–3 word screen-safe phrase."""
+_CTA_ACTION_PHRASES = [
+    "GET YOURS BELOW",
+    "TRY IT TODAY",
+    "SEE WHY IT'S TRENDING",
+]
+
+
+def _short_cta(cta: str, affiliate_url: str, product: str = "") -> tuple[str, str]:
+    """Return (primary_text, sub_text) for the CTA card.
+
+    primary_text: short action phrase, ≤ 4 words
+    sub_text: "(link in description)" when there is a real affiliate URL
+    """
     has_link = bool((affiliate_url or "").strip())
     words = (cta or "").split()
-    # Already short enough — use as-is
-    if len(words) <= 5:
-        return cta.upper()
-    # Long sentence → pick a preset based on link availability
-    return "LINK IN DESCRIPTION" if has_link else "FOLLOW FOR MORE"
+
+    if has_link:
+        # Rotate through action phrases deterministically by product name
+        idx = abs(hash(product or cta)) % len(_CTA_ACTION_PHRASES)
+        primary = _CTA_ACTION_PHRASES[idx]
+        sub = "(link in description)"
+    elif len(words) <= 5:
+        primary = cta.upper()
+        sub = ""
+    else:
+        primary = "FOLLOW FOR MORE"
+        sub = ""
+
+    return primary, sub
 
 
 @app.post("/api/hydra/generate_from_idea")
@@ -5319,9 +5339,11 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             req.viral_hook or req.product,
             DEFAULT_VIDEO_SIZE, start=0.0, end=hook_end, style=style_cfg,
         )
+        _cta_primary, _cta_sub = _short_cta(req.cta, req.affiliate_url, req.product)
         cta_clip = _hv_captions.make_cta_clip(
-            _short_cta(req.cta, req.affiliate_url),
+            _cta_primary,
             DEFAULT_VIDEO_SIZE, start=cta_start, end=duration, style=style_cfg,
+            sub_text=_cta_sub,
         )
 
         # ── 5. Optional background music ─────────────────────────────────────

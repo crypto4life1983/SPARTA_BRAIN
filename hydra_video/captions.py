@@ -218,9 +218,12 @@ def _render_cta_png(
     text: str,
     canvas_size: tuple[int, int],
     font_size: int,
+    sub_text: str = "",
 ) -> np.ndarray:
     """Lower-third CTA card: rounded translucent background + big text.
 
+    Optionally renders a smaller secondary line (sub_text) beneath the
+    main action text — e.g. "(link in description)".
     Font auto-reduces until the text block fits inside the card's inner
     area, so no clipping regardless of input length.
     """
@@ -287,14 +290,40 @@ def _render_cta_png(
 
     draw = ImageDraw.Draw(img)
     font = _load_font(scaled_font)
+
+    # With sub_text, shift the main block upward to leave room for sub-line.
+    sub_font_size = max(18, int(scaled_font * 0.52))
+    sub_font = _load_font(sub_font_size) if sub_text else None
+    sub_h = (draw.textbbox((0, 0), sub_text, font=sub_font)[3]
+             - draw.textbbox((0, 0), sub_text, font=sub_font)[1]) if sub_font else 0
+    sub_gap = max(10, int(16 * scale))
+
+    # Main text y_anchor: center of card, shifted up by half sub_text height
+    main_center_y = (card_top_y + card_bot_y) / 2
+    if sub_font:
+        main_center_y -= (sub_h + sub_gap) / 2
+
     _draw_word_run(draw, text.split(), font, canvas_size,
-                   y_anchor=(card_top_y + card_bot_y) / 2 / h,
+                   y_anchor=main_center_y / h,
                    upper=True,
                    fill_default=(255, 255, 255, 255),
                    fill_highlight=(255, 220, 70, 255),
                    stroke_width=stroke,
                    max_width_pct=0.82,
                    line_gap=gap)
+
+    # Secondary line: smaller, muted, centered near bottom of card
+    if sub_font and sub_text:
+        sub_y = int(card_bot_y - v_pad - sub_h)
+        bb = draw.textbbox((0, 0), sub_text, font=sub_font)
+        sub_x = (w - (bb[2] - bb[0])) // 2
+        draw.text(
+            (sub_x, sub_y), sub_text, font=sub_font,
+            fill=(190, 190, 210, 220),
+            stroke_width=max(1, stroke - 1),
+            stroke_fill=(0, 0, 0, 180),
+        )
+
     return np.array(img)
 
 
@@ -373,6 +402,7 @@ def make_cta_clip(
     start: float,
     end: float,
     style: StyleConfig = CLEAN,
+    sub_text: str = "",
 ):
     """End-of-video CTA card. Returns None if there's no room."""
     from moviepy import ImageClip
@@ -381,7 +411,7 @@ def make_cta_clip(
         return None
     if end - start < 0.4:
         return None
-    arr = _render_cta_png(cta_text, video_size, style.cta_font_size)
+    arr = _render_cta_png(cta_text, video_size, style.cta_font_size, sub_text=sub_text)
     clip = (
         ImageClip(arr, transparent=True)
         .with_start(start)
