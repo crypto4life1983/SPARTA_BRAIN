@@ -5544,11 +5544,36 @@ def _video_hook(product: str, niche: str, problem_solved: str = "") -> str:
 
 _YT_NICHE_BENEFIT: dict[str, str] = {
     "productivity":     "This Amazon find completely changed how I work — saves me time every single day.",
-    "business":         "This tool genuinely improved my daily workflow and paid for itself fast.",
+    "business":         "One of the best business finds on Amazon. Paid for itself in the first month.",
     "ai":               "If you're running AI locally, this is a game changer — no more cloud fees.",
     "work_from_home":   "Best work-from-home upgrade I've made. If you WFH, you need this.",
     "content_creation": "This completely leveled up my content quality. Highly recommend for creators.",
 }
+
+# Product-keyword overrides — checked before niche fallback
+_YT_PRODUCT_BENEFIT: list[tuple[list[str], str]] = [
+    (["mastercard", "visa", "credit card", "cashback card", "rewards card"],
+     "Cashback on every purchase — no annual fee. Best card for Amazon buyers."),
+    (["rewards mastercard", "amazon card", "amazon visa"],
+     "Earn cashback on Amazon and everywhere you shop. Link in description."),
+    (["keyboard", "mechanical keyboard"], "Typing feels completely different. Best upgrade for your desk."),
+    (["monitor", "screen", "display"],    "Biggest upgrade I made — the difference is night and day."),
+    (["webcam", "web cam"],               "Finally looks professional on every call. No more blurry video."),
+    (["microphone", "mic"],               "Audio quality completely changed my content. Huge difference."),
+    (["mouse", "trackpad"],               "Smooth, precise — hands don't hurt anymore after long sessions."),
+    (["chair", "standing desk", "desk"],  "Back doesn't hurt anymore. This was 100% worth it."),
+    (["cable", "organizer", "wire"],      "Desk went from chaos to clean in 10 minutes flat."),
+    (["camera", "ring light"],            "Lighting completely changed how I look on camera."),
+]
+
+
+def _yt_benefit_for_product(product: str, niche: str) -> str:
+    """Return a benefit line, preferring product-keyword matches over niche defaults."""
+    lower = product.lower()
+    for keywords, phrase in _YT_PRODUCT_BENEFIT:
+        if any(kw in lower for kw in keywords):
+            return phrase
+    return _YT_NICHE_BENEFIT.get(niche, f"{product} — one of the best finds on Amazon right now.")
 
 _YT_NICHE_HASHTAGS: dict[str, str] = {
     "productivity":     "#productivity #amazonfinds #worksmarter #desksetup",
@@ -5594,16 +5619,50 @@ def _generate_yt_title(product: str, niche: str) -> str:
     return title
 
 
+def _registry_affiliate_url(product: str) -> str:
+    """Look up the real affiliate URL from the registry.
+
+    Tries exact match first, then falls back to token-overlap matching so
+    'Amazon Rewards Mastercard' finds 'Amazon.ca Rewards Mastercard'.
+    Returns '' when nothing matches (caller falls back to CTA-only).
+    """
+    import re as _re
+    try:
+        from spartacus.agents import amazon_engine as _ae
+        reg = _ae.load_affiliate_links()
+    except Exception:
+        return ""
+    if not reg:
+        return ""
+    if product in reg:
+        return reg[product].get("url", "")
+
+    def _norm(s: str) -> list[str]:
+        return _re.sub(r"[^a-z0-9 ]", " ", s.lower()).split()
+
+    prod_tokens = set(_norm(product))
+    best_key, best_score = None, 0
+    for key in reg:
+        overlap = len(prod_tokens & set(_norm(key)))
+        if overlap > best_score:
+            best_score, best_key = overlap, key
+    if best_key and best_score >= 2:
+        return reg[best_key].get("url", "")
+    return ""
+
+
 def _generate_yt_description(product: str, niche: str, affiliate_url: str) -> str:
-    """Generate a YouTube Shorts description: benefit + link + hashtags."""
-    benefit = _YT_NICHE_BENEFIT.get(
-        niche,
-        f"{product} is one of the best finds I've come across on Amazon.",
-    )
+    """Generate a YouTube Shorts description: benefit + link + hashtags.
+
+    Always prefers the registry URL over whatever the brief passed in —
+    the brief may carry AI-generated placeholder URLs.
+    """
+    real_url = _registry_affiliate_url(product) or affiliate_url
+    benefit = _yt_benefit_for_product(product, niche)
     link_line = (
-        f"Check it out here:\n{affiliate_url}"
-        if affiliate_url
-        else "Check it out here:\n[link in description]"
+        f"Check it out here:\n{real_url}"
+        if real_url
+        else "Link in description."
     )
     base_tags = _YT_NICHE_HASHTAGS.get(niche, "#amazonfinds #productivity")
     # Deduplicate and append #shorts
@@ -5821,6 +5880,8 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             "elapsed_sec": round(_time.time() - started, 2),
             "yt_title": _generate_yt_title(req.product, req.niche),
             "yt_description": _generate_yt_description(req.product, req.niche, req.affiliate_url or ""),
+            # Expose the resolved registry URL so the JS publish call uses it
+            "affiliate_url": _registry_affiliate_url(req.product) or req.affiliate_url or "",
         }
 
     except Exception as exc:  # noqa: BLE001
