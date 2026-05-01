@@ -149,6 +149,33 @@ function renderToday(today) {
           <button class="btn btn-sm" id="amz-vidgen-copy-${i}">Copy Path</button>
           <span class="hint" id="amz-vidgen-meta-${i}" style="font-size:11px;"></span>
         </div>
+        <div id="amz-vidgen-yt-${i}" style="display:none; margin-top:12px; padding:10px; background:#0d1117; border:1px solid #1e293b; border-radius:6px;">
+          <div style="margin-bottom:8px;">
+            <span class="lbl" style="font-size:11px; color:#64748b;">TITLE</span>
+            <div id="amz-vidgen-title-${i}" style="font-weight:600; font-size:13px; margin-top:2px;"></div>
+            <button class="btn btn-sm" id="amz-vidgen-copy-title-${i}" style="margin-top:4px; font-size:11px;">Copy title</button>
+          </div>
+          <div>
+            <span class="lbl" style="font-size:11px; color:#64748b;">DESCRIPTION</span>
+            <pre id="amz-vidgen-desc-${i}" style="white-space:pre-wrap; font-size:11px; margin:4px 0; color:#94a3b8;"></pre>
+            <button class="btn btn-sm" id="amz-vidgen-copy-desc-${i}" style="font-size:11px;">Copy description</button>
+          </div>
+          <div style="margin-top:12px; padding-top:12px; border-top:1px solid #1e293b;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button class="btn btn-primary" id="amz-pub-btn-${i}" style="font-size:13px;">🚀 Publish to YouTube</button>
+              <label style="display:flex; align-items:center; gap:5px; font-size:12px; color:#94a3b8; cursor:pointer;">
+                <input type="checkbox" id="amz-pub-public-${i}"> Make Public immediately
+              </label>
+            </div>
+            <p id="amz-pub-status-${i}" class="hint" style="margin:6px 0 0; min-height:1.2em;"></p>
+            <div id="amz-pub-result-${i}" style="display:none; margin-top:8px; padding:8px 10px; background:#071a0f; border:1px solid #166534; border-radius:6px; font-size:12px;">
+              <span style="color:#4ade80; font-weight:700;">✓ Uploaded</span>
+              <span id="amz-pub-privacy-${i}" style="color:#64748b; margin-left:6px;"></span>
+              <br>
+              <a id="amz-pub-link-${i}" href="#" target="_blank" rel="noopener" style="color:#60a5fa; word-break:break-all; font-size:11px;"></a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `).join('');
@@ -193,6 +220,66 @@ function renderToday(today) {
           ? `📸 ${data.image_count} real images`
           : '🎨 PIL cards (no images found)';
         metaEl.textContent = `${data.duration_sec}s · ${data.word_count} words · ${modeLabel} · ${data.elapsed_sec}s`;
+
+        // YouTube title + description
+        const ytBox   = document.getElementById(`amz-vidgen-yt-${i}`);
+        const titleEl = document.getElementById(`amz-vidgen-title-${i}`);
+        const descEl  = document.getElementById(`amz-vidgen-desc-${i}`);
+        const copyTitleBtn = document.getElementById(`amz-vidgen-copy-title-${i}`);
+        const copyDescBtn  = document.getElementById(`amz-vidgen-copy-desc-${i}`);
+        if (data.yt_title) {
+          titleEl.textContent = data.yt_title;
+          descEl.textContent  = data.yt_description || '';
+          ytBox.style.display = '';
+          copyTitleBtn.onclick = async () => {
+            try { await navigator.clipboard.writeText(data.yt_title); copyTitleBtn.textContent = 'Copied!'; setTimeout(() => { copyTitleBtn.textContent = 'Copy title'; }, 1500); }
+            catch { prompt('Copy title:', data.yt_title); }
+          };
+          copyDescBtn.onclick = async () => {
+            try { await navigator.clipboard.writeText(data.yt_description || ''); copyDescBtn.textContent = 'Copied!'; setTimeout(() => { copyDescBtn.textContent = 'Copy description'; }, 1500); }
+            catch { prompt('Copy description:', data.yt_description || ''); }
+          };
+        }
+
+        // Publish to YouTube wiring
+        const pubBtn     = document.getElementById(`amz-pub-btn-${i}`);
+        const pubPublic  = document.getElementById(`amz-pub-public-${i}`);
+        const pubStatus  = document.getElementById(`amz-pub-status-${i}`);
+        const pubResult  = document.getElementById(`amz-pub-result-${i}`);
+        const pubLink    = document.getElementById(`amz-pub-link-${i}`);
+        const pubPrivacy = document.getElementById(`amz-pub-privacy-${i}`);
+        if (pubBtn) {
+          pubBtn.addEventListener('click', async () => {
+            pubBtn.disabled = true;
+            pubStatus.textContent = 'Uploading to YouTube… (30–120s)';
+            pubResult.style.display = 'none';
+            try {
+              const rPub = await fetch('/api/hydra/publish_to_youtube', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  video_path:     data.video_path,
+                  yt_title:       data.yt_title       || 'Amazon Product Review',
+                  yt_description: data.yt_description || '',
+                  niche:          data.niche          || '',
+                  privacy:        pubPublic.checked   ? 'public' : 'unlisted',
+                }),
+              });
+              const pub = await rPub.json();
+              if (!pub.ok) throw new Error(pub.error || 'Upload failed');
+              pubLink.href        = pub.video_url;
+              pubLink.textContent = pub.video_url;
+              pubPrivacy.textContent = pub.privacy === 'public' ? '(public)' : '(unlisted)';
+              pubResult.style.display = '';
+              pubStatus.textContent = 'Done.';
+            } catch (e) {
+              pubStatus.textContent = 'Error: ' + e.message;
+            } finally {
+              pubBtn.disabled = false;
+            }
+          });
+        }
+
         statusEl.textContent = 'Done.';
         resultEl.style.display = '';
         resultEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});

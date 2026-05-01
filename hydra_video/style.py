@@ -83,20 +83,19 @@ AGGRESSIVE = StyleConfig(
 
 AFFILIATE = StyleConfig(
     name="affiliate",
-    # Bigger captions (×1.18 vs CLEAN at 720px reference)
-    caption_font_size=66,
-    chunk_max_words=3,         # 3 words = fast TikTok pacing
-    caption_fade_sec=0.06,
-    hook_font_size=100,        # full-screen impact
-    hook_max_seconds=1.5,      # short punchy hook
-    hook_fade_sec=0.12,
+    caption_font_size=70,
+    chunk_max_words=3,         # 3 words = readable YouTube pace
+    caption_fade_sec=0.05,
+    hook_font_size=104,
+    hook_max_seconds=1.5,
+    hook_fade_sec=0.10,
     cta_font_size=62,
     cta_min_seconds=1.8,
     cta_max_seconds=3.0,
     cta_fade_sec=0.18,
     zoom_amount=1.08,
     drift_px=14,
-    pulse_every_sec=0.0,
+    pulse_every_sec=5.0,    # flash interrupt interval (seconds)
     music_volume_mult=0.18,
     product_start_sec=1.2,
     product_fade_sec=0.25,

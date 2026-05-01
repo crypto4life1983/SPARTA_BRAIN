@@ -5219,256 +5219,297 @@ _CTA_ACTION_PHRASES = [
 # More specific patterns come before broader ones.
 _HOOK_PATTERNS: list[tuple[list[str], list[str]]] = [
     (["back pain", "lower back", "slouch", "posture"], [
-        "THIS FIXED MY BACK PAIN",         # A outcome
-        "I STOPPED SLOUCHING INSTANTLY",    # A outcome
-        "MY BACK USED TO HURT DAILY",      # B pain
-        "I WAS TIRED OF BACK PAIN",        # B frustration
-        "I DIDN'T EXPECT THIS TO WORK",    # C surprise
+        "THIS FIXED MY BACK PAIN",
+        "I STOPPED SLOUCHING INSTANTLY",
+        "MY BACK USED TO HURT DAILY",
+        "I WAS TIRED OF BACK PAIN",
+        "I DIDN'T EXPECT THIS TO WORK",
+        "THIS FIXED MY BACK IN 3 DAYS",        # YT specific
+        "I WASTED 2 YEARS IGNORING THIS",      # YT specific
     ]),
 
     (["eye strain", "glare", "monitor light", "staring"], [
-        "MY EYES STOPPED HURTING",         # A
-        "I CAN WORK LONGER NOW",           # A
-        "EYE STRAIN WAS RUINING MY DAY",   # B
-        "I COULDN'T WORK PAST 3PM",        # B before
-        "THIS ACTUALLY FIXED IT",          # C
+        "MY EYES STOPPED HURTING",
+        "I CAN WORK LONGER NOW",
+        "EYE STRAIN WAS RUINING MY DAY",
+        "I COULDN'T WORK PAST 3PM",
+        "THIS ACTUALLY FIXED IT",
+        "MY EYES FELT BETTER IN 1 HOUR",       # YT specific
+        "I NOW WORK 4 EXTRA HOURS DAILY",      # YT specific
     ]),
 
     # Lighting before webcam — Key Light's description mentions "webcam footage"
     (["lighting", "dim", "dark footage", "key light", "yellow footage"], [
-        "MY VIDEOS LOOK CINEMATIC",        # A
-        "LIGHTING CHANGED MY CONTENT",     # A
-        "MY VIDEOS LOOKED TERRIBLE BEFORE",# B before
-        "BAD LIGHTING KILLED MY VIEWS",    # B pain
-        "I DIDN'T EXPECT THIS DIFFERENCE", # C
+        "MY VIDEOS LOOK CINEMATIC",
+        "LIGHTING CHANGED MY CONTENT",
+        "MY VIDEOS LOOKED TERRIBLE BEFORE",
+        "BAD LIGHTING KILLED MY VIEWS",
+        "I DIDN'T EXPECT THIS DIFFERENCE",
+        "MY VIDEOS LOOK 10X BETTER NOW",       # YT specific
     ]),
 
     (["webcam", "look on camera", "pixelat", "grainy", "potato"], [
-        "I LOOK BETTER ON CALLS NOW",      # A
-        "MY VIDEO QUALITY CHANGED",        # A
-        "I LOOKED TERRIBLE ON ZOOM",       # B pain
-        "POTATO CAM WAS EMBARRASSING",     # B frustration
-        "THIS CHANGED HOW PEOPLE SEE ME",  # C before/after
+        "I LOOK BETTER ON CALLS NOW",
+        "MY VIDEO QUALITY CHANGED",
+        "I LOOKED TERRIBLE ON ZOOM",
+        "POTATO CAM WAS EMBARRASSING",
+        "THIS CHANGED HOW PEOPLE SEE ME",
+        "I LOOK 10X BETTER ON CALLS NOW",      # YT specific
     ]),
 
     (["zoom call", "dropped call", "dead spot", "wi-fi", "mesh wifi"], [
-        "NO MORE DROPPED CALLS",           # A
-        "ZERO DEAD SPOTS NOW",             # A
-        "DROPPED CALLS RUINED MY MEETINGS",# B
-        "I WAS ALWAYS DISCONNECTING",      # B before
-        "I DIDN'T EXPECT THIS COVERAGE",   # C
+        "NO MORE DROPPED CALLS",
+        "ZERO DEAD SPOTS NOW",
+        "DROPPED CALLS RUINED MY MEETINGS",
+        "I WAS ALWAYS DISCONNECTING",
+        "I DIDN'T EXPECT THIS COVERAGE",
+        "ZERO DROPPED CALLS IN 2 WEEKS",       # YT specific
     ]),
 
     (["standing desk", "stiffness", "sitting all day", "afternoon energy"], [
-        "I STOPPED SITTING ALL DAY",       # A
-        "MY ENERGY IS BACK",               # A
-        "SITTING ALL DAY WAS KILLING ME",  # B pain
-        "AFTERNOON CRASHES WERE CONSTANT", # B before
-        "STANDING CHANGED EVERYTHING",     # C before/after
+        "I STOPPED SITTING ALL DAY",
+        "MY ENERGY IS BACK",
+        "SITTING ALL DAY WAS KILLING ME",
+        "AFTERNOON CRASHES WERE CONSTANT",
+        "STANDING CHANGED EVERYTHING",
+        "I SIT 60% LESS NOW",                  # YT specific
+        "MY BACK PAIN GONE IN 1 WEEK",         # YT specific
     ]),
 
     (["noise cancell", "background noise", "open-office", "cafe distraction"], [
-        "FINALLY FOUND MY FOCUS",          # A
-        "I HEAR NOTHING BUT WORK",         # A
-        "OFFICE NOISE DESTROYED MY FOCUS", # B
-        "I COULDN'T THINK STRAIGHT",       # B before
-        "SILENCE CHANGED MY OUTPUT",       # C
+        "FINALLY FOUND MY FOCUS",
+        "I HEAR NOTHING BUT WORK",
+        "OFFICE NOISE DESTROYED MY FOCUS",
+        "I COULDN'T THINK STRAIGHT",
+        "SILENCE CHANGED MY OUTPUT",
+        "I FOCUSED FOR 3 HOURS STRAIGHT",      # YT specific
+        "SAVED 2 HOURS IN ONE DAY",            # YT specific
     ]),
 
     (["noise", "distraction", "focus", "concentration"], [
-        "I FINALLY CAN FOCUS",             # A
-        "MY FOCUS CAME BACK",              # A
-        "I WAS TIRED OF DISTRACTIONS",     # B
-        "I COULDN'T FOCUS FOR AN HOUR",    # B before
+        "I FINALLY CAN FOCUS",
+        "MY FOCUS CAME BACK",
+        "I WAS TIRED OF DISTRACTIONS",
+        "I COULDN'T FOCUS FOR AN HOUR",
+        "I SAVED AN HOUR EVERY DAY",           # YT specific
     ]),
 
     # Scan before print — scanner descriptions often contain "contract"
     (["scan", "receipt", "paper pile", "bookkeep", "tax season"], [
-        "PAPER CLUTTER IS GONE",           # A
-        "I DIGITIZED EVERYTHING",          # A
-        "PAPER PILES WERE OUT OF CONTROL", # B
-        "TAX SEASON USED TO STRESS ME",    # B before
-        "I DIDN'T EXPECT THIS TO BE EASY", # C
+        "PAPER CLUTTER IS GONE",
+        "I DIGITIZED EVERYTHING",
+        "PAPER PILES WERE OUT OF CONTROL",
+        "TAX SEASON USED TO STRESS ME",
+        "I DIDN'T EXPECT THIS TO BE EASY",
+        "CLEARED 3 YEARS OF PAPER IN 1 DAY",  # YT specific
     ]),
 
     # Shipping label before generic print
     (["shipping label", "etsy", "ecommerce", "hand-writing"], [
-        "MY PACKAGES LOOK PRO NOW",        # A
-        "LABELS IN 10 SECONDS",            # A
-        "HAND WRITING LABELS WAS AWFUL",   # B
-        "I LOOKED UNPROFESSIONAL BEFORE",  # B before
-        "THIS CHANGED MY SHIPPING GAME",   # C
+        "MY PACKAGES LOOK PRO NOW",
+        "LABELS IN 10 SECONDS",
+        "HAND WRITING LABELS WAS AWFUL",
+        "I LOOKED UNPROFESSIONAL BEFORE",
+        "THIS CHANGED MY SHIPPING GAME",
+        "I SHIP 3X FASTER NOW",                # YT specific
     ]),
 
     (["printer", "invoice", "contract printing"], [
-        "I PRINT FROM HOME NOW",           # A
-        "PRINTING IN SECONDS NOW",         # A
-        "PRINT SHOP RUNS WASTED MY TIME",  # B
-        "PRINTING USED TO SLOW ME DOWN",   # B before
+        "I PRINT FROM HOME NOW",
+        "PRINTING IN SECONDS NOW",
+        "PRINT SHOP RUNS WASTED MY TIME",
+        "PRINTING USED TO SLOW ME DOWN",
+        "I PRINT FROM HOME IN 10 SECONDS",     # YT specific
     ]),
 
     # Stream deck before cable — "recording" contains "cord" as substring
     (["stream deck", "fumbling", "obs scenes", "livestream", "mid-recording"], [
-        "ONE CLICK CHANGES EVERYTHING",    # A
-        "STREAMING GOT EASIER",            # A
-        "FUMBLING SCENES WAS EMBARRASSING",# B
-        "I LOOKED UNPROFESSIONAL LIVE",    # B before
-        "I DIDN'T EXPECT THIS UPGRADE",    # C
+        "ONE CLICK CHANGES EVERYTHING",
+        "STREAMING GOT EASIER",
+        "FUMBLING SCENES WAS EMBARRASSING",
+        "I LOOKED UNPROFESSIONAL LIVE",
+        "I DIDN'T EXPECT THIS UPGRADE",
+        "MY STREAM TIME DOUBLED",              # YT specific
     ]),
 
     (["cable", "tangled", "wire clutter", "cords under"], [
-        "MY DESK IS FINALLY CLEAN",        # A
-        "CABLE CHAOS IS OVER",             # A
-        "I WAS TIRED OF THIS MESS",        # B frustration
-        "CABLES DROVE ME CRAZY",           # B pain
-        "DESK BEFORE VS AFTER THIS",       # C before/after
+        "MY DESK IS FINALLY CLEAN",
+        "CABLE CHAOS IS OVER",
+        "I WAS TIRED OF THIS MESS",
+        "CABLES DROVE ME CRAZY",
+        "DESK BEFORE VS AFTER THIS",
+        "MY DESK WAS A MESS BEFORE THIS",      # YT specific
+        "CLEANED MY DESK IN 5 MINUTES",        # YT specific
     ]),
 
     (["battery", "dying laptop", "power bank", "laptop battery"], [
-        "MY LAPTOP NEVER DIES NOW",        # A
-        "BATTERY ANXIETY IS GONE",         # A
-        "DYING BATTERY RUINED MEETINGS",   # B
-        "I LOST WORK SO MANY TIMES",       # B before
-        "I DIDN'T EXPECT THIS TO LAST",    # C
+        "MY LAPTOP NEVER DIES NOW",
+        "BATTERY ANXIETY IS GONE",
+        "DYING BATTERY RUINED MEETINGS",
+        "I LOST WORK SO MANY TIMES",
+        "I DIDN'T EXPECT THIS TO LAST",
+        "8 MORE HOURS OF BATTERY NOW",         # YT specific
+        "I WAS ALWAYS AT 3% BATTERY",          # YT specific
     ]),
 
     (["microphone", "audio", "sound quality", "tinny", "podcast"], [
-        "MY AUDIO IS CRISP NOW",           # A
-        "PEOPLE HEAR ME CLEARLY NOW",      # A
-        "MY AUDIO SOUNDED TERRIBLE",       # B before
-        "PEOPLE KEPT ASKING ME TO REPEAT", # B frustration
-        "THIS CHANGED HOW I SOUND",        # C
+        "MY AUDIO IS CRISP NOW",
+        "PEOPLE HEAR ME CLEARLY NOW",
+        "MY AUDIO SOUNDED TERRIBLE",
+        "PEOPLE KEPT ASKING ME TO REPEAT",
+        "THIS CHANGED HOW I SOUND",
+        "MY AUDIO IMPROVED IN 30 SECONDS",     # YT specific
     ]),
 
     (["gimbal", "shaky", "stabiliz"], [
-        "NO MORE SHAKY FOOTAGE",           # A
-        "SMOOTH SHOTS EVERY TIME",         # A
-        "SHAKY FOOTAGE RUINED MY CONTENT", # B
-        "I DELETED SO MANY CLIPS BEFORE",  # B before
-        "THIS ACTUALLY WORKS",             # C
+        "NO MORE SHAKY FOOTAGE",
+        "SMOOTH SHOTS EVERY TIME",
+        "SHAKY FOOTAGE RUINED MY CONTENT",
+        "I DELETED SO MANY CLIPS BEFORE",
+        "THIS ACTUALLY WORKS",
+        "100% OF MY SHOTS WERE USABLE",        # YT specific
     ]),
 
     (["mouse", "hand fatigue", "wrist pain", "long scrolling"], [
-        "MY WRIST STOPPED HURTING",        # A
-        "NO MORE HAND FATIGUE",            # A
-        "WRIST PAIN WAS CONSTANT",         # B pain
-        "I COULDN'T WORK MORE THAN 2 HRS", # B before
-        "I DIDN'T EXPECT THIS TO HELP",    # C
+        "MY WRIST STOPPED HURTING",
+        "NO MORE HAND FATIGUE",
+        "WRIST PAIN WAS CONSTANT",
+        "I COULDN'T WORK MORE THAN 2 HRS",
+        "I DIDN'T EXPECT THIS TO HELP",
+        "ZERO WRIST PAIN AFTER 1 WEEK",        # YT specific
+        "I WORK 2 MORE HOURS COMFORTABLY",     # YT specific
     ]),
 
     (["keyboard", "typing", "cramped laptop"], [
-        "I TYPE FASTER THAN EVER",         # A
-        "TYPING IS DIFFERENT NOW",         # A
-        "LAPTOP KEYBOARD WAS KILLING ME",  # B
-        "CRAMPED KEYS HURT MY HANDS",      # B before
-        "I DIDN'T EXPECT THIS DIFFERENCE", # C
+        "I TYPE FASTER THAN EVER",
+        "TYPING IS DIFFERENT NOW",
+        "LAPTOP KEYBOARD WAS KILLING ME",
+        "CRAMPED KEYS HURT MY HANDS",
+        "I DIDN'T EXPECT THIS DIFFERENCE",
+        "I TYPE 30% FASTER NOW",               # YT specific
     ]),
 
     (["headphone", "headset", "noise-cancell"], [
-        "I FINALLY CAN FOCUS",             # A
-        "I HEAR NOTHING BUT WORK",         # A
-        "NOISE USED TO RUIN MY DAY",       # B
-        "I COULDN'T WORK IN PUBLIC",       # B before
+        "I FINALLY CAN FOCUS",
+        "I HEAR NOTHING BUT WORK",
+        "NOISE USED TO RUIN MY DAY",
+        "I COULDN'T WORK IN PUBLIC",
+        "I FOCUSED FOR 4 HOURS STRAIGHT",      # YT specific
     ]),
 
     (["notebook", "notes", "reusable"], [
-        "NEVER LOSE A NOTE AGAIN",         # A
-        "MY NOTES ARE ORGANIZED NOW",      # A
-        "I KEPT LOSING IMPORTANT IDEAS",   # B frustration
-        "MY OLD NOTEBOOKS WERE USELESS",   # B before
-        "I DIDN'T EXPECT THIS TO STICK",   # C
+        "NEVER LOSE A NOTE AGAIN",
+        "MY NOTES ARE ORGANIZED NOW",
+        "I KEPT LOSING IMPORTANT IDEAS",
+        "MY OLD NOTEBOOKS WERE USELESS",
+        "I DIDN'T EXPECT THIS TO STICK",
+        "I HAVEN'T LOST A NOTE IN 6 MONTHS",   # YT specific
     ]),
 
     (["gpu", "local llm", "stable diffusion", "fine-tun", "cloud gpu"], [
-        "RUNNING AI LOCALLY NOW",          # A
-        "NO MORE CLOUD GPU BILLS",         # A
-        "CLOUD GPU BILLS WERE KILLING ME", # B
-        "I WAS PAYING $200 A MONTH",       # B before (specific)
-        "I DIDN'T EXPECT THIS SPEED",      # C
+        "RUNNING AI LOCALLY NOW",
+        "NO MORE CLOUD GPU BILLS",
+        "CLOUD GPU BILLS WERE KILLING ME",
+        "I WAS PAYING $200 A MONTH",
+        "I DIDN'T EXPECT THIS SPEED",
+        "CUT MY AI COSTS BY 80%",              # YT specific
     ]),
 
     (["raspberry pi", "home automation", "home agent"], [
-        "I AUTOMATED MY HOME SETUP",       # A
-        "HOME AUTOMATION FOR $50",         # A
-        "MANUAL TASKS WASTED MY TIME",     # B
-        "I DIDN'T KNOW THIS WAS POSSIBLE", # C surprise
+        "I AUTOMATED MY HOME SETUP",
+        "HOME AUTOMATION FOR $50",
+        "MANUAL TASKS WASTED MY TIME",
+        "I DIDN'T KNOW THIS WAS POSSIBLE",
+        "I SAVED HOURS EVERY WEEK",            # YT specific
     ]),
 
     (["edge tpu", "computer vision", "edge ai"], [
-        "AI WITHOUT INTERNET NOW",         # A
-        "LOCAL AI UNDER $100",             # A
-        "CLOUD AI COSTS WERE TOO HIGH",    # B
-        "I DIDN'T EXPECT THIS TO RUN LOCAL",# C
+        "AI WITHOUT INTERNET NOW",
+        "LOCAL AI UNDER $100",
+        "CLOUD AI COSTS WERE TOO HIGH",
+        "I DIDN'T EXPECT THIS TO RUN LOCAL",
     ]),
 
     (["speakerphone", "meeting audio", "jabra", "voice assistant"], [
-        "MEETINGS SOUND DIFFERENT NOW",    # A
-        "EVERYONE HEARS ME CLEARLY",       # A
-        "BAD CALL AUDIO WAS HUMILIATING",  # B
-        "PEOPLE KEPT ASKING ME TO REPEAT", # B before
-        "THIS ACTUALLY WORKS",             # C
+        "MEETINGS SOUND DIFFERENT NOW",
+        "EVERYONE HEARS ME CLEARLY",
+        "BAD CALL AUDIO WAS HUMILIATING",
+        "PEOPLE KEPT ASKING ME TO REPEAT",
+        "THIS ACTUALLY WORKS",
+        "ZERO COMPLAINTS IN 30 DAYS",          # YT specific
     ]),
 
     (["nvme", "ssd", "dataset", "load time", "gen5"], [
-        "MY COMPUTER IS FASTER NOW",       # A
-        "LOAD TIMES ARE INSTANT",          # A
-        "SLOW LOADS WASTED HOURS DAILY",   # B
-        "I WAITED MINUTES FOR AI TO LOAD", # B before (specific)
-        "I DIDN'T EXPECT THIS SPEED",      # C
+        "MY COMPUTER IS FASTER NOW",
+        "LOAD TIMES ARE INSTANT",
+        "SLOW LOADS WASTED HOURS DAILY",
+        "I WAITED MINUTES FOR AI TO LOAD",
+        "I DIDN'T EXPECT THIS SPEED",
+        "MY AI LOADED IN 3 SECONDS",           # YT specific
     ]),
 
     (["payment", "checkout", "e-transfer", "in-person sale"], [
-        "I NEVER MISS A SALE NOW",         # A
-        "PAYMENTS IN SECONDS NOW",         # A
-        "I LOST SALES WITHOUT THIS",       # B before
-        "CASH ONLY WAS COSTING ME",        # B frustration
+        "I NEVER MISS A SALE NOW",
+        "PAYMENTS IN SECONDS NOW",
+        "I LOST SALES WITHOUT THIS",
+        "CASH ONLY WAS COSTING ME",
+        "I CLOSED 3 MORE SALES THIS WEEK",     # YT specific
     ]),
 
     (["360", "action camera", "missed the shot", "re-shooting"], [
-        "I NEVER MISS THE SHOT NOW",       # A
-        "ONE CAMERA GETS EVERYTHING",      # A
-        "I KEPT MISSING THE ACTION",       # B frustration
-        "I DELETED SO MANY BAD CLIPS",     # B before
-        "I DIDN'T EXPECT THIS COVERAGE",   # C
+        "I NEVER MISS THE SHOT NOW",
+        "ONE CAMERA GETS EVERYTHING",
+        "I KEPT MISSING THE ACTION",
+        "I DELETED SO MANY BAD CLIPS",
+        "I DIDN'T EXPECT THIS COVERAGE",
+        "GOT THE SHOT 100% OF THE TIME",       # YT specific
     ]),
 ]
 
-# Niche fallbacks — all three registers mixed in
+# Niche fallbacks — all three registers mixed in + YouTube-specific numbered variants
 _HOOK_NICHE_FALLBACK: dict[str, list[str]] = {
     "productivity": [
-        "SAVED AN HOUR TODAY",             # A
-        "I GET MORE DONE NOW",             # A
-        "I WAS ALWAYS FALLING BEHIND",     # B
-        "THIS PAID FOR ITSELF FAST",       # C
-        "I DIDN'T EXPECT THIS TO HELP",    # C
+        "SAVED AN HOUR TODAY",
+        "I GET MORE DONE NOW",
+        "I WAS ALWAYS FALLING BEHIND",
+        "THIS PAID FOR ITSELF FAST",
+        "I DIDN'T EXPECT THIS TO HELP",
+        "SAVED 3 HOURS IN ONE DAY",            # YT specific
+        "I DO 2X THE WORK NOW",                # YT specific
     ],
     "business": [
-        "MY WORKFLOW CHANGED OVERNIGHT",   # A/C
-        "THIS PAID FOR ITSELF",            # A
-        "I WAS WASTING SO MUCH TIME",      # B
-        "BEST $50 I SPENT",                # C
-        "I WISH I HAD THIS SOONER",        # B before
+        "MY WORKFLOW CHANGED OVERNIGHT",
+        "THIS PAID FOR ITSELF",
+        "I WAS WASTING SO MUCH TIME",
+        "BEST $50 I SPENT",
+        "I WISH I HAD THIS SOONER",
+        "THIS PAID BACK IN 3 DAYS",            # YT specific
+        "SAVED 2 HOURS EVERY MORNING",         # YT specific
     ],
     "ai": [
-        "RUNNING AI FROM HOME NOW",        # A
-        "CLOUD BILLS WERE OUT OF CONTROL", # B
-        "AI WITHOUT THE MONTHLY FEE",      # A
-        "I DIDN'T EXPECT THIS TO WORK",    # C
-        "LOCAL AI FINALLY WORKS",          # A/C
+        "RUNNING AI FROM HOME NOW",
+        "CLOUD BILLS WERE OUT OF CONTROL",
+        "AI WITHOUT THE MONTHLY FEE",
+        "I DIDN'T EXPECT THIS TO WORK",
+        "LOCAL AI FINALLY WORKS",
+        "CUT MY AI BILL BY 70%",               # YT specific
     ],
     "work_from_home": [
-        "MY HOME OFFICE IS NEXT LEVEL",    # A
-        "WFH JUST GOT EASIER",             # A
-        "I WAS EMBARRASSED BY MY SETUP",   # B
-        "I WISH I UPGRADED SOONER",        # B before
-        "BEST HOME OFFICE UPGRADE",        # C
+        "MY HOME OFFICE IS NEXT LEVEL",
+        "WFH JUST GOT EASIER",
+        "I WAS EMBARRASSED BY MY SETUP",
+        "I WISH I UPGRADED SOONER",
+        "BEST HOME OFFICE UPGRADE",
+        "MY HOME SETUP IS NEXT LEVEL NOW",     # YT specific
+        "I WAS WASTING HOURS EVERY DAY",       # YT specific
     ],
     "content_creation": [
-        "MY CONTENT LOOKS DIFFERENT NOW",  # A
-        "MY PRODUCTION VALUE DOUBLED",     # A
-        "MY OLD CONTENT WAS EMBARRASSING", # B
-        "I DIDN'T EXPECT THIS DIFFERENCE", # C
-        "VIEWS WENT UP AFTER THIS",        # A/C
+        "MY CONTENT LOOKS DIFFERENT NOW",
+        "MY PRODUCTION VALUE DOUBLED",
+        "MY OLD CONTENT WAS EMBARRASSING",
+        "I DIDN'T EXPECT THIS DIFFERENCE",
+        "VIEWS WENT UP AFTER THIS",
+        "MY VIEWS WENT UP 40% AFTER THIS",     # YT specific
     ],
 }
 _HOOK_DEFAULT_FALLBACK = [
@@ -5478,14 +5519,18 @@ _HOOK_DEFAULT_FALLBACK = [
     "I WAS SKEPTICAL AT FIRST",
     "I DIDN'T EXPECT THIS TO WORK",
     "MY LIFE IS EASIER NOW",
+    "SAVED 3 HOURS THIS WEEK",                 # YT specific
+    "THIS CHANGED MY ROUTINE IN 1 DAY",        # YT specific
 ]
 
 
 def _video_hook(product: str, niche: str, problem_solved: str = "") -> str:
-    """Return a specific, emotionally varied 3-7 word hook.
+    """Return a specific, emotionally varied hook for this product.
 
     Matches whole-word boundaries against (product + problem_solved).
     random.choice ensures different emotional register each generation.
+    YouTube-specific numbered variants are included in each pool so they
+    surface naturally without any special-casing.
     """
     import random as _random
     import re as _re
@@ -5495,6 +5540,80 @@ def _video_hook(product: str, niche: str, problem_solved: str = "") -> str:
             return _random.choice(hooks)
     niche_hooks = _HOOK_NICHE_FALLBACK.get((niche or "").lower(), _HOOK_DEFAULT_FALLBACK)
     return _random.choice(niche_hooks)
+
+
+_YT_NICHE_BENEFIT: dict[str, str] = {
+    "productivity":     "This Amazon find completely changed how I work — saves me time every single day.",
+    "business":         "This tool genuinely improved my daily workflow and paid for itself fast.",
+    "ai":               "If you're running AI locally, this is a game changer — no more cloud fees.",
+    "work_from_home":   "Best work-from-home upgrade I've made. If you WFH, you need this.",
+    "content_creation": "This completely leveled up my content quality. Highly recommend for creators.",
+}
+
+_YT_NICHE_HASHTAGS: dict[str, str] = {
+    "productivity":     "#productivity #amazonfinds #worksmarter #desksetup",
+    "business":         "#business #entrepreneur #amazonfinds #productivity",
+    "ai":               "#ai #tech #amazonfinds #aitools",
+    "work_from_home":   "#workfromhome #wfh #amazonfinds #homeoffice",
+    "content_creation": "#contentcreator #youtube #amazonfinds #creatortips",
+}
+
+_YT_TITLE_TEMPLATES: list[str] = [
+    "This {product} Changed My Entire Routine",
+    "Best Amazon Find: {product}",
+    "{product} — Worth Every Penny",
+    "I Tried {product} For 30 Days",
+    "Why I Can't Work Without {product} Now",
+    "This Simple {niche_word} Saved Me Hours Daily",
+    "The {niche_word} Upgrade That Actually Works",
+    "Honest Review: {product} (Amazon Find)",
+]
+
+
+def _generate_yt_title(product: str, niche: str) -> str:
+    """Generate a curiosity-driven YouTube Shorts title (6-10 words)."""
+    # Use first 3 words of product name to keep titles concise
+    p_words = product.split()
+    short = " ".join(p_words[:3]) if len(p_words) > 3 else product
+    niche_word = {
+        "productivity": "Productivity Tool",
+        "business": "Business Tool",
+        "ai": "AI Tool",
+        "work_from_home": "WFH Upgrade",
+        "content_creation": "Creator Tool",
+    }.get(niche, "Amazon Find")
+    # Deterministic selection — same product always gets same title style
+    tmpl = _YT_TITLE_TEMPLATES[abs(hash(product + niche)) % len(_YT_TITLE_TEMPLATES)]
+    title = tmpl.format(product=short, niche_word=niche_word)
+    # Enforce 6-10 word range
+    words = title.split()
+    if len(words) > 10:
+        title = " ".join(words[:10])
+    if len(title.split()) < 6:
+        title += " (Amazon Find)"
+    return title
+
+
+def _generate_yt_description(product: str, niche: str, affiliate_url: str) -> str:
+    """Generate a YouTube Shorts description: benefit + link + hashtags."""
+    benefit = _YT_NICHE_BENEFIT.get(
+        niche,
+        f"{product} is one of the best finds I've come across on Amazon.",
+    )
+    link_line = (
+        f"Check it out here:\n{affiliate_url}"
+        if affiliate_url
+        else "Check it out here:\n[link in description]"
+    )
+    base_tags = _YT_NICHE_HASHTAGS.get(niche, "#amazonfinds #productivity")
+    # Deduplicate and append #shorts
+    seen: set[str] = set()
+    tags: list[str] = []
+    for tag in (base_tags + " #shorts").split():
+        if tag.lower() not in seen:
+            seen.add(tag.lower())
+            tags.append(tag)
+    return f"{benefit}\n\n{link_line}\n\n{' '.join(tags)}"
 
 
 def _short_cta(cta: str, affiliate_url: str, product: str = "") -> tuple[str, str]:
@@ -5587,12 +5706,18 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
         )
 
         # ── 3. Build slideshow ────────────────────────────────────────────────
+        # Timing constants computed here so the slideshow builder can pin
+        # the right image under the CTA window.
+        hook_end   = 1.2
+        cta_start  = max(duration - 3.5, duration * 0.78)
+
         if len(image_paths) >= 2:
             # Real images available — use photo slideshow
             slideshow_path = await _asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: build_slideshow_from_images(
                     image_paths, duration, DEFAULT_VIDEO_SIZE,
+                    cta_start_sec=cta_start,
                 ),
             )
         else:
@@ -5615,16 +5740,31 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             )
 
         # ── 4. Captions + hook + CTA overlays ────────────────────────────────
-        # hook_end matches the black intro frame duration so hook text
-        # shows on full black before any product image appears.
-        hook_end   = 1.2
-        cta_start  = max(duration - 3.5, duration * 0.78)
+        # hook_end / cta_start already computed in step 3.
 
         caption_clips = _hv_captions.make_caption_clips(
             v.word_timings, DEFAULT_VIDEO_SIZE, style=style_cfg,
             skip_before=hook_end,   # captions start after hook clears
             skip_after=cta_start,   # captions end before CTA card
         )
+        if style_cfg.pulse_every_sec > 0:
+            caption_clips = caption_clips + _hv_captions.make_flash_clips(
+                duration, DEFAULT_VIDEO_SIZE, style=style_cfg,
+                interval_sec=style_cfg.pulse_every_sec,
+                skip_before=hook_end,
+                skip_after=cta_start,
+            )
+        # Mid-video payoff line — white, centered, 0.9 s, fires at 50% of body
+        _payoff_text = _hv_captions.pick_payoff(req.product, req.niche)
+        _payoff_mid  = hook_end + (cta_start - hook_end) * 0.50
+        payoff_clip = _hv_captions.make_payoff_clip(
+            _payoff_text, DEFAULT_VIDEO_SIZE,
+            start=_payoff_mid - 0.45, end=_payoff_mid + 0.45,
+            style=style_cfg,
+        )
+        if payoff_clip is not None:
+            caption_clips = caption_clips + [payoff_clip]
+
         hook_clip = _hv_captions.make_hook_clip(
             _video_hook(req.product, req.niche, req.problem_solved),
             DEFAULT_VIDEO_SIZE, start=0.0, end=hook_end, style=style_cfg,
@@ -5632,7 +5772,7 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
         _cta_primary, _cta_sub = _short_cta(req.cta, req.affiliate_url, req.product)
         cta_clip = _hv_captions.make_cta_clip(
             _cta_primary,
-            DEFAULT_VIDEO_SIZE, start=cta_start, end=duration, style=style_cfg,
+            DEFAULT_VIDEO_SIZE, start=cta_start + 0.4, end=duration, style=style_cfg,
             sub_text=_cta_sub,
         )
 
@@ -5679,8 +5819,77 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             "image_count": len(image_paths),
             "visual_mode": "real_images" if len(image_paths) >= 2 else "pil_cards",
             "elapsed_sec": round(_time.time() - started, 2),
+            "yt_title": _generate_yt_title(req.product, req.niche),
+            "yt_description": _generate_yt_description(req.product, req.niche, req.affiliate_url or ""),
         }
 
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+
+# ---------- Hydra → YouTube one-click publish --------------------------------
+
+class HydraPublishReq(BaseModel):
+    video_path: str
+    yt_title: str
+    yt_description: str
+    niche: str = ""
+    privacy: str = "unlisted"   # "unlisted" | "public"
+
+_HYDRA_NICHE_TAGS: dict[str, list[str]] = {
+    "productivity":     ["productivity", "desksetup", "worksmarter", "officetips"],
+    "business":         ["business", "entrepreneur", "businesstips", "workefficiency"],
+    "ai":               ["ai", "artificialintelligence", "tech", "aitools"],
+    "work_from_home":   ["workfromhome", "wfh", "homeoffice", "remotework"],
+    "content_creation": ["contentcreator", "youtube", "creatortips", "youtuber"],
+}
+_HYDRA_BASE_TAGS = ["amazonfinds", "productreview", "shorts", "amazon"]
+
+
+@app.post("/api/hydra/publish_to_youtube")
+async def api_hydra_publish_to_youtube(req: HydraPublishReq):
+    """Upload a Hydra-generated MP4 to YouTube Shorts with one click.
+
+    Bypasses the Spartacus run system — no run_id needed. Calls
+    youtube_uploader.upload_video() directly via asyncio executor so
+    the server stays responsive during the 30-120s upload. Returns
+    the YouTube URL on success or a plain error string on failure.
+    """
+    import asyncio as _asyncio
+    import youtube_uploader as _ytup
+
+    if not _ytup.is_connected():
+        return {
+            "ok": False,
+            "error": "YouTube channel not connected. Go to Settings → YouTube to connect.",
+        }
+
+    video_path = Path(req.video_path)
+    if not video_path.exists():
+        return {"ok": False, "error": f"Video file not found: {req.video_path}"}
+
+    tags = _HYDRA_BASE_TAGS + _HYDRA_NICHE_TAGS.get((req.niche or "").lower(), [])
+    privacy = "public" if (req.privacy or "").lower() == "public" else "unlisted"
+
+    try:
+        result = await _asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: _ytup.upload_video(
+                video_path=video_path,
+                title=req.yt_title[:100],
+                description=req.yt_description[:5000],
+                tags=tags[:30],
+                privacy=privacy,
+                category_id="22",   # People & Blogs — correct for Shorts
+            ),
+        )
+        return {
+            "ok": True,
+            "video_id":  result["video_id"],
+            "video_url": result["video_url"],
+            "title":     result["title"],
+            "privacy":   result["privacy_status"],
+        }
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 

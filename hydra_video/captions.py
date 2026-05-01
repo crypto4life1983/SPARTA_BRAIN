@@ -103,11 +103,14 @@ def _draw_word_run(
     max_width_pct: float = 0.88,
     line_gap: int = 14,
     highlight_first: bool = False,
+    force_default_idx: int | None = None,
 ) -> None:
     """Word-wrap `words` and draw them centered, highlighting any hits.
 
     `y_anchor` is the vertical center of the text block (fraction of h).
-    `highlight_first` forces the first word yellow regardless of content."""
+    `highlight_first` forces the first word yellow regardless of content.
+    `force_default_idx` pins that word index to fill_default (white) even if
+    it would normally be highlighted — used for visual hierarchy in hooks."""
     w, h = canvas_size
     max_w = int(w * max_width_pct)
     space_w = draw.textbbox((0, 0), " ", font=font, stroke_width=stroke_width)[2]
@@ -122,7 +125,10 @@ def _draw_word_run(
             "raw": word,
             "w": bb[2] - bb[0],
             "h": bb[3] - bb[1],
-            "highlight": _is_highlight(word) or (highlight_first and i == 0),
+            "highlight": (
+                (_is_highlight(word) or (highlight_first and i == 0))
+                and i != force_default_idx
+            ),
         })
 
     lines: list[list[dict]] = [[]]
@@ -195,16 +201,29 @@ def _render_hook_png(
     gap = max(10, int(16 * scale))
 
     w, h = canvas_size
+    words = text.split()
+    # Longest alphabetic word gets white — creates yellow/white hierarchy without
+    # semantic guessing. Skips single-char words (I, A) so the contrast lands on
+    # a visually substantial word.
+    key_idx: int | None = None
+    if len(words) > 1:
+        key_idx = max(
+            (i for i in range(len(words)) if len(re.sub(r"[^A-Za-z]", "", words[i])) >= 2),
+            key=lambda i: len(re.sub(r"[^A-Za-z]", "", words[i])),
+            default=None,
+        )
+
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     font = _load_font(scaled_font)
-    _draw_word_run(draw, text.split(), font, canvas_size,
+    _draw_word_run(draw, words, font, canvas_size,
                    y_anchor=0.45, upper=True,
-                   stroke_width=stroke, line_gap=gap)
+                   stroke_width=stroke, line_gap=gap,
+                   force_default_idx=key_idx)
     # Soft shadow halo for that "produced" feel.
     halo = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     halo_draw = ImageDraw.Draw(halo)
-    _draw_word_run(halo_draw, text.split(), font, canvas_size,
+    _draw_word_run(halo_draw, words, font, canvas_size,
                    y_anchor=0.45, upper=True,
                    fill_default=(0, 0, 0, 180),
                    fill_highlight=(0, 0, 0, 180),
@@ -327,6 +346,182 @@ def _render_cta_png(
     return np.array(img)
 
 
+PAYOFF_BY_NICHE: dict[str, str] = {
+    "productivity":     "GAME CHANGER",
+    "business":         "THIS ACTUALLY WORKS",
+    "ai":               "I DIDN'T EXPECT THIS",
+    "work_from_home":   "THIS CHANGED EVERYTHING",
+    "content_creation": "TOTAL GAME CHANGER",
+}
+
+# Each entry: (keyword_list, payoff_phrase). First match wins.
+# Keywords are checked against the lowercased product name.
+_PAYOFF_PRODUCT_PATTERNS: list[tuple[list[str], str]] = [
+    (["cable", "cord", "organizer", "wire management"],  "DESK = FINALLY CLEAN"),
+    (["monitor light", "bias light", "screen light"],    "NO MORE EYE STRAIN"),
+    (["webcam", "web cam"],                              "CRYSTAL CLEAR CALLS"),
+    (["gpu", "graphics card", "video card"],             "NO MORE CLOUD FEES"),
+    (["standing desk", "sit-stand", "height-adj"],       "BACK PAIN = GONE"),
+    (["keyboard", "mechanical"],                         "TYPING FEELS PREMIUM"),
+    (["ergonomic mouse", "vertical mouse"],              "ZERO WRIST PAIN"),
+    (["headset", "headphones", "earbuds", "earphones"],  "CALLS SOUND CRISP"),
+    (["microphone", " mic "],                            "YOU SOUND PROFESSIONAL"),
+    (["ssd", "nvme", "hard drive", "storage drive"],     "STORAGE = SOLVED"),
+    (["planner", "bullet journal", "notebook"],          "PLANS ACTUALLY HAPPEN"),
+    (["credit card", "cashback", "rewards card"],        "MONEY BACK EVERY TIME"),
+    (["scanner", "document scan"],                       "PAPER CLUTTER = GONE"),
+    (["printer"],                                        "PRINTS IN SECONDS"),
+    (["charger", "power bank", "usb-c hub"],             "ALWAYS FULLY CHARGED"),
+    (["monitor", "display", "screen", "external screen"], "EYES THANK YOU"),
+    (["chair", "lumbar", "seat cushion"],                "BACK PAIN = DONE"),
+    (["desk lamp", "desk light"],                        "PERFECT LIGHTING"),
+    (["laptop stand", "monitor stand", "riser"],         "POSTURE = FIXED"),
+    (["mouse", "trackpad"],                              "ZERO WRIST FATIGUE"),
+    (["camera", "ring light", "key light", "studio light"], "YOU LOOK PROFESSIONAL"),
+    (["software", "subscription", "tool"],               "HOURS SAVED DAILY"),
+]
+
+
+def pick_payoff(product: str, niche: str) -> str:
+    """Return the tightest payoff phrase for this specific product.
+
+    Tries each keyword pattern against the product name (case-insensitive).
+    Falls back to the niche phrase, then the global default."""
+    lower = " " + product.lower() + " "
+    for keywords, phrase in _PAYOFF_PRODUCT_PATTERNS:
+        if any(kw in lower for kw in keywords):
+            return phrase
+    return PAYOFF_BY_NICHE.get(niche, "GAME CHANGER")
+
+
+def _render_payoff_png(
+    text: str,
+    canvas_size: tuple[int, int],
+    font_size: int,
+) -> np.ndarray:
+    """Mid-video payoff line — white text, vertically centered, distinct from
+    the yellow flash interrupts so it reads as a content beat, not noise."""
+    scale = max(1.0, canvas_size[0] / 720.0)
+    scaled_font = max(36, int(font_size * scale))
+    stroke = max(3, int(5 * scale))
+    gap = max(8, int(12 * scale))
+
+    w, h = canvas_size
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    font = _load_font(scaled_font)
+    _draw_word_run(
+        draw, text.split(), font, canvas_size,
+        y_anchor=0.42,
+        upper=True,
+        fill_default=(255, 255, 255, 255),
+        fill_highlight=(255, 255, 255, 255),
+        stroke_width=stroke,
+        line_gap=gap,
+    )
+    return np.array(img)
+
+
+def make_payoff_clip(
+    text: str,
+    video_size: tuple[int, int],
+    start: float,
+    end: float,
+    style: StyleConfig = CLEAN,
+):
+    """Single mid-video retention beat — white, centered, 0.8–1.0s duration.
+
+    Returns None if text is empty or there is no room."""
+    from moviepy import ImageClip
+
+    if not text or not text.strip() or end - start < 0.3:
+        return None
+    font_size = max(52, int(style.hook_font_size * 0.72))
+    arr = _render_payoff_png(text, video_size, font_size)
+    clip = (
+        ImageClip(arr, transparent=True)
+        .with_start(start)
+        .with_end(end)
+    )
+    if style.caption_fade_sec > 0:
+        try:
+            from moviepy.video.fx import CrossFadeIn, CrossFadeOut
+            clip = clip.with_effects([
+                CrossFadeIn(style.caption_fade_sec),
+                CrossFadeOut(style.caption_fade_sec),
+            ])
+        except Exception:  # noqa: BLE001
+            pass
+    return clip
+
+
+_FLASH_CYCLE = ["WAIT.", "REAL TALK.", "SERIOUSLY?", "NO JOKE.", "FACTS.", "LOOK."]
+
+
+def _render_flash_png(
+    text: str,
+    canvas_size: tuple[int, int],
+    font_size: int,
+) -> np.ndarray:
+    """Upper-center interrupt flash — bright yellow, bold stroke."""
+    scale = max(1.0, canvas_size[0] / 720.0)
+    scaled_font = max(32, int(font_size * scale))
+    stroke = max(3, int(5 * scale))
+    gap = max(8, int(12 * scale))
+
+    w, h = canvas_size
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    font = _load_font(scaled_font)
+    _draw_word_run(
+        draw, text.split(), font, canvas_size,
+        y_anchor=0.22,
+        upper=True,
+        fill_default=(255, 220, 50, 255),
+        fill_highlight=(255, 220, 50, 255),
+        stroke_width=stroke,
+        line_gap=gap,
+    )
+    return np.array(img)
+
+
+def make_flash_clips(
+    duration: float,
+    video_size: tuple[int, int],
+    style: StyleConfig = CLEAN,
+    interval_sec: float = 3.5,
+    flash_dur: float = 0.40,
+    skip_before: float = 0.0,
+    skip_after: float | None = None,
+):
+    """Short pattern-interrupt text flashes every interval_sec seconds.
+
+    Cycles through _FLASH_CYCLE words (WAIT. / REAL TALK. / etc.) as bright
+    yellow upper-center overlays lasting flash_dur seconds each. Fires only
+    between skip_before and skip_after so it never clashes with hook or CTA.
+    """
+    from moviepy import ImageClip
+
+    clips = []
+    end_bound = (skip_after if skip_after is not None else duration) - 0.5
+    font_size = max(48, int(style.hook_font_size * 0.65))
+
+    t = skip_before + interval_sec
+    idx = 0
+    while t + flash_dur <= end_bound:
+        word = _FLASH_CYCLE[idx % len(_FLASH_CYCLE)]
+        arr = _render_flash_png(word, video_size, font_size)
+        clips.append(
+            ImageClip(arr, transparent=True)
+            .with_start(t)
+            .with_end(t + flash_dur)
+        )
+        t += interval_sec
+        idx += 1
+
+    return clips
+
+
 def make_caption_clips(
     word_timings: list[dict],
     video_size: tuple[int, int],
@@ -426,4 +621,15 @@ def make_cta_clip(
             ])
         except Exception:  # noqa: BLE001
             pass
+    # Scale-in "button arrival": 0.96 → 1.00 in 130 ms, ease-out cubic.
+    # The clip is full-canvas RGBA; scaling it slightly and centering creates
+    # a subtle pop-in that makes the card feel interactive.
+    try:
+        _anim = 0.15
+        def _cta_scale(t: float) -> float:
+            p = min(t / _anim, 1.0)
+            return 0.96 + 0.04 * (1.0 - (1.0 - p) ** 3)
+        clip = clip.resized(_cta_scale).with_position('center')
+    except Exception:  # noqa: BLE001
+        pass
     return clip

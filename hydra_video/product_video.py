@@ -420,9 +420,10 @@ def build_slideshow_from_images(
     duration_sec: float,
     video_size: tuple[int, int] = DEFAULT_VIDEO_SIZE,
     fps: int = DEFAULT_FPS,
-    min_clip_sec: float = 1.5,
-    max_clip_sec: float = 2.0,
+    min_clip_sec: float = 1.2,
+    max_clip_sec: float = 1.8,
     intro_sec: float = 1.2,
+    cta_start_sec: float | None = None,
     out_path: "Path | None" = None,
 ) -> "Path":
     """Build a real-image Ken Burns slideshow (silent MP4, canvas-sized).
@@ -431,6 +432,10 @@ def build_slideshow_from_images(
     overlay in compose() appears on full black before any product image.
     Each image then gets a unique motion pattern from a 6-entry cycle:
     zoom-in/out × right/left/up/down drift.
+
+    When `cta_start_sec` is provided, the cycling body images stop there and
+    image_paths[0] (typically the cleanest product shot) fills the remaining
+    CTA window with a slow neutral zoom — reinforcing buying intent.
 
     Suitable as avatar_video for compose(skip_fit=True).
     """
@@ -469,12 +474,21 @@ def build_slideshow_from_images(
         )
 
     image_duration = max(0.1, duration_sec - intro_sec)
-    clip_dur = max(min_clip_sec, min(max_clip_sec, image_duration / n))
+
+    # Split into cycling body + optional pinned CTA segment
+    if cta_start_sec is not None:
+        body_duration = max(0.1, cta_start_sec - intro_sec)
+        cta_fill_dur  = max(0.0, image_duration - body_duration)
+    else:
+        body_duration = image_duration
+        cta_fill_dur  = 0.0
+
+    clip_dur = max(min_clip_sec, min(max_clip_sec, body_duration / n))
 
     total = 0.0
     idx = 0
-    while total < image_duration - 0.05:
-        remaining = image_duration - total
+    while total < body_duration - 0.05:
+        remaining = body_duration - total
         dur = min(clip_dur, remaining)
         if dur < 0.2:
             break
@@ -493,6 +507,17 @@ def build_slideshow_from_images(
                                      drift_px=dx, drift_y=dy))
         total += dur
         idx += 1
+
+    # CTA segment: pin image_paths[0] (main product shot) with calm slow zoom
+    if cta_fill_dur >= 0.2:
+        try:
+            cta_img = _PILImage.open(image_paths[0]).convert("RGB")
+            cta_arr = _fit_image_vertical(cta_img, video_size)
+            clips.append(_ken_burns_clip(cta_arr, cta_fill_dur, video_size, fps,
+                                         zoom_start=1.00, zoom_end=1.04,
+                                         drift_px=0, drift_y=0))
+        except Exception:
+            pass
 
     if len(clips) == 0 or (intro_sec > 0 and len(clips) == 1):
         raise ValueError("No image clips generated from image paths")
