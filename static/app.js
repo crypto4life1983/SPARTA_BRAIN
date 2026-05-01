@@ -51,6 +51,8 @@ function escapeHtml(s) {
    ========================================================= */
 
 const PAID_MODELS = new Set(["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o", "gpt-4.1"]);
+// Gemini and Ollama never trigger paid confirmation
+const FREE_PROVIDERS = (m) => !m || m.startsWith("gemini") || !m.startsWith("gpt-");
 
 let __settingsCache = null;
 async function getSettingsCached() {
@@ -66,6 +68,7 @@ function clearSettingsCache() { __settingsCache = null; }
 
 function isPaidModel(model) {
   if (!model) return false;
+  if (model.startsWith("gemini")) return false;   // Gemini = never paid confirm
   return PAID_MODELS.has(model) || /^gpt-/.test(model);
 }
 

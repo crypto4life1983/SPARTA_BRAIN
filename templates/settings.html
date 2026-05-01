@@ -1,0 +1,859 @@
+{% extends "base.html" %}
+{% block title %}Settings - SPARTA BRAIN{% endblock %}
+{% block content %}
+<section>
+  <h1>War Room Settings</h1>
+  <p class="muted">Changes save instantly. The next forge uses the new values - no restart needed.</p>
+
+  <!-- ============== SHORTS AUTOPILOT ============== -->
+  <div class="card" id="autopilot-card">
+    <div class="card-head">
+      <h3>YouTube Shorts Autopilot</h3>
+      <span class="badge" id="ap-badge">checking...</span>
+    </div>
+    <p class="hint">
+      Fires the full Spartacus -> render -> auto-upload chain at configured local times each day.
+      Off by default - flip on once you trust the output. Quality gate refuses sub-par renders.
+      Requires: a campaign, YouTube channel connected, and Auto Upload YouTube on (above).
+    </p>
+
+    <label class="lbl" style="margin-top:10px;">
+      <input type="checkbox" id="autopilot_enabled" {% if settings.autopilot_enabled == 'true' %}checked{% endif %}
+             style="transform:scale(1.2);margin-right:8px;vertical-align:middle;" />
+      Enable Autopilot (3 posts per day at configured slots)
+    </label>
+
+    <label class="lbl" for="autopilot_slots" style="margin-top:10px;">Slots (HH:MM, comma-separated, local time)</label>
+    <input id="autopilot_slots" type="text" value="{{ settings.autopilot_slots or '09:00,14:00,20:00' }}"
+           placeholder="09:00,14:00,20:00" />
+
+    <label class="lbl" for="autopilot_min_spacing_hours">Minimum hours between posts</label>
+    <input id="autopilot_min_spacing_hours" type="number" min="1" max="24"
+           value="{{ settings.autopilot_min_spacing_hours or '4' }}" />
+
+    <label class="lbl" for="autopilot_hashtags">Hashtags appended to every description</label>
+    <input id="autopilot_hashtags" type="text"
+           value="{{ settings.autopilot_hashtags or '#ai #automation #productivity #aitools' }}"
+           placeholder="#ai #automation #productivity #aitools" />
+
+    <label class="lbl" for="autopilot_campaign_id">Campaign (leave blank = most recent)</label>
+    <select id="autopilot_campaign_id">
+      <option value="">(auto - most recent campaign)</option>
+    </select>
+
+    <div class="row-actions" style="margin-top:14px;">
+      <button id="btn-save-autopilot" type="button" class="btn btn-primary">Save Autopilot Settings</button>
+      <button id="btn-autopilot-run-now" type="button" class="btn">Run One Slot Now</button>
+    </div>
+
+    <div class="hint" id="ap-status-line" style="margin-top:14px;">Loading status...</div>
+    <div id="ap-recent-log" style="margin-top:10px;"></div>
+
+    <hr style="border:0; border-top:1px solid #2a2a2a; margin:20px 0;" />
+
+    <h4 style="margin-bottom:6px;">Amazon Affiliate Brief - daily auto-generation</h4>
+    <p class="hint" style="margin-top:0;">
+      Independent of the slot schedule above. Generates 3-5 daily Amazon
+      affiliate video ideas (productivity / business / AI / WFH / content
+      creation niches) and saves them to
+      <code>spartacus/data/amazon/YYYY-MM-DD.json</code>. Never uploads to
+      YouTube. Products without a registered affiliate link run in CTA-only
+      mode automatically. Manage links at <a href="/amazon">/amazon</a>.
+    </p>
+
+    <label class="lbl" style="margin-top:10px;">
+      <input type="checkbox" id="amazon_autopilot_enabled"
+             style="transform:scale(1.2);margin-right:8px;vertical-align:middle;" />
+      Enable daily Amazon brief
+    </label>
+
+    <label class="lbl" for="amazon_autopilot_count">Ideas per day (1-5)</label>
+    <input id="amazon_autopilot_count" type="number" min="1" max="5" value="3" style="width:90px;" />
+
+    <div class="row-actions" style="margin-top:14px;">
+      <button id="btn-save-amazon-autopilot" type="button" class="btn btn-primary">Save Amazon Settings</button>
+      <button id="btn-amazon-run-now" type="button" class="btn">Run Amazon Brief Now</button>
+    </div>
+    <div class="hint" id="amz-ap-status" style="margin-top:14px;">Loading...</div>
+  </div>
+
+  <!-- ============== AI MODE ============== -->
+  <div class="card">
+    <h3>AI Mode</h3>
+    <p class="hint">Three clean modes. Clicking a card auto-fills all router rows below including Gemini. Override any row freely — the Smart Model Router is the source of truth.</p>
+
+    <div class="mode-grid">
+      <label class="mode-card">
+        <input type="radio" name="ai_mode" value="free" {% if settings.ai_mode == 'free' %}checked{% endif %} />
+        <div class="mode-name">Free Mode</div>
+        <div class="mode-cost-tag">No paid API calls</div>
+        <p>Ollama (llama3.1:8b) for everything. Gemini CLI for video/audio/PDF analysis. Zero cost.</p>
+      </label>
+
+      <label class="mode-card">
+        <input type="radio" name="ai_mode" value="balanced" {% if settings.ai_mode == 'balanced' %}checked{% endif %} />
+        <div class="mode-name">Balanced Mode</div>
+        <div class="mode-cost-tag">Pay only for polish</div>
+        <p>Ollama for ideas and drafts. GPT-4o-mini for hooks, polish, captions. Gemini for analysis. Best for daily production.</p>
+      </label>
+
+      <label class="mode-card">
+        <input type="radio" name="ai_mode" value="advanced" {% if settings.ai_mode in ('advanced', 'premium') %}checked{% endif %} />
+        <div class="mode-name">Advanced Mode</div>
+        <div class="mode-cost-tag">Highest quality</div>
+        <p>GPT-4o-mini for everything. Gemini 2.5 Pro for analysis. Best output quality for your most important videos.</p>
+      </label>
+    </div>
+
+    <p class="hint" style="margin-top:18px;">Clicking a mode card auto-fills <strong>all rows</strong> including Gemini. Click <strong>Save Settings</strong> to persist.</p>
+
+    <label class="lbl" style="margin-top:18px;">
+      <input type="checkbox" id="confirm_paid_calls" {% if settings.confirm_paid_calls != 'false' %}checked{% endif %} style="transform:scale(1.2);margin-right:8px;vertical-align:middle;" />
+      Confirm before paid API calls
+    </label>
+    <p class="hint">On = browser pops a one-click "Paid API call - continue?" dialog before any gpt-* model fires. Off = paid calls run silently. Either way, every call is logged in the server console.</p>
+
+    <label class="lbl" style="margin-top:18px;">
+      <input type="checkbox" id="auto_adapt_product" {% if settings.auto_adapt_product != 'false' %}checked{% endif %} style="transform:scale(1.2);margin-right:8px;vertical-align:middle;" />
+      Auto-adapt scripts when changing product
+    </label>
+    <p class="hint">On = when you launch a Spartacus run with a similar niche to a past campaign, the system reuses the best-scoring hooks from those runs (rewriting product mentions to match) and regenerates the script body, CTA, and funnel for the new product. Off = every run starts from a blank slate.</p>
+
+    <label class="lbl" style="margin-top:18px;">
+      <input type="checkbox" id="auto_performance_tracking" {% if settings.auto_performance_tracking != 'false' %}checked{% endif %} style="transform:scale(1.2);margin-right:8px;vertical-align:middle;" />
+      Auto-track YouTube performance daily
+    </label>
+    <p class="hint">On = once a day, pull view/like/comment counts from YouTube for every video you've marked as Posted. Top-performing hooks get a bigger boost in the Auto Product Adapter; underperformers get downweighted. Requires a YouTube API key. TikTok stats are not pulled (no public API).</p>
+
+    <label class="lbl" style="margin-top:18px;">
+      <input type="checkbox" id="auto_upload_youtube" {% if settings.auto_upload_youtube != 'false' %}checked{% endif %} style="transform:scale(1.2);margin-right:8px;vertical-align:middle;" />
+      Auto-upload finished videos to YouTube
+    </label>
+    <p class="hint">On = the moment a Spartacus render targets YouTube Shorts and finishes successfully, the MP4 is uploaded to your connected channel automatically and the Victory card flips to Posted. Off = upload only fires when you click the Victory button. Requires Connect YouTube Channel above.</p>
+  </div>
+
+  <!-- ============== SMART MODEL ROUTER ============== -->
+  <div class="card">
+    <h3>Smart Model Router</h3>
+    <p class="hint">Pick which model handles each task. Any name starting with <code>gpt-</code> = paid OpenAI. Names starting with <code>gemini</code> = Gemini CLI (free/low-cost, no confirmation dialog). Everything else = local Ollama.</p>
+
+    <datalist id="model-suggestions">
+      <option value="llama3.1:8b" label="FREE local"></option>
+      <option value="llama3:latest" label="FREE local"></option>
+      <option value="mistral:7b" label="FREE local"></option>
+      <option value="qwen2.5:7b" label="FREE local"></option>
+      <option value="qwen2.5:14b" label="FREE local (better quality)"></option>
+      <option value="qwen2.5:latest" label="FREE local"></option>
+      <option value="gpt-4o-mini" label="PAID - LOW cost"></option>
+      <option value="gpt-4.1-mini" label="PAID - MEDIUM cost"></option>
+      <option value="gpt-4o" label="PAID - HIGH quality"></option>
+      <option value="gpt-4.1" label="PAID - HIGH quality"></option>
+    </datalist>
+
+    <datalist id="gemini-suggestions">
+      <option value="gemini-2.5-flash" label="FREE / low-cost — recommended"></option>
+      <option value="gemini-2.5-pro" label="LOW cost — best quality"></option>
+      <option value="gemini-2.0-flash" label="FREE / low-cost"></option>
+    </datalist>
+
+    {% set TASKS = [
+      ('trend_to_ideas', 'Idea Generation',  'Ollama or OpenAI. Used by /ideas page and trend-driven idea forging.'),
+      ('hooks',          'Hook Forging',     'Ollama or OpenAI. Used when generating 10 hooks for a saved idea.'),
+      ('script_draft',   'Script Drafting',  'Ollama or OpenAI. First-pass script before polishing.'),
+      ('script_polish',  'Script Polish',    'Ollama or OpenAI. Used by the "Sharpen with API" button.'),
+      ('caption',        'Caption + Hashtags','Ollama or OpenAI. Final caption and 15 hashtags.')
+    ] %}
+
+    {% for key, label, desc in TASKS %}
+    {% set current = settings[key + '_model'] or 'llama3.1:8b' %}
+    <label class="lbl">{{ label }}</label>
+    <input type="text" list="model-suggestions"
+           id="{{ key }}_model" data-task-model="{{ key }}"
+           value="{{ current }}"
+           autocomplete="off"
+           placeholder="e.g. llama3.1:8b, gpt-4o-mini" />
+    <p class="hint">{{ desc }}</p>
+    {% endfor %}
+
+    <!-- Gemini analysis row -->
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid #1e3a5f;">
+      <label class="lbl" style="display:flex; align-items:center; gap:8px;">
+        Video / Audio / PDF Analysis
+        <span id="gemini-cli-badge" style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; background:#0f2a4a; color:#64748b;">CHECKING…</span>
+      </label>
+      <input type="text" list="gemini-suggestions"
+             id="gemini_model" data-task-model="gemini_analysis"
+             value="{{ settings.gemini_model or 'gemini-2.5-flash' }}"
+             autocomplete="off"
+             placeholder="gemini-2.5-flash" />
+      <p class="hint" id="gemini-row-hint">Routes video, audio, PDF, transcript, and long-context tasks. Uses Gemini CLI — free with a Google account (60 req/min). Never triggers paid API confirmation.</p>
+      <div id="gemini-install-hint" style="display:none; margin-top:8px; padding:10px 12px; background:#1c1000; border:1px solid #78350f; border-radius:6px; font-size:12px; color:#fbbf24;">
+        Gemini CLI not installed. Install it with:<br/>
+        <code style="color:#fde68a;">npm install -g @google/gemini-cli &amp;&amp; gemini</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== GEMINI STATUS ============== -->
+  <div class="card" id="gemini-status-card">
+    <h3>Gemini CLI</h3>
+    <p class="hint">Free analysis brain for video, audio, PDF, long-context, and visual review. Requires the Gemini CLI — no paid API key needed with a personal Google account.</p>
+
+    <div id="gemini-status-body" style="padding:14px; background:#0a1628; border:1px solid #1e3a5f; border-radius:8px; margin-bottom:14px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+        <span id="gemini-status-dot" style="width:10px;height:10px;border-radius:50%;background:#64748b;display:inline-block;flex-shrink:0;"></span>
+        <strong id="gemini-status-label" style="color:#e2e8f0;">Checking…</strong>
+        <span id="gemini-status-version" style="color:#64748b; font-size:12px; margin-left:auto;"></span>
+      </div>
+      <p id="gemini-status-note" style="color:#94a3b8; font-size:12px; margin:0;"></p>
+    </div>
+
+    <div style="padding:14px; background:#0a1628; border:1px solid #1e3a5f; border-radius:8px;">
+      <h4 style="color:#e2e8f0; font-size:13px; margin:0 0 8px;">Install Gemini CLI</h4>
+      <pre style="background:#071118; border:1px solid #0f2a4a; border-radius:4px; padding:10px; font-size:12px; color:#a8c5e8; margin:0 0 6px; white-space:pre-wrap;">npm install -g @google/gemini-cli
+gemini --version
+gemini</pre>
+      <p style="color:#64748b; font-size:11px; margin:0;">Sign in with Google. 60 req/min free with a personal Google account. No billing required.</p>
+    </div>
+  </div>
+
+  <!-- ============== GENERATION DEFAULTS ============== -->
+  <div class="card">
+    <h3>Generation Defaults</h3>
+
+    <label class="lbl" for="default_niche">Default Niche</label>
+    <input id="default_niche" type="text" value="{{ settings.default_niche }}" />
+    <p class="hint">Pre-fills the Idea Generator. Trend-derived ideas use the trend's keyword instead.</p>
+  </div>
+
+  <!-- ============== OPENAI ============== -->
+  <div class="card">
+    <h3>OpenAI</h3>
+    <p class="hint">Required when any task uses a paid model. Only ever called when you've chosen a gpt-* model and AI Mode is not Free.</p>
+
+    <label class="lbl" for="openai_api_key">OpenAI API Key</label>
+    <div class="key-row">
+      <input id="openai_api_key" type="password" autocomplete="off"
+             placeholder="{% if settings.openai_api_key_set %}Already saved - leave blank to keep, paste new key to replace{% else %}sk-... (paste new key){% endif %}" />
+      {% if settings.openai_api_key_set %}
+      <span class="badge badge-exported">Configured</span>
+      <button id="btn-clear-key" type="button" class="btn btn-sm">Clear Key</button>
+      {% else %}
+      <span class="badge">Not set</span>
+      {% endif %}
+    </div>
+    <div class="row-actions" style="margin-top:10px;">
+      <button id="btn-save-openai-key" type="button" class="btn btn-primary">Save OpenAI Key</button>
+    </div>
+    <p class="hint">Stored locally in sparta.db. Never logged. Never shown back after saving. (You can also use Save Settings at the bottom — both work.)</p>
+  </div>
+
+  <!-- ============== YOUTUBE ============== -->
+  <div class="card">
+    <h3>YouTube Data API</h3>
+    <p class="hint">Used by Trend Finder. Without a key, you can still paste titles manually on the Trends page.</p>
+
+    <label class="lbl" for="youtube_api_key">YouTube API Key</label>
+    <div class="key-row">
+      <input id="youtube_api_key" type="password" autocomplete="off"
+             placeholder="{% if settings.youtube_api_key_set %}Already saved - leave blank to keep, paste new key to replace{% else %}AIza... (paste new key){% endif %}" />
+      {% if settings.youtube_api_key_set %}
+      <span class="badge badge-exported">Configured</span>
+      <button id="btn-clear-yt-key" type="button" class="btn btn-sm">Clear Key</button>
+      {% else %}
+      <span class="badge">Not set</span>
+      {% endif %}
+    </div>
+    <div class="row-actions" style="margin-top:10px;">
+      <button id="btn-save-youtube-key" type="button" class="btn btn-primary">Save YouTube Key</button>
+    </div>
+    <p class="hint">Stored locally. Never logged. Never shown back after saving. (You can also use Save Settings at the bottom — both work.)</p>
+  </div>
+
+  <!-- ============== PEXELS (stock visuals) ============== -->
+  <div class="card">
+    <h3>Pexels (Stock Footage)</h3>
+    <p class="hint">
+      Free stock video + photos for per-scene visuals so videos aren't just
+      gradient + text. Get a key at
+      <a href="https://www.pexels.com/api/" target="_blank" rel="noopener">pexels.com/api</a>
+      (free, 200 requests/hour). Without a key, scenes fall back to the
+      gradient background.
+    </p>
+
+    <label class="lbl" for="pexels_api_key">Pexels API Key</label>
+    <div class="key-row">
+      <input id="pexels_api_key" type="password" autocomplete="off"
+             placeholder="{% if settings.pexels_api_key_set %}Already saved - leave blank to keep, paste new key to replace{% else %}paste API key{% endif %}" />
+      {% if settings.pexels_api_key_set %}
+      <span class="badge badge-exported">Configured</span>
+      <button id="btn-clear-pexels-key" type="button" class="btn btn-sm">Clear Key</button>
+      {% else %}
+      <span class="badge">Not set</span>
+      {% endif %}
+    </div>
+    <div class="row-actions" style="margin-top:10px;">
+      <button id="btn-save-pexels-key" type="button" class="btn btn-primary">Save Pexels Key</button>
+    </div>
+    <p class="hint">Stored locally. Never logged. Never shown back after saving. (You can also use Save Settings at the bottom — both work.)</p>
+  </div>
+
+  <!-- ============== YOUTUBE OAUTH ============== -->
+  <div class="card">
+    <h3>YouTube Channel (Upload + Stats)</h3>
+    <p class="hint">
+      One-time setup so SPARTA can upload Shorts directly without copy/paste:
+      create a Google Cloud project, enable YouTube Data API v3, make an
+      OAuth Client ID (Web application), and add this exact redirect URI:
+      <code>http://127.0.0.1:8765/api/youtube/oauth/callback</code>.
+      Paste the Client ID + Secret below, then click Connect Channel.
+    </p>
+
+    <label class="lbl" for="yt_oauth_client_id">OAuth Client ID</label>
+    <input id="yt_oauth_client_id" type="text" autocomplete="off"
+           placeholder="{% if settings.youtube_oauth_client_id_set %}Already saved - paste new value to replace{% else %}xxxxx.apps.googleusercontent.com{% endif %}" />
+
+    <label class="lbl" for="yt_oauth_client_secret">OAuth Client Secret</label>
+    <input id="yt_oauth_client_secret" type="password" autocomplete="off"
+           placeholder="{% if settings.youtube_oauth_client_secret_set %}Already saved - paste new value to replace{% else %}GOCSPX-...{% endif %}" />
+
+    <div class="row-actions">
+      <button id="btn-save-oauth-client" type="button" class="btn">Save OAuth Client</button>
+      <button id="btn-yt-connect" type="button" class="btn btn-primary">Connect YouTube Channel</button>
+      <button id="btn-yt-disconnect" type="button" class="btn btn-sm">Disconnect</button>
+    </div>
+    <p class="hint" id="yt-channel-status">Status: checking...</p>
+  </div>
+
+  <!-- ============== INFRASTRUCTURE ============== -->
+  <div class="card">
+    <h3>Infrastructure</h3>
+
+    <label class="lbl" for="ollama_url">Ollama URL</label>
+    <input id="ollama_url" type="text" value="{{ settings.ollama_url }}" />
+    <p class="hint">Defaults to http://localhost:11434. Change only if you run Ollama on a different port or machine.</p>
+
+    <div class="row-actions">
+      <button id="btn-save" class="btn btn-primary big">Save Settings</button>
+      <button id="btn-test" class="btn big">Test Ollama Connection</button>
+    </div>
+
+    <div id="test-result" class="hint"></div>
+  </div>
+
+  <!-- ============== ZERO-RISK RESET ============== -->
+  <div class="card">
+    <h3>Zero-Cost Reset</h3>
+    <p class="hint">One click to lock SPARTA BRAIN to local-only operation. Sets AI Mode to Free, every task model to llama3, and quality_mode to local_only. No paid API can fire after this until you change Settings yourself.</p>
+    <div class="row-actions">
+      <button id="btn-free-safe-defaults" class="btn">Apply Free Safe Defaults</button>
+    </div>
+  </div>
+</section>
+
+<style>
+.ap-log-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+.ap-log-table th, .ap-log-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; }
+.ap-log-table th { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-bright); }
+.ap-log-table tr:hover td { background: rgba(255,255,255,0.025); }
+</style>
+
+<script>
+const $ = (s) => document.querySelector(s);
+
+// ----- AI Mode preset auto-fill -----
+const PRESETS = {
+  free: {
+    trend_to_ideas: 'llama3.1:8b',
+    hooks:          'llama3.1:8b',
+    script_draft:   'llama3.1:8b',
+    script_polish:  'llama3.1:8b',
+    caption:        'llama3.1:8b',
+    gemini_analysis: 'gemini-2.5-flash',
+  },
+  balanced: {
+    trend_to_ideas: 'llama3.1:8b',
+    hooks:          'gpt-4o-mini',
+    script_draft:   'llama3.1:8b',
+    script_polish:  'gpt-4o-mini',
+    caption:        'gpt-4o-mini',
+    gemini_analysis: 'gemini-2.5-flash',
+  },
+  advanced: {
+    trend_to_ideas: 'gpt-4o-mini',
+    hooks:          'gpt-4o-mini',
+    script_draft:   'gpt-4o-mini',
+    script_polish:  'gpt-4o-mini',
+    caption:        'gpt-4o-mini',
+    gemini_analysis: 'gemini-2.5-pro',
+  },
+};
+
+document.querySelectorAll('input[name="ai_mode"]').forEach(r => {
+  r.addEventListener('change', (e) => {
+    const preset = PRESETS[e.target.value];
+    if (!preset) return;
+    Object.entries(preset).forEach(([task, model]) => {
+      const sel = document.querySelector(`[data-task-model="${task}"]`);
+      if (sel) sel.value = model;
+    });
+    const label = e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1);
+    showBanner(`${label} Mode preset applied — all rows updated. Click Save Settings to persist.`, "success");
+  });
+});
+
+// ----- Gemini CLI status loader -----
+(async () => {
+  try {
+    const r = await fetch('/api/three-brain/status');
+    const d = await r.json();
+    const g = d.gemini || {};
+    const dot   = document.getElementById('gemini-status-dot');
+    const lbl   = document.getElementById('gemini-status-label');
+    const ver   = document.getElementById('gemini-status-version');
+    const note  = document.getElementById('gemini-status-note');
+    const badge = document.getElementById('gemini-cli-badge');
+    const hint  = document.getElementById('gemini-install-hint');
+
+    if (g.available) {
+      if (dot)   { dot.style.background = '#22c55e'; }
+      if (lbl)   { lbl.textContent = 'Gemini CLI — Installed'; lbl.style.color = '#22c55e'; }
+      if (ver)   { ver.textContent = g.version || ''; }
+      if (note)  { note.textContent = 'Ready. Video/audio/PDF analysis is available.'; }
+      if (badge) { badge.textContent = 'INSTALLED'; badge.style.background = '#166534'; badge.style.color = '#4ade80'; }
+      if (hint)  { hint.style.display = 'none'; }
+    } else {
+      if (dot)   { dot.style.background = '#ef4444'; }
+      if (lbl)   { lbl.textContent = 'Gemini CLI — Not Installed'; lbl.style.color = '#ef4444'; }
+      if (ver)   { ver.textContent = ''; }
+      if (note)  { note.textContent = g.note || 'Run: npm install -g @google/gemini-cli && gemini'; }
+      if (badge) { badge.textContent = 'NOT INSTALLED'; badge.style.background = '#7f1d1d'; badge.style.color = '#f87171'; }
+      if (hint)  { hint.style.display = ''; }
+    }
+  } catch(e) { /* non-fatal */ }
+})();
+
+// ----- Save -----
+async function saveOne(key, value) {
+  await api("/api/settings", { key, value });
+}
+
+$("#btn-save").addEventListener("click", async () => {
+  setBusy($("#btn-save"), true, "Saving...");
+  try {
+    // Mode + router
+    const mode = document.querySelector('input[name="ai_mode"]:checked');
+    if (mode) await saveOne("ai_mode", mode.value);
+    for (const task of ["trend_to_ideas","hooks","script_draft","script_polish","caption"]) {
+      const sel = document.querySelector(`[data-task-model="${task}"]`);
+      if (sel) {
+        const v = (sel.value || "").trim();
+        if (v) await saveOne(`${task}_model`, v);
+      }
+    }
+    // Gemini model row
+    const geminiSel = document.getElementById('gemini_model');
+    if (geminiSel) {
+      const gv = (geminiSel.value || "").trim();
+      if (gv) await saveOne('gemini_model', gv);
+    }
+
+    // Defaults
+    await saveOne("default_niche", $("#default_niche").value.trim());
+    await saveOne("ollama_url", $("#ollama_url").value.trim() || "http://localhost:11434");
+
+    // Confirm-paid toggle
+    const confirmEl = document.getElementById("confirm_paid_calls");
+    if (confirmEl) await saveOne("confirm_paid_calls", confirmEl.checked ? "true" : "false");
+
+    // Auto-adapt-product toggle
+    const adaptEl = document.getElementById("auto_adapt_product");
+    if (adaptEl) await saveOne("auto_adapt_product", adaptEl.checked ? "true" : "false");
+
+    // Auto-perf-tracking toggle
+    const perfEl = document.getElementById("auto_performance_tracking");
+    if (perfEl) await saveOne("auto_performance_tracking", perfEl.checked ? "true" : "false");
+
+    // Auto-upload-youtube toggle
+    const ytAutoEl = document.getElementById("auto_upload_youtube");
+    if (ytAutoEl) await saveOne("auto_upload_youtube", ytAutoEl.checked ? "true" : "false");
+
+    // Secret keys (only if user typed something - blank means keep existing)
+    const oaiKey = $("#openai_api_key").value;
+    if (oaiKey.trim()) await saveOne("openai_api_key", oaiKey.trim());
+    const ytKey = $("#youtube_api_key").value;
+    if (ytKey.trim()) await saveOne("youtube_api_key", ytKey.trim());
+    const pxKey = $("#pexels_api_key").value;
+    if (pxKey.trim()) await saveOne("pexels_api_key", pxKey.trim());
+
+    $("#openai_api_key").value = "";
+    $("#youtube_api_key").value = "";
+    $("#pexels_api_key").value = "";
+
+    // Bust the front-end settings cache so confirm-paid prompts use fresh values
+    if (typeof clearSettingsCache === "function") clearSettingsCache();
+
+    showBanner("Settings saved.", "success");
+    setTimeout(() => location.reload(), 600);
+  } catch (e) { showBanner(e.message, "danger"); }
+  finally { setBusy($("#btn-save"), false, "Save Settings"); }
+});
+
+// ----- Test Ollama -----
+$("#btn-test").addEventListener("click", async () => {
+  setBusy($("#btn-test"), true, "Testing...");
+  $("#test-result").textContent = "";
+  try {
+    const r = await fetch("/api/settings/test", { method: "POST" });
+    const data = await r.json();
+    $("#test-result").textContent = data.message || JSON.stringify(data);
+    $("#test-result").className = "hint " + (data.ok && data.model_loaded ? "ok" : "warn");
+  } catch (e) {
+    $("#test-result").textContent = e.message;
+    $("#test-result").className = "hint warn";
+  } finally { setBusy($("#btn-test"), false, "Test Ollama Connection"); }
+});
+
+// ----- Clear key buttons -----
+function wireClear(btnId, settingKey, label) {
+  const b = document.getElementById(btnId);
+  if (!b) return;
+  b.addEventListener("click", async () => {
+    if (!confirm(`Clear the saved ${label}?`)) return;
+    setBusy(b, true, "Clearing...");
+    try {
+      await saveOne(settingKey, "");
+      showBanner(`${label} cleared.`, "success");
+      setTimeout(() => location.reload(), 500);
+    } catch (e) { showBanner(e.message, "danger"); setBusy(b, false, "Clear Key"); }
+  });
+}
+wireClear("btn-clear-key",        "openai_api_key",  "OpenAI API key");
+wireClear("btn-clear-yt-key",     "youtube_api_key", "YouTube API key");
+wireClear("btn-clear-pexels-key", "pexels_api_key",  "Pexels API key");
+
+// Inline save buttons so users don't have to scroll to the bottom.
+function wireInlineSave(btnId, inputId, settingKey, label) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const defaultLabel = btn.textContent;
+  btn.addEventListener("click", async () => {
+    const v = document.getElementById(inputId).value.trim();
+    if (!v) {
+      showBanner(`Paste a ${label} first.`, "danger");
+      return;
+    }
+    setBusy(btn, true, "Saving...");
+    try {
+      await saveOne(settingKey, v);
+      showBanner(`${label} saved.`, "success");
+      document.getElementById(inputId).value = "";
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      showBanner(e.message, "danger");
+      setBusy(btn, false, defaultLabel);
+    }
+  });
+}
+wireInlineSave("btn-save-openai-key",  "openai_api_key",  "openai_api_key",  "OpenAI API key");
+wireInlineSave("btn-save-youtube-key", "youtube_api_key", "youtube_api_key", "YouTube API key");
+wireInlineSave("btn-save-pexels-key",  "pexels_api_key",  "pexels_api_key",  "Pexels API key");
+
+// ----- YouTube OAuth -----
+async function refreshYTStatus() {
+  const el = document.getElementById("yt-channel-status");
+  if (!el) return;
+  try {
+    const s = await fetch("/api/youtube/oauth/status").then(r => r.json());
+    if (s.connected) {
+      el.innerHTML = `Status: <strong style="color:#2ecc71;">Connected</strong> &middot; ${escapeHtml(s.channel_title || "(unknown channel)")}`;
+    } else if (s.client_configured) {
+      el.innerHTML = `Status: <strong style="color:#c9a84c;">OAuth client saved</strong> &middot; click Connect Channel`;
+    } else {
+      el.innerHTML = `Status: <strong style="color:#888;">Not configured</strong> &middot; paste Client ID + Secret first`;
+    }
+  } catch (e) {
+    el.textContent = "Status: error fetching state";
+  }
+}
+
+const btnSaveOAuthClient = document.getElementById("btn-save-oauth-client");
+if (btnSaveOAuthClient) {
+  btnSaveOAuthClient.addEventListener("click", async () => {
+    const cid = document.getElementById("yt_oauth_client_id").value.trim();
+    const sec = document.getElementById("yt_oauth_client_secret").value.trim();
+    if (!cid || !sec) {
+      showBanner("Both Client ID and Secret are required.", "danger"); return;
+    }
+    setBusy(btnSaveOAuthClient, true, "Saving...");
+    try {
+      const r = await fetch("/api/youtube/oauth/client", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ client_id: cid, client_secret: sec }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      showBanner("OAuth client saved.", "success");
+      document.getElementById("yt_oauth_client_id").value = "";
+      document.getElementById("yt_oauth_client_secret").value = "";
+      refreshYTStatus();
+    } catch (e) {
+      showBanner(e.message, "danger");
+    } finally { setBusy(btnSaveOAuthClient, false, "Save OAuth Client"); }
+  });
+}
+
+const btnYTConnect = document.getElementById("btn-yt-connect");
+if (btnYTConnect) {
+  btnYTConnect.addEventListener("click", async () => {
+    setBusy(btnYTConnect, true, "Opening Google...");
+    try {
+      const r = await fetch("/api/youtube/oauth/start");
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      if (!data.auth_url) throw new Error("server did not return an auth URL");
+      window.open(data.auth_url, "_blank", "noopener");
+      showBanner("Approve in the new tab. Status will update once you finish.", "success");
+      // Poll the status endpoint a few times so the UI flips when done
+      const stop = Date.now() + 5 * 60 * 1000;
+      const tick = setInterval(async () => {
+        const s = await fetch("/api/youtube/oauth/status").then(r => r.json());
+        if (s.connected) { clearInterval(tick); refreshYTStatus(); setBusy(btnYTConnect, false, "Connect YouTube Channel"); }
+        else if (Date.now() > stop) { clearInterval(tick); setBusy(btnYTConnect, false, "Connect YouTube Channel"); }
+      }, 3000);
+    } catch (e) {
+      showBanner(e.message, "danger");
+      setBusy(btnYTConnect, false, "Connect YouTube Channel");
+    }
+  });
+}
+
+const btnYTDisconnect = document.getElementById("btn-yt-disconnect");
+if (btnYTDisconnect) {
+  btnYTDisconnect.addEventListener("click", async () => {
+    if (!confirm("Disconnect this YouTube channel? Uploads will need re-authorization.")) return;
+    setBusy(btnYTDisconnect, true, "Disconnecting...");
+    try {
+      const r = await fetch("/api/youtube/oauth/disconnect", { method: "POST" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      showBanner("Channel disconnected.", "success");
+      refreshYTStatus();
+    } catch (e) { showBanner(e.message, "danger"); }
+    finally { setBusy(btnYTDisconnect, false, "Disconnect"); }
+  });
+}
+
+refreshYTStatus();
+
+// ----- Shorts Autopilot -----
+async function loadAutopilotStatus() {
+  try {
+    const [s, camps] = await Promise.all([
+      fetch("/api/autopilot/status").then(r => r.json()),
+      fetch("/api/campaigns").then(r => r.json()).catch(() => ({campaigns: []})),
+    ]);
+    // Badge
+    const badge = document.getElementById("ap-badge");
+    if (badge) {
+      badge.textContent = s.enabled ? "ENABLED" : "OFF";
+      badge.className = "badge " + (s.enabled ? "badge-exported" : "");
+    }
+    // Campaign dropdown
+    const sel = document.getElementById("autopilot_campaign_id");
+    if (sel) {
+      const current = "{{ settings.autopilot_campaign_id }}";
+      sel.innerHTML = `<option value="">(auto - most recent campaign)</option>`
+        + (camps.campaigns || []).map(c =>
+            `<option value="${c.campaign_id}">#${c.campaign_id} ${escapeHtml(c.name)}</option>`
+          ).join("");
+      sel.value = current;
+    }
+    // Status line
+    const line = document.getElementById("ap-status-line");
+    if (line) {
+      const next = s.next_slot ? `${s.next_slot} (${(s.next_slot_at || '').replace('T', ' ')})` : "no slots configured";
+      const last = s.last_run_at ? s.last_run_at.replace('T', ' ') + ` (${s.last_slot})` : "never";
+      const camp = s.campaign ? `${s.campaign.name}` : "no campaign — create one on /spartacus";
+      line.innerHTML = `Next slot: <strong>${escapeHtml(next)}</strong> &middot; Last run: <strong>${escapeHtml(last)}</strong> &middot; Campaign: <strong>${escapeHtml(camp)}</strong>`;
+    }
+    // Recent log
+    const logBox = document.getElementById("ap-recent-log");
+    if (logBox) {
+      if (!s.recent_log || s.recent_log.length === 0) {
+        logBox.innerHTML = `<p class="muted small">No autopilot runs logged yet.</p>`;
+      } else {
+        logBox.innerHTML = `<table class="ap-log-table">
+          <thead><tr><th>Slot</th><th>Started</th><th>Status</th><th>Run</th><th>YT</th></tr></thead>
+          <tbody>` + s.recent_log.map(e => `
+            <tr>
+              <td>${escapeHtml(e.slot || '-')}</td>
+              <td class="muted small">${escapeHtml((e.started_at || '').replace('T', ' '))}</td>
+              <td><span class="badge ${e.status === 'done' ? 'badge-exported' : (e.status === 'crashed' || e.status === 'rejected_quality' ? 'badge-draft' : '')}">${escapeHtml(e.status || '')}</span></td>
+              <td>${e.run_id ? '#' + e.run_id : '-'}</td>
+              <td>${e.upload_url ? `<a href="${escapeHtml(e.upload_url)}" target="_blank" rel="noopener">open</a>` : (e.upload_status || (e.reason ? escapeHtml(e.reason) : '-'))}</td>
+            </tr>`).join("") + `</tbody></table>`;
+      }
+    }
+  } catch (e) {
+    console.warn("autopilot status load failed:", e);
+  }
+}
+
+const apEnabledEl = document.getElementById("autopilot_enabled");
+const btnSaveAutopilot = document.getElementById("btn-save-autopilot");
+if (btnSaveAutopilot) {
+  btnSaveAutopilot.addEventListener("click", async () => {
+    setBusy(btnSaveAutopilot, true, "Saving...");
+    try {
+      await saveOne("autopilot_enabled", apEnabledEl.checked ? "true" : "false");
+      await saveOne("autopilot_slots", document.getElementById("autopilot_slots").value.trim());
+      await saveOne("autopilot_min_spacing_hours", document.getElementById("autopilot_min_spacing_hours").value || "4");
+      await saveOne("autopilot_hashtags", document.getElementById("autopilot_hashtags").value.trim());
+      await saveOne("autopilot_campaign_id", document.getElementById("autopilot_campaign_id").value);
+      showBanner("Autopilot settings saved.", "success");
+      loadAutopilotStatus();
+    } catch (e) {
+      showBanner(e.message, "danger");
+    } finally { setBusy(btnSaveAutopilot, false, "Save Autopilot Settings"); }
+  });
+}
+
+const btnRunNow = document.getElementById("btn-autopilot-run-now");
+if (btnRunNow) {
+  btnRunNow.addEventListener("click", async () => {
+    if (!confirm("Fire one Spartacus run + auto-upload right now? This will post a video to your YouTube channel if all gates pass. Bypasses the spacing check.")) return;
+    setBusy(btnRunNow, true, "Firing...");
+    try {
+      const r = await fetch("/api/autopilot/run-now", { method: "POST" });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(data.detail || `HTTP ${r.status}`);
+      }
+      // Rich response: pin the run-id + slot to the status line
+      // so the user sees something concrete BEFORE the 3-min pipeline.
+      const camp = (data.campaign && data.campaign.name) || "(no campaign)";
+      const ytWarn = data.youtube_connected ? "" : " (YouTube NOT connected; upload will skip)";
+      showBanner(
+        `Autopilot started: slot ${data.slot}, Spartacus run #${data.spartacus_run_id}, campaign "${camp}"${ytWarn}. Poll for ~3-5 min.`,
+        data.youtube_connected ? "success" : "danger",
+      );
+      // Refresh immediately so the row appears, then poll every 5s
+      // for ~6 min so we catch render done + upload finish.
+      await loadAutopilotStatus();
+      let n = 0;
+      const tick = setInterval(async () => {
+        await loadAutopilotStatus();
+        if (++n > 72) clearInterval(tick);   // ~6 min
+      }, 5000);
+    } catch (e) {
+      showBanner("Run-Now failed: " + e.message, "danger");
+    } finally { setBusy(btnRunNow, false, "Run One Slot Now"); }
+  });
+}
+
+loadAutopilotStatus();
+
+// ----- Amazon Affiliate Brief autopilot -----
+const amzEnabledEl = document.getElementById("amazon_autopilot_enabled");
+const amzCountEl   = document.getElementById("amazon_autopilot_count");
+const amzStatusEl  = document.getElementById("amz-ap-status");
+const btnSaveAmz   = document.getElementById("btn-save-amazon-autopilot");
+const btnAmzRunNow = document.getElementById("btn-amazon-run-now");
+
+async function loadAmazonAutopilotStatus() {
+  try {
+    const r = await fetch("/api/autopilot/amazon/status");
+    if (!r.ok) return;
+    const j = await r.json();
+    if (amzEnabledEl) amzEnabledEl.checked = !!j.enabled;
+    if (amzCountEl)   amzCountEl.value     = j.count;
+    if (amzStatusEl) {
+      const last = j.last_log;
+      let summary;
+      if (j.today_done) {
+        const products = (last && last.products) ? last.products.join(", ") : "(unknown)";
+        const ctaProds = (last && last.cta_only_products) || [];
+        summary = `Today's brief is generated. Products: ${escapeHtml(products)}.` +
+                  (ctaProds.length ? ` ${ctaProds.length} in CTA-only mode.` : ` All products had affiliate links.`);
+      } else {
+        summary = j.enabled
+          ? "Today's brief not generated yet. Will fire on the next scheduler tick (~1 min)."
+          : "Daily Amazon brief is disabled.";
+      }
+      amzStatusEl.innerHTML = summary;
+    }
+  } catch (e) { console.warn("amazon autopilot status load failed:", e); }
+}
+
+if (btnSaveAmz) {
+  btnSaveAmz.addEventListener("click", async () => {
+    setBusy(btnSaveAmz, true, "Saving...");
+    try {
+      const r = await fetch("/api/autopilot/amazon/config", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          enabled: amzEnabledEl.checked,
+          count: parseInt(amzCountEl.value, 10) || 3,
+        }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.detail || `HTTP ${r.status}`);
+      showBanner("Amazon brief settings saved.", "success");
+      loadAmazonAutopilotStatus();
+    } catch (e) {
+      showBanner(e.message, "danger");
+    } finally { setBusy(btnSaveAmz, false, "Save Amazon Settings"); }
+  });
+}
+
+if (btnAmzRunNow) {
+  btnAmzRunNow.addEventListener("click", async () => {
+    setBusy(btnAmzRunNow, true, "Generating...");
+    try {
+      const r = await fetch("/api/autopilot/amazon/run-now", { method: "POST" });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.detail || `HTTP ${r.status}`);
+      const e = j.entry || {};
+      if (e.status === "done") {
+        showBanner(`Brief generated: ${e.count} ideas, ${(e.cta_only_products||[]).length} in CTA-only mode.`, "success");
+      } else if (e.status === "skipped_already_done") {
+        showBanner("Today's brief is already generated.", "info");
+      } else {
+        showBanner("Brief failed: " + (e.error || e.status), "danger");
+      }
+      loadAmazonAutopilotStatus();
+    } catch (e) {
+      showBanner("Run failed: " + e.message, "danger");
+    } finally { setBusy(btnAmzRunNow, false, "Run Amazon Brief Now"); }
+  });
+}
+
+loadAmazonAutopilotStatus();
+
+// ----- Apply Free Safe Defaults -----
+const fsBtn = document.getElementById("btn-free-safe-defaults");
+if (fsBtn) {
+  fsBtn.addEventListener("click", async () => {
+    if (!confirm("This will set AI Mode to Free and every task model to llama3. Continue?")) return;
+    setBusy(fsBtn, true, "Applying...");
+    try {
+      const r = await fetch("/api/router/apply-free-safe-defaults", { method: "POST" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      if (typeof clearSettingsCache === "function") clearSettingsCache();
+      showBanner("Free Safe Defaults applied. Reloading.", "success");
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      showBanner(e.message, "danger");
+      setBusy(fsBtn, false, "Apply Free Safe Defaults");
+    }
+  });
+}
+</script>
+{% endblock %}

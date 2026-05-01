@@ -225,6 +225,17 @@ def _safe_settings() -> dict:
     has_pex = bool((s.get("pexels_api_key") or "").strip())
     s["pexels_api_key"] = ""
     s["pexels_api_key_set"] = has_pex
+    # Ensure gemini_model always has a value in settings
+    if not (s.get("gemini_model") or "").strip():
+        s["gemini_model"] = "gemini-2.5-flash"
+    # Normalise legacy "premium" → "advanced"
+    if (s.get("ai_mode") or "") == "premium":
+        s["ai_mode"] = "advanced"
+    # Normalise legacy "llama3" bare name → llama3.1:8b in task model fields
+    for t in ("trend_to_ideas", "hooks", "script_draft", "script_polish", "caption"):
+        key = f"{t}_model"
+        if (s.get(key) or "").strip() == "llama3":
+            s[key] = "llama3.1:8b"
     return s
 
 
@@ -251,19 +262,50 @@ TASK_KEYS = (
 
 # Cost tier labels used by the router status endpoint and UI panels.
 MODEL_TIERS = {
-    "llama3.1:8b":  "FREE local",
-    "llama3":       "FREE local",
-    "mistral:7b":   "FREE local",
-    "qwen2.5:7b":   "FREE local",
-    "qwen2.5:14b":  "FREE local",
-    "gpt-4o-mini":  "LOW cost",
-    "gpt-4.1-mini": "MEDIUM cost",
-    "gpt-4o":       "HIGH quality / higher cost",
-    "gpt-4.1":      "HIGH quality / higher cost",
+    "llama3.1:8b":        "FREE local",
+    "llama3":             "FREE local",
+    "mistral:7b":         "FREE local",
+    "qwen2.5:7b":         "FREE local",
+    "qwen2.5:14b":        "FREE local",
+    "gpt-4o-mini":        "LOW cost",
+    "gpt-4.1-mini":       "MEDIUM cost",
+    "gpt-4o":             "HIGH quality / higher cost",
+    "gpt-4.1":            "HIGH quality / higher cost",
+    "gemini-2.5-flash":   "FREE / low-cost (Gemini)",
+    "gemini-2.5-pro":     "LOW cost (Gemini)",
+    "gemini-2.0-flash":   "FREE / low-cost (Gemini)",
 }
 
 # Universal local fallback when a task setting is empty/missing.
-SAFE_LOCAL_FALLBACK = "llama3"
+SAFE_LOCAL_FALLBACK = "llama3.1:8b"
+
+# Mode presets — single source of truth used by both API endpoints and UI
+_MODE_PRESETS: dict[str, dict] = {
+    "free": {
+        "trend_to_ideas": "llama3.1:8b",
+        "hooks":          "llama3.1:8b",
+        "script_draft":   "llama3.1:8b",
+        "script_polish":  "llama3.1:8b",
+        "caption":        "llama3.1:8b",
+        "gemini_model":   "gemini-2.5-flash",
+    },
+    "balanced": {
+        "trend_to_ideas": "llama3.1:8b",
+        "hooks":          "gpt-4o-mini",
+        "script_draft":   "llama3.1:8b",
+        "script_polish":  "gpt-4o-mini",
+        "caption":        "gpt-4o-mini",
+        "gemini_model":   "gemini-2.5-flash",
+    },
+    "advanced": {
+        "trend_to_ideas": "gpt-4o-mini",
+        "hooks":          "gpt-4o-mini",
+        "script_draft":   "gpt-4o-mini",
+        "script_polish":  "gpt-4o-mini",
+        "caption":        "gpt-4o-mini",
+        "gemini_model":   "gemini-2.5-pro",
+    },
+}
 
 
 def is_paid_model(model: str) -> bool:
@@ -836,6 +878,7 @@ def api_set_setting(req: SettingReq):
         "script_draft_model",
         "script_polish_model",
         "caption_model",
+        "gemini_model",
         "confirm_paid_calls",
         "daily_run_real_mode",
         "daily_run_platform",
@@ -878,8 +921,8 @@ def api_set_setting(req: SettingReq):
         raise HTTPException(400, f"unknown setting: {req.key}")
     if req.key == "quality_mode" and req.value not in ("local_only", "api_polish"):
         raise HTTPException(400, "quality_mode must be local_only or api_polish")
-    if req.key == "ai_mode" and req.value not in ("free", "balanced", "premium"):
-        raise HTTPException(400, "ai_mode must be free, balanced, or premium")
+    if req.key == "ai_mode" and req.value not in ("free", "balanced", "advanced", "premium"):
+        raise HTTPException(400, "ai_mode must be free, balanced, or advanced")
     if req.key == "daily_run_platform" and req.value not in _VALID_PLATFORMS:
         raise HTTPException(400, "daily_run_platform must be tiktok or youtube_shorts")
     if req.key == "daily_run_real_mode" and req.value.lower() not in ("true", "false"):
@@ -943,6 +986,11 @@ def api_set_setting(req: SettingReq):
             "quality_mode",
             "local_only" if req.value == "free" else "api_polish",
         )
+        # Auto-apply the full preset when mode changes via this key
+        preset = _MODE_PRESETS.get(req.value)
+        if preset:
+            for t, m in preset.items():
+                db.set_setting(f"{t}_model" if t != "gemini_model" else "gemini_model", m)
     return {"ok": True}
 
 
@@ -950,38 +998,65 @@ def api_set_setting(req: SettingReq):
 # Smart Model Router - status + safe-defaults endpoints
 # ============================================================
 
+def _is_gemini_model(model: str) -> bool:
+    return (model or "").startswith("gemini")
+
+
 @app.get("/api/router/status")
 def api_router_status():
-    """Snapshot of the live model routing decisions. Always reads DB
-    fresh - this is the source of truth the UI panels render."""
+    """Snapshot of the live model routing decisions. Always reads DB fresh."""
     ai_mode = (db.get_setting("ai_mode") or "balanced").lower()
+    # Normalise legacy "premium" to "advanced"
+    if ai_mode == "premium":
+        ai_mode = "advanced"
     tasks = {}
     for t in TASK_KEYS:
         model = get_task_model(t)
         paid = is_paid_model(model)
+        is_gemini = _is_gemini_model(model)
         tasks[t] = {
             "model": model,
             "is_paid": paid,
-            "provider": "openai" if paid else "ollama",
+            "provider": "openai" if paid else ("gemini" if is_gemini else "ollama"),
             "tier_label": MODEL_TIERS.get(model, "unknown"),
         }
+    # Gemini analysis row (not a text-gen task, handled by three_brain_router)
+    gemini_model = (db.get_setting("gemini_model") or "gemini-2.5-flash").strip()
+    from spartacus.three_brain_router import detect_available_tools as _dtools
+    gemini_status = _dtools().get("gemini", {})
+    tasks["gemini_analysis"] = {
+        "model": gemini_model,
+        "is_paid": False,
+        "provider": "gemini",
+        "tier_label": MODEL_TIERS.get(gemini_model, "Gemini CLI"),
+        "cli_available": gemini_status.get("available", False),
+        "cli_note": gemini_status.get("note", ""),
+    }
     return {"ai_mode": ai_mode, "tasks": tasks}
 
 
 @app.post("/api/router/apply-free-safe-defaults")
 def api_apply_free_safe_defaults():
-    """One-shot reset: ai_mode=free + every task model -> llama3 +
-    quality_mode=local_only. The bullet-proof 'no surprises' button."""
-    db.set_setting("ai_mode", "free")
-    db.set_setting("quality_mode", "local_only")
-    for task in TASK_KEYS:
-        db.set_setting(f"{task}_model", SAFE_LOCAL_FALLBACK)
-    return {
-        "ok": True,
-        "applied": "free_safe_defaults",
-        "ai_mode": "free",
-        "task_model": SAFE_LOCAL_FALLBACK,
-    }
+    """Reset to Free Mode — all Ollama, no paid calls."""
+    return _apply_mode_preset("free")
+
+
+@app.post("/api/router/apply-preset/{mode}")
+def api_apply_preset(mode: str):
+    """Apply a named mode preset (free / balanced / advanced)."""
+    if mode not in _MODE_PRESETS:
+        raise HTTPException(400, f"Unknown mode '{mode}'. Use: free, balanced, advanced")
+    return _apply_mode_preset(mode)
+
+
+def _apply_mode_preset(mode: str) -> dict:
+    preset = _MODE_PRESETS[mode]
+    db.set_setting("ai_mode", mode)
+    db.set_setting("quality_mode", "local_only" if mode == "free" else "api_polish")
+    for key, model in preset.items():
+        setting_key = key if key == "gemini_model" else f"{key}_model"
+        db.set_setting(setting_key, model)
+    return {"ok": True, "applied": mode, "preset": preset}
 
 
 @app.get("/api/system/ollama-version")
