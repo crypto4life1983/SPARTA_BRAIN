@@ -1,0 +1,641 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SPARTA BRAIN{% endblock %}
+{% block content %}
+
+<!-- ============== CINEMATIC HERO ============== -->
+<section class="cinematic-hero">
+  <div class="hud-corner-tr"></div>
+  <div class="hud-corner-bl"></div>
+
+  <div class="cinematic-emblem" aria-hidden="true">&Lambda;</div>
+
+  <h1>
+    <span class="word-1">SPARTA</span>
+    <span class="word-2">BRAIN</span>
+  </h1>
+
+  <p class="cinematic-tag">
+    Think <span class="dot-sep">&bull;</span>
+    Create <span class="dot-sep">&bull;</span>
+    Conquer
+  </p>
+
+  <p class="cinematic-line">Your AI-Powered Content War Machine</p>
+
+  <div class="cinematic-actions" style="margin-top:18px;">
+    <button id="btn-create-demo" class="btn btn-primary">Create Demo Video</button>
+    <span id="demo-status-text" class="muted small" style="margin-left:14px;"></span>
+    <a id="demo-video-link" class="btn btn-sm" href="#" target="_blank" rel="noopener" style="display:none;margin-left:10px;">Open Demo MP4</a>
+  </div>
+</section>
+
+<!-- ============== METRIC CARDS ============== -->
+<section class="metrics-row">
+
+  <div class="metric-card">
+    <div class="metric-icon" aria-hidden="true">&#x2726;</div>
+    <div class="metric-label">Idea Arsenal</div>
+    <div class="metric-value">{{ metrics.ideas.total }}</div>
+    {% if metrics.ideas.week > 0 %}
+      <div class="metric-delta">+{{ metrics.ideas.week }} this week &#x2197;</div>
+    {% else %}
+      <div class="metric-delta zero">no new this week</div>
+    {% endif %}
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon" aria-hidden="true">&#x2694;</div>
+    <div class="metric-label">Hook Weapons</div>
+    <div class="metric-value">{{ metrics.hooks.total }}</div>
+    {% if metrics.hooks.week > 0 %}
+      <div class="metric-delta">+{{ metrics.hooks.week }} this week &#x2197;</div>
+    {% else %}
+      <div class="metric-delta zero">no new this week</div>
+    {% endif %}
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon" aria-hidden="true">&#x2630;</div>
+    <div class="metric-label">Battle Scripts</div>
+    <div class="metric-value">{{ metrics.scripts.total }}</div>
+    {% if metrics.scripts.week > 0 %}
+      <div class="metric-delta">+{{ metrics.scripts.week }} this week &#x2197;</div>
+    {% else %}
+      <div class="metric-delta zero">no new this week</div>
+    {% endif %}
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon" aria-hidden="true">&#x270E;</div>
+    <div class="metric-label">War Captions</div>
+    <div class="metric-value">{{ metrics.captions.total }}</div>
+    {% if metrics.captions.week > 0 %}
+      <div class="metric-delta">+{{ metrics.captions.week }} this week &#x2197;</div>
+    {% else %}
+      <div class="metric-delta zero">no new this week</div>
+    {% endif %}
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon" aria-hidden="true">&#x2197;</div>
+    <div class="metric-label">Trend Intel</div>
+    <div class="metric-value">{{ metrics.trends.total }}</div>
+    {% if metrics.trends.week > 0 %}
+      <div class="metric-delta">+{{ metrics.trends.week }} this week &#x2197;</div>
+    {% else %}
+      <div class="metric-delta zero">no new this week</div>
+    {% endif %}
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon" aria-hidden="true">&#x2713;</div>
+    <div class="metric-label">Completed Missions</div>
+    <div class="metric-value">{{ metrics.exports.total }}</div>
+    {% if metrics.exports.week > 0 %}
+      <div class="metric-delta">+{{ metrics.exports.week }} this week &#x2197;</div>
+    {% else %}
+      <div class="metric-delta zero">no new this week</div>
+    {% endif %}
+  </div>
+
+</section>
+
+<!-- ============== MISSION CONTROL + ACTIVITY ============== -->
+<section class="command-grid">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Mission Control</h2>
+    </div>
+    <p class="panel-sub">Live status of every connected system</p>
+
+    <div class="mission-body">
+      <div class="radar" aria-hidden="true"></div>
+
+      <ul class="system-list">
+        <li>
+          <span class="sys-name"><span class="ico">&#x25C6;</span>AI Brain (<span id="ollama-version-label">Ollama</span>)</span>
+          <span class="sys-status" data-system="ollama" data-state="checking">CHECKING</span>
+        </li>
+        <li>
+          <span class="sys-name"><span class="ico">&#x2726;</span>Content Engine</span>
+          <span class="sys-status" data-system="content-engine" data-state="active">ACTIVE</span>
+        </li>
+        <li>
+          <span class="sys-name"><span class="ico">&#x2197;</span>Trend Scanner</span>
+          <span class="sys-status" data-system="youtube" data-state="checking">CHECKING</span>
+        </li>
+        <li>
+          <span class="sys-name"><span class="ico">&#x2694;</span>Idea Forge</span>
+          <span class="sys-status" data-system="idea-forge" data-state="active">READY</span>
+        </li>
+        <li>
+          <span class="sys-name"><span class="ico">&#x2691;</span>Script Polish AI</span>
+          <span class="sys-status" data-system="openai" data-state="checking">CHECKING</span>
+        </li>
+        <li>
+          <span class="sys-name"><span class="ico">&Lambda;</span>Victory Mode</span>
+          <span class="sys-status" data-state="active">ENGAGED</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mission-footer">
+      <p class="ready">The machine is ready</p>
+      <p class="pump">Time to create victory</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Recent Activity</h2>
+      <a href="/library" class="btn btn-sm">View All</a>
+    </div>
+    <p class="panel-sub">Latest forged operations</p>
+
+    {% if recent %}
+    <ul class="activity-list">
+      {% for idea in recent %}
+      <li>
+        <span class="activity-ico" aria-hidden="true">&#x2726;</span>
+        <span class="activity-text">
+          <a href="/ideas/{{ idea.id }}">{{ idea.title }}</a>
+        </span>
+        {% if idea.source %}<span class="badge source-{{ idea.source }}">{{ idea.source }}</span>{% endif %}
+        {% if idea.platform %}<span class="badge platform-{{ idea.platform }}">{{ idea.platform.replace('_', ' ') }}</span>{% endif %}
+        <span class="activity-meta">{{ idea.created_at[5:16] }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No operations yet. Hit a Quick Command below to begin.</p>
+    {% endif %}
+  </div>
+
+</section>
+
+<!-- ============== DAILY OPERATION ============== -->
+<section class="panel daily-op">
+  <div class="panel-head">
+    <h2 class="panel-title">Sparta Daily Operation</h2>
+    <span class="badge daily-op-status" id="daily-op-status" data-state="idle">IDLE</span>
+  </div>
+  <p class="panel-sub">One click runs the full pipeline: trends &rarr; forge ideas &rarr; score &rarr; top picks get hook + script + caption. Uses your Smart Model Router routing and platform-aware prompts.</p>
+
+  <div class="daily-op-controls">
+    <label class="lbl">Real Trends Mode</label>
+    <label class="toggle-switch">
+      <input type="checkbox" id="opt-real-mode"
+             {% if settings.daily_run_real_mode == 'true' %}checked{% endif %} />
+      <span class="toggle-slider"></span>
+      <span class="toggle-text" data-on="LIVE" data-off="SEED"></span>
+    </label>
+    <p class="hint">Off = hardcoded SEED_TRENDS. On = pull live YouTube + Google Trends, score them, use the top 10 as inspiration.</p>
+
+    <label class="lbl" style="margin-top:14px;">Platform</label>
+    <div class="radio-row">
+      <label><input type="radio" name="opt-platform" value="youtube_shorts"
+        {% if settings.daily_run_platform != 'tiktok' %}checked{% endif %} /> YouTube Shorts</label>
+      <label><input type="radio" name="opt-platform" value="tiktok"
+        {% if settings.daily_run_platform == 'tiktok' %}checked{% endif %} /> TikTok</label>
+    </div>
+    <p class="hint">Prepends a platform style rule to every generation prompt. Saved automatically when changed.</p>
+  </div>
+
+  <div class="row-actions">
+    <button id="btn-run-daily" class="btn btn-primary big">Run Daily Operation</button>
+  </div>
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:22px 0;" />
+
+  <h4>Auto Mode (Phase 4)</h4>
+  <p class="hint">When ON, every 24 hours SPARTA BRAIN automatically pulls fresh research, takes the top 3 topics with score above the threshold, and runs the full pipeline.</p>
+
+  <div class="daily-op-controls">
+    <label class="lbl">Auto Mode</label>
+    <label class="toggle-switch">
+      <input type="checkbox" id="opt-auto-mode"
+             {% if settings.auto_mode_enabled == 'true' %}checked{% endif %} />
+      <span class="toggle-slider"></span>
+      <span class="toggle-text" data-on="ON" data-off="OFF"></span>
+    </label>
+
+    <label class="lbl" style="margin-top:14px;">Auto Video <span class="muted" style="font-size:10px;text-transform:none;letter-spacing:0;">(polish top 1 script + render via Remotion each run)</span></label>
+    <label class="toggle-switch">
+      <input type="checkbox" id="opt-auto-video"
+             {% if settings.auto_video_enabled == 'true' %}checked{% endif %} />
+      <span class="toggle-slider"></span>
+      <span class="toggle-text" data-on="ON" data-off="OFF"></span>
+    </label>
+
+    <div id="auto-status" class="hint" style="margin-top:12px;">checking auto-mode status...</div>
+
+    <div class="row-actions" style="margin-top:10px;">
+      <button id="btn-auto-now" class="btn">Run Auto Now (skip 24h timer)</button>
+    </div>
+  </div>
+
+  <div id="daily-op-live" class="hidden daily-op-live">
+    <div class="daily-op-counters" id="daily-op-counters"></div>
+    <pre id="daily-op-log" class="daily-op-log"></pre>
+  </div>
+
+  {% if sparta_runs %}
+  <h4>Recent Runs</h4>
+  <ul class="list">
+    {% for r in sparta_runs %}
+    <li class="row">
+      <span class="row-num">#{{ r.id }}</span>
+      <span class="badge {% if r.status == 'done' %}badge-exported{% elif r.status == 'failed' %}badge-draft{% else %}badge-polished{% endif %}">{{ r.status }}</span>
+      {% if r.mode %}<span class="badge run-mode-{{ r.mode }}">{{ r.mode }}</span>{% endif %}
+      {% if r.platform %}<span class="badge run-platform">{{ r.platform.replace('_', ' ') }}</span>{% endif %}
+      <span class="row-title muted">
+        ideas {{ r.ideas_created }} &middot;
+        picked {{ r.ideas_picked }} &middot;
+        hooks {{ r.hooks_created }} &middot;
+        scripts {{ r.scripts_created }} &middot;
+        captions {{ r.captions_created }}
+      </span>
+      <span class="muted">{{ r.started_at }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<!-- ============== VIDEO ENGINE (Remotion) ============== -->
+<section class="panel video-engine">
+  <div class="panel-head">
+    <h2 class="panel-title">Video Engine</h2>
+    <span class="muted" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;">Remotion render &middot; from Ryah engine</span>
+  </div>
+  <p class="panel-sub">Renders the most recent saved script via the vendored Ryah Remotion compositions.</p>
+
+  <div class="daily-op-controls">
+    {% if latest_script %}
+      <p class="hint">Target script: <strong>#{{ latest_script.id }}</strong>
+      {% if latest_script.idea_title %}- "{{ latest_script.idea_title[:60] }}"{% endif %}
+      ({{ latest_script.body|length }} chars)</p>
+
+      <label class="lbl" for="video-topic">Topic / Title</label>
+      <input id="video-topic" type="text"
+             value="{{ latest_script.idea_title or 'SPARTA Video' }}" />
+
+      <input type="hidden" id="video-script-id" value="{{ latest_script.id }}" />
+
+      <div class="row-actions" style="margin-top:12px;">
+        <button id="btn-generate-video" class="btn btn-primary big">Generate Video</button>
+      </div>
+    {% else %}
+      <p class="muted">No saved scripts yet. Forge an idea, generate a script, save it, then come back.</p>
+    {% endif %}
+
+    <div id="video-job-live" class="hidden daily-op-live">
+      <div class="row-actions" id="video-job-status-row"></div>
+      <pre id="video-job-log" class="daily-op-log"></pre>
+      <div id="video-job-preview" class="hidden"></div>
+    </div>
+  </div>
+
+  {% if video_jobs %}
+  <h4>Recent Video Jobs</h4>
+  <ul class="list">
+    {% for j in video_jobs %}
+    <li class="row">
+      <span class="row-num">#{{ j.id }}</span>
+      <span class="badge {% if j.status == 'done' %}badge-exported{% elif j.status == 'failed' %}badge-draft{% else %}badge-polished{% endif %}">{{ j.status }}</span>
+      <span class="row-title">{{ j.topic }}</span>
+      {% if j.video_url %}
+        <a class="btn btn-sm" href="{{ j.video_url }}" target="_blank" rel="noopener">Open</a>
+        <a class="btn btn-sm" href="{{ j.video_url }}" download>Download</a>
+      {% elif j.status == 'failed' %}
+        <span class="muted" style="font-size:11px;">{{ (j.error or '')[:60] }}</span>
+      {% endif %}
+      <span class="muted">{{ j.created_at }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<!-- ============== QUICK COMMANDS ============== -->
+<section class="quick-commands">
+  <div class="qc-header">
+    <span class="qc-title">Quick Commands</span>
+    <span class="qc-sub">Execute powerful actions</span>
+  </div>
+  <a href="/ideas" class="qc-btn">
+    <span class="qc-ico" aria-hidden="true">&#x2726;</span>
+    <span>Forge Ideas</span>
+  </a>
+  <a href="/scripts" class="qc-btn">
+    <span class="qc-ico" aria-hidden="true">&#x2630;</span>
+    <span>Create Script</span>
+  </a>
+  <a href="/trends" class="qc-btn">
+    <span class="qc-ico" aria-hidden="true">&#x2197;</span>
+    <span>Scout Trends</span>
+  </a>
+  <a href="/library" class="qc-btn">
+    <span class="qc-ico" aria-hidden="true">&Lambda;</span>
+    <span>Mission Archive</span>
+  </a>
+</section>
+
+<!-- pass server-rendered totals to JS for the bottom Sparta Wins counter -->
+<script>
+  window.__SPARTA__ = {
+    exports_total: {{ metrics.exports.total }},
+  };
+
+  // ----- Sparta Daily Operation -----
+  const _dq = (s) => document.querySelector(s);
+
+  // ----- Auto Mode (Phase 4) -----
+  async function refreshAutoStatus() {
+    try {
+      const s = await fetch("/api/auto/status").then(r => r.json());
+      const elem = _dq("#auto-status");
+      if (!elem) return;
+      const last = s.last_run_at || "(never)";
+      const next = s.next_due_at || "(no schedule yet)";
+      const enabled = s.enabled ? "ON" : "OFF";
+      const autoVideo = s.auto_video_enabled ? "ON" : "OFF";
+      elem.innerHTML =
+        `Auto Mode: <strong>${enabled}</strong> &middot; ` +
+        `Auto Video: <strong>${autoVideo}</strong> &middot; ` +
+        `Last run: <strong>${escapeHtml(last)}</strong> &middot; ` +
+        `Next due: <strong>${escapeHtml(next)}</strong> &middot; ` +
+        `Filter: <strong>score &ge; ${s.min_research_score}</strong>`;
+    } catch (e) { /* silent */ }
+  }
+  refreshAutoStatus();
+
+  const autoModeEl = _dq("#opt-auto-mode");
+  if (autoModeEl) {
+    autoModeEl.addEventListener("change", async () => {
+      try {
+        await api("/api/settings", {
+          key: "auto_mode_enabled",
+          value: autoModeEl.checked ? "true" : "false",
+        });
+        if (typeof clearSettingsCache === "function") clearSettingsCache();
+        refreshAutoStatus();
+        showBanner(`Auto Mode ${autoModeEl.checked ? 'enabled' : 'disabled'}.`, "success");
+      } catch (e) { showBanner(e.message, "danger"); }
+    });
+  }
+
+  const autoVideoEl = _dq("#opt-auto-video");
+  if (autoVideoEl) {
+    autoVideoEl.addEventListener("change", async () => {
+      try {
+        await api("/api/settings", {
+          key: "auto_video_enabled",
+          value: autoVideoEl.checked ? "true" : "false",
+        });
+        if (typeof clearSettingsCache === "function") clearSettingsCache();
+        refreshAutoStatus();
+        showBanner(`Auto Video ${autoVideoEl.checked ? 'enabled' : 'disabled'}.`, "success");
+      } catch (e) { showBanner(e.message, "danger"); }
+    });
+  }
+  const autoNowBtn = _dq("#btn-auto-now");
+  if (autoNowBtn) {
+    autoNowBtn.addEventListener("click", async () => {
+      setBusy(autoNowBtn, true, "Launching...");
+      try {
+        await fetch("/api/auto/run-now", { method: "POST" });
+        showBanner("Auto run launched. Watch Recent Runs - it will appear as a new run.", "success");
+        setTimeout(() => refreshAutoStatus(), 1000);
+      } catch (e) { showBanner(e.message, "danger"); }
+      finally { setBusy(autoNowBtn, false, "Run Auto Now (skip 24h timer)"); }
+    });
+  }
+
+  // ----- Video Engine (Remotion) -----
+  const genVideoBtn = _dq("#btn-generate-video");
+  if (genVideoBtn) {
+    genVideoBtn.addEventListener("click", async () => {
+      const sid = parseInt(_dq("#video-script-id").value, 10);
+      const topic = _dq("#video-topic").value.trim();
+      if (!sid || !topic) {
+        showBanner("Need a script and a topic.", "danger"); return;
+      }
+      setBusy(genVideoBtn, true, "Queueing...");
+      try {
+        const res = await api("/api/video/generate", { script_id: sid, topic });
+        showBanner(`Video job #${res.job_id} queued. Watching live below.`, "success");
+        _dq("#video-job-live").classList.remove("hidden");
+        pollVideoJob(res.job_id);
+      } catch (e) {
+        showBanner(e.message, "danger");
+        setBusy(genVideoBtn, false, "Generate Video");
+      }
+    });
+  }
+
+  async function pollVideoJob(jobId) {
+    const statusRow = _dq("#video-job-status-row");
+    const logEl = _dq("#video-job-log");
+    const previewEl = _dq("#video-job-preview");
+    statusRow.innerHTML = `<span class="badge badge-polished">QUEUED</span> <span class="muted">job #${jobId}</span>`;
+
+    for (let i = 0; i < 240; i++) { // ~12 min cap
+      await new Promise(r => setTimeout(r, 3000));
+      let job;
+      try {
+        job = await fetch(`/api/video/jobs/${jobId}`).then(r => r.json());
+      } catch { continue; }
+
+      const cls = job.status === "done"   ? "badge-exported"
+                : job.status === "failed" ? "badge-draft"
+                : "badge-polished";
+      statusRow.innerHTML =
+        `<span class="badge ${cls}">${job.status.toUpperCase()}</span> ` +
+        `<span class="muted">job #${jobId}</span>`;
+      logEl.textContent = job.log || "";
+      logEl.scrollTop = logEl.scrollHeight;
+
+      if (job.status === "done") {
+        previewEl.classList.remove("hidden");
+        previewEl.innerHTML = `
+          <h4 style="margin-top:14px;">Preview</h4>
+          <video controls preload="metadata" src="${job.video_url}" playsinline
+                 style="max-width:100%;max-height:540px;background:#000;border:1px solid var(--border);border-radius:4px;"></video>
+          <div class="row-actions" style="margin-top:8px;">
+            <a class="btn btn-sm" href="${job.video_url}" target="_blank" rel="noopener">Open MP4</a>
+            <a class="btn btn-sm" href="${job.video_url}" download>Download MP4</a>
+          </div>
+        `;
+        showBanner(`Video #${jobId} done.`, "success");
+        if (genVideoBtn) setBusy(genVideoBtn, false, "Generate Video");
+        return;
+      }
+      if (job.status === "failed") {
+        previewEl.classList.remove("hidden");
+        previewEl.innerHTML = `
+          <p class="hint warn" style="margin-top:14px;">Render failed: ${escapeHtml(job.error || 'see log above')}</p>
+        `;
+        showBanner(`Video #${jobId} failed: ${job.error || 'see log'}`, "danger");
+        if (genVideoBtn) setBusy(genVideoBtn, false, "Generate Video");
+        return;
+      }
+    }
+    showBanner(`Video #${jobId} still running. Reload the page to keep watching.`, "danger");
+  }
+
+  // Persist toggle changes immediately so the next page load reflects them.
+  const realModeEl = _dq("#opt-real-mode");
+  if (realModeEl) {
+    realModeEl.addEventListener("change", async () => {
+      try {
+        await api("/api/settings", {
+          key: "daily_run_real_mode",
+          value: realModeEl.checked ? "true" : "false",
+        });
+        if (typeof clearSettingsCache === "function") clearSettingsCache();
+      } catch (e) { showBanner(e.message, "danger"); }
+    });
+  }
+  document.querySelectorAll('input[name="opt-platform"]').forEach(r => {
+    r.addEventListener("change", async (e) => {
+      try {
+        await api("/api/settings", {
+          key: "daily_run_platform",
+          value: e.target.value,
+        });
+        if (typeof clearSettingsCache === "function") clearSettingsCache();
+      } catch (err) { showBanner(err.message, "danger"); }
+    });
+  });
+
+  const dailyBtn = _dq("#btn-run-daily");
+  if (dailyBtn) {
+    dailyBtn.addEventListener("click", async () => {
+      const realMode = _dq("#opt-real-mode")?.checked ?? false;
+      const platformEl = document.querySelector('input[name="opt-platform"]:checked');
+      const platform = platformEl ? platformEl.value : "youtube_shorts";
+
+      setBusy(dailyBtn, true, "Launching...");
+      try {
+        const res = await api("/api/sparta/run-daily", {
+          real_trends_mode: realMode,
+          platform: platform,
+        });
+        const modeLabel = realMode ? "LIVE" : "SEED";
+        showBanner(
+          `Daily Operation #${res.run_id} launched. Mode: ${modeLabel} | Platform: ${platform.replace('_',' ')}.`,
+          "success",
+        );
+        _dq("#daily-op-live").classList.remove("hidden");
+        _dq("#daily-op-status").textContent = "RUNNING";
+        _dq("#daily-op-status").dataset.state = "running";
+        pollDailyOp(res.run_id);
+      } catch (e) {
+        showBanner(e.message, "danger");
+        setBusy(dailyBtn, false, "Run Daily Operation");
+      }
+    });
+  }
+
+  async function pollDailyOp(runId) {
+    const counters = _dq("#daily-op-counters");
+    const logEl = _dq("#daily-op-log");
+    const status = _dq("#daily-op-status");
+
+    for (let i = 0; i < 240; i++) { // up to ~12 min
+      await new Promise(r => setTimeout(r, 3000));
+      let row;
+      try {
+        row = await fetch(`/api/sparta/runs/${runId}`).then(r => r.json());
+      } catch { continue; }
+
+      counters.innerHTML = `
+        <span class="op-counter">trends <strong>${row.trends_created}</strong></span>
+        <span class="op-counter">ideas <strong>${row.ideas_created}</strong></span>
+        <span class="op-counter">picked <strong>${row.ideas_picked}</strong></span>
+        <span class="op-counter">hooks <strong>${row.hooks_created}</strong></span>
+        <span class="op-counter">scripts <strong>${row.scripts_created}</strong></span>
+        <span class="op-counter">captions <strong>${row.captions_created}</strong></span>
+      `;
+      logEl.textContent = row.log || "";
+      logEl.scrollTop = logEl.scrollHeight;
+
+      if (row.status === "done") {
+        status.textContent = "DONE";
+        status.dataset.state = "done";
+        showBanner(`Daily Operation #${runId} complete. Reloading dashboard...`, "success");
+        setTimeout(() => location.reload(), 1500);
+        return;
+      }
+      if (row.status === "failed") {
+        status.textContent = "FAILED";
+        status.dataset.state = "failed";
+        showBanner(`Daily Operation #${runId} failed: ${row.error || "see log"}`, "danger");
+        if (dailyBtn) setBusy(dailyBtn, false, "Run Daily Operation");
+        return;
+      }
+    }
+    showBanner(`Daily Operation #${runId} still running. Reload the page to keep watching.`, "danger");
+  }
+
+// ============================================================
+// Auto Demo Video Generator
+// ============================================================
+(() => {
+  const btn = document.getElementById("btn-create-demo");
+  const statusText = document.getElementById("demo-status-text");
+  const linkEl = document.getElementById("demo-video-link");
+  if (!btn) return;
+
+  function setUi(s) {
+    if (!s) return;
+    if (s.status === "running") {
+      btn.disabled = true; btn.textContent = "Generating...";
+      const last = (s.log || []).slice(-1)[0] || "";
+      statusText.textContent = "Running — " + last.replace(/^\[[^\]]+\]\s*/, "");
+      linkEl.style.display = "none";
+    } else if (s.status === "done") {
+      btn.disabled = false; btn.textContent = "Create Demo Video";
+      statusText.textContent = "Done.";
+      if (s.video_url) {
+        linkEl.href = s.video_url;
+        linkEl.style.display = "inline-block";
+      }
+    } else if (s.status === "failed") {
+      btn.disabled = false; btn.textContent = "Create Demo Video";
+      statusText.innerHTML = `<span style="color:#e74c3c;">Failed:</span> ${escapeHtml(s.error || "unknown")}`;
+      linkEl.style.display = "none";
+    } else {
+      btn.disabled = false; btn.textContent = "Create Demo Video";
+      statusText.textContent = "";
+      linkEl.style.display = "none";
+    }
+  }
+
+  // On load, hydrate from /api/demo/status (in case a previous demo exists)
+  fetch("/api/demo/status").then(r => r.json()).then(setUi).catch(() => {});
+
+  btn.addEventListener("click", async () => {
+    if (!confirm("Generate a public-safe demo video of SPARTA BRAIN? Captures every page with all sensitive fields blurred. Takes ~2-3 minutes. Output: storage/demo/spartacus_demo.mp4")) return;
+    btn.disabled = true; btn.textContent = "Starting...";
+    try {
+      const r = await fetch("/api/demo/generate", { method: "POST" });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.detail || `HTTP ${r.status}`);
+      showBanner("Demo generation started. Watch the status line below.", "success");
+      const tick = setInterval(async () => {
+        const s = await fetch("/api/demo/status").then(r => r.json()).catch(() => null);
+        setUi(s);
+        if (!s || s.status === "done" || s.status === "failed") clearInterval(tick);
+      }, 2000);
+    } catch (e) {
+      showBanner("Demo generation failed: " + e.message, "danger");
+      btn.disabled = false; btn.textContent = "Create Demo Video";
+    }
+  });
+})();
+</script>
+
+{% endblock %}

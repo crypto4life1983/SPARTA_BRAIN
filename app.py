@@ -984,6 +984,22 @@ def api_apply_free_safe_defaults():
     }
 
 
+@app.get("/api/system/ollama-version")
+def api_ollama_version():
+    """Return the installed Ollama version by running `ollama --version`."""
+    import subprocess as _sp
+    try:
+        out = _sp.run(["ollama", "--version"], capture_output=True, text=True, timeout=5)
+        raw = (out.stdout or out.stderr or "").strip()
+        # "ollama version is 0.22.1" → "0.22.1"
+        import re as _re
+        m = _re.search(r"(\d+\.\d+[\.\d]*)", raw)
+        version = m.group(1) if m else raw
+        return {"ok": True, "version": version, "raw": raw}
+    except Exception as exc:
+        return {"ok": False, "version": None, "raw": str(exc)}
+
+
 @app.post("/api/settings/test")
 async def api_test_connection():
     """Test Ollama AND verify every local task model is actually pulled.
