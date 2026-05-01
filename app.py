@@ -25,6 +25,32 @@ EXPORTS = BASE / "exports"
 VIDEOS_DIR = EXPORTS / "videos"
 STORAGE_DIR = BASE / "storage"
 
+# Three-Brain anti-loop rescue tracker.
+# Call _tbr_check(key, error_str) after every generation failure.
+# When the same key fails >= 2 times it logs a rescue recommendation.
+_tbr_failure_counts: dict[str, int] = {}
+_tbr_last_errors:    dict[str, str] = {}
+
+
+def _tbr_check(key: str, error_str: str) -> None:
+    """Track repeated failures and log a Codex rescue recommendation."""
+    import logging as _logging
+    _tbr_failure_counts[key] = _tbr_failure_counts.get(key, 0) + 1
+    repeated = error_str and error_str == _tbr_last_errors.get(key)
+    _tbr_last_errors[key] = error_str
+    count = _tbr_failure_counts[key]
+    if count >= 2 or repeated:
+        _logging.getLogger("sparta.three_brain").warning(
+            "Three-Brain rescue recommended: Codex  "
+            "[key=%s  failures=%d  repeated=%s]", key, count, repeated
+        )
+
+
+def _tbr_reset(key: str) -> None:
+    """Clear failure tracking after a successful run."""
+    _tbr_failure_counts.pop(key, None)
+    _tbr_last_errors.pop(key, None)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -62,6 +88,27 @@ async def lifespan(app: FastAPI):
             "`python hydra_video/run_video.py \"...\"` from the project root."
         ),
         sort_order=85,
+    )
+    db.upsert_manual_entry(
+        "three_brain_router",
+        module_name="Three Brain Router",
+        category="AI",
+        status="READY",
+        short_description=(
+            "Automatically routes tasks to Claude, Codex, or Gemini based on "
+            "task keywords. Includes anti-loop rescue escalation to Codex."
+        ),
+        how_it_works=(
+            "Keyword scan: video/audio/PDF signals → Gemini; code review/bug/"
+            "stuck signals → Codex; everything else → Claude. "
+            "should_rescue() escalates to Codex after 1-2 failures."
+        ),
+        when_to_use=(
+            "When you want the system to pick the right AI automatically, or "
+            "when Claude is stuck and you need a fresh adversarial pass."
+        ),
+        user_action="Open /three-brain, describe the task, click Route Task.",
+        sort_order=95,
     )
 
     # One-shot migration: if the user is still on the previous-generation
@@ -5883,8 +5930,10 @@ async def api_hydra_generate_from_idea(req: HydraIdeaReq):
             # Expose the resolved registry URL so the JS publish call uses it
             "affiliate_url": _registry_affiliate_url(req.product) or req.affiliate_url or "",
         }
+        _tbr_reset(f"hydra_generate:{req.product}")
 
     except Exception as exc:  # noqa: BLE001
+        _tbr_check(f"hydra_generate:{req.product}", f"{type(exc).__name__}: {exc}")
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
 
@@ -6035,6 +6084,67 @@ def api_amazon_remove_link(product: str):
     removed = amazon_engine.remove_affiliate_link(product)
     return {"ok": removed, "removed": removed,
             "registry": amazon_engine.load_affiliate_links()}
+
+
+# ---------- Three Brain Router -----------------------------------------------
+
+@app.get("/three-brain", response_class=HTMLResponse)
+def page_three_brain(request: Request):
+    return templates.TemplateResponse(
+        "three_brain.html",
+        {"request": request, "page": "three_brain"},
+    )
+
+
+@app.get("/api/three-brain/status")
+def api_three_brain_status():
+    """Return availability of Codex and Gemini CLIs."""
+    from spartacus.three_brain_router import detect_available_tools
+    return detect_available_tools()
+
+
+class ThreeBrainRouteReq(BaseModel):
+    task_text: str = ""
+    attached_files: list = []
+    rescue_check: bool = False
+    failure_count: int = 0
+    repeated_error: bool = False
+
+
+@app.post("/api/three-brain/route")
+def api_three_brain_route(req: ThreeBrainRouteReq):
+    """Route a task to the best brain and, optionally, check rescue status."""
+    from spartacus.three_brain_router import route_task, should_rescue
+    result = route_task(req.task_text, attached_files=req.attached_files or None)
+    result["rescue"] = should_rescue(req.failure_count, req.repeated_error)
+    return result
+
+
+class ThreeBrainRunReq(BaseModel):
+    prompt: str
+    target_files: list = []
+
+
+@app.post("/api/three-brain/codex-review")
+async def api_three_brain_codex(req: ThreeBrainRunReq):
+    """Run a Codex CLI review. Returns {ok, output, error}."""
+    import asyncio as _asyncio
+    from spartacus.three_brain_router import run_codex_review
+    files = req.target_files or None
+    return await _asyncio.get_event_loop().run_in_executor(
+        None, lambda: run_codex_review(req.prompt, files)
+    )
+
+
+@app.post("/api/three-brain/gemini-analysis")
+async def api_three_brain_gemini(req: ThreeBrainRunReq):
+    """Run a Gemini CLI analysis. Returns {ok, output, error}."""
+    import asyncio as _asyncio
+    from spartacus.three_brain_router import run_gemini_analysis
+    files = req.target_files or None
+    return await _asyncio.get_event_loop().run_in_executor(
+        None, lambda: run_gemini_analysis(req.prompt, files)
+    )
 
 
 # ---------- Shorts Ideation Engine -------------------------------------------

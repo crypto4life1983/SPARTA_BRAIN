@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block title %}Three Brain — SPARTA BRAIN{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Three Brain Router</h1>
+  <p class="page-subtitle">Claude builds. Codex reviews. Gemini sees.</p>
+</div>
+
+<!-- ── Brain Status Cards ─────────────────────────────────────────── -->
+<section class="card" style="margin-bottom:18px;">
+  <h2 class="section-title" style="margin-bottom:14px;">Brain Status</h2>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+
+    <!-- Claude -->
+    <div id="brain-claude" style="padding:16px; background:#0f1a2e; border:1px solid #1e3a5f; border-radius:8px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+        <strong style="color:#e2e8f0; font-size:15px;">Claude</strong>
+        <span style="margin-left:auto; font-size:11px; color:#22c55e; font-weight:600;">ALWAYS ON</span>
+      </div>
+      <p style="color:#94a3b8; font-size:12px; margin:0;">Default builder. Writing, strategy, ideation, code generation.</p>
+    </div>
+
+    <!-- Codex -->
+    <div id="brain-codex" style="padding:16px; background:#0f1a2e; border:1px solid #1e3a5f; border-radius:8px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <span id="codex-dot" style="width:10px;height:10px;border-radius:50%;background:#64748b;display:inline-block;"></span>
+        <strong style="color:#e2e8f0; font-size:15px;">Codex</strong>
+        <span id="codex-badge" style="margin-left:auto; font-size:11px; color:#64748b; font-weight:600;">CHECKING…</span>
+      </div>
+      <p style="color:#94a3b8; font-size:12px; margin:0;">Adversarial reviewer. Code audits, bug hunts, rescue from loops.</p>
+      <p id="codex-version" style="color:#64748b; font-size:11px; margin:4px 0 0;"></p>
+    </div>
+
+    <!-- Gemini -->
+    <div id="brain-gemini" style="padding:16px; background:#0f1a2e; border:1px solid #1e3a5f; border-radius:8px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <span id="gemini-dot" style="width:10px;height:10px;border-radius:50%;background:#64748b;display:inline-block;"></span>
+        <strong style="color:#e2e8f0; font-size:15px;">Gemini</strong>
+        <span id="gemini-badge" style="margin-left:auto; font-size:11px; color:#64748b; font-weight:600;">CHECKING…</span>
+      </div>
+      <p style="color:#94a3b8; font-size:12px; margin:0;">Multimodal brain. Video, audio, PDF, long docs, frame analysis.</p>
+      <p id="gemini-version" style="color:#64748b; font-size:11px; margin:4px 0 0;"></p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Route Task ─────────────────────────────────────────────────── -->
+<section class="card" style="margin-bottom:18px;">
+  <h2 class="section-title" style="margin-bottom:14px;">Route a Task</h2>
+
+  <label style="display:block; color:#94a3b8; font-size:12px; margin-bottom:6px;">Describe the task</label>
+  <textarea id="tb-task" rows="4" placeholder="e.g. Review this Python function for security issues…&#10;e.g. Analyse the audio transcript of this MP3…&#10;e.g. Write a YouTube hook for a desk organiser…"
+    style="width:100%; padding:10px 12px; background:#0a1628; border:1px solid #1e3a5f; border-radius:6px; color:#e2e8f0; font-size:13px; resize:vertical; box-sizing:border-box;"></textarea>
+
+  <label style="display:block; color:#94a3b8; font-size:12px; margin:10px 0 6px;">File path (optional)</label>
+  <input id="tb-file" type="text" placeholder="e.g. C:\path\to\file.mp4 or /path/to/code.py"
+    style="width:100%; padding:8px 12px; background:#0a1628; border:1px solid #1e3a5f; border-radius:6px; color:#e2e8f0; font-size:13px; box-sizing:border-box;" />
+
+  <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+    <button id="btn-route" class="btn btn-primary">Route Task</button>
+    <button id="btn-codex-run" class="btn" disabled>Run Codex Review</button>
+    <button id="btn-gemini-run" class="btn" disabled>Run Gemini Analysis</button>
+  </div>
+
+  <!-- Result card -->
+  <div id="route-result" style="display:none; margin-top:16px; padding:14px 16px; background:#071628; border:1px solid #1e3a5f; border-radius:8px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+      <span style="font-size:20px;" id="result-icon"></span>
+      <span style="font-size:16px; font-weight:700; color:#e2e8f0;" id="result-brain"></span>
+      <span id="result-avail-badge" style="margin-left:auto; font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px;"></span>
+    </div>
+    <p id="result-reason" style="color:#94a3b8; font-size:13px; margin:0 0 6px;"></p>
+    <p id="result-hint" style="color:#f59e0b; font-size:12px; margin:0; display:none;"></p>
+  </div>
+
+  <!-- Run output -->
+  <div id="run-output-wrap" style="display:none; margin-top:14px;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+      <strong style="color:#e2e8f0; font-size:13px;" id="run-output-label">Output</strong>
+      <span id="run-output-status" style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px;"></span>
+    </div>
+    <pre id="run-output-text" style="background:#0a1628; border:1px solid #1e3a5f; border-radius:6px; padding:12px; color:#a8c5e8; font-size:12px; white-space:pre-wrap; word-break:break-word; max-height:360px; overflow-y:auto; margin:0;"></pre>
+  </div>
+</section>
+
+<!-- ── Anti-Loop Rescue Checker ───────────────────────────────────── -->
+<section class="card" style="margin-bottom:18px;">
+  <h2 class="section-title" style="margin-bottom:14px;">Anti-Loop Rescue Check</h2>
+  <p style="color:#94a3b8; font-size:13px; margin:0 0 12px;">If Claude is stuck or repeating the same error, check whether a Codex rescue is needed.</p>
+  <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+    <div>
+      <label style="display:block; color:#94a3b8; font-size:12px; margin-bottom:4px;">Failure count</label>
+      <input id="rescue-count" type="number" min="0" value="0"
+        style="width:80px; padding:7px 10px; background:#0a1628; border:1px solid #1e3a5f; border-radius:6px; color:#e2e8f0; font-size:13px;" />
+    </div>
+    <div style="display:flex; align-items:center; gap:6px; padding-bottom:4px;">
+      <input type="checkbox" id="rescue-repeat" style="accent-color:#6366f1;">
+      <label for="rescue-repeat" style="color:#94a3b8; font-size:13px;">Same error repeating</label>
+    </div>
+    <button id="btn-rescue" class="btn btn-primary" style="padding:8px 18px;">Check Rescue</button>
+  </div>
+  <div id="rescue-result" style="display:none; margin-top:12px; padding:12px 14px; border-radius:6px;">
+    <strong id="rescue-level" style="font-size:13px;"></strong>
+    <p id="rescue-msg" style="color:#94a3b8; font-size:12px; margin:4px 0 0;"></p>
+  </div>
+</section>
+
+<!-- ── Setup Guide ────────────────────────────────────────────────── -->
+<section class="card">
+  <h2 class="section-title" style="margin-bottom:14px;">Install the Brains</h2>
+  <p style="color:#94a3b8; font-size:13px; margin:0 0 14px;">Both CLIs are free tiers — no paid API key required to get started.</p>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+    <!-- Codex -->
+    <div style="padding:14px; background:#0a1628; border:1px solid #1e3a5f; border-radius:8px;">
+      <h3 style="color:#e2e8f0; font-size:14px; margin:0 0 10px;">Codex CLI</h3>
+      <pre style="background:#071118; border:1px solid #0f2a4a; border-radius:4px; padding:10px; font-size:12px; color:#a8c5e8; margin:0 0 8px; white-space:pre-wrap;">npm install -g @openai/codex
+codex --version
+codex login</pre>
+      <p style="color:#64748b; font-size:11px; margin:0;">Requires Node 18+. Sign in with your OpenAI account (free tier available).</p>
+    </div>
+
+    <!-- Gemini -->
+    <div style="padding:14px; background:#0a1628; border:1px solid #1e3a5f; border-radius:8px;">
+      <h3 style="color:#e2e8f0; font-size:14px; margin:0 0 10px;">Gemini CLI</h3>
+      <pre style="background:#071118; border:1px solid #0f2a4a; border-radius:4px; padding:10px; font-size:12px; color:#a8c5e8; margin:0 0 8px; white-space:pre-wrap;">npm install -g @google/gemini-cli
+gemini --version
+gemini</pre>
+      <p style="color:#64748b; font-size:11px; margin:0;">Sign in with Google account. 60 req/min free with personal Google account.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:14px; padding:12px 14px; background:#0a1628; border:1px solid #1e3a5f; border-radius:8px;">
+    <h3 style="color:#e2e8f0; font-size:14px; margin:0 0 6px;">Verify both are installed</h3>
+    <pre style="background:#071118; border:1px solid #0f2a4a; border-radius:4px; padding:10px; font-size:12px; color:#a8c5e8; margin:0;">codex --version
+gemini --version</pre>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const $ = s => document.querySelector(s);
+
+// ── 1. Load brain status on page load ────────────────────────────────
+(async () => {
+  try {
+    const r = await fetch('/api/three-brain/status');
+    const d = await r.json();
+
+    for (const brain of ['codex', 'gemini']) {
+      const info = d[brain] || {};
+      const dot   = document.getElementById(`${brain}-dot`);
+      const badge = document.getElementById(`${brain}-badge`);
+      const ver   = document.getElementById(`${brain}-version`);
+      if (info.available) {
+        dot.style.background   = '#22c55e';
+        badge.style.color      = '#22c55e';
+        badge.textContent      = 'INSTALLED';
+        ver.textContent        = info.version || '';
+        document.getElementById(`brain-${brain}`).style.borderColor = '#166534';
+      } else {
+        dot.style.background   = '#ef4444';
+        badge.style.color      = '#ef4444';
+        badge.textContent      = 'NOT INSTALLED';
+        ver.textContent        = info.note || '';
+      }
+    }
+  } catch(e) {
+    console.warn('Status load failed:', e);
+  }
+})();
+
+// ── 2. Route task ────────────────────────────────────────────────────
+$('#btn-route').addEventListener('click', async () => {
+  const task  = $('#tb-task').value.trim();
+  const fpath = $('#tb-file').value.trim();
+  if (!task) { alert('Describe the task first.'); return; }
+
+  const btn = $('#btn-route');
+  btn.disabled = true;
+  btn.textContent = 'Routing…';
+
+  try {
+    const r = await fetch('/api/three-brain/route', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ task_text: task, attached_files: fpath ? [fpath] : [] }),
+    });
+    const d = await r.json();
+
+    const icons = { CLAUDE: '🤖', CODEX: '🔍', GEMINI: '🌐' };
+    const colors = { CLAUDE: '#6366f1', CODEX: '#f59e0b', GEMINI: '#22c55e' };
+
+    $('#result-icon').textContent  = icons[d.brain]  || '🤖';
+    $('#result-brain').textContent = d.brain;
+    $('#result-brain').style.color = colors[d.brain] || '#e2e8f0';
+    $('#result-reason').textContent = d.reason || '';
+
+    const avBadge = $('#result-avail-badge');
+    if (d.available) {
+      avBadge.textContent = 'AVAILABLE';
+      avBadge.style.cssText = 'background:#166534; color:#4ade80; margin-left:auto; font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px;';
+    } else {
+      avBadge.textContent = 'NOT INSTALLED';
+      avBadge.style.cssText = 'background:#7f1d1d; color:#f87171; margin-left:auto; font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px;';
+    }
+
+    const hintEl = $('#result-hint');
+    if (d.install_hint) {
+      hintEl.textContent = d.install_hint;
+      hintEl.style.display = '';
+    } else {
+      hintEl.style.display = 'none';
+    }
+
+    $('#route-result').style.display = '';
+    $('#run-output-wrap').style.display = 'none';
+
+    // Enable run buttons based on routing result and availability
+    $('#btn-codex-run').disabled  = !(d.brain === 'CODEX'  && d.available);
+    $('#btn-gemini-run').disabled = !(d.brain === 'GEMINI' && d.available);
+
+  } catch(e) {
+    alert('Route request failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Route Task';
+  }
+});
+
+// ── 3. Run buttons ───────────────────────────────────────────────────
+async function runBrain(endpoint) {
+  const task  = $('#tb-task').value.trim();
+  const fpath = $('#tb-file').value.trim();
+  const btn   = endpoint === '/api/three-brain/codex-review'
+              ? $('#btn-codex-run') : $('#btn-gemini-run');
+
+  btn.disabled = true;
+  btn.textContent = 'Running…';
+  $('#run-output-wrap').style.display = '';
+  $('#run-output-text').textContent = 'Waiting for response (up to 120 s)…';
+  $('#run-output-status').textContent = '';
+
+  try {
+    const r = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ prompt: task, target_files: fpath ? [fpath] : [] }),
+    });
+    const d = await r.json();
+    $('#run-output-label').textContent = endpoint.includes('codex') ? 'Codex Output' : 'Gemini Output';
+    $('#run-output-text').textContent  = d.output || d.error || '(no output)';
+
+    const stEl = $('#run-output-status');
+    if (d.ok) {
+      stEl.textContent = 'SUCCESS';
+      stEl.style.cssText = 'font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; background:#166534; color:#4ade80;';
+    } else {
+      stEl.textContent = 'FAILED';
+      stEl.style.cssText = 'font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; background:#7f1d1d; color:#f87171;';
+    }
+  } catch(e) {
+    $('#run-output-text').textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = endpoint.includes('codex') ? 'Run Codex Review' : 'Run Gemini Analysis';
+  }
+}
+
+$('#btn-codex-run').addEventListener('click',  () => runBrain('/api/three-brain/codex-review'));
+$('#btn-gemini-run').addEventListener('click', () => runBrain('/api/three-brain/gemini-analysis'));
+
+// ── 4. Rescue checker ────────────────────────────────────────────────
+$('#btn-rescue').addEventListener('click', async () => {
+  const count  = parseInt($('#rescue-count').value || '0', 10);
+  const repeat = $('#rescue-repeat').checked;
+
+  try {
+    const r = await fetch('/api/three-brain/route', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ task_text: '', rescue_check: true, failure_count: count, repeated_error: repeat }),
+    });
+    const d = await r.json();
+    const rescue = d.rescue || {};
+
+    const resultEl = $('#rescue-result');
+    const levelEl  = $('#rescue-level');
+    const msgEl    = $('#rescue-msg');
+
+    if (rescue.level === 'required') {
+      resultEl.style.cssText = 'display:block; margin-top:12px; padding:12px 14px; border-radius:6px; background:#1c0a0a; border:1px solid #7f1d1d;';
+      levelEl.style.color    = '#f87171';
+      levelEl.textContent    = 'RESCUE REQUIRED — Route to Codex';
+    } else if (rescue.level === 'suggested') {
+      resultEl.style.cssText = 'display:block; margin-top:12px; padding:12px 14px; border-radius:6px; background:#1c1400; border:1px solid #78350f;';
+      levelEl.style.color    = '#fbbf24';
+      levelEl.textContent    = 'Codex Review Suggested';
+    } else {
+      resultEl.style.cssText = 'display:block; margin-top:12px; padding:12px 14px; border-radius:6px; background:#071628; border:1px solid #166534;';
+      levelEl.style.color    = '#4ade80';
+      levelEl.textContent    = 'All Good — No Rescue Needed';
+    }
+    msgEl.textContent = rescue.message || '';
+    resultEl.style.display = 'block';
+
+  } catch(e) {
+    alert('Rescue check failed: ' + e.message);
+  }
+});
+</script>
+{% endblock %}

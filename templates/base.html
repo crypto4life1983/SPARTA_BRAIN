@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}SPARTA BRAIN{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <a href="/" class="sidebar-brand" aria-label="SPARTA BRAIN home">
+        <span class="brand-emblem" aria-hidden="true">&Lambda;</span>
+        <span class="brand-text">
+          <span class="brand-name">SPARTA BRAIN</span>
+          <span class="brand-sub">AI Content Command Center</span>
+        </span>
+      </a>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="{% if page == 'dashboard' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x25C6;</span>Dashboard
+        </a>
+        <a href="/ideas" class="{% if page == 'ideas' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2726;</span>Ideas
+        </a>
+        <a href="/scripts" class="{% if page == 'scripts' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2630;</span>Scripts
+        </a>
+        <a href="/library" class="{% if page == 'library' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x29C9;</span>Library
+        </a>
+        <a href="/trends" class="{% if page == 'trends' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2197;</span>Trends
+        </a>
+        <a href="/research-brain" class="{% if page == 'research_brain' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2691;</span>Research
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/videos" class="{% if page == 'videos' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x25B6;</span>Videos
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/spartacus" class="{% if page == 'spartacus' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&Lambda;</span>Spartacus
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/clone" class="{% if page == 'clone' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x267B;</span>Clone Engine
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/hydra" class="{% if page == 'hydra' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x1F409;</span>Hydra Video
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/amazon" class="{% if page == 'amazon' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x1F6D2;</span>Amazon
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/shorts" class="{% if page == 'shorts' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x25B6;</span>Shorts
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/viral-engine" class="{% if page == 'viral_engine' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2694;</span>Viral Engine
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/victory" class="{% if page == 'victory' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2654;</span>Victory
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/performance" class="{% if page == 'performance' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2605;</span>Performance
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/learning" class="{% if page == 'learning' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x269A;</span>Learning
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/safety" class="{% if page == 'safety' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x26E8;</span>Safety
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/demo" class="{% if page == 'demo' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x25B6;</span>Demo
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/guide" class="{% if page == 'guide' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x261B;</span>Guide
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/three-brain" class="{% if page == 'three_brain' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x25B3;</span>Three Brain
+          <span class="nav-badge">NEW</span>
+        </a>
+        <a href="/settings" class="{% if page == 'settings' %}active{% endif %}">
+          <span class="nav-icon" aria-hidden="true">&#x2699;</span>Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-motto" aria-hidden="true">
+        <div class="sidebar-motto-emblem">&Lambda;</div>
+        <p>
+          Discipline. Focus.<br />
+          Execution. Victory.
+          <strong>This is SPARTA.</strong>
+        </p>
+      </div>
+    </aside>
+
+    <main class="app-content">
+      <div class="content-topbar">
+        <span class="status-chip" title="SPARTA BRAIN local server is running">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>War Ready</span>
+        </span>
+        <span class="victory-widget" title="Victory in progress">
+          <span class="victory-icon" aria-hidden="true">&Lambda;</span>
+          <span class="victory-widget-stack">
+            <span class="small">Victory</span>
+            <span>In Progress</span>
+          </span>
+        </span>
+      </div>
+
+      <div id="banner" class="banner hidden"></div>
+
+      <div class="content-body">
+        {% block content %}{% endblock %}
+      </div>
+
+      <footer class="content-footer">
+        <p class="content-footer-motto">
+          We do not hope for victory. <strong>We engineer it.</strong>
+        </p>
+        <div class="foot-status">
+          <span class="foot-pill" id="foot-ai" data-state="checking">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="label">Local AI:</span>
+            <span class="value" data-foot="ai-label">OLLAMA</span>
+            <span class="value" data-foot="ai-state">CHECKING</span>
+          </span>
+          <span class="foot-pill" id="foot-api" data-state="standby">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="label">API Mode:</span>
+            <span class="value" data-foot="api-label">LOCAL ONLY</span>
+          </span>
+          <span class="foot-pill wins" title="Completed Missions (Exports)">
+            <span class="label">Sparta Wins</span>
+            <span class="value" data-foot="wins">0</span>
+          </span>
+        </div>
+      </footer>
+    </main>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
