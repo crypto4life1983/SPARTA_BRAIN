@@ -354,7 +354,10 @@ def _ollama_error_response(e: OllamaError) -> JSONResponse:
 
 
 def _openai_error_response(e: OpenAIError) -> JSONResponse:
-    return JSONResponse(status_code=503, content={"error": str(e)})
+    msg = str(e)
+    # Rate-limit errors should return 429, not 503
+    status = 429 if ("429" in msg or "rate limit" in msg.lower() or "RateLimitError" in type(e).__name__) else 503
+    return JSONResponse(status_code=status, content={"error": msg})
 
 
 # ============================================================
@@ -609,6 +612,26 @@ async def api_gen_script(req: GenScriptReq):
     except OpenAIError as e:
         return _openai_error_response(e)
     return {"script": text.strip()}
+
+
+class GenRawReq(BaseModel):
+    task: str
+    prompt: str
+
+
+@app.post("/api/generate/raw")
+async def api_gen_raw(req: GenRawReq):
+    """Route a raw prompt through the model router for a given task.
+    For callers (skills, scripts) that supply their own prompt text."""
+    if req.task not in TASK_KEYS:
+        raise HTTPException(400, f"Unknown task '{req.task}'. Valid: {', '.join(TASK_KEYS)}")
+    try:
+        text = await _route_text_gen(req.task, req.prompt)
+    except OllamaError as e:
+        return _ollama_error_response(e)
+    except OpenAIError as e:
+        return _openai_error_response(e)
+    return {"text": text.strip(), "task": req.task, "model": get_task_model(req.task)}
 
 
 @app.post("/api/generate/caption")
@@ -6189,9 +6212,28 @@ def page_three_brain(request: Request):
 
 @app.get("/api/three-brain/status")
 def api_three_brain_status():
-    """Return availability of Codex and Gemini CLIs."""
+    """Return availability of Codex and Gemini CLIs, including Gemini auth state."""
+    import os, sys
     from spartacus.three_brain_router import detect_available_tools
-    return detect_available_tools()
+    tools = detect_available_tools()
+
+    gemini_key = os.environ.get("GEMINI_API_KEY") or ""
+    if not gemini_key and sys.platform == "win32":
+        try:
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as k:
+                gemini_key, _ = winreg.QueryValueEx(k, "GEMINI_API_KEY")
+                # also inject into the process env so subprocess calls to gemini CLI work
+                os.environ["GEMINI_API_KEY"] = gemini_key
+        except (FileNotFoundError, OSError):
+            gemini_key = ""
+
+    tools["gemini"]["auth"] = "ready" if gemini_key else "missing"
+    tools["gemini"]["auth_hint"] = (
+        None if gemini_key
+        else 'setx GEMINI_API_KEY "your-key-here" — then restart SPARTA server'
+    )
+    return tools
 
 
 class ThreeBrainRouteReq(BaseModel):

@@ -24,7 +24,15 @@ recommends escalating to Codex for a fresh adversarial pass.
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
+
+
+def _cmd(args: list) -> list:
+    """On Windows, wrap args with cmd /c so .CMD shims execute correctly."""
+    if sys.platform == "win32":
+        return ["cmd", "/c"] + args
+    return args
 
 # ---------------------------------------------------------------------------
 # Keyword tables
@@ -69,7 +77,7 @@ def detect_available_tools() -> dict:
             continue
         try:
             proc = subprocess.run(
-                [tool, "--version"],
+                _cmd([tool, "--version"]),
                 capture_output=True, text=True, timeout=5,
             )
             version_line = (proc.stdout or proc.stderr or "").strip().splitlines()
@@ -80,7 +88,7 @@ def detect_available_tools() -> dict:
         except subprocess.TimeoutExpired:
             result[tool]["note"] = f"{tool} --version timed out"
         except (FileNotFoundError, OSError):
-            result[tool]["note"] = f"{tool} found on PATH but not executable (run: npm install -g @openai/codex or @google/gemini-cli)"
+            result[tool]["note"] = f"{tool} found on PATH but not executable"
         except Exception as exc:
             result[tool]["note"] = f"{tool} probe failed: {exc}"
 
@@ -219,7 +227,7 @@ def _probe_cli(tool: str) -> bool:
     if shutil.which(tool) is None:
         return False
     try:
-        subprocess.run([tool, "--version"], capture_output=True, timeout=5)
+        subprocess.run(_cmd([tool, "--version"]), capture_output=True, timeout=5)
         return True
     except (FileNotFoundError, OSError):
         return False
@@ -233,12 +241,12 @@ def run_codex_review(prompt: str, target_files=None) -> dict:
     if not _probe_cli("codex"):
         return {"ok": False, "output": "", "error": _CODEX_NOT_INSTALLED}
 
-    cmd = ["codex", prompt]
+    args = ["codex", prompt]
     if target_files:
-        cmd.extend(str(f) for f in target_files)
+        args.extend(str(f) for f in target_files)
 
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        proc = subprocess.run(_cmd(args), capture_output=True, text=True, timeout=120)
         output = proc.stdout or ""
         if proc.returncode != 0:
             return {"ok": False, "output": output, "error": proc.stderr or "Non-zero exit"}
@@ -255,18 +263,40 @@ def run_codex_review(prompt: str, target_files=None) -> dict:
 # 6. run_gemini_analysis
 # ---------------------------------------------------------------------------
 
+def _get_gemini_env() -> dict:
+    """Return an env dict with GEMINI_API_KEY set, reading from Windows registry as fallback."""
+    import os
+    env = os.environ.copy()
+    if not env.get("GEMINI_API_KEY") and sys.platform == "win32":
+        try:
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as k:
+                key_val, _ = winreg.QueryValueEx(k, "GEMINI_API_KEY")
+                env["GEMINI_API_KEY"] = key_val
+        except (FileNotFoundError, OSError):
+            pass
+    return env
+
+
 def run_gemini_analysis(prompt: str, target_files=None) -> dict:
     """Run `gemini \"<prompt>\"` and return its output."""
 
     if not _probe_cli("gemini"):
         return {"ok": False, "output": "", "error": _GEMINI_NOT_INSTALLED}
 
-    cmd = ["gemini", prompt]
+    env = _get_gemini_env()
+    if not env.get("GEMINI_API_KEY"):
+        return {
+            "ok": False, "output": "",
+            "error": 'Gemini auth missing — run: setx GEMINI_API_KEY "your-key-here" then restart SPARTA server',
+        }
+
+    args = ["gemini", prompt]
     if target_files:
-        cmd.extend(str(f) for f in target_files)
+        args.extend(str(f) for f in target_files)
 
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        proc = subprocess.run(_cmd(args), capture_output=True, text=True, timeout=120, env=env)
         output = proc.stdout or ""
         if proc.returncode != 0:
             return {"ok": False, "output": output, "error": proc.stderr or "Non-zero exit"}
