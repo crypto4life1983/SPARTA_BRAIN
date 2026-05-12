@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-05-12T13:43:20.355377+00:00",
+  "input": {
+    "candidate_id": "seed_regime_filter_overlay",
+    "in_sample_return": 12.0,
+    "max_drawdown": 0.42,
+    "out_of_sample_return": -3.0,
+    "parameter_sensitivity_score": 0.88,
+    "regime_count_tested": 2,
+    "symbol_count_tested": 2,
+    "trades_count": 18,
+    "walk_forward_pass_rate": 0.42
+  },
+  "mode": "EXPERIMENTAL",
+  "result": {
+    "candidate_id": "seed_regime_filter_overlay",
+    "failure_reasons": [
+      "out_of_sample_return_non_positive",
+      "walk_forward_pass_rate_below_threshold",
+      "symbol_count_tested_below_threshold",
+      "regime_count_tested_below_threshold",
+      "trades_count_below_threshold",
+      "max_drawdown_above_threshold",
+      "parameter_sensitivity_score_above_threshold"
+    ],
+    "generated_at": "2026-05-12T13:43:20.355370+00:00",
+    "passed": false,
+    "recommendation": "reject_or_rework",
+    "risk_level": "HIGH",
+    "score": 0,
+    "status": "EXPERIMENTAL"
+  },
+  "schema_version": "strategy_lab.anti_overfit_result.v1"
+}

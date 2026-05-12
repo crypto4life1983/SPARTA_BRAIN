@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-05-12T13:43:14.893912+00:00",
+  "input": {
+    "candidate_id": "seed_regime_filter_overlay",
+    "compression_return": 2.0,
+    "expansion_return": -1.0,
+    "high_vol_return": 0.0,
+    "low_vol_return": 1.0,
+    "range_return": 1.0,
+    "regime_sample_count": 4,
+    "trend_return": -2.0
+  },
+  "mode": "EXPERIMENTAL",
+  "result": {
+    "candidate_id": "seed_regime_filter_overlay",
+    "generated_at": "2026-05-12T13:43:14.893906+00:00",
+    "passed": false,
+    "recommendation": "reject_or_rework",
+    "regime_score": 0,
+    "status": "EXPERIMENTAL",
+    "strongest_regime": "COMPRESSION",
+    "weak_regimes": [
+      "COMPRESSION",
+      "EXPANSION",
+      "HIGH_VOL",
+      "LOW_VOL",
+      "RANGE",
+      "TREND"
+    ],
+    "weakest_regime": "TREND"
+  },
+  "schema_version": "strategy_lab.regime_score_result.v1"
+}

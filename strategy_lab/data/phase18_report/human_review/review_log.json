@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-05-12T13:43:14.888904+00:00",
+  "mode": "EXPERIMENTAL",
+  "review_log": [
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "decision": "APPROVE_FOR_RESEARCH",
+      "notes": "Phase 18 simulated research evidence requires research-stage approval.",
+      "reviewed_at": "2026-05-12T13:43:14.878770+00:00",
+      "reviewer": "Mahmoud"
+    },
+    {
+      "candidate_id": "seed_regime_filter_overlay",
+      "decision": "APPROVE_FOR_RESEARCH",
+      "notes": "Phase 18 simulated research evidence requires research-stage approval.",
+      "reviewed_at": "2026-05-12T13:43:14.888803+00:00",
+      "reviewer": "Mahmoud"
+    }
+  ],
+  "schema_version": "strategy_lab.human_review.v1"
+}

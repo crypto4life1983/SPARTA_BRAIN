@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-05-12T13:38:52.324633+00:00",
+  "ideas": [
+    {
+      "created_at": "2026-05-12T13:38:52.317783+00:00",
+      "expected_edge": "Trade volatility release after a dormant period.",
+      "hypothesis": "Compression in ATR followed by directional release can signal a tradable expansion event before the move becomes crowded.",
+      "idea_id": "seed_atr_compression_expansion",
+      "risk_notes": "May underperform in persistently trendless range conditions.",
+      "source": "seed_batch",
+      "status": "IDEA",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "XRPUSDT"
+      ],
+      "timeframe": "1D",
+      "title": "ATR Compression Expansion"
+    },
+    {
+      "created_at": "2026-05-12T13:38:52.317771+00:00",
+      "expected_edge": "Capture confirmed breakouts after volatility expansion.",
+      "hypothesis": "A breakout only counts when Donchian expansion is confirmed by ATR expansion and follow-through, reducing false expansion signals.",
+      "idea_id": "seed_donchian_breakout_confirmation",
+      "risk_notes": "Can whipsaw in choppy compression regimes and may lag in fast reversals.",
+      "source": "seed_batch",
+      "status": "IDEA",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "XRPUSDT"
+      ],
+      "timeframe": "1D",
+      "title": "Donchian Breakout Confirmation"
+    },
+    {
+      "created_at": "2026-05-12T13:38:52.317788+00:00",
+      "expected_edge": "Fade exhaustion after abnormal expansion.",
+      "hypothesis": "After abnormal expansion, exhaustion often creates a short-term reversion window back toward fair value.",
+      "idea_id": "seed_extreme_expansion_mean_reversion",
+      "risk_notes": "Can be dangerous in strong trend continuation or news-driven breakouts.",
+      "source": "seed_batch",
+      "status": "IDEA",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "XRPUSDT"
+      ],
+      "timeframe": "1D",
+      "title": "Extreme Expansion Mean Reversion"
+    },
+    {
+      "created_at": "2026-05-12T13:38:52.317789+00:00",
+      "expected_edge": "Reduce poor-fit trades through regime-aware behavior switching.",
+      "hypothesis": "A regime overlay can switch between behavior modes based on volatility regime and suppress poor-fit entries when the market environment is unfavorable.",
+      "idea_id": "seed_regime_filter_overlay",
+      "risk_notes": "Requires reliable regime detection and can over-block if the filter is too strict.",
+      "source": "seed_batch",
+      "status": "IDEA",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "XRPUSDT"
+      ],
+      "timeframe": "1D",
+      "title": "Regime Filter Overlay"
+    },
+    {
+      "created_at": "2026-05-12T13:38:52.317786+00:00",
+      "expected_edge": "Ride trend continuation after orderly pullbacks.",
+      "hypothesis": "A trend filter plus pullback entry can catch continuation moves after brief retracements without chasing extended moves.",
+      "idea_id": "seed_trend_pullback_continuation",
+      "risk_notes": "Can fail when pullbacks become full reversals or when trend filters lag too much.",
+      "source": "seed_batch",
+      "status": "IDEA",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "XRPUSDT"
+      ],
+      "timeframe": "1D",
+      "title": "Trend Pullback Continuation"
+    }
+  ],
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.discovery_inbox.v1"
+}

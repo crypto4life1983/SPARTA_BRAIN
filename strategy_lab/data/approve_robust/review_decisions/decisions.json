@@ -1,0 +1,17 @@
+{
+  "decisions": [
+    {
+      "candidate_id": "cand_pt_01",
+      "decided_at": "2026-05-12T13:50:10.240187+00:00",
+      "decision": "APPROVE_FOR_ROBUST",
+      "evidence_recommendation": "ready_for_review",
+      "new_state": "ROBUST",
+      "notes": "Robust evidence",
+      "previous_state": "BACKTESTED",
+      "reviewer": "alice"
+    }
+  ],
+  "generated_at": "2026-05-12T13:50:10.240237+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.review_decision.v1"
+}

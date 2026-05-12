@@ -1,0 +1,28 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "cand_pack_05",
+      "created_at": "2026-05-12T13:48:22.763390+00:00",
+      "current_scorecard": null,
+      "description": "",
+      "family": "",
+      "last_backtest_run_id": null,
+      "last_paper_run_id": null,
+      "last_updated_at": "2026-05-12T13:48:22.763398+00:00",
+      "lifecycle_state": "BACKTESTED",
+      "name": "",
+      "notes": null,
+      "parameter_sets_tested": [],
+      "promotion_reason": null,
+      "regimes_tested": [],
+      "rejection_reason": null,
+      "status": "BACKTESTED",
+      "strategy_id": "cand_pack_05",
+      "symbols_tested": [],
+      "timeframes_tested": []
+    }
+  ],
+  "generated_at": "2026-05-12T13:48:22.763649+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.registry.v1"
+}

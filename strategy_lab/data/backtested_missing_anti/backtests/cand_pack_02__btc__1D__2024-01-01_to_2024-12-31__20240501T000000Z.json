@@ -1,0 +1,17 @@
+{
+  "candidate_id": "cand_pack_02",
+  "result": {
+    "candidate_id": "cand_pack_02",
+    "expectancy": 0.8,
+    "fees_paid": 20.0,
+    "max_drawdown": 0.18,
+    "notes": "synthetic backtest",
+    "sharpe": 1.4,
+    "slippage_cost": 12.0,
+    "status": "OK",
+    "symbol": "BTCUSDT",
+    "total_return": 12.0,
+    "trades_count": 42,
+    "win_rate": 0.61
+  }
+}

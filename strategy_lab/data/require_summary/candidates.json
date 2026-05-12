@@ -1,0 +1,28 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "cand_wl_04",
+      "created_at": "2026-05-12T13:58:42.253969+00:00",
+      "current_scorecard": null,
+      "description": "",
+      "family": "",
+      "last_backtest_run_id": null,
+      "last_paper_run_id": null,
+      "last_updated_at": "2026-05-12T13:58:42.253974+00:00",
+      "lifecycle_state": "PAPER_TESTING",
+      "name": "",
+      "notes": null,
+      "parameter_sets_tested": [],
+      "promotion_reason": null,
+      "regimes_tested": [],
+      "rejection_reason": null,
+      "status": "PAPER_TESTING",
+      "strategy_id": "cand_wl_04",
+      "symbols_tested": [],
+      "timeframes_tested": []
+    }
+  ],
+  "generated_at": "2026-05-12T13:58:42.254007+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.registry.v1"
+}

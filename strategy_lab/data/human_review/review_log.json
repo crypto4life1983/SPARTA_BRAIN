@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-05-12T13:43:20.352470+00:00",
+  "mode": "EXPERIMENTAL",
+  "review_log": [
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "decision": "APPROVE_FOR_RESEARCH",
+      "notes": "Selected first because the ATR compression/expansion and regime filter ideas have the clearest setup for initial research and should be vetted before the other seed concepts.",
+      "reviewed_at": "2026-05-12T13:40:48.397099+00:00",
+      "reviewer": "Mahmoud"
+    },
+    {
+      "candidate_id": "seed_regime_filter_overlay",
+      "decision": "APPROVE_FOR_RESEARCH",
+      "notes": "Selected first because the ATR compression/expansion and regime filter ideas have the clearest setup for initial research and should be vetted before the other seed concepts.",
+      "reviewed_at": "2026-05-12T13:40:48.398863+00:00",
+      "reviewer": "Mahmoud"
+    },
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "decision": "APPROVE_FOR_RESEARCH",
+      "notes": "Phase 18 simulated research evidence requires research-stage approval.",
+      "reviewed_at": "2026-05-12T13:43:20.342710+00:00",
+      "reviewer": "Mahmoud"
+    },
+    {
+      "candidate_id": "seed_regime_filter_overlay",
+      "decision": "APPROVE_FOR_RESEARCH",
+      "notes": "Phase 18 simulated research evidence requires research-stage approval.",
+      "reviewed_at": "2026-05-12T13:43:20.352350+00:00",
+      "reviewer": "Mahmoud"
+    }
+  ],
+  "schema_version": "strategy_lab.human_review.v1"
+}

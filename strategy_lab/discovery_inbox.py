@@ -13,6 +13,8 @@ LAB_ROOT = Path(__file__).resolve().parent
 DATA_ROOT = LAB_ROOT / "data"
 DISCOVERY_INBOX_ROOT = DATA_ROOT / "discovery_inbox"
 IDEAS_FILE = DISCOVERY_INBOX_ROOT / "ideas.json"
+REPORT_ROOT = LAB_ROOT / "reports"
+SEED_BATCH_REPORT = REPORT_ROOT / "seed_candidate_batch.md"
 
 
 def _utc_now() -> str:
@@ -138,3 +140,117 @@ def convert_idea_to_candidate(idea_id: str) -> dict[str, Any]:
     )
     return candidate
 
+
+SEED_IDEA_BATCH: list[StrategyIdea] = [
+    StrategyIdea(
+        idea_id="seed_donchian_breakout_confirmation",
+        title="Donchian Breakout Confirmation",
+        hypothesis="A breakout only counts when Donchian expansion is confirmed by ATR expansion and follow-through, reducing false expansion signals.",
+        source="seed_batch",
+        symbols=["BTCUSDT", "ETHUSDT", "XRPUSDT"],
+        timeframe="1D",
+        expected_edge="Capture confirmed breakouts after volatility expansion.",
+        risk_notes="Can whipsaw in choppy compression regimes and may lag in fast reversals.",
+    ),
+    StrategyIdea(
+        idea_id="seed_atr_compression_expansion",
+        title="ATR Compression Expansion",
+        hypothesis="Compression in ATR followed by directional release can signal a tradable expansion event before the move becomes crowded.",
+        source="seed_batch",
+        symbols=["BTCUSDT", "ETHUSDT", "XRPUSDT"],
+        timeframe="1D",
+        expected_edge="Trade volatility release after a dormant period.",
+        risk_notes="May underperform in persistently trendless range conditions.",
+    ),
+    StrategyIdea(
+        idea_id="seed_trend_pullback_continuation",
+        title="Trend Pullback Continuation",
+        hypothesis="A trend filter plus pullback entry can catch continuation moves after brief retracements without chasing extended moves.",
+        source="seed_batch",
+        symbols=["BTCUSDT", "ETHUSDT", "XRPUSDT"],
+        timeframe="1D",
+        expected_edge="Ride trend continuation after orderly pullbacks.",
+        risk_notes="Can fail when pullbacks become full reversals or when trend filters lag too much.",
+    ),
+    StrategyIdea(
+        idea_id="seed_extreme_expansion_mean_reversion",
+        title="Extreme Expansion Mean Reversion",
+        hypothesis="After abnormal expansion, exhaustion often creates a short-term reversion window back toward fair value.",
+        source="seed_batch",
+        symbols=["BTCUSDT", "ETHUSDT", "XRPUSDT"],
+        timeframe="1D",
+        expected_edge="Fade exhaustion after abnormal expansion.",
+        risk_notes="Can be dangerous in strong trend continuation or news-driven breakouts.",
+    ),
+    StrategyIdea(
+        idea_id="seed_regime_filter_overlay",
+        title="Regime Filter Overlay",
+        hypothesis="A regime overlay can switch between behavior modes based on volatility regime and suppress poor-fit entries when the market environment is unfavorable.",
+        source="seed_batch",
+        symbols=["BTCUSDT", "ETHUSDT", "XRPUSDT"],
+        timeframe="1D",
+        expected_edge="Reduce poor-fit trades through regime-aware behavior switching.",
+        risk_notes="Requires reliable regime detection and can over-block if the filter is too strict.",
+    ),
+]
+
+
+def seed_candidate_batch() -> dict[str, Any]:
+    created_ideas: list[dict[str, Any]] = []
+    created_candidates: list[dict[str, Any]] = []
+    for idea in SEED_IDEA_BATCH:
+        created_ideas.append(add_idea(idea))
+        created_candidates.append(convert_idea_to_candidate(idea.idea_id))
+
+    lifecycle_counts: dict[str, int] = {}
+    for candidate in created_candidates:
+        state = str(candidate.get("lifecycle_state") or candidate.get("status") or "IDEA").upper()
+        lifecycle_counts[state] = lifecycle_counts.get(state, 0) + 1
+
+    report = {
+        "generated_at": _utc_now(),
+        "idea_count": len(created_ideas),
+        "candidate_count": len(created_candidates),
+        "lifecycle_distribution": lifecycle_counts,
+        "seed_ideas": created_ideas,
+        "seed_candidates": created_candidates,
+    }
+
+    REPORT_ROOT.mkdir(parents=True, exist_ok=True)
+    approved = assert_approved_path(REPORT_ROOT)
+    path = approved / SEED_BATCH_REPORT.name
+    lines = [
+        "# Strategy Lab Seed Candidate Batch",
+        "",
+        f"Generated at: {report['generated_at']}",
+        f"Idea count: {report['idea_count']}",
+        f"Candidate count: {report['candidate_count']}",
+        "",
+        "## Lifecycle Distribution",
+    ]
+    for key, value in sorted(lifecycle_counts.items()):
+        lines.append(f"- {key}: {value}")
+    lines.extend(["", "## Seed Ideas"])
+    for idea in created_ideas:
+        lines.extend(
+            [
+                f"- {idea['idea_id']}: {idea['title']}",
+                f"  - hypothesis: {idea['hypothesis']}",
+                f"  - symbols: {', '.join(idea.get('symbols') or []) or 'n/a'}",
+                f"  - timeframe: {idea.get('timeframe') or 'n/a'}",
+                f"  - risk_notes: {idea.get('risk_notes') or 'n/a'}",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "## Safety",
+            "- isolated: true",
+            "- frozen_stack_touched: false",
+            "- profit_brain_touched: false",
+            "- execution_imports: false",
+            "- lifecycle_state: IDEA only",
+        ]
+    )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return report

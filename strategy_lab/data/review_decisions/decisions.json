@@ -1,0 +1,17 @@
+{
+  "decisions": [
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "decided_at": "2026-05-12T13:48:15.441890+00:00",
+      "decision": "APPROVE_FOR_ROBUST",
+      "evidence_recommendation": "ready_for_review",
+      "new_state": "ROBUST",
+      "notes": "Passed simulated backtest, anti-overfit gate, regime score, and evidence pack. Approved for ROBUST status only, not paper/watchlist/live.",
+      "previous_state": "BACKTESTED",
+      "reviewer": "Mahmoud"
+    }
+  ],
+  "generated_at": "2026-05-12T13:48:15.441940+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.review_decision.v1"
+}

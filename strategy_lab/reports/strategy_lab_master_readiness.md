@@ -1,6 +1,6 @@
 # Strategy Lab Master Readiness
 
-Generated at: 2026-05-12T13:36:00.639367+00:00
+Generated at: 2026-05-12T14:19:17.080182+00:00
 Candidates: 0
 Live Ready: False
 

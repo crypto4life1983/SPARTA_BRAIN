@@ -1,0 +1,33 @@
+{
+  "config": {
+    "candidate_id": "seed_atr_compression_expansion",
+    "end_date": "2024-12-31",
+    "fee_bps": 5.0,
+    "initial_capital": 100000.0,
+    "slippage_bps": 2.0,
+    "start_date": "2024-01-01",
+    "symbol": "BTCUSDT",
+    "timeframe": "1D"
+  },
+  "generated_at": "2026-05-12T13:43:14.857818+00:00",
+  "mode": "EXPERIMENTAL",
+  "result": {
+    "candidate_id": "seed_atr_compression_expansion",
+    "expectancy": 0.85,
+    "fees_paid": 18.0,
+    "max_drawdown": 0.18,
+    "notes": "Simulated positive backtest for phase 18.",
+    "sharpe": 1.45,
+    "slippage_cost": 10.0,
+    "status": "OK",
+    "symbol": "BTCUSDT",
+    "total_return": 18.0,
+    "trades_count": 44,
+    "win_rate": 0.62
+  },
+  "schema_version": "strategy_lab.backtest_result.v1",
+  "strategy": {
+    "candidate_id": "seed_atr_compression_expansion",
+    "mode": "simulated_research"
+  }
+}

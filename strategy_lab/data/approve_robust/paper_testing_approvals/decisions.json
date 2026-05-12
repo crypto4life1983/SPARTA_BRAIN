@@ -1,0 +1,16 @@
+{
+  "decisions": [
+    {
+      "candidate_id": "cand_pt_01",
+      "decided_at": "2026-05-12T13:50:10.242576+00:00",
+      "decision": "APPROVE_FOR_PAPER_TESTING",
+      "new_state": "PAPER_TESTING",
+      "notes": "Approve paper testing",
+      "previous_state": "ROBUST",
+      "reviewer": "bob"
+    }
+  ],
+  "generated_at": "2026-05-12T13:50:10.242623+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.paper_testing_approval.v1"
+}

@@ -1,0 +1,71 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "created_at": "2026-05-12T13:43:14.854301+00:00",
+      "current_scorecard": null,
+      "description": "Compression in ATR followed by directional release can signal a tradable expansion event before the move becomes crowded.",
+      "family": "strategy_lab_discovery",
+      "last_backtest_run_id": null,
+      "last_paper_run_id": null,
+      "last_updated_at": "2026-05-12T13:43:14.863475+00:00",
+      "lifecycle_state": "BACKTESTED",
+      "name": "ATR Compression Expansion",
+      "notes": {
+        "expected_edge": "Trade volatility release after a dormant period.",
+        "origin_idea_id": "seed_atr_compression_expansion",
+        "risk_notes": "May underperform in persistently trendless range conditions.",
+        "source": "seed_batch",
+        "symbols": [
+          "BTCUSDT",
+          "ETHUSDT",
+          "XRPUSDT"
+        ],
+        "timeframe": "1D"
+      },
+      "parameter_sets_tested": [],
+      "promotion_reason": null,
+      "regimes_tested": [],
+      "rejection_reason": null,
+      "status": "BACKTESTED",
+      "strategy_id": "seed_atr_compression_expansion",
+      "symbols_tested": [],
+      "timeframes_tested": []
+    },
+    {
+      "candidate_id": "seed_regime_filter_overlay",
+      "created_at": "2026-05-12T13:43:14.864384+00:00",
+      "current_scorecard": null,
+      "description": "A regime overlay can switch between behavior modes based on volatility regime and suppress poor-fit entries when the market environment is unfavorable.",
+      "family": "strategy_lab_discovery",
+      "last_backtest_run_id": null,
+      "last_paper_run_id": null,
+      "last_updated_at": "2026-05-12T13:43:14.866006+00:00",
+      "lifecycle_state": "IN_RESEARCH",
+      "name": "Regime Filter Overlay",
+      "notes": {
+        "expected_edge": "Reduce poor-fit trades through regime-aware behavior switching.",
+        "origin_idea_id": "seed_regime_filter_overlay",
+        "risk_notes": "Requires reliable regime detection and can over-block if the filter is too strict.",
+        "source": "seed_batch",
+        "symbols": [
+          "BTCUSDT",
+          "ETHUSDT",
+          "XRPUSDT"
+        ],
+        "timeframe": "1D"
+      },
+      "parameter_sets_tested": [],
+      "promotion_reason": null,
+      "regimes_tested": [],
+      "rejection_reason": null,
+      "status": "IN_RESEARCH",
+      "strategy_id": "seed_regime_filter_overlay",
+      "symbols_tested": [],
+      "timeframes_tested": []
+    }
+  ],
+  "generated_at": "2026-05-12T13:43:14.866095+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.registry.v1"
+}

@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-05-12T13:48:22.743016+00:00",
+  "input": {
+    "candidate_id": "cand_pack_02",
+    "compression_return": 9.0,
+    "expansion_return": 13.0,
+    "high_vol_return": 11.0,
+    "low_vol_return": 10.0,
+    "range_return": 12.0,
+    "regime_sample_count": 6,
+    "trend_return": 14.0
+  },
+  "mode": "EXPERIMENTAL",
+  "result": {
+    "candidate_id": "cand_pack_02",
+    "generated_at": "2026-05-12T13:48:22.743011+00:00",
+    "passed": true,
+    "recommendation": "continue_research",
+    "regime_score": 95,
+    "status": "EXPERIMENTAL",
+    "strongest_regime": "TREND",
+    "weak_regimes": [],
+    "weakest_regime": "COMPRESSION"
+  },
+  "schema_version": "strategy_lab.regime_score_result.v1"
+}

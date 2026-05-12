@@ -1,6 +1,6 @@
 # Strategy Lab Phase 12 Evidence Pack
 
-Generated at: 2026-05-12T13:36:00.836166+00:00
+Generated at: 2026-05-12T13:50:10.238187+00:00
 Candidate: cand_pt_01
 Lifecycle State: BACKTESTED
 Recommendation: ready_for_review

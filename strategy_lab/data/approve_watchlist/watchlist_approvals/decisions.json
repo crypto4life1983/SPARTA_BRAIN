@@ -1,0 +1,17 @@
+{
+  "decisions": [
+    {
+      "candidate_id": "cand_wl_01",
+      "decided_at": "2026-05-12T13:58:42.247018+00:00",
+      "decision": "APPROVE_FOR_WATCHLIST",
+      "new_state": "WATCHLIST",
+      "notes": "Observation only",
+      "paper_summary": "Paper testing observed and summarized.",
+      "previous_state": "PAPER_TESTING",
+      "reviewer": "alice"
+    }
+  ],
+  "generated_at": "2026-05-12T13:58:42.247067+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.watchlist_approval.v1"
+}

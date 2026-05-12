@@ -1,0 +1,16 @@
+{
+  "decisions": [
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "decided_at": "2026-05-12T13:49:56.689705+00:00",
+      "decision": "APPROVE_FOR_PAPER_TESTING",
+      "new_state": "PAPER_TESTING",
+      "notes": "Approved for simulated paper testing only after ROBUST evidence review. No watchlist/live approval.",
+      "previous_state": "ROBUST",
+      "reviewer": "Mahmoud"
+    }
+  ],
+  "generated_at": "2026-05-12T13:49:56.689757+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.paper_testing_approval.v1"
+}

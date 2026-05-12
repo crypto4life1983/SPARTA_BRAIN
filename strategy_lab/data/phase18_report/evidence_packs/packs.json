@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-05-12T13:43:14.895805+00:00",
+  "mode": "EXPERIMENTAL",
+  "packs": [
+    {
+      "anti_overfit_found": true,
+      "backtest_found": true,
+      "candidate_id": "seed_atr_compression_expansion",
+      "created_at": "2026-05-12T13:43:14.885508+00:00",
+      "evidence_summary": {
+        "anti_overfit": true,
+        "backtest": true,
+        "complete_required_set": true,
+        "failed_evidence": false,
+        "paper_snapshot": false,
+        "regime_score": true,
+        "required_for_state": [
+          "research_plan",
+          "backtest",
+          "anti_overfit",
+          "regime_score"
+        ],
+        "research_plan": true
+      },
+      "lifecycle_state": "IN_RESEARCH",
+      "missing_evidence": [],
+      "paper_snapshot_found": false,
+      "recommendation": "ready_for_review",
+      "regime_score_found": true,
+      "research_plan_found": true
+    },
+    {
+      "anti_overfit_found": true,
+      "backtest_found": true,
+      "candidate_id": "seed_regime_filter_overlay",
+      "created_at": "2026-05-12T13:43:14.895701+00:00",
+      "evidence_summary": {
+        "anti_overfit": true,
+        "backtest": true,
+        "complete_required_set": true,
+        "failed_evidence": true,
+        "paper_snapshot": false,
+        "regime_score": true,
+        "required_for_state": [
+          "research_plan",
+          "backtest",
+          "anti_overfit",
+          "regime_score"
+        ],
+        "research_plan": true
+      },
+      "lifecycle_state": "IN_RESEARCH",
+      "missing_evidence": [],
+      "paper_snapshot_found": false,
+      "recommendation": "reject_or_rework",
+      "regime_score_found": true,
+      "research_plan_found": true
+    }
+  ],
+  "schema_version": "strategy_lab.evidence_pack.v1"
+}

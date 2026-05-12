@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-05-12T12:58:22.692406+00:00",
+  "input": {
+    "candidate_id": "cand_02",
+    "in_sample_return": 20.0,
+    "max_drawdown": 0.2,
+    "out_of_sample_return": -1.0,
+    "parameter_sensitivity_score": 0.2,
+    "regime_count_tested": 3,
+    "symbol_count_tested": 3,
+    "trades_count": 40,
+    "walk_forward_pass_rate": 0.88
+  },
+  "mode": "EXPERIMENTAL",
+  "result": {
+    "candidate_id": "cand_02",
+    "failure_reasons": [
+      "out_of_sample_return_non_positive"
+    ],
+    "generated_at": "2026-05-12T12:58:22.692401+00:00",
+    "passed": false,
+    "recommendation": "reject_or_rework",
+    "risk_level": "MEDIUM",
+    "score": 65,
+    "status": "EXPERIMENTAL"
+  },
+  "schema_version": "strategy_lab.anti_overfit_result.v1"
+}

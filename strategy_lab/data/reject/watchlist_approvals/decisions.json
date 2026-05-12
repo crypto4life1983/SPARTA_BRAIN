@@ -1,0 +1,17 @@
+{
+  "decisions": [
+    {
+      "candidate_id": "cand_wl_05",
+      "decided_at": "2026-05-12T13:58:42.256681+00:00",
+      "decision": "REJECT",
+      "new_state": "REJECTED",
+      "notes": "Reject before watchlist",
+      "paper_summary": "Observation summary",
+      "previous_state": "PAPER_TESTING",
+      "reviewer": "bob"
+    }
+  ],
+  "generated_at": "2026-05-12T13:58:42.256749+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.watchlist_approval.v1"
+}

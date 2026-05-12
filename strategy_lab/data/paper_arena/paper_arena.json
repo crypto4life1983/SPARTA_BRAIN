@@ -1,0 +1,53 @@
+{
+  "arenas": [
+    {
+      "candidate_id": "cand_01",
+      "generated_at": "2026-05-12T13:58:42.266940+00:00",
+      "initial_equity": 100000.0,
+      "max_simulated_risk_per_trade": 0.01,
+      "snapshots": [
+        {
+          "candidate_id": "cand_01",
+          "generated_at": "2026-05-12T13:58:42.266803+00:00",
+          "notes": "first simulated update",
+          "simulated_closed_trades": 2,
+          "simulated_drawdown": 0.03,
+          "simulated_equity": 101250.0,
+          "simulated_open_positions": 1,
+          "status": "EXPERIMENTAL",
+          "symbol": "BTCUSDT"
+        }
+      ],
+      "start_date": "2024-01-01",
+      "status": "EXPERIMENTAL",
+      "symbol": "BTCUSDT",
+      "timeframe": "1D"
+    },
+    {
+      "candidate_id": "seed_atr_compression_expansion",
+      "generated_at": "2026-05-12T13:53:05.390983+00:00",
+      "initial_equity": 100000.0,
+      "max_simulated_risk_per_trade": 0.01,
+      "snapshots": [
+        {
+          "candidate_id": "seed_atr_compression_expansion",
+          "generated_at": "2026-05-12T13:53:05.390833+00:00",
+          "notes": "Simulated paper observation only. No live approval.",
+          "simulated_closed_trades": 24,
+          "simulated_drawdown": 0.08,
+          "simulated_equity": 106500.0,
+          "simulated_open_positions": 0,
+          "status": "SIMULATED_OBSERVATION",
+          "symbol": "BTCUSDT"
+        }
+      ],
+      "start_date": "2024-01-01",
+      "status": "SIMULATED_OBSERVATION",
+      "symbol": "BTCUSDT",
+      "timeframe": "1D"
+    }
+  ],
+  "generated_at": "2026-05-12T13:58:42.266943+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.paper_arena.v1"
+}

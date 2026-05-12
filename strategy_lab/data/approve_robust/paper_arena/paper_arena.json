@@ -1,0 +1,30 @@
+{
+  "arenas": [
+    {
+      "candidate_id": "cand_pt_01",
+      "generated_at": "2026-05-12T13:50:10.235931+00:00",
+      "initial_equity": 100000.0,
+      "max_simulated_risk_per_trade": 0.01,
+      "snapshots": [
+        {
+          "candidate_id": "cand_pt_01",
+          "generated_at": "2026-05-12T13:50:10.235669+00:00",
+          "notes": "snapshot present",
+          "simulated_closed_trades": 2,
+          "simulated_drawdown": 0.02,
+          "simulated_equity": 101000.0,
+          "simulated_open_positions": 0,
+          "status": "EXPERIMENTAL",
+          "symbol": "BTCUSDT"
+        }
+      ],
+      "start_date": "2024-01-01",
+      "status": "EXPERIMENTAL",
+      "symbol": "BTCUSDT",
+      "timeframe": "1D"
+    }
+  ],
+  "generated_at": "2026-05-12T13:50:10.235933+00:00",
+  "mode": "EXPERIMENTAL",
+  "schema_version": "strategy_lab.paper_arena.v1"
+}

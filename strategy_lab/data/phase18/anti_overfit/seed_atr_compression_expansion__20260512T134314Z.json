@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-05-12T13:43:14.858781+00:00",
+  "input": {
+    "candidate_id": "seed_atr_compression_expansion",
+    "in_sample_return": 26.0,
+    "max_drawdown": 0.18,
+    "out_of_sample_return": 17.0,
+    "parameter_sensitivity_score": 0.29,
+    "regime_count_tested": 4,
+    "symbol_count_tested": 3,
+    "trades_count": 44,
+    "walk_forward_pass_rate": 0.88
+  },
+  "mode": "EXPERIMENTAL",
+  "result": {
+    "candidate_id": "seed_atr_compression_expansion",
+    "failure_reasons": [],
+    "generated_at": "2026-05-12T13:43:14.858776+00:00",
+    "passed": true,
+    "recommendation": "continue_research",
+    "risk_level": "LOW",
+    "score": 100,
+    "status": "EXPERIMENTAL"
+  },
+  "schema_version": "strategy_lab.anti_overfit_result.v1"
+}
