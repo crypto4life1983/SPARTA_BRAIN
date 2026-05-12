@@ -1,0 +1,23 @@
+{
+  "candidates": [],
+  "generated_at": "2026-05-12T13:36:00.639367+00:00",
+  "mode": "EXPERIMENTAL",
+  "safety": {
+    "execution_imports": false,
+    "frozen_stack_touched": false,
+    "isolated": true,
+    "live_deployment_recommended": false,
+    "profit_brain_touched": false
+  },
+  "schema_version": "strategy_lab.master_readiness.v1",
+  "summary": {
+    "candidate_count": 0,
+    "live_ready": false,
+    "status_counts": {
+      "NEEDS_MORE_RESEARCH": 0,
+      "PAPER_READY": 0,
+      "REJECT": 0,
+      "WATCHLIST_READY": 0
+    }
+  }
+}

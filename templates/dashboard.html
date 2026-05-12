@@ -100,6 +100,2201 @@
 
 </section>
 
+{% macro ui_status_class(status) -%}
+  {%- set s = (status or 'INSUFFICIENT_DATA')|upper -%}
+  {%- if s in ['GREEN', 'READY', 'OK', 'ACTIVE', 'GOOD'] -%}status-green
+  {%- elif s in ['YELLOW', 'WATCH', 'WATCHLIST', 'CAUTION', 'PARTIAL', 'DRIFT_WARNING'] -%}status-yellow
+  {%- elif s in ['ORANGE', 'BLOCKED', 'WAITING', 'SUPPRESSED', 'COMPRESSED_DORMANT'] -%}status-orange
+  {%- elif s in ['RED', 'FAILED', 'CRITICAL', 'BROKEN'] -%}status-red
+  {%- else -%}status-gray
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro ui_status_label(status) -%}
+  {%- set s = (status or 'INSUFFICIENT_DATA')|upper -%}
+  {%- if s in ['GREEN', 'READY', 'OK', 'ACTIVE', 'GOOD'] -%}Good
+  {%- elif s in ['YELLOW', 'WATCH', 'WATCHLIST', 'CAUTION', 'PARTIAL'] -%}Caution
+  {%- elif s in ['ORANGE', 'RED', 'BLOCKED', 'FAILED', 'CRITICAL', 'BROKEN', 'WAITING', 'SUPPRESSED', 'COMPRESSED_DORMANT'] -%}Blocked
+  {%- else -%}Unavailable
+  {%- endif -%}
+{%- endmacro %}
+
+{% set frozen_status = (sparta_commander_summary.frozen_stack_read_only_context.deployment_readiness.status if sparta_commander_summary and sparta_commander_summary.frozen_stack_read_only_context and sparta_commander_summary.frozen_stack_read_only_context.deployment_readiness and sparta_commander_summary.frozen_stack_read_only_context.deployment_readiness.status else None) %}
+{% set decision_status = (sparta_commander_summary.profit_brain_decision_gate.gate_status if sparta_commander_summary and sparta_commander_summary.profit_brain_decision_gate and sparta_commander_summary.profit_brain_decision_gate.gate_status else None) %}
+{% set data_quality_status = (sparta_commander_summary.profit_brain_data_quality_repair.decision_gate_status if sparta_commander_summary and sparta_commander_summary.profit_brain_data_quality_repair and sparta_commander_summary.profit_brain_data_quality_repair.decision_gate_status else None) %}
+{% set waiting_status = (sparta_commander_summary.profit_brain_waiting_protocol.current_gate_status if sparta_commander_summary and sparta_commander_summary.profit_brain_waiting_protocol and sparta_commander_summary.profit_brain_waiting_protocol.current_gate_status else None) %}
+{% set alert_status = (sparta_commander_summary.profit_brain_alerts.alert_state if sparta_commander_summary and sparta_commander_summary.profit_brain_alerts and sparta_commander_summary.profit_brain_alerts.alert_state else None) %}
+{% set frozen_validation = sparta_commander_summary.frozen_stack_read_only_context.validation_summary if sparta_commander_summary and sparta_commander_summary.frozen_stack_read_only_context and sparta_commander_summary.frozen_stack_read_only_context.validation_summary else None %}
+{% set frozen_market_regime = sparta_commander_summary.frozen_stack_read_only_context.market_regime if sparta_commander_summary and sparta_commander_summary.frozen_stack_read_only_context and sparta_commander_summary.frozen_stack_read_only_context.market_regime else None %}
+{% set frozen_ui_status = 'GRAY' %}
+{% if sparta_commander_summary and sparta_commander_summary.frozen_stack_read_only_context %}
+  {% if frozen_validation and (frozen_validation.global_verdict|upper == 'FAIL' or frozen_validation.d4_reproducible is sameas false or frozen_validation.frozen_stack_survives_operational_reality is sameas false) %}
+    {% set frozen_ui_status = 'RED' %}
+  {% elif frozen_status|upper == 'GREEN' %}
+    {% set frozen_ui_status = 'GREEN' %}
+  {% elif frozen_status|upper in ['YELLOW', 'PARTIAL'] %}
+    {% set frozen_ui_status = 'YELLOW' %}
+  {% elif frozen_market_regime and frozen_market_regime.label|upper in ['COMPRESSED_DORMANT', 'SUPPRESSED'] %}
+    {% set frozen_ui_status = 'ORANGE' %}
+  {% elif frozen_status %}
+    {% set frozen_ui_status = 'ORANGE' %}
+  {% endif %}
+{% endif %}
+{% set decision_ui_status = 'GRAY' %}
+{% if decision_status %}
+  {% if decision_status|upper == 'GREEN' %}
+    {% set decision_ui_status = 'GREEN' %}
+  {% elif decision_status|upper in ['YELLOW', 'PARTIAL', 'WATCH', 'WATCHLIST', 'CAUTION'] %}
+    {% set decision_ui_status = 'YELLOW' %}
+  {% elif decision_status|upper in ['RED', 'BLOCKED'] %}
+    {% set decision_ui_status = 'ORANGE' %}
+  {% else %}
+    {% set decision_ui_status = 'GRAY' %}
+  {% endif %}
+{% endif %}
+{% set data_quality_ui_status = 'GRAY' %}
+{% if data_quality_status %}
+  {% if data_quality_status|upper == 'GREEN' %}
+    {% set data_quality_ui_status = 'GREEN' %}
+  {% elif data_quality_status|upper in ['YELLOW', 'PARTIAL', 'WATCH', 'WATCHLIST', 'CAUTION'] %}
+    {% set data_quality_ui_status = 'YELLOW' %}
+  {% elif data_quality_status|upper in ['RED', 'BLOCKED'] %}
+    {% set data_quality_ui_status = 'ORANGE' %}
+  {% else %}
+    {% set data_quality_ui_status = 'GRAY' %}
+  {% endif %}
+{% endif %}
+{% set waiting_ui_status = 'GRAY' %}
+{% if waiting_status %}
+  {% if waiting_status|upper == 'GREEN' %}
+    {% set waiting_ui_status = 'GREEN' %}
+  {% elif waiting_status|upper in ['YELLOW', 'PARTIAL', 'WATCH', 'WATCHLIST', 'CAUTION'] %}
+    {% set waiting_ui_status = 'YELLOW' %}
+  {% elif waiting_status|upper in ['RED', 'BLOCKED'] %}
+    {% set waiting_ui_status = 'ORANGE' %}
+  {% else %}
+    {% set waiting_ui_status = 'GRAY' %}
+  {% endif %}
+{% endif %}
+{% set alert_ui_status = 'GRAY' %}
+{% if alert_status %}
+  {% if alert_status|upper in ['GREEN', 'READY', 'OK'] %}
+    {% set alert_ui_status = 'GREEN' %}
+  {% elif alert_status|upper in ['WATCHING', 'ACTIVE', 'YELLOW'] %}
+    {% set alert_ui_status = 'YELLOW' %}
+  {% elif alert_status|upper in ['RED', 'BLOCKED'] %}
+    {% set alert_ui_status = 'ORANGE' %}
+  {% else %}
+    {% set alert_ui_status = 'GRAY' %}
+  {% endif %}
+{% endif %}
+{% set dashboard_status = 'GRAY' %}
+{% if frozen_ui_status == 'RED' or decision_ui_status == 'RED' or data_quality_ui_status == 'RED' or waiting_ui_status == 'RED' or alert_ui_status == 'RED' %}
+  {% set dashboard_status = 'RED' %}
+{% elif frozen_ui_status == 'ORANGE' or decision_ui_status == 'ORANGE' or data_quality_ui_status == 'ORANGE' or waiting_ui_status == 'ORANGE' or alert_ui_status == 'ORANGE' %}
+  {% set dashboard_status = 'ORANGE' %}
+{% elif frozen_ui_status == 'YELLOW' or decision_ui_status == 'YELLOW' or data_quality_ui_status == 'YELLOW' or waiting_ui_status == 'YELLOW' or alert_ui_status == 'YELLOW' %}
+  {% set dashboard_status = 'YELLOW' %}
+{% elif frozen_ui_status == 'GREEN' or decision_ui_status == 'GREEN' or data_quality_ui_status == 'GREEN' or waiting_ui_status == 'GREEN' or alert_ui_status == 'GREEN' %}
+  {% set dashboard_status = 'GREEN' %}
+{% endif %}
+{% set dashboard_banner_text = (
+  'GREEN MODE: Deployment conditions acceptable.' if dashboard_status|upper == 'GREEN' else
+  'YELLOW MODE: Evidence improving, but not deployment-ready.' if dashboard_status|upper == 'YELLOW' else
+  'SYSTEM STATUS: DEFENSIVE MODE. Architecture healthy. Market participation suppressed. Monitoring for regime recovery.' if dashboard_status|upper == 'ORANGE' else
+  'CRITICAL MODE: Broken automation or corrupted evidence requires attention.' if dashboard_status|upper == 'RED' else
+  'OFFLINE MODE: Reports unavailable or stale.'
+) %}
+{% set dashboard_banner_class = ui_status_class(dashboard_status) %}
+{% set dashboard_banner_suffix = (
+  'green' if dashboard_banner_class == 'status-green' else
+  'yellow' if dashboard_banner_class == 'status-yellow' else
+  'orange' if dashboard_banner_class == 'status-orange' else
+  'red' if dashboard_banner_class == 'status-red' else
+  'gray'
+) %}
+
+<section class="status-banner {{ dashboard_banner_class }} status-banner--{{ dashboard_banner_suffix }}">
+  <div class="status-banner-head">
+    <div class="status-banner-kicker">{{ ui_status_label(dashboard_status) }}</div>
+    <div class="status-banner-title">{{ dashboard_banner_text }}</div>
+  </div>
+  <div class="status-banner-meta">
+    <span class="status-tag {{ dashboard_banner_class }}">{{ dashboard_status|upper if dashboard_status else 'OFFLINE' }}</span>
+    <span class="status-tag status-gray">READ-ONLY</span>
+    <span class="status-tag status-gray">NO EXECUTION</span>
+    <span class="status-tag {{ ui_status_class(frozen_ui_status) }}">Operational: {{ ui_status_label(frozen_ui_status) }}</span>
+    <span class="status-tag {{ ui_status_class(decision_ui_status) }}">Deployment: {{ ui_status_label(decision_ui_status) }}</span>
+  </div>
+  <div class="status-banner-legend" aria-label="Status legend">
+    <span class="status-tag status-green">Good</span>
+    <span class="status-tag status-yellow">Caution</span>
+    <span class="status-tag status-orange">Blocked</span>
+    <span class="status-tag status-gray">Unavailable</span>
+    <span class="muted small">Red is reserved for critical failure or broken evidence.</span>
+  </div>
+</section>
+
+<!-- ============== FROZEN-STACK REGIME INTELLIGENCE ============== -->
+{% set frozen_stack_context = (sparta_commander_summary.frozen_stack_read_only_context if sparta_commander_summary and sparta_commander_summary.frozen_stack_read_only_context else None) %}
+<section class="panel status-panel {{ ui_status_class(frozen_ui_status) }}">
+  <div class="panel-head">
+    <h2 class="panel-title">Frozen-Stack Regime Intelligence</h2>
+    {% if frozen_stack_context %}
+      <span class="badge status-badge {{ ui_status_class(frozen_ui_status) }}">
+        {{ frozen_stack_context.deployment_readiness.status if frozen_stack_context.deployment_readiness and frozen_stack_context.deployment_readiness.status else 'INSUFFICIENT_DATA' }}
+      </span>
+      <span class="status-tag {{ ui_status_class(frozen_ui_status) }}">
+        {{ ui_status_label(frozen_ui_status) }}
+      </span>
+    {% else %}
+      <span class="badge status-badge status-gray">OFFLINE</span>
+      <span class="status-tag status-gray">Unavailable</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only frozen Donchian + V2 + D4 evidence. It informs confidence context only and does not affect trade decisions.</p>
+
+  {% if frozen_stack_context %}
+    {% set frozen_market_regime = frozen_stack_context.market_regime if frozen_stack_context.market_regime else None %}
+    {% set frozen_validation = frozen_stack_context.validation_summary if frozen_stack_context.validation_summary else None %}
+    {% set frozen_evidence = frozen_stack_context.evidence if frozen_stack_context.evidence else None %}
+    {% set frozen_confidence = frozen_stack_context.confidence_context if frozen_stack_context.confidence_context else None %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Market Regime</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ frozen_market_regime.label if frozen_market_regime and frozen_market_regime.label else 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Suppression: {{ frozen_market_regime.suppression_duration_days if frozen_market_regime and frozen_market_regime.suppression_duration_days is not none else 'n/a' }} days</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Deployment Readiness</div>
+        <div class="metric-delta">{{ frozen_stack_context.deployment_readiness.status if frozen_stack_context.deployment_readiness and frozen_stack_context.deployment_readiness.status else 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Confidence context: {{ frozen_confidence.adjusted_confidence if frozen_confidence and frozen_confidence.adjusted_confidence is not none else 'n/a' }}</div>
+        <div class="metric-delta">Base confidence: {{ frozen_confidence.base_confidence if frozen_confidence and frozen_confidence.base_confidence is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Cadence / Participation</div>
+        <div class="metric-delta">30d exec: {{ frozen_evidence.executed_trades_30d if frozen_evidence and frozen_evidence.executed_trades_30d is not none else 'n/a' }}</div>
+        <div class="metric-delta">60d exec: {{ frozen_evidence.executed_trades_60d if frozen_evidence and frozen_evidence.executed_trades_60d is not none else 'n/a' }}</div>
+        <div class="metric-delta">90d exec: {{ frozen_evidence.executed_trades_90d if frozen_evidence and frozen_evidence.executed_trades_90d is not none else 'n/a' }}</div>
+        <div class="metric-delta">90d participation: {{ frozen_evidence.participation_ratio_90d if frozen_evidence and frozen_evidence.participation_ratio_90d is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Why Not Ready</div>
+        {% if frozen_stack_context.why_not_ready_reasons %}
+          {% for reason in frozen_stack_context.why_not_ready_reasons[:4] %}
+            <div class="metric-delta">{{ reason }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Rolling Trade Cadence</div>
+        <div class="metric-delta">Trend: {{ frozen_market_regime.cadence_trend|join(' → ') if frozen_market_regime and frozen_market_regime.cadence_trend else 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Validation Summary</div>
+        <div class="metric-delta">Verdict: {{ frozen_validation.global_verdict if frozen_validation and frozen_validation.global_verdict else 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Envelope out: {{ frozen_validation.n_out_envelope if frozen_validation and frozen_validation.n_out_envelope is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Read-Only Confidence Note</div>
+        <div class="metric-delta">{{ frozen_confidence.note if frozen_confidence and frozen_confidence.note else 'INSUFFICIENT_DATA' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(frozen_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Drift Warning Count</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ frozen_evidence.drift_warning_count if frozen_evidence and frozen_evidence.drift_warning_count is not none else 'n/a' }}</div>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Frozen-stack regime intelligence is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== PROFIT BRAIN DECISION GATE ============== -->
+{% set trading_profit_brain_decision_gate = (sparta_commander_summary.profit_brain_decision_gate if sparta_commander_summary and sparta_commander_summary.profit_brain_decision_gate else None) %}
+<section class="panel status-panel {{ ui_status_class(decision_ui_status) }}">
+  <div class="panel-head">
+    <h2 class="panel-title">Trading Profit Brain Decision Gate</h2>
+    {% if trading_profit_brain_decision_gate %}
+      <span class="badge status-badge {{ ui_status_class(decision_ui_status) }}">
+        {{ trading_profit_brain_decision_gate.gate_status }}
+      </span>
+      <span class="status-tag {{ ui_status_class(decision_ui_status) }}">{{ ui_status_label(decision_ui_status) }}</span>
+    {% else %}
+      <span class="badge status-badge status-gray">OFFLINE</span>
+      <span class="status-tag status-gray">Unavailable</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only decision gate that converts Profit Brain evidence into one daily stance. It recommends only and never enables execution.</p>
+
+  {% if trading_profit_brain_decision_gate %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Recommended Stance</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain_decision_gate.gate_status }}</div>
+        <div class="metric-delta">{{ trading_profit_brain_decision_gate.recommended_stance }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Confidence / Data Quality</div>
+        <div class="metric-delta">Confidence: {{ trading_profit_brain_decision_gate.confidence_score if trading_profit_brain_decision_gate.confidence_score is not none else 'n/a' }}</div>
+        <div class="metric-delta">Calibrated: {{ trading_profit_brain_decision_gate.calibrated_confidence if trading_profit_brain_decision_gate.calibrated_confidence is not none else 'n/a' }}</div>
+        <div class="metric-delta">Data quality: {{ trading_profit_brain_decision_gate.data_quality_score if trading_profit_brain_decision_gate.data_quality_score is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Current Regime / Fit</div>
+        <div class="metric-delta">Regime: {{ trading_profit_brain_decision_gate.current_regime or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Fit now: {{ trading_profit_brain_decision_gate.market_fit_now or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Risk: {{ trading_profit_brain_decision_gate.risk_level or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Top 3 Reasons</div>
+        {% if trading_profit_brain_decision_gate.top_3_reasons %}
+          {% for reason in trading_profit_brain_decision_gate.top_3_reasons[:3] %}
+            <div class="metric-delta">{{ reason }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">INSUFFICIENT_DATA</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Allowed to Watch</div>
+        <div class="metric-delta">{{ trading_profit_brain_decision_gate.strategies_allowed_to_watch|join(', ') if trading_profit_brain_decision_gate.strategies_allowed_to_watch else 'none' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Strategies to Avoid</div>
+        <div class="metric-delta">{{ trading_profit_brain_decision_gate.strategies_to_avoid|join(', ') if trading_profit_brain_decision_gate.strategies_to_avoid else 'none' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Risk Warnings</div>
+        {% if trading_profit_brain_decision_gate.risk_warnings %}
+          {% for warning in trading_profit_brain_decision_gate.risk_warnings[:4] %}
+            <div class="metric-delta">{{ warning }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(decision_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">7-Day Snapshot Trend</div>
+        {% if trading_profit_brain_decision_gate.snapshot_trend %}
+          <div class="metric-delta">Regime: {{ trading_profit_brain_decision_gate.snapshot_trend.regime_trend|join(' → ') if trading_profit_brain_decision_gate.snapshot_trend.regime_trend else 'n/a' }}</div>
+          <div class="metric-delta">Confidence: {{ trading_profit_brain_decision_gate.snapshot_trend.confidence_trend|join(' → ') if trading_profit_brain_decision_gate.snapshot_trend.confidence_trend else 'n/a' }}</div>
+          <div class="metric-delta">Risk: {{ trading_profit_brain_decision_gate.snapshot_trend.risk_level_trend|join(' → ') if trading_profit_brain_decision_gate.snapshot_trend.risk_level_trend else 'n/a' }}</div>
+        {% else %}
+          <div class="metric-delta">n/a</div>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Profit Brain Decision Gate report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== PROFIT BRAIN DATA QUALITY ============== -->
+{% set trading_profit_brain_data_quality = (sparta_commander_summary.profit_brain_data_quality_repair if sparta_commander_summary and sparta_commander_summary.profit_brain_data_quality_repair else None) %}
+<section class="panel status-panel {{ ui_status_class(data_quality_ui_status) }}">
+  <div class="panel-head">
+    <h2 class="panel-title">Profit Brain Data Quality</h2>
+    {% if trading_profit_brain_data_quality %}
+      <span class="badge status-badge {{ ui_status_class(data_quality_ui_status) }}">
+        {{ trading_profit_brain_data_quality.current_data_quality_score if trading_profit_brain_data_quality.current_data_quality_score is not none else 'INSUFFICIENT_DATA' }}
+      </span>
+      <span class="status-tag {{ ui_status_class(data_quality_ui_status) }}">
+        {{ ui_status_label(data_quality_ui_status) }}
+      </span>
+    {% else %}
+      <span class="badge status-badge status-gray">OFFLINE</span>
+      <span class="status-tag status-gray">Unavailable</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only inspector showing which missing or weak evidence is keeping the Profit Brain gate conservative.</p>
+
+{% if trading_profit_brain_data_quality %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(data_quality_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Current Data Quality</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain_data_quality.current_data_quality_score if trading_profit_brain_data_quality.current_data_quality_score is not none else 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Decision gate: {{ trading_profit_brain_data_quality.decision_gate_status or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(data_quality_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Top Missing Evidence</div>
+        {% if trading_profit_brain_data_quality.top_missing_evidence %}
+          {% for item in trading_profit_brain_data_quality.top_missing_evidence[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(data_quality_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Top Repair Actions</div>
+        {% if trading_profit_brain_data_quality.top_repair_actions %}
+          {% for item in trading_profit_brain_data_quality.top_repair_actions[:4] %}
+            <div class="metric-delta">{{ item.priority }} · {{ item.recommended_action }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(data_quality_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Confidence / Gate Blockers</div>
+        <div class="metric-delta">Confidence: {{ trading_profit_brain_data_quality.confidence_blockers|length if trading_profit_brain_data_quality.confidence_blockers else 0 }}</div>
+        <div class="metric-delta">Gate: {{ trading_profit_brain_data_quality.gate_blockers|length if trading_profit_brain_data_quality.gate_blockers else 0 }}</div>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Profit Brain Data Quality repair report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== PROFIT BRAIN WAITING PROTOCOL ============== -->
+{% set trading_profit_brain_waiting_protocol = (sparta_commander_summary.profit_brain_waiting_protocol if sparta_commander_summary and sparta_commander_summary.profit_brain_waiting_protocol else None) %}
+<section class="panel status-panel {{ ui_status_class(waiting_ui_status) }}">
+  <div class="panel-head">
+    <h2 class="panel-title">What SPARTA Is Waiting For</h2>
+    {% if trading_profit_brain_waiting_protocol %}
+      <span class="badge status-badge {{ ui_status_class(waiting_ui_status) }}">
+        {{ trading_profit_brain_waiting_protocol.waiting_status }}
+      </span>
+      <span class="status-tag {{ ui_status_class(waiting_ui_status) }}">
+        {{ ui_status_label(waiting_ui_status) }}
+      </span>
+    {% else %}
+      <span class="badge status-badge status-gray">OFFLINE</span>
+      <span class="status-tag status-gray">Unavailable</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">A read-only checklist showing exactly what must improve before Profit Brain confidence can move up.</p>
+
+  {% if trading_profit_brain_waiting_protocol %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(waiting_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Current Gate / Why Waiting</div>
+        <div class="metric-delta">Gate: {{ trading_profit_brain_waiting_protocol.current_gate_status or 'INSUFFICIENT_DATA' }}</div>
+        {% if trading_profit_brain_waiting_protocol.why_gate_red %}
+          {% for item in trading_profit_brain_waiting_protocol.why_gate_red[:3] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">Conditions satisfied.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(waiting_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Closed Trades Progress</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain_waiting_protocol.current_closed_trades_count if trading_profit_brain_waiting_protocol.current_closed_trades_count is not none else 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Target: {{ trading_profit_brain_waiting_protocol.minimum_closed_trades_needed }}</div>
+        <div class="metric-delta">Progress: {{ trading_profit_brain_waiting_protocol.closed_trades_progress_pct if trading_profit_brain_waiting_protocol.closed_trades_progress_pct is not none else 'n/a' }}%</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(waiting_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Concentration Status</div>
+        {% set concentration = trading_profit_brain_waiting_protocol.current_concentration_risk or {} %}
+        <div class="metric-delta">{{ concentration.dominant_symbol or 'INSUFFICIENT_DATA' }} · {{ concentration.concentration_ratio_pct if concentration.concentration_ratio_pct is not none else 'n/a' }}%</div>
+        <div class="metric-delta">Open trades: {{ concentration.open_trade_count if concentration.open_trade_count is not none else 'n/a' }}</div>
+        <div class="metric-delta">Target: under 60%</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(waiting_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Data Quality / Next Unlock</div>
+        <div class="metric-delta">Data quality: {{ trading_profit_brain_waiting_protocol.data_quality_score if trading_profit_brain_waiting_protocol.data_quality_score is not none else 'n/a' }} / 70+</div>
+        <div class="metric-delta">Calibrated confidence: {{ trading_profit_brain_waiting_protocol.calibrated_confidence if trading_profit_brain_waiting_protocol.calibrated_confidence is not none else 'n/a' }} / 45+</div>
+        <div class="metric-delta">{{ trading_profit_brain_waiting_protocol.unlock_target or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+    </div>
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(waiting_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">What SPARTA Needs Next</div>
+        {% if trading_profit_brain_waiting_protocol.what_sparta_needs_next %}
+          {% for item in trading_profit_brain_waiting_protocol.what_sparta_needs_next[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(waiting_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">What Not To Do Yet</div>
+        {% if trading_profit_brain_waiting_protocol.what_should_not_be_done_yet %}
+          {% for item in trading_profit_brain_waiting_protocol.what_should_not_be_done_yet[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">What SPARTA Is Waiting For report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== PROFIT BRAIN ALERTS ============== -->
+{% set trading_profit_brain_alerts = (sparta_commander_summary.profit_brain_alerts if sparta_commander_summary and sparta_commander_summary.profit_brain_alerts else None) %}
+<section class="panel status-panel {{ ui_status_class(alert_ui_status) }}">
+  <div class="panel-head">
+    <h2 class="panel-title">Profit Brain Alerts</h2>
+    {% if trading_profit_brain_alerts %}
+      <span class="badge status-badge {{ ui_status_class(alert_ui_status) }}">
+        {{ trading_profit_brain_alerts.alert_badge or 'WATCHING' }}
+      </span>
+      <span class="status-tag {{ ui_status_class(alert_ui_status) }}">
+        {{ ui_status_label(alert_ui_status) }}
+      </span>
+    {% else %}
+      <span class="badge status-badge status-gray">OFFLINE</span>
+      <span class="status-tag status-gray">Unavailable</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only alerting that reports when unlock conditions change. It never executes trades.</p>
+
+  {% if trading_profit_brain_alerts %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(alert_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Current State</div>
+        <div class="metric-delta">Gate: {{ trading_profit_brain_alerts.current_gate_status or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Closed trades: {{ trading_profit_brain_alerts.current_closed_trades_count if trading_profit_brain_alerts.current_closed_trades_count is not none else 'n/a' }}</div>
+        <div class="metric-delta">XRP concentration: {{ trading_profit_brain_alerts.current_xrp_concentration_pct if trading_profit_brain_alerts.current_xrp_concentration_pct is not none else 'n/a' }}%</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(alert_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Triggered Alerts</div>
+        <div class="metric-delta">Count: {{ trading_profit_brain_alerts.alert_count if trading_profit_brain_alerts.alert_count is not none else 0 }}</div>
+        {% if trading_profit_brain_alerts.triggered_alerts %}
+          {% for alert in trading_profit_brain_alerts.triggered_alerts[:4] %}
+            <div class="metric-delta">{{ alert.message }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No unlock threshold changes detected on this refresh.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(alert_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Unlock Targets</div>
+        <div class="metric-delta">Closed trades: &gt;= {{ trading_profit_brain_alerts.unlock_targets.closed_trades }}</div>
+        <div class="metric-delta">Concentration: &lt; {{ trading_profit_brain_alerts.unlock_targets.xrp_concentration_pct }}%</div>
+        <div class="metric-delta">Data quality: &gt; {{ trading_profit_brain_alerts.unlock_targets.data_quality_score }}</div>
+        <div class="metric-delta">Calibrated confidence: &gt; {{ trading_profit_brain_alerts.unlock_targets.calibrated_confidence }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(alert_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Latest Trend</div>
+        {% if trading_profit_brain_alerts.snapshot_trend and trading_profit_brain_alerts.snapshot_trend.recent %}
+          {% set last_snapshot = trading_profit_brain_alerts.snapshot_trend.recent[0] %}
+          <div class="metric-delta">Last regime: {{ last_snapshot.regime or 'n/a' }}</div>
+          <div class="metric-delta">Last confidence: {{ last_snapshot.calibrated_confidence if last_snapshot.calibrated_confidence is not none else last_snapshot.confidence_score if last_snapshot.confidence_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Last action: {{ last_snapshot.recommended_next_action or 'n/a' }}</div>
+        {% else %}
+          <div class="metric-delta">No recent alert trend available yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Profit Brain Alerts report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== STRATEGY LAB ============== -->
+{% set strategy_lab_master_readiness = (sparta_commander_summary.strategy_lab_master_readiness if sparta_commander_summary and sparta_commander_summary.strategy_lab_master_readiness else None) %}
+{% set strategy_lab_ui_status = 'GRAY' %}
+{% if strategy_lab_master_readiness %}
+  {% set strategy_lab_counts = strategy_lab_master_readiness.status_counts if strategy_lab_master_readiness.status_counts else None %}
+  {% if strategy_lab_counts and (strategy_lab_counts.WATCHLIST_READY or 0) > 0 %}
+    {% set strategy_lab_ui_status = 'GREEN' %}
+  {% elif strategy_lab_counts and (strategy_lab_counts.PAPER_READY or 0) > 0 %}
+    {% set strategy_lab_ui_status = 'YELLOW' %}
+  {% elif strategy_lab_counts and (strategy_lab_counts.NEEDS_MORE_RESEARCH or 0) > 0 %}
+    {% set strategy_lab_ui_status = 'YELLOW' %}
+  {% elif strategy_lab_counts and (strategy_lab_counts.REJECT or 0) > 0 %}
+    {% set strategy_lab_ui_status = 'ORANGE' %}
+  {% endif %}
+{% endif %}
+<section id="strategy-lab-panel" class="panel status-panel {{ ui_status_class(strategy_lab_ui_status) }}">
+  <div class="panel-head">
+    <h2 class="panel-title">Strategy Lab</h2>
+    {% if strategy_lab_master_readiness %}
+      <span class="badge status-badge {{ ui_status_class(strategy_lab_ui_status) }}">
+        {{ strategy_lab_master_readiness.status or 'INSUFFICIENT_DATA' }}
+      </span>
+      <span class="status-tag {{ ui_status_class(strategy_lab_ui_status) }}">{{ ui_status_label(strategy_lab_ui_status) }}</span>
+    {% else %}
+      <span class="badge status-badge status-gray">OFFLINE</span>
+      <span class="status-tag status-gray">Unavailable</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only experimental candidate readiness. Commander only displays the Strategy Lab master report.</p>
+
+  {% if strategy_lab_master_readiness %}
+    {% set strategy_lab_counts = strategy_lab_master_readiness.status_counts if strategy_lab_master_readiness.status_counts else {} %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card status-card {{ ui_status_class(strategy_lab_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Candidate Count</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ strategy_lab_master_readiness.candidate_count if strategy_lab_master_readiness.candidate_count is not none else 0 }}</div>
+        <div class="metric-delta">Latest: {{ strategy_lab_master_readiness.latest_generated_at or 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(strategy_lab_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Readiness Counts</div>
+        <div class="metric-delta">Reject: {{ strategy_lab_counts.get('REJECT', 0) if strategy_lab_counts else 0 }}</div>
+        <div class="metric-delta">Needs more research: {{ strategy_lab_counts.get('NEEDS_MORE_RESEARCH', 0) if strategy_lab_counts else 0 }}</div>
+        <div class="metric-delta">Paper ready: {{ strategy_lab_counts.get('PAPER_READY', 0) if strategy_lab_counts else 0 }}</div>
+        <div class="metric-delta">Watchlist ready: {{ strategy_lab_counts.get('WATCHLIST_READY', 0) if strategy_lab_counts else 0 }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(strategy_lab_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Safety Status</div>
+        <div class="metric-delta">{{ strategy_lab_master_readiness.safety_status or 'ISOLATED / READ_ONLY' }}</div>
+        <div class="metric-delta">Source: {{ strategy_lab_master_readiness.source_report.path or 'n/a' }}</div>
+      </div>
+      <div class="metric-card status-card {{ ui_status_class(strategy_lab_ui_status) }}" style="text-align:left;">
+        <div class="metric-label">Panel Notes</div>
+        <div class="metric-delta">No live deployment recommendation is ever shown here.</div>
+        <div class="metric-delta">Read-only and isolated from deployment control.</div>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Strategy Lab master readiness report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== PROFIT BRAIN DATA QUALITY ============== -->
+{% set trading_profit_brain_data_quality = (sparta_commander_summary.profit_brain_data_quality_repair if sparta_commander_summary and sparta_commander_summary.profit_brain_data_quality_repair else None) %}
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Profit Brain Data Quality</h2>
+    {% if trading_profit_brain_data_quality %}
+      <span class="badge {% if trading_profit_brain_data_quality.current_data_quality_score is not none and trading_profit_brain_data_quality.current_data_quality_score >= 70 %}badge-exported{% elif trading_profit_brain_data_quality.current_data_quality_score is not none and trading_profit_brain_data_quality.current_data_quality_score >= 50 %}badge-draft{% else %}badge-imported{% endif %}">
+        {{ trading_profit_brain_data_quality.current_data_quality_score if trading_profit_brain_data_quality.current_data_quality_score is not none else 'INSUFFICIENT_DATA' }}
+      </span>
+    {% else %}
+      <span class="badge">OFFLINE</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only inspector showing which missing or weak evidence is keeping the Profit Brain gate conservative.</p>
+
+  {% if trading_profit_brain_data_quality %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Current Data Quality</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain_data_quality.current_data_quality_score if trading_profit_brain_data_quality.current_data_quality_score is not none else 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Decision gate: {{ trading_profit_brain_data_quality.decision_gate_status or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Top Missing Evidence</div>
+        {% if trading_profit_brain_data_quality.top_missing_evidence %}
+          {% for item in trading_profit_brain_data_quality.top_missing_evidence[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Top Repair Actions</div>
+        {% if trading_profit_brain_data_quality.top_repair_actions %}
+          {% for item in trading_profit_brain_data_quality.top_repair_actions[:4] %}
+            <div class="metric-delta">{{ item.priority }} · {{ item.recommended_action }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">none</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Confidence / Gate Blockers</div>
+        <div class="metric-delta">Confidence: {{ trading_profit_brain_data_quality.confidence_blockers|length if trading_profit_brain_data_quality.confidence_blockers else 0 }}</div>
+        <div class="metric-delta">Gate: {{ trading_profit_brain_data_quality.gate_blockers|length if trading_profit_brain_data_quality.gate_blockers else 0 }}</div>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Profit Brain Data Quality repair report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== SPARTA MEMORY ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">SPARTA Memory</h2>
+    {% if memory_summary %}
+      <span class="badge badge-exported">READ-ONLY INTEL</span>
+    {% else %}
+      <span class="badge">OFFLINE</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Project context, decision logging, and analytics-derived lessons. This layer does not modify trading logic.</p>
+
+  {% if memory_summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Identity</div>
+        <div class="metric-delta">{{ memory_summary.identity[:220] }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Trading Bot Context</div>
+        <div class="metric-delta">{{ memory_summary.projects.trading_bot.project_md[:260] }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Analytics Insights Captured</div>
+        <div class="metric-value">{{ memory_summary.analytics_insights_captured|length }}</div>
+        <div class="metric-delta">idempotent notes</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="metric-label">Recent Knowledge</div>
+      <ul class="list" style="margin-top:8px;">
+        {% for note in memory_summary.latest_insights.trading[-3:] %}
+          <li class="row"><span class="badge">TRADING</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+        {% for note in memory_summary.latest_insights.video[-3:] %}
+          <li class="row"><span class="badge">VIDEO</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+        {% for note in memory_summary.latest_insights.business[-3:] %}
+          <li class="row"><span class="badge">BUSINESS</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="metric-card" style="margin-top:14px;text-align:left;">
+      <div class="metric-label">Log Decision</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        <select id="memory-project" style="padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">
+          <option value="trading_bot">trading_bot</option>
+          <option value="hydra_video">hydra_video</option>
+          <option value="youtube_growth">youtube_growth</option>
+          <option value="moving_company">moving_company</option>
+          <option value="affiliate_system">affiliate_system</option>
+        </select>
+        <input id="memory-context" placeholder="context" style="flex:1;min-width:160px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">
+      </div>
+      <textarea id="memory-decision" placeholder="decision to log" style="width:100%;box-sizing:border-box;min-height:70px;margin-top:8px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;"></textarea>
+      <button class="btn btn-sm" style="margin-top:8px;" onclick="memoryLogDecision()">Log Decision</button>
+      <pre id="memory-result" class="muted small" style="white-space:pre-wrap;margin-top:8px;"></pre>
+    </div>
+  {% else %}
+    <p class="muted">Memory files are not available.</p>
+  {% endif %}
+</section>
+
+<!-- ============== BRAIN MEMORY STATUS ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Brain Memory Status</h2>
+    {% if brain_memory_status %}
+      <span class="badge badge-exported">{{ brain_memory_status.status }}</span>
+    {% else %}
+      <span class="badge">OFFLINE</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only status for the central Brain Memory Layer. Folder: <code>brain_memory</code>.</p>
+
+  {% if brain_memory_status %}
+    <div class="metric-card" style="margin-top:12px;text-align:left;">
+      <div class="metric-label">Today's Brain Brief</div>
+      {% if brain_brief %}
+        <div class="metric-delta"><strong>Suggested focus:</strong> {{ brain_brief.suggested_focus_today }}</div>
+        <div class="metric-label" style="margin-top:10px;">Recent System Changes</div>
+        {% for change in brain_brief.recent_system_changes[:5] %}
+          <div class="metric-delta">{{ change }}</div>
+        {% endfor %}
+        <div class="metric-label" style="margin-top:10px;">Open Next Actions</div>
+        {% for project in brain_brief.projects %}
+          <div class="metric-delta"><strong>{{ project.project }}:</strong> {{ project.next_actions[0] }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="metric-delta">No memory found yet</div>
+      {% endif %}
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Status</div>
+        <div class="metric-value">{{ brain_memory_status.status }}</div>
+        <div class="metric-delta">{{ brain_memory_status.root_path }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Valid Projects</div>
+        <div class="metric-delta">{{ brain_memory_status.valid_projects|join(', ') }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Path Hints</div>
+        {% for hint in brain_memory_status.path_hints %}
+          <div class="metric-delta">{{ hint }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="metric-label">Last 5 System Changes</div>
+      {% if brain_memory_status.last_system_changes %}
+        <ul class="list" style="margin-top:8px;">
+          {% for change in brain_memory_status.last_system_changes %}
+            <li class="row"><span class="badge">CHANGE</span><span class="row-title">{{ change }}</span></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">No system changes logged yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="metrics-row" style="margin-top:14px;">
+      {% for project in brain_memory_status.projects %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">{{ project.name }}</div>
+          <div class="metric-delta">{{ project.project_path }}</div>
+          <div class="metric-label" style="margin-top:10px;">Last Decisions</div>
+          {% if project.decisions %}
+            {% for decision in project.decisions %}
+              <div class="metric-delta">{{ decision }}</div>
+            {% endfor %}
+          {% else %}
+            <div class="metric-delta">No decisions yet.</div>
+          {% endif %}
+          <div class="metric-label" style="margin-top:10px;">Next Actions</div>
+          {% if project.next_actions %}
+            {% for action in project.next_actions %}
+              <div class="metric-delta">{{ action }}</div>
+            {% endfor %}
+          {% else %}
+            <div class="metric-delta">No next actions yet.</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">Brain Memory files are not available.</p>
+  {% endif %}
+</section>
+
+<!-- ============== SPARTA COMMANDER ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">SPARTA COMMANDER</h2>
+    {% if sparta_commander_summary %}
+      <span class="badge {% if sparta_commander_summary.overall_status in ['ok', 'active'] %}badge-exported{% else %}badge-draft{% endif %}">
+        {{ sparta_commander_summary.overall_status|upper }}
+      </span>
+    {% else %}
+      <span class="badge">OFFLINE</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Additive orchestration, memory, monitoring, routing, and reporting. No trading, rendering, or upload logic is changed here.</p>
+
+  {% if sparta_commander_summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Pending Tasks</div>
+        <div class="metric-value">{{ sparta_commander_summary.pending_tasks_count }}</div>
+        <div class="metric-delta">Commander task queue</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Latest Workflow Memory</div>
+        {% if sparta_commander_summary.latest_workflow_memory %}
+          <div class="metric-value" style="font-size:1.05rem">{{ sparta_commander_summary.latest_workflow_memory.workflow_name }}</div>
+          <div class="metric-delta">{{ sparta_commander_summary.latest_workflow_memory.status }}</div>
+        {% else %}
+          <div class="metric-delta">No workflow memory yet.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Recommended Brain</div>
+        <div class="metric-value" style="font-size:1.05rem">{{ sparta_commander_summary.recommended_brain_for_next_task }}</div>
+        <div class="metric-delta">{{ sparta_commander_summary.recommended_next_action }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Watcher</div>
+        <div class="metric-value" style="font-size:1.05rem">{{ sparta_commander_summary.watcher.watcher_status }}</div>
+        <div class="metric-delta">Age: {{ sparta_commander_summary.watcher.heartbeat_age_seconds if sparta_commander_summary.watcher.heartbeat_age_seconds is not none else 'n/a' }}s</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Pipeline Health</div>
+        <div class="metric-delta">Render: {{ sparta_commander_summary.health.render_health }}</div>
+        <div class="metric-delta">YouTube: {{ sparta_commander_summary.health.youtube_health }}</div>
+        <div class="metric-delta">Audit: {{ sparta_commander_summary.health.audit_health }}</div>
+        <div class="metric-delta">Queue: {{ sparta_commander_summary.health.queue_health }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Health Warnings</div>
+        {% if sparta_commander_summary.health_warnings %}
+          {% for warning in sparta_commander_summary.health_warnings[:5] %}
+            <div class="metric-delta">{{ warning }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No commander health warnings.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Commander Files</div>
+        <div class="metric-delta">data/sparta_commander_memory.json</div>
+        <div class="metric-delta">data/sparta_commander_tasks.json</div>
+        <div class="metric-delta">data/sparta_commander_report.json</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Watcher Heartbeat</div>
+        <div class="metric-delta">Last check: {{ sparta_commander_summary.watcher.last_check_at or 'never' }}</div>
+        <div class="metric-delta">Last error: {{ sparta_commander_summary.watcher.last_error or 'none' }}</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Failure Classifications</div>
+        {% if sparta_commander_summary.failure_classifications %}
+          {% for item in sparta_commander_summary.failure_classifications[:5] %}
+            <div class="metric-delta">{{ item.category }} · {{ item.severity }} · {{ item.recommended_action }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No active failure classifications.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Workflow Reliability Top 5</div>
+        {% if sparta_commander_summary.workflow_reliability_top5 %}
+          {% for item in sparta_commander_summary.workflow_reliability_top5 %}
+            <div class="metric-delta">{{ item.workflow_name }} · {{ item.reliability_label }} · {{ item.success_rate }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No workflow score data yet.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Skill Suggestions</div>
+        <div class="metric-value" style="font-size:1.05rem">{{ sparta_commander_summary.skill_suggestions_count }}</div>
+        <div class="metric-delta">Reusable workflow candidates</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Notifications</div>
+        <div class="metric-delta">Configured: {{ sparta_commander_summary.notification_config.configured }}</div>
+        <div class="metric-delta">Enabled: {{ sparta_commander_summary.notification_config.enabled }}</div>
+        <div class="metric-delta">Dry run: {{ sparta_commander_summary.notification_config.dry_run }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Latest Daily Summary</div>
+        <div class="metric-delta">{{ sparta_commander_summary.daily_summary.commander_message or 'No daily summary generated yet.' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Top 3 Recommended Actions</div>
+        {% if sparta_commander_summary.top_recommended_actions %}
+          {% for action in sparta_commander_summary.top_recommended_actions %}
+            <div class="metric-delta">{{ action }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No recommended actions.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Safe Action Planner</div>
+        <div class="metric-delta">Proposed: {{ sparta_commander_summary.action_plan_summary.proposed }}</div>
+        <div class="metric-delta">Blocked: {{ sparta_commander_summary.action_plan_summary.blocked }}</div>
+        <div class="metric-delta">Approved: {{ sparta_commander_summary.action_plan_summary.approved }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Top Action Plans</div>
+        {% if sparta_commander_summary.top_action_plans %}
+          {% for plan in sparta_commander_summary.top_action_plans %}
+            <div class="metric-delta"><strong>{{ plan.title }}</strong></div>
+            <div class="metric-delta">{{ plan.risk_level }} · approval: {{ plan.approval_required }} · {{ plan.status }}</div>
+            <div class="metric-delta">{{ plan.safety_notes }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No action plans proposed.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Approved Executor</div>
+        <div class="metric-delta">Enabled: {{ sparta_commander_summary.safe_executor.config.safe_executor_enabled }}</div>
+        <div class="metric-delta">Dry run: {{ sparta_commander_summary.safe_executor.config.dry_run }}</div>
+        <div class="metric-delta">Executable approved plans: {{ sparta_commander_summary.safe_executor.executable_approved_plans_count }}</div>
+        <div class="metric-delta">Blocked attempts: {{ sparta_commander_summary.safe_executor.blocked_execution_attempts_count }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Execution Ledger</div>
+        {% if sparta_commander_summary.safe_executor.last_5_execution_ledger_entries %}
+          {% for item in sparta_commander_summary.safe_executor.last_5_execution_ledger_entries %}
+            <div class="metric-delta">{{ item.status }} · {{ item.action_type }} · {{ item.result_summary }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No execution records yet.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Trading Bridge</div>
+        <div class="metric-delta">Root: {{ sparta_commander_summary.trading_bridge.trading_bridge_status.trading_root }}</div>
+        <div class="metric-delta">Read-only: {{ sparta_commander_summary.trading_bridge.trading_bridge_status.read_only }}</div>
+        <div class="metric-delta">Enabled: {{ sparta_commander_summary.trading_bridge.trading_bridge_status.enabled }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Bot Health</div>
+        {% if sparta_commander_summary.trading_bridge.trading_bot_health.bots %}
+          {% for symbol, bot in sparta_commander_summary.trading_bridge.trading_bot_health.bots.items() %}
+            <div class="metric-delta">{{ symbol }}: {{ bot.status }} · age {{ bot.heartbeat_age_seconds if bot.heartbeat_age_seconds is not none else 'n/a' }}s · open {{ bot.open_trades if bot.open_trades is not none else 'n/a' }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No bot heartbeat data available.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Scheduler</div>
+        <div class="metric-delta">Status: {{ sparta_commander_summary.trading_bridge.scheduler.status }}</div>
+        <div class="metric-delta">Next: {{ sparta_commander_summary.trading_bridge.scheduler.next_run_at or 'unknown' }}</div>
+        <div class="metric-delta">Last: {{ sparta_commander_summary.trading_bridge.scheduler.last_run_at or 'unknown' }}</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Trading Analytics</div>
+        <div class="metric-delta">Open trades: {{ sparta_commander_summary.trading_bridge.analytics.open_trades_count if sparta_commander_summary.trading_bridge.analytics.open_trades_count is not none else 'unknown' }}</div>
+        <div class="metric-delta">Closed trades: {{ sparta_commander_summary.trading_bridge.analytics.closed_trades_count if sparta_commander_summary.trading_bridge.analytics.closed_trades_count is not none else 'unknown' }}</div>
+        <div class="metric-delta">ATR shadow: {{ sparta_commander_summary.trading_bridge.analytics.atr_shadow_active }}</div>
+        <div class="metric-delta">Strategy metrics: {{ sparta_commander_summary.trading_bridge.analytics.strategy_metrics_available }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Trading Alerts</div>
+        {% if sparta_commander_summary.trading_bridge.trading_alerts %}
+          {% for alert in sparta_commander_summary.trading_bridge.trading_alerts[:5] %}
+            <div class="metric-delta">{{ alert }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No trading bridge alerts.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Trading Recommendations</div>
+        {% if sparta_commander_summary.trading_bridge.trading_recommendations %}
+          {% for item in sparta_commander_summary.trading_bridge.trading_recommendations[:5] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No trading recommendations.</div>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">SPARTA Commander summary is not available.</p>
+  {% endif %}
+</section>
+
+<!-- ============== TRADING PROFIT BRAIN ============== -->
+{% set trading_profit_brain = (sparta_commander_summary.profit_brain if sparta_commander_summary and sparta_commander_summary.profit_brain else None) %}
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Trading Profit Brain</h2>
+    <span class="badge badge-exported">READ-ONLY — NO EXECUTION ENABLED</span>
+  </div>
+  <p class="panel-sub">Read-only profitability intelligence from the trading bot bridge. Recommendations only; no live execution or strategy changes.</p>
+
+  {% if trading_profit_brain %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px 0;">
+      <button class="btn btn-sm" onclick="refreshProfitBrainReports()">Refresh Profit Brain Reports</button>
+      <span id="profit-brain-refresh-status" class="muted small"></span>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Current Regime</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain.daily_profit_brief.current_regime or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Market fit now: {{ trading_profit_brain.market_regime_compatibility.best_fit_strategy_type_now or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Best / Worst Strategy</div>
+        <div class="metric-delta"><strong>Best:</strong> {{ trading_profit_brain.daily_profit_brief.best_strategy_today.strategy or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta"><strong>Worst:</strong> {{ trading_profit_brain.daily_profit_brief.worst_strategy_today.strategy or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Recommended Next Action</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain.daily_profit_brief.recommended_next_action or 'watchlist' }}</div>
+        <div class="metric-delta">Confidence: {{ trading_profit_brain.daily_profit_brief.confidence_score if trading_profit_brain.daily_profit_brief.confidence_score is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Calibrated Confidence</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ (sparta_commander_summary.profit_brain_learning.confidence_calibration_layer.calibrated_confidence if sparta_commander_summary and sparta_commander_summary.profit_brain_learning and sparta_commander_summary.profit_brain_learning.confidence_calibration_layer else 'n/a') }}</div>
+        <div class="metric-delta">Data quality: {{ trading_profit_brain.daily_profit_brief.data_quality_score if trading_profit_brain.daily_profit_brief.data_quality_score is not none else 'n/a' }}</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Risk Level</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain.risk_officer_report.risk_level or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Open trades: {{ trading_profit_brain.risk_officer_report.open_trade_count if trading_profit_brain.risk_officer_report.open_trade_count is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Top Risk Warnings</div>
+        {% if trading_profit_brain.risk_officer_report.warnings %}
+          {% for warning in trading_profit_brain.risk_officer_report.warnings[:4] %}
+            <div class="metric-delta">{{ warning }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No active warnings.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Strategies To Pause</div>
+        <div class="metric-delta">{{ trading_profit_brain.daily_profit_brief.strategies_to_pause|join(', ') if trading_profit_brain.daily_profit_brief.strategies_to_pause else 'none' }}</div>
+        <div class="metric-label" style="margin-top:10px;">Strategies To Watch</div>
+        <div class="metric-delta">{{ trading_profit_brain.daily_profit_brief.strategies_to_watch|join(', ') if trading_profit_brain.daily_profit_brief.strategies_to_watch else 'none' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Improving Edge</div>
+        <div class="metric-delta">{{ trading_profit_brain.daily_profit_brief.strategies_with_improving_edge|join(', ') if trading_profit_brain.daily_profit_brief.strategies_with_improving_edge else 'none' }}</div>
+        <div class="metric-label" style="margin-top:10px;">Account / Bot Health</div>
+        <div class="metric-delta">{{ trading_profit_brain.daily_profit_brief.account_bot_health_summary or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Trading Profit Brain report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== PROFIT BRAIN LEARNING ============== -->
+{% set trading_profit_brain_learning = (sparta_commander_summary.profit_brain_learning if sparta_commander_summary and sparta_commander_summary.profit_brain_learning else None) %}
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Profit Brain Learning</h2>
+    <span class="badge badge-exported">READ-ONLY — NO EXECUTION ENABLED</span>
+  </div>
+  <p class="panel-sub">Historical learning from Profit Brain recommendations and regime memory. Stored locally in SPARTA_BRAIN only.</p>
+
+  {% if trading_profit_brain_learning %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Learning Status</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ trading_profit_brain_learning.summary.status or 'INSUFFICIENT_DATA' }}</div>
+        <div class="metric-delta">Confidence drift: {{ trading_profit_brain_learning.learning_insights.confidence_drift if trading_profit_brain_learning.learning_insights.confidence_drift is not none else 'n/a' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Recommendation Accuracy</div>
+        <div class="metric-delta">Strategy: {{ trading_profit_brain_learning.learning_insights.recommendation_accuracy.strategy.accuracy_pct if trading_profit_brain_learning.learning_insights.recommendation_accuracy.strategy.accuracy_pct is not none else 'INSUFFICIENT_DATA' }}%</div>
+        <div class="metric-delta">Regime: {{ trading_profit_brain_learning.learning_insights.recommendation_accuracy.regime.accuracy_pct if trading_profit_brain_learning.learning_insights.recommendation_accuracy.regime.accuracy_pct is not none else 'INSUFFICIENT_DATA' }}%</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Most Reliable / Weakest Strategy</div>
+        <div class="metric-delta"><strong>Reliable:</strong> {{ (trading_profit_brain_learning.summary.most_reliable_strategies[0].strategy if trading_profit_brain_learning.summary.most_reliable_strategies else 'INSUFFICIENT_DATA') }}</div>
+        <div class="metric-delta"><strong>Weakest:</strong> {{ (trading_profit_brain_learning.summary.weakest_strategies[0].strategy if trading_profit_brain_learning.summary.weakest_strategies else 'INSUFFICIENT_DATA') }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Regime Memory Summary</div>
+        <div class="metric-delta">Entries: {{ trading_profit_brain_learning.regime_memory_database.entries_count if trading_profit_brain_learning.regime_memory_database.entries_count is not none else 'n/a' }}</div>
+        <div class="metric-delta">Status: {{ trading_profit_brain_learning.regime_memory_database.status or 'INSUFFICIENT_DATA' }}</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Recurring Risk Patterns</div>
+        {% if trading_profit_brain_learning.summary.recurring_risk_patterns %}
+          {% for item in trading_profit_brain_learning.summary.recurring_risk_patterns[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">INSUFFICIENT_DATA</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Most Reliable Regimes</div>
+        {% if trading_profit_brain_learning.summary.most_reliable_regimes %}
+          {% for item in trading_profit_brain_learning.summary.most_reliable_regimes[:3] %}
+            <div class="metric-delta">{{ item.regime }} · entries {{ item.entries }} · confidence {{ item.average_confidence }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">INSUFFICIENT_DATA</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Weakest Strategies</div>
+        {% if trading_profit_brain_learning.summary.weakest_strategies %}
+          {% for item in trading_profit_brain_learning.summary.weakest_strategies[:3] %}
+            <div class="metric-delta">{{ item.strategy }} · survival {{ item.survival_score }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">INSUFFICIENT_DATA</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Report Paths</div>
+        <div class="metric-delta">reports/profit_brain_learning.json</div>
+        <div class="metric-delta">reports/profit_brain_learning.md</div>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">Profit Brain Learning report is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== DAILY PROFIT BRAIN SNAPSHOTS ============== -->
+{% set trading_profit_brain_snapshots = (sparta_commander_summary.profit_brain_daily_snapshots if sparta_commander_summary and sparta_commander_summary.profit_brain_daily_snapshots else []) %}
+{% set trading_profit_brain_snapshot_summary = (sparta_commander_summary.profit_brain_daily_snapshot_summary if sparta_commander_summary and sparta_commander_summary.profit_brain_daily_snapshot_summary else None) %}
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Daily Profit Brain Snapshots</h2>
+    <span class="badge badge-exported">READ-ONLY — NO EXECUTION ENABLED</span>
+  </div>
+  <p class="panel-sub">Daily history captured after each read-only Profit Brain refresh. This is local SPARTA memory only.</p>
+
+  {% if trading_profit_brain_snapshot_summary and trading_profit_brain_snapshot_summary.count %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Regime Trend</div>
+        <div class="metric-delta">{{ trading_profit_brain_snapshot_summary.regime_trend|join(' → ') if trading_profit_brain_snapshot_summary.regime_trend else 'n/a' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Confidence Trend</div>
+        <div class="metric-delta">{{ trading_profit_brain_snapshot_summary.confidence_trend|join(' → ') if trading_profit_brain_snapshot_summary.confidence_trend else 'n/a' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Risk Level Trend</div>
+        <div class="metric-delta">{{ trading_profit_brain_snapshot_summary.risk_level_trend|join(' → ') if trading_profit_brain_snapshot_summary.risk_level_trend else 'n/a' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Recent Snapshot Count</div>
+        <div class="metric-value">{{ trading_profit_brain_snapshot_summary.count }}</div>
+        <div class="metric-delta">Last 7 daily runs</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Recurring Risks</div>
+        {% if trading_profit_brain_snapshot_summary.recurring_risks %}
+          {% for item in trading_profit_brain_snapshot_summary.recurring_risks[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">n/a</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Strategy Changes</div>
+        {% if trading_profit_brain_snapshot_summary.strategy_changes %}
+          {% for item in trading_profit_brain_snapshot_summary.strategy_changes[:4] %}
+            <div class="metric-delta">{{ item }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">n/a</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Latest Snapshot</div>
+        {% if trading_profit_brain_snapshots %}
+          {% set latest_snapshot = trading_profit_brain_snapshots[0] %}
+          <div class="metric-delta">Regime: {{ latest_snapshot.regime }}</div>
+          <div class="metric-delta">Market fit now: {{ latest_snapshot.market_fit_now }}</div>
+          <div class="metric-delta">Best / Worst: {{ latest_snapshot.best_strategy }} / {{ latest_snapshot.worst_strategy }}</div>
+          <div class="metric-delta">Risk: {{ latest_snapshot.risk_level }}</div>
+        {% else %}
+          <div class="metric-delta">No snapshots yet.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Latest 7 Snapshot Timestamps</div>
+        {% if trading_profit_brain_snapshots %}
+          {% for item in trading_profit_brain_snapshots[:7] %}
+            <div class="metric-delta">{{ item.timestamp }} · {{ item.recommended_next_action }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No snapshot history yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">No daily snapshot history available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== MEDIA OS PIPELINE ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">MEDIA OS PIPELINE</h2>
+    {% if media_os_pipeline_status %}
+      <span class="badge {% if media_os_pipeline_status.overall_status == 'working' %}badge-exported{% elif media_os_pipeline_status.overall_status == 'partial' %}badge-draft{% else %}badge-imported{% endif %}">
+        {{ media_os_pipeline_status.overall_status|upper }}
+      </span>
+    {% else %}
+      <span class="badge">OFFLINE</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Read-only orchestration shell for the current SPARTA systems. It aggregates existing reports into a single production flow view without changing render, upload, trading, or safety logic.</p>
+
+  {% if media_os_pipeline_status %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Overall Score</div>
+        <div class="metric-value">{{ media_os_pipeline_status.overall_score if media_os_pipeline_status.overall_score is not none else 'n/a' }}</div>
+        <div class="metric-delta">Status: {{ media_os_pipeline_status.overall_status|upper }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Ready to Produce?</div>
+        <div class="metric-value" style="font-size:1.1rem;">{{ 'YES' if media_os_pipeline_status.ready_to_produce.ready_to_produce else 'NO' }}</div>
+        <div class="metric-delta">{{ media_os_pipeline_status.ready_to_produce.reason }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Production Validity</div>
+        <div class="metric-value" style="font-size:1.1rem;">{{ 'VALID' if media_os_pipeline_status.production_validity.valid else 'INVALID' }}</div>
+        <div class="metric-delta">Active folder: {{ media_os_pipeline_status.production_validity.active_render_folder or 'none' }}</div>
+        <div class="metric-delta">Missing: {{ media_os_pipeline_status.production_validity.missing_files|join(', ') if media_os_pipeline_status.production_validity.missing_files else 'none' }}</div>
+        <div class="metric-delta">Next fix: {{ media_os_pipeline_status.production_validity.next_fix }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">POLISH Validity</div>
+        <div class="metric-value" style="font-size:1.1rem;">{{ 'VALID' if media_os_pipeline_status.polish_readiness.polish_valid else 'INVALID' }}</div>
+        <div class="metric-delta">Sources: {{ media_os_pipeline_status.polish_readiness.source_reports_used|join(', ') }}</div>
+        {% if media_os_pipeline_status.polish_readiness.blockers %}
+          <div class="metric-delta" style="margin-top:6px;">Blockers</div>
+          {% for blocker in media_os_pipeline_status.polish_readiness.blockers[:3] %}
+            <div class="metric-delta">{{ blocker.warning_type }} · {{ blocker.warning }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta" style="margin-top:6px;">No POLISH blockers.</div>
+        {% endif %}
+        {% if media_os_pipeline_status.polish_readiness.required_fixes %}
+          <div class="metric-delta" style="margin-top:6px;">Required fixes</div>
+          {% for fix in media_os_pipeline_status.polish_readiness.required_fixes[:3] %}
+            <div class="metric-delta">{{ fix }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="metric-delta" style="margin-top:6px;">Recommended Fix Plan</div>
+        {% if media_os_pipeline_status.polish_fix_plan %}
+          <div class="metric-delta">Still blocked: {{ 'YES' if media_os_pipeline_status.polish_fix_plan.still_blocked else 'NO' }}</div>
+          <div class="metric-delta">Expected improvement: {{ media_os_pipeline_status.polish_fix_plan.expected_effect }}</div>
+          {% if media_os_pipeline_status.polish_fix_plan.applied_fixes %}
+            {% for fix in media_os_pipeline_status.polish_fix_plan.applied_fixes[:3] %}
+              <div class="metric-delta">{{ fix.blocker_type }} · {{ fix.title }}</div>
+            {% endfor %}
+          {% endif %}
+        {% else %}
+          <div class="metric-delta">No fix plan available.</div>
+        {% endif %}
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Top 3 Bottlenecks</div>
+        {% if media_os_pipeline_status.top_bottlenecks %}
+          {% for item in media_os_pipeline_status.top_bottlenecks %}
+            <div class="metric-delta"><strong>{{ item.stage }}</strong> · {{ item.priority }} · score {{ item.score if item.score is not none else 'n/a' }}</div>
+            {% for blocker in item.blockers[:2] %}
+              <div class="metric-delta">{{ blocker }}</div>
+            {% endfor %}
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">No bottlenecks.</div>
+        {% endif %}
+      </div>
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Next Recommended Action</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.next_recommended_action }}</div>
+          {% if media_os_pipeline_status.ready_to_produce.required_fixes_before_production %}
+            <div class="metric-delta" style="margin-top:6px;">Required fixes</div>
+            {% for fix in media_os_pipeline_status.ready_to_produce.required_fixes_before_production %}
+              <div class="metric-delta">{{ fix }}</div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% if media_os_pipeline_status.latest_outputs.motivation_emotion_plan.active %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Motivation Emotion Plan</div>
+          <div class="metric-value" style="font-size:1.05rem;">{{ media_os_pipeline_status.latest_outputs.motivation_emotion_plan.emotional_wound }}</div>
+          <div class="metric-delta">Authenticity: {{ media_os_pipeline_status.latest_outputs.motivation_emotion_plan.authenticity_score if media_os_pipeline_status.latest_outputs.motivation_emotion_plan.authenticity_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Generic risk: {{ media_os_pipeline_status.latest_outputs.motivation_emotion_plan.generic_motivation_risk.label if media_os_pipeline_status.latest_outputs.motivation_emotion_plan.generic_motivation_risk else 'n/a' }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Story stages</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_emotion_plan.story_stages|join(' → ') }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Voice direction</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_emotion_plan.voice_direction.style if media_os_pipeline_status.latest_outputs.motivation_emotion_plan.voice_direction else 'n/a' }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Rejected clichés</div>
+          {% set rejected_generic_lines = media_os_pipeline_status.latest_outputs.motivation_emotion_plan.rejected_generic_lines|default([]) %}
+          {% for line in rejected_generic_lines[:3] %}
+            <div class="metric-delta">{{ line }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if media_os_pipeline_status.latest_outputs.motivation_scene_plan.active %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Motivation Scene Plan</div>
+          <div class="metric-value" style="font-size:1.05rem;">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.character_archetype }}</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.cinematic_scene }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Emotional goal</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.emotional_goal }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Camera direction</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.camera_direction|join(', ') }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Symbolic visuals</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.symbolic_visuals|join(', ') }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Sound direction</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.sound_design|join(', ') }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Motion requirements</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_plan.motion_requirements|join(', ') }}</div>
+        </div>
+        {% endif %}
+        {% if media_os_pipeline_status.latest_outputs.motivation_voice_report.active %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Motivation Voice Report</div>
+          <div class="metric-value" style="font-size:1.05rem;">{{ media_os_pipeline_status.latest_outputs.motivation_voice_report.voice_style }}</div>
+          <div class="metric-delta">AI voice risk: {{ media_os_pipeline_status.latest_outputs.motivation_voice_report.ai_voice_risk.label if media_os_pipeline_status.latest_outputs.motivation_voice_report.ai_voice_risk else 'n/a' }}</div>
+          <div class="metric-delta">Authenticity score: {{ media_os_pipeline_status.latest_outputs.motivation_voice_report.human_authenticity_score if media_os_pipeline_status.latest_outputs.motivation_voice_report.human_authenticity_score is not none else 'n/a' }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Forbidden patterns</div>
+          {% set forbidden_patterns_detected = media_os_pipeline_status.latest_outputs.motivation_voice_report.forbidden_patterns_detected|default([]) %}
+          {% for item in forbidden_patterns_detected[:3] %}
+            <div class="metric-delta">{{ item.pattern }} · {{ item.line }}</div>
+          {% endfor %}
+          <div class="metric-delta" style="margin-top:6px;">Required voice fixes</div>
+          {% set required_voice_fixes = media_os_pipeline_status.latest_outputs.motivation_voice_report.required_voice_fixes|default([]) %}
+          {% for fix in required_voice_fixes[:3] %}
+            <div class="metric-delta">{{ fix }}</div>
+          {% endfor %}
+          <div class="metric-delta" style="margin-top:6px;">Sample delivery notes</div>
+          {% set line_level_delivery_notes = media_os_pipeline_status.latest_outputs.motivation_voice_report.line_level_delivery_notes|default([]) %}
+          {% for note in line_level_delivery_notes[:2] %}
+            <div class="metric-delta">{{ note.line_index }} · {{ note.delivery_style }} · pause {{ note.pause_before }} / {{ note.pause_after }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.active %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Motivation Sound Design</div>
+          <div class="metric-value" style="font-size:1.05rem;">Score {{ media_os_pipeline_status.latest_outputs.motivation_sound_design_report.cinematic_impact_score if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.cinematic_impact_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Sound sync: {{ media_os_pipeline_status.latest_outputs.motivation_sound_design_report.sound_sync_score if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.sound_sync_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Tension: {{ media_os_pipeline_status.latest_outputs.motivation_sound_design_report.tension_score if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.tension_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Transition impact: {{ media_os_pipeline_status.latest_outputs.motivation_sound_design_report.transition_impact_score if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.transition_impact_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Silence quality: {{ media_os_pipeline_status.latest_outputs.motivation_sound_design_report.silence_quality_score if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.silence_quality_score is not none else 'n/a' }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Weakest segment</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_sound_design_report.weakest_emotional_segment.segment if media_os_pipeline_status.latest_outputs.motivation_sound_design_report.weakest_emotional_segment else 'n/a' }}</div>
+        </div>
+        {% endif %}
+        {% if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.passed is not none %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Cinematic Impact</div>
+          <div class="metric-value" style="font-size:1.05rem;">{{ 'PASS' if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.passed else 'NEEDS_FIX' }}</div>
+          <div class="metric-delta">Impact score: {{ media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.cinematic_impact_score if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.cinematic_impact_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Sound sync: {{ media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.sound_sync_score if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.sound_sync_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Tension: {{ media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.tension_score if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.tension_score is not none else 'n/a' }}</div>
+          <div class="metric-delta">Silence quality: {{ media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.silence_quality_score if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.silence_quality_score is not none else 'n/a' }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Weakest segment</div>
+          <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.weakest_emotional_segment.segment if media_os_pipeline_status.latest_outputs.motivation_cinematic_impact_report.weakest_emotional_segment else 'n/a' }}</div>
+        </div>
+        {% endif %}
+        {% if media_os_pipeline_status.latest_outputs.motivation_world_guard.mode %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Motivation World Guard</div>
+          <div class="metric-value" style="font-size:1.05rem;">{{ 'PASS' if media_os_pipeline_status.latest_outputs.motivation_world_guard.passed else 'FAIL' }}</div>
+          <div class="metric-delta">Detected world: {{ media_os_pipeline_status.latest_outputs.motivation_world_guard.detected_world }}</div>
+          <div class="metric-delta">Leakage score: {{ media_os_pipeline_status.latest_outputs.motivation_world_guard.leakage_score if media_os_pipeline_status.latest_outputs.motivation_world_guard.leakage_score is not none else 'n/a' }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Forbidden assets</div>
+          {% if media_os_pipeline_status.latest_outputs.motivation_world_guard.forbidden_assets_detected %}
+            {% for asset in media_os_pipeline_status.latest_outputs.motivation_world_guard.forbidden_assets_detected[:3] %}
+              <div class="metric-delta">{{ asset }}</div>
+            {% endfor %}
+          {% else %}
+            <div class="metric-delta">None detected.</div>
+          {% endif %}
+          <div class="metric-delta" style="margin-top:6px;">Required fixes</div>
+          {% for fix in media_os_pipeline_status.latest_outputs.motivation_world_guard.required_fixes[:3] %}
+            <div class="metric-delta">{{ fix }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="metric-card" style="text-align:left;">
+          <div class="metric-label">Motivation Scene Execution</div>
+          {% if media_os_pipeline_status.latest_outputs.motivation_scene_execution.status %}
+            <div class="metric-value" style="font-size:1.05rem;">{{ media_os_pipeline_status.latest_outputs.motivation_scene_execution.status }}</div>
+            <div class="metric-delta">Generic visuals replaced: {{ media_os_pipeline_status.latest_outputs.motivation_scene_execution.generic_visuals_replaced_count if media_os_pipeline_status.latest_outputs.motivation_scene_execution.generic_visuals_replaced_count is not none else 'n/a' }}</div>
+            <div class="metric-delta">Scenes missing cinematic execution: {{ media_os_pipeline_status.latest_outputs.motivation_scene_execution.scenes_missing_cinematic_execution|join(', ') if media_os_pipeline_status.latest_outputs.motivation_scene_execution.scenes_missing_cinematic_execution else 'none' }}</div>
+            <div class="metric-delta" style="margin-top:6px;">Active archetypes</div>
+            <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_execution.active_archetypes|join(', ') if media_os_pipeline_status.latest_outputs.motivation_scene_execution.active_archetypes else 'n/a' }}</div>
+            <div class="metric-delta" style="margin-top:6px;">Active environments</div>
+            <div class="metric-delta">{{ media_os_pipeline_status.latest_outputs.motivation_scene_execution.active_environments|join(', ') if media_os_pipeline_status.latest_outputs.motivation_scene_execution.active_environments else 'n/a' }}</div>
+          {% else %}
+            <div class="metric-delta">No execution manifest yet.</div>
+          {% endif %}
+        </div>
+      </div>
+
+    <div class="metrics-row" style="margin-top:12px; grid-template-columns:repeat(2, minmax(0, 1fr));">
+      {% for stage in media_os_pipeline_status.stages_list %}
+        <div class="metric-card" style="text-align:left; border-top:3px solid {{ stage.status_color }};">
+          <div class="metric-label">{{ stage.name }}</div>
+          <div class="metric-value" style="font-size:1.25rem;">{{ stage.status_label }}</div>
+          <div class="metric-delta">Score {{ stage.score if stage.score is not none else 'n/a' }} · Priority {{ stage.priority }}</div>
+          <div class="metric-delta" style="margin-top:6px;">{{ stage.summary }}</div>
+          {% if stage.blockers %}
+            <div class="metric-delta" style="margin-top:6px;">Blockers</div>
+            {% for blocker in stage.blockers[:2] %}
+              <div class="metric-delta">{{ blocker }}</div>
+            {% endfor %}
+          {% else %}
+            <div class="metric-delta" style="margin-top:6px;">No blockers.</div>
+          {% endif %}
+          <div class="metric-delta" style="margin-top:6px;">Next action</div>
+          <div class="metric-delta">{{ stage.next_action }}</div>
+          <div class="metric-delta" style="margin-top:6px;">Latest outputs</div>
+          {% for key, value in stage.outputs.items() %}
+            <div class="metric-delta">{{ key }}: {{ value|tojson }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">Media OS pipeline summary is not available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== MOTIVATION HUMAN REVIEW ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">MOTIVATION HUMAN REVIEW</h2>
+    {% if latest_motivation_review %}
+      <span class="badge {% if latest_motivation_review.post_ready %}badge-exported{% else %}badge-draft{% endif %}">
+        {{ 'POST READY' if latest_motivation_review.post_ready else 'REVIEW PENDING' }}
+      </span>
+    {% else %}
+      <span class="badge">NO REVIEW</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Manual taste approval for Motivation videos. Technical readiness is not enough; posting still requires human approval and post-worthy judgment.</p>
+
+  {% if latest_motivation_review %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Latest Render</div>
+        <div class="metric-value" style="font-size:1.05rem;">{{ latest_motivation_review.render_id }}</div>
+        <div class="metric-delta">{{ latest_motivation_review.video_path }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Technical Readiness</div>
+        <div class="metric-value" style="font-size:1.1rem;">{{ 'YES' if latest_motivation_review.technical_ready_to_produce else 'NO' }}</div>
+        <div class="metric-delta">Human approved: {{ 'YES' if latest_motivation_review.human_approved else 'NO' }}</div>
+        <div class="metric-delta">Post worthy: {{ 'YES' if latest_motivation_review.post_worthy else 'NO' }}</div>
+        <div class="metric-delta">Post ready: {{ 'YES' if latest_motivation_review.post_ready else 'NO' }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Taste Scores</div>
+        <div class="metric-delta">Voice: {{ latest_motivation_review.voice_score_1_10 if latest_motivation_review.voice_score_1_10 is not none else 'n/a' }}/10</div>
+        <div class="metric-delta">Hook: {{ latest_motivation_review.hook_score_1_10 if latest_motivation_review.hook_score_1_10 is not none else 'n/a' }}/10</div>
+        <div class="metric-delta">Visual motion: {{ latest_motivation_review.visual_motion_score_1_10 if latest_motivation_review.visual_motion_score_1_10 is not none else 'n/a' }}/10</div>
+        <div class="metric-delta">Emotional truth: {{ latest_motivation_review.emotional_truth_score_1_10 if latest_motivation_review.emotional_truth_score_1_10 is not none else 'n/a' }}/10</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Required Changes</div>
+        {% if latest_motivation_review.required_changes %}
+          {% for change in latest_motivation_review.required_changes %}
+            <div class="metric-delta">{{ change }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="metric-delta">None recorded.</div>
+        {% endif %}
+        <div class="metric-delta" style="margin-top:6px;">{{ latest_motivation_review.reviewer_notes or 'No reviewer notes yet.' }}</div>
+        {% if not latest_motivation_review.human_approved %}
+          <div class="metric-delta" style="margin-top:6px; color:#ffb74d;">Not approved yet.</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="metric-card" style="text-align:left; margin-top:12px;">
+      <div class="metric-label">Manual Review Form</div>
+      <form method="post" action="/api/motivation/human-review" style="display:grid; gap:10px; margin-top:12px;">
+        <input type="hidden" name="render_id" value="{{ latest_motivation_review.render_id }}">
+        <input type="hidden" name="technical_ready_to_produce" value="{{ 'true' if latest_motivation_review.technical_ready_to_produce else 'false' }}">
+        <label class="metric-delta">Reviewer notes</label>
+        <textarea name="reviewer_notes" rows="3" style="width:100%; background:#111; color:#fff; border:1px solid #333; border-radius:6px;">{{ latest_motivation_review.reviewer_notes or '' }}</textarea>
+        <div class="metrics-row" style="grid-template-columns:repeat(4, minmax(0, 1fr));">
+          <div>
+            <label class="metric-delta">Voice</label>
+            <input type="number" name="voice_score_1_10" min="1" max="10" value="{{ latest_motivation_review.voice_score_1_10 if latest_motivation_review.voice_score_1_10 is not none else '' }}" style="width:100%;">
+          </div>
+          <div>
+            <label class="metric-delta">Hook</label>
+            <input type="number" name="hook_score_1_10" min="1" max="10" value="{{ latest_motivation_review.hook_score_1_10 if latest_motivation_review.hook_score_1_10 is not none else '' }}" style="width:100%;">
+          </div>
+          <div>
+            <label class="metric-delta">Visual</label>
+            <input type="number" name="visual_motion_score_1_10" min="1" max="10" value="{{ latest_motivation_review.visual_motion_score_1_10 if latest_motivation_review.visual_motion_score_1_10 is not none else '' }}" style="width:100%;">
+          </div>
+          <div>
+            <label class="metric-delta">Truth</label>
+            <input type="number" name="emotional_truth_score_1_10" min="1" max="10" value="{{ latest_motivation_review.emotional_truth_score_1_10 if latest_motivation_review.emotional_truth_score_1_10 is not none else '' }}" style="width:100%;">
+          </div>
+        </div>
+        <label class="metric-delta">Required changes</label>
+        <textarea name="required_changes" rows="3" style="width:100%; background:#111; color:#fff; border:1px solid #333; border-radius:6px;">{{ latest_motivation_review.required_changes|join('\n') if latest_motivation_review.required_changes else '' }}</textarea>
+        <label class="metric-delta">
+          <input type="checkbox" name="post_worthy" value="true" {% if latest_motivation_review.post_worthy %}checked{% endif %}>
+          Post worthy
+        </label>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <label class="metric-delta">
+            <input type="radio" name="human_approved" value="true" {% if latest_motivation_review.human_approved %}checked{% endif %}>
+            Approve
+          </label>
+          <label class="metric-delta">
+            <input type="radio" name="human_approved" value="false" {% if not latest_motivation_review.human_approved %}checked{% endif %}>
+            Reject
+          </label>
+          <button type="submit" class="btn btn-primary">Save Review</button>
+        </div>
+      </form>
+    </div>
+  {% else %}
+    <p class="muted">No Motivation human review is available yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA PACKAGING ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Packaging Director</h2>
+    {% if latest_packaging_plan %}
+      <span class="badge {% if latest_packaging_plan.ok %}badge-exported{% else %}badge-draft{% endif %}">
+        SCORE {{ latest_packaging_plan.packaging_score }}
+      </span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest truthful YouTube packaging: title, thumbnail text, tags, shorts candidates, and compliance flags.</p>
+
+  {% if latest_packaging_plan %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Packaging Score</div>
+        <div class="metric-value">{{ latest_packaging_plan.packaging_score }}</div>
+        <div class="metric-delta">{% if latest_packaging_plan.ok %}ready{% else %}blocked{% endif %}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Title</div>
+        <div class="metric-delta">{{ latest_packaging_plan.youtube_title }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Thumbnail Text</div>
+        <div class="metric-value" style="font-size:1.25rem">{{ latest_packaging_plan.thumbnail_text }}</div>
+        <div class="metric-delta">max 4 words</div>
+      </div>
+    </div>
+    {% if latest_packaging_plan.risk_flags %}
+      <ul class="list" style="margin-top:12px;">
+        {% for flag in latest_packaging_plan.risk_flags[:5] %}
+          <li class="row"><span class="badge badge-draft">RISK</span><span class="row-title">{{ flag }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted" style="margin-top:12px;">No packaging risk flags.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted">No packaging plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== YOUTUBE AUTOPILOT ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">YouTube Autopilot</h2>
+    {% if youtube_autopilot_summary %}
+      <span class="badge {% if youtube_autopilot_summary.enabled %}badge-exported{% else %}badge-draft{% endif %}">
+        {% if youtube_autopilot_summary.enabled %}ENABLED{% else %}DISABLED{% endif %}
+      </span>
+    {% else %}
+      <span class="badge">NO DATA</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Safe queue for verified, packaged renders. Defaults to unlisted and one upload per day.</p>
+
+  {% if youtube_autopilot_summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Queued</div>
+        <div class="metric-value">{{ youtube_autopilot_summary.queued_count }}</div>
+        <div class="metric-delta">videos</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Latest Status</div>
+        <div class="metric-value" style="font-size:1.2rem">{{ youtube_autopilot_summary.latest_upload_status }}</div>
+        <div class="metric-delta">upload readiness</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Daily Limit</div>
+        <div class="metric-value">{{ youtube_autopilot_summary.daily_limit }}</div>
+        <div class="metric-delta">{{ youtube_autopilot_summary.privacy }} privacy</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Manual Approval</div>
+        <div class="metric-value" style="font-size:1.2rem">{% if youtube_autopilot_summary.manual_approval_required %}YES{% else %}NO{% endif %}</div>
+        <div class="metric-delta">{{ youtube_autopilot_summary.next_scheduled_slot }}</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <h3 class="panel-title" style="font-size:.95rem;">YouTube Autopilot Approval UI</h3>
+      {% if youtube_autopilot_summary.queue %}
+        {% for item in youtube_autopilot_summary.queue %}
+          <div class="metric-card" style="margin-top:12px;text-align:left;">
+            <div class="metric-label">Queued Render {{ item.run_id }}</div>
+            <div class="metric-delta">Approval: {{ item.approval_status or 'pending' }} | Status: {{ item.status }} | Privacy: {{ item.privacy }}</div>
+            <p class="muted" style="margin:8px 0;">Preview:
+              <a href="{{ item.video_url }}" target="_blank" rel="noopener">{{ item.video_path }}</a>
+            </p>
+            <label class="metric-label">Title</label>
+            <input id="yt-title-{{ item.run_id }}" value="{{ item.title }}" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">
+            <label class="metric-label">Description</label>
+            <textarea id="yt-desc-{{ item.run_id }}" style="width:100%;box-sizing:border-box;min-height:80px;margin:4px 0 8px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">{{ item.description }}</textarea>
+            <label class="metric-label">Tags</label>
+            <input id="yt-tags-{{ item.run_id }}" value="{{ item.tags|join(', ') }}" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">
+            <label class="metric-label">Thumbnail Text</label>
+            <input id="yt-thumb-{{ item.run_id }}" value="{{ item.thumbnail_text }}" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">
+            <label class="metric-label">Pinned Comment</label>
+            <input id="yt-pin-{{ item.run_id }}" value="{{ item.pinned_comment or '' }}" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px;border-radius:8px;border:1px solid #2a2a40;background:#0d0d1a;color:#eee;">
+            <div class="metric-delta">Risk flags: {{ item.risk_flags|join(', ') if item.risk_flags else 'none' }}</div>
+            <div class="metric-delta">Upload readiness: {{ item.upload_readiness }}</div>
+            {% if item.status == 'needs_connection' %}
+              <p class="muted">status: needs_connection | message: Connect YouTube first</p>
+            {% endif %}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+              <button class="btn btn-sm" onclick="ytSaveEdits('{{ item.run_id }}')">Save Edits</button>
+              <button class="btn btn-sm" onclick="ytApprove('{{ item.run_id }}')">Approve</button>
+              <button class="btn btn-sm" onclick="ytReject('{{ item.run_id }}')">Reject</button>
+              <button class="btn btn-primary btn-sm" onclick="ytUploadUnlisted('{{ item.run_id }}')">Upload Unlisted</button>
+            </div>
+            <pre id="yt-result-{{ item.run_id }}" class="muted small" style="white-space:pre-wrap;margin-top:8px;"></pre>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">No queued videos awaiting approval.</p>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="muted">No YouTube autopilot status yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA RETENTION ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Retention Director</h2>
+    {% if latest_retention_plan %}
+      <span class="badge {% if latest_retention_plan.summary.retention_score >= 80 %}badge-exported{% else %}badge-draft{% endif %}">
+        SCORE {{ latest_retention_plan.summary.retention_score }}
+      </span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest retention design: hooks, pattern interrupts, escalation, payoff delay, and rewatch triggers.</p>
+
+  {% if latest_retention_plan %}
+    {% set rt = latest_retention_plan.summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Retention Score</div>
+        <div class="metric-value">{{ rt.retention_score }}</div>
+        <div class="metric-delta">{{ rt.warning_count }} warnings</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Interrupts</div>
+        <div class="metric-value">{{ rt.pattern_interrupt_count }}</div>
+        <div class="metric-delta">pattern</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Surprises</div>
+        <div class="metric-value">{{ rt.visual_surprise_count }}</div>
+        <div class="metric-delta">visual</div>
+      </div>
+    </div>
+    {% if rt.retention_warnings %}
+      <ul class="list" style="margin-top:12px;">
+        {% for warning in rt.retention_warnings[:4] %}
+          <li class="row"><span class="badge badge-draft">RETENTION</span><span class="row-title">{{ warning }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if rt.retention_notes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for note in rt.retention_notes[:4] %}
+          <li class="row"><span class="badge">NOTE</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No retention plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA VIRAL RETENTION ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Viral Retention</h2>
+    {% if latest_creative_retention_report %}
+      <span class="badge {% if latest_creative_retention_report.ok %}badge-exported{% else %}badge-draft{% endif %}">
+        {{ latest_creative_retention_report.status }}
+      </span>
+    {% else %}
+      <span class="badge">NO REPORT</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Creative retention layer: viral mode, interruption density, emotional contrast, energy curve, and weakest segment.</p>
+
+  {% if latest_creative_retention_report %}
+    {% set cr = latest_creative_retention_report %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Retention Score</div>
+        <div class="metric-value">{{ cr.retention_score }}</div>
+        <div class="metric-delta">{{ cr.status }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Viral Mode</div>
+        <div class="metric-value" style="font-size:1.2rem;">{% if cr.viral_mode %}ON{% else %}OFF{% endif %}</div>
+        <div class="metric-delta">social-native rhythm</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Emotional Contrast</div>
+        <div class="metric-value">{{ cr.metrics.emotional_contrast_score }}</div>
+        <div class="metric-delta">argue / panic / payoff</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Interruptions</div>
+        <div class="metric-value">{{ cr.metrics.interruption_count }}</div>
+        <div class="metric-delta">{{ cr.metrics.interruption_frequency_per_scene }} per scene</div>
+      </div>
+    </div>
+
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Weakest Segment</div>
+        <div class="metric-delta">Scene {{ cr.weakest_retention_segment.scene_id }}: {{ cr.weakest_retention_segment.reason }}</div>
+        <div class="metric-delta">{{ cr.weakest_retention_segment.suggested_fix }}</div>
+      </div>
+      <div class="metric-card" style="text-align:left;">
+        <div class="metric-label">Energy Graph</div>
+        {% for point in cr.energy_graph[:8] %}
+          <div class="metric-delta">Scene {{ point.scene_id }}: {{ point.energy }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% if cr.recommendations %}
+      <ul class="list" style="margin-top:12px;">
+        {% for rec in cr.recommendations[:4] %}
+          <li class="row"><span class="badge">RETENTION</span><span class="row-title">{{ rec }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No creative retention report has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA EXECUTION VERIFICATION ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Execution Verification</h2>
+    {% if latest_execution_report %}
+      <span class="badge {% if latest_execution_report.ok %}badge-exported{% else %}badge-draft{% endif %}">
+        {% if latest_execution_report.ok %}PASS{% else %}FAIL{% endif %}
+      </span>
+    {% else %}
+      <span class="badge">NO REPORT</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Verifies the final render metadata actually consumed all director plans.</p>
+
+  {% if latest_execution_report %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Execution Score</div>
+        <div class="metric-value">{{ latest_execution_report.overall_score }}</div>
+        <div class="metric-delta">{% if latest_execution_report.ok %}pass{% else %}needs fix{% endif %}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Matched</div>
+        <div class="metric-value">{{ latest_execution_report.matched_directives_count }}</div>
+        <div class="metric-delta">directives</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Missing</div>
+        <div class="metric-value">{{ latest_execution_report.missing_directives_count }}</div>
+        <div class="metric-delta">directives</div>
+      </div>
+    </div>
+    {% if latest_execution_report.suggested_fixes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for fix in latest_execution_report.suggested_fixes[:5] %}
+          <li class="row"><span class="badge badge-draft">FIX</span><span class="row-title">{{ fix }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted" style="margin-top:12px;">All director directives were reflected in render metadata.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted">No execution verification has run yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA DIALOGUE ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Dialogue Director</h2>
+    {% if latest_dialogue_plan %}
+      <span class="badge badge-exported">V6 ACTIVE</span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest speaker/listener blocking, cutaways, reaction shots, and interruption beats.</p>
+
+  {% if latest_dialogue_plan %}
+    {% set dg = latest_dialogue_plan.summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Scenes</div>
+        <div class="metric-value">{{ dg.total_scenes }}</div>
+        <div class="metric-delta">{{ dg.top_dialogue_mode }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Reaction Shots</div>
+        <div class="metric-value">{{ dg.reaction_shot_count }}</div>
+        <div class="metric-delta">required</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Overlap Risk</div>
+        <div class="metric-value">{{ dg.overlap_risk_count }}</div>
+        <div class="metric-delta">blocking</div>
+      </div>
+    </div>
+    {% if dg.dialogue_warnings %}
+      <ul class="list" style="margin-top:12px;">
+        {% for warning in dg.dialogue_warnings[:4] %}
+          <li class="row"><span class="badge badge-draft">DIALOGUE</span><span class="row-title">{{ warning }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if dg.interaction_notes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for note in dg.interaction_notes[:4] %}
+          <li class="row"><span class="badge">BLOCK</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No dialogue plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA PERFORMANCE ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Performance Director</h2>
+    {% if latest_performance_plan %}
+      <span class="badge badge-exported">V5 ACTIVE</span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest acting direction: face, eyes, posture, gestures, reactions, and silence beats.</p>
+
+  {% if latest_performance_plan %}
+    {% set pf = latest_performance_plan.summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Scenes</div>
+        <div class="metric-value">{{ pf.total_scenes }}</div>
+        <div class="metric-delta">{{ pf.top_emotion }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg Intensity</div>
+        <div class="metric-value">{{ pf.average_intensity }}</div>
+        <div class="metric-delta">acting</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Silence Beats</div>
+        <div class="metric-value">{{ pf.silence_beat_count }}</div>
+        <div class="metric-delta">timed</div>
+      </div>
+    </div>
+    {% if pf.performance_warnings %}
+      <ul class="list" style="margin-top:12px;">
+        {% for warning in pf.performance_warnings[:4] %}
+          <li class="row"><span class="badge badge-draft">ACT</span><span class="row-title">{{ warning }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if pf.acting_notes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for note in pf.acting_notes[:4] %}
+          <li class="row"><span class="badge">NOTE</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No performance plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA CONTINUITY ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Continuity Director</h2>
+    {% if latest_continuity_plan %}
+      <span class="badge badge-exported">V4 ACTIVE</span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest story coherence, carryover props, positions, and emotional progression plan.</p>
+
+  {% if latest_continuity_plan %}
+    {% set co = latest_continuity_plan.summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Scenes</div>
+        <div class="metric-value">{{ co.total_scenes }}</div>
+        <div class="metric-delta">{{ co.dominant_location }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Locations</div>
+        <div class="metric-value">{{ co.location_count }}</div>
+        <div class="metric-delta">tracked</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Warnings</div>
+        <div class="metric-value">{{ co.warning_count }}</div>
+        <div class="metric-delta">continuity</div>
+      </div>
+    </div>
+    {% if co.continuity_warnings %}
+      <ul class="list" style="margin-top:12px;">
+        {% for warning in co.continuity_warnings[:4] %}
+          <li class="row"><span class="badge badge-draft">JUMP</span><span class="row-title">{{ warning }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if co.emotion_arc %}
+      <ul class="list" style="margin-top:12px;">
+        {% for item in co.emotion_arc[:4] %}
+          <li class="row"><span class="badge">ARC</span><span class="row-title">Scene {{ item.scene_id + 1 }}: {{ item.before }} &rarr; {{ item.after }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No continuity plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA SHOT LANGUAGE ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Shot Director</h2>
+    {% if latest_shot_plan %}
+      <span class="badge badge-exported">V3 ACTIVE</span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest shot composition, framing, camera language, and cut rhythm plan.</p>
+
+  {% if latest_shot_plan %}
+    {% set sh = latest_shot_plan.summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Shot Variety</div>
+        <div class="metric-value">{{ sh.shot_type_variety }}</div>
+        <div class="metric-delta">{{ sh.dominant_shot_type }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Camera Variety</div>
+        <div class="metric-value">{{ sh.camera_move_variety }}</div>
+        <div class="metric-delta">moves</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cut Rhythm</div>
+        <div class="metric-value" style="font-size:1.25rem;">{{ sh.dominant_cut_rhythm }}</div>
+        <div class="metric-delta">dominant</div>
+      </div>
+    </div>
+    {% if sh.missing_shot_warnings %}
+      <ul class="list" style="margin-top:12px;">
+        {% for warning in sh.missing_shot_warnings[:4] %}
+          <li class="row"><span class="badge badge-draft">SHOT</span><span class="row-title">{{ warning }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if sh.focus_notes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for note in sh.focus_notes[:4] %}
+          <li class="row"><span class="badge">FOCUS</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No shot plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA CHOREOGRAPHY ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Choreography Director</h2>
+    {% if latest_choreography_plan %}
+      <span class="badge badge-exported">V2 ACTIVE</span>
+    {% else %}
+      <span class="badge">NO PLAN</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest scene-level movement instructions from Director Layer v2.</p>
+
+  {% if latest_choreography_plan %}
+    {% set ch = latest_choreography_plan.summary %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Scenes</div>
+        <div class="metric-value">{{ ch.total_scenes }}</div>
+        <div class="metric-delta">planned</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Top Emotion</div>
+        <div class="metric-value" style="font-size:1.35rem;">{{ ch.top_emotion }}</div>
+        <div class="metric-delta">motion driver</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Highest Tension</div>
+        <div class="metric-value">{{ ch.highest_tension_scene.tension_level }}</div>
+        <div class="metric-delta">scene #{{ (ch.highest_tension_scene.scene_id or 0) + 1 }}</div>
+      </div>
+    </div>
+    {% if ch.missing_action_warnings %}
+      <ul class="list" style="margin-top:12px;">
+        {% for warning in ch.missing_action_warnings[:4] %}
+          <li class="row"><span class="badge badge-draft">WARN</span><span class="row-title">{{ warning }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if ch.visual_payoff_notes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for note in ch.visual_payoff_notes[:4] %}
+          <li class="row"><span class="badge">PAYOFF</span><span class="row-title">{{ note }}</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    <p class="muted">No choreography plan has been generated yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA AUDIO INTEGRITY ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Audio Integrity</h2>
+    {% if latest_audio_integrity_report %}
+      <span class="badge {% if latest_audio_integrity_report.ok %}badge-exported{% else %}badge-draft{% endif %}">
+        {{ latest_audio_integrity_report.status }}
+      </span>
+    {% else %}
+      <span class="badge">NO REPORT</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Render-blocking narration audit for silence gaps, volume drops, fades, and music conflicts.</p>
+
+  {% if latest_audio_integrity_report %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Worst Silence Gap</div>
+        <div class="metric-value">{{ latest_audio_integrity_report.worst_silence_gap_ms }}</div>
+        <div class="metric-delta">ms</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Worst Volume Drop</div>
+        <div class="metric-value">{{ latest_audio_integrity_report.worst_volume_drop_db }}</div>
+        <div class="metric-delta">dB</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Minimum Voice</div>
+        <div class="metric-value" style="font-size:1.35rem;">
+          {{ latest_audio_integrity_report.minimum_voice_level.lufs if latest_audio_integrity_report.minimum_voice_level.lufs is not none else latest_audio_integrity_report.minimum_voice_level.db }}
+        </div>
+        <div class="metric-delta">LUFS / dB</div>
+      </div>
+    </div>
+
+    {% if latest_audio_integrity_report.issues %}
+      <ul class="list" style="margin-top:12px;">
+        {% for issue in latest_audio_integrity_report.issues[:3] %}
+          <li class="row">
+            <span class="badge badge-draft">{{ issue.severity|upper }}</span>
+            <span class="row-title">
+              {{ issue.description }}
+              <span class="muted">Fix: {{ issue.recommended_fix }}</span>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted" style="margin-top:12px;">Narration audio passed the strict integrity gate.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted">No audio integrity audit has run yet.</p>
+  {% endif %}
+</section>
+
+<!-- ============== HYDRA MOTION DENSITY ============== -->
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Hydra Motion Density</h2>
+    {% if latest_motion_report %}
+      <span class="badge {% if latest_motion_report.ok %}badge-exported{% else %}badge-draft{% endif %}">
+        {{ latest_motion_report.rating|upper }}
+      </span>
+    {% else %}
+      <span class="badge">NO REPORT</span>
+    {% endif %}
+  </div>
+  <p class="panel-sub">Latest render motion score and static-scene failures.</p>
+
+  {% if latest_motion_report %}
+    <div class="metrics-row" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-label">Motion Score</div>
+        <div class="metric-value">{{ latest_motion_report.score }}</div>
+        <div class="metric-delta">{{ latest_motion_report.rating }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Failed Scenes</div>
+        <div class="metric-value">{{ latest_motion_report.failed_scenes|length }}</div>
+        <div class="metric-delta {% if latest_motion_report.failed_scenes|length == 0 %}zero{% endif %}">
+          {{ latest_motion_report.counts.first_5s_moving_element_count or 0 }} movers in first 5s
+        </div>
+      </div>
+    </div>
+
+    {% if latest_motion_report.failed_scenes %}
+      <ul class="list" style="margin-top:12px;">
+        {% for scene in latest_motion_report.failed_scenes[:5] %}
+          <li class="row">
+            <span class="row-num">#{{ scene["index"] + 1 }}</span>
+            <span class="badge">{{ scene.role }}</span>
+            <span class="row-title">
+              {{ scene.why_failed|join('; ') }}
+              <span class="muted">Fix: {{ scene.suggested_fix }}</span>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% elif latest_motion_report.issues %}
+      <ul class="list" style="margin-top:12px;">
+        {% for issue in latest_motion_report.issues[:5] %}
+          <li class="row"><span class="badge badge-draft">FAIL</span><span class="row-title">{{ issue }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted" style="margin-top:12px;">No motion density failures on the latest render.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted">No motion density audit has run yet.</p>
+  {% endif %}
+</section>
+
 <!-- ============== MISSION CONTROL + ACTIVITY ============== -->
 <section class="command-grid">
 
@@ -580,6 +2775,23 @@
     showBanner(`Daily Operation #${runId} still running. Reload the page to keep watching.`, "danger");
   }
 
+  async function refreshProfitBrainReports() {
+    const statusEl = _dq("#profit-brain-refresh-status");
+    const btn = document.querySelector('[onclick="refreshProfitBrainReports()"]');
+    if (statusEl) statusEl.textContent = "Refreshing read-only reports...";
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch("/api/commander/profit-brain/daily-refresh", { method: "POST" }).then(r => r.json());
+      if (!res || !res.ok) throw new Error(res?.error || "Refresh failed");
+      if (statusEl) statusEl.textContent = `Refreshed: ${res.summary?.profit_brain_status || "n/a"} / ${res.summary?.learning_status || "n/a"}`;
+      setTimeout(() => location.reload(), 750);
+    } catch (e) {
+      if (statusEl) statusEl.textContent = `Refresh failed: ${e.message || e}`;
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
 // ============================================================
 // Auto Demo Video Generator
 // ============================================================
@@ -636,6 +2848,62 @@
     }
   });
 })();
+
+async function ytPost(url, body) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return await res.json().catch(() => ({ok:false, error:`HTTP ${res.status}`}));
+}
+
+function ytResult(runId, data) {
+  const el = document.getElementById(`yt-result-${runId}`);
+  if (el) el.textContent = JSON.stringify(data, null, 2);
+}
+
+async function ytSaveEdits(runId) {
+  const tags = (document.getElementById(`yt-tags-${runId}`)?.value || "")
+    .split(",").map(s => s.trim()).filter(Boolean);
+  const data = await ytPost("/api/hydra/youtube-autopilot/save-edits", {
+    run_id: runId,
+    youtube_title: document.getElementById(`yt-title-${runId}`)?.value || "",
+    description: document.getElementById(`yt-desc-${runId}`)?.value || "",
+    tags,
+    thumbnail_text: document.getElementById(`yt-thumb-${runId}`)?.value || "",
+    pinned_comment: document.getElementById(`yt-pin-${runId}`)?.value || "",
+  });
+  ytResult(runId, data);
+}
+
+async function ytApprove(runId) {
+  ytResult(runId, await ytPost(`/api/hydra/youtube-autopilot/approve/${runId}`));
+}
+
+async function ytReject(runId) {
+  ytResult(runId, await ytPost(`/api/hydra/youtube-autopilot/reject/${runId}`));
+}
+
+async function ytUploadUnlisted(runId) {
+  ytResult(runId, await ytPost(`/api/hydra/youtube-autopilot/upload-unlisted/${runId}`));
+}
+
+async function memoryLogDecision() {
+  const result = document.getElementById("memory-result");
+  const body = {
+    project: document.getElementById("memory-project")?.value || "hydra_video",
+    context: document.getElementById("memory-context")?.value || "dashboard",
+    decision: document.getElementById("memory-decision")?.value || "",
+    source: "dashboard",
+  };
+  if (!body.decision.trim()) {
+    if (result) result.textContent = "Decision is required.";
+    return;
+  }
+  const data = await ytPost("/api/memory/decision", body);
+  if (result) result.textContent = JSON.stringify(data, null, 2);
+}
 </script>
 
 {% endblock %}
