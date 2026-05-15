@@ -1,0 +1,37 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Project DB + exports
+sparta.db
+sparta.db-journal
+exports/*.txt
+
+# OS + IDE
+.DS_Store
+.idea/
+.vscode/
+.claude/
+
+# Secrets + env
+.env
+.env.*
+
+# Local backups
+*.bak
+
+# Runtime + generated output trees
+logs/
+outputs/
+storage/
+logsserver.log
+
+# Rendered media + temp media artifacts
+*.mp4
+*.wav
+*.tmp
+
+# JS deps (if ever introduced)
+node_modules/
