@@ -1,0 +1,8 @@
+# Pure Python + stdlib + numpy + pandas only at BUILD time.
+# Per plan-lock build_scope_invariants: no broker/exchange adapters,
+# no Databento client, no QuantConnect runtime required at import time.
+# QC LEAN runtime is provided by the QC environment when the algorithm is
+# uploaded; it must NOT be a build-time hard dependency.
+
+numpy>=1.24
+pandas>=2.0
