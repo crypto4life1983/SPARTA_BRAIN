@@ -320,9 +320,18 @@ def run_in_sample(*, expected_seals: Optional[Dict[str, str]] = None,
     }
     cap_tracker = runner_main.PortfolioCapTracker(max_total_units=CONFIG["portfolio_cap_max_units"])
 
-    # Per-market rolling buffers (high/low/close) sized to max(entry, stop period + 1)
-    buf_len = max(CONFIG["entry_channel_length"], CONFIG["exit_channel_length"],
+    # Per-market rolling buffers (high/low/close) sized to max(entry+1, exit+1, stop_n+1).
+    # P6.5a fix: each consumer slices [-(n+1):-1] (today's bar plus n historical bars),
+    # so the deque maxlen MUST be >= n+1 for every n it serves.
+    buf_len = max(CONFIG["entry_channel_length"] + 1,
+                  CONFIG["exit_channel_length"] + 1,
                   CONFIG["stop_n_period"] + 1)
+    # P6.5a runtime guard: fail loud if the buffer-size invariant ever regresses
+    if buf_len < CONFIG["entry_channel_length"] + 1:
+        raise RuntimeError(
+            f"P6.5a regression: buf_len={buf_len} < entry_channel_length+1="
+            f"{CONFIG['entry_channel_length'] + 1}; entry trigger would never fire"
+        )
     buffers: Dict[str, Dict[str, deque]] = {
         market: {"high": deque(maxlen=buf_len), "low": deque(maxlen=buf_len),
                  "close": deque(maxlen=buf_len)}
