@@ -1,0 +1,264 @@
+{
+  "schema": "sparta.external_research_hunter.family_level_park_memo.v1",
+  "phase": "T8_SPY_TLT_GLD_USO_2014_2022_ETF_PROXY_FAMILY_LEVEL_PARK_MEMO_RECORD_ONLY",
+  "memo_date_utc": "2026-05-26",
+  "authorization": "Authorize T8 + T7-Path-A paired next step after s9 park.",
+  "controller_session": "THIS_SESSION",
+  "selection_plan_reference": {
+    "path": "docs/next_research_track_selection_plan_after_s9_park.md",
+    "commit": "2ec9330"
+  },
+  "is_record_only_memo": true,
+  "is_sealed_lifecycle_artifact": false,
+  "universe_identification": {
+    "universe_id": "spy_tlt_gld_uso_2014_2022_etf_proxy",
+    "symbols": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "USO"
+    ],
+    "vendor": "yfinance_operator_side_fetch_step_02b",
+    "frequency": "daily_close",
+    "is_window_start": "2014-01-02",
+    "is_window_end": "2022-12-30",
+    "oos_window_start_never_inspected_on_this_universe": "2023-01-01",
+    "oos_window_end_never_inspected_on_this_universe": "2025-12-30",
+    "post_oos_data_informational_only_no_diagnostic": "2026-01-02 through 2026-05-22",
+    "sealed_dataset_path": "data/s7_d1_cross_asset_donchian/raw/*.csv",
+    "universe_diversification_mechanic_agnostic": {
+      "effective_independent_bets": 3.5585,
+      "avg_pairwise_dependence_measure": 0.0414
+    },
+    "step_02c_raw_data_audit_verdict": "PASS",
+    "rows_per_symbol_in_csv": 3116
+  },
+  "two_orthogonal_mechanic_priors_cited": {
+    "P1_s7_d1_donchian_trend": {
+      "candidate_record_id": "s7-cross-asset-donchian-no-filter-spy-tlt-gld-uso-yfinance-proxy",
+      "mechanic_family": "trend_following_donchian_55_entry_20_exit_pyramid_plus_0_5N_4_unit_max_2N_stop",
+      "park_report_path": "reports/s7_d1_cross_asset_donchian_yfinance_proxy_park_report.json",
+      "park_report_sha256": "5eb4309096a8377943799b7cc164cbbb13a86f327a813520255d0fa3b3e00263",
+      "park_report_seal_sha256": "e7f3fce5239d18f7cff78ddda81dde060b6842c54ddb1fdba95bfdcd584eb326",
+      "park_report_md_path": "reports/s7_d1_cross_asset_donchian_yfinance_proxy_park_report.md",
+      "park_commit": "a5ac092",
+      "lesson_append_commit": "c6730d2",
+      "terminal_verdict": "REJECT_FAST",
+      "active_K_path": "K12 (DR2 fired + DR3 fired on cost-stress matrix); K4 trade-curve MaxDD > 50% also fired; K9 sample size below 100 (37 trades) also fired",
+      "metrics_S1_baseline": {
+        "net_pnl_dollars_on_100k": 589.5904078177693,
+        "trade_curve_max_drawdown_pct": 69.10094005427824,
+        "total_closed_trades": 37
+      },
+      "per_symbol_pattern_S1": {
+        "SPY": "net negative (~-$45,000)",
+        "TLT": "net negative (~-$8,000)",
+        "GLD": "net negative (~-$43,000)",
+        "USO": "net positive (~+$96,538); USO-only carries the portfolio"
+      },
+      "diversification": {
+        "effective_independent_bets": 3.5585269132770376,
+        "avg_pairwise_dependence_measure": 0.041353542957696436
+      },
+      "edge_at_S0_positive": true,
+      "cost_stress_destroys_edge_at_S2_S3": true
+    },
+    "P2_s9_rsi2_mean_reversion": {
+      "candidate_record_id": "s9-cross-asset-mean-reversion-rsi2-spy-tlt-gld-uso-yfinance-proxy",
+      "mechanic_family": "mean_reversion_rsi_2_oversold_bounce_connors_canonical_no_filter_no_regime_no_asset_selection",
+      "park_report_path": "reports/s9_cross_asset_mean_reversion_rsi2_yfinance_proxy_park_report.json",
+      "park_report_sha256": "cefa80e7b4c2e73f66d5ff4aad37bcb329247e7f16691f92b6d3b748666542c3",
+      "park_report_seal_sha256": "026595ed2b1d81589d5a946bd0fd897e182736b75c15ce8a0c3e9f0d585b94c7",
+      "park_report_md_path": "reports/s9_cross_asset_mean_reversion_rsi2_yfinance_proxy_park_report.md",
+      "park_report_md_sha256": "7c2128b5faf1b872e0ac34d6050e60ab5ae64c90d5feb6eaedd1454ad6173b18",
+      "is_decision_memo_path": "reports/s9_cross_asset_mean_reversion_rsi2_is_decision_memo.json",
+      "is_decision_memo_sha256": "30da17f4d9f04a07a36e5300df38f75ae111ba2c9dc15efa5f73ea7c660d8e71",
+      "park_commit": "9cf2f56",
+      "lesson_append_commit": "efa3076",
+      "terminal_verdict": "PARKED_SAFE_BUT_NOT_MONEY_PROVEN",
+      "active_K_path": "K1 (Sharpe proxy per trade < 0) AND K2 (expectancy per trade <= 0) at S1 baseline",
+      "metrics_S1_baseline": {
+        "total_net_pnl_dollars": -1334.870032,
+        "sharpe_proxy_per_trade": -0.097135,
+        "expectancy_per_trade_dollars": -3.224324,
+        "portfolio_win_rate": 0.531401,
+        "portfolio_implied_breakeven_win_rate": 0.624425,
+        "portfolio_win_rate_gap_to_breakeven_pp": -9.302437,
+        "trade_curve_max_drawdown_pct_vs_starting_cash": 1.64225,
+        "total_closed_trades_portfolio": 414
+      },
+      "cost_stress_matrix_total_net_pnl_per_tier": {
+        "S0": -1211.030033,
+        "S1": -1334.870032,
+        "S2": -1578.440026,
+        "S3": -1825.78003
+      },
+      "per_symbol_pattern_S1": {
+        "SPY": 140.090297,
+        "TLT": -104.229948,
+        "GLD": -194.130359,
+        "USO": -1176.600021
+      },
+      "diversification": {
+        "effective_independent_bets": 3.558527,
+        "avg_pairwise_dependence_measure": 0.041354
+      },
+      "edge_at_S0_negative": true,
+      "cost_amplifies_loss_does_not_cause_it": true
+    }
+  },
+  "cumulative_family_level_finding": {
+    "statement": "On the SPY/TLT/GLD/USO universe over the 2014-2022 in-sample window, two structurally orthogonal mechanic families (trend-following and mean-reversion) at canonical parameters with realistic ETF-proxy costs both empirically failed to demonstrate a money-proven edge. The validated diversification structure of this universe (effective_independent_bets ~ 3.56; avg_pairwise_dependence ~ 0.041) is genuine, mechanic-agnostic, and re-usable, but it does NOT rescue a negative or cost-fragile edge.",
+    "diversification_independence_orthogonal_to_edge_presence": true,
+    "s9_is_load_bearing_demonstration_of_principle": true,
+    "two_failure_modes_on_opposite_ends_of_spectrum": true,
+    "axis_comparison": {
+      "trade_count_over_IS": {
+        "P1": 37,
+        "P2": 414
+      },
+      "edge_at_S0_sign": {
+        "P1": "positive",
+        "P2": "negative"
+      },
+      "failure_mode": {
+        "P1": "cost_stress_sensitivity_destroys_S0_edge",
+        "P2": "negative_edge_even_before_cost"
+      },
+      "max_drawdown_pct": {
+        "P1": 69.1,
+        "P2": 1.64
+      },
+      "per_symbol_concentration": {
+        "P1": "USO_carries_+96k_profit",
+        "P2": "USO_carries_-1177_loss"
+      },
+      "diversification_eff_indep_bets": {
+        "P1": 3.5585,
+        "P2": 3.5585
+      },
+      "diversification_avg_pairwise_dep": {
+        "P1": 0.0414,
+        "P2": 0.0414
+      }
+    }
+  },
+  "family_level_park_rule": {
+    "scope": "spy_tlt_gld_uso_2014_2022_etf_proxy_universe_at_canonical_mechanic_parameters",
+    "rule": "No further mechanic-variant candidates on this universe shall be authorized without first-principles burden satisfaction.",
+    "first_principles_burden_requirements": [
+      {
+        "id": "R5_AB_a",
+        "requirement": "Candidate's Tier-N spec at locking time MUST explicitly state WHY its mechanic is structurally different from BOTH P1 (trend-following) AND P2 (mean-reversion)."
+      },
+      {
+        "id": "R5_AB_b",
+        "requirement": "Candidate's Tier-N spec at locking time MUST explicitly state WHY it might survive where P1 failed on cost-stress sensitivity AND where P2 failed on negative S0 edge."
+      }
+    ],
+    "burden_failure_conditions": [
+      "Addresses only ONE of P1 or P2 failure modes -> burden NOT satisfied",
+      "Rebadges P1 or P2 with relaxed thresholds -> burden NOT satisfied",
+      "Depends on diversification rescuing a negative edge -> burden NOT satisfied"
+    ],
+    "enforcement_reference": "docs/next_research_track_selection_plan_after_s9_park.md section 6 reject-fast criterion R8"
+  },
+  "related_b006_nnn_single_instrument_spy_context_informational_only": {
+    "scope_note": "These candidates are SPY-only single-instrument vol-targeting and are NOT direct evidence for the multi-asset universe park. They are informational context only.",
+    "B006_001_SPY_VOL_TARGETING": {
+      "mechanic": "single_instrument_spy_long_with_realized_vol_sizing_at_10pct_target",
+      "final_sealed_verdict": "REQUEST_FULL_PREREGISTRATION_REVIEW",
+      "lesson_references": [
+        "LESSON_B006_001_002",
+        "LESSON_B006_001_003",
+        "LESSON_B006_001_004"
+      ],
+      "live_unlocked": false,
+      "frc_granted": false,
+      "promoted": false
+    },
+    "B006_002_SPY_VOL_TARGETING_C4_ENFORCED": {
+      "mechanic": "same_b006_001_strategy_plus_warmup_guard_plus_dr6_post_warmup_narrowing_plus_dr11_c4_enforcement",
+      "final_sealed_verdict": "REJECT_FAST",
+      "lesson_references": [
+        "LESSON_B006_002_001",
+        "LESSON_B006_002_002"
+      ],
+      "live_unlocked": false,
+      "frc_granted": false,
+      "promoted": false
+    },
+    "explicit_caveat": "Inclusion of these references does NOT extend the universe-level park to vol-targeting on the multi-asset basket -- such an extension would require its own diagnostic prior."
+  },
+  "what_this_memo_does_not_do": {
+    "modify_any_sealed_prior_artifact": false,
+    "author_or_modify_strategy_code": false,
+    "run_any_backtest_or_simulator": false,
+    "compute_any_signal": false,
+    "fetch_any_data": false,
+    "call_yfinance_or_yahoo_finance": false,
+    "call_databento": false,
+    "access_databento_api_key": false,
+    "authorize_live_trading": false,
+    "grant_frc": false,
+    "promote_any_candidate": false,
+    "mutate_review_queue_json": false,
+    "mutate_production_idea_memory": false,
+    "modify_brain_memory_lessons_md_dirty_unstaged_left_untouched": false,
+    "modify_or_stage_anything_outside_three_planning_artifacts_named_in_authorization": false,
+    "recommend_a_third_try_on_this_universe": false
+  },
+  "permanent_labels_for_this_universe": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "FAMILY_LEVEL_PARK_TWO_ORTHOGONAL_MECHANICS_FAILED",
+    "DIVERSIFICATION_HOLDS_BUT_DOES_NOT_RESCUE_EDGE",
+    "FIRST_PRINCIPLES_BURDEN_REQUIRED_FOR_THIRD_MECHANIC_CANDIDATE",
+    "LIVE_TRADING_BLOCKED",
+    "STRATEGY_LAB_PROMOTION_BLOCKED",
+    "BROKER_INTEGRATION_BLOCKED",
+    "OOS_BLOCKED",
+    "DO_NOT_RESCUE_S7_D1_SPEC",
+    "DO_NOT_ITERATE_S9_PARAMETERS_WITHOUT_REVN_SPEC",
+    "DO_NOT_LOOSEN_K_THRESHOLDS_OR_A_GATE_THRESHOLDS_RETROACTIVELY"
+  ],
+  "files_written_this_memo_turn": [
+    "reports/external_research_hunter/t8_spy_tlt_gld_uso_2014_2022_family_park_memo.md",
+    "reports/external_research_hunter/t8_spy_tlt_gld_uso_2014_2022_family_park_memo.json",
+    "docs/s10_d1_mnq_mgc_databento_long_history_tier_n_spec_plan.md"
+  ],
+  "brain_memory_dirty_lessons_md_left_unstaged_and_unmodified": true,
+  "status_carried_forward": {
+    "trading": "PAUSED",
+    "live_mode": "BLOCKED_AT_6_GATES",
+    "frc": "NEVER_GRANTED",
+    "no_strategy_optimization_authorized": true,
+    "no_live_trading": true,
+    "no_strategy_lab_promotion": true,
+    "no_brokerage_connection": true,
+    "no_external_network_this_turn": true,
+    "no_databento_this_turn": true,
+    "no_review_queue_mutation": true,
+    "no_production_idea_memory_mutation": true,
+    "no_profitability_claim": true
+  },
+  "next_step_authorization_paths_available": [
+    {
+      "label": "Build T7-Path-A Databento MNQ+MGC long-history Tier-N spec",
+      "scope_note": "Builds on the sibling plan file authored in this same turn (docs/s10_d1_mnq_mgc_databento_long_history_tier_n_spec_plan.md). Requires its own separately authorized operator turn."
+    },
+    {
+      "label": "Stay at family-level park only",
+      "scope_note": "No further track opened; trading-bot research arc pauses. Default if operator chooses consolidation."
+    },
+    {
+      "label": "Pivot to different universe entirely (T4 sector / T5 international / T6 single-name)",
+      "scope_note": "Requires fresh selection-plan revision per section 21 of docs/next_research_track_selection_plan_after_s9_park.md."
+    }
+  ],
+  "is_live_approved": false,
+  "is_profit_proof": false,
+  "frc_granted": false,
+  "is_candidate_promoted": false,
+  "report_seal_sha256": "4f375af7a46d059078782ba490a91e80ef3e1329db7fc710b66b67615e2b0b65",
+  "seal_method": "sha256(json.dumps(body, sort_keys=True, separators=(',',':'), ensure_ascii=False)) excluding report_seal_sha256+seal_method"
+}
