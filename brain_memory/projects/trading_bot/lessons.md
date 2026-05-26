@@ -4227,3 +4227,132 @@ into deep extraction even if the warning_labels list omits them.
   is the canonical terminal record. Do not rescue this spec; build
   the next research track on top of the validated diversification
   finding with a different edge family or a fresh sealed parameterization.
+
+
+## 2026-05-25 · Four B006_001 framework lessons formalized (record-only, do not change sealed verdict)
+
+- **LESSON_B006_001_001 — favorable verdict ≠ live-ready.**
+  A `REQUEST_FULL_PREREGISTRATION_REVIEW` outcome is the *strongest favorable*
+  value in the closed enum, but it is still NOT a `PASS`, NOT live-ready, NOT
+  profit-proof, NOT a candidate promotion, NOT an FRC grant, and does NOT
+  unlock the 6-gate live block. The "favorable" label denotes only that the
+  next legitimate step is a preregistration review — itself a human-judgment
+  paperwork process — not an operational status change.
+
+- **LESSON_B006_001_002 — warmup-guard pattern is mandatory.**
+  QC engine emitted a `OnWarmupFinished` / order-submit warning during the
+  warmup window. The warning was code-quality (auto-resolved before any
+  eligible rebalance touched live order flow) but exposes that future runners
+  must defensively no-op all sizing/submit logic until `IsWarmingUp` clears.
+  Future successor B006_NNN candidates MUST include a runner-level warmup
+  guard before any order or sizing path.
+
+- **LESSON_B006_001_003 — latent fail-closed evaluation must remain
+  observability-only, never verdict-driving (when off-precedence by design).**
+  DR6 latent-fired during B006_001 but is not in B006_001's verdict precedence
+  chain (same as the entire B005_NNN family). The framework's invariant —
+  latent rules are informational, not verdict-driving when explicitly off
+  precedence — held. Successor candidates MUST continue to publish the latent
+  evaluation table without letting it short-circuit verdict logic.
+
+- **LESSON_B006_001_004 — sealed-spec preconditions MUST be runner-enforced.**
+  Sealed-spec §13 listed conditions C3 and C4 (leverage-cap-bound-rate
+  preconditions) but the sealed runner did not enforce them — it only emitted
+  the rate as a metric. The leverage-cap-bound rate exceeded the C4 textual
+  precondition, but because the runner did not enforce, no fail-closed rule
+  fired and the verdict logic still produced a favorable outcome. This is a
+  load-bearing successor lesson: every textual precondition in a future
+  sealed-spec MUST have a runner-side enforcement and a fail-closed rule that
+  fires when violated. Successor B006_002 must close this gap.
+
+
+## 2026-05-26 - LESSON_S10_D1_001 - Metadata-surface failures do not generalize to availability verdicts
+
+- **Lesson:** A `BentoClientError` (or any provider-specific error class) returned by the **metadata/symbology** surface MUST NOT be treated as a "symbol unavailable" verdict. The right surface for the availability question is the **timeseries** surface (`get_range` per-day probe with record-counting).
+- **Why:** Different Databento API surfaces fail-closed differently. The metadata surface can fail on auth, rate, schema-detection, or symbology-not-resolved-yet errors that do not imply the underlying timeseries is empty or absent. The S10-D1 probe demonstrated this: all 18 timeseries probes returned HTTP `OK`, even for cells where the metadata surface previously erred.
+- **How to apply:** Before declaring a symbol unavailable in a candidate spec, run a small-grid timeseries availability probe (3-6 dates) with record-counting. Zero counts paired with an unresolved-symbol warning are strong negative evidence; non-zero counts on any date are strong positive evidence. Mixed results require further probing at boundary dates.
+- **Anti-pattern:** Accepting a single error from the metadata surface as evidence the symbol is "not on the vendor" — this would cause the framework to skip otherwise-valid candidate universes.
+
+## 2026-05-26 - LESSON_S10_D1_002 - The 1380-minute canonical day for CME Globex futures ohlcv-1m
+
+- **Lesson:** For continuous CME Globex futures probed on the `ohlcv-1m` schema, a record count of exactly `1380` represents the canonical full-session day (23 hours of trading × 60 minutes). Counts of 1,296-1,375 are normal partial / shortened-session days. Counts of 244-990 are typically launch-day-adjacent, low-adoption-era, or extended-holiday days. A count of `0` paired with an unresolved-symbol warning is strong evidence the contract did not exist on that date.
+- **Why:** CME Globex includes a 60-minute daily settlement maintenance window; the trading session is 23 hours not 24. This makes 1,380 (not 1,440) the natural ceiling for one trading day's ohlcv-1m record count.
+- **How to apply:** When interpreting availability-probe output for any CME futures dataset, calibrate against the 1,380 ceiling rather than 1,440. Anything significantly below 1,380 deserves a brief look at whether the day was a known shortened session (year-end, day-after-holiday, etc.) before concluding the symbol was unavailable.
+
+## 2026-05-26 - s9 RSI-2 mean-reversion ETF-proxy terminal lesson (parked at PARKED_SAFE_BUT_NOT_MONEY_PROVEN)
+
+- **Edge was negative even at zero cost; this is a different failure mode
+  from s7 D1**. The s9 cross-asset RSI-2 mean-reversion ETF-proxy chain
+  (10 sealed commits from `530b545` selection plan to `9cf2f56` park
+  report) parked at `PARKED_SAFE_BUT_NOT_MONEY_PROVEN` because K1
+  (Sharpe proxy per trade < 0) AND K2 (expectancy per trade <= 0) fired
+  at S1 baseline. The cost-stress matrix degraded smoothly across
+  S0/S1/S2/S3 with DR2/DR3/DR5 ALL CLEAR; K12 did NOT fire. The
+  smoking-gun S0 row showed `-$1,211.03` net PnL over 414 closed
+  trades at zero slippage and zero commission. The edge itself is
+  negative; costs only make a negative edge more negative. This is
+  STRUCTURALLY DISTINCT from s7 D1 ETF-proxy's `REJECT_FAST` via K12
+  (cost-stress with a positive S0 edge that costs destroyed). The
+  s9 simulator solved every other failure mode of s7 D1: trade
+  density (414 vs 37 trades; clears K9 by 4x), drawdown (1.64% vs
+  cap-binding catastrophe; clears K4 by 30x), cost-stress robustness
+  (DRs all clear), safety attestations (C1-C8 all True), and
+  provenance (K8 zero drift across 11 pinned upstream artifacts).
+  Per-trade win rate 53.14% is above absolute breakeven but below
+  the P/L-implied breakeven of 62.44%, leaving a -9.30 percentage-
+  point WR gap (A5 fails); the strategy reverts often enough to win
+  the majority of trades but the few losing trades are large enough
+  to erase the cumulative edge. All four markets show the same shape,
+  so the failure is structural across the universe, not market-
+  specific.
+
+- **The diversification finding is now validated by two structurally
+  orthogonal mechanics; it is a universe property, not a mechanic
+  artifact**. The s9 aggregator independently measured
+  `effective_independent_bets = 3.56` and `avg_pairwise_dependence =
+  0.041` on the same four-symbol daily-return matrix over the same
+  in-sample window, matching the s7 D1 measurement to within
+  rounding. This convergence across one trend-following mechanic
+  (s7 D1 Donchian) and one mean-reversion mechanic (s9 RSI-2) is
+  unusually strong evidence that the diversification structure on
+  SPY/TLT/GLD/USO 2014-2022 is a property of the universe, not an
+  artifact of either mechanic. It is the one finding that survives
+  both parks and that any future research on this universe can
+  legitimately rely on. K10 and A7 clear comfortably under both
+  mechanics. The diversification idea is permanently inheritable;
+  the strategies that wrapped it are permanently parked.
+
+- **Do not continue simple canonical mechanics on this exact
+  universe without a fresh first-principles reason**. Two
+  structurally orthogonal mechanics empirically falsified on the
+  same ETF universe at canonical parameters with realistic ETF-proxy
+  cost assumptions over 2014-2022 is a strong universe-level
+  finding. The two failure modes point at different things: s7
+  trend-following had a positive S0 edge that cost-stress destroyed
+  (motivates lower-cost-regime research); s9 mean-reversion had a
+  negative S0 edge that no cost regime could rescue (motivates a
+  different mechanic family or different universe). Future research
+  should NOT continue rebadging simple canonical mechanics on this
+  exact universe under a slightly different parameterization; that
+  is parameter-shopping and would invite K7 silent-introduction
+  risk. Future research MAY: (a) carry the diversification finding
+  forward to a different mechanic family (rotation, carry,
+  vol-of-vol) on the same universe; (b) carry the same mechanics to
+  a different universe (international ETFs, sector ETFs, single
+  names); (c) revisit the cost-structure assumption (futures, prop,
+  options) with a fresh `_revN_` spec and first-principles
+  justification; (d) accept the universe-level finding and pivot
+  entirely. Any rebadged s9 or s7 variant on this exact universe
+  requires a fresh sealed Tier-N spec with explicit first-principles
+  reasoning, not threshold relaxation. The 10-commit s9 chain
+  (`530b545` ... `9cf2f56`) is preserved as the audit trail; the
+  park report at `reports/s9_cross_asset_mean_reversion_rsi2_yfinance_proxy_park_report.json`
+  (sha256 `cefa80e7b4c2e73f66d5ff4aad37bcb329247e7f16691f92b6d3b748666542c3`,
+  seal `026595ed2b1d81589d5a946bd0fd897e182736b75c15ce8a0c3e9f0d585b94c7`)
+  is the canonical terminal record. The s9 IS decision memo at
+  `reports/s9_cross_asset_mean_reversion_rsi2_is_decision_memo.json`
+  (sha256 `30da17f4d9f04a07a36e5300df38f75ae111ba2c9dc15efa5f73ea7c660d8e71`,
+  seal `0d7b3561c16cf7cb4892f0233c7445342036c566da52fc54462f4915a0744729`)
+  is the corroborating evidence memo. Trading remains PAUSED; live
+  remains BLOCKED_AT_6_GATES; FRC never granted; advisory label
+  permanent `DIAGNOSTIC_ONLY_NOT_LIVE_GRADE`.
