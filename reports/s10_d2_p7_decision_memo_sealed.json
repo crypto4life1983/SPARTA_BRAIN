@@ -1,0 +1,292 @@
+{
+  "algo_version_for_run_id": "s10_d2_v0_1_0",
+  "authored_at_utc": "2026-05-27T03:04:28.767045Z",
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "commit_candidate_summary": {
+    "commit_message_body_summary": "Decision memo synthesizing P6 IS + P6.5 cost-stress matrix into a conservative recommendation to advance S10-D2 to the P10 OOS gate as the next research action.",
+    "commit_subject": "Seal S10-D2 P7 decision memo",
+    "files_authorized_by_operator": [
+      "reports/s10_d2_p7_decision_memo_sealed.json",
+      "reports/s10_d2_p7_decision_memo_sealed.md"
+    ],
+    "files_not_to_be_staged": [
+      "brain_memory/projects/trading_bot/lessons.md (long-running parallel-session dirty file; not mine)",
+      "any other unrelated tracked file (none of which are mine)"
+    ],
+    "pathspec_commit_mode_required": true,
+    "verification_required_before_commit": "git status --short -uall must show ONLY the 2 new authorized files staged"
+  },
+  "cost_friction_interpretation": {
+    "cost_stress_observation": "Each tier step S0->S1->S2->S3->S4 erodes net PnL by approximately ~$14k, ~$59k, ~$89k, and ~$257k respectively (cumulative). The S4 result of +$568k on $500k starting cash is the most conservative cost-modeled IS outcome and still cleared DR2..DR5.",
+    "frictions_modeled": [
+      "commission",
+      "fees",
+      "slippage_ticks (entry/stop/exit) scaled by tick_value"
+    ],
+    "frictions_not_modeled_in_p6_or_p6_5": [
+      "Liquidity impact on large orders (sizing is 1% portfolio per unit; small enough that point-tick slippage is generally a reasonable proxy).",
+      "Exchange outage / circuit breaker behavior.",
+      "Margin call cascades during stress events.",
+      "Roll execution slippage beyond the +1 spread tick model.",
+      "Funding/borrowing cost asymmetry for shorts."
+    ],
+    "tier_definition_pin": "Cost tiers S0..S4 defined in CONFIG['cost_stress_tiers']; S0 = low/relaxed cost; S1 = baseline; S4 = adversarial.",
+    "what_this_does_NOT_say": "These cost-stress results are model-level frictions applied to historical IS data. They do NOT model live broker-level execution variance, exchange-level idiosyncrasies, or stress regime conditions that may exist outside the 2013-2022 window. Live frictions can exceed the S4 model."
+  },
+  "evidence_summary_p6_5_cost_stress": {
+    "A8_cost_stress_S0_S4_run": "PASS",
+    "K12_DR_fires_on_cost_stress": "not_fired",
+    "cache_view_used": "USE_DEFAULT_CACHE_ROOT_NO_MONKEY_PATCH",
+    "closed_trade_invariance": "200 closed trades across all 5 tiers (entry signal is identical; only cost frictions differ)",
+    "matrix_verdict": "READY_FOR_NEXT_PHASE",
+    "monotonic_degradation_observed": "S0 net_pnl > S1 > S2 > S3 > S4 (cost stress erodes returns without suppressing entries)",
+    "per_tier_summary": {
+      "S0": {
+        "DR_fires": [],
+        "all_safety_zero": true,
+        "closed_trades": 200,
+        "expectancy_usd": 4936.208961572274,
+        "net_pnl_usd": 987241.7923144549,
+        "sharpe_proxy": 0.14501965117253296,
+        "source": "EXECUTED_THIS_TURN_V2_RERUN",
+        "trade_curve_maxdd_pct": -27.974029416679908,
+        "wall_s": 226.664
+      },
+      "S1": {
+        "DR_fires": [],
+        "all_safety_zero": true,
+        "closed_trades": 200,
+        "expectancy_usd": 4865.489302337149,
+        "net_pnl_usd": 973097.8604674297,
+        "sharpe_proxy": 0.14311192966266303,
+        "source": "BASELINE_READ_FROM_P6_SEAL",
+        "trade_curve_maxdd_pct": -28.305996161770587,
+        "wall_s": 277.547
+      },
+      "S2": {
+        "DR_fires": [],
+        "all_safety_zero": true,
+        "closed_trades": 200,
+        "expectancy_usd": 4569.246671770833,
+        "net_pnl_usd": 913849.3343541665,
+        "sharpe_proxy": 0.14003399758896373,
+        "source": "EXECUTED_THIS_TURN_V2_RERUN",
+        "trade_curve_maxdd_pct": -29.759133659674404,
+        "wall_s": 255.419
+      },
+      "S3": {
+        "DR_fires": [],
+        "all_safety_zero": true,
+        "closed_trades": 200,
+        "expectancy_usd": 4122.114682297307,
+        "net_pnl_usd": 824422.9364594615,
+        "sharpe_proxy": 0.1300411761461735,
+        "source": "EXECUTED_THIS_TURN_V2_RERUN",
+        "trade_curve_maxdd_pct": -30.348316612531956,
+        "wall_s": 241.867
+      },
+      "S4": {
+        "DR_fires": [],
+        "all_safety_zero": true,
+        "closed_trades": 200,
+        "expectancy_usd": 2839.3620267964325,
+        "net_pnl_usd": 567872.4053592865,
+        "sharpe_proxy": 0.10557617333749131,
+        "source": "EXECUTED_THIS_TURN_V2_RERUN",
+        "trade_curve_maxdd_pct": -36.92630600470151,
+        "wall_s": 243.836
+      }
+    },
+    "source_seal_sha256": "f9a34674de4f7fdf8098b39959032d152bf2282e9ad57cedd68bc33cee2099ab",
+    "tiers_evaluated": [
+      "S0",
+      "S1 (baseline from P6)",
+      "S2",
+      "S3",
+      "S4"
+    ],
+    "total_DR_fires_count": 0
+  },
+  "evidence_summary_p6_is": {
+    "agate_evaluation_summary": {
+      "A10_cap_binding_events_eq_0": true,
+      "A1_closed_trades_ge_100": true,
+      "A2_sharpe_proxy_gt_0": true,
+      "A3_expectancy_gt_0": true,
+      "A4_trade_curve_maxdd_pct_le_50": true,
+      "A5_2of4_markets_wr_gap_ge_0_or_portfolio_wr_gap_ge_plus_half_pp": true,
+      "A6_validator_pass": true,
+      "A8_cost_stress_S0_S4_run": "not_evaluated",
+      "A9_phase2_c1_c8_inheritance_attestable": true
+    },
+    "all_safety_warnings_zero": true,
+    "breakeven_wr_pct": 24.52140879795446,
+    "cap_binding_events_count": 0,
+    "closed_trades_portfolio": 200,
+    "cost_tier": "S1 (baseline)",
+    "expectancy_per_trade_usd": 4865.489302337149,
+    "final_equity_mnq_equivalent": 1473097.8604674295,
+    "in_sample_window": [
+      "2013-01-01",
+      "2022-12-30"
+    ],
+    "kgate_K_fires_count": 0,
+    "long_pnl_usd": 458468.0468345126,
+    "losses": 130,
+    "max_units_observed_per_market_max": 1,
+    "n_long": 111,
+    "n_short": 89,
+    "net_pnl_mnq_equivalent": 973097.8604674297,
+    "no_pyramid_invariant_held": true,
+    "per_market": {
+      "CL": {
+        "n_trades": 49,
+        "net_pnl_usd": 422894.5533926982,
+        "win_rate_pct": 38.775510204081634
+      },
+      "GC": {
+        "n_trades": 49,
+        "net_pnl_usd": -345.0100277875581,
+        "win_rate_pct": 28.57142857142857
+      },
+      "NQ": {
+        "n_trades": 54,
+        "net_pnl_usd": 126607.38988965136,
+        "win_rate_pct": 35.18518518518518
+      },
+      "ZN": {
+        "n_trades": 48,
+        "net_pnl_usd": 423940.92721286777,
+        "win_rate_pct": 37.5
+      }
+    },
+    "pl_ratio": 3.0780691200883146,
+    "sharpe_proxy_per_trade": 0.14311192966266303,
+    "short_pnl_usd": 514629.8136329171,
+    "source_seal_sha256": "e6cdc7c68a9e2b7b6d749b73ff433e585c9de55890af5dce3dca51d74430c1b8",
+    "starting_cash_mnq_equivalent": 500000,
+    "trade_curve_maxdd_pct": -28.305996161770587,
+    "trade_curve_maxdd_usd": -141529.98080885294,
+    "trading_days_in_union": 2574,
+    "verdict": "READY_FOR_LONGER_BACKTEST",
+    "win_rate_gap_to_breakeven_pp": 10.478591202045537,
+    "win_rate_pct": 35.0,
+    "wins": 70
+  },
+  "executive_decision": "Advance S10-D2 to the P10 OOS gate as the next research action. P6 IS produced a clean READY_FOR_LONGER_BACKTEST verdict (200 closed trades, 0 safety counters firing, 0 K-gates fired, no-pyramid invariant held, A1..A10 evaluated gates passing). P6.5 cost-stress matrix produced a clean READY_FOR_NEXT_PHASE verdict (A8 PASS, K12 not fired, 0 DR fires across all 4 non-baseline tiers S0/S2/S3/S4; monotonic PnL degradation S0->S4 as expected; closed trade count invariant at 200 across all 5 tiers). The IS layer of the lifecycle is complete. The next phase that produces new evidence about whether the strategy generalizes is the OOS gate, which is a research truth-test, NOT an approval to trade.",
+  "explicit_blocked_actions": [
+    "DO NOT advance to live trading.",
+    "DO NOT advance to paper trading via broker connection.",
+    "DO NOT modify any sealed Tier-N / plan-lock / phase-2 / P3 / P3.5 / P4 / P6 / P6.5 file.",
+    "DO NOT revisit the OOS window (2023+) before a separate AUTHORIZE S10-D2 P10 OOS gate turn is issued.",
+    "DO NOT relax any K-gate / A-gate / DR threshold to make a future verdict cleaner.",
+    "DO NOT change the candidate_record_id, starting_cash, max_units_per_market, AMB6 filter, Donchian 55/20, Wilder ATR(20), 2N stop, or 1% risk sizing.",
+    "DO NOT revive S8-D1, S7-D1, D5, B005_001, or NKE.",
+    "DO NOT make any profitability claim outside this conservative diagnostic framing.",
+    "DO NOT touch obsidian-trade-logger.",
+    "DO NOT mutate review_queue.json.",
+    "DO NOT fetch or call Databento or QuantConnect or any broker/exchange/wallet API."
+  ],
+  "hard_boundaries_held": {
+    "no_backtest": true,
+    "no_broker_adapter_touched": true,
+    "no_commit_in_orchestrator": true,
+    "no_d5_b005_001_nke_revival": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_db_historical": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_inspection": true,
+    "no_paper_trading": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_qc_runtime": true,
+    "no_review_queue_mutation": true,
+    "no_scheduler_change": true,
+    "no_source_modification": true,
+    "no_strategy_execution": true,
+    "no_unrelated_tracked_file_modified": true
+  },
+  "inherited_seals": {
+    "p3_5_scaffold_completion_seal_sha256": "66d38f359b54882b3107c4ad4291673d63f05f5b0d3daa19088b4a4c76469261",
+    "p3_build_in_sample_driver_report_seal_sha256": "ddd604c96508a0ab835bcbae6e72fabc2993cd3f0dc459898ca326617dd96443",
+    "p3_build_runner_report_seal_sha256": "1eb04aa312f4053134c1e9387be7716aa4564c019168ee2cedcf789063d96405",
+    "p4_smoke_seal_sha256": "c31ded81f9a2883586883aadda4d64d629a047917fcebd56169ca42eccf4fdde",
+    "p6_5_cost_stress_matrix_seal_sha256": "f9a34674de4f7fdf8098b39959032d152bf2282e9ad57cedd68bc33cee2099ab",
+    "p6_is_diagnostic_seal_sha256": "e6cdc7c68a9e2b7b6d749b73ff433e585c9de55890af5dce3dca51d74430c1b8",
+    "phase2_plan_seal_sha256": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "RESEARCH_DECISION_ONLY",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NEXT_TRUTH_TEST_IS_OOS"
+  ],
+  "live_promotion_path_closed": true,
+  "live_trading_remains_blocked_at_6_gates_permanently": true,
+  "no_profitability_claim": true,
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC",
+  "recommended_next_phase": "ADVANCE_TO_P10_OOS_GATE",
+  "report_kind": "S10-D2 P7 decision memo (synthesis of P6 IS + P6.5 cost-stress)",
+  "report_seal_sha256": "87baa6e8c4cc1eb47c1345b97990eab86d5cefb37636e9fe57a029506d398c05",
+  "risk_interpretation": {
+    "concentration_risk_per_market": {
+      "CL_and_ZN_dominant": "CL +$422,895 and ZN +$423,941 each contributed ~43.5% of total IS net PnL.",
+      "GC_essentially_flat": "GC contributed -$345 over 10y IS (49 trades). Strategy edge is concentrated in CL/ZN/NQ; GC contributes diversification with near-zero realized return."
+    },
+    "long_vs_short_balance": {
+      "interpretation": "Roughly balanced (~111 long / 89 short over 10y). Short side contributes ~53% of net PnL.",
+      "long_pnl_usd": 458468.0468345126,
+      "n_long": 111,
+      "n_short": 89,
+      "short_pnl_usd": 514629.8136329171
+    },
+    "max_drawdown_observed": {
+      "S1_baseline_pct": -28.305996161770587,
+      "S4_worst_case_pct": -36.92630600470151,
+      "S4_worst_case_usd": -184631.53002350754
+    },
+    "trade_curve_drawdown_envelope": "Trade-curve max DD grew monotonically with cost stress: S0=-27.97%, S1=-28.31%, S2=-29.76%, S3=-30.35%, S4=-36.93%. S4 drawdown crosses -30% but stays below the K4 threshold of -50%.",
+    "what_remains_unobserved": [
+      "Out-of-sample generalization (2023+).",
+      "Regime-specific behavior (rate hikes, vol spikes, exchange holiday quirks not in IS window).",
+      "Live execution friction beyond the modeled cost-stress envelope.",
+      "Concurrent risk to correlated positions (cross-market correlation effects under stress)."
+    ]
+  },
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "status_fields": {
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "verdict_never_means_live_ready": true,
+  "why_ready_or_not_for_oos": {
+    "blocked_by_anything": false,
+    "blockers_observed": [],
+    "ready_for_OOS_gate": true,
+    "reasons_ready": [
+      "P6 IS produced READY_FOR_LONGER_BACKTEST with 0 K-gates fired and all evaluated A-gates passing.",
+      "Closed trade count (200) is 2x the K9 threshold (100) - the sample is structurally sufficient for the per-trade-statistics gates that apply at this stage.",
+      "All safety counters held zero in P6 IS AND in all 4 P6.5 non-baseline tiers (no cap binding, no N-drift, no non-RTH fills, no rollover violations, no stale fills, no unsupported order types, no pyramid state machine violations, no per-market unit invariant violations).",
+      "No-pyramid invariant (max_units_per_market=1) held across all 5 tiers; second_unit_add_attempt_count=0.",
+      "starting_cash invariant ($500,000) held across all 5 tiers (S-STOP-14 not fired).",
+      "P6.5 cost-stress sweep cleared A8 with K12 not fired; even adversarial S4 tier remained profitable, positive-expectancy, positive-sharpe, and above the trade-count floor.",
+      "Inherited seal chain (Tier-N -> P1 -> P2 -> P3 -> P3.5 -> P4 -> P6 -> P6.5) is intact and verified at each step; assert_seal_inheritance() passed at every P6/P6.5 invocation."
+    ],
+    "what_this_does_NOT_mean": [
+      "IS results do not generalize automatically to OOS.",
+      "Cost-stress matrix passes do not imply live execution will match modeled frictions.",
+      "K-gate / A-gate / DR-rule passes are necessary but not sufficient for live promotion.",
+      "Live promotion path remains BLOCKED_AT_6_GATES permanently regardless of OOS outcome (per phase-2 plan; this is a research lifecycle, not a deployment lifecycle).",
+      "No statement about future P&L is implied by these results.",
+      "OOS is the next truth-test; it has the power to invalidate the IS conclusion. Approaching OOS with the expectation that it MIGHT fail is the correct stance."
+    ]
+  }
+}
