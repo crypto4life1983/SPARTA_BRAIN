@@ -1,0 +1,691 @@
+{
+  "algo_version_for_run_id": "s12_d1_v0_1_0",
+  "authored_at_utc": "2026-05-27T14:38:51.562701Z",
+  "binding": true,
+  "candidate_purpose": "Author a sealed Tier-N specification for a single-instrument MNQ.c.0 fresh-candidate research diagnostic using a deliberately faster Donchian channel (15/8) than s11-d1 v1's Donchian-55/20. The candidate's load-bearing structural property is a faster signal frequency intended to bring the expected IS-window closed-trade count above the K9 floor of 100 (s11-d1 v1 disclosed expected ~25-50 trades; s12-d1 expects ~80-200). The s11-d1 v1 SEAL explicitly stated that shortening Donchian periods requires a fresh candidate_record_id; this SEAL satisfies that clause structurally. Research diagnostic only. No promotion. No live trading. No paper trading. No FRC. No profitability claim.",
+  "candidate_record_id": "s12-d1-mnq-c0-single-instrument-donchian-15-8-databento-long-history",
+  "cost_assumptions_locked_at_seal": {
+    "commission_per_round_trip_default_DA8_resolved_to_A": 0.74,
+    "cost_stress_tiers_DA7_resolved_to_A": "five_tier_S0_S1_S2_S3_S4_byte_equivalent_from_s11_d1_v1",
+    "cost_stress_tiers_detail": [
+      {
+        "cost_scalar": 0.0,
+        "note": "zero-cost ideal",
+        "slippage_scalar": 0.0,
+        "tier": "S0"
+      },
+      {
+        "cost_scalar": 1.0,
+        "note": "baseline retail",
+        "slippage_scalar": 1.0,
+        "tier": "S1"
+      },
+      {
+        "cost_scalar": 1.5,
+        "note": "stressed retail",
+        "slippage_scalar": 1.5,
+        "tier": "S2"
+      },
+      {
+        "cost_scalar": 2.0,
+        "note": "adversarial",
+        "slippage_scalar": 2.0,
+        "tier": "S3"
+      },
+      {
+        "cost_scalar": 3.0,
+        "note": "extreme adversarial",
+        "slippage_scalar": 3.0,
+        "tier": "S4"
+      }
+    ],
+    "dollar_per_point": 2.0,
+    "fees_per_round_trip_default_DA9_resolved_to_A": 0.36,
+    "s0_edge_pre_registration_at_seal": "POSITIVE_open_question_no_a_priori_claim_acceptance_threshold_S0_net_pnl_positive_after_K9_trades",
+    "slippage_entry_ticks_default_DA10_resolved_to_A": 1,
+    "slippage_exit_ticks_default_DA10_resolved_to_A": 1,
+    "slippage_stop_ticks_default_DA10_resolved_to_A": 1,
+    "start_cash_usd_DA4_resolved_to_B_REVISED_FROM_DRAFT_DEFAULT_A": 100000,
+    "start_cash_usd_revision_rationale": "DA4=B raises START_CASH from $50,000 (DRAFT default A; s11-d1 v1 carry) to $100,000 to mitigate elevated DR10 turnover-cost-explosion risk introduced by Donchian-15/8's faster signal density. With per-trade risk pct fixed at 1.0% (DA3=A), doubling START_CASH roughly halves contracts-per-trade for a given ATR and reduces per-dollar commission/slip pressure. This does NOT relax any DR threshold (DR10 thresholds remain byte-equivalent at annual_turnover>0.50 OR S2 cost drag>0.05); it changes the equity scale only.",
+    "tick_size_points": 0.25,
+    "tick_value_usd": 0.5,
+    "warmup_days_DA11_resolved_to_A": 220,
+    "warmup_days_formula": "MAX(longest_lookback_in_mechanic, 220); longest s12-d1 lookback is ATR(20) so floor at 220"
+  },
+  "data_requirements": {
+    "alternate_schema_authorized_by_this_spec": false,
+    "alternate_symbols_authorized_by_this_spec": false,
+    "alternate_vendor_authorized_by_this_spec": false,
+    "audit_anchors_inherited_from_s10_d1": {
+      "audit_verdict_for_mnq": "CLEAN (0 gaps > 5 days; max abs-log-return 0.1164; is_pct_observed 1.2365)",
+      "holiday_aware_audit_seal": "5f0258117cf35afa17ada593d464a0fc941e87c95bc52b76d54b8d719ee34686",
+      "strict_audit_seal": "fd5cd136891638d2a1338850b616d000b969c7b46ce8c12365ba9498855e5865"
+    },
+    "audit_pre_existing": true,
+    "controller_side_databento_call_authorized_any_phase": false,
+    "databento_api_key_access_required_any_phase": false,
+    "dataset": "GLBX.MDP3",
+    "fresh_fetch_authorized_by_this_spec": false,
+    "fresh_fetch_required": false,
+    "primary_artifact": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "primary_artifact_row_count_required": 2066,
+    "primary_artifact_sha256_required": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "primary_artifact_window_observed": [
+      "2019-05-13",
+      "2025-12-29"
+    ],
+    "schema": "ohlcv-1d",
+    "secondary_data_authorized_by_this_spec": false,
+    "stype_in": "continuous",
+    "symbol": "MNQ.c.0",
+    "vendor": "Databento"
+  },
+  "draft_ambiguities_resolved_at_seal": {
+    "DA1": {
+      "default_at_draft": "A",
+      "notes": "Wilder ATR(20) carried byte-equivalent from s11-d1 v1",
+      "operator_choice": "A",
+      "resolved_value": 20,
+      "topic": "ATR stop window P"
+    },
+    "DA10": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": "1/1/1",
+      "topic": "Slippage entry/stop/exit ticks"
+    },
+    "DA11": {
+      "default_at_draft": "A",
+      "notes": "MAX(longest_lookback, 220) -> 220; LOCKED at SEAL",
+      "operator_choice": "A",
+      "resolved_value": 220,
+      "topic": "WARMUP_DAYS"
+    },
+    "DA12": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": "09:30-16:00 ET America/New_York",
+      "topic": "RTH window"
+    },
+    "DA13": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL non-negotiable per no_dr_redefinition_post_seal; byte-equivalent from s10-D1 / s11-d1 v1 sealed chain",
+      "operator_choice": "A",
+      "resolved_value": [
+        0.95,
+        0.3,
+        5,
+        5
+      ],
+      "topic": "DR9 thresholds"
+    },
+    "DA14": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL non-negotiable per no_dr_redefinition_post_seal; DR10 risk ELEVATED prior probability mitigated via DA4=B START_CASH revision",
+      "operator_choice": "A",
+      "resolved_value": "annual_turnover_threshold=0.50 AND s2_cost_drag_threshold=0.05",
+      "topic": "DR10 thresholds"
+    },
+    "DA2": {
+      "default_at_draft": "A",
+      "notes": "2N stop carried byte-equivalent from s11-d1 v1",
+      "operator_choice": "A",
+      "resolved_value": 2.0,
+      "topic": "ATR stop multiplier K"
+    },
+    "DA3": {
+      "default_at_draft": "A",
+      "notes": "1.0% of portfolio equity carried byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": 0.01,
+      "topic": "Per-trade risk percentage"
+    },
+    "DA4": {
+      "default_at_draft": "A_50000",
+      "notes": "REVISED FROM DRAFT DEFAULT to $100,000 for DR10 mitigation; halves contracts-per-trade for given ATR; does NOT relax DR10 thresholds which remain byte-equivalent",
+      "operator_choice": "B",
+      "resolved_value": 100000,
+      "topic": "START_CASH_USD"
+    },
+    "DA5": {
+      "default_at_draft": "A",
+      "notes": "50% magnitude threshold carried byte-equivalent from s11-d1 v1 K4 formula",
+      "operator_choice": "A",
+      "resolved_value": 0.5,
+      "topic": "K4 max-drawdown threshold (magnitude)"
+    },
+    "DA6": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL",
+      "operator_choice": "A",
+      "resolved_value": "sparta.s12.d1.mnq_c0.donchian_15_8.diagnostic_run_report.v1",
+      "topic": "Output schema name"
+    },
+    "DA7": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL non-negotiable per no_dr_redefinition_post_seal; byte-equivalent from s11-d1 v1",
+      "operator_choice": "A",
+      "resolved_value": "5-tier S0/S1/S2/S3/S4 with scalars 0.0/1.0/1.5/2.0/3.0",
+      "topic": "Cost-stress tier set"
+    },
+    "DA8": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": 0.74,
+      "topic": "Commission per round-trip"
+    },
+    "DA9": {
+      "default_at_draft": "A",
+      "notes": "LOCKED at SEAL byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": 0.36,
+      "topic": "Fees per round-trip"
+    }
+  },
+  "entry_exit_logic_boundary_locked_at_seal": {
+    "amb6_filter": "NONE",
+    "atr_method": "Wilder",
+    "atr_stop_multiplier_K_DA2_resolved_to_A": 2.0,
+    "atr_window_days_P_DA1_resolved_to_A": 20,
+    "contract_multiplier_description": "MNQ: $2 * Nasdaq index value per point",
+    "correlation_filter": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+    "daily_bars_only": true,
+    "dollar_per_point": 2.0,
+    "donchian_entry_channel_days_N": 15,
+    "donchian_exit_channel_days_M": 8,
+    "donchian_n_m_lock_origin": "LOCKED at PLAN (commit b4eac65); DRAFT did NOT reopen Donchian-N/M; load-bearing departure from s11-d1 v1's 55/20",
+    "intraday_data_used": false,
+    "leverage_cap": "NONE_implicit_via_per_trade_risk_sizing_only_no_separate_C4",
+    "logic_modification_post_seal_forbidden": true,
+    "logic_modification_requires_fresh_candidate_record_id": true,
+    "long_entry_signal": "Daily close > prior 15-day high (Donchian-15 upper band breakout)",
+    "long_exit_signal": "Daily close < prior 8-day low (Donchian-8 lower band crossing) OR stop hit",
+    "max_units_per_market": 1,
+    "mechanic_family": "F1_long_short_bi_directional_donchian_no_pyramid_atr_stop",
+    "mechanic_family_lock_origin": "LOCKED at PLAN (commit b4eac65); DRAFT did NOT reopen mechanic-family menu",
+    "no_pyramid_per_signal_invariant": true,
+    "per_trade_risk_pct_DA3_resolved_to_A": 0.01,
+    "position_sizing_formula": "contracts = floor((per_trade_risk_pct * equity) / (ATR_entry * tick_value_usd))",
+    "pyramid_method": "NONE",
+    "regime_overlay": "NONE",
+    "roll_method": "Continuous front-month per Databento stype_in=continuous (vendor-side); no operator-side roll override",
+    "rth_window_DA12_resolved_to_A": {
+      "close_h": 16,
+      "close_m": 0,
+      "open_h": 9,
+      "open_m": 30,
+      "tz": "America/New_York"
+    },
+    "short_entry_signal": "Daily close < prior 15-day low (Donchian-15 lower band breakout)",
+    "short_exit_signal": "Daily close > prior 8-day high (Donchian-8 upper band crossing) OR stop hit",
+    "side_long_plus_short_bi_directional": true,
+    "stop_method": "2 * Wilder ATR(20) below entry (long) or above entry (short); set at entry; trail/lock per s11-d1 v1 byte-equivalent (trailing per 2N method)",
+    "tick_size_points": 0.25,
+    "tick_value_usd": 0.5,
+    "vol_targeting": "NONE"
+  },
+  "exact_next_phase_authorized_by_this_seal": "NONE",
+  "files_allowed_to_be_created_or_modified": {
+    "p10_oos_gate_sealed": [
+      "reports/s12_d1_p10_oos_gate_sealed.json",
+      "reports/s12_d1_p10_oos_gate_sealed.md"
+    ],
+    "p11_lifecycle_decision_sealed": [
+      "reports/s12_d1_p11_decision_memo_sealed.json",
+      "reports/s12_d1_p11_decision_memo_sealed.md"
+    ],
+    "p3_build_reports_sealed": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_build_report.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_build_report.md"
+    ],
+    "p3_build_runner_harness_and_drivers": [
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/__init__.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/main.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/execution_guard.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/in_sample_driver.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/out_of_sample_driver.py"
+    ],
+    "p3_build_tests_scaffold": [
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/__init__.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/conftest.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/fixtures/synthetic_mnq_daily.csv",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/test_smoke_t1_t15.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/test_oos_driver_invariants.py"
+    ],
+    "p4_synthetic_smoke_report": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_smoke_t1_t15_report.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_smoke_t1_t15_report.md"
+    ],
+    "p6_5_cost_stress_matrix_sealed": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_cost_stress_matrix_result_sealed.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_cost_stress_matrix_result_sealed.md"
+    ],
+    "p6_is_diagnostic_sealed": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_in_sample_diagnostic_result_sealed.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_in_sample_diagnostic_result_sealed.md"
+    ],
+    "p7_decision_memo_sealed": [
+      "reports/s12_d1_p7_decision_memo_sealed.json",
+      "reports/s12_d1_p7_decision_memo_sealed.md"
+    ],
+    "this_seal_turn_creates_exactly": [
+      "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec.md",
+      "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_sealed.json"
+    ]
+  },
+  "files_explicitly_forbidden_from_modification": [
+    "all s11-d1 v1 sealed artifacts at commit 9c63088",
+    "all s11-d1 P1 plan-lock sealed artifacts at commit 7d86486",
+    "all s11-d1 P2 phase-2 plan sealed artifacts at commit f64f984",
+    "s11-d1 clarification memo at commit d13b56a",
+    "all s11-d1 rev2 sealed artifacts at commit c110fd4",
+    "all S10-D2 sealed artifacts at park commit 23c7164 and all preceding sealed reports in the S10-D2 chain",
+    "all s10-D1 MNQ+MGC sealed artifacts at park commit 1a9acec and the full s10-D1 chain",
+    "all s9 RSI-2 ETF-proxy sealed artifacts",
+    "all s7 D1 ETF-proxy sealed artifacts",
+    "all B005_NNN sealed artifacts",
+    "all B006_001 sealed artifacts",
+    "all B006_002 sealed artifacts",
+    "all s8-D1 cross-asset Donchian sealed artifacts",
+    "T8 ETF-proxy family-park memo",
+    "S10-D1 micro availability probe memo",
+    "next_research_track_selection_plan_after_*_park.md files",
+    "review_queue.json",
+    "production idea_memory directory",
+    "all Strategy Lab artifacts",
+    "all ORB branch artifacts and Step 30 cost constants",
+    "obsidian-trade-logger / obsidian directory and contents",
+    "brain_memory/projects/trading_bot/lessons.md (dirty + unstaged from prior controller-session appends; explicitly off-limits this turn AND all future S12-D1 turns)",
+    "CLAUDE.md, docs/decisions.md (if exists), RUNBOOK, pipeline_manifest, .gitignore",
+    "data/databento_cache/ data/databento_cache_oos/ data/databento_cache_is_only/ (S10-D2 lineage caches; S12-D1 reuses s10-D1 sealed CSV instead)",
+    "any candidate_record_id namespace other than s12-d1-mnq-c0-single-instrument-donchian-15-8-databento-long-history"
+  ],
+  "fresh_candidate_attestation": {
+    "first_principles_burden_satisfied_vs_each_predecessor": true,
+    "is_a_b006_001_revision": false,
+    "is_a_b006_002_revision": false,
+    "is_a_s10_d1_revision": false,
+    "is_a_s10_d2_revision": false,
+    "is_a_s11_d1_revision": false,
+    "is_a_s7_d1_revision": false,
+    "is_a_s9_revision": false,
+    "is_a_t8_revision": false,
+    "s11_d1_v1_p1_p2_clarification_rev2_byte_stable_unmodified_by_this_seal": true
+  },
+  "hard_boundaries_held_this_seal_turn": {
+    "no_backtest": true,
+    "no_branch_change": true,
+    "no_broker_call": true,
+    "no_brokerage_connection": true,
+    "no_build": true,
+    "no_cache_mutation": true,
+    "no_candidate_promoted": true,
+    "no_code_modification": true,
+    "no_commit_in_orchestrator": true,
+    "no_d5_b005_001_nke_revival": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_databento_api_key_access": true,
+    "no_dr_redefinition_post_seal": true,
+    "no_external_network_call": true,
+    "no_frc_grant": true,
+    "no_git_push": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_readiness_claim": true,
+    "no_live_trading": true,
+    "no_modification_of_any_sealed_predecessor": true,
+    "no_modification_of_app_py": true,
+    "no_modification_of_brain_memory_projects_trading_bot_lessons_md": true,
+    "no_modification_of_claude_md_or_runbook_or_gitignore": true,
+    "no_modification_of_data_databento_cache_or_oos_or_is_only": true,
+    "no_modification_of_idea_memory": true,
+    "no_modification_of_obsidian_trade_logger": true,
+    "no_modification_of_orb_step_30_constants": true,
+    "no_modification_of_reports_external_research_hunter": true,
+    "no_modification_of_review_queue": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_strategy_lab_artifacts": true,
+    "no_modification_of_tests_directory": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_computation": true,
+    "no_oos_inspection": true,
+    "no_optimization": true,
+    "no_p10_authorization": true,
+    "no_p11_authorization": true,
+    "no_p3_authorization": true,
+    "no_p4_authorization": true,
+    "no_p6_5_authorization": true,
+    "no_p6_authorization": true,
+    "no_p7_authorization": true,
+    "no_paper_order_placed": true,
+    "no_paper_trading": true,
+    "no_phase_pre_approval": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_promotion_to_paper": true,
+    "no_qc_runtime": true,
+    "no_real_order_placed": true,
+    "no_review_queue_mutation": true,
+    "no_s10_d1_modification": true,
+    "no_s10_d2_modification": true,
+    "no_s10_d2_reinterpretation": true,
+    "no_s10_d2_revival": true,
+    "no_s9_or_s7_or_b006_revival": true,
+    "no_safety_gate_relaxation": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_source_modification": true,
+    "no_strategy_execution": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_optimization_authorized": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true
+  },
+  "intentional_differences_from_s11_d1_v1": {
+    "all_other_parameters": "byte_equivalent_carry_from_s11_d1_v1_via_DRAFT_defaults_A_for_DA1_DA2_DA3_DA5_DA6_DA7_DA8_DA9_DA10_DA11_DA12_DA13_DA14",
+    "donchian_entry_channel": {
+      "reason": "load-bearing K9 mitigation",
+      "s11_d1_v1": 55,
+      "s12_d1": 15
+    },
+    "donchian_exit_channel": {
+      "reason": "load-bearing K9 mitigation",
+      "s11_d1_v1": 20,
+      "s12_d1": 8
+    },
+    "dr10_risk": {
+      "s11_d1_v1": "low",
+      "s12_d1": "ELEVATED_load_bearing_trade_off_mitigated_via_DA4_B"
+    },
+    "expected_is_trade_count": {
+      "s11_d1_v1": "25-50",
+      "s12_d1": "80-200"
+    },
+    "k9_risk": {
+      "s11_d1_v1": "fires_K9_high_prior_probability",
+      "s12_d1": "borderline_at_lower_bound"
+    },
+    "start_cash_usd": {
+      "reason": "DA4=B revised at SEAL for DR10 mitigation; halves contracts-per-trade for given ATR",
+      "s11_d1_v1": 50000,
+      "s12_d1": 100000
+    }
+  },
+  "is_oos_split_plan": {
+    "in_sample_window_end": "2023-12-29",
+    "in_sample_window_length_years_approx": 4.6,
+    "in_sample_window_pct_observed": 1.2365,
+    "in_sample_window_row_count_audit_confirmed": 1443,
+    "in_sample_window_start": "2019-05-13",
+    "no_parameter_tuning": true,
+    "no_purged_k_fold": true,
+    "no_threshold_loosening": true,
+    "no_train_validate_test_split": true,
+    "no_walk_forward": true,
+    "oos_evaluation_uses_native_oos_driver": true,
+    "oos_inspection_blocked_during_is_phase": true,
+    "out_of_sample_window_end": "2025-12-30",
+    "out_of_sample_window_length_years_approx": 2.0,
+    "out_of_sample_window_row_count_structural_only": 622,
+    "out_of_sample_window_start": "2024-01-02",
+    "post_oos_data_informational_only": true,
+    "post_oos_data_start": "2026-01-02"
+  },
+  "k9_and_oos_confirmation_rules": {
+    "k9_definition": "K9 fires iff closed_trades_portfolio < 100",
+    "k9_evaluated_at_is": true,
+    "k9_evaluated_at_oos": true,
+    "k9_threshold_inviolate": true,
+    "oos_confirmation_definition": "OOS is CONFIRMED only iff ALL of: (a) C7 verdict is READY_FOR_LONGER_BACKTEST, (b) OOS closed_trades >= 100, (c) OOS sharpe > 0, (d) OOS expectancy > 0, (e) OOS trade_curve_maxdd_pct >= -30% (equivalently |trade_curve_maxdd_pct| <= 30%; i.e., the realized OOS drawdown shall not exceed 30% in magnitude), (f) all safety counters zero, (g) no-pyramid invariant held, (h) starting_cash invariant held.",
+    "oos_confirmation_definition_source": "s11_d1_rev2_at_commit_c110fd4_magnitude_based_corrected_form_byte_equivalent_v1_sign_typo_NOT_reintroduced",
+    "oos_indeterminate_definition": "K9 fires (closed_trades < 100) AND no safety counter fires AND headline metrics (sharpe, expectancy, net PnL) are positive; this is NOT a confirmation",
+    "oos_killed_definition": "any safety K-gate fires (K6, K7, K8) OR any performance K-gate fires (K1 sharpe<0, K2 expectancy<=0, K4 trade-curve maxdd magnitude > 50%) on OOS",
+    "oos_pass_does_NOT_promote_to_live": true,
+    "oos_pass_does_NOT_promote_to_paper": true,
+    "oos_pass_is_research_diagnostic_only": true
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "TIER_N_SEALED_SPEC",
+    "S12_D1_MNQ_DONCHIAN_15_8_FRESH_CANDIDATE",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NO_FRC_GRANTED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_NEXT_PHASE_PRE_APPROVED",
+    "S11_D1_TREATED_AS_PARENT_REFERENCE_ONLY",
+    "S11_D1_NOT_REVISED_NOT_MODIFIED_NOT_REINTERPRETED",
+    "K9_THRESHOLD_INVIOLATE",
+    "DR10_RISK_ELEVATED_MITIGATED_VIA_DA4_B_START_CASH_100K",
+    "DR_REDEFINITION_POST_SEAL_FORBIDDEN",
+    "DONCHIAN_15_8_LOCKED_AT_PLAN_NO_RETREAT_TO_55_20",
+    "MECHANIC_FAMILY_F1_LOCKED_AT_PLAN_NO_REOPENING",
+    "OOS_K9_STRUCTURALLY_UNREACHABLE_TERMINAL_OOS_PARK_LIKELY",
+    "ADDENDUM_MEMO_REC1_INCORPORATED_AT_SEAL_OOS_K9_DISCLOSURE_ADDED"
+  ],
+  "live_promotion_path_closed": true,
+  "live_trading_remains_blocked_at_6_gates_permanently": true,
+  "minimum_trade_count_requirements": {
+    "comparison_to_s11_d1_v1_baseline": "s11_d1_v1_donchian_55_20_disclosed_expected_25_50_below_K9_floor_fires_K9_with_high_prior_probability_s12_d1_expects_3_4x_more_signals_borderline_to_clearing",
+    "expected_closed_trades_estimate_4_6y_IS_central": 140,
+    "expected_closed_trades_estimate_4_6y_IS_high": 200,
+    "expected_closed_trades_estimate_4_6y_IS_low": 80,
+    "implied_closed_trades_estimate_2y_OOS_central": 61,
+    "implied_closed_trades_estimate_2y_OOS_high": 87,
+    "implied_closed_trades_estimate_2y_OOS_low": 35,
+    "implied_per_year_trade_rate_low_central_high": [
+      17.4,
+      30.4,
+      43.5
+    ],
+    "k9_fire_response_IS": "DR1_INCONCLUSIVE_HOLD_not_REJECT_FAST_candidate_archived_without_parameter_modification",
+    "k9_risk_at_seal_IS": "borderline_at_lower_bound_80_below_K9_central_140_clears_high_200_clears_with_margin",
+    "k9_risk_at_seal_OOS": "STRUCTURALLY_UNREACHABLE_across_entire_DRAFT_documented_band_low_35_central_61_high_87_all_below_K9_100",
+    "k9_threshold_closed_trades_portfolio": 100,
+    "k9_threshold_modification_forbidden": true,
+    "oos_window_length_years": 2.0
+  },
+  "no_oos_confirmation_claim": true,
+  "no_phase_pre_approved_by_this_seal": true,
+  "no_profitability_claim": true,
+  "oos_k9_risk_disclosure": {
+    "candidate_acceptance_implication": "Sealing this candidate via the SEAL turn explicitly accepts the structural likelihood that the s12-d1 lifecycle terminal verdict will be OOS PARK regardless of IS outcome. The candidate's research value lies in (a) testing the K9-mitigation IS hypothesis and (b) producing a reusable single-instrument Donchian-15/8 runner-harness scaffolding pattern, not in producing an OOS-confirmed strategy.",
+    "disclosure_verbatim": "OOS K9 EXPECTED TO FIRE. Implied OOS trade count over 2.0y at IS rate is approximately 35-87 trades, below K9 = 100. If OOS K9 fires, the OOS verdict will be OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE analogous to S10-D2 P11 PARK at 23c7164. The chain shall NOT relax K9 at OOS; the appropriate response is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and park the candidate. Pursuing s12-d1 accepts the structural likelihood of an OOS PARK outcome.",
+    "implied_terminal_verdict_if_oos_k9_fires_and_no_safety_counter_fires": "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED (analogous to S10-D2 P11 PARK at 23c7164)",
+    "is_k9_solvable_by_donchian_15_8_choice": true,
+    "no_chain_response_relaxes_K9_at_OOS": true,
+    "no_threshold_relaxation_authorized_by_this_seal": true,
+    "oos_k9_solvable_by_donchian_15_8_choice": false,
+    "oos_k9_unsolvable_reason": "OOS window length is inherited byte-equivalent from s11-d1 v1 sealed spec at 2.0 years. Even the upper estimate of the DRAFT-documented IS trade-rate band (43.5 trades/year) scaled to 2.0y produces ~87 trades, still below K9=100. Extending the OOS window would require fresh Databento fetch plus a further-fresh candidate_record_id; both are out of scope for this SEAL.",
+    "rec1_does_not_alter_DA1_through_DA14_resolutions": true,
+    "rec1_does_not_alter_DR9_or_DR10_thresholds": true,
+    "rec1_is_disclosure_only_not_a_DR_redefinition": true,
+    "rec1_priority": "HIGH",
+    "rec1_source": "S12-D1 DRAFT OOS K9 + 15/8 justification addendum memo at commit 538eaf3 (memo authored 2026-05-27T14:24:55Z; report_seal_sha256 10c388491f2735bbd2b16d9589ef44e3c7ab5d4c3fa89d8632ae82e3e7766add); incorporated at SEAL per operator-confirmed REC1 priority HIGH"
+  },
+  "p10_oos_gate_requires_separate_authorization": true,
+  "p11_lifecycle_decision_requires_separate_authorization": true,
+  "p3_build_requires_separate_authorization": true,
+  "p4_smoke_requires_separate_authorization": true,
+  "p6_5_cost_stress_requires_separate_authorization": true,
+  "p6_is_requires_separate_authorization": true,
+  "p7_decision_memo_requires_separate_authorization": true,
+  "parent_references": {
+    "mnq_c0_daily_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_daily_csv_row_count": 2066,
+    "mnq_c0_daily_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "mnq_c0_daily_csv_window_observed": [
+      "2019-05-13",
+      "2025-12-29"
+    ],
+    "s10_d1_micro_availability_probe_memo_sha256": "76dcb833f89d3044547e0e361e03f39ae325a22a5c9c06baf1ec0f2e9df213fe",
+    "s10_d1_mnq_mgc_park_commit": "1a9acec",
+    "s10_d1_mnq_mgc_park_report_seal_sha256": "32c1a87146264197fd852e53ba45baf6d6d45e40355b716e5a4d41a08edf1b2f",
+    "s10_d1_mnq_mgc_step02c_audit_seal_sha256": "fd5cd136891638d2a1338850b616d000b969c7b46ce8c12365ba9498855e5865",
+    "s10_d1_mnq_mgc_step02c_holiday_aware_seal_sha256": "5f0258117cf35afa17ada593d464a0fc941e87c95bc52b76d54b8d719ee34686",
+    "s10_d2_park_commit": "23c7164",
+    "s10_d2_park_status": "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "s11_d1_clarification_memo_commit": "d13b56a",
+    "s11_d1_clarification_memo_seal_sha256": "eda08aceeb4afd7d4f985a739d6e87b3e803daff8da3f645f016b0a56a3af871",
+    "s11_d1_p1_plan_lock_commit": "7d86486",
+    "s11_d1_p2_phase_2_plan_commit": "f64f984",
+    "s11_d1_rev2_commit": "c110fd4",
+    "s11_d1_rev2_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "s11_d1_v1_spec_commit": "9c63088",
+    "s11_d1_v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "s12_d1_draft_commit": "7e9c867",
+    "s12_d1_draft_path": "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_DRAFT.md",
+    "s12_d1_plan_commit": "b4eac65",
+    "s12_d1_plan_path": "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_plan.md"
+  },
+  "phase_prefix": "PHASE2-S12-D1-MNQ-DONCHIAN-15-8",
+  "promotion_rules": {
+    "diagnostic_only_not_live_grade_label": true,
+    "live_promotion_blocked_at_6_gates_permanently": true,
+    "no_verdict_unblocks_frc": true,
+    "no_verdict_unblocks_live": true,
+    "no_verdict_unblocks_paper_via_broker": true,
+    "no_verdict_unblocks_review_queue_mutation": true,
+    "no_verdict_unblocks_strategy_lab_promotion": true,
+    "permanent_live_block": true,
+    "permanent_paper_block": true,
+    "promotion_at_any_stage_is_OUT_OF_SCOPE_FOR_THIS_RECORD_ID": true,
+    "research_diagnostic_only": true
+  },
+  "rejection_rules": {
+    "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+    "dr_rules": {
+      "DR1": "oos_rebalance_count<36 OOS-phase only -> INCONCLUSIVE_HOLD",
+      "DR10": "turnover_cost_explosion annual_turnover>0.50 OR S2_cost_drag>0.05 DA14=A -> REJECT_FAST; ELEVATED prior probability vs s11-d1 v1 because Donchian-15/8 raises annual turnover materially; load-bearing trade-off accepted at PLAN and mitigated at SEAL via DA4=B raising START_CASH to $100k",
+      "DR11": "NOT_IN_CHAIN_F1_HAS_NO_LEVERAGE_CAP",
+      "DR2": "oos_metrics_degrade_materially_under_cost_stress -> REJECT_FAST",
+      "DR3": "zero_cost_only_survival (S0>0 AND all S1..S4<=0) -> REJECT_FAST",
+      "DR4": "oos_negative_while_is_positive_unexplained -> REJECT_FAST",
+      "DR5": "cost_stress_turns_edge_negative tier flip -> REJECT_FAST or INCONCLUSIVE_HOLD carveout",
+      "DR6": "post_warmup_sizing_ambiguity_or_invalid NARROWED post-warmup only -> REJECT_FAST",
+      "DR7": "missing_oos_or_date_window_evidence -> INCONCLUSIVE_HOLD",
+      "DR8": "live_or_order_routing_path_detected at Initialize -> HARD_FAIL_VOIDED",
+      "DR9": "mnq_c0_only_data_continuity_integrity_check thresholds 0.95/0.30/5/5 byte-equivalent DA13=A -> INCONCLUSIVE_HOLD"
+    },
+    "fail_safety_outcomes_terminal_for_this_candidate_record_id": true,
+    "k_gate_firing_priority_order": "K8 > K12 > K7 > K9 > K1/K2/K4 > A-gates > ELIGIBLE_FOR_OOS",
+    "k_gates": {
+      "K10_avg_pairwise_corr": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+      "K11_cap_binding_events": "NOT_APPLICABLE_F1_NO_LEVERAGE_CAP",
+      "K12_DR_fires_on_cost_stress": "if any DR2/DR3/DR4/DR5 fires across S0/S2/S3/S4 cost-stress sweep at P6.5-equivalent -> FAIL_SAFETY",
+      "K1_sharpe_proxy_lt_0": "if sharpe_proxy_per_trade < 0 at S1 -> FAIL_SAFETY",
+      "K2_expectancy_le_0": "if expectancy_per_trade_usd <= 0 at S1 -> FAIL_SAFETY",
+      "K4_trade_curve_maxdd_pct_magnitude_gt_50": "if |trade_curve_maxdd_pct| > 50% (DA5=A) -> FAIL_SAFETY",
+      "K6_per_symbol_dispersion": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+      "K7_correlation_or_filter_silently_introduced": "if any filter/regime/correlation gate is introduced post-SEAL -> FAIL_SAFETY",
+      "K8_sealed_parent_drift": "if any sealed parent seal does not match the embedded constant -> FAIL_SAFETY",
+      "K9_closed_trades_lt_100": "if closed_trades_portfolio < 100 -> INSUFFICIENT_SAMPLE (NOT FAIL_SAFETY)"
+    },
+    "no_dr_redefinition_post_seal": true,
+    "no_filter_introduction_post_seal": true,
+    "no_starting_cash_modification_post_seal": true,
+    "no_strategy_parameter_modification_post_seal": true,
+    "no_threshold_loosening": true,
+    "no_universe_widening_post_seal": true,
+    "reject_fast_criteria_RF1_through_RF16": [
+      "RF1: any DR rule fires REJECT_FAST (DR2/DR3/DR4/DR5/DR6/DR10)",
+      "RF2: DR9 fires AND > 5 violations",
+      "RF3: DR6 post-warmup invalid-sizing event count > 0",
+      "RF4: any forbidden-verdict-token in runner output (PASS/APPROVE/LIVE/PROMOTE/SIGNAL/FOR_PRODUCTION/EXECUTE/ROUTE_ORDER)",
+      "RF5: runner attempts SetLiveMode/SetBrokerageModel/DeployAlgorithm or unauthorized network/Databento call at runtime",
+      "RF6: any order-submit attempt while in warmup window",
+      "RF7: runner mutates any s11-d1 v1/P1/P2/clarification/rev2 or s10-d2/s10-d1/s9/s7-d1/B006_NNN/T8/s12-d1 sealed artifact (byte-shift)",
+      "RF8: runner makes a Databento API call at runtime (controller-side; this candidate is zero-fresh-fetch)",
+      "RF9: runner caches .dbn.zst files anywhere",
+      "RF10: runner accesses DATABENTO_API_KEY at runtime",
+      "RF11: track silently re-introduces a filter/regime gate/selection rule",
+      "RF12: pyramid mechanism re-introduced in code",
+      "RF13: Donchian-N or Donchian-M silently switched from the LOCKED 15/8 post-SEAL",
+      "RF14: universe widening or symbol substitution attempted at any phase",
+      "RF15: track depends on a survivorship-cherry-pick rule",
+      "RF16: any retroactive re-anchoring or modification of s11-d1 v1/P1/P2/clarification/rev2 caused by this candidate"
+    ]
+  },
+  "report_kind": "S12-D1 Tier-N specification (sealed; binding; fresh candidate per s11-d1 v1 SEAL's 'REQUIRES FRESH CANDIDATE_RECORD_ID' clause; Donchian-55/20 -> 15/8 IS K9 mitigation; START_CASH revised at SEAL DA4=B from $50k to $100k for DR10 mitigation; addendum-memo REC1 incorporated at SEAL: explicit oos_k9_risk_disclosure field added documenting OOS K9 structural unreachability and likely terminal OOS PARK)",
+  "report_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48",
+  "runtime_invariants": [
+    "no_live_trading",
+    "no_strategy_lab_promotion",
+    "no_review_queue_mutation",
+    "no_brokerage_connection",
+    "no_external_network",
+    "no_databento_at_runtime",
+    "no_production_signal",
+    "no_strategy_optimization_authorized",
+    "no_profitability_claim",
+    "no_universe_membership_logic",
+    "no_dr_redefinition_post_seal",
+    "no_warmup_order_submission",
+    "dr6_warmup_contamination_blocked",
+    "no_continuous_roll_stitch_modification_post_seal",
+    "no_mcl_inclusion_under_long_history_scope",
+    "no_intraday_schema_ingest_under_daily_only_design",
+    "databento_api_key_read_from_env_only_never_logged_or_saved",
+    "no_pyramid_per_signal",
+    "single_instrument_universe_NO_widening_post_seal",
+    "no_substitution_of_any_symbol_into_this_universe_post_seal",
+    "mnq_c0_csv_reuse_byte_equivalent_no_fresh_fetch",
+    "donchian_15_8_locked_at_plan_no_retreat_to_55_20",
+    "no_revision_of_s11_d1_sealed_artifacts",
+    "s12_d1_does_not_supersede_s11_d1_v1_p1_p2_clarification_rev2",
+    "mechanic_family_lock_at_plan_no_reopening_at_draft_or_seal"
+  ],
+  "runtime_invariants_count": 25,
+  "s11_d1_v1_lessons_inherited_explicitly": [
+    "Donchian channel mechanic with ATR-based stop and per-trade risk sizing is a structurally sound F1 family on MNQ.c.0 futures",
+    "Single-instrument single-MNQ.c.0 design eliminates per-market dominance pathology observed in s7-D1 (USO concentration) and s9 (USO concentration)",
+    "MNQ.c.0 daily-bar CSV at 8b7b832c...fa23e is DR9-clean over 2019-05-13 to 2025-12-29 under both strict and holiday-aware audits",
+    "Wilder ATR(20) + 2N stop placement is byte-equivalent across s11-d1 v1 and s12-d1",
+    "RTH-only 09:30-16:00 ET filter is byte-equivalent",
+    "Long+short bi-directional Donchian (long entry on N-day high; short entry on N-day low) is byte-equivalent",
+    "Closed-trades portfolio count is the K9 evaluation unit at threshold 100 inviolate",
+    "Native OOS driver pattern (sibling out_of_sample_driver.py at P3 BUILD time, not retrofit)",
+    "C7 closed verdict enum: FAIL_SAFETY / INSUFFICIENT_SAMPLE / READY_FOR_LONGER_BACKTEST (never live-ready)",
+    "6-gate permanent live-block; trading PAUSED; live BLOCKED_AT_6_GATES; FRC never granted",
+    "Conservative interpretation discipline: positive metrics do NOT imply live-readiness; OOS pass is a research truth-test not approval to trade",
+    "oos_confirmation_definition condition (e) magnitude-based form per rev2 byte-equivalent"
+  ],
+  "schema_id": "sparta.external_research_hunter.s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "spec_lifecycle_state": "SEALED",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "spec_lifecycle_state": "SEALED",
+    "trading_status": "PAUSED"
+  },
+  "universe": {
+    "add_universe_calls": 0,
+    "common_history_start": "2019-05-13",
+    "diversification_claim": "NONE",
+    "effective_independent_bets_trivial": 1,
+    "removed_from_universe_events": 0,
+    "symbol_count": 1,
+    "symbol_substitution_post_seal_forbidden": true,
+    "symbols": [
+      "MNQ.c.0"
+    ],
+    "symbols_explicitly_excluded": [
+      "MGC.c.0",
+      "MCL.c.0",
+      "all_other_databento_micros_pending_separate_availability_probes"
+    ],
+    "universe_type": "single_fixed_instrument_continuous_micro_futures",
+    "universe_widening_post_seal_forbidden": true
+  },
+  "verdict_never_means_live_ready": true,
+  "why_donchian_15_8_fresh_candidate_is_being_tested": "s11-d1 v1 sealed Tier-N spec at commit 9c63088 (seal sha 077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24) section 9 'Mitigation options NOT pre-approved by this spec' states verbatim: 'Shorten Donchian periods (e.g., 20/10 instead of 55/20) -- would change strategy logic; REQUIRES FRESH CANDIDATE_RECORD_ID; not authorized here.' s12-d1 honors that clause: it is a structurally fresh candidate_record_id, not a revision of s11-d1. The Donchian-15/8 choice is targeted at K9-mitigation: s11-d1 v1 disclosed expected closed_trades over 4.6y IS of ~25-50 (below K9 floor of 100); the faster channel is expected to produce 80-200 trades (borderline-to-clearing). The trade-off is elevated DR10 turnover-cost-explosion risk; the operator mitigated this at SEAL via DA4=B (raising START_CASH from $50k to $100k), which roughly halves contracts-per-trade for a given ATR and reduces per-dollar commission/slip pressure."
+}
