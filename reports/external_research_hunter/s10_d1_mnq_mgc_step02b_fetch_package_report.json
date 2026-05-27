@@ -1,0 +1,193 @@
+{
+  "schema": "sparta.external_research_hunter.step02b_fetch_package_report.v1",
+  "phase": "S10_D1_MNQ_MGC_STEP02B_FETCH_PACKAGE_AUTHORED_NOT_RUN",
+  "report_date_utc": "2026-05-26",
+  "authorization": "Authorize s10 D1 MNQ+MGC Step 02b operator-side Databento fetch package.",
+  "controller_session": "THIS_SESSION_PACKAGE_AUTHORING_ONLY",
+  "candidate_record_id": "s10-d1-cross-asset-trend-or-meanrev-mnq-mgc-databento-long-history",
+  "sealed_spec_commit_anchor": "9040429",
+  "sealed_spec_path": "docs/s10_d1_mnq_mgc_databento_long_history_tier_n_spec.md",
+  "package_artifacts_authored_this_turn": [
+    {
+      "id": 1,
+      "label": "fetch_script",
+      "path": "tools/operator_side/s10_d1_mnq_mgc_step02b_fetch_databento.py",
+      "bytes": 10408,
+      "sha256": "e8cc33ae37b3431ee673c1b4374006472b2586a1a3711209dac5dd2cf354dedc",
+      "py_compile_passed": true,
+      "ascii_only": true
+    },
+    {
+      "id": 2,
+      "label": "operator_runbook",
+      "path": "docs/s10_d1_mnq_mgc_step02b_operator_fetch_runbook.md",
+      "bytes": 9787,
+      "sha256": "10e9559c99059ed3355d5a1102b91b14a8cb63443594c39817ec123b5640a17f",
+      "ascii_only": true
+    },
+    {
+      "id": 3,
+      "label": "package_report_md",
+      "path": "reports/external_research_hunter/s10_d1_mnq_mgc_step02b_fetch_package_report.md",
+      "bytes": 10783,
+      "sha256": "eab952e2c112a397e07585c1d5ddec04a877f58a845c3c1403e718739556c4f7",
+      "ascii_only": true
+    },
+    {
+      "id": 4,
+      "label": "package_report_json",
+      "path": "reports/external_research_hunter/s10_d1_mnq_mgc_step02b_fetch_package_report.json",
+      "self_referential": true,
+      "embedded_report_seal_sha256": true
+    }
+  ],
+  "locked_fetch_parameters_carried_byte_equivalent_from_sealed_spec": {
+    "dataset": "GLBX.MDP3",
+    "schema_databento": "ohlcv-1d",
+    "stype_in": "continuous",
+    "symbols": [
+      "MNQ.c.0",
+      "MGC.c.0"
+    ],
+    "mcl_c_0_explicitly_excluded": true,
+    "start_date_inclusive": "2019-05-13",
+    "end_date_inclusive": "2025-12-30",
+    "is_window_start": "2019-05-13",
+    "is_window_end": "2023-12-29",
+    "oos_window_start_locked_not_inspected": "2024-01-02",
+    "oos_window_end_locked_not_inspected": "2025-12-30",
+    "approved_output_dir": "data/s10_d1_mnq_mgc_databento_long_history/raw",
+    "default_output_filenames": {
+      "MNQ.c.0": "MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+      "MGC.c.0": "MGC_c_0_ohlcv_1d_20190513_20251230.csv"
+    },
+    "manifest_filename": "s10_d1_mnq_mgc_step02b_fetch_manifest.json",
+    "required_csv_columns": [
+      "ts_event",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume"
+    ]
+  },
+  "fail_closed_exit_codes_in_script": {
+    "2": "DATABENTO_API_KEY not set in environment",
+    "3": "Unknown symbol attempted (only MNQ.c.0 and MGC.c.0 permitted)",
+    "4": "Resolved output path falls outside APPROVED_OUTPUT_DIR",
+    "5": "DataFrame missing required columns OR ts_event missing after reset_index",
+    "6": "databento python client not installed",
+    "7": "Any symbol returns 0 rows over the locked date range",
+    "0": "successful run (no other path)"
+  },
+  "static_scan_results_all_pass": {
+    "py_compile_passed": true,
+    "ascii_only": true,
+    "required_strings_present_count_25_of_25": true,
+    "no_forbidden_key_printing_or_logging_in_script": true,
+    "no_yfinance_import": true,
+    "no_review_queue_mutation_call_in_script": true,
+    "review_queue_substring_only_in_self_disclaimer_docstring_no_actual_write": true,
+    "no_strategy_lab_import": true,
+    "no_signal_or_backtest_or_simulator_function_definitions": true,
+    "no_setlivemode_or_setbrokeragemodel_or_deployalgorithm_calls": true,
+    "get_range_call_has_no_path_kwarg_only_in_note_comment": true,
+    "oos_mentions_confined_to_metadata_comments_manifest_fields": true,
+    "fetch_not_run_by_controller_this_turn": true,
+    "no_databento_call_by_controller_this_turn": true,
+    "no_databento_api_key_access_by_controller_this_turn": true,
+    "no_network_io_by_controller_this_turn": true
+  },
+  "runbook_summary": {
+    "preflight_section_present": true,
+    "set_api_key_powershell_idiom_present": true,
+    "verify_without_print_idiom_present": true,
+    "run_fetch_powershell_command_present": true,
+    "expected_output_files_documented": true,
+    "safe_paste_back_format_documented": true,
+    "forbidden_paste_back_list_documented": true,
+    "explicit_warnings_count": 6,
+    "abort_conditions_count": 5,
+    "post_run_next_authorization_specified": true,
+    "next_authorization_phrase": "Authorize s10 D1 MNQ+MGC Step 02c raw-data audit only."
+  },
+  "boundaries_held_this_package_turn": {
+    "step02b_package_only_no_fetch_run": true,
+    "databento_api_key_not_accessed_by_controller": true,
+    "databento_api_key_not_printed_logged_hashed_stored_or_inspected": true,
+    "no_databento_call_from_controller": true,
+    "no_backtest": true,
+    "no_simulator_run": true,
+    "no_signal_computation": true,
+    "no_oos_inspection": true,
+    "no_oos_return_summary": true,
+    "no_strategy_performance_evaluation": true,
+    "no_review_queue_mutation": true,
+    "no_strategy_lab_run": true,
+    "no_candidate_promotion": true,
+    "no_live_trading": true,
+    "no_modification_of_lessons_md": true,
+    "no_staging_of_lessons_md": true,
+    "lessons_md_dirty_and_unstaged_preserved": true,
+    "no_branch_change_no_branch_creation_no_git_push": true,
+    "only_four_named_package_files_authored": true,
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc": "NEVER_GRANTED",
+    "no_strategy_optimization_authorized": true
+  },
+  "next_step_authorization_paths": [
+    {
+      "label": "operator_runs_fetch_in_local_shell",
+      "command_sequence_powershell": [
+        "cd C:\\SPARTA_BRAIN",
+        "$env:DATABENTO_API_KEY = \"<paste-your-databento-key-here-locally>\"",
+        "python .\\tools\\operator_side\\s10_d1_mnq_mgc_step02b_fetch_databento.py"
+      ],
+      "controller_does_not_run_this": true,
+      "expected_runtime_seconds_estimate": "60-300",
+      "expected_output_files_count": 3
+    },
+    {
+      "label": "after_successful_fetch_safe_paste_back",
+      "fields_to_paste_back": [
+        "symbol",
+        "row_count",
+        "first_timestamp",
+        "last_timestamp",
+        "sha256",
+        "size_bytes",
+        "manifest_path",
+        "manifest_sha256"
+      ],
+      "fields_NEVER_to_paste_back": [
+        "DATABENTO_API_KEY",
+        "any_row_content_ohlcv_volume",
+        "any_sharpe_or_return_or_pnl_or_drawdown_number",
+        "any_oos_window_analysis",
+        "any_raw_api_payload"
+      ]
+    },
+    {
+      "label": "after_safe_paste_back_next_authorization",
+      "phrase": "Authorize s10 D1 MNQ+MGC Step 02c raw-data audit only.",
+      "scope": "local-only audit; no Databento call; no network; consumes the manifest JSON to validate row counts, sha256 anchors, date-window coverage, required-column presence"
+    },
+    {
+      "label": "if_fetch_fails_closed",
+      "actions": [
+        "Do NOT modify the script",
+        "Do NOT modify the runbook",
+        "Paste back only safe summary line + exit code",
+        "Controller authors parking memo under separate authorization, NOT a parameter tweak"
+      ]
+    }
+  ],
+  "is_sealed": false,
+  "is_live_approved": false,
+  "is_profit_proof": false,
+  "frc_granted": false,
+  "is_candidate_promoted": false,
+  "report_seal_sha256": "c024e33120f68406a2c283efcf4dceacb20a46cbb663b07c10c461a562910be3",
+  "seal_method": "sha256(json.dumps(body, sort_keys=True, separators=(',',':'), ensure_ascii=False)) excluding report_seal_sha256+seal_method"
+}
