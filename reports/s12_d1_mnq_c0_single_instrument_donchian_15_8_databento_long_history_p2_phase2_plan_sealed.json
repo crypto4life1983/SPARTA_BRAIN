@@ -1,0 +1,539 @@
+{
+  "anchors": {
+    "operator_authorization_phrase_p2": "Authorize s12 D1 MNQ.c.0 P2 phase-2 plan only. Preserve REC1 oos_k9_risk_disclosure as binding.",
+    "p1_plan_lock_commit": "d8bd359",
+    "p1_plan_lock_json_path": "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p1_plan_lock_sealed.json",
+    "p1_plan_lock_md_path": "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p1_plan_lock.md",
+    "p1_plan_lock_seal_sha256": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+    "parallel_session_seal_at_9ce4d66_acknowledged_not_anchored": true,
+    "rec1_oos_k9_risk_disclosure_binding": true,
+    "tier_n_spec_commit": "66bbbd1",
+    "tier_n_spec_json_path": "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_sealed.json",
+    "tier_n_spec_md_path": "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec.md",
+    "tier_n_spec_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+  },
+  "authored_at_utc": "2026-05-27T15:14:39.017279Z",
+  "binding": true,
+  "c1_live_mode_refusal": {
+    "description": "Algorithm refuses to run in live mode at Initialize. Output JSONs carry explicit trading and live status markers.",
+    "must_not": [
+      "ever conditionally bypass the LiveMode check",
+      "reduce the status strings to anything weaker than PAUSED / BLOCKED_AT_6_GATES"
+    ],
+    "required_initialize_block": "if self.LiveMode: raise Exception(\"LIVE_PATH_DETECTED: s12-d1-mnq-c0-single-instrument-donchian-15-8 is paper-only forever; refuse to run in live mode.\")",
+    "required_output_json_status_fields": {
+      "backtest_diagnostic_only": true,
+      "frc_status": "NEVER_GRANTED",
+      "live_status": "BLOCKED_AT_6_GATES",
+      "trading_status": "PAUSED"
+    }
+  },
+  "c2_provenance_contract": {
+    "description": "Every backtest/simulator output tagged with deterministic engine-truth run_id from sealed inheritance chain + algorithm version + actual run window.",
+    "must_not": [
+      "hash run_id from operator-mutable fields",
+      "skip the Initialize date cross-check",
+      "use CONFIG dates for run_id or CAGR when engine dates are readable",
+      "allow run_id to come from a hardcoded literal"
+    ],
+    "required_ceiling_check": "if self.EndDate.date() > date(*CONFIG['plan_lock_window_ceiling']) -> raise WINDOW_EXTENSION_BEYOND_PLAN_LOCK_FORBIDDEN",
+    "required_compute_deterministic_run_id_inputs_hashed_in_order": [
+      "tier_spec_seal",
+      "plan_lock_seal",
+      "plan_doc_sha256",
+      "phase_literal_tag b\"PHASE2-S12-D1\"",
+      "algo_version_for_run_id",
+      "self.StartDate.date() (engine truth; NOT CONFIG)",
+      "self.EndDate.date() (engine truth; NOT CONFIG)"
+    ],
+    "required_config_fields": {
+      "algo_version_for_run_id": "s12_d1_v0_1_0",
+      "end_date_is": [
+        2023,
+        12,
+        29
+      ],
+      "end_date_oos": [
+        2025,
+        12,
+        30
+      ],
+      "plan_doc_sha256": "(populated at P3 BUILD; sha256 of the P1 plan-lock MD file on disk)",
+      "plan_lock_seal": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+      "plan_lock_window_ceiling": [
+        2025,
+        12,
+        30
+      ],
+      "start_date_is": [
+        2019,
+        5,
+        13
+      ],
+      "start_date_oos": [
+        2024,
+        1,
+        2
+      ],
+      "tier_spec_seal": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+    },
+    "required_initialize_cross_check": [
+      "if self.StartDate.date() != date(*CONFIG['start_date_<phase>']) -> raise CONFIG_START_DATE_MISMATCH",
+      "if self.EndDate.date() != date(*CONFIG['end_date_<phase>']) -> raise CONFIG_END_DATE_MISMATCH"
+    ],
+    "required_output_naming": "<output_dir>/<prefix>_<run_id_12hex>.{json,md}",
+    "required_output_seal_method": "LESSON_HUNTER_004 canonical roundtrip (sha256 of json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)"
+  },
+  "c3_safety_counters": {
+    "asset_class_conditional_counters_s12_d1_status": {
+      "atr_stop_breach_count": "NEW s12-d1-specific (disclosure; tracks count of stop-loss exits as fraction of total exits for whipsaw signature)",
+      "donchian_15_8_signal_count_per_year": "NEW s12-d1-specific (disclosure; tracks per-year trade density to inform DR10 risk monitoring)",
+      "expiry_or_settlement_fills_outside_rth_count": "NOT_APPLICABLE (continuous front-month per Databento stype_in=continuous; vendor-side roll; no expiry surface)",
+      "extended_hours_fill_warning_count": "NOT_APPLICABLE (single-instrument futures; MNQ session structure does NOT have extended-hours-as-violation semantics that equity options have)",
+      "unsupported_order_type_detected_count": "NOT_APPLICABLE (s12-d1 uses CSV-based simulator at P6; QC live brokerage path is structurally not in this candidate's chain)"
+    },
+    "must_not": [
+      "conflate QC lifecycle events with operator violations",
+      "mutate a counter without a corresponding _forbidden_action_attempts or _skip_log entry",
+      "use per-minute increments when per-day is intended"
+    ],
+    "pseudocode_pattern_for_unique_day_counters": "if today not in self._<category>_dates_seen:\n    self._<category>_skip_count += 1\n    self._<category>_dates_seen.add(today)",
+    "universal_counters_every_inheritor_must_track": {
+      "all_safety_warnings_zero": {
+        "required": "True iff all applicable counters are 0",
+        "type": "bool"
+      },
+      "forbidden_action_attempts_detected": {
+        "required_for_ready_verdict": "empty",
+        "type": "list"
+      },
+      "stale_fill_warning_count": {
+        "required_for_safety_zero": 0,
+        "type": "int"
+      }
+    }
+  },
+  "c4_rth_execution_discipline": {
+    "boundary_alignment_rule_s12_d1": "trivially satisfied (eod_cancel_time == rth_safe_window_close == [16, 0]); both reduce to daily-bar close for s12-d1's daily-only design",
+    "limit_order_discipline_s12_d1": "NOT_APPLICABLE at P6 simulator level (CSV-based simulator transacts at daily close; LIMIT-order discipline applies at hypothetical future P3.7+ QC live-path which is BLOCKED by 6-gate live-block invariant)",
+    "must_not": [
+      "set eod_cancel_time later than rth_safe_window_close (trivially satisfied for daily-bar design)",
+      "submit MarketOrder/MarketOnClose for opens (NOT APPLICABLE at P6 CSV-simulator)",
+      "use a wider RTH safe window than the asset's regular session (09:30-16:00 ET is MNQ regular session)"
+    ],
+    "required_config_for_s12_d1": {
+      "eod_cancel_time": [
+        16,
+        0
+      ],
+      "max_quote_age_seconds": "NOT_APPLICABLE (daily bars; no intraday quote-age check needed)",
+      "max_relative_spread": "NOT_APPLICABLE (daily bars; no intraday spread check needed)",
+      "rth_safe_window_close": [
+        16,
+        0
+      ],
+      "rth_safe_window_open": [
+        9,
+        30
+      ],
+      "rth_window_tz": "America/New_York"
+    },
+    "required_eod_cleanup_s12_d1": "NOT_APPLICABLE (daily bars; no intraday pending orders; CSV-based simulator at P6 handles fills atomically per daily bar)",
+    "required_per_candidate_checks_in_chain_loop_s12_d1": [
+      "Daily bar at RTH close (16:00 ET America/New_York); intraday checks NOT APPLICABLE",
+      "bid/ask checks NOT APPLICABLE for daily-bar OHLCV ingestion",
+      "Spread checks NOT APPLICABLE for daily-bar OHLCV ingestion"
+    ]
+  },
+  "c5_corporate_action_event_risk_contract": {
+    "must_not": [
+      "introduce a synthetic corporate-action list to apply equity-class C5 logic to futures (NOT APPLICABLE)",
+      "submit MarketOnClose for the underlying contract (NOT APPLICABLE at P6 CSV-simulator level)",
+      "modify the Databento continuous-stitch method post-seal"
+    ],
+    "operator_responsibilities_for_s12_d1": [
+      "Verify the sealed MNQ.c.0 CSV at sha 8b7b832c...fa23e remains byte-stable on disk at every phase",
+      "No fresh fetch authorized; no re-stitching authorized; no roll-override authorized"
+    ],
+    "rationale": "MNQ.c.0 is a continuous front-month futures contract synthesized vendor-side by Databento (stype_in=continuous). Futures do NOT have stock splits, dividends, or option-style corporate actions. Quarterly contract roll is handled by the Databento continuous-stitch (documented in s10-D1 audit; sealed CSV at sha 8b7b832c...fa23e). The C5 corporate-action blackout / known_corporate_actions / LIMIT pre-close / MOC-rejection-detection mechanisms are STRUCTURALLY ABSENT for this candidate.",
+    "required_config_for_s12_d1": {
+      "corp_action_blackout_days_after": "NOT_APPLICABLE",
+      "corp_action_blackout_days_before": "NOT_APPLICABLE",
+      "corp_action_pre_close_aggressive_ticks": "NOT_APPLICABLE",
+      "futures_roll_method": "Databento native continuous-front-month synthesis (stype_in=continuous); vendor-side; documented byte-equivalent from s11-d1 v1",
+      "futures_roll_method_modification_post_seal_forbidden": true,
+      "known_corporate_actions": []
+    },
+    "s12_d1_status": "STRUCTURALLY_ABSENT (single-instrument futures continuous-stitch)"
+  },
+  "c6_diagnostic_output_schema": {
+    "must_not": [
+      "emit win_rate as a number when closed_trades < verdict_min_closed_trades",
+      "compute CAGR from CONFIG dates",
+      "omit report_seal_sha256",
+      "silently bump schema_id",
+      "omit REC1 oos_k9_risk_disclosure from inherited_constraints_block"
+    ],
+    "performance_summary_required_fields": [
+      "starting_cash_usd (s12-d1: 100000 per DA4=B)",
+      "final_equity_usd",
+      "gross_pnl_usd",
+      "net_pnl_usd",
+      "total_commission_usd",
+      "total_slippage_usd",
+      "max_drawdown_usd",
+      "max_drawdown_pct (magnitude-based; per s11-d1 rev2 condition (e) correction byte-equivalent)",
+      "longest_drawdown_days",
+      "time_underwater_pct",
+      "cagr_pct (computed from self.StartDate/self.EndDate; NOT CONFIG)",
+      "sharpe_annualized",
+      "sortino_annualized (or null)",
+      "win_rate_pct_or_NA_INSUFFICIENT_SAMPLE (literal string 'NA_INSUFFICIENT_SAMPLE' when closed_trades < verdict_min_closed_trades)",
+      "margin_usage_summary (futures margin disclosure)",
+      "monte_carlo_optimism_disclosure (honest CI disclaimer string)",
+      "closed_trades_count",
+      "annual_turnover (for DR10 monitoring)",
+      "s12_d1_specific_donchian_15_8_signal_density_per_year"
+    ],
+    "rec1_oos_k9_risk_disclosure_in_inherited_constraints_block": "OOS K9 EXPECTED TO FIRE. Implied OOS trade count over 2.0y at IS rate is approximately 35-87 trades, below K9 = 100. If OOS K9 fires, the OOS verdict will be OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE analogous to S10-D2 P11 PARK at 23c7164. The chain shall NOT relax K9 at OOS; the appropriate response is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and park the candidate. Pursuing s12-d1 accepts the structural likelihood of an OOS PARK outcome.",
+    "required_top_level_fields_universal": [
+      "schema_id (candidate-specific; ends in .v1)",
+      "title (must mention paper-research-only + diagnostic-only + secondary label)",
+      "phase (candidate-specific phase identifier; e.g. PHASE2-S12-D1-MNQ-DONCHIAN-15-8)",
+      "backtest_run_id (<PREFIX>-<run_id_12hex>)",
+      "report_date_utc (ISO 8601 UTC)",
+      "config_used (verbatim CONFIG)",
+      "linked_plan_doc_sha256",
+      "linked_seals_at_init (dict; cites tier_spec_seal + plan_lock_seal + p2_phase2_plan_seal)",
+      "safety_fix_attestations (dict of per-fix booleans)",
+      "inherited_constraints_block (list of verbatim constraint strings; includes REC1 oos_k9_risk_disclosure)",
+      "inherited_advisory_labels (list)",
+      "inherited_secondary_labels (list)",
+      "inherited_quarantine_flags (dict)",
+      "scan_diagnostics (dict)",
+      "trade_diagnostics (dict)",
+      "safety_diagnostics (dict)",
+      "performance_summary (dict; see below)",
+      "verdict (closed enum)",
+      "verdict_reasons (list of strings)",
+      "forbidden_action_attempts_detected (list)",
+      "negative_invariants (dict; all False except backtest_run=True, schedule_created=True)",
+      "status_fields (dict; PAUSED / BLOCKED_AT_6_GATES)",
+      "labels (list; includes DIAGNOSTIC_ONLY_NOT_LIVE_GRADE)",
+      "final_status_list (list)",
+      "algo_version (string)",
+      "seal_method (string describing the seal recipe)",
+      "report_seal_sha256 (the seal itself)"
+    ]
+  },
+  "c7_verdict_semantics": {
+    "closed_enum_allowed_verdicts": [
+      "FAIL_SAFETY",
+      "INSUFFICIENT_SAMPLE",
+      "READY_FOR_LONGER_BACKTEST"
+    ],
+    "must_not": [
+      "add a new verdict outside the closed enum without an explicit operator-authorized schema bump",
+      "interpret READY_FOR_LONGER_BACKTEST as live-ready in any downstream automation",
+      "emit numeric win-rate when n < threshold",
+      "treat REC1 OOS K9 disclosure as advisory only -- it is binding per operator authorization"
+    ],
+    "never_live_clause_LOAD_BEARING": "READY_FOR_LONGER_BACKTEST is exclusively a research label. It NEVER signals readiness for live trading. The 6-gate live-block applies regardless of verdict for any candidate inheriting this template, including s12-d1.",
+    "rec1_explicit_at_c7": "Per REC1 oos_k9_risk_disclosure carried byte-equivalent from SEAL: the EXPECTED OOS verdict for s12-d1 is INSUFFICIENT_SAMPLE / OOS_INDETERMINATE. READY_FOR_LONGER_BACKTEST at IS does NOT imply OOS will reach READY; OOS is structurally expected to PARK at K9.",
+    "required_config_thresholds_s12_d1": {
+      "verdict_max_drawdown_pct_magnitude_concern": 0.3,
+      "verdict_max_drawdown_pct_magnitude_fail_safety": 0.5,
+      "verdict_min_closed_trades": 100,
+      "verdict_min_closed_trades_lock_origin": "K9 byte-equivalent; LOCKED non-negotiable per no_k9_relaxation"
+    },
+    "verdict_precedence_high_to_low": [
+      "1. unsupported_order_type_detected_count > 0 -> FAIL_SAFETY (top priority; NOT APPLICABLE for s12-d1)",
+      "2. stale_fill_warning_count > 0 -> FAIL_SAFETY (extended_hours_fill_warning_count NOT APPLICABLE for s12-d1)",
+      "3. closed_trades < verdict_min_closed_trades (= 100; K9 byte-equivalent) -> INSUFFICIENT_SAMPLE",
+      "4. else -> READY_FOR_LONGER_BACKTEST (with caveats appended to verdict_reasons if n < 100, DD > concern, etc.)"
+    ]
+  },
+  "c8_candidate_lifecycle": {
+    "allowed_operational_statuses": {
+      "ACTIVE_RESEARCH": "Default during s12-d1 Phase 2 ladder",
+      "ARCHIVED": "Operator action; record preserved, no further activity",
+      "PARKED_FAILED_SAFETY": "Any safety counter > 0 that operator chooses not to repair",
+      "PARKED_FALSIFIED_AT_OOS": "OOS run definitively negative per pre-committed thresholds",
+      "PARKED_SAFE_BUT_NOT_MONEY_PROVEN": "Negative/neutral economics on clean run",
+      "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED": "(s12-d1 EXPECTED terminal verdict per REC1; analogous to S10-D2 P11 PARK at 23c7164)",
+      "READY_FOR_LONGER_BACKTEST": "After a clean Step 5.x with sufficient sample (>=K9)"
+    },
+    "must_not": [
+      "auto-revive a parked candidate",
+      "modify a parked candidate's record to claim better economics",
+      "use parking as a soft path back to live promotion",
+      "interpret REC1 OOS K9 disclosure as advisory only -- it is binding"
+    ],
+    "permanent_attributes_unchanged_by_parking": [
+      "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE secondary label",
+      "All advisory labels",
+      "6-gate live-block",
+      "FRC status (never granted)",
+      "REC1 oos_k9_risk_disclosure (binding; carried into any future PARK memo for s12-d1)"
+    ],
+    "rec1_explicit_at_c8": "s12-d1 expected terminal verdict is PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED per REC1 oos_k9_risk_disclosure. If OOS K9 fires (expected: 35-87 trades < K9=100), the operator MUST park s12-d1 under that status; the chain shall NOT relax K9 to extract a different verdict.",
+    "transitions": {
+      "revival_from_PARKED": "requires FRESH SEALED RESEARCH CYCLE; fresh seals throughout; new plan-lock; new ladder; not a continuation; old run record stays intact",
+      "to_any_PARKED": "operator authorization required; writes canonical parking report at reports/external_research_hunter/<candidate>_PARKING_REPORT.md; algorithm source preserved verbatim as reference"
+    },
+    "weak_performance_rejection_rule_LOAD_BEARING": "If a candidate shows decisively negative economics on a meaningful sample (Sharpe < 0, expectancy <= 0, profit-loss ratio < 0.5, closed_trades >= verdict_min_closed_trades), the operator MUST park it. Do NOT iterate parameters in search of better numbers -- that is optimization, which is forbidden by the safety-contract template."
+  },
+  "candidate_record_id": "s12-d1-mnq-c0-single-instrument-donchian-15-8-databento-long-history",
+  "citation_block_for_p3_build_to_embed": "# Inherits Phase 2 safety contracts (C1-C8) from:\n#   docs/phase2_safety_contract_template.md\n#   docs/phase2_safety_contract_template.json\n# Template source candidate (parked, not money-proven):\n#   s2-62fc753afc01f22c (NKE Options Wheel Tier-1 v6.1)\n# Template reuse notice: NKE strategy logic NOT inherited;\n#   only safety contracts.\n# s12-d1 specific adaptations:\n#   - C5 corporate-action/event-risk STRUCTURALLY_ABSENT (futures continuous-stitch)\n#   - C3 extended_hours / unsupported_order_type NOT_APPLICABLE\n#   - REC1 oos_k9_risk_disclosure carried binding\n# Anchors:\n#   tier_n_spec_seal = 07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48\n#   p1_plan_lock_seal = eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340\n",
+  "explicit_next_phase_requirement": {
+    "next_phase_is_p3_build": true,
+    "next_phase_pre_approved_by_this_p2": false,
+    "no_phase_beyond_p3_pre_approved_by_this_p2": true,
+    "p10_oos_gate_requires_separate_authorization": true,
+    "p11_lifecycle_decision_requires_separate_authorization": true,
+    "p3_build_files_allowed_per_p1_section_1": "16 files (5 source + 5 test scaffold + 6 sealed build reports) at namespace external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/",
+    "p3_build_requires_separate_authorization": true,
+    "p3_build_requires_separate_authorization_phrase": "Authorize s12 D1 MNQ.c.0 P3 BUILD only (or P3-RUNNER / P3-IS-DRIVER / P3-OOS-DRIVER sub-phase split)",
+    "p4_smoke_requires_separate_authorization": true,
+    "p6_5_cost_stress_requires_separate_authorization": true,
+    "p6_is_requires_separate_authorization": true,
+    "p7_decision_memo_requires_separate_authorization": true,
+    "this_p2_authoring_sealing_commit_completes_here": true
+  },
+  "hard_boundaries_held_this_p2_phase2_plan_turn": {
+    "no_app_py_touched": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_commit_in_orchestrator": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_dr_redefinition": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_parallel_session_seal_at_9ce4d66": true,
+    "no_modification_of_phase_2_safety_contract_template": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_s12_d1_draft_at_7e9c867": true,
+    "no_modification_of_s12_d1_p1_plan_lock_at_d8bd359": true,
+    "no_modification_of_s12_d1_plan_at_b4eac65": true,
+    "no_modification_of_s12_d1_seal_at_66bbbd1": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_inspection": true,
+    "no_paper_trading": true,
+    "no_phase_pre_approval_beyond_p2": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_qc_runtime": true,
+    "no_rec1_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_s10_d1_modification": true,
+    "no_s10_d2_modification": true,
+    "no_s10_d2_revival": true,
+    "no_safety_gate_relaxation": true,
+    "no_source_modification": true,
+    "no_strategy_build": true,
+    "no_templates_base_html_touched": true,
+    "no_threshold_loosening": true,
+    "no_tier_n_spec_modification": true,
+    "no_unrelated_tracked_file_modified": true,
+    "preserves_seal_at_66bbbd1_and_p1_at_d8bd359_as_source_of_truth": true,
+    "rec1_oos_k9_risk_disclosure_carried_byte_equivalent_binding": true
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P2_PHASE_2_PLAN_SEALED",
+    "S12_D1_MNQ_DONCHIAN_15_8_FRESH_CANDIDATE",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NO_FRC_GRANTED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_PHASE_PRE_APPROVED_BEYOND_P2",
+    "K9_THRESHOLD_INVIOLATE",
+    "OOS_K9_STRUCTURALLY_UNREACHABLE_REC1_BINDING",
+    "DR10_RISK_ELEVATED_MITIGATED_VIA_DA4_B_START_CASH_100K",
+    "DONCHIAN_15_8_LOCKED_AT_PLAN_NO_RETREAT_TO_55_20",
+    "MECHANIC_FAMILY_F1_LOCKED_AT_PLAN_NO_REOPENING",
+    "TIER_N_SPEC_LOCKED_BYTE_EQUIVALENT_AT_66BBBD1",
+    "P1_PLAN_LOCK_LOCKED_BYTE_EQUIVALENT_AT_D8BD359",
+    "PARALLEL_SEAL_AT_9CE4D66_ACKNOWLEDGED_NOT_ANCHORED",
+    "C1_THROUGH_C8_INHERITED_BYTE_EQUIVALENT_FROM_PHASE_2_TEMPLATE",
+    "C5_CORPORATE_ACTION_STRUCTURALLY_ABSENT_FUTURES",
+    "REC1_OOS_K9_RISK_DISCLOSURE_BINDING",
+    "EXPECTED_TERMINAL_VERDICT_PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED"
+  ],
+  "lifecycle_state": "P2_PHASE_2_PLAN_SEALED",
+  "negative_invariants_for_p2_plan_usage": {
+    "claims_nke_strategy_money_proven": false,
+    "config_window_ceiling_extension_authorized": false,
+    "engine_date_check_silently_bypassed": false,
+    "fresh_sealed_revision_circumvented": false,
+    "live_path_proposed_via_p2_plan": false,
+    "nke_strategy_logic_reused_as_template": false,
+    "optimization_via_p2_plan_authorized": false,
+    "parking_loophole_for_live_promotion": false,
+    "rec1_oos_k9_risk_disclosure_demoted_to_advisory": false,
+    "s11_d1_sealed_artifacts_modified": false,
+    "s12_d1_seal_or_p1_modified": false,
+    "schema_id_silently_bumped": false,
+    "verdict_enum_silently_extended": false
+  },
+  "parent_references": {
+    "mnq_c0_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "p1_plan_lock_commit": "d8bd359",
+    "p1_plan_lock_seal_sha256": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+    "phase_2_safety_contract_template_md_sha256_at_authorship": "(populated dynamically at P3 BUILD via plan_doc_sha256 computation)",
+    "s10_d1_mnq_mgc_park_commit": "1a9acec",
+    "s10_d2_park_commit": "23c7164",
+    "s10_d2_park_status": "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "s11_d1_clarification_memo_commit": "d13b56a",
+    "s11_d1_p1_plan_lock_commit": "7d86486",
+    "s11_d1_p2_phase_2_plan_commit": "f64f984",
+    "s11_d1_rev2_commit": "c110fd4",
+    "s11_d1_rev2_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "s11_d1_v1_spec_commit": "9c63088",
+    "s11_d1_v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "s12_d1_draft_commit": "7e9c867",
+    "s12_d1_plan_commit": "b4eac65",
+    "tier_n_spec_commit": "66bbbd1",
+    "tier_n_spec_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+  },
+  "phase_prefix": "PHASE2-S12-D1-MNQ-DONCHIAN-15-8",
+  "pre_flight_checklist_for_p3_build": {
+    "minimum_tests_before_running_p3_build": [
+      "T1 Sealed sha256s match disk: verify CONFIG['tier_spec_seal']==07c3200b... and CONFIG['plan_lock_seal']==eb72798e... byte-for-byte",
+      "T2 Window ceiling: confirm CONFIG['end_date_oos']=(2024,1,2)..(2025,12,30) <= plan_lock_window_ceiling=(2025,12,30)",
+      "T3 Boundary alignment: confirm rth_safe_window_close == eod_cancel_time == (16,0)",
+      "T4 Brokerage compatibility: NOT_APPLICABLE for s12-d1 (CSV simulator; no QC live path)",
+      "T5 Distinct run_id: compute deterministic run_id offline; confirm distinct from s11-d1 / s10-D2 / all prior s12-d1 algo versions",
+      "T6 QC smoke init: NOT_APPLICABLE for s12-d1 (CSV simulator; no QC dependency in P3 BUILD scope per P1)",
+      "T7 P4 synthetic smoke (T1-T15 + T7b + T7c) per P1 section 10",
+      "T8 Validator pass at P4 (execution_guard.full_guard_check returns overall_pass=True)",
+      "T9 Verdict semantics: confirm READY_FOR_LONGER_BACKTEST is NOT interpreted as live-ready in any downstream automation; REC1 OOS K9 disclosure carried into output JSON inherited_constraints_block"
+    ],
+    "required_config_fields_to_populate": {
+      "event_risk": [
+        "known_corporate_actions=[] (STRUCTURALLY_ABSENT)",
+        "futures_roll_method=Databento_continuous"
+      ],
+      "identity": [
+        "candidate_record_id",
+        "title",
+        "candidate_grade",
+        "secondary_label",
+        "advisory_labels"
+      ],
+      "instrument": [
+        "asset_class=futures",
+        "ticker_or_root_symbol=MNQ",
+        "continuous_contract_symbol=MNQ.c.0",
+        "resolution=daily",
+        "brokerage_model_name=NOT_APPLICABLE_CSV_SIMULATOR_AT_P6"
+      ],
+      "rth_window": [
+        "rth_safe_window_open=(9,30)",
+        "rth_safe_window_close=(16,0)",
+        "eod_cancel_time=(16,0)",
+        "tz=America/New_York"
+      ],
+      "sealed_chain": [
+        "tier_spec_seal",
+        "plan_lock_seal",
+        "p2_phase2_plan_seal",
+        "plan_doc_sha256"
+      ],
+      "strategy_params": [
+        "donchian_entry_period_n=15",
+        "donchian_exit_period_n=8",
+        "atr_period=20",
+        "atr_method=Wilder",
+        "stop_multiplier_in_atr=2.0",
+        "risk_pct_per_trade=0.01",
+        "max_units_per_market=1",
+        "starting_cash_mnq_equivalent=100000",
+        "tick_size_points=0.25",
+        "tick_value_usd=0.5",
+        "dollar_per_point=2.0"
+      ],
+      "verdict_thresholds": [
+        "verdict_min_closed_trades=100 (K9 byte-equivalent)",
+        "verdict_max_drawdown_pct_magnitude_concern=0.30",
+        "verdict_max_drawdown_pct_magnitude_fail_safety=0.50 (per DA5=A)"
+      ],
+      "version": [
+        "algo_version_for_run_id=s12_d1_v0_1_0",
+        "phase_prefix=PHASE2-S12-D1-MNQ-DONCHIAN-15-8"
+      ],
+      "window": [
+        "start_date_is=(2019,5,13)",
+        "end_date_is=(2023,12,29)",
+        "start_date_oos=(2024,1,2)",
+        "end_date_oos=(2025,12,30)",
+        "plan_lock_window_ceiling=(2025,12,30)"
+      ]
+    }
+  },
+  "report_kind": "S12-D1 P2 phase-2 plan (sealed; binding; adapts C1-C8 phase-2 safety-contract template byte-equivalent for s12-d1 single-instrument futures; anchors to SEAL at 66bbbd1 (sha 07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48) and P1 plan-lock at d8bd359 (sha eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340); REC1 oos_k9_risk_disclosure carried byte-equivalent binding)",
+  "report_seal_sha256": "689dd3d06c0e2518ab5f6105544cb3d38194027647de10940da976e427c8efa9",
+  "schema_id": "sparta.external_research_hunter.s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p2_phase2_plan_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P2_PHASE_2_PLAN_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_oos_k9_risk_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "template_inheritance": {
+    "contracts_inherited": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8"
+    ],
+    "phase_2_safety_contract_template_json": "docs/phase2_safety_contract_template.json",
+    "phase_2_safety_contract_template_md": "docs/phase2_safety_contract_template.md",
+    "single_instrument_futures_adaptations": [
+      "C5 corporate-action/event-risk: STRUCTURALLY_ABSENT (futures; roll handled vendor-side via Databento continuous-stitch)",
+      "C3 extended_hours_fill_warning_count: NOT_APPLICABLE (futures session structure)",
+      "C3 unsupported_order_type_detected_count: NOT_APPLICABLE (s12-d1 uses CSV-based simulator, not QC live brokerage)",
+      "C4 RTH window: 09:30-16:00 ET America/New_York (MNQ regular session)"
+    ],
+    "template_source_candidate_parked": "s2-62fc753afc01f22c (NKE Options Wheel Tier-1 v6.1) -- PARKED_SAFE_BUT_NOT_MONEY_PROVEN; NKE strategy logic NOT inherited; only C1-C8 safety contracts extracted"
+  },
+  "what_this_p2_plan_explicitly_does_not_include": [
+    "NO strategy logic beyond what is already locked in SEAL + P1 plan-lock (Donchian-15/8 / ATR-20 / 1% risk / no pyramid)",
+    "NO NKE-specific values (no split-2015-12-24, no DTE, no abs(delta), no S3 sizing, no BSM IV, no wheel state machine)",
+    "NO live-promotion path",
+    "NO revival mechanism for parked predecessors",
+    "NO optimization permission (no_strategy_optimization_authorized = True)",
+    "NO DR threshold relaxation (no_dr_redefinition_post_seal = True)",
+    "NO K9 relaxation",
+    "NO universe widening",
+    "NO modification of s11-d1 v1 / P1 / P2 / clarification / rev2 sealed artifacts",
+    "NO modification of s12-d1 SEAL at 66bbbd1 or P1 plan-lock at d8bd359",
+    "NO modification of parallel-session SEAL at 9ce4d66",
+    "NO modification of brain_memory/projects/trading_bot/lessons.md"
+  ],
+  "what_this_p2_plan_includes": {
+    "C1_through_C8_safety_contracts_byte_equivalent_from_template": true,
+    "closed_enum_verdicts_and_precedence": true,
+    "operational_lifecycle_states": true,
+    "pre_flight_checklist": true,
+    "rec1_oos_k9_risk_disclosure_carried_byte_equivalent": true,
+    "required_config_field_list": true,
+    "required_output_schema": true,
+    "s12_d1_specific_config_values_from_seal_and_p1": true,
+    "single_instrument_futures_adaptations": true
+  }
+}
