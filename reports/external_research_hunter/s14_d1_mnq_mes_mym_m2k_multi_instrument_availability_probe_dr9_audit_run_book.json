@@ -1,0 +1,265 @@
+{
+  "authored_at_utc": "2026-05-27T20:31:11.140637Z",
+  "authorization_phrase": "Authorize s14-d1 multi-instrument availability probe + DR9 audit for MES, MYM, M2K only.",
+  "contingency_paths_per_s14_d1_plan_section_3_2": [
+    {
+      "contingency": "all_3_symbols_pass_dr9",
+      "description": "MES, MYM, M2K all pass DR9 with thresholds met. 4-instrument basket is fully available.",
+      "next_authorization_at_separate_turn": "Authorize s14-d1 multi-instrument RSI(2) bi-directional Tier-N spec DRAFT only — bound by DR10 v2."
+    },
+    {
+      "contingency": "1_symbol_fails_dr9",
+      "description": "One of MES/MYM/M2K fails DR9 (e.g., M2K thin-liquidity gap fires DR9). Per s14-d1 PLAN §3.2, the 3-symbol basket of the remaining instruments + MNQ is the contingency path.",
+      "next_authorization_at_separate_turn": "Authorize s14-d1 shrunk-basket Tier-N spec PLAN only — bound by DR10 v2.",
+      "note": "Shrunk-basket requires fresh candidate_record_id and re-authoring the Tier-N spec PLAN to reflect 3-symbol scope. Substitution of the failing symbol is FORBIDDEN."
+    },
+    {
+      "contingency": "2_symbols_fail_dr9",
+      "description": "Two of MES/MYM/M2K fail DR9. 2-symbol basket of remaining + MNQ may not have enough diversification or signal density; likely revert to T2 rev2 cash-equity basket alternative.",
+      "next_authorization_at_separate_turn": "Authorize s14-d1 cash-equity 3-name basket RSI(3) bi-directional Tier-N spec PLAN only — bound by DR10 v2.",
+      "note": "T2 rev2 from the post-s13-d1 next-track selection plan rev2 is the documented fallback."
+    },
+    {
+      "contingency": "3_symbols_fail_dr9",
+      "description": "All of MES, MYM, M2K fail DR9. Multi-instrument micro-futures hypothesis fails at data-quality gate.",
+      "next_authorization_at_separate_turn": "Authorize s14-d1 cash-equity 3-name basket RSI(3) bi-directional Tier-N spec PLAN only — bound by DR10 v2.",
+      "note": "Same as 2-symbol-fail contingency; T2 rev2 cash-equity alternative is the documented fallback."
+    },
+    {
+      "contingency": "any_symbol_inconclusive_hold",
+      "description": "DR9 audit returns INCONCLUSIVE_HOLD on any symbol (ambiguous data-quality outcome).",
+      "next_authorization_at_separate_turn": "Operator manual review + decision; no auto-progression to DRAFT.",
+      "note": "Analogous to s10-d1 INCONCLUSIVE_HOLD park outcome."
+    }
+  ],
+  "controller_advisory_probe": {
+    "controller_finding": "All three target symbols (MES.c.0, MYM.c.0, M2K.c.0) are EXPECTED to be available on GLBX.MDP3 with continuous-stitch behavior similar to MNQ.c.0 based on (a) coordinated CME launch dates in May 2019, (b) consistent Databento continuous-contract symbology, (c) known vendor docs. Controller advisory probe outcome: EXPECTED AVAILABLE — but BINDING availability + DR9 outcomes can only be determined by operator-side fetch.",
+    "expected_common_history_start": "2019-05-13 (matches MNQ.c.0 in audit chain; CME launched MNQ/MES/MYM/M2K as a coordinated micro-futures family in May 2019)",
+    "known_continuous_contract_convention": "{symbol_root}.c.0 = front-month continuous contract (Databento convention; same as MNQ.c.0, MGC.c.0)",
+    "known_dataset": "GLBX.MDP3 (CME Globex; same dataset as MNQ.c.0)",
+    "known_schema": "ohlcv-1d (daily aggregate bars)",
+    "known_stype_in": "continuous (same as MNQ.c.0)",
+    "method": "Controller reads (a) repository vendor docs (databento_vendor_docs/CME Globex MDP 3.0...) for known specs, (b) s10-d1 fetch manifest for prior MNQ.c.0 fetch parameters, (c) publicly-known CME equity-index micro futures launch information. No Databento call. No network IO.",
+    "vendor_docs_available_in_repo": [
+      "databento_vendor_docs/CME Globex MDP 3.0 _ CME futures historical & live data API.html",
+      "databento_vendor_docs/Venues and datasets _ Databento Docs.html",
+      "databento_vendor_docs/databento_continuous_contracts.html",
+      "databento_vendor_docs/Symbology _ Databento standards & conventions.html"
+    ]
+  },
+  "document_type": "RUN_BOOK_NOT_SEALED",
+  "dr9_audit_framework": {
+    "audit_result_schema_per_instrument": {
+      "csv_path": "string",
+      "csv_sha256": "string (verified by controller at audit turn)",
+      "dr9_failure_branches_if_any": "array of branch names that failed",
+      "dr9_per_instrument_status": "PASS / FAIL / INCONCLUSIVE_HOLD",
+      "first_ts_event": "ISO date",
+      "gap_continuity": "float in [0,1]",
+      "last_ts_event": "ISO date",
+      "max_gap_ratio": "float in [0,1]",
+      "quality_violation_count": "integer",
+      "roll_event_count": "integer",
+      "row_count": "integer",
+      "symbol": "string"
+    },
+    "per_instrument_check_procedure": [
+      "Step 1: Verify the captured CSV exists at the expected path",
+      "Step 2: Verify CSV sha256 against the recorded value in the operator-captured fetch manifest",
+      "Step 3: Parse CSV; verify schema matches sparta.databento.ohlcv_1d.continuous (fields: ts_event, open, high, low, close, volume)",
+      "Step 4: Compute gap_continuity = (number of trading days with rows) / (number of expected trading days between first_ts and last_ts based on a CME-Globex US-equity-index session calendar). Threshold: >= 0.95",
+      "Step 5: Compute max_gap_ratio = max(consecutive missing trading days) / total trading days. Threshold: <= 0.30 (any single gap longer than 30% of the total window flags failure)",
+      "Step 6: Count roll_event_count via detected discontinuities (price-level jumps consistent with futures roll). For continuous-stitch contracts on CME equity-index micros, expected ~24 quarterly rolls over 6.6y window — RESHAPE this threshold context: the s10-d1 DR9 threshold of <=5 was for ROLL EVENTS THAT VIOLATE STITCH QUALITY (not all roll events). Confirm with operator at audit turn what 'roll_event_count' captures in the s10-d1 framework.",
+      "Step 7: Count quality_violation_count = total checks failed across (bar OHLC sanity: low<=open<=high AND low<=close<=high; volume>=0; ts_event monotonic; no duplicate ts_event). Threshold: <= 5",
+      "Step 8: Aggregate: per-instrument DR9 status = PASS if ALL thresholds met; FAIL otherwise. INCONCLUSIVE_HOLD if any threshold is ambiguous (per s12-d1 DR9 outcome class)."
+    ],
+    "thresholds_carried_byte_equivalent_from_s10_d1": {
+      "gap_continuity_min": 0.95,
+      "max_gap_ratio_max": 0.3,
+      "quality_violation_count_max": 5,
+      "roll_event_count_max": 5
+    },
+    "thresholds_immutable_per_no_dr_redefinition_post_seal": true
+  },
+  "explicit_exclusions_this_turn": [
+    "No Databento call",
+    "No DATABENTO_API_KEY access",
+    "No network IO",
+    "No data fetch",
+    "No DR9 audit RESULTS sealed (only the framework is pre-authored; results require operator-captured CSVs at a future turn)",
+    "No DRAFT",
+    "No SEAL (this RUN_BOOK is not a sealed artifact)",
+    "No BUILD",
+    "No backtest",
+    "No simulator",
+    "No signal computation",
+    "No OOS inspection",
+    "No live trading",
+    "No broker / exchange API",
+    "No Strategy Lab promotion",
+    "No candidate promotion",
+    "No s13-d1 / s12-d1 / parked-candidate revival",
+    "No `brain_memory/projects/trading_bot/lessons.md` modification or staging",
+    "No modification of any existing sealed artifact"
+  ],
+  "hard_boundaries_held_this_run_book_turn": {
+    "binding_availability_outcome_pending_operator_fetch": true,
+    "binding_dr9_outcomes_pending_operator_captured_csvs": true,
+    "controller_advisory_probe_only_no_binding_availability_outcome": true,
+    "dr9_audit_framework_pre_authored_only_no_per_symbol_outcome": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_candidate_promotion": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_claude_md_modification": true,
+    "no_data_fetch": true,
+    "no_databento_api_key_access": true,
+    "no_databento_call": true,
+    "no_dr9_audit_RESULTS_sealed": true,
+    "no_dr9_audit_RUN_executed": true,
+    "no_draft": true,
+    "no_gitignore_modification": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_seal": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "is_a_sealed_artifact": false,
+  "labels": [
+    "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_RUN_BOOK",
+    "NOT_A_SEAL",
+    "PENDING_OPERATOR_FETCH",
+    "CONTROLLER_ADVISORY_PROBE_ONLY",
+    "DR9_AUDIT_FRAMEWORK_PRE_AUTHORED",
+    "S14_D1_LIFECYCLE_STATE_PROBE_PENDING",
+    "LESSONS_MD_NOT_TOUCHED",
+    "NO_BACKTEST_NO_FETCH_NO_NETWORK",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "DR10_V2_BINDING_FOR_S14_PLUS"
+  ],
+  "lifecycle_state": "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "operator_side_fetch_run_book": {
+    "executor": "operator (DATABENTO_API_KEY in operator's environment only; controller never reads the key)",
+    "expected_output_directory": "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/",
+    "expected_output_files": [
+      "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/MES_c_0_ohlcv_1d_20190513_20251230.csv",
+      "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/MYM_c_0_ohlcv_1d_20190513_20251230.csv",
+      "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/M2K_c_0_ohlcv_1d_20190513_20251230.csv",
+      "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/s14_d1_mes_mym_m2k_step02b_fetch_manifest.json"
+    ],
+    "fetch_boundaries_required": {
+      "databento_api_key_never_printed_or_logged_or_saved": true,
+      "databento_api_key_read_from_env_only": true,
+      "no_backtest": true,
+      "no_dbn_zst_cache_written_by_client_no_path_kwarg_passed": true,
+      "no_live_trading": true,
+      "no_oos_inspection_by_this_fetch": true,
+      "no_review_queue_mutation": true,
+      "no_signal_computation": true,
+      "no_simulator_run": true,
+      "no_strategy_lab_promotion": true,
+      "raw_csv_only_written_to_approved_directory": true
+    },
+    "fetch_parameters": {
+      "dataset": "GLBX.MDP3",
+      "end_date_inclusive": "2025-12-30",
+      "is_window_end": "2023-12-29",
+      "is_window_start": "2019-05-13",
+      "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+      "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+      "schema": "ohlcv-1d",
+      "start_date_inclusive": "2019-05-13",
+      "stype_in": "continuous",
+      "symbols": [
+        "MES.c.0",
+        "MYM.c.0",
+        "M2K.c.0"
+      ]
+    },
+    "post_fetch_action": "Operator confirms each CSV exists at the expected path, the manifest file exists with sha256 entries for each CSV, and types `Authorize s14-d1 multi-instrument availability probe + DR9 audit RESULT SEALING only.` to invoke controller-side DR9 audit + result sealing in a separate authorization turn."
+  },
+  "parent_references": {
+    "candidate_record_id": "s14-d1-mnq-mes-mym-m2k-multi-instrument-rsi-2-bi-directional-databento-long-history",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "s10_d1_fetch_manifest_model_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/s10_d1_mnq_mgc_step02b_fetch_manifest.json",
+    "s10_d1_fetch_manifest_sha256": "c4b7d2d064a601ce01e0c30190630640d27db0ef1cd9c5c5d8324b16655fc43b",
+    "s14_d1_tier_n_spec_plan_commit": "5376de7",
+    "s14_d1_tier_n_spec_plan_file_sha256": "be53ca7ecbb05ee4e243f15a98bf4e0208910d726e12ef787465544855f5f28f"
+  },
+  "report_date_utc": "2026-05-27T20:31:11.140637Z",
+  "report_kind": "RUN_BOOK / operator-side fetch instructions + pre-authored DR9 audit framework for MES.c.0, MYM.c.0, M2K.c.0. NOT a sealed Tier-N or framework artifact. Status PENDING operator-side fetch; controller cannot make Databento calls per s14-d1 PLAN hard boundaries.",
+  "schema_id": "sparta.external_research_hunter.s14_d1_multi_instrument_availability_probe_dr9_audit_run_book.v1",
+  "scope_of_this_run_book": [
+    "Controller-side advisory probe: based on vendor docs (databento_vendor_docs/) + publicly-known CME equity-index micro futures specifications + s10-d1 fetch precedent",
+    "Pre-authored DR9 audit framework: per-instrument check structure + thresholds carried byte-equivalent from s10-d1 audit",
+    "Operator-side fetch RUN_BOOK: explicit step-by-step instructions for the operator to perform a Databento fetch with the DATABENTO_API_KEY held only in the operator's environment",
+    "Expected operator-captured artifacts: manifest + 3 CSVs at specified paths",
+    "Contingency tree: per s14-d1 PLAN §3.2 (1-symbol fail / 2-symbol fail / 3-symbol fail / all pass)",
+    "Future result-sealing scope: separate authorization required for sealing the audit result after operator-side fetch completes"
+  ],
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal_for_existing_candidates": true,
+    "no_strategy_optimization_authorized": true,
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_lifecycle_state": "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+    "trading_status": "PAUSED"
+  },
+  "symbols_to_probe": [
+    {
+      "approximate_notional_per_contract_2024": 26000,
+      "controller_advisory_availability_estimate": "EXPECTED AVAILABLE — CME Globex; launched 2019-05-06; common-history start expected to match MNQ.c.0's 2019-05-13 within days; widely-traded equity-index micro futures",
+      "dataset_expected": "GLBX.MDP3",
+      "dollar_per_point_expected": 5.0,
+      "exchange": "CME Globex",
+      "expected_dr9_outcome": "EXPECTED PASS — equity-index micro futures have continuous-stitch behavior similar to MNQ; high liquidity; minimal gap risk",
+      "name": "Micro E-mini S&P 500",
+      "risk_factors": "Low (similar liquidity profile to MNQ; same exchange + schedule + roll pattern)",
+      "symbol": "MES.c.0",
+      "tick_size_points_expected": 0.25
+    },
+    {
+      "approximate_notional_per_contract_2024": 20000,
+      "controller_advisory_availability_estimate": "EXPECTED AVAILABLE — CME Globex; launched 2019-05-06; common-history start expected to match MNQ.c.0",
+      "dataset_expected": "GLBX.MDP3",
+      "dollar_per_point_expected": 0.5,
+      "exchange": "CME Globex",
+      "expected_dr9_outcome": "EXPECTED PASS — same family as MNQ/MES; similar liquidity profile",
+      "name": "Micro E-mini Dow",
+      "risk_factors": "Low (similar to MES)",
+      "symbol": "MYM.c.0",
+      "tick_size_points_expected": 1.0
+    },
+    {
+      "approximate_notional_per_contract_2024": 11000,
+      "controller_advisory_availability_estimate": "EXPECTED AVAILABLE — CME Globex; launched 2019-05-06; common-history start expected to match MNQ.c.0",
+      "dataset_expected": "GLBX.MDP3",
+      "dollar_per_point_expected": 5.0,
+      "exchange": "CME Globex",
+      "expected_dr9_outcome": "PROBABLE PASS — small-cap index micro futures have slightly lower liquidity than MES/MYM; thin-trading-day gaps possible in early 2019 weeks; DR9 audit will determine binding outcome",
+      "name": "Micro E-mini Russell 2000",
+      "risk_factors": "Low-to-moderate (Russell 2000 small-cap exposure; slightly thinner liquidity than MES/MYM; risk of one or two thin days early in 2019 history)",
+      "symbol": "M2K.c.0",
+      "tick_size_points_expected": 0.1
+    }
+  ],
+  "title": "s14-d1 multi-instrument availability probe + DR9 audit RUN_BOOK (NOT a SEAL; controller-side advisory probe + pre-authored DR9 audit framework + operator-side fetch instructions)"
+}
