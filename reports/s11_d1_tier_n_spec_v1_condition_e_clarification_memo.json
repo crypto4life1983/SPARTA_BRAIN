@@ -1,0 +1,180 @@
+{
+  "authored_at_utc": "2026-05-27T04:39:34Z",
+  "authorization_phrase_received": "(operator selection of Option 1 after rev1 authorization was structurally voided by parallel session sealing P1 plan-lock at commit 7d86486 before this controller's authorization landed)",
+  "candidate_record_id": "s11-d1-mnq-c0-single-instrument-databento-long-history",
+  "finding_1_v1_condition_e_is_broken_if_read_in_isolation": {
+    "broken_field_path": "k9_and_oos_confirmation_rules.oos_confirmation_definition (condition (e) within the 8-condition AND chain)",
+    "demonstration": {
+      "case_large_drawdown_minus_35_pct": {
+        "intuitive_expected": "FAIL (drawdown worse than threshold)",
+        "v1_literal_evaluation": "(-35.00 <= -30) is True",
+        "v1_literal_says": "PASS (would accept bad outcomes)"
+      },
+      "case_small_drawdown_minus_12_96_pct": {
+        "intuitive_expected": "PASS (small drawdown is good)",
+        "v1_literal_evaluation": "(-12.96 <= -30) is False",
+        "v1_literal_says": "FAIL (would reject good outcomes)"
+      }
+    },
+    "intended_form_either_equivalent": [
+      "maxdd_pct >= -30%",
+      "|maxdd_pct| <= 30%",
+      "abs(maxdd_pct) <= 30%"
+    ],
+    "literal_text_as_sealed": "OOS is CONFIRMED only iff ALL of: (a) C7 verdict is READY_FOR_LONGER_BACKTEST, (b) OOS closed_trades >= 100, (c) OOS sharpe > 0, (d) OOS expectancy > 0, (e) OOS trade_curve_maxdd_pct <= -30%, (f) all safety counters zero, (g) no-pyramid invariant held, (h) starting_cash invariant held.",
+    "this_memo_does_not_modify_v1": true,
+    "v1_spec_commit": "9c63088",
+    "v1_spec_file_bytes": 29600,
+    "v1_spec_path": "reports/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec_sealed.json",
+    "v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "why_condition_e_is_inverted": "With maxdd_pct expressed as a negative number (per S10-D2 convention: -12.96, -28.31, etc.), '<= -30' evaluates True only for drawdowns deeper than -30% (bad outcomes). Small / shallow drawdowns (e.g., -12.96%) fail the condition. The intended meaning of an acceptance gate is the inverse: drawdown not worse than -30% (i.e., maxdd_pct >= -30% or equivalently |maxdd_pct| <= 30%)."
+  },
+  "finding_2_p1_plan_lock_is_operationally_binding": {
+    "p1_anchors_v1_by_sha": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "p1_grid_is_the_grid_that_will_actually_run_at_p6_is_p6_5_p10": true,
+    "p1_introduces_its_own_evaluation_grid": true,
+    "p1_lock_action_quote_verbatim": "All Tier-N spec decisions are inherited byte-equivalent into the BUILD phase. No Tier-N spec modification is permitted; any change requires a fresh _revN_ Tier-N spec under a separate authorization.",
+    "p1_next_phase_pre_approved": false,
+    "p1_plan_lock_commit": "7d86486",
+    "p1_plan_lock_commit_subject": "Seal S11-D1 P1 plan-lock",
+    "p1_plan_lock_path": "reports/s11_d1_mnq_c0_single_instrument_databento_long_history_p1_plan_lock_sealed.json",
+    "v1_oos_confirmation_definition_is_operationally_dormant": "P1's rejection_rules_locked block defines the gates that the future IS driver / OOS driver / cost-stress sweep / OOS gate will evaluate. v1's oos_confirmation_definition literal text is not consumed by any planned execution path; it remains as documentation prose only. This memo flags it as a documentation hazard only, not as an active runtime defect."
+  },
+  "finding_3_p1_A4_is_correctly_magnitude_based": {
+    "direction_is_correct_at_p1": true,
+    "field_path": "rejection_rules_locked.a_gates_evaluated_at_p6_is.A4_trade_curve_maxdd_pct_le_30",
+    "naming_convention_le_30": "'le_30' = magnitude not exceeding 30. Pass iff |maxdd_pct| <= 30%. Fail iff |maxdd_pct| > 30% -> FAIL_SAFETY.",
+    "p1_literal_text": "fail -> FAIL_SAFETY (S10-D2 used 50; S11-D1 tightens to 30 per Tier-N spec rejection-rules section, single-instrument higher concentration risk)",
+    "phase_evaluated_at": "P6 IS diagnostic",
+    "tightens_vs_s10_d2_k4_50": "S10-D2 K4 threshold was 50% magnitude. S11-D1 A4 tightens to 30% magnitude for single-instrument concentration risk. This is correct discipline: tightening, not loosening."
+  },
+  "finding_4_p1_K4_is_correctly_magnitude_based": {
+    "byte_inherited_from_s10_d2_k4": true,
+    "direction_is_correct_at_p1": true,
+    "field_path": "rejection_rules_locked.k_gates_evaluated.K4_trade_curve_maxdd_gt_50",
+    "naming_convention_gt_50": "'gt_50' = magnitude greater than 50. P1 uses explicit |maxdd_pct| notation, eliminating sign ambiguity.",
+    "p1_literal_text": "FAIL_SAFETY trigger (|maxdd_pct| > 50%)",
+    "phase_evaluated_at": "P6 IS diagnostic + P10 OOS gate"
+  },
+  "finding_5_this_memo_is_non_binding": {
+    "memo_does_NOT_alter_any_threshold": true,
+    "memo_does_NOT_count_as_revN_revision_under_p1_clause": true,
+    "memo_does_NOT_fulfill_the_p1_clause_requiring_revN_for_any_tier_n_change": "True. The P1 clause says 'any change [to Tier-N spec] requires a fresh _revN_ Tier-N spec under a separate authorization.' This memo makes NO change to v1; v1 stays byte-stable. If a future operator decides a binding correction is needed, they must author an actual _revN_ Tier-N spec AND re-anchor P1 under separate fresh authorizations. This memo does neither.",
+    "memo_does_NOT_introduce_a_new_evaluation_gate": true,
+    "memo_does_NOT_modify_any_sealed_artifact_on_disk": true,
+    "memo_does_NOT_modify_in_sample_driver_or_out_of_sample_driver_source": true,
+    "memo_does_NOT_modify_runner_main_source": true,
+    "memo_does_NOT_re_anchor_p1_to_a_different_seal": true,
+    "memo_does_NOT_supersede_p1_plan_lock": true,
+    "memo_does_NOT_supersede_v1_tier_n_spec": true,
+    "purpose": "Documentation hazard mitigation only. Future readers of v1 in isolation will see condition (e) and may interpret it literally; this memo records that the intended interpretation is the inverse, and that the P1 plan-lock at commit 7d86486 is the operationally binding evaluation grid."
+  },
+  "finding_6_no_lifecycle_phase_authorized": {
+    "memo_does_not_advance_any_phase_or_pre_approve_any_phase": true,
+    "p10_oos_gate": "requires fresh operator authorization",
+    "p11_lifecycle_decision": "requires fresh operator authorization",
+    "p2_phase2_plan": "requires fresh operator authorization",
+    "p3_build": "requires fresh operator authorization",
+    "p4_smoke": "requires fresh operator authorization",
+    "p6_5_cost_stress": "requires fresh operator authorization",
+    "p6_is_diagnostic": "requires fresh operator authorization",
+    "p7_decision_memo": "requires fresh operator authorization"
+  },
+  "hard_boundaries_held_this_memo_turn": {
+    "no_backtest": true,
+    "no_branch_change": true,
+    "no_brokerage_connection": true,
+    "no_candidate_promoted": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_databento_api_key_access": true,
+    "no_external_network_call": true,
+    "no_frc_grant": true,
+    "no_git_push": true,
+    "no_key_leakage": true,
+    "no_live_readiness_claim": true,
+    "no_live_trading": true,
+    "no_modification_of_any_b006_artifact": true,
+    "no_modification_of_any_s10_d1_artifact": true,
+    "no_modification_of_any_s10_d2_artifact": true,
+    "no_modification_of_any_s7_or_s8_or_s9_artifact": true,
+    "no_modification_of_any_sealed_predecessor": true,
+    "no_modification_of_cache_data_databento_or_databento_oos_or_databento_is_only": true,
+    "no_modification_of_claude_md_or_runbook_or_gitignore": true,
+    "no_modification_of_command_center_app_py_template_test": true,
+    "no_modification_of_idea_memory": true,
+    "no_modification_of_in_sample_driver_source": true,
+    "no_modification_of_lessons_md": true,
+    "no_modification_of_obsidian_trade_logger": true,
+    "no_modification_of_orb_step30_artifacts": true,
+    "no_modification_of_out_of_sample_driver_source": true,
+    "no_modification_of_p1_plan_lock": true,
+    "no_modification_of_review_queue": true,
+    "no_modification_of_runner_harness_source": true,
+    "no_modification_of_strategy_lab_artifacts": true,
+    "no_modification_of_v1_tier_n_spec": true,
+    "no_oos_computation": true,
+    "no_oos_inspection": true,
+    "no_paper_order_placed": true,
+    "no_paper_trading": true,
+    "no_profitability_claim": true,
+    "no_real_order_placed": true,
+    "no_rev1_tier_n_spec_authored": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_invoked": true
+  },
+  "memo_authorizes_any_lifecycle_phase": false,
+  "memo_is_binding": false,
+  "memo_modifies_any_sealed_artifact": false,
+  "memo_supersedes_p1": false,
+  "memo_supersedes_v1": false,
+  "operator_next_step_options_documented_only_not_authorized": [
+    {
+      "description": "Treat this memo as sufficient documentation hazard mitigation. The P1 plan-lock's gate grid is binding and correct; v1's dormant text is flagged here for future readers. Advance the lifecycle by authorizing P2 phase-2 plan under separate authorization.",
+      "option": "ACCEPT_AS_IS_AUTHORIZE_S11_D1_P2_PHASE_2_PLAN"
+    },
+    {
+      "description": "If you decide the dormant-text hazard is unacceptable, author a binding _revN_ Tier-N spec correcting condition (e), AND author a _revN_ P1 plan-lock re-anchored to _revN_ Tier-N spec. Heavier correction; forks the v1+P1 chain. Requires two separate operator authorizations.",
+      "option": "AUTHORIZE_BINDING_REVN_TIER_N_SPEC_AND_REVN_P1_PLAN_LOCK",
+      "requires_separate_authorization": true
+    },
+    {
+      "description": "Most thorough: open a fresh candidate id (e.g., s11-d1b or s11-d2) with a clean Tier-N spec containing the correctly-signed oos_confirmation_definition. Discards the v1 + P1 work done so far.",
+      "option": "HALT_S11_D1_LIFECYCLE_AND_RE_SPEC_UNDER_FRESH_CANDIDATE_ID",
+      "requires_separate_authorization": true
+    }
+  ],
+  "p10_oos_gate_still_requires_separate_authorization": true,
+  "p11_lifecycle_decision_still_requires_separate_authorization": true,
+  "p2_phase2_plan_still_requires_separate_authorization": true,
+  "p3_build_still_requires_separate_authorization": true,
+  "p4_smoke_still_requires_separate_authorization": true,
+  "p6_5_cost_stress_still_requires_separate_authorization": true,
+  "p6_is_diagnostic_still_requires_separate_authorization": true,
+  "p7_decision_memo_still_requires_separate_authorization": true,
+  "posture_invariants_unchanged_by_this_memo": {
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "frc_granted": false,
+    "live_promotion_path_closed": true,
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_strategy_optimization_authorized": true,
+    "trading_status": "PAUSED",
+    "verdict_never_means_live_ready": true
+  },
+  "predecessor_seal_chain_attestation_drift_zero": {
+    "all_predecessor_seals_re_verifiable_from_on_disk_artifacts": true,
+    "no_predecessor_seal_modified_by_this_memo": true,
+    "p1_plan_lock_commit": "7d86486",
+    "s10_d2_p11_park_seal_sha256_for_reference": "e121b82b411697c7d06bbe9ee1cc2df29c04df76712873ed0fbfd76f25fab1cb",
+    "selection_plan_commit_for_reference": "556ab3f",
+    "v1_tier_n_spec_commit": "9c63088",
+    "v1_tier_n_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24"
+  },
+  "report_kind": "S11-D1 non-binding clarification memo (warns future readers about an inverted-sign literal in v1 Tier-N spec oos_confirmation_definition condition (e); does NOT supersede v1, does NOT modify P1, does NOT authorize any lifecycle phase)",
+  "report_seal_sha256": "eda08aceeb4afd7d4f985a739d6e87b3e803daff8da3f645f016b0a56a3af871",
+  "schema_id": "sparta.external_research_hunter.s11_d1_tier_n_spec_v1_condition_e_clarification_memo.v1",
+  "seal_method": "sha256( json.dumps(body_excluding_seal_fields, sort_keys=True, separators=(',',':'), ensure_ascii=False) )"
+}
