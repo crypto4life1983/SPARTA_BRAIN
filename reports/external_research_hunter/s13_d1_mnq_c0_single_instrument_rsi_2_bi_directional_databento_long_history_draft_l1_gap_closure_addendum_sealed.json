@@ -1,0 +1,435 @@
+{
+  "schema_id": "sparta.external_research_hunter.s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_draft_l1_gap_closure_addendum_sealed.v1",
+  "candidate_record_id": "s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history",
+  "phase_prefix": "PHASE2-S13-D1-MNQ-RSI-2-BIDIR",
+  "phase": "DRAFT_L1_GAP_CLOSURE_ADDENDUM",
+  "lifecycle_state": "S13_D1_DRAFT_L1_GAP_CLOSURE_ADDENDUM_SEALED",
+  "title": "s13-d1 RSI(2) bi-directional MNQ.c.0 — DRAFT L1-gap-closure addendum (addendum-only; not a competing DRAFT; not a SEAL; carries L1 discount framework into the chain before any SEAL)",
+  "report_kind": "Sealed addendum to s13-d1 Tier-N spec DRAFT 8fcefaf. Applies the L1 epistemic discount framework from L1-discount memo 2869945 (seal e41690d6...) to the T1 RSI(2) ~50-65 trades/year estimate. Classifies the source, presents formal 2x/3x discount tables, discloses the 3x scenario explicitly, renames the DRAFT's 'REC1-equivalent' as REC1_T1_BINDING_K9_DISCLOSURE, mandates byte-equivalent carry through future SEAL/P1/P2/P3/P4/P6/P6.5/P7/P10/P11. No code, no build, no execution, no signal, no fetch, no CSV read.",
+  "authored_at_utc": "2026-05-27T16:58:33.128471+00:00",
+  "binding": true,
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "PLAN_ONLY_ADDENDUM",
+    "NOT_A_COMPETING_DRAFT",
+    "NOT_A_SEAL",
+    "L1_EPISTEMIC_DISCOUNT_FRAMEWORK_APPLIED",
+    "K9_REACHABILITY_DISCIPLINE_REINFORCED",
+    "REC1_T1_BINDING_K9_DISCLOSURE_FORMALIZED",
+    "S12_D1_TERMINAL_PARK_PRESERVED",
+    "PARALLEL_SEAL_B_CHAIN_NOT_ANCHORED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_LIVE_READINESS_CLAIM",
+    "NO_OOS_CONFIRMATION_CLAIM",
+    "NO_K9_RELAXATION",
+    "NO_DR_REDEFINITION",
+    "NO_TIER_N_SPEC_AUTHORED",
+    "NO_BUILD_NO_EXEC_NO_FETCH"
+  ],
+  "operator_authorization_phrase": "Authorize a short S13-D1 L1-gap-closure addendum only",
+  "addendum_status_attestation": {
+    "is_addendum_only": true,
+    "is_competing_draft": false,
+    "is_seal": false,
+    "modifies_5e57984_plan": false,
+    "modifies_8fcefaf_draft": false,
+    "supersedes_8fcefaf_draft": false,
+    "addendum_role": "Attaches a binding L1-discount framework + REC1_T1 disclosure to the s13-d1 DRAFT at 8fcefaf. The DRAFT remains the source of truth for DA1-DA14 and the locked-at-PLAN mechanic parameters; this addendum supplements but does NOT supersede or replace it. A future SEAL of s13-d1 shall carry both 8fcefaf DRAFT content AND this addendum's REC1_T1 disclosure byte-equivalent."
+  },
+  "predecessor_acceptance": {
+    "s13_d1_plan_commit": "5e57984",
+    "s13_d1_plan_file": "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec_plan.md",
+    "s13_d1_draft_commit": "8fcefaf",
+    "s13_d1_draft_file": "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec_DRAFT.md",
+    "l1_discount_memo_commit": "2869945",
+    "l1_discount_memo_seal_sha256": "e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3",
+    "l1_discount_memo_file_json": "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.json",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_terminal_state_preserved": true,
+    "s12_d1_chain_byte_stable": true
+  },
+  "source_classification_for_t1_50_to_65_per_year_estimate": {
+    "estimate_as_quoted_from_5e57984_plan_section_9_2": "~50-65 trades/year (long+short bi-directional; daily bars on MNQ.c.0)",
+    "evidence_provided_in_plan": [
+      "Larry Connors' published RSI(2) research suggesting 50-100 entries/year on liquid equity indices (name-checked; NO specific paper / edition / URL / page reference provided)",
+      "Bi-directional symmetric thresholds typically each contribute roughly equally to total trade count",
+      "MNQ.c.0 vol profile is broadly similar to NQ.c.0 (scaled-down notional)"
+    ],
+    "source_class_per_l1_memo_taxonomy": "PARTIAL_PUBLISHED_LITERATURE_WEAKLY_CITED",
+    "specific_citation_provided": false,
+    "hand_count_on_sealed_csv_performed": false,
+    "explicit_heuristic_admission": false,
+    "operator_decision_required": "If operator has access to a specific Connors RSI(2) citation that quantifies trade rates on daily-bar liquid futures indices (e.g., Connors & Alvarez 'Short-Term Trading Strategies That Work' specific chapter and table reference), the source class upgrades to PUBLISHED_LITERATURE and L1 discount drops to 1.5x. If no specific citation is available, the conservative classification is HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES and full 2-3x discount scenarios are the binding ones for the lifecycle decision.",
+    "default_classification_for_addendum_purposes": "HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES",
+    "rationale_for_default": "Per the L1-discount memo at 2869945, partial citations without specific paper/edition/URL anchoring default to HEURISTIC. The Connors name-check in 5e57984 PLAN §9.2 is informative but not a verifiable citation. Operator may upgrade to PUBLISHED_LITERATURE with a specific citation."
+  },
+  "formal_l1_discount_table_t1_rsi_2_bidir_mnq_c0": {
+    "central": {
+      "label": "central_50_to_65_per_year",
+      "trades_per_year_low": 50.0,
+      "trades_per_year_mid": 57.5,
+      "trades_per_year_high": 65.0,
+      "is_k9_at_low": {
+        "rate_per_year": 50.0,
+        "floor_per_year": 21.74,
+        "margin_ratio": 2.3,
+        "verdict": "CLEARS_WITH_MARGIN"
+      },
+      "is_k9_at_mid": {
+        "rate_per_year": 57.5,
+        "floor_per_year": 21.74,
+        "margin_ratio": 2.645,
+        "verdict": "CLEARS_WITH_MARGIN"
+      },
+      "is_k9_at_high": {
+        "rate_per_year": 65.0,
+        "floor_per_year": 21.74,
+        "margin_ratio": 2.99,
+        "verdict": "CLEARS_WITH_MARGIN"
+      },
+      "oos_k9_at_low": {
+        "rate_per_year": 50.0,
+        "floor_per_year": 50.0,
+        "margin_ratio": 1.0,
+        "verdict": "AT_FLOOR_INDETERMINATE"
+      },
+      "oos_k9_at_mid": {
+        "rate_per_year": 57.5,
+        "floor_per_year": 50.0,
+        "margin_ratio": 1.15,
+        "verdict": "CLEARS_BORDERLINE"
+      },
+      "oos_k9_at_high": {
+        "rate_per_year": 65.0,
+        "floor_per_year": 50.0,
+        "margin_ratio": 1.3,
+        "verdict": "CLEARS_BORDERLINE"
+      },
+      "likely_terminal_risk": "OOS K9 CLEARS_BORDERLINE at low (50.0/y matches floor exactly), CLEARS_BORDERLINE at mid (1.15x), CLEARS_BORDERLINE at high (1.30x). Likely terminal risk: PASS_BUT_THIN_OOS_MARGIN if observed rate matches central estimate; INSUFFICIENT_SAMPLE if observed rate < 50/y."
+    },
+    "2x_discount": {
+      "label": "2x_l1_discount_25_to_32_5_per_year",
+      "trades_per_year_low": 25.0,
+      "trades_per_year_mid": 28.75,
+      "trades_per_year_high": 32.5,
+      "is_k9_at_low": {
+        "rate_per_year": 25.0,
+        "floor_per_year": 21.74,
+        "margin_ratio": 1.15,
+        "verdict": "CLEARS_BORDERLINE"
+      },
+      "is_k9_at_mid": {
+        "rate_per_year": 28.75,
+        "floor_per_year": 21.74,
+        "margin_ratio": 1.322,
+        "verdict": "CLEARS_BORDERLINE"
+      },
+      "is_k9_at_high": {
+        "rate_per_year": 32.5,
+        "floor_per_year": 21.74,
+        "margin_ratio": 1.495,
+        "verdict": "CLEARS_BORDERLINE"
+      },
+      "oos_k9_at_low": {
+        "rate_per_year": 25.0,
+        "floor_per_year": 50.0,
+        "margin_ratio": 0.5,
+        "verdict": "FAILS"
+      },
+      "oos_k9_at_mid": {
+        "rate_per_year": 28.75,
+        "floor_per_year": 50.0,
+        "margin_ratio": 0.575,
+        "verdict": "FAILS"
+      },
+      "oos_k9_at_high": {
+        "rate_per_year": 32.5,
+        "floor_per_year": 50.0,
+        "margin_ratio": 0.65,
+        "verdict": "FAILS"
+      },
+      "likely_terminal_risk": "OOS K9 FAILS across the entire range (25-32.5/y < 50/y floor). IS K9 clears borderline at high (32.5/y) and mid (28.75/y); fails-borderline at low (25/y < 21.74/y floor only barely clears at 1.15x). Likely terminal risk: INSUFFICIENT_SAMPLE_AT_OOS_K9_FIRED analogous to s12-d1 PARK pattern. PARK is expected terminal outcome."
+    },
+    "3x_discount": {
+      "label": "3x_l1_discount_16_7_to_21_7_per_year",
+      "trades_per_year_low": 16.7,
+      "trades_per_year_mid": 19.2,
+      "trades_per_year_high": 21.7,
+      "is_k9_at_low": {
+        "rate_per_year": 16.7,
+        "floor_per_year": 21.74,
+        "margin_ratio": 0.768,
+        "verdict": "FAILS"
+      },
+      "is_k9_at_mid": {
+        "rate_per_year": 19.2,
+        "floor_per_year": 21.74,
+        "margin_ratio": 0.883,
+        "verdict": "FAILS"
+      },
+      "is_k9_at_high": {
+        "rate_per_year": 21.7,
+        "floor_per_year": 21.74,
+        "margin_ratio": 0.998,
+        "verdict": "AT_FLOOR_INDETERMINATE"
+      },
+      "oos_k9_at_low": {
+        "rate_per_year": 16.7,
+        "floor_per_year": 50.0,
+        "margin_ratio": 0.334,
+        "verdict": "FAILS"
+      },
+      "oos_k9_at_mid": {
+        "rate_per_year": 19.2,
+        "floor_per_year": 50.0,
+        "margin_ratio": 0.384,
+        "verdict": "FAILS"
+      },
+      "oos_k9_at_high": {
+        "rate_per_year": 21.7,
+        "floor_per_year": 50.0,
+        "margin_ratio": 0.434,
+        "verdict": "FAILS"
+      },
+      "likely_terminal_risk": "OOS K9 FAILS SEVERELY across entire range (16.7-21.7/y vs 50/y floor; 0.33-0.43x). IS K9 FAILS at low (16.7/y < 21.74/y) and mid (19.2/y); marginally clears at high (21.7/y - essentially AT_FLOOR_INDETERMINATE). Likely terminal risk: BOTH IS AND OOS K9 FIRED. PARK at IS without even reaching P10. Direct replication of s12-d1 PARK pattern."
+    },
+    "k9_floors_per_year": {
+      "is": 21.74,
+      "oos_binding": 50.0
+    },
+    "summary": "Under HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES classification, the 2x discount scenario shows OOS K9 FAILS across the entire 25-32.5/y range. The 3x discount scenario shows BOTH IS K9 and OOS K9 FAIL. Only the central scenario (50-65/y) clears OOS K9, and only borderline at the low end (50/y exactly matches the 50/y floor)."
+  },
+  "explicit_3x_discount_scenario_disclosure": {
+    "purpose": "The s13-d1 PLAN/DRAFT (5e57984 + 8fcefaf) do NOT disclose the 3x discount scenario at all. This addendum makes it explicit and binding.",
+    "scenario_3x_trades_per_year_range": "16.7 / 19.2 / 21.7 (low / mid / high)",
+    "is_k9_outcome_at_3x": "FAILS at low (16.7/y < 21.74/y floor) and mid (19.2/y < 21.74/y). AT_FLOOR_INDETERMINATE at high (21.7/y barely matches 21.74/y floor).",
+    "oos_k9_outcome_at_3x": "FAILS SEVERELY across entire range. Margins 0.33 / 0.38 / 0.43 vs 1.0 floor. This is the worst case where s13-d1 fails K9 at BOTH windows.",
+    "lifecycle_implication": "Under 3x discount, s13-d1 would PARK at IS analogous to s12-d1 (INSUFFICIENT_SAMPLE at IS K9 fire), without even reaching P10 OOS. The P6 IS diagnostic would document closed_trades 76-100 (vs K9=100 required), short by 0-24 trades. Net PnL outcome would be informational only and would NOT override K9 verdict per LESSON_B006_002_002.",
+    "structural_parallel_to_s12_d1": "s12-d1 PARK at ecbd001 was PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS with 48 closed trades vs K9=100 (48% of floor). Under 3x L1 discount, s13-d1 mid-scenario implies 4.6 * 19.2 = 88.3 closed trades over IS (88% of floor). The s12-d1 PARK pattern would repeat under this scenario, though with a less severe shortfall. Per L1-memo guidance and the K9 inviolacy principle, this would be a sealed PARK verdict.",
+    "operator_must_accept_this_risk_explicitly_before_sealing_s13_d1": true
+  },
+  "rec1_t1_binding_k9_disclosure": {
+    "renaming_directive": "The DRAFT 8fcefaf §9.4 (PLAN) and §10.2 (DRAFT) reference a 'REC1-equivalent disclosure for s13-d1' specifying a 25/y tripwire. Per this addendum, that disclosure is FORMALLY RENAMED and REINFORCED as REC1_T1_BINDING_K9_DISCLOSURE with the full L1 discount framework attached.",
+    "rec1_t1_binding_text": "REC1_T1 (binding): Under the L1 epistemic-discount framework (memo 2869945 seal e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3), the T1 RSI(2) bi-directional MNQ.c.0 trade-rate estimate of 50-65 trades/year is classified as HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES pending operator-supplied specific citation or hand-count validation. At the 2x conservative discount (25-32.5 trades/year), OOS K9 (>= 50/y over 2.0y = 100 trades) FIRES; expected OOS verdict is OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED. At the 3x conservative discount (16.7-21.7 trades/year), BOTH IS K9 and OOS K9 fire; expected IS verdict is INSUFFICIENT_SAMPLE analogous to s12-d1 PARK at ecbd001 (48 closed trades < K9=100). The chain shall NOT relax K9 at any phase. The 25/y tripwire identified in DRAFT 8fcefaf §10.2 is the 2x discount low-end and remains the parking trigger. Pursuing s13-d1 without independent source validation of the 50-65/y estimate accepts the structural likelihood of OOS PARK (under 2x discount) or IS PARK (under 3x discount) outcomes analogous to s12-d1.",
+    "carry_byte_equivalent_through": [
+      "s13_d1_tier_n_spec_SEAL",
+      "s13_d1_step_02b_manifest_cross_link",
+      "s13_d1_P1_plan_lock",
+      "s13_d1_P2_phase_2_plan",
+      "s13_d1_P3_BUILD",
+      "s13_d1_P4_synthetic_smoke",
+      "s13_d1_P6_IS_diagnostic",
+      "s13_d1_P6_5_cost_stress",
+      "s13_d1_P7_decision_memo",
+      "s13_d1_P10_OOS_gate",
+      "s13_d1_P11_lifecycle_decision"
+    ],
+    "byte_equivalent_carry_requirement_load_bearing": true,
+    "rec1_t1_relaxation_or_demotion_authorized": false
+  },
+  "cross_reference_l1_discount_memo": {
+    "commit": "2869945",
+    "seal_sha256": "e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3",
+    "file_json": "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.json",
+    "file_md": "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.md",
+    "memo_lessons_applied_in_this_addendum": [
+      "L1_DISCOUNT_FACTORS_2X_AND_3X (memo §l1_epistemic_discount_definition)",
+      "SOURCE_CLASS_TAXONOMY_PUBLISHED_OR_HAND_COUNT_OR_HEURISTIC (memo §t1_estimate_source_inquiry)",
+      "REC1_T1_DRAFT_TEMPLATE (memo §rec1_style_disclosure_for_t1_if_pursued)",
+      "K9_OOS_FLOOR_50_PER_YEAR_BINDING (memo §k9_reachability_floors)",
+      "ALT_A_HAND_COUNT_PATH_AVAILABLE (memo §alternative_paths_if_t1_falsely_optimistic)"
+    ]
+  },
+  "embedded_discount_reconciliation": {
+    "issue_statement": "The 5e57984 PLAN §9.2 derives the 50-65/y central estimate from Connors' 50-100/y long-only equity-index rate, doubled approximately for bi-directional (yielding 100-200/y), and then implicitly reduced to 50-65/y for MNQ.c.0 futures. The reduction step from 100-200/y (Connors-doubled) to 50-65/y (PLAN central) is unacknowledged in the PLAN but corresponds to a ~2-3x cross-instrument extrapolation discount (equity-indices to MNQ futures).",
+    "implication_for_layered_l1_discount": "If the 50-65/y central is interpreted as already-L1-2x-discounted from Connors-doubled 100-200/y, then applying ANOTHER 2x L1 discount (yielding 25-32.5/y) is a COMPOUND 4x discount from Connors baseline. If interpreted as the raw central estimate with no embedded discount, then the 2x and 3x L1 discounts are first-application and 25-32.5/y is the appropriate conservative scenario.",
+    "two_possible_readings": [
+      {
+        "reading": "READING_A_NO_EMBEDDED_DISCOUNT",
+        "interpretation": "50-65/y is the raw central estimate; L1 2x and 3x discounts are first-application; 25-32.5/y (2x) and 16.7-21.7/y (3x) are conservative scenarios. This is the assumption underlying this addendum's formal L1 discount table.",
+        "implication": "Standard L1 framework applies. 2x = 25-32.5/y FAILS OOS K9. 3x = 16.7-21.7/y FAILS both K9 windows."
+      },
+      {
+        "reading": "READING_B_EMBEDDED_2X_DISCOUNT_ALREADY_APPLIED",
+        "interpretation": "50-65/y already silently incorporates a 2-3x cross-instrument extrapolation discount from Connors-doubled 100-200/y. Further L1 discount would be COMPOUND with the embedded discount and potentially overconservative.",
+        "implication": "If READING_B is correct, the formal 2x L1 discount above is actually a 4x compound discount from Connors baseline, and the 3x is 6x compound. The honest central estimate under READING_B might be closer to 50-65/y itself (already L1-aware by construction), with 2x/3x further-discount scenarios representing stress tests rather than expected ranges."
+      }
+    ],
+    "resolution_required_before_seal": "Operator (or future SEAL authoring turn) must explicitly choose READING_A or READING_B and document the choice in the s13-d1 SEAL. Either reading is defensible; the absence of a documented choice is the gap this addendum surfaces.",
+    "default_reading_for_addendum_l1_table_purposes": "READING_A_NO_EMBEDDED_DISCOUNT",
+    "rationale_for_default_reading_a": "The PLAN does not explicitly document an embedded discount; treating the central estimate as discount-free and applying L1 on top is the more conservative interpretation. Operator may revise to READING_B with a specific Connors citation that quantifies the equity-to-futures translation."
+  },
+  "s12_d1_terminal_preservation_attestation": {
+    "s12_d1_lifecycle_state": "PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_chain_byte_stable_at_head": true,
+    "s12_d1_runner_harness_files_modified_by_this_addendum": false,
+    "s12_d1_seal_a_chain_modified_by_this_addendum": false,
+    "s12_d1_revival_authorized_by_this_addendum": false
+  },
+  "no_seal_no_build_no_exec_no_fetch_attestation": {
+    "addendum_is_documentation_only": true,
+    "no_tier_n_spec_authored": true,
+    "no_tier_n_spec_sealed": true,
+    "no_build_authorized": true,
+    "no_tests_authorized": true,
+    "no_diagnostics_authorized": true,
+    "no_signal_computation_authorized": true,
+    "no_csv_read_during_authoring": true,
+    "no_data_fetch": true,
+    "no_databento_call": true,
+    "no_databento_api_key_access": true,
+    "no_network_io": true,
+    "no_strategy_logic_authored_or_modified": true,
+    "no_phase_pre_approved_by_this_addendum": true
+  },
+  "parent_references": {
+    "s13_d1_plan_commit": "5e57984",
+    "s13_d1_draft_commit": "8fcefaf",
+    "l1_discount_memo_commit": "2869945",
+    "l1_discount_memo_seal_sha256": "e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3",
+    "selection_plan_commit": "0e3f9d4",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_p6_is_diagnostic_commit": "9241ed6",
+    "s12_d1_seal_a_commit": "66bbbd1",
+    "s11_d1_v1_commit": "9c63088",
+    "s11_d1_rev2_commit": "c110fd4",
+    "s10_d2_park_commit": "23c7164",
+    "s10_d1_park_commit": "1a9acec",
+    "mnq_c0_csv_path_reference_only_not_read": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_sha256_reference_only_not_read": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e"
+  },
+  "non_anchored_acknowledgements": {
+    "parallel_seal_b_chain": {
+      "seal_b_commit": "9ce4d66",
+      "p1_b_commit": "bd7245e",
+      "p2_b_commit": "2b27acc",
+      "p3_b_commit": "b97331a",
+      "p4_b_commit": "8cfdeb1",
+      "p6_b_commit": "8621c32",
+      "p11_b_commit": "ce279cf",
+      "status": "PARALLEL_SEAL_B_CHAIN_ACKNOWLEDGED_NOT_ANCHORED"
+    }
+  },
+  "posture_invariants": {
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc_status": "NEVER_GRANTED",
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "profitability_claim_made": false,
+    "live_readiness_claim_made": false,
+    "oos_confirmation_claim_made": false,
+    "paper_ready_claim_made": false,
+    "money_proven_claim_made": false,
+    "k9_threshold_relaxed": false,
+    "rec1_binding_demoted": false,
+    "permanent_live_block": true,
+    "research_diagnostic_only": true,
+    "no_strategy_optimization_authorized": true,
+    "no_dr_redefinition_post_seal": true
+  },
+  "hard_boundaries_held_this_addendum_turn": {
+    "addendum_only_no_competing_draft": true,
+    "addendum_only_no_seal": true,
+    "addendum_only_no_build": true,
+    "addendum_only_no_tests": true,
+    "addendum_only_no_diagnostics": true,
+    "addendum_only_no_signal_computation": true,
+    "addendum_only_no_csv_read": true,
+    "addendum_only_no_data_fetch": true,
+    "addendum_only_no_databento_call": true,
+    "addendum_only_no_databento_api_key_access": true,
+    "addendum_only_no_network_call": true,
+    "addendum_only_no_strategy_logic_modification": true,
+    "no_modification_of_5e57984_plan_doc": true,
+    "no_modification_of_8fcefaf_draft_doc": true,
+    "no_modification_of_2869945_l1_discount_memo": true,
+    "no_modification_of_ecbd001_s12_d1_p11_park": true,
+    "no_modification_of_s12_d1_seal_a_chain": true,
+    "no_modification_of_s11_d1_artifacts": true,
+    "no_modification_of_s10_d1_artifacts": true,
+    "no_modification_of_s10_d2_artifacts": true,
+    "no_modification_of_parallel_seal_b_chain": true,
+    "no_modification_of_runner_harness_files": true,
+    "no_modification_of_drivers": true,
+    "no_modification_of_cache_or_data_directory": true,
+    "no_command_center_files_touched": true,
+    "no_lessons_md_touched": true,
+    "no_tmp_build_s12_d1_seal_artifacts_py_touched": true,
+    "no_tmp_run_s12_d1_p6_is_diagnostic_py_touched": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_seal_authored": true,
+    "no_s13_d1_p1_authored": true,
+    "no_s13_d1_p2_authored": true,
+    "no_s13_d1_p3_build_authored": true,
+    "no_s13_d1_any_phase_authored": true,
+    "no_k9_relaxation": true,
+    "no_rec1_demotion": true,
+    "no_dr_redefinition": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true,
+    "no_self_authorization_to_run_anything": true,
+    "no_phase_pre_approved_by_this_addendum": true,
+    "no_staging": true,
+    "no_commit": true
+  },
+  "negative_invariants": {
+    "claims_money_proven": false,
+    "claims_live_ready": false,
+    "claims_paper_ready_for_broker_routing": false,
+    "claims_strategy_optimized": false,
+    "claims_oos_confirmed": false,
+    "claims_t1_will_clear_k9_oos": false,
+    "claims_t1_estimate_is_validated": false,
+    "claims_seal_authorized": false,
+    "claims_s12_d1_revived": false,
+    "schema_id_silently_bumped": false,
+    "rec1_oos_k9_risk_disclosure_demoted_to_advisory": false,
+    "s12_d1_seal_a_chain_modified": false,
+    "parallel_seal_b_chain_modified": false,
+    "draft_8fcefaf_modified": false,
+    "plan_5e57984_modified": false
+  },
+  "next_phase_requirements": {
+    "no_phase_pre_approved_by_this_addendum": true,
+    "s13_d1_seal_requires_separate_authorization": true,
+    "s13_d1_seal_must_carry_rec1_t1_binding_byte_equivalent": true,
+    "operator_must_choose_reading_a_or_reading_b_at_seal": true,
+    "alt_a_hand_count_path_remains_available_to_operator": true,
+    "halt_or_pivot_path_remains_available_to_operator": true
+  },
+  "files_touched_during_this_addendum_authoring": {
+    "tracked_files_modified": [],
+    "tracked_files_added": [],
+    "untracked_files_created_by_this_addendum_authoring": [
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_draft_l1_gap_closure_addendum_sealed.json",
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_draft_l1_gap_closure_addendum_sealed.md"
+    ],
+    "helper_script_to_delete_after_seal_verify": ".tmp_author_s13_d1_l1_gap_addendum.py",
+    "not_staged_not_committed": true,
+    "no_network_calls_no_data_fetch_no_csv_read_no_signal_compute": true
+  },
+  "final_status_list": [
+    "addendum_role: L1_GAP_CLOSURE_FOR_S13_D1_DRAFT_BEFORE_SEAL",
+    "s13_d1_plan_5e57984: accepted",
+    "s13_d1_draft_8fcefaf: accepted",
+    "l1_discount_memo_2869945: cross-referenced",
+    "rec1_t1_binding_k9_disclosure: formalized",
+    "rec1_t1_byte_equivalent_carry: required through future SEAL/P1/P2/P3/P4/P6/P6.5/P7/P10/P11",
+    "source_class_default: HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES",
+    "l1_central_50_to_65: borderline clears OOS K9",
+    "l1_2x_25_to_32_5: fails OOS K9",
+    "l1_3x_16_7_to_21_7: fails BOTH IS and OOS K9 (parallel to s12-d1 PARK)",
+    "embedded_discount_issue: surfaced; reading A or B operator choice required at SEAL",
+    "s12_d1_terminal: preserved",
+    "trading_status: PAUSED",
+    "live_status: BLOCKED_AT_6_GATES",
+    "frc_status: NEVER_GRANTED",
+    "no_phase_pre_approved_by_this_addendum: True"
+  ],
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "report_seal_sha256": "769eac9954e3da940d09913b63a6095e2d807da9f7b4d3291d7dc67236a64055"
+}
