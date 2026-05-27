@@ -1,0 +1,103 @@
+{
+  "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+  "authored_at_utc": "2026-05-27T03:16:16Z",
+  "authorization": "Authorize S10-D2 K10 pairwise dependence computation.",
+  "boundaries_held": {
+    "no_backtest_run": true,
+    "no_broker_call": true,
+    "no_cache_mutation": true,
+    "no_candidate_promoted": true,
+    "no_databento_api_key_access": true,
+    "no_databento_call": true,
+    "no_databento_historical_instantiation": true,
+    "no_external_network_call": true,
+    "no_file_content_modification_under_data_databento_cache": true,
+    "no_file_content_modification_under_data_databento_cache_oos": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_staged_or_modified": true,
+    "no_live_trading": true,
+    "no_oos_computation": true,
+    "no_oos_inspection": true,
+    "no_paper_trading": true,
+    "no_parameter_changes": true,
+    "no_review_queue_mutation": true,
+    "no_signal_computed": true,
+    "no_simulator_run": true,
+    "no_socket_open_attempt": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_optimization_authorized": true,
+    "no_tier_n_spec_mutation": true
+  },
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "common_date_count_used_for_alignment": 2253,
+  "common_date_count_used_for_returns": 2252,
+  "data_inputs": {
+    "cache_assertion_pass": true,
+    "cache_root": "C:\\SPARTA_BRAIN\\data\\databento_cache",
+    "expected_cache_bytes_per_market": {
+      "CL": 46540654,
+      "GC": 2162216,
+      "NQ": 53148359,
+      "ZN": 27939222
+    },
+    "expected_files_per_root": 120,
+    "in_sample_end": "2022-12-30",
+    "in_sample_start": "2013-01-01",
+    "phase2_plan_seal_sha256_pinned": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256_pinned": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "predecessor_seal_sha256_pinned": "007110ff5a57dd04b184409bad64fd667374cd049155416c869a73f7af0c1f97",
+    "seal_assertion_pass": true,
+    "symbols_in_canonical_order": [
+      "NQ.c.0",
+      "GC.c.0",
+      "ZN.c.0",
+      "CL.c.0"
+    ],
+    "tier_n_spec_seal_sha256_pinned": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "frc_granted": false,
+  "k10_evaluation": {
+    "avg_pairwise_corr": 0.052804410488788645,
+    "avg_pairwise_corr_rounded_6dp": 0.052804,
+    "fires": false,
+    "metric_name": "K10_avg_pairwise_corr_gt_0_50",
+    "threshold": 0.5,
+    "threshold_direction": "fires_when_avg_strictly_greater_than_threshold"
+  },
+  "live_promotion_path_closed": true,
+  "live_status": "BLOCKED_AT_6_GATES",
+  "method": {
+    "aggregation": "unweighted_arithmetic_mean_of_pair_correlations",
+    "alignment": "inner_join_on_calendar_date_after_per_market_rth_aggregation",
+    "correlation": "pearson",
+    "pairs_count_expected_for_4_symbols": 6,
+    "return_kind": "simple_daily_return",
+    "rth_aggregation_source": "external_research_hunter.s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness.in_sample_driver.derive_rth_daily_bars"
+  },
+  "pair_count": 6,
+  "pairwise_correlations_rounded_6dp": {
+    "CL__GC": 0.040105,
+    "CL__NQ": 0.112892,
+    "CL__ZN": -0.062184,
+    "GC__NQ": 0.021195,
+    "GC__ZN": 0.357209,
+    "NQ__ZN": -0.15239
+  },
+  "per_symbol_observation_count_after_inner_join": {
+    "CL": 2253,
+    "GC": 2253,
+    "NQ": 2253,
+    "ZN": 2253
+  },
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC-K10",
+  "report_seal_sha256": "8c620cc5bfe53f71d4ededba45b3d8cee0de54992db6819103875811cbdb99e4",
+  "schema_id": "sparta.external_research_hunter.s10_d2_k10_pairwise_dependence_result_sealed.v1",
+  "seal_method": "sha256( json.dumps(body_excluding_seal_fields, sort_keys=True, separators=(',',':'), ensure_ascii=False) )",
+  "trading_status": "PAUSED",
+  "verdict": "K10_PASS_AVG_PAIRWISE_CORR_AT_OR_BELOW_0_50",
+  "verdict_enum_allowed": [
+    "K10_PASS_AVG_PAIRWISE_CORR_AT_OR_BELOW_0_50",
+    "K10_FIRED_AVG_PAIRWISE_CORR_EXCEEDS_0_50"
+  ],
+  "verdict_never_means_live_ready": true
+}
