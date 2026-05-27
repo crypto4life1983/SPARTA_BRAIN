@@ -1,0 +1,259 @@
+{
+  "authored_at_utc": "2026-05-27T04:09:34Z",
+  "authorization_phrase_received": "Authorize S10-D2 P11 INSUFFICIENT_SAMPLE park.",
+  "boundaries_held_this_memo_turn": {
+    "no_amb6_filter_change": true,
+    "no_app_py_modification": true,
+    "no_atr_multiplier_change": true,
+    "no_b005_artifact_modified": true,
+    "no_b006_artifact_modified": true,
+    "no_branch_change": true,
+    "no_broker_call": true,
+    "no_brokerage_connection": true,
+    "no_cache_mutation": true,
+    "no_candidate_promoted": true,
+    "no_command_center_route_modification": true,
+    "no_command_center_template_modification": true,
+    "no_command_center_test_modification": true,
+    "no_competing_canonical_p11_artifact_created": true,
+    "no_d5_artifact_modified": true,
+    "no_data_databento_cache_modification": true,
+    "no_data_databento_cache_oos_modification": true,
+    "no_databento_api_key_access": true,
+    "no_databento_call": true,
+    "no_databento_historical_instantiation": true,
+    "no_donchian_period_change": true,
+    "no_external_network_call": true,
+    "no_frc_grant": true,
+    "no_git_push": true,
+    "no_hydra_ghost_directory_fix_attempted": true,
+    "no_idea_memory_mutation": true,
+    "no_key_leakage": true,
+    "no_lessons_md_staged_or_modified": true,
+    "no_live_readiness_claim": true,
+    "no_live_trading": true,
+    "no_max_units_change": true,
+    "no_modification_of_any_sealed_artifact": true,
+    "no_modification_of_in_sample_driver_source": true,
+    "no_modification_of_k10_evaluator_source_at_4ddaa84": true,
+    "no_modification_of_k10_sealed_report_at_4ddaa84": true,
+    "no_modification_of_k10_test_at_4ddaa84": true,
+    "no_modification_of_out_of_sample_driver_source": true,
+    "no_modification_of_parallel_p10_memo": true,
+    "no_modification_of_parallel_p11_memo": true,
+    "no_modification_of_parallel_p7_memo": true,
+    "no_modification_of_runner_main_source": true,
+    "no_modification_of_runner_test_files": true,
+    "no_nke_artifact_modified": true,
+    "no_oos_cost_stress_sweep_attempted": true,
+    "no_oos_inspection_beyond_constants_already_in_sealed_driver_source": true,
+    "no_oos_re_execution": true,
+    "no_orb_artifact_modified": true,
+    "no_p11_execution": true,
+    "no_paper_order_placed": true,
+    "no_paper_trading": true,
+    "no_parameter_changes": true,
+    "no_phase2_plan_mutation": true,
+    "no_plan_lock_mutation": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_strategy_lab": true,
+    "no_real_order_placed": true,
+    "no_review_queue_mutation": true,
+    "no_risk_pct_change": true,
+    "no_run_in_sample_invocation": true,
+    "no_run_out_of_sample_invocation": true,
+    "no_s10_d1_artifact_modified": true,
+    "no_s11_d1_started_or_advanced": true,
+    "no_s11_d1_tier_n_spec_plan_modified_at_488579e": true,
+    "no_s7_artifact_modified": true,
+    "no_s8_d1_artifact_modified": true,
+    "no_s9_artifact_modified": true,
+    "no_starting_cash_change": true,
+    "no_step_30_cost_constant_modified": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_optimization_authorized": true,
+    "no_tier_n_spec_mutation": true,
+    "no_wallet_or_exchange_api_call": true,
+    "no_write_to_canonical_p11_path": true
+  },
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "k10_cleanup_observation_commit_ed046d5": {
+    "commit_hash": "ed046d5",
+    "commit_subject": "chore: discard duplicate S10-D2 K10 diagnostic artifacts (Option 1)",
+    "from_this_sessions_perspective": "Race-pattern outcome inverted vs P11: for K10, THIS session was the canonical winner (sealed first, at non-colliding paths); the parallel session's later run was the duplicate. The parallel session followed the same defer-and-document discipline this session used for P10 and is using for P11.",
+    "verdict_agreement_between_two_independent_runs": {
+      "agreement_strength": "Two independent implementations producing the same K10 PASS verdict at ~0.04-0.05 avg vs the 0.50 threshold constitutes strong corroboration of gap G2 closure.",
+      "delta_explanation": "Both methodologies share derive_rth_daily_bars + simple daily returns + Pearson + unweighted mean of 6 pairs. ~0.0127 avg-delta is from inner-join vs return-computation ordering. Both clear K10 by ~10x the 0.50 threshold.",
+      "parallel_session_discarded": {
+        "avg_pairwise_corr": 0.04009,
+        "common_dates": 2251,
+        "verdict": "K10 CLEARS / A7 PASS"
+      },
+      "this_session_canonical_4ddaa84": {
+        "avg_pairwise_corr": 0.052804,
+        "common_dates": 2253,
+        "verdict": "K10_PASS_AVG_PAIRWISE_CORR_AT_OR_BELOW_0_50"
+      }
+    },
+    "what_was_deleted": "Only the parallel session's own competing K10 diagnostic artifacts at reports/external_research_hunter/s10_d2_..._k10_pairwise_dependence_diagnostic_report.{json,md}. These were unstaged and uncommitted at delete time; never published.",
+    "what_was_kept_canonical": "This controller session's K10 work at commit 4ddaa84 (4 files: tools/external_research_hunter/s10_d2_k10_pairwise_dependence.py, tests/test_s10_d2_k10_pairwise_dependence.py, and reports/external_research_hunter/s10_d2_..._k10_pairwise_dependence_result_sealed.{json,md}). All 4 files remain tracked in HEAD and byte-stable."
+  },
+  "operator_chosen_disposition_after_preemption_observed": "OPTION_1_DEFER_TO_PARALLEL_P11_WRITE_OBSERVATION_MEMO_AT_NON_COLLIDING_PATH",
+  "operator_designated_this_session_as_canonical_executor": true,
+  "operator_next_step_recommendations_documented_only_not_authorized": [
+    {
+      "description": "Treat parallel commit 23c7164 as the canonical S10-D2 terminal park record. Move forward to S11-D1 (single-instrument MNQ.c.0 long-history Databento candidate; Tier-N spec plan committed at parallel 488579e but build NOT pre-authorized). S11-D1 directly addresses the K9 sample-size constraint by using a single instrument over a longer history (rather than the 4-symbol 3-year OOS that constrained S10-D2). Operator authorization phrase for next-phase would be e.g. 'Authorize S11-D1 Tier-N spec DRAFT' (or whichever phase the S11-D1 plan names).",
+      "option": "ACCEPT_PARALLEL_P11_AS_CANONICAL_AND_MOVE_TO_S11_D1",
+      "recommended": true
+    },
+    {
+      "description": "Treat the S10-D2 chain (Tier-N, plan-lock, phase-2, P3-P3.6 builds, P4 smoke, P6 IS, P6.5 cost-stress, K10, P7, P10, P11 park) as a unit of work. Pause new authorizations and review the chain end-to-end before opening S11-D1 or any other candidate. Useful if operator wants to reflect on lessons before launching another multi-week candidate lifecycle.",
+      "option": "HALT_RESEARCH_AND_REVIEW_CHAIN",
+      "requires_separate_authorization": true
+    },
+    {
+      "description": "If operator wants additional S10-D2 evidence before declaring fully parked, authorize an OOS cost-stress sweep (S0/S2/S3/S4 against OOS cache). This would NOT close gap G1 differently (cost-stress already cleared at IS) and would NOT close the K9 sample-size gap (same 53 trades). Mostly informational; ~5 min wall time.",
+      "notes": "Tension with the just-sealed P11 park: re-running OOS-side cost-stress on a parked candidate is structurally valid (the cache is read-only; the driver is byte-stable) but signals continued interest in S10-D2 that may contradict the park decision. Operator's call.",
+      "option": "AUTHORIZE_S10_D2_OOS_COST_STRESS_AS_SUPPLEMENTAL_DIAGNOSTIC",
+      "requires_separate_authorization": true
+    }
+  ],
+  "operator_required_seven_points_coverage_audit": {
+    "point_1_p10_was_real_run": {
+      "evidence": "executive_park_decision explicitly references P10 with metrics (200 closed trades IS, 53 OOS, all safety counters zero, max DD improved vs IS); P10 commit 15231cb itself had run_completed_without_exception=True, duration_seconds=81.816, monkey_patches_applied_count=0, driver_byte_stable_through_run=True.",
+      "operator_required": "P10 OOS was a real run.",
+      "parallel_p11_covers": true
+    },
+    "point_2_oos_directionally_consistent": {
+      "evidence": "oos_vs_is_comparison.what_survived enumerates: (a) direction of edge (positive sharpe/expectancy/net PnL), (b) all safety counters zero, (c) no-pyramid invariant held, (d) starting-cash invariant held; oos_vs_is_comparison.what_degraded enumerates the magnitude losses (expectancy ~0.44x, sharpe ~0.70x, net PnL/year ~0.39x of IS).",
+      "operator_required": "OOS metrics were positive and directionally consistent.",
+      "parallel_p11_covers": true
+    },
+    "point_3_k9_a1_failed_53_lt_100": {
+      "evidence": "why_park_not_advance[0]: 'OOS closed-trade count (53) is below K9 threshold of 100. A1 acceptance gate FAILED.' Same metric also embedded in executive_park_decision.",
+      "operator_required": "K9/A1 failed because closed trades were 53 < 100.",
+      "parallel_p11_covers": true
+    },
+    "point_4_not_refutation_not_confirmation": {
+      "evidence": "executive_park_decision verbatim: 'neither a confirmation nor a refutation - it is an absence of refutation under a structurally small sample.' Reinforced by what_the_park_does_NOT_mean (9 anti-claims) and what_the_park_means (5 items).",
+      "operator_required": "This is not a refutation and not confirmation.",
+      "parallel_p11_covers": true
+    },
+    "point_5_parked_under_insufficient_sample": {
+      "evidence": "park_status_enum = PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED (semantically equivalent to INSUFFICIENT_SAMPLE; parallel's enum is more specific about WHICH gate fired).",
+      "operator_required": "Candidate is parked under INSUFFICIENT_SAMPLE.",
+      "parallel_p11_covers": true
+    },
+    "point_6_no_further_phases_under_this_candidate_id": {
+      "evidence": "what_the_park_means[4]: 'Any future continuation must come through a separate fresh sealed authorization.' what_the_park_does_NOT_mean[4]: explicitly names S11-D1, longer OOS, OOS cost-stress, and 'fresh candidate' as NOT pre-approved. why_park_not_advance[2]: 'a fresh sealed authorization with a documented research hypothesis' required for any P10.5 / P11.5 / similar.",
+      "operator_required": "No further S10-D2 phases are authorized under this candidate ID.",
+      "parallel_p11_covers": true
+    },
+    "point_7_s11_d1_natural_next_dont_start": {
+      "evidence": "what_the_park_does_NOT_mean[4] names S11-D1 explicitly as NOT pre-approved. The memo's future_research_options_only_no_pre_approval block (all_options_require_separate_fresh_sealed_authorization = True, no_option_is_pre_approved_by_this_memo = True) defers all successor authorization. S11-D1's tier-N spec plan was authored separately at parallel commit 488579e but its build/execution is NOT pre-authorized.",
+      "operator_required": "Natural next research direction is S11-D1 MNQ long-history, but do not start it in this step.",
+      "parallel_p11_covers": true
+    },
+    "summary_coverage_verdict": "All 7 operator-required points are covered by the parallel P11 memo. No coverage gap requires this session to author a competing P11 record."
+  },
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC-P11-OBSERVATION",
+  "posture_invariants_unchanged_by_this_memo": {
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "frc_granted": false,
+    "live_promotion_path_closed": true,
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_strategy_optimization_authorized": true,
+    "trading_status": "PAUSED",
+    "verdict_never_means_live_ready": true
+  },
+  "predecessor_seal_chain_attestation_drift_zero": {
+    "all_predecessor_seals_re_verifiable_from_on_disk_artifacts": true,
+    "k10_pairwise_dependence_seal_sha256_this_session": "8c620cc5bfe53f71d4ededba45b3d8cee0de54992db6819103875811cbdb99e4",
+    "no_predecessor_seal_modified_by_this_memo": true,
+    "p10_oos_gate_seal_sha256_parallel_session": "4038e5334feba9ea61b91dcb47287a7a8f9f8fdfd8ad35990866bc9fbd106137",
+    "p11_park_seal_sha256_parallel_session": "e121b82b411697c7d06bbe9ee1cc2df29c04df76712873ed0fbfd76f25fab1cb",
+    "p7_decision_memo_seal_sha256_parallel_session": "87baa6e8c4cc1eb47c1345b97990eab86d5cefb37636e9fe57a029506d398c05",
+    "phase2_plan_seal_sha256": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "predecessor_seal_sha256": "007110ff5a57dd04b184409bad64fd667374cd049155416c869a73f7af0c1f97",
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "preemption_findings": {
+    "parallel_p11_authored_at_utc": "2026-05-27T03:45:29Z",
+    "parallel_p11_classification_note": "Operator-requested park label was INSUFFICIENT_SAMPLE; parallel memo uses the more specific closed-enum value PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED. Semantically equivalent: both name K9 (closed_trades=53 < 100) as the load-bearing reason. Parallel's enum more precisely identifies the specific gate that fired.",
+    "parallel_p11_commit_hash": "23c7164",
+    "parallel_p11_commit_subject": "Seal S10-D2 P11 PARK memo",
+    "parallel_p11_files_added": [
+      "reports/s10_d2_p11_park_memo_sealed.json",
+      "reports/s10_d2_p11_park_memo_sealed.md"
+    ],
+    "parallel_p11_park_status_enum": "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "parallel_p11_park_status_enum_allowed": [
+      "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+      "PARKED_SAFE_BUT_NOT_MONEY_PROVEN_OOS_SIZING_UNDERSIZED",
+      "PARKED_OOS_REFUTED",
+      "PARKED_PENDING_LONGER_OOS_WINDOW"
+    ],
+    "parallel_p11_report_seal_sha256": "e121b82b411697c7d06bbe9ee1cc2df29c04df76712873ed0fbfd76f25fab1cb"
+  },
+  "purpose": "Document, read-only, that the S10-D2 P11 PARK step authorized this turn was preempted by the parallel controller session, which authored a comprehensive sealed P11 memo at commit 23c7164 (reports/s10_d2_p11_park_memo_sealed.{json,md}, report_seal_sha256 e121b82b411697c7d06bbe9ee1cc2df29c04df76712873ed0fbfd76f25fab1cb). Audit confirms that memo covers all seven operator-required points adequately. This controller session defers to the parallel P11 memo as the canonical S10-D2 terminal record. This memo records the defer decision and the K10 cleanup outcome at a non-colliding path; it does NOT alter or supersede the parallel canonical P11.",
+  "race_condition_summary_full_session": {
+    "pattern_observation": "Three S10-D2 race patterns this session, all resolved with Option 1 (defer or discard the duplicate). When this session won (K10), the parallel session's duplicate was discarded. When the parallel session won (P10, P11), this session authored a non-colliding observation memo. Net result: zero competing canonical artifacts; complete audit trail of both perspectives via observation memos.",
+    "race_patterns": [
+      {
+        "operator_chosen_disposition": "OPTION_1_DISCARD_PARALLEL_DUPLICATE_KEEP_THIS_SESSION_CANONICAL",
+        "outcome": "THIS_SESSION_CANONICAL_WINNER",
+        "parallel_session_committed_cleanup": "ed046d5",
+        "phase": "K10",
+        "this_session_commit": "4ddaa84"
+      },
+      {
+        "operator_chosen_disposition": "OPTION_1_DEFER_TO_PARALLEL_WRITE_OBSERVATION_MEMO",
+        "outcome": "PARALLEL_SESSION_CANONICAL_WINNER",
+        "parallel_session_commit": "15231cb",
+        "phase": "P10_OOS_GATE",
+        "this_session_commit": "44b9059_observation_memo_only"
+      },
+      {
+        "operator_chosen_disposition": "OPTION_1_DEFER_TO_PARALLEL_WRITE_OBSERVATION_MEMO",
+        "outcome": "PARALLEL_SESSION_CANONICAL_WINNER",
+        "parallel_session_commit": "23c7164",
+        "phase": "P11_PARK",
+        "this_session_commit": "p11_observation_memo_pending_operator_commit_approval"
+      }
+    ],
+    "total_race_patterns_observed_this_session": 7
+  },
+  "report_seal_sha256": "279b2be45212f164ff695979578de9362aa44e253fa51cad7d591fc03188761a",
+  "schema_id": "sparta.external_research_hunter.s10_d2_p11_oos_park_observation_memo.v1",
+  "seal_method": "sha256( json.dumps(body_excluding_seal_fields, sort_keys=True, separators=(',',':'), ensure_ascii=False) )",
+  "this_memo_does_not_compete_with_parallel_p11": true,
+  "this_memo_does_not_modify_parallel_p11": true,
+  "this_memo_does_not_park_or_unpark_at_a_competing_canonical_path": true,
+  "this_memo_does_not_re_execute_p10": true,
+  "this_memo_does_not_start_s11_d1_work": true,
+  "this_memo_does_not_touch_command_center_files": true,
+  "this_memo_does_not_touch_lessons_md": true,
+  "this_memo_does_not_write_to_canonical_p11_path": true,
+  "this_session_s10_d2_chain_contributions": {
+    "k10_artifacts_tracked_in_HEAD": [
+      "tools/external_research_hunter/s10_d2_k10_pairwise_dependence.py",
+      "tests/test_s10_d2_k10_pairwise_dependence.py",
+      "reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_k10_pairwise_dependence_result_sealed.json",
+      "reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_k10_pairwise_dependence_result_sealed.md"
+    ],
+    "k10_pairwise_dependence_canonical_commit": "4ddaa84",
+    "no_other_s10_d2_artifacts_authored_by_this_session": true,
+    "p10_observation_memo_commit": "44b9059",
+    "p10_observation_memo_files": [
+      "reports/s10_d2_p10_oos_execution_observation_memo.json",
+      "reports/s10_d2_p10_oos_execution_observation_memo.md"
+    ],
+    "p11_observation_memo_files_this_turn_to_be_committed_pending_approval": [
+      "reports/s10_d2_p11_oos_park_observation_memo.json",
+      "reports/s10_d2_p11_oos_park_observation_memo.md"
+    ]
+  }
+}
