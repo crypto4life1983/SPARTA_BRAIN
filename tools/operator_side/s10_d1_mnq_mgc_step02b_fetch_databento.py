@@ -27,7 +27,7 @@ import hashlib
 import json
 import os
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 
@@ -125,6 +125,58 @@ def _fetch_one_symbol(client, symbol):
     return data
 
 
+def _normalize_dbn_dataframe(df):
+    """Normalize a databento `to_df()` output so `ts_event` is a column.
+
+    Databento's `to_df()` may emit the event timestamp as:
+      - the DataFrame index named `ts_event` (most common; older clients)
+      - the DataFrame index unnamed (some newer client versions)
+      - a column literally named `ts_event` (already normalized)
+
+    This helper:
+      1. Returns df unchanged if `ts_event` is already a column.
+      2. If `ts_event` is the index name, calls `reset_index()` to surface it.
+      3. If the index is unnamed and `ts_event` is missing from columns, calls
+         `reset_index()` and, only if the resulting `index` column has a
+         datetime64 dtype AND no other ts_event candidate exists, safely
+         renames `index` to `ts_event`.
+      4. Returns the resulting DataFrame; caller still does the
+         missing-required-columns fail-closed check (defense-in-depth).
+
+    Does NOT print row contents. Does NOT log API payloads. Does NOT inspect
+    or summarize OOS performance.
+    """
+    import pandas as pd  # local import; standard library + databento + pandas only
+    if df is None or len(df) == 0:
+        return df
+
+    # Case 1: ts_event is already a column.
+    if "ts_event" in df.columns:
+        return df
+
+    idx_name = df.index.name
+    df2 = df.reset_index()
+
+    # Case 2: index was named ts_event; reset_index already surfaced it.
+    if "ts_event" in df2.columns:
+        return df2
+
+    # Case 3: index was unnamed; reset_index produced an `index` column.
+    # Safe rename ONLY if `index` is datetime-like AND no ambiguous alternative
+    # is present in df2.columns.
+    if idx_name is None and "index" in df2.columns:
+        try:
+            is_dt = pd.api.types.is_datetime64_any_dtype(df2["index"])
+        except Exception:
+            is_dt = False
+        if is_dt:
+            df2 = df2.rename(columns={"index": "ts_event"})
+            return df2
+
+    # Could not normalize; let caller's required-column check fail closed.
+    return df2
+
+
 def _write_csv_via_pandas(data, output_path):
     """Convert DBNStore to DataFrame and write CSV. Counts rows for caller.
 
@@ -136,19 +188,19 @@ def _write_csv_via_pandas(data, output_path):
     if df is None or len(df) == 0:
         return 0, None, None
 
-    # Validate required columns are present.
+    # Normalize the Databento DataFrame so `ts_event` is reliably a column
+    # before any required-column or sort logic runs.
+    df = _normalize_dbn_dataframe(df)
+
+    # Validate required columns are present AFTER normalization.
     missing = [c for c in REQUIRED_CSV_COLUMNS if c not in df.columns]
     if missing:
         sys.stderr.write(
-            f"Output DataFrame missing required columns {missing}; fail-closed.\n"
+            "Output DataFrame missing required columns "
+            f"{missing} after normalization; fail-closed.\n"
         )
         sys.exit(5)
 
-    # Ensure ts_event is sorted ascending and serializable.
-    df = df.reset_index() if "ts_event" not in df.columns else df
-    if "ts_event" not in df.columns:
-        sys.stderr.write("ts_event column missing after reset_index; fail-closed.\n")
-        sys.exit(5)
     df = df.sort_values("ts_event").reset_index(drop=True)
 
     df.to_csv(output_path, index=False)
@@ -218,7 +270,7 @@ def main():
         "is_window_end": IS_WINDOW_END,
         "oos_window_start_LOCKED_NOT_INSPECTED": OOS_WINDOW_START,
         "oos_window_end_LOCKED_NOT_INSPECTED": OOS_WINDOW_END,
-        "fetch_run_utc": datetime.utcnow().isoformat() + "Z",
+        "fetch_run_utc": datetime.now(timezone.utc).isoformat(),
         "symbols": [],
         "boundaries_held": {
             "databento_api_key_read_from_env_only": True,

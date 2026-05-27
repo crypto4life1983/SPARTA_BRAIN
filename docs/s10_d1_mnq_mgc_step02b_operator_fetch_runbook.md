@@ -3,9 +3,29 @@
 Status: OPERATOR_RUNBOOK (operator runs this in their local shell outside the controller session).
 Authored: 2026-05-26
 Authorization: "Authorize s10 D1 MNQ+MGC Step 02b operator-side Databento fetch package."
+Patched: 2026-05-26 -- DataFrame normalization patch under "Authorize s10 D1 MNQ+MGC Step 02b fetch script dataframe-normalization patch."
 
 Sealed spec reference: docs/s10_d1_mnq_mgc_databento_long_history_tier_n_spec.md (commit 9040429).
 Fetch script reference: tools/operator_side/s10_d1_mnq_mgc_step02b_fetch_databento.py.
+
+---
+
+## 0. Rerun-after-patch quick reference
+
+If you are returning to this runbook after the first run failed with `Output DataFrame missing required columns ['ts_event']; fail-closed.` (exit code 5), the patched script handles the DataFrame normalization case where Databento's `to_df()` emits the timestamp as an index rather than a column.
+
+**Rerun command (identical to original; idempotent):**
+
+```powershell
+cd C:\SPARTA_BRAIN
+$env:DATABENTO_API_KEY = "<paste-your-databento-key-here-locally>"
+python .\tools\operator_side\s10_d1_mnq_mgc_step02b_fetch_databento.py
+```
+
+Before rerunning:
+
+- Verify the output directory `data/s10_d1_mnq_mgc_databento_long_history/raw/` is either empty or absent. The first failed run did not produce any partial CSV (the fail-closed check fires before `df.to_csv()` runs). If a partial CSV is present, delete it locally and rerun.
+- The patched script's behavior is identical on the safe paths; only the DataFrame normalization helper changes how `ts_event` is recovered from a Databento index.
 
 ---
 
@@ -92,11 +112,21 @@ The script will:
 2. Read `DATABENTO_API_KEY` from environment (never echoes it).
 3. Create the output directory `data/s10_d1_mnq_mgc_databento_long_history/raw/` if it does not exist.
 4. Fetch MNQ.c.0 first, then MGC.c.0, each over the full sealed-spec date range (2019-05-13 through 2025-12-30).
-5. Write one CSV per symbol plus one manifest JSON.
-6. Print one safe summary line per symbol: `symbol | row_count | first_timestamp | last_timestamp | sha256 | bytes`.
-7. Exit with code 0 on success; non-zero on any fail-closed condition.
+5. **Normalize the Databento DataFrame so `ts_event` is reliably a column** before any required-column check (handles index-named-ts_event and unnamed-datetime-index cases per `_normalize_dbn_dataframe` helper).
+6. Write one CSV per symbol plus one manifest JSON.
+7. Print one safe summary line per symbol: `symbol | row_count | first_timestamp | last_timestamp | sha256 | bytes`.
+8. Exit with code 0 on success; non-zero on any fail-closed condition.
 
 Expected runtime: under a few minutes total for daily-bar data over ~6.6 years on 2 symbols. If you see no progress within 5 minutes, abort with `Ctrl+C` and verify your Databento permissions.
+
+### 4.1 Expected non-fatal warnings (safe to ignore at this phase)
+
+The Databento client may emit one or both of the following warnings during a fetch. **Neither is a fail-closed condition for Step 02b**; both are handled at Step 02c raw-data audit.
+
+- `DeprecationWarning: datetime.utcnow()` -- the patched script uses `datetime.now(timezone.utc)`; if the operator sees this warning it originates from a vendor library (databento/pandas), not the script itself.
+- `BentoWarning: reduced quality days including <YYYY-MM-DD>, ...` -- Databento flags days where the underlying CME tick feed was incomplete or reconstructed (e.g., 2020-02-27, 2020-02-28, 2020-06-30 are common micro-futures reduced-quality dates around early COVID volatility). The reduced-quality day list shall be captured by the operator (copy the warning text safely; no row content) and forwarded to **Step 02c raw-data audit**, which will apply the sealed-spec DR9 thresholds (`DR9_MIN_PCT_EXPECTED_TRADING_DAYS = 0.95`, `DR9_MAX_CONSECUTIVE_ABS_LOG_RETURN = 0.30`, `DR9_MAX_MISSING_OBSERVATIONS = 5`, `DR9_MAX_CONSECUTIVE_VIOLATION_THRESHOLD = 5`) to decide whether the days breach DR9.
+
+**Operator action on reduced-quality warnings:** copy the full warning line(s) to a local note for inclusion in Step 02c paste-back. Do NOT modify the script. Do NOT alter the date range. Do NOT exclude the flagged days from the CSV.
 
 ---
 

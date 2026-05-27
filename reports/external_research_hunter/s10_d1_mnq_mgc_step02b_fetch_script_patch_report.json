@@ -1,0 +1,192 @@
+{
+  "schema": "sparta.external_research_hunter.step02b_fetch_script_patch_report.v1",
+  "phase": "S10_D1_MNQ_MGC_STEP02B_FETCH_SCRIPT_PATCHED_NOT_RUN",
+  "report_date_utc": "2026-05-26",
+  "authorization": "Authorize s10 D1 MNQ+MGC Step 02b fetch script dataframe-normalization patch.",
+  "controller_session": "THIS_SESSION_PATCH_AUTHORING_ONLY",
+  "candidate_record_id": "s10-d1-cross-asset-trend-or-meanrev-mnq-mgc-databento-long-history",
+  "sealed_spec_commit_anchor": "9040429",
+  "original_fetch_package_commit_anchor": "a8df18b",
+  "problem_statement": {
+    "first_run_outcome": "fail-closed exit code 5",
+    "fail_closed_message": "Output DataFrame missing required columns ['ts_event']; fail-closed.",
+    "non_fatal_warnings_observed": [
+      "DeprecationWarning: datetime.utcnow()",
+      "BentoWarning: reduced quality days including 2020-02-27, 2020-02-28, 2020-06-30"
+    ],
+    "no_api_key_pasted_into_chat": true,
+    "databento_api_key_was_local_env_only": true,
+    "databento_endpoint_reached": true,
+    "mnq_c_0_fetch_initiated": true,
+    "root_cause": "Required-column check ran BEFORE the reset_index() recovery, so the fail-closed fired immediately when ts_event was an index rather than a column. Recovery logic was unreachable."
+  },
+  "patch_summary": [
+    {
+      "change_id": "P1",
+      "type": "NEW_FUNCTION",
+      "name": "_normalize_dbn_dataframe",
+      "location": "before _write_csv_via_pandas",
+      "behavior": "Case 1: ts_event already a column -> return unchanged. Case 2: index has a name; reset_index surfaces it as a column. Case 3: index unnamed; reset_index produced 'index' column; safe rename only if 'index' dtype is datetime64. Fallback: return df2 and let caller's required-column check fail-closed.",
+      "defensive_properties": [
+        "idempotent on already-normalized DataFrames",
+        "conservative renaming only when dtype is datetime-like",
+        "fail-closed on ambiguity (defers to caller)",
+        "no row content access (only column names, index name, dtype check)"
+      ]
+    },
+    {
+      "change_id": "P2",
+      "type": "MODIFY_FUNCTION_BODY",
+      "name": "_write_csv_via_pandas",
+      "modification": "Call _normalize_dbn_dataframe(df) BEFORE the required-column check. Update fail-closed message to mention 'after normalization'. Remove the now-redundant inline reset_index logic."
+    },
+    {
+      "change_id": "P3",
+      "type": "MODIFY_LINE",
+      "modification": "Replace datetime.utcnow().isoformat() + \"Z\" with datetime.now(timezone.utc).isoformat() in manifest fetch_run_utc."
+    },
+    {
+      "change_id": "P4",
+      "type": "MODIFY_IMPORT",
+      "modification": "Add timezone to 'from datetime import date, datetime, timezone'."
+    },
+    {
+      "change_id": "P5",
+      "type": "RUNBOOK_DOCUMENTATION",
+      "location": "docs/s10_d1_mnq_mgc_step02b_operator_fetch_runbook.md sections 0 + 4 + 4.1",
+      "modification": "Added section 0 (Rerun-after-patch quick reference). Updated section 4 to mention DataFrame normalization in the flow. Added section 4.1 documenting expected non-fatal warnings, including the BentoWarning reduced-quality-days handling protocol (captured and forwarded to Step 02c raw-data audit; not handled by Step 02b)."
+    }
+  ],
+  "patched_fetch_script_artifact": {
+    "path": "tools/operator_side/s10_d1_mnq_mgc_step02b_fetch_databento.py",
+    "bytes_post_patch": 12414,
+    "sha256_post_patch": "9269a778c501bc9c45c11760a38610665d9c3008dfa3b64a2c9e5316f110683b",
+    "sha256_pre_patch": "e8cc33ae37b3431ee673c1b4374006472b2586a1a3711209dac5dd2cf354dedc",
+    "py_compile_post_patch_passed": true,
+    "ascii_only_post_patch": true
+  },
+  "patched_runbook_artifact": {
+    "path": "docs/s10_d1_mnq_mgc_step02b_operator_fetch_runbook.md",
+    "bytes_post_patch": 12567,
+    "sha256_post_patch": "2efafd663768f0bbc875b37cc2d8d04c2b2914dc5835d74f01840b8408357bc4",
+    "sha256_pre_patch": "10e9559c99059ed3355d5a1102b91b14a8cb63443594c39817ec123b5640a17f"
+  },
+  "patch_report_md_artifact": {
+    "path": "reports/external_research_hunter/s10_d1_mnq_mgc_step02b_fetch_script_patch_report.md",
+    "bytes": 11464,
+    "sha256": "f6994de11a3803ae3a398859ba52c3eafba6d98787e36d0dfb07c563edff75da"
+  },
+  "static_scan_results_post_patch_all_pass": {
+    "py_compile_passed": true,
+    "ascii_only": true,
+    "datetime_utcnow_absent": true,
+    "datetime_now_timezone_utc_present": true,
+    "timezone_imported": true,
+    "normalize_dbn_dataframe_function_defined": true,
+    "normalize_dbn_dataframe_called_before_required_column_check": true,
+    "fail_closed_message_mentions_after_normalization": true,
+    "no_yfinance_import": true,
+    "no_strategy_lab_import": true,
+    "no_idea_memory_mutation": true,
+    "no_setlivemode_or_setbrokeragemodel_or_deployalgorithm": true,
+    "no_signal_or_backtest_or_simulator_function_definitions": true,
+    "get_range_call_has_no_path_kwarg_only_in_note_comment": true,
+    "no_databento_api_key_misuse_patterns_print_log_hash_write": true,
+    "controller_side_no_databento_call_this_turn": true,
+    "controller_side_no_databento_api_key_access_this_turn": true,
+    "controller_side_no_fetch_run_this_turn": true,
+    "no_oos_inspection_in_script_or_this_turn": true,
+    "no_backtest_or_simulator_or_signal_in_script_or_this_turn": true,
+    "no_review_queue_mutation": true,
+    "no_strategy_lab_promotion": true,
+    "no_live_trading": true
+  },
+  "reduced_quality_day_handling": {
+    "script_action_post_patch": "none (no date-range modification, no day exclusion)",
+    "runbook_action_post_patch": "operator captures warning text safely and forwards to Step 02c raw-data audit",
+    "step_02c_decision_thresholds_carried_byte_equivalent_from_sealed_spec": {
+      "DR9_MIN_PCT_EXPECTED_TRADING_DAYS": 0.95,
+      "DR9_MAX_CONSECUTIVE_ABS_LOG_RETURN": 0.3,
+      "DR9_MAX_MISSING_OBSERVATIONS": 5,
+      "DR9_MAX_CONSECUTIVE_VIOLATION_THRESHOLD": 5
+    },
+    "rationale": "Step 02b is fetch-only by sealed scope. Reduced-quality flags are an audit concern at Step 02c. The script preserves full sealed-spec fidelity (date range unchanged; no day exclusions) and defers all data-quality decisions to the Step 02c audit phase."
+  },
+  "boundaries_held_this_patch_turn": {
+    "patch_only_no_fetch_run": true,
+    "databento_api_key_not_accessed_by_controller": true,
+    "databento_api_key_not_printed_logged_hashed_stored_or_inspected": true,
+    "no_databento_call_from_controller": true,
+    "no_backtest": true,
+    "no_simulator_run": true,
+    "no_signal_computation": true,
+    "no_oos_inspection": true,
+    "no_review_queue_mutation": true,
+    "no_strategy_lab_run": true,
+    "no_candidate_promotion": true,
+    "no_live_trading": true,
+    "no_modification_of_lessons_md": true,
+    "no_staging_of_lessons_md": true,
+    "lessons_md_dirty_and_unstaged_preserved": true,
+    "no_branch_change_no_branch_creation_no_git_push": true,
+    "only_four_named_patch_files_modified_or_authored": true,
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc": "NEVER_GRANTED",
+    "no_strategy_optimization_authorized": true
+  },
+  "next_step_authorization_paths": [
+    {
+      "label": "operator_reruns_patched_fetch_in_local_shell",
+      "command_sequence_powershell": [
+        "cd C:\\SPARTA_BRAIN",
+        "$env:DATABENTO_API_KEY = \"<paste-your-databento-key-here-locally>\"",
+        "python .\\tools\\operator_side\\s10_d1_mnq_mgc_step02b_fetch_databento.py"
+      ],
+      "controller_does_not_run_this": true,
+      "preflight_check_for_operator": "Verify data/s10_d1_mnq_mgc_databento_long_history/raw/ is empty or absent before rerun; the first failed run wrote no partial CSV but if any is present, delete locally before rerun."
+    },
+    {
+      "label": "after_successful_rerun_safe_paste_back",
+      "fields_to_paste_back": [
+        "symbol",
+        "row_count",
+        "first_timestamp",
+        "last_timestamp",
+        "sha256",
+        "size_bytes",
+        "manifest_path",
+        "manifest_sha256",
+        "reduced_quality_warning_text_if_any"
+      ],
+      "fields_NEVER_to_paste_back": [
+        "DATABENTO_API_KEY",
+        "any_row_content_ohlcv_volume",
+        "any_sharpe_or_return_or_pnl_or_drawdown_number",
+        "any_oos_window_analysis",
+        "any_raw_api_payload"
+      ]
+    },
+    {
+      "label": "after_safe_paste_back_next_authorization",
+      "phrase": "Authorize s10 D1 MNQ+MGC Step 02c raw-data audit only.",
+      "scope": "local-only audit; no Databento call; no network; consumes the manifest JSON and the operator-captured reduced-quality-day warning text to validate row counts, sha256 anchors, date-window coverage, required-column presence, and DR9 thresholds (0.95 pct expected trading days; 0.30 max consecutive abs log return; 5 max missing observations; 5 max consecutive violation threshold)."
+    },
+    {
+      "label": "if_rerun_fails_closed_again",
+      "actions": [
+        "Do NOT modify the script without a fresh patch authorization",
+        "Do NOT modify the runbook without authorization",
+        "Paste back safe summary line + exit code + any non-fatal warning text",
+        "Controller assesses whether second patch is warranted OR whether candidate should be parked under data-availability finding"
+      ]
+    }
+  ],
+  "is_sealed": false,
+  "is_live_approved": false,
+  "is_profit_proof": false,
+  "frc_granted": false,
+  "is_candidate_promoted": false,
+  "report_seal_sha256": "d0b1ad0c1bed9872c54e29260d38308ee2c44e9ca73a724bb312ba6b00f3310e",
+  "seal_method": "sha256(json.dumps(body, sort_keys=True, separators=(',',':'), ensure_ascii=False)) excluding report_seal_sha256+seal_method"
+}
