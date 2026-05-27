@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}SPARTA Trading Command Center — Lifecycles (v1){% endblock %}
+
+{% block content %}
+<style>
+  .cc-wrap { font-family: ui-monospace, Menlo, Consolas, monospace;
+             color:#e6edf3; padding: 8px 0 32px; }
+  .cc-h1 { font-size: 1.35rem; margin: 0 0 4px; color:#e6edf3; }
+  .cc-sub { color:#8b949e; font-size:.85rem; margin: 0 0 12px; }
+  .cc-invariants { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0 18px;
+                   font-size:.78rem; }
+  .cc-invariants .pill { background:#161b22; border:1px solid #30363d;
+                         padding:5px 10px; border-radius:6px; color:#e6edf3; }
+  .cc-lifecycle { background:#0d1117; border:1px solid #30363d;
+                  border-radius:8px; padding:14px 16px; margin: 14px 0; }
+  .cc-lifecycle h2 { font-size: 1.05rem; margin: 0 0 4px; color:#58a6ff;
+                     letter-spacing:.3px; }
+  .cc-desc { color:#8b949e; font-size:.82rem; margin: 0 0 10px; }
+  .cc-verdict { display:inline-block; padding:2px 8px; border-radius:4px;
+                font-size:.75rem; margin-left:8px;
+                background:#3d1f1f; color:#ff7b72; border:1px solid #6e2e2e; }
+  .cc-verdict.empty { background:#161b22; color:#8b949e; border-color:#30363d; }
+  .cc-section-label { color:#8b949e; font-size:.72rem; margin: 10px 0 4px;
+                      text-transform:uppercase; letter-spacing:.6px; }
+  table.cc-table { width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.cc-table th, table.cc-table td { text-align:left; padding:4px 8px;
+                                         border-bottom:1px solid #21262d;
+                                         vertical-align:top; word-break:break-all; }
+  table.cc-table th { color:#8b949e; font-weight:600; }
+  .cc-status-OK              { color:#3fb950; }
+  .cc-status-SEAL_DRIFT      { color:#ff7b72; font-weight:bold; }
+  .cc-status-MISSING         { color:#d29922; }
+  .cc-status-NO_DECLARED_SHA { color:#8b949e; }
+  .cc-status-ERROR           { color:#ff7b72; font-weight:bold; }
+  .cc-status-COMPLETE        { color:#3fb950; }
+  .cc-status-NEXT            { color:#58a6ff; font-weight:bold; }
+  .cc-status-PENDING         { color:#8b949e; }
+  .cc-authorize { background:#161b22; border:1px solid #30363d;
+                  border-radius:6px; padding:8px 10px; margin: 8px 0 0;
+                  font-size:.8rem; color:#e6edf3; }
+  .cc-authorize .lbl { color:#8b949e; font-size:.72rem;
+                       text-transform:uppercase; letter-spacing:.5px;
+                       display:block; margin-bottom:3px; }
+  .cc-authorize .phrase { color:#58a6ff; font-weight:bold; }
+  .cc-authorize .note { color:#8b949e; font-size:.72rem;
+                        margin-top:4px; font-style:italic; }
+  .cc-empty { color:#d29922; padding: 16px; background:#161b22;
+              border:1px dashed #d2992288; border-radius:6px;
+              font-size:.85rem; }
+  .cc-foot { color:#8b949e; font-size:.72rem; margin-top: 22px;
+             padding-top: 10px; border-top:1px solid #21262d; }
+  .cc-mono-small { font-size:.7rem; color:#8b949e; }
+</style>
+
+<div class="cc-wrap">
+  <h1 class="cc-h1">SPARTA Trading Command Center &mdash; Lifecycles (v1)</h1>
+  <p class="cc-sub">
+    Read-only lifecycle viewer for B006_* candidate sealed-artifact state.
+    GET-only. Localhost-only. No trade, no fetch, no broker, no optimization.
+  </p>
+
+  <div class="cc-invariants" aria-label="Posture invariants">
+    {% for inv in posture_invariants %}
+      <span class="pill">{{ inv }}</span>
+    {% endfor %}
+  </div>
+
+  {% if not reports_dir_exists %}
+    <div class="cc-empty">
+      MISSING: reports/external_research_hunter/ directory not found.
+      Nothing to render. No fabricated values.
+    </div>
+  {% elif not lifecycles %}
+    <div class="cc-empty">
+      MISSING: no B006_* lifecycle artifacts found on disk.
+      Nothing to render. No fabricated values.
+    </div>
+  {% else %}
+    {% for lc in lifecycles %}
+      <section class="cc-lifecycle">
+        <h2>
+          {{ lc.lifecycle_id }}
+          {% if lc.sealed_verdict %}
+            <span class="cc-verdict">{{ lc.sealed_verdict }}</span>
+          {% else %}
+            <span class="cc-verdict empty">no sealed verdict</span>
+          {% endif %}
+        </h2>
+        <p class="cc-desc">{{ lc.description }}</p>
+
+        <div class="cc-section-label">Phase ladder (0-8)</div>
+        <table class="cc-table" aria-label="Phase ladder for {{ lc.lifecycle_id }}">
+          <thead>
+            <tr><th style="width:3rem">#</th><th>Phase</th><th style="width:9rem">Status</th></tr>
+          </thead>
+          <tbody>
+            {% for ph in lc.phases %}
+              <tr>
+                <td>{{ ph.phase }}</td>
+                <td>{{ ph.label }}</td>
+                <td class="cc-status-{{ ph.status }}">{{ ph.status }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="cc-section-label">Artifacts on disk ({{ lc.artifacts|length }})</div>
+        {% if lc.artifacts %}
+        <table class="cc-table" aria-label="Artifacts for {{ lc.lifecycle_id }}">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th style="width:5rem">Bytes</th>
+              <th>Declared sha</th>
+              <th>Recomputed sha</th>
+              <th style="width:9rem">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for art in lc.artifacts %}
+              <tr>
+                <td>
+                  {{ art.name }}
+                  <div class="cc-mono-small">{{ art.rel_path }}</div>
+                </td>
+                <td>{{ art.bytes }}</td>
+                <td class="cc-mono-small">
+                  {% if art.declared_sha %}{{ art.declared_sha }}{% else %}&mdash;{% endif %}
+                </td>
+                <td class="cc-mono-small">
+                  {% if art.recomputed_sha %}{{ art.recomputed_sha }}{% else %}&mdash;{% endif %}
+                </td>
+                <td class="cc-status-{{ art.status }}">{{ art.status }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+          <div class="cc-empty">MISSING: no artifacts for this lifecycle.</div>
+        {% endif %}
+
+        <div class="cc-authorize">
+          <span class="lbl">Next expected authorization phrase</span>
+          {% if lc.next_authorize %}
+            <span class="phrase">{{ lc.next_authorize }}</span>
+          {% else %}
+            <span class="cc-mono-small">&mdash; not surfaced in decisions.md tail</span>
+          {% endif %}
+          <div class="note">
+            Operator types this verbatim in the controller session.
+            The command center never executes it.
+          </div>
+        </div>
+      </section>
+    {% endfor %}
+  {% endif %}
+
+  <div class="cc-foot">
+    Read-only &middot; localhost &middot; v1 lifecycle viewer &middot;
+    Module 1 of 8 planned per
+    docs/sparta_command_center_first_build_plan.md
+  </div>
+</div>
+{% endblock %}

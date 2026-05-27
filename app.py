@@ -110,6 +110,36 @@ async def lifespan(app: FastAPI):
         user_action="Open /three-brain, describe the task, click Route Task.",
         sort_order=95,
     )
+    # SPARTA Trading Command Center v1 — Module 1 of 8 planned per
+    # docs/sparta_command_center_first_build_plan.md (commit 970452c).
+    # Read-only lifecycle viewer over B006_* sealed-artifact lifecycles.
+    db.upsert_manual_entry(
+        "trading_command_center",
+        module_name="Trading Command Center (v1 lifecycle viewer)",
+        category="Trading",
+        status="READY",
+        short_description=(
+            "Read-only viewer for B006_* candidate lifecycle sealed-artifact "
+            "state. No trade, no fetch, no broker, no optimization."
+        ),
+        how_it_works=(
+            "Scans reports/external_research_hunter/ for B006_* artifacts, "
+            "recomputes sha256 of each file, compares against any declared "
+            "sha pin in the JSON sidecar, infers phase 0-8 from artifact "
+            "presence, surfaces the next-expected Authorize phrase verbatim "
+            "from brain_memory/projects/trading_bot/decisions.md."
+        ),
+        when_to_use=(
+            "When you want one read-only pane that shows which sealed-"
+            "artifact lifecycles are in which phase and whether any seal "
+            "has drifted, without navigating the reports tree by hand."
+        ),
+        user_action=(
+            "Open http://127.0.0.1:8765/command in a browser. GET-only, "
+            "localhost-only, no buttons, no forms, no execution."
+        ),
+        sort_order=92,
+    )
 
     # One-shot migration: if the user is still on the previous-generation
     # short-form defaults (45s max / 30s target), bump them to 35s/25s.
@@ -6554,6 +6584,374 @@ def api_ve_reset_rotation():
         backup = viral_engine.VE_DIR / f"repetition_guard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         viral_engine.REPETITION_PATH.rename(backup)
     return {"ok": True, "message": "Rotation reset. All styles re-eligible."}
+
+
+# ===========================================================================
+# SPARTA Trading Command Center — v1 lifecycle viewer (Module 1 of 8)
+# ---------------------------------------------------------------------------
+# Authorized by: docs/sparta_command_center_first_build_plan.md (commit 970452c)
+# Inspired by:   docs/fincept_inspiration_review_for_sparta_trading_command_center.md
+#                (commit a2ca6f7) — inspiration only, not dependency.
+#
+# Hard contract for this entire block:
+#   - GET only. No POST/PUT/PATCH/DELETE handler. Non-GET verbs return 405.
+#   - Localhost-only (inherits app's 127.0.0.1:8765 bind).
+#   - Read-only. Zero filesystem writes. Zero external network. Zero subprocess.
+#   - No trade affordance. No fetch. No optimize. No broker. No LLM chat.
+#   - No forms, no inputs, no mutating buttons in the rendered template.
+#   - Sha re-verification with explicit MISSING / SEAL_DRIFT / NO_DECLARED_SHA
+#     statuses. Never fabricates a value. Fail-closed rendering.
+#
+# Soft-rollback (per plan §13.1): comment out the @app.get("/command")
+# decorator below and restart the dashboard. The helpers stay inert.
+# ===========================================================================
+
+import hashlib as _command_hashlib
+import json as _command_json
+import re as _command_re
+from dataclasses import dataclass as _command_dataclass, field as _command_field
+
+_COMMAND_REPORTS_DIR = BASE / "reports" / "external_research_hunter"
+_COMMAND_DECISIONS_FILE = (
+    BASE / "brain_memory" / "projects" / "trading_bot" / "decisions.md"
+)
+
+_COMMAND_POSTURE_INVARIANTS = (
+    "Trading PAUSED",
+    "Live BLOCKED_AT_6_GATES",
+    "FRC NEVER_GRANTED",
+    "no_strategy_optimization_authorized = True",
+)
+
+# Phase ladder definition. Each phase has a list of filename-fragment
+# patterns; the phase is COMPLETE if any matching file exists for the
+# lifecycle, else PENDING. The first PENDING phase is marked NEXT.
+_COMMAND_PHASE_DEFS = (
+    (0, "Selection / diagnostic plan", (
+        "_non_equity_candidate_selection_plan.",
+        "_integrity_audit_diagnostic_plan.",
+        "_integrity_audit_minimum_feasible_diagnostic_spec.",
+    )),
+    (1, "Spec DRAFT", (
+        "_spec_DRAFT.",
+    )),
+    (2, "Spec SEAL / sealed finding", (
+        "_minimum_feasible_diagnostic_spec.",
+        "_audit_finding_report_SEALED.",
+    )),
+    (3, "Runner / analyzer build report", (
+        "_runner_build_report.",
+        "_audit_analyzer_build_report.",
+    )),
+    (4, "Execution guard build report", (
+        "_execution_guard_build_report.",
+    )),
+    (5, "Operator execution preparation", (
+        "_operator_execution_preparation.",
+        "_RUN_BOOK.",
+    )),
+    (6, "Operator QC acknowledgment / capture", (
+        "_operator_qc_execution_acknowledgment.",
+        "_qc_run_capture",
+    )),
+    (7, "Result sealing report", (
+        "_result_sealing_report.",
+    )),
+    (8, "Archival memo / recommendations", (
+        "_archival_memo.",
+        "_recommendations_memo.",
+    )),
+)
+
+# Keys whose value is treated as a raw-file sha256 pin when found in a
+# JSON sidecar. Other sha keys (e.g. report_seal_sha256 over a canonical
+# body, not the raw file) are intentionally ignored here to avoid false
+# SEAL_DRIFT alerts on existing artifacts.
+_COMMAND_RAW_FILE_SHA_KEYS = (
+    "artifact_sha256",
+    "file_sha256",
+    "body_sha256",
+    "self_sha256",
+)
+
+
+@_command_dataclass
+class _CmdArtifactRow:
+    name: str
+    rel_path: str
+    bytes: int
+    declared_sha: str
+    recomputed_sha: str
+    status: str  # OK | SEAL_DRIFT | MISSING | NO_DECLARED_SHA | ERROR
+
+
+@_command_dataclass
+class _CmdPhaseRow:
+    phase: int
+    label: str
+    status: str  # COMPLETE | NEXT | PENDING
+
+
+@_command_dataclass
+class _CmdLifecycleRow:
+    lifecycle_id: str
+    description: str
+    sealed_verdict: str
+    phases: list = _command_field(default_factory=list)
+    artifacts: list = _command_field(default_factory=list)
+    next_authorize: str = ""
+
+
+def _command_sha256_of_file(path):
+    try:
+        h = _command_hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except (OSError, IOError):
+        return ""
+
+
+def _command_load_sidecar_pin(json_sidecar_path):
+    """Return the raw-file sha256 pin from a JSON sidecar, or '' if none."""
+    if not json_sidecar_path.exists():
+        return ""
+    try:
+        data = _command_json.loads(
+            json_sidecar_path.read_text(encoding="utf-8", errors="replace")
+        )
+    except (OSError, IOError, ValueError):
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    for key in _COMMAND_RAW_FILE_SHA_KEYS:
+        val = data.get(key)
+        if isinstance(val, str) and len(val) == 64:
+            lower = val.lower()
+            if all(c in "0123456789abcdef" for c in lower):
+                return lower
+    return ""
+
+
+def _command_artifact_row_for(artifact_path, reports_dir):
+    """Build an _CmdArtifactRow for an existing artifact path."""
+    try:
+        size = artifact_path.stat().st_size if artifact_path.is_file() else 0
+    except OSError:
+        size = 0
+    if artifact_path.is_dir():
+        # Directories (e.g. *_qc_run_capture/) get a synthetic OK row.
+        return _CmdArtifactRow(
+            name=artifact_path.name + "/",
+            rel_path=str(artifact_path.relative_to(reports_dir)),
+            bytes=0,
+            declared_sha="",
+            recomputed_sha="",
+            status="OK",
+        )
+    recomputed = _command_sha256_of_file(artifact_path)
+    if not recomputed:
+        return _CmdArtifactRow(
+            name=artifact_path.name,
+            rel_path=str(artifact_path.relative_to(reports_dir)),
+            bytes=size,
+            declared_sha="",
+            recomputed_sha="",
+            status="ERROR",
+        )
+    # Look for a sidecar pin. For X.md try X.json; for X.json try itself.
+    if artifact_path.suffix.lower() == ".md":
+        sidecar = artifact_path.with_suffix(".json")
+    elif artifact_path.suffix.lower() == ".json":
+        sidecar = artifact_path
+    else:
+        sidecar = artifact_path
+    declared = _command_load_sidecar_pin(sidecar)
+    if not declared:
+        status = "NO_DECLARED_SHA"
+    elif declared == recomputed:
+        status = "OK"
+    else:
+        status = "SEAL_DRIFT"
+    return _CmdArtifactRow(
+        name=artifact_path.name,
+        rel_path=str(artifact_path.relative_to(reports_dir)),
+        bytes=size,
+        declared_sha=declared,
+        recomputed_sha=recomputed,
+        status=status,
+    )
+
+
+def _command_discover_lifecycle_ids(reports_dir):
+    """Return sorted list of canonical lifecycle ids (e.g. 'B006_002')."""
+    if not reports_dir.exists() or not reports_dir.is_dir():
+        return []
+    ids = set()
+    try:
+        entries = list(reports_dir.iterdir())
+    except OSError:
+        return []
+    for entry in entries:
+        name = entry.name
+        m = _command_re.match(r"^(b006_\d{3})(?:_|$)", name, _command_re.IGNORECASE)
+        if m:
+            ids.add(m.group(1).upper())
+    return sorted(ids)
+
+
+def _command_collect_artifacts(reports_dir, lifecycle_id):
+    """Return sorted list of paths whose name starts with the lifecycle id."""
+    prefix_lc = lifecycle_id.lower() + "_"
+    prefix_eq = lifecycle_id.lower()
+    out = []
+    try:
+        for entry in sorted(reports_dir.iterdir()):
+            name_lc = entry.name.lower()
+            if name_lc.startswith(prefix_lc) or name_lc == prefix_eq:
+                out.append(entry)
+    except OSError:
+        return []
+    return out
+
+
+def _command_infer_phases(artifact_paths):
+    """Walk the phase ladder; mark each phase COMPLETE/NEXT/PENDING."""
+    names_lc = [p.name.lower() for p in artifact_paths]
+    rows = []
+    next_marked = False
+    for phase, label, fragments in _COMMAND_PHASE_DEFS:
+        has_any = any(
+            any(frag.lower() in name for frag in fragments) for name in names_lc
+        )
+        if has_any:
+            status = "COMPLETE"
+        elif not next_marked:
+            status = "NEXT"
+            next_marked = True
+        else:
+            status = "PENDING"
+        rows.append(_CmdPhaseRow(phase=phase, label=label, status=status))
+    return rows
+
+
+def _command_extract_description(artifact_paths, lifecycle_id):
+    """Best-effort: pull a short description from the spec sidecar."""
+    for p in artifact_paths:
+        if p.suffix.lower() != ".json":
+            continue
+        name_lc = p.name.lower()
+        if "_spec_draft" not in name_lc and "_minimum_feasible_diagnostic_spec" not in name_lc:
+            continue
+        try:
+            data = _command_json.loads(p.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, IOError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        for key in ("candidate_description", "description", "title", "candidate_name"):
+            val = data.get(key)
+            if isinstance(val, str) and val.strip():
+                return val.strip()[:200]
+    return lifecycle_id
+
+
+def _command_extract_verdict(artifact_paths):
+    """Best-effort: pull sealed verdict from result_sealing_report JSON.
+    Handles both flat string and nested-dict shapes; in real B006_002 the
+    'sealed_verdict' key holds a dict with 'verdict_closed_enum_value'."""
+    for p in artifact_paths:
+        if p.suffix.lower() != ".json":
+            continue
+        if "_result_sealing_report" not in p.name.lower():
+            continue
+        try:
+            data = _command_json.loads(p.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, IOError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        for key in ("sealed_verdict", "verdict", "result_verdict", "terminal_verdict"):
+            val = data.get(key)
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+            if isinstance(val, dict):
+                for nested_key in (
+                    "verdict_closed_enum_value", "verdict", "value", "sealed_verdict",
+                ):
+                    nested = val.get(nested_key)
+                    if isinstance(nested, str) and nested.strip():
+                        return nested.strip()
+    return ""
+
+
+def _command_load_next_authorize(decisions_path, lifecycle_id):
+    """Read the tail of decisions.md, return the last `Authorize <lid>...`
+    phrase mentioning the lifecycle id, verbatim. '' if no match."""
+    if not decisions_path.exists():
+        return ""
+    try:
+        size = decisions_path.stat().st_size
+        with open(decisions_path, "rb") as f:
+            if size > 131072:
+                f.seek(size - 131072)
+            tail = f.read().decode("utf-8", errors="replace")
+    except (OSError, IOError):
+        return ""
+    pattern = _command_re.compile(
+        r"`(Authorize\s+" + _command_re.escape(lifecycle_id) + r"[^`]+?)`",
+        _command_re.IGNORECASE,
+    )
+    matches = pattern.findall(tail)
+    return matches[-1] if matches else ""
+
+
+def _command_scan_lifecycles(reports_dir, decisions_path):
+    """Pure read-only scan. Returns list[_CmdLifecycleRow] sorted by id."""
+    rows = []
+    for lid in _command_discover_lifecycle_ids(reports_dir):
+        artifacts = _command_collect_artifacts(reports_dir, lid)
+        artifact_rows = [_command_artifact_row_for(a, reports_dir) for a in artifacts]
+        phases = _command_infer_phases(artifacts)
+        description = _command_extract_description(artifacts, lid)
+        verdict = _command_extract_verdict(artifacts)
+        next_auth = _command_load_next_authorize(decisions_path, lid)
+        rows.append(_CmdLifecycleRow(
+            lifecycle_id=lid,
+            description=description,
+            sealed_verdict=verdict,
+            phases=phases,
+            artifacts=artifact_rows,
+            next_authorize=next_auth,
+        ))
+    return rows
+
+
+@app.get("/command", response_class=HTMLResponse)
+async def page_command(request: Request):
+    """SPARTA Trading Command Center v1 — read-only lifecycle viewer.
+
+    GET-only. Localhost-only. No write. No external network. No trading
+    affordance. Fail-closed rendering with explicit MISSING / SEAL_DRIFT /
+    NO_DECLARED_SHA / ERROR statuses; never fabricates a value.
+    """
+    lifecycles = _command_scan_lifecycles(
+        _COMMAND_REPORTS_DIR, _COMMAND_DECISIONS_FILE
+    )
+    return templates.TemplateResponse(
+        "command.html",
+        {
+            "request": request,
+            "page": "command",
+            "lifecycles": lifecycles,
+            "posture_invariants": _COMMAND_POSTURE_INVARIANTS,
+            "reports_dir_exists": _COMMAND_REPORTS_DIR.exists(),
+        },
+    )
+
+
+# === END SPARTA Trading Command Center v1 block ============================
 
 
 if __name__ == "__main__":
