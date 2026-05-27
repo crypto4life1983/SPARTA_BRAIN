@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}SPARTA Research Orchestrator v2{% endblock %}
+
+{% block content %}
+<style>
+  .ro-wrap { font-family: ui-monospace, Menlo, Consolas, monospace;
+             color:#e6edf3; padding: 8px 0 32px; }
+  .ro-h1 { font-size: 1.35rem; margin: 0 0 4px; color:#e6edf3; }
+  .ro-sub { color:#8b949e; font-size:.85rem; margin: 0 0 12px; }
+  .ro-panel { background:#0d1117; border:1px solid #30363d; border-radius:8px;
+              padding:14px 16px; margin: 14px 0; }
+  .ro-panel h2 { font-size:1.05rem; margin:0 0 8px; color:#58a6ff; letter-spacing:.3px; }
+  .ro-pill { display:inline-block; background:#161b22; border:1px solid #30363d;
+             padding:3px 8px; border-radius:4px; color:#e6edf3; font-size:.72rem;
+             margin: 2px 4px 2px 0; }
+  .ro-pill.risk-HIGH    { background:#3d1f1f; color:#ff7b72; border-color:#6e2e2e; font-weight:bold; }
+  .ro-pill.risk-MEDIUM  { background:#3d2e1f; color:#d29922; border-color:#6e562e; }
+  .ro-pill.risk-LOW     { background:#1f3d2e; color:#3fb950; border-color:#2e6e56; }
+  .ro-pill.risk-NONE    { background:#161b22; color:#8b949e; }
+  .ro-pill.status-PASS  { background:#1f3d2e; color:#3fb950; border-color:#2e6e56; }
+  .ro-pill.status-FAIL  { background:#3d1f1f; color:#ff7b72; border-color:#6e2e2e; font-weight:bold; }
+  .ro-pill.status-MISSING { background:#3d2e1f; color:#d29922; border-color:#6e562e; }
+  .ro-pill.prio-HIGH    { background:#3d1f1f; color:#ff7b72; border-color:#6e2e2e; font-weight:bold; }
+  .ro-pill.prio-MEDIUM  { background:#3d2e1f; color:#d29922; border-color:#6e562e; }
+  .ro-pill.prio-LOW     { background:#161b22; color:#8b949e; }
+  table.ro-table { width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.ro-table th, table.ro-table td { text-align:left; padding:4px 8px;
+                                          border-bottom:1px solid #21262d;
+                                          vertical-align:top; word-break:break-all; }
+  table.ro-table th { color:#8b949e; font-weight:600; }
+  .ro-mono { font-family: ui-monospace, Menlo, Consolas, monospace; color:#8b949e; }
+  .ro-warn { background:#3d1f1f; color:#ff7b72; border:1px solid #6e2e2e;
+             padding:8px 12px; border-radius:6px; margin: 8px 0; }
+  .ro-info { background:#161b22; color:#8b949e; border:1px solid #30363d;
+             padding:8px 12px; border-radius:6px; margin: 8px 0; }
+  .ro-cmd { background:#0d1117; border:1px solid #30363d; padding:8px 10px;
+            border-radius:4px; color:#e6edf3; font-size:.78rem;
+            display:block; margin: 6px 0; word-break:break-all; }
+  .ro-section-label { color:#8b949e; font-size:.72rem; margin: 10px 0 4px;
+                      text-transform:uppercase; letter-spacing:.6px; }
+</style>
+
+<div class="ro-wrap">
+  <h1 class="ro-h1">SPARTA Research Orchestrator v2</h1>
+  <p class="ro-sub">Research-lifecycle control tower. GET-only. Read-only watcher. Operator-gated actions.</p>
+
+  <div class="ro-info">
+    <strong>Posture (always):</strong>
+    Trading <span class="ro-pill">PAUSED</span>
+    Live <span class="ro-pill">BLOCKED_AT_6_GATES</span>
+    FRC <span class="ro-pill">NEVER_GRANTED</span>
+    <span class="ro-pill">DIAGNOSTIC_ONLY_NOT_LIVE_GRADE</span>
+  </div>
+
+  {% if new_drift_paths %}
+  <div class="ro-warn">
+    <strong>⚠ NEW PROTECTED-FILE DRIFT (no baseline OR hash changed):</strong>
+    {% for p in new_drift_paths %}<div class="ro-mono">{{ p }}</div>{% endfor %}
+    <div style="margin-top:6px; font-size:.78rem;">
+      Use <code>python tools/research_orchestrator_watch.py --accept-protected-drift &lt;PATH&gt; --reason "..."</code>
+      to record an operator-accepted baseline if the change is intentional.
+    </div>
+  </div>
+  {% endif %}
+
+  {% if protected_drift_details %}
+  <div class="ro-panel">
+    <h2>Protected drift ({{ protected_drift_details|length }})</h2>
+    <table class="ro-table">
+      <thead><tr>
+        <th>path</th>
+        <th>classification</th>
+        <th>working-tree sha256</th>
+        <th>baseline accepted sha256</th>
+        <th>operator status</th>
+        <th>reason</th>
+      </tr></thead>
+      <tbody>
+      {% for d in protected_drift_details %}
+        <tr>
+          <td class="ro-mono">{{ d.path }}</td>
+          <td>
+            {% if d.classification == 'KNOWN_PRE_EXISTING_DRIFT' %}
+              <span class="ro-pill risk-LOW">{{ d.classification }}</span>
+            {% elif d.classification == 'NEW_PROTECTED_DRIFT' %}
+              <span class="ro-pill risk-HIGH">{{ d.classification }}</span>
+            {% else %}
+              <span class="ro-pill risk-NONE">{{ d.classification }}</span>
+            {% endif %}
+          </td>
+          <td class="ro-mono">{{ (d.current_working_tree_sha256 or '—')[:16] }}{% if d.current_working_tree_sha256 %}…{% endif %}</td>
+          <td class="ro-mono">{{ (d.baseline_accepted_sha256 or '—')[:16] }}{% if d.baseline_accepted_sha256 %}…{% endif %}</td>
+          <td>{{ d.operator_status or '—' }}</td>
+          <td>{{ d.baseline_reason or '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="ro-sub" style="margin-top:8px;">
+      Hard guards still refuse to stage/commit any of these files regardless of baseline status.
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="ro-panel">
+    <h2>Repo state</h2>
+    <table class="ro-table">
+      <tr><th>HEAD</th><td><span class="ro-mono">{{ head_sha[:12] }}</span> {{ head_subject }}</td></tr>
+      <tr><th>Index</th><td>{{ staged_count }} staged file(s){% if staged_count > 0 %} <span class="ro-pill risk-MEDIUM">REVIEW</span>{% endif %}</td></tr>
+      <tr><th>Working tree</th><td>{{ modified_count }} modified · {{ untracked_count }} untracked</td></tr>
+      <tr><th>Duplicate-chain artifacts</th><td>{{ duplicate_chain_count }}{% if duplicate_chain_count > 0 %} <span class="ro-pill">acknowledged, not anchored</span>{% endif %}</td></tr>
+      <tr><th>Untracked tmp helpers</th><td>{{ tmp_helpers_count }}</td></tr>
+    </table>
+  </div>
+
+  <div class="ro-panel">
+    <h2>Candidates ({{ candidates|length }})</h2>
+    {% if candidates %}
+    <table class="ro-table">
+      <thead><tr>
+        <th>candidate_id</th>
+        <th>phase</th>
+        <th>K9</th>
+        <th>L1 carry</th>
+        <th>verdict</th>
+        <th>next recommended</th>
+      </tr></thead>
+      <tbody>
+      {% for c in candidates %}
+        <tr>
+          <td><span class="ro-mono">{{ c.candidate_id }}</span></td>
+          <td>{{ c.current_phase }}</td>
+          <td>
+            <span class="ro-pill status-{{ c.k9_status }}">{{ c.k9_status }}</span>
+            {% if c.closed_trades_observed is not none %}
+              <span class="ro-mono">{{ c.closed_trades_observed }} / {{ c.k9_threshold }}</span>
+            {% endif %}
+          </td>
+          <td>{{ c.rec1_t1_carry_status }}</td>
+          <td>{{ c.latest_verdict or "—" }}</td>
+          <td>{{ c.next_recommended_action or "—" }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="ro-mono">No candidates tracked yet. Run the watcher to populate:</p>
+    <code class="ro-cmd">python tools/research_orchestrator_watch.py</code>
+    {% endif %}
+  </div>
+
+  <div class="ro-panel">
+    <h2>Pending decisions ({{ pending_decisions|length }})</h2>
+    {% if pending_decisions %}
+    <table class="ro-table">
+      <thead><tr>
+        <th>priority</th>
+        <th>candidate</th>
+        <th>action</th>
+        <th>reason</th>
+        <th>approval level</th>
+      </tr></thead>
+      <tbody>
+      {% for d in pending_decisions %}
+        <tr>
+          <td><span class="ro-pill prio-{{ d.priority|default('LOW') }}">{{ d.priority|default('LOW') }}</span></td>
+          <td><span class="ro-mono">{{ d.candidate_id|truncate(50, True) }}</span></td>
+          <td><span class="ro-mono">{{ d.action }}</span></td>
+          <td>{{ d.reason }}</td>
+          <td>LEVEL_{{ d.approval_level_required|default(2) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="ro-sub" style="margin-top:12px;">
+      Approval flow (this UI is read-only):
+      <span class="ro-pill">LEVEL_0 auto</span>
+      <span class="ro-pill">LEVEL_1 housekeeping</span>
+      <span class="ro-pill">LEVEL_2 memo+commit</span>
+      <span class="ro-pill">LEVEL_3 real diagnostic (refused by orchestrator)</span>
+    </p>
+    <p class="ro-sub">
+      To approve a decision, type the corresponding operator phrase in your terminal session.
+      The orchestrator does not auto-execute LEVEL_2 or LEVEL_3 actions.
+    </p>
+    {% else %}
+    <p class="ro-mono">No pending decisions.</p>
+    {% endif %}
+  </div>
+
+  <div class="ro-panel">
+    <h2>Recent action ledger ({{ action_ledger|length }})</h2>
+    {% if action_ledger %}
+    <table class="ro-table">
+      <thead><tr><th>ts</th><th>action</th><th>status</th><th>reason</th></tr></thead>
+      <tbody>
+      {% for e in action_ledger %}
+        <tr>
+          <td class="ro-mono">{{ e.ts_utc|default('?') }}</td>
+          <td>{{ e.action|default('?') }}</td>
+          <td><span class="ro-pill status-{{ e.status|default('') }}">{{ e.status|default('?') }}</span></td>
+          <td>{{ e.reason|default('?')|truncate(120, True) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="ro-mono">No actions logged yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="ro-panel">
+    <h2>Recent audit log ({{ audit_log|length }})</h2>
+    {% if audit_log %}
+    <table class="ro-table">
+      <thead><tr><th>ts</th><th>event</th><th>HEAD</th><th>summary</th></tr></thead>
+      <tbody>
+      {% for e in audit_log %}
+        <tr>
+          <td class="ro-mono">{{ e.ts_utc|default('?') }}</td>
+          <td>{{ e.event|default('?') }}</td>
+          <td class="ro-mono">{{ (e.head_sha|default(''))[:7] }}</td>
+          <td>
+            {% if e.seal_verify_summary %}
+              pass={{ e.seal_verify_summary.pass }}
+              fail={{ e.seal_verify_summary.fail }}
+              missing={{ e.seal_verify_summary.missing }}
+            {% endif %}
+            {% if e.candidates_updated %}
+              · {{ e.candidates_updated|length }} candidates
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="ro-mono">No audit log entries yet. Watcher writes one per scan.</p>
+    {% endif %}
+  </div>
+
+  <div class="ro-panel">
+    <h2>How to use</h2>
+    <p class="ro-sub">Watcher CLI:</p>
+    <code class="ro-cmd">python tools/research_orchestrator_watch.py</code>
+    <code class="ro-cmd">python tools/research_orchestrator_watch.py --loop --interval 60</code>
+    <p class="ro-sub">Storage paths:</p>
+    <code class="ro-cmd">storage/research_orchestrator/candidates/*.json</code>
+    <code class="ro-cmd">storage/research_orchestrator/pending_decisions/*.json</code>
+    <code class="ro-cmd">storage/research_orchestrator/audit_logs/YYYY-MM-DD.jsonl</code>
+    <code class="ro-cmd">storage/research_orchestrator/action_ledger/YYYY-MM-DD.jsonl</code>
+    <p class="ro-sub">Hard guards (never overridden):</p>
+    <ul style="font-size:.78rem; color:#8b949e;">
+      <li>never stage/modify <code>brain_memory/projects/trading_bot/lessons.md</code></li>
+      <li>never touch live/paper trading or broker code</li>
+      <li>never relax K9 / DR thresholds</li>
+      <li>never claim profitability / live-readiness / OOS-confirmed</li>
+      <li>never modify already-sealed artifacts</li>
+      <li>never fetch Databento without explicit LEVEL_3 approval</li>
+      <li>never run P6 / P6.5 / P10 (orchestrator refuses; operator runs manually)</li>
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

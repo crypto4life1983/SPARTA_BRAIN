@@ -7063,6 +7063,130 @@ async def page_journal(request: Request):
 # === END SPARTA Trade Intelligence Journal v1 block ========================
 
 
+# ===========================================================================
+# SPARTA Research Orchestrator v2 (read-only viewer)
+#
+# Mirrors the /command pattern: GET-only, localhost-only, no forms, no
+# inputs, no mutating buttons. Reads state from
+# storage/research_orchestrator/ which the watcher CLI populates:
+#
+#     python tools/research_orchestrator_watch.py
+#
+# Fail-closed: if storage is missing or unreadable, route still renders
+# (empty tables) so the operator can see what's wrong.
+# ===========================================================================
+
+
+_RO_REPO_ROOT = BASE
+_RO_STORAGE_DIR = BASE / "storage" / "research_orchestrator"
+
+
+def _ro_safe_load_storage() -> dict:
+    """Load orchestrator state from storage/ — never raises."""
+    from sparta_commander.research_orchestrator import git_sentinel as _ro_gs
+    from sparta_commander.research_orchestrator import protected_drift as _ro_pd
+    from sparta_commander.research_orchestrator.storage import Storage as _ROStorage
+
+    candidates = []
+    pending_decisions = []
+    audit_log = []
+    action_ledger = []
+    snapshot = {
+        "head_sha": "",
+        "head_subject": "",
+        "staged_files": [],
+        "untracked_files": [],
+        "modified_files": [],
+        "dirty_protected_files": [],
+        "untracked_tmp_helpers": [],
+        "duplicate_chain_files": [],
+        "protected_drift_details": [],
+    }
+
+    try:
+        storage = _ROStorage(_RO_STORAGE_DIR)
+        candidates = [c.to_dict() for c in storage.list_candidates()]
+        pending_decisions = storage.list_pending_decisions()
+        # Sort decisions: HIGH priority first
+        prio_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+        pending_decisions.sort(
+            key=lambda d: (prio_order.get(d.get("priority", "LOW"), 9),
+                          d.get("created_utc", ""))
+        )
+        audit_log = list(storage.iter_audit_logs(days=3))
+        # newest first; cap
+        audit_log.sort(key=lambda e: e.get("ts_utc", ""), reverse=True)
+        audit_log = audit_log[:20]
+        action_ledger = list(storage.iter_action_ledger(days=14))
+        action_ledger.sort(key=lambda e: e.get("ts_utc", ""), reverse=True)
+        action_ledger = action_ledger[:20]
+    except (OSError, ValueError):
+        pass  # render with empty tables
+
+    try:
+        snap = _ro_gs.scan(_RO_REPO_ROOT)
+        snapshot = snap.to_dict()
+        # Augment with protected-drift classification
+        drift = _ro_pd.scan_protected_drift(
+            repo=_RO_REPO_ROOT,
+            storage_root=_RO_STORAGE_DIR,
+            protected_paths=_ro_gs.PROTECTED_FILES_NEVER_TOUCH,
+        )
+        snapshot["protected_drift_details"] = drift
+    except (RuntimeError, OSError, PermissionError):
+        pass
+
+    return {
+        "snapshot": snapshot,
+        "candidates": candidates,
+        "pending_decisions": pending_decisions,
+        "audit_log": audit_log,
+        "action_ledger": action_ledger,
+    }
+
+
+@app.get("/command/research-orchestrator", response_class=HTMLResponse)
+async def page_research_orchestrator(request: Request):
+    """SPARTA Research Orchestrator v2 — read-only viewer.
+
+    GET-only. Localhost-only. No write. No trading affordance. Renders
+    candidates, pending decisions, audit log, and action ledger from
+    storage/research_orchestrator/. Approval buttons are intentionally
+    absent — operator approval happens via terminal operator-phrase
+    workflow, not via HTTP buttons.
+    """
+    state = _ro_safe_load_storage()
+    snap = state["snapshot"]
+    drift_details = snap.get("protected_drift_details", [])
+    new_drift_paths = [
+        d["path"] for d in drift_details
+        if d.get("classification") == "NEW_PROTECTED_DRIFT"
+    ]
+    return templates.TemplateResponse(
+        "research_orchestrator.html",
+        {
+            "request": request,
+            "page": "research_orchestrator",
+            "head_sha": snap.get("head_sha", ""),
+            "head_subject": snap.get("head_subject", ""),
+            "staged_count": len(snap.get("staged_files", [])),
+            "untracked_count": len(snap.get("untracked_files", [])),
+            "modified_count": len(snap.get("modified_files", [])),
+            "duplicate_chain_count": len(snap.get("duplicate_chain_files", [])),
+            "tmp_helpers_count": len(snap.get("untracked_tmp_helpers", [])),
+            "protected_drift_details": drift_details,
+            "new_drift_paths": new_drift_paths,
+            "candidates": state["candidates"],
+            "pending_decisions": state["pending_decisions"],
+            "audit_log": state["audit_log"],
+            "action_ledger": state["action_ledger"],
+        },
+    )
+
+
+# === END SPARTA Research Orchestrator v2 block =============================
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="127.0.0.1", port=8765, reload=False)
