@@ -1,0 +1,737 @@
+{
+  "schema_id": "sparta.external_research_hunter.next_track_selection_plan_revision_l1_discount_memo_sealed.v1",
+  "candidate_record_id": "N_A_PLAN_REVISION_MEMO_NOT_A_CANDIDATE",
+  "phase_prefix": "PHASE2-NEXT-TRACK-SELECTION-REVISION",
+  "phase": "PLAN_REVISION_COMPARISON_MEMO",
+  "lifecycle_state": "NEXT_TRACK_SELECTION_PLAN_REVISION_L1_DISCOUNT_MEMO_SEALED",
+  "title": "Next-research-track selection plan revision: L1 epistemic discount applied to T1/T2/T3 K9-reachability estimates (PLAN_ONLY; no build/exec/fetch authorized)",
+  "report_kind": "Sealed PLAN-only revision/comparison memo that applies the L1 epistemic discount (2x and 3x) from s12-d1 P11 PARK lessons to the T1/T2/T3 K9-reachability estimates in 0e3f9d4, requires source disclosure for T1's 50-65 trades/year estimate, re-scores T1/T2/T3 under conservative-discount scenarios, and presents the honest analytical recommendation including an explicit halt/pivot option. No code, no build, no execution, no data fetch, no signal computation.",
+  "authored_at_utc": "2026-05-27T16:40:53.824964+00:00",
+  "binding": true,
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "PLAN_ONLY",
+    "NO_BUILD_NO_EXEC_NO_FETCH",
+    "L1_EPISTEMIC_DISCOUNT_APPLIED",
+    "K9_REACHABILITY_DISCIPLINE_REINFORCED",
+    "S12_D1_PARK_TERMINAL_ACCEPTED",
+    "PARALLEL_SEAL_B_CHAIN_NOT_ANCHORED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_LIVE_READINESS_CLAIM",
+    "NO_OOS_CONFIRMATION_CLAIM",
+    "NO_K9_RELAXATION",
+    "NO_DR_REDEFINITION",
+    "NO_NEW_CANDIDATE_RECORD_ID_AUTHORED",
+    "NO_TIER_N_SPEC_AUTHORED"
+  ],
+  "operator_authorization_phrase": "Authorize a PLAN-only revision/comparison memo for 0e3f9d4",
+  "predecessor_acceptance": {
+    "s12_d1_terminal_status_accepted": "PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_chain_byte_stable_at_park": true,
+    "s12_d1_revival_not_authorized_by_this_memo": true,
+    "s12_d1_revn_revision_not_authorized_by_this_memo": true
+  },
+  "selection_plan_under_review": {
+    "commit": "0e3f9d4",
+    "file": "docs/next_research_track_selection_plan_after_s12_d1_park.md",
+    "status_attestation": "PLAN_ONLY",
+    "status_evidence": [
+      "0e3f9d4 §0 opener: 'Status: PLAN_ONLY (no code written, no spec sealed, no data fetched, no signal computation, no backtest by this plan; the next step is a separate operator authorization to author a Tier-N specification plan for the selected track).'",
+      "0e3f9d4 §10 HARD BOUNDARIES: 'PLAN only. No DRAFT. No SEAL. No code. No backtest. No simulator. No signal computation. No data fetch.'",
+      "0e3f9d4 §11 boundary table: 'PLAN only (no DRAFT / no SEAL / no BUILD / no fetch): met'",
+      "0e3f9d4 §13 enumerates explicit next-step authorization phrases for operator; no execution implied by the plan itself.",
+      "0e3f9d4 §14: 'no_strategy_optimization_authorized: TRUE'"
+    ],
+    "build_or_execution_authorized_by_plan": false
+  },
+  "l1_epistemic_discount_definition": {
+    "lesson_id": "L1",
+    "lesson_source": "s12-d1 P11 PARK memo (parallel commit ecbd001), §lessons_learned_for_future_candidates",
+    "lesson_text_verbatim": "Linear-scaling extrapolation from S10-D2's NQ 10y (54 trades) to MNQ 4.6y was 2-3x over-optimistic. Per-instrument signal density does not scale linearly across instruments / windows.",
+    "discount_factors_applied": [
+      2.0,
+      3.0
+    ],
+    "discount_rationale": "L1 quantifies the over-optimism factor (2-3x) observed when extrapolating signal-density estimates from prior diagnostics. To apply this lesson to any new candidate's K9-reachability estimate, the central estimate is divided by 2 (low-end discount) and by 3 (high-end discount) to bracket the honest expected range. K9 verdicts are evaluated at both the central and the discounted scenarios; the conservative scenario should drive the lifecycle decision.",
+    "scope": "Applies to ANY trades/year estimate that was extrapolated from another instrument, window, mechanic family, or analogous-but-not-identical case.",
+    "non_scope": "Does NOT apply to PURELY EMPIRICAL observations on the exact instrument/window/mechanic being evaluated (e.g., s12-d1 observed 48 trades is empirical, not extrapolated). Calendar-rule estimates (weekly/bi-weekly rebalance counts) have a related but distinct discount: the trade-realization fraction (not every rebalance triggers a contract turnover)."
+  },
+  "k9_reachability_floors": {
+    "is_k9_floor_total_trades": 100,
+    "is_window_length_years": 4.6,
+    "is_k9_floor_per_year": 21.74,
+    "oos_k9_floor_total_trades": 100,
+    "oos_window_length_years": 2.0,
+    "oos_k9_floor_per_year": 50.0,
+    "binding_constraint": "OOS_K9_PER_YEAR_50",
+    "note": "The 50/y OOS floor is approximately 2.3x the 21.74/y IS floor. Any candidate that produces less than 50/y on average across the full diagnostic window is structurally expected to fire OOS K9 regardless of IS outcome."
+  },
+  "per_track_k9_reachability_analysis": {
+    "T1": {
+      "label": "T1_RSI_2_bi_directional_MNQ_c0",
+      "central_estimate_low": 50.0,
+      "central_estimate_high": 65.0,
+      "central_estimate_mid": 57.5,
+      "estimate_source_note": "Estimate sourced from 0e3f9d4 §5.2; **NO citation, NO hand-count, NO published reference provided**. Plausibly grounded in Connors RSI(2) literature for daily-bar mean-reversion on liquid markets (Larry Connors trade rates on S&P 500 stocks typically ~30-50 trades/year long-only), doubled approximately for bi-directional extension, but the transfer from equity stocks to a single futures index has NOT been validated by the plan. Per L1 lesson, single-instrument signal density does not scale linearly from analogous markets. CLASSIFY AS HEURISTIC ESTIMATE pending operator-supplied source or hand-count.",
+      "scenarios": [
+        {
+          "scenario": "central",
+          "trades_per_year_range_low": 50.0,
+          "trades_per_year_range_mid": 57.5,
+          "trades_per_year_range_high": 65.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 57.5,
+            "floor_per_year": 21.74,
+            "margin_ratio": 2.645,
+            "verdict": "CLEARS_WITH_MARGIN"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 57.5,
+            "floor_per_year": 50.0,
+            "margin_ratio": 1.15,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 50.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 2.3,
+            "verdict": "CLEARS_WITH_MARGIN"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 50.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 1.0,
+            "verdict": "AT_FLOOR_INDETERMINATE"
+          }
+        },
+        {
+          "scenario": "2x_discount",
+          "trades_per_year_range_low": 25.0,
+          "trades_per_year_range_mid": 28.75,
+          "trades_per_year_range_high": 32.5,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 28.75,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.322,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 28.75,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.575,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 25.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.15,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 25.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.5,
+            "verdict": "FAILS"
+          }
+        },
+        {
+          "scenario": "3x_discount",
+          "trades_per_year_range_low": 16.67,
+          "trades_per_year_range_mid": 19.17,
+          "trades_per_year_range_high": 21.67,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 19.17,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.882,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 19.17,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.383,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 16.67,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.767,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 16.67,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.333,
+            "verdict": "FAILS"
+          }
+        }
+      ]
+    },
+    "T2": {
+      "label": "T2_multi_instrument_Donchian_15_8_micro_futures_basket",
+      "central_estimate_low": 40.0,
+      "central_estimate_high": 40.0,
+      "central_estimate_mid": 40.0,
+      "estimate_source_note": "Estimate is 4-instrument basket * (10 trades/year per instrument); the 10/y per-instrument figure is the OBSERVED s12-d1 P6 IS result for Donchian-15/8 on MNQ.c.0. The 4x multiplier ASSUMES the other 3 candidate instruments (MES, MYM, M2K) produce signal density similar to MNQ. This cross-instrument assumption is precisely the L1 failure mode (extrapolating density across instruments). Discount applies.",
+      "scenarios": [
+        {
+          "scenario": "central",
+          "trades_per_year_range_low": 40.0,
+          "trades_per_year_range_mid": 40.0,
+          "trades_per_year_range_high": 40.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 40.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.84,
+            "verdict": "CLEARS_WITH_MARGIN"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 40.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.8,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 40.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.84,
+            "verdict": "CLEARS_WITH_MARGIN"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 40.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.8,
+            "verdict": "FAILS"
+          }
+        },
+        {
+          "scenario": "2x_discount",
+          "trades_per_year_range_low": 20.0,
+          "trades_per_year_range_mid": 20.0,
+          "trades_per_year_range_high": 20.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 20.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.92,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 20.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.4,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 20.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.92,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 20.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.4,
+            "verdict": "FAILS"
+          }
+        },
+        {
+          "scenario": "3x_discount",
+          "trades_per_year_range_low": 13.33,
+          "trades_per_year_range_mid": 13.33,
+          "trades_per_year_range_high": 13.33,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 13.33,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.613,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 13.33,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.267,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 13.33,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.613,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 13.33,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.267,
+            "verdict": "FAILS"
+          }
+        }
+      ]
+    },
+    "T3_biweekly": {
+      "label": "T3_vol_targeting_MNQ_c0_bi_weekly_rebalance",
+      "central_estimate_low": 26.0,
+      "central_estimate_high": 26.0,
+      "central_estimate_mid": 26.0,
+      "estimate_source_note": "Estimate is a CALENDAR rule (52 weeks / 2 = 26 bi-weekly rebalances). Not an extrapolated signal-density estimate. However, not every rebalance produces a contract turnover (if target matches current position, no trade is executed). The 26/y figure is an UPPER BOUND on trade count, not a central estimate. L1 discount is conceptually different here: it represents the fraction of rebalances that actually produce trades, which could plausibly be 50-66% for a slowly-drifting vol regime. Discount applied as such.",
+      "scenarios": [
+        {
+          "scenario": "central",
+          "trades_per_year_range_low": 26.0,
+          "trades_per_year_range_mid": 26.0,
+          "trades_per_year_range_high": 26.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.196,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.52,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.196,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.52,
+            "verdict": "FAILS"
+          }
+        },
+        {
+          "scenario": "2x_discount",
+          "trades_per_year_range_low": 13.0,
+          "trades_per_year_range_mid": 13.0,
+          "trades_per_year_range_high": 13.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 13.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.598,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 13.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.26,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 13.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.598,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 13.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.26,
+            "verdict": "FAILS"
+          }
+        },
+        {
+          "scenario": "3x_discount",
+          "trades_per_year_range_low": 8.67,
+          "trades_per_year_range_mid": 8.67,
+          "trades_per_year_range_high": 8.67,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 8.67,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.399,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 8.67,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.173,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 8.67,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.399,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 8.67,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.173,
+            "verdict": "FAILS"
+          }
+        }
+      ]
+    },
+    "T3_weekly": {
+      "label": "T3_alternate_vol_targeting_MNQ_c0_weekly_rebalance",
+      "central_estimate_low": 52.0,
+      "central_estimate_high": 52.0,
+      "central_estimate_mid": 52.0,
+      "estimate_source_note": "Calendar rule (52 weekly rebalances). Same upper-bound caveat as bi-weekly variant: not every rebalance produces a trade. L1-equivalent discount represents trade-realization fraction.",
+      "scenarios": [
+        {
+          "scenario": "central",
+          "trades_per_year_range_low": 52.0,
+          "trades_per_year_range_mid": 52.0,
+          "trades_per_year_range_high": 52.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 52.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 2.392,
+            "verdict": "CLEARS_WITH_MARGIN"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 52.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 1.04,
+            "verdict": "AT_FLOOR_INDETERMINATE"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 52.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 2.392,
+            "verdict": "CLEARS_WITH_MARGIN"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 52.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 1.04,
+            "verdict": "AT_FLOOR_INDETERMINATE"
+          }
+        },
+        {
+          "scenario": "2x_discount",
+          "trades_per_year_range_low": 26.0,
+          "trades_per_year_range_mid": 26.0,
+          "trades_per_year_range_high": 26.0,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.196,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.52,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 21.74,
+            "margin_ratio": 1.196,
+            "verdict": "CLEARS_BORDERLINE"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 26.0,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.52,
+            "verdict": "FAILS"
+          }
+        },
+        {
+          "scenario": "3x_discount",
+          "trades_per_year_range_low": 17.33,
+          "trades_per_year_range_mid": 17.33,
+          "trades_per_year_range_high": 17.33,
+          "is_k9_reachability_at_mid": {
+            "rate_per_year": 17.33,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.797,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_mid": {
+            "rate_per_year": 17.33,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.347,
+            "verdict": "FAILS"
+          },
+          "is_k9_reachability_at_low": {
+            "rate_per_year": 17.33,
+            "floor_per_year": 21.74,
+            "margin_ratio": 0.797,
+            "verdict": "FAILS"
+          },
+          "oos_k9_reachability_at_low": {
+            "rate_per_year": 17.33,
+            "floor_per_year": 50.0,
+            "margin_ratio": 0.347,
+            "verdict": "FAILS"
+          }
+        }
+      ]
+    }
+  },
+  "per_track_likely_terminal_risk_under_l1_discount": {
+    "T1": "INSUFFICIENT_SAMPLE_LIKELY_AT_OOS_UNDER_L1_2X_DISCOUNT",
+    "T2": "INSUFFICIENT_SAMPLE_LIKELY_AT_OOS_EVEN_AT_CENTRAL_ESTIMATE",
+    "T3_biweekly": "INSUFFICIENT_SAMPLE_LIKELY_AT_OOS_EVEN_AT_CENTRAL_ESTIMATE",
+    "T3_weekly": "INSUFFICIENT_SAMPLE_LIKELY_AT_OOS_UNDER_L1_2X_DISCOUNT"
+  },
+  "t1_estimate_source_inquiry": {
+    "estimate_quoted_from_0e3f9d4": "~50-65 trades/year (long+short bi-directional; daily bars on MNQ)",
+    "source_provided_in_0e3f9d4": false,
+    "source_classes_requested_in_order_of_preference": [
+      {
+        "class": "PUBLISHED_LITERATURE",
+        "description": "Citation to peer-reviewed or vendor-published study of Connors RSI(2) trade rates on daily-bar liquid futures index instruments (MNQ, MES, or analogous equity-index micros). Bi-directional adaptation also cited if applicable.",
+        "if_provided": "Discount factor may be lower (1.5x instead of 2-3x) given external corroboration on similar markets.",
+        "if_unavailable": "Heuristic estimate; full L1 2-3x discount applies."
+      },
+      {
+        "class": "HAND_COUNT_ON_SEALED_CSV",
+        "description": "Manual hand-count of RSI(2) signals in a representative 12-month slice of the sealed MNQ.c.0 CSV (long signals when RSI(2) < 10, short signals when RSI(2) > 90), under the proposed entry/exit rules. Operator can perform this OFFLINE without authoring code in the controller session; the operator-provided hand-count would be a validated central estimate.",
+        "if_provided": "L1 discount drops to 1.0x (no discount needed since estimate is empirical for the exact instrument + window + mechanic).",
+        "if_unavailable": "Heuristic estimate; full L1 2-3x discount applies."
+      },
+      {
+        "class": "EXPLICIT_HEURISTIC_ADMISSION",
+        "description": "Operator (or the plan author) explicitly admits the 50-65/y figure is heuristic without published or empirical anchor.",
+        "if_admitted": "L1 2-3x discount applies. Conservative-discount scenarios are the binding ones for the lifecycle decision."
+      }
+    ],
+    "default_classification_until_source_provided": "HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES"
+  },
+  "conservative_rescoring": {
+    "T1_RSI_2_bi_directional_MNQ_c0": {
+      "central_score_from_0e3f9d4": 41,
+      "k9_is_central_verdict": "CLEARS_WITH_MARGIN",
+      "k9_oos_central_verdict": "CLEARS_BORDERLINE",
+      "k9_is_2x_discount_verdict": "CLEARS_BORDERLINE",
+      "k9_oos_2x_discount_verdict": "FAILS",
+      "k9_is_3x_discount_verdict": "FAILS",
+      "k9_oos_3x_discount_verdict": "FAILS"
+    },
+    "T2_multi_instrument_Donchian_15_8_basket": {
+      "central_score_from_0e3f9d4": 25,
+      "k9_is_central_verdict": "CLEARS_WITH_MARGIN",
+      "k9_oos_central_verdict": "FAILS",
+      "k9_is_2x_discount_verdict": "FAILS",
+      "k9_oos_2x_discount_verdict": "FAILS",
+      "k9_is_3x_discount_verdict": "FAILS",
+      "k9_oos_3x_discount_verdict": "FAILS"
+    },
+    "T3_vol_targeting_bi_weekly": {
+      "central_score_from_0e3f9d4": 35,
+      "k9_is_central_verdict": "CLEARS_BORDERLINE",
+      "k9_oos_central_verdict": "FAILS",
+      "k9_is_2x_discount_verdict": "FAILS",
+      "k9_oos_2x_discount_verdict": "FAILS",
+      "k9_is_3x_discount_verdict": "FAILS",
+      "k9_oos_3x_discount_verdict": "FAILS"
+    },
+    "T3_vol_targeting_weekly_alternate": {
+      "central_score_from_0e3f9d4": -1,
+      "k9_is_central_verdict": "CLEARS_WITH_MARGIN",
+      "k9_oos_central_verdict": "AT_FLOOR_INDETERMINATE",
+      "k9_is_2x_discount_verdict": "CLEARS_BORDERLINE",
+      "k9_oos_2x_discount_verdict": "FAILS",
+      "k9_is_3x_discount_verdict": "FAILS",
+      "k9_oos_3x_discount_verdict": "FAILS"
+    }
+  },
+  "honest_recommendation_after_l1_discount": {
+    "t1_status_after_discount": "RELATIVELY BEST OF T1/T2/T3 but ABSOLUTELY BORDERLINE. At central estimate (50-65/y), T1 clears OOS K9 borderline-to-clearing. At 2x discount (25-32.5/y), T1 FAILS OOS K9. At 3x discount (16.7-21.7/y), T1 FAILS BOTH IS AND OOS K9. T1 only structurally clears OOS K9 if the 50-65/y estimate is REAL (not heuristic). Source disclosure is load-bearing for the lifecycle decision.",
+    "t2_status_after_discount": "FAILS OOS K9 AT CENTRAL ESTIMATE (40/y < 50/y floor). 2x and 3x discount scenarios fail more severely. T2 is structurally K9-OOS-unsafe under any discount.",
+    "t3_biweekly_status_after_discount": "FAILS OOS K9 AT CENTRAL ESTIMATE (26/y < 50/y floor). T3 bi-weekly is structurally K9-OOS-unsafe at calendar-rule rate.",
+    "t3_weekly_status_after_discount": "CLEARS OOS K9 BORDERLINE AT CENTRAL ESTIMATE (52/y > 50/y floor by 4% margin). Under realization-fraction discount (e.g., 0.7 trade per rebalance), 36.4/y FAILS. T3 weekly is borderline-but-thin and cost-drag elevated.",
+    "summary": "Under self-applied L1 discipline, NONE of T1/T2/T3 reliably clears OOS K9 across all tested discount scenarios. T1 is the best of the three in relative terms but the lifecycle outcome depends entirely on whether the 50-65/y estimate is real or heuristic. If heuristic, T1 has a high probability of reproducing the s12-d1 PARK pattern.",
+    "does_t1_still_win_after_discounting": "YES_IN_RELATIVE_TERMS_BUT_FRAGILE_IN_ABSOLUTE_TERMS"
+  },
+  "rec1_style_disclosure_for_t1_if_pursued": {
+    "applicability": "If T1 (RSI(2) bi-directional on MNQ.c.0) is pursued without independent source/hand-count validation of the 50-65/y estimate, the following REC1-style disclosure SHALL be carried byte-equivalent at SEAL time and propagated through P1 -> P2 -> P3 -> P4 -> P6 -> P11 of the new candidate.",
+    "draft_rec1_for_next_candidate": "REC1_T1 (binding): Under L1 epistemic discipline applied to the T1 central estimate (50-65 trades/year heuristic, NOT empirically validated for this exact instrument + window + mechanic), the 2x conservative discount yields 25-32.5 trades/year and the 3x discount yields 16.7-21.7 trades/year. At the 2x discount, OOS K9 (>= 50/y over 2.0y = 100 trades) FIRES; expected OOS verdict is OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE. At the 3x discount, IS K9 also fires; expected IS verdict is INSUFFICIENT_SAMPLE analogous to s12-d1. The chain shall NOT relax K9 at any phase; the appropriate response to any K9 fire is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and PARK the candidate. Pursuing T1 without independent validation accepts the structural likelihood of an OOS PARK outcome analogous to s12-d1.",
+    "rec1_t1_load_bearing_for_lifecycle_decision": true
+  },
+  "alternative_paths_if_t1_falsely_optimistic": [
+    {
+      "path_id": "ALT_A_HAND_COUNT_FIRST",
+      "description": "Before authorizing T1 Tier-N spec PLAN, operator hand-counts RSI(2) signals on a representative 1-year slice of sealed MNQ.c.0 CSV. If hand-count confirms 50+/year, L1 discount drops to 1.0x and T1 is safe to pursue. If hand-count yields <50/year, fall back to ALT_B or ALT_D.",
+      "controller_session_role": "READ-ONLY support: operator provides hand-count; controller authors a PLAN-only validation memo documenting the hand-count + revised K9-reachability table. No code execution in this session."
+    },
+    {
+      "path_id": "ALT_B_SEEK_HIGHER_DENSITY_MECHANIC",
+      "description": "Search for a mechanic family with structurally higher signal density (>= 100 trades/year on a single instrument daily, or transferable across instruments with low extrapolation risk). Candidates not yet enumerated in 0e3f9d4: (a) Donchian breakout + breakdown + range compound on daily bars; (b) volatility-regime-switching mechanic with daily rebalance + signal layer; (c) statistical-arbitrage on a single instrument's intra-day microstructure WITHOUT requiring fresh fetch (NOT available — would need intraday data); (d) abandon daily-bar paradigm and consider weekly bars (which would HALVE both K9 floors but also halve trade rates — neutral).",
+      "data_fetch_risk": "MEDIUM-HIGH for some sub-options (intraday data not in sealed CSV)."
+    },
+    {
+      "path_id": "ALT_C_PIVOT_TO_DIFFERENT_UNIVERSE_T4",
+      "description": "Authorize the T4 universe-pivot path enumerated in 0e3f9d4 §8 (crypto MBT / Treasury ZN / energy CL). Highest data scope friction; requires fresh Databento fetch + availability probe + audit lifecycle BEFORE any Tier-N spec PLAN.",
+      "data_fetch_risk": "HIGH."
+    },
+    {
+      "path_id": "ALT_D_HALT_TRADING_TRACK",
+      "description": "Per 0e3f9d4 §9 (T5), pause the trading-bot track entirely. Acknowledges that multiple recent Phase-2 candidates (s7-D1, s9, B006_001/002, s10-d1, s10-D2, s11-d1, s12-d1) have all parked without producing a money-proven candidate; the structural pattern suggests the current Phase-2 framework + daily-bar constraint + single-instrument scope may be fundamentally incompatible with K9 OOS >= 100. Honest acknowledgement: a pause for reflection may be warranted before burning more sealed-artifact authoring effort.",
+      "data_fetch_risk": "NONE.",
+      "cost": "Zero new sealed-artifact cost. Forgone option value: no forward research motion."
+    },
+    {
+      "path_id": "ALT_E_RELAX_OOS_WINDOW_OR_K9_FLOOR_NOT_AUTHORIZED",
+      "description": "Relaxing K9 from 100 closed trades or extending the OOS window beyond the audit-clean MNQ CSV coverage (2024-01-02 to 2025-12-30 = 2.0y) is EXPLICITLY NOT AUTHORIZED by this memo. K9 is INVIOLATE per the Tier-N spec invariants carried across the chain. Extending OOS requires fresh data which requires fresh fetch which is out of scope.",
+      "authorization_status": "FORBIDDEN_BY_TIER_N_INVARIANTS"
+    }
+  ],
+  "halt_option_explicit_for_higher_density_search": {
+    "operator_phrase_to_halt": "Defer / Pause trading-bot track",
+    "operator_phrase_to_search_higher_density": "Authorize alternative selection plan rev2 only [scope: enumerate higher-density mechanic families that structurally clear OOS K9 >= 50/y without fresh data fetch]",
+    "halt_rationale_per_pattern_recognition": "Eight consecutive Phase-2 candidates (s7-D1, s9, B006_001, B006_002, s10-d1, s10-D2, s11-d1, s12-d1) have parked. The structural common denominator is daily-bar resolution + single-instrument-or-small-basket + K9=100 OOS floor. Under L1 discipline applied retroactively, the K9 OOS floor of 50 trades/year is structurally hard to clear with daily-bar single-instrument mechanics. A halt for reflection or a fundamental framework revisit (intraday data acquisition, K9 threshold review, multi-instrument expansion strategy) may produce more research value than another T1-style attempt."
+  },
+  "final_recommendation": {
+    "primary": "DO NOT authorize T1 Tier-N spec PLAN until the T1 50-65/y estimate is validated by hand-count or published citation (ALT_A). The cost of operator-side hand-count is low; the cost of authoring a full Tier-N spec lifecycle for a candidate that ends in another PARK is high.",
+    "secondary": "If hand-count is not feasible operator-side, authorize ALT_B (search for higher-density mechanic) or ALT_D (halt). Both preserve sealed-artifact discipline and avoid repeating the s12-d1 PARK pattern.",
+    "tertiary": "If operator wishes to proceed with T1 despite heuristic estimate, authorize T1 Tier-N spec PLAN ONLY with the REC1_T1 disclosure (drafted above) carried byte-equivalent through the chain. This formalizes the expected likelihood of PARK and prevents lessons-learned regression at P11 time.",
+    "not_recommended": [
+      "Authorize T1 Tier-N spec PLAN without source disclosure or REC1_T1",
+      "Authorize T2 (K9 OOS fails at central)",
+      "Authorize T3 bi-weekly (K9 OOS fails at central)",
+      "Authorize T4 without first establishing K9-reachability estimate for the chosen universe (insufficient information at PLAN time)"
+    ]
+  },
+  "parent_references": {
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "next_track_selection_plan_commit": "0e3f9d4",
+    "next_track_selection_plan_doc_sha256": null,
+    "s12_d1_p6_is_diagnostic_commit_for_l1_lesson_source": "9241ed6",
+    "s12_d1_p6_is_diagnostic_seal_sha256": "33c91592c09860c3ab9469aab38741b7378f54ad56ff3772f9ef6a03ea92156d"
+  },
+  "non_anchored_acknowledgements": {
+    "parallel_seal_b_chain": {
+      "seal_b_commit": "9ce4d66",
+      "p1_b_commit": "bd7245e",
+      "p2_b_commit": "2b27acc",
+      "p3_b_commit": "b97331a",
+      "p4_b_commit": "8cfdeb1",
+      "p6_b_commit": "8621c32",
+      "status": "PARALLEL_SEAL_B_CHAIN_ACKNOWLEDGED_NOT_ANCHORED",
+      "note": "This memo does NOT use the SEAL-B chain as a source for any K9-reachability estimate, recommendation, or lifecycle decision."
+    }
+  },
+  "posture_invariants": {
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc_status": "NEVER_GRANTED",
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "profitability_claim_made": false,
+    "live_readiness_claim_made": false,
+    "oos_confirmation_claim_made": false,
+    "paper_ready_claim_made": false,
+    "money_proven_claim_made": false,
+    "k9_threshold_relaxed": false,
+    "rec1_binding_demoted": false,
+    "permanent_live_block": true,
+    "research_diagnostic_only": true,
+    "no_strategy_optimization_authorized": true,
+    "no_dr_redefinition_post_seal": true
+  },
+  "hard_boundaries_held_this_memo_turn": {
+    "memo_only_no_code": true,
+    "memo_only_no_build": true,
+    "memo_only_no_tests": true,
+    "memo_only_no_diagnostics": true,
+    "memo_only_no_signal_computation": true,
+    "memo_only_no_real_signals": true,
+    "memo_only_no_backtest": true,
+    "memo_only_no_simulator": true,
+    "memo_only_no_data_fetch": true,
+    "memo_only_no_databento_call": true,
+    "memo_only_no_databento_api_key_access": true,
+    "memo_only_no_network_call": true,
+    "memo_only_no_strategy_logic_modification": true,
+    "memo_only_no_drivers_modification": true,
+    "memo_only_no_cache_modification": true,
+    "memo_only_no_data_modification": true,
+    "no_lessons_md_touched": true,
+    "no_tmp_build_s12_d1_seal_artifacts_py_touched": true,
+    "no_tmp_run_s12_d1_p6_is_diagnostic_py_touched": true,
+    "no_s12_d1_seal_a_chain_modified": true,
+    "no_s12_d1_p1_modified": true,
+    "no_s12_d1_p2_modified": true,
+    "no_s12_d1_p3_build_modified": true,
+    "no_s12_d1_p4_smoke_modified": true,
+    "no_s12_d1_p6_is_modified": true,
+    "no_s12_d1_p11_park_modified": true,
+    "no_seal_b_chain_modified": true,
+    "no_0e3f9d4_plan_doc_modified": true,
+    "no_s11_d1_artifacts_modified": true,
+    "no_s10_d1_artifacts_modified": true,
+    "no_s10_d2_artifacts_modified": true,
+    "no_command_center_files_touched": true,
+    "no_runner_harness_modified": true,
+    "no_tools_directory_modified": true,
+    "no_new_candidate_record_id_authored": true,
+    "no_tier_n_spec_authored": true,
+    "no_t1_authorized": true,
+    "no_t2_authorized": true,
+    "no_t3_authorized": true,
+    "no_t4_authorized": true,
+    "no_k9_relaxation": true,
+    "no_rec1_demotion": true,
+    "no_dr_redefinition": true,
+    "no_threshold_loosening": true,
+    "no_self_authorization_to_run_anything": true,
+    "no_phase_pre_approved_by_this_memo": true,
+    "no_staging": true,
+    "no_commit": true,
+    "no_unrelated_tracked_file_modified": true
+  },
+  "negative_invariants": {
+    "claims_money_proven": false,
+    "claims_live_ready": false,
+    "claims_paper_ready_for_broker_routing": false,
+    "claims_strategy_optimized": false,
+    "claims_oos_confirmed": false,
+    "claims_t1_will_clear_k9_oos": false,
+    "claims_t2_will_clear_k9_oos": false,
+    "claims_t3_will_clear_k9_oos": false,
+    "schema_id_silently_bumped": false,
+    "rec1_oos_k9_risk_disclosure_demoted_to_advisory": false,
+    "s12_d1_seal_or_chain_modified": false,
+    "parallel_seal_b_chain_modified": false,
+    "tier_n_spec_authored": false,
+    "new_candidate_record_id_authored": false
+  },
+  "next_phase_requirements": {
+    "no_phase_pre_approved_by_this_memo": true,
+    "any_track_authorization_requires_separate_operator_phrase": true,
+    "t1_tier_n_spec_plan_requires_separate_authorization": true,
+    "hand_count_path_requires_operator_side_action": true,
+    "halt_option_remains_available": true,
+    "higher_density_search_requires_separate_authorization": true
+  },
+  "files_touched_during_this_memo_authoring": {
+    "tracked_files_modified": [],
+    "tracked_files_added": [],
+    "untracked_files_created": [
+      "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.json",
+      "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.md"
+    ],
+    "helper_script_to_delete_after_seal_verify": ".tmp_author_next_track_l1_discount_memo.py",
+    "not_staged_not_committed": true,
+    "no_network_calls_no_data_fetch_no_csv_read_no_signal_compute": true
+  },
+  "final_status_list": [
+    "memo_kind: PLAN_REVISION_COMPARISON_MEMO",
+    "l1_discount_applied: 2x_and_3x",
+    "t1_central_50_to_65_per_year",
+    "t1_2x_25_to_32_5_per_year",
+    "t1_3x_16_7_to_21_7_per_year",
+    "t1_oos_k9_clears_at_central_only_if_estimate_real",
+    "t1_oos_k9_fails_at_2x_discount",
+    "t2_oos_k9_fails_at_central",
+    "t3_biweekly_oos_k9_fails_at_central",
+    "t3_weekly_oos_k9_borderline_at_central",
+    "none_of_t1_t2_t3_reliably_clears_oos_k9_under_all_discount_scenarios",
+    "primary_recommendation: HAND_COUNT_VALIDATE_T1_OR_HALT_OR_SEEK_HIGHER_DENSITY",
+    "trading_status: PAUSED",
+    "live_status: BLOCKED_AT_6_GATES",
+    "frc_status: NEVER_GRANTED",
+    "no_phase_pre_approved_by_this_memo: True"
+  ],
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "report_seal_sha256": "e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3"
+}
