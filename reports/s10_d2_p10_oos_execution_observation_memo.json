@@ -1,0 +1,193 @@
+{
+  "authored_at_utc": "2026-05-27T03:33:56Z",
+  "authorization_phrase_received": "Authorize S10-D2 P10 OOS gate.",
+  "boundaries_held_this_memo_turn": {
+    "no_app_py_modification": true,
+    "no_b006_revival": true,
+    "no_branch_change": true,
+    "no_broker_call": true,
+    "no_brokerage_connection": true,
+    "no_cache_mutation": true,
+    "no_candidate_promoted": true,
+    "no_command_template_modification": true,
+    "no_command_test_modification": true,
+    "no_competing_oos_output_artifact_created": true,
+    "no_data_databento_cache_modification": true,
+    "no_data_databento_cache_oos_modification": true,
+    "no_databento_api_key_access": true,
+    "no_databento_call": true,
+    "no_databento_historical_instantiation": true,
+    "no_external_network_call": true,
+    "no_frc_grant": true,
+    "no_git_push": true,
+    "no_hydra_ghost_directory_fix_attempted": true,
+    "no_idea_memory_mutation": true,
+    "no_key_leakage": true,
+    "no_lessons_md_staged_or_modified": true,
+    "no_live_readiness_claim": true,
+    "no_live_trading": true,
+    "no_oos_driver_source_modification": true,
+    "no_oos_inspection_beyond_constants_already_in_sealed_driver_source": true,
+    "no_orb_artifact_modified": true,
+    "no_p10_execution": true,
+    "no_paper_order_placed": true,
+    "no_paper_trading": true,
+    "no_parameter_changes": true,
+    "no_phase2_plan_mutation": true,
+    "no_plan_lock_mutation": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_strategy_lab": true,
+    "no_real_order_placed": true,
+    "no_review_queue_mutation": true,
+    "no_run_out_of_sample_invocation": true,
+    "no_runner_harness_code_modification": true,
+    "no_s10_d1_artifact_modified": true,
+    "no_s7_artifact_modified": true,
+    "no_s8_d1_artifact_modified": true,
+    "no_s9_artifact_modified": true,
+    "no_sealed_driver_source_modification": true,
+    "no_step_30_cost_constant_modified": true,
+    "no_strategy_optimization_authorized": true,
+    "no_tier_n_spec_mutation": true,
+    "no_write_to_canonical_oos_output_paths": true
+  },
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "oos_execution_readiness_findings": {
+    "canonical_oos_execution_output_paths_declared_by_driver": {
+      "exists_on_disk_yet": false,
+      "json": "reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_diagnostic_result_sealed.json",
+      "md": "reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_diagnostic_result_sealed.md",
+      "this_memo_intentionally_does_not_write_to_these_paths": true
+    },
+    "oos_driver_build_report_sealed_pair": {
+      "json": "reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_driver_build_report.json",
+      "md": "reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_driver_build_report.md",
+      "tracked_in_HEAD": true
+    },
+    "oos_driver_built_and_committed_by_parallel_session": true,
+    "oos_driver_commit_hash": "f0b3721",
+    "oos_driver_commit_subject": "Add native S10-D2 OOS driver support",
+    "oos_driver_constants": {
+      "CACHE_ROOT": "C:\\SPARTA_BRAIN\\data\\databento_cache_oos",
+      "EXPECTED_CACHE_BYTES_per_market": {
+        "CL": 13779406,
+        "GC": 540803,
+        "NQ": 19770364,
+        "ZN": 8573282
+      },
+      "EXPECTED_FILES_PER_ROOT": 36,
+      "OUT_OF_SAMPLE_END": "2025-12-31",
+      "OUT_OF_SAMPLE_START": "2023-01-01"
+    },
+    "oos_driver_docstring_authorization_clause": "Execution of run_out_of_sample() requires a separate operator authorization (P10).",
+    "oos_driver_function_signature": "run_out_of_sample(*, expected_seals=None, cost_tier=S1) -> Dict[str, Any]",
+    "oos_driver_path": "external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness/out_of_sample_driver.py",
+    "oos_invariant_smoke_test_committed": true,
+    "oos_invariant_smoke_test_path": "external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness/tests/test_oos_driver_invariants.py"
+  },
+  "operator_chosen_disposition": "DEFER_TO_PARALLEL_SESSION_AS_CANONICAL_EXECUTOR",
+  "operator_chosen_path": {
+    "create_competing_oos_output_artifact": false,
+    "execute_p10_now": false,
+    "memo_path_chosen_to_avoid_collision": {
+      "json": "reports/s10_d2_p10_oos_execution_observation_memo.json",
+      "md": "reports/s10_d2_p10_oos_execution_observation_memo.md",
+      "rationale_for_path_choice": "Top-level reports/ (sibling to s10_d2_p7_decision_memo_sealed.{json,md} and s10_d2_cache_directory_restructure_report.{json,md}); different directory AND different filename suffix from the canonical OOS execution output at reports/external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_diagnostic_result_sealed.{json,md}. Zero filename overlap with anything the parallel session has authored or is queued to author."
+    },
+    "path_label": "OPTION_1_DEFER_TO_PARALLEL_SESSION",
+    "write_observation_memo_at_non_colliding_path": true
+  },
+  "operator_next_step_recommendations_documented_only_not_authorized": [
+    {
+      "description": "Let the parallel session execute P10 at its own next-turn cadence. They authored the OOS driver and the P7 memo recommending P10; they are the natural canonical executor. No action required from this controller session beyond this observation memo.",
+      "option": "DEFER_TO_PARALLEL_RUN",
+      "recommended": true
+    },
+    {
+      "description": "If operator wants THIS session to execute P10 instead, type a fresh authorization phrase that explicitly names this session and instructs it to coordinate cache-control with the parallel session first (e.g., wait until parallel session is observably idle). The current authorization phrase alone is ambiguous on which session is the executor.",
+      "option": "EXPLICITLY_CHOOSE_THIS_CONTROLLER_AS_EXECUTOR",
+      "requires_separate_authorization": true
+    },
+    {
+      "description": "Operator types a fresh authorization phrase into the parallel session, naming it as the canonical P10 executor. This controller session takes no further action on S10-D2 P10 until that run is sealed at the canonical paths.",
+      "option": "EXPLICITLY_CHOOSE_PARALLEL_SESSION_AS_EXECUTOR",
+      "requires_separate_authorization": true
+    },
+    {
+      "description": "If operator decides the S10-D2 evidence chain is already sufficient for present purposes (Tier-N spec sealed; IS diagnostic passed; cost-stress matrix passed; K10 passed) and OOS truth-test is not the highest-priority next move, P10 can be deferred indefinitely without breaking any sealed-artifact invariant.",
+      "option": "HALT_S10_D2_LIFECYCLE_AND_PURSUE_DIFFERENT_TRACK",
+      "requires_separate_authorization": true
+    }
+  ],
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC-P10-OBSERVATION",
+  "posture_invariants_unchanged_by_this_memo": {
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "frc_granted": false,
+    "live_promotion_path_closed": true,
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "trading_status": "PAUSED",
+    "verdict_never_means_live_ready": true
+  },
+  "predecessor_seal_chain_attestation_drift_zero": {
+    "all_predecessor_seals_re_verifiable_from_on_disk_artifacts": true,
+    "k10_pairwise_dependence_seal_sha256_this_session": "8c620cc5bfe53f71d4ededba45b3d8cee0de54992db6819103875811cbdb99e4",
+    "no_predecessor_seal_modified_by_this_memo": true,
+    "p7_decision_memo_seal_sha256_parallel_session": "87baa6e8c4cc1eb47c1345b97990eab86d5cefb37636e9fe57a029506d398c05",
+    "phase2_plan_seal_sha256": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "predecessor_seal_sha256": "007110ff5a57dd04b184409bad64fd667374cd049155416c869a73f7af0c1f97",
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "purpose": "Document, read-only, that the S10-D2 P10 OOS gate is execution-ready as of HEAD (commit 4ddaa84), that the canonical OOS execution code was authored and committed by a parallel controller session at commit f0b3721, and that the operator has elected to defer the actual P10 execution to a single canonical executor (most likely the parallel session) to avoid a canonical-output-path race between concurrent controller sessions.",
+  "race_condition_assessment": {
+    "canonical_output_path_collision_risk_if_both_sessions_execute_p10": true,
+    "collision_failure_mode_if_both_executed": "Both sessions would write to the same OUTPUT_DIAGNOSTIC_JSON and OUTPUT_DIAGNOSTIC_MD paths. Last-writer-wins. The canonical report_seal_sha256 would belong to only one of the two runs. The other run's evidence would be lost. Likely follow-on: a parallel-session stale-artifact cleanup commit (pattern: e2db693 for S10-D1 step 02b stale artifacts) to remove or supersede whichever run was deemed non-canonical.",
+    "estimated_probability_parallel_session_will_execute_p10_within_30_minutes": "HIGH",
+    "operator_authorization_received_this_session": true,
+    "p7_memo_commit_hash": "b466fbb",
+    "p7_memo_explicit_blocked_actions_clause_3": "DO NOT revisit the OOS window (2023+) before a separate AUTHORIZE S10-D2 P10 OOS gate turn is issued.",
+    "p7_memo_recommended_next_phase": "ADVANCE_TO_P10_OOS_GATE",
+    "parallel_session_most_recent_s10_d2_commits_chronological": [
+      {
+        "commit": "1ddf441",
+        "subject": "Seal S10-D2 cache directory restructure (IS/OOS split; 624 sha preserved)"
+      },
+      {
+        "commit": "912d332",
+        "subject": "Seal S10-D2 P6.5 cost-stress matrix: READY_FOR_NEXT_PHASE (A8 PASS, K12 not fired, 0 DR fires)"
+      },
+      {
+        "commit": "9211ab7",
+        "subject": "Seal S10-D2 P6.5 cost-stress sweep SUCCESS (K12 does not fire; READY_FOR_LONGER_BACKTEST)"
+      },
+      {
+        "commit": "b466fbb",
+        "subject": "Seal S10-D2 P7 decision memo"
+      },
+      {
+        "commit": "f0b3721",
+        "subject": "Add native S10-D2 OOS driver support"
+      }
+    ],
+    "parallel_session_s10_d2_commit_cadence_minutes_recent_average": 10
+  },
+  "report_seal_sha256": "dd105d8e99d9611581d1195514beb2e4dcd128a6a91c118b8d14655d2de964a0",
+  "schema_id": "sparta.external_research_hunter.s10_d2_p10_oos_execution_observation_memo.v1",
+  "seal_method": "sha256( json.dumps(body_excluding_seal_fields, sort_keys=True, separators=(',',':'), ensure_ascii=False) )",
+  "this_memo_does_not_execute_p10": true,
+  "this_memo_does_not_mutate_cache_or_sealed_artifacts": true,
+  "this_memo_does_not_write_to_canonical_oos_output_paths": true,
+  "tier_n_spec_already_covers_oos_methodology": {
+    "no_p10_spec_draft_required_by_sealed_chain": true,
+    "off_by_one_observation": "Tier-N spec data_requirements.oos_window_utc end = 2025-12-30; OOS driver OUT_OF_SAMPLE_END = 2025-12-31. Plausibly an inclusive/exclusive boundary convention difference. Noted as a documentation-only observation; not flagged as a defect by this memo. The parallel session's P10 execution will resolve which convention is canonical.",
+    "tier_n_spec_acceptance_gates_byte_inherited_from_s8_d1": true,
+    "tier_n_spec_oos_inspection_in_in_sample_run_prohibited": true,
+    "tier_n_spec_oos_window_utc": [
+      "2023-01-01",
+      "2025-12-30"
+    ],
+    "tier_n_spec_rejection_gates_byte_inherited_from_s8_d1": true,
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  }
+}
