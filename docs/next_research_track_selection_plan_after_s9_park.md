@@ -201,7 +201,7 @@ T5. **Move off SPY/TLT/GLD/USO to international ETF universe**: EFA / EEM / EWJ 
 
 T6. **Move off ETF-proxy universe to single-name equities**: a Donchian or RSI-2 mechanic on a 10-20 single-name equity basket. Different universe; different cost structure (per-share commission scales differently than ETF); different signal density. Highest data-fetch friction among the options.
 
-T7. **Pivot to a Databento micro-futures track**: per S10-D1 memo (`reports/external_research_hunter/s10_d1_micro_availability_probe_result_memo.md`), MNQ.c.0 / MGC.c.0 are available from 2019 onward (MGC from 2013); MCL.c.0 from mid-2021 onward. Three sub-options inherited from S10-D1 §6: Path A (long-history MNQ+MGC two-market candidate), Path B (2021+ MNQ+MGC+MCL short-history), Path C (probe alternate micros). Substantial structural break from the ETF-proxy chain.
+T7. **Pivot to a Databento micro-futures track**: per S10-D1 memo (`reports/external_research_hunter/s10_d1_micro_availability_probe_result_memo.md`), MNQ.c.0 / MGC.c.0 are available from 2019 onward (MGC from 2013); MCL.c.0 from mid-2021 onward. Three sub-options inherited from S10-D1 section 6: Path A (long-history MNQ+MGC two-market candidate), Path B (2021+ MNQ+MGC+MCL short-history), Path C (probe alternate micros). Substantial structural break from the ETF-proxy chain.
 
 T8. **Family-level park**. Declare the SPY/TLT/GLD/USO 2014-2022 universe empirically falsified across two orthogonal mechanics; formally park the whole arc (trend / mean-reversion / sizing-variations on this universe) without authorizing another track on the same universe.
 
