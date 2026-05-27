@@ -1,0 +1,297 @@
+{
+  "authored_at_utc": "2026-05-27T05:10:37Z",
+  "authorization_phrase_received": "(operator instruction to create the next operator memo evaluating whether a future P1_rev_M re-anchoring should switch from v1 to rev2; explicitly requested 'Do not run P3' and 'Do not stage or commit unless I approve after review')",
+  "candidate_record_id": "s11-d1-mnq-c0-single-instrument-databento-long-history",
+  "hard_boundaries_held_this_memo_turn": {
+    "no_app_py_modification": true,
+    "no_b006_artifact_modified": true,
+    "no_backtest": true,
+    "no_branch_change": true,
+    "no_broker_call": true,
+    "no_brokerage_connection": true,
+    "no_cache_mutation": true,
+    "no_candidate_promoted": true,
+    "no_claude_md_or_runbook_or_gitignore_modification": true,
+    "no_command_route_modification": true,
+    "no_command_template_modification": true,
+    "no_command_test_modification": true,
+    "no_csv_data_modification": true,
+    "no_data_databento_cache_is_only_modification": true,
+    "no_data_databento_cache_modification": true,
+    "no_data_databento_cache_oos_modification": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_databento_api_key_access": true,
+    "no_execution_guard_authored_or_modified": true,
+    "no_external_network_call": true,
+    "no_frc_grant": true,
+    "no_git_push": true,
+    "no_idea_memory_mutation": true,
+    "no_in_sample_driver_authored_or_modified": true,
+    "no_key_leakage": true,
+    "no_lessons_md_staged_or_modified": true,
+    "no_live_readiness_claim": true,
+    "no_live_trading": true,
+    "no_main_py_authored_or_modified": true,
+    "no_modification_of_any_sealed_predecessor": true,
+    "no_modification_of_clarification_memo_on_disk": true,
+    "no_modification_of_p1_plan_lock_on_disk": true,
+    "no_modification_of_p2_phase_2_plan_on_disk": true,
+    "no_modification_of_rev2_spec_on_disk": true,
+    "no_modification_of_v1_spec_on_disk": true,
+    "no_obsidian_modification": true,
+    "no_oos_computation": true,
+    "no_oos_inspection_beyond_constants_already_in_sealed_spec_text": true,
+    "no_orb_step_30_modification": true,
+    "no_out_of_sample_driver_authored_or_modified": true,
+    "no_p1_rev_m_plan_lock_artifact_authored": true,
+    "no_p2_rev_m_phase_2_plan_artifact_authored": true,
+    "no_p3_authorization": true,
+    "no_p3_build_report_authored": true,
+    "no_p3_source_code_written": true,
+    "no_p3_test_written": true,
+    "no_paper_order_placed": true,
+    "no_paper_trading": true,
+    "no_parameter_change": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_strategy_lab": true,
+    "no_real_order_placed": true,
+    "no_review_queue_mutation": true,
+    "no_runner_harness_modification": true,
+    "no_s10_d1_artifact_modified": true,
+    "no_s10_d2_artifact_modified": true,
+    "no_s7_or_s8_or_s9_artifact_modified": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_logic_modification": true,
+    "no_test_file_authored_or_modified": true,
+    "no_threshold_loosening": true,
+    "no_threshold_tightening_via_this_memo": true
+  },
+  "memo_does_not_authorize_any_later_phase": true,
+  "memo_does_not_authorize_p3": true,
+  "memo_does_not_change_strategy_logic": true,
+  "memo_does_not_modify_clarification_memo_on_disk": true,
+  "memo_does_not_modify_p1_plan_lock_on_disk": true,
+  "memo_does_not_modify_p2_phase_2_plan_on_disk": true,
+  "memo_does_not_modify_rev2_spec_on_disk": true,
+  "memo_does_not_modify_v1_spec_on_disk": true,
+  "memo_does_not_re_anchor_p1": true,
+  "memo_does_not_run_any_backtest": true,
+  "memo_does_not_run_any_optimization": true,
+  "memo_does_not_run_databento": true,
+  "memo_does_not_touch_data_caches": true,
+  "memo_is_binding": false,
+  "memo_is_decision_support_only": true,
+  "operator_next_step_options_documented_only_not_authorized": [
+    {
+      "description": "3-step re-anchoring sequence described in section 5. Cleanest path; routes all forward work through the rev2-anchored chain; keeps v1+P1+P2 byte-stable as historical record. Each step requires its own separate operator authorization phrase.",
+      "option": "AUTHORIZE_P1_REV_M_PLAN_LOCK_ANCHORING_REV2_then_P2_REV_M_then_P3",
+      "recommended": true
+    },
+    {
+      "description": "Faster but creates a v1->rev2 anchor discontinuity at P3 that the P3 build report must document. Workable but uglier than the 3-step sequence.",
+      "option": "AUTHORIZE_P3_DIRECTLY_WITH_EXPLICIT_REV2_ANCHOR_skip_P1_rev_M_P2_rev_M",
+      "recommended": false
+    },
+    {
+      "description": "Propagates v1's broken condition (e) into P3 source code, deferring the fix. Requires either spec-vs-code divergence or a later code-only patch that bypasses the sealed-spec discipline. Not recommended.",
+      "option": "AUTHORIZE_P3_WITH_V1_ANCHOR_and_defer_rev2",
+      "recommended": false
+    },
+    {
+      "description": "Most conservative. Preserves all sealed artifacts as historical record. Appropriate if the K9 sample-size structural risk (expected ~25-50 IS trades vs >=100 K9 threshold) is reason enough to defer the multi-week P3-through-P11 execution. The S11-D1 chain remains a useful methodology artifact even if not executed; future single-instrument candidates can reference it.",
+      "option": "HALT_S11_D1_LIFECYCLE_AT_P2",
+      "recommended_conditionally": true
+    },
+    {
+      "description": "No further S11-D1 authorization this session. Revisit later. All artifacts remain on disk as sealed record. Posture invariants stay in force.",
+      "option": "DEFER_DECISION"
+    }
+  ],
+  "predecessor_seal_chain_attestation_drift_zero": {
+    "all_predecessor_seals_re_verifiable_from_on_disk_artifacts": true,
+    "head_at_memo_authorship_time": "6895012 (Seal S10-D2 terminal-lesson sealed report; unrelated to S11-D1; lessons.md untouched per parallel session)",
+    "no_predecessor_seal_modified_by_this_memo": true,
+    "non_binding_clarification_memo_commit": "d13b56a",
+    "non_binding_clarification_memo_seal_sha256": "eda08aceeb4afd7d4f985a739d6e87b3e803daff8da3f645f016b0a56a3af871",
+    "p1_plan_lock_commit": "7d86486",
+    "p2_phase_2_plan_commit": "f64f984",
+    "rev2_tier_n_spec_commit": "c110fd4",
+    "rev2_tier_n_spec_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "v1_tier_n_spec_commit": "9c63088",
+    "v1_tier_n_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24"
+  },
+  "report_kind": "S11-D1 P1_rev_M re-anchoring evaluation memo (operator decision-support document; non-binding analysis comparing v1-anchored vs rev2-anchored futures of the S11-D1 lifecycle; does NOT itself re-anchor P1, does NOT modify P1/P2, does NOT authorize P3 or any later phase)",
+  "report_seal_sha256": "56adfa13d2f176322649ad5af362fac1d24fdd6a26d5962de21d3253b19fda20",
+  "schema_id": "sparta.external_research_hunter.s11_d1_p1_rev_m_reanchor_memo.v1",
+  "seal_method": "sha256( json.dumps(body_excluding_seal_fields, sort_keys=True, separators=(',',':'), ensure_ascii=False) )",
+  "section_1_p3_is_not_authorized": {
+    "all_later_phases_also_not_authorized": true,
+    "p3_anchor_choice_v1_vs_rev2_requires_separate_authorization": true,
+    "p3_remains_not_authorized": true,
+    "p3_requires_separate_authorization_phrase": true,
+    "phases_not_authorized": [
+      "P3_build",
+      "P4_smoke",
+      "P6_in_sample_diagnostic",
+      "P6_5_cost_stress",
+      "P7_decision_memo",
+      "P10_oos_gate",
+      "P11_lifecycle_decision"
+    ],
+    "statement": "P3 BUILD phase (runner harness + execution guard + IS/OOS driver sources + smoke tests) is NOT authorized by this memo. Authoring this memo does NOT advance the S11-D1 lifecycle. Authoring this memo does NOT remove the requirement that P3 receive its own separate explicit operator authorization phrase before any P3 source file is written, any test is run, or any P3 build report is sealed."
+  },
+  "section_2_rev2_does_not_retroactively_modify_p1_or_p2": {
+    "p1_plan_lock_byte_stable_attestation_at_memo_authorship_time": true,
+    "p1_re_anchor_requires_p1_rev_M_plan_lock_authoring_step": true,
+    "p2_phase_2_plan_byte_stable_attestation_at_memo_authorship_time": true,
+    "p2_re_anchor_requires_p2_rev_M_phase_2_plan_authoring_step": true,
+    "rev2_is_a_sibling_artifact_not_a_supersession_of_p1_or_p2_anchors": true,
+    "statement": "Rev2 was sealed at commit c110fd4 as a sibling Tier-N spec artifact. It does NOT mutate any byte of v1 (sha 077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24), does NOT mutate the P1 plan-lock at commit 7d86486 (which anchors v1 by sha), and does NOT mutate the P2 phase-2 plan at commit f64f984 (which inherits v1 via P1). Both P1 and P2 remain bound to v1 on disk. Re-anchoring P1 or P2 to rev2 requires authoring fresh P1_rev_M and P2_rev_M plan-lock artifacts under their own separate operator authorizations. This memo evaluates whether such re-anchoring is recommended; it does NOT perform it.",
+    "v1_byte_stable_attestation_at_memo_authorship_time": true,
+    "v1_remains_binding_for_p1": true,
+    "v1_remains_binding_for_p2": true
+  },
+  "section_3_v1_vs_rev2_diff": {
+    "additive_metadata_introduced_by_rev2": [
+      "revision_metadata (predecessor pins, supersedes scope, downstream-anchored attestation, semantic diff)",
+      "canonical_top_level_keys_that_differ_from_v1 (machine-verifiable diff list)",
+      "posture_invariants_attested_unchanged_by_rev2",
+      "hard_boundaries_held_this_rev2_authoring_turn"
+    ],
+    "administrative_header_changes": [
+      "report_kind (updated to identify rev2)",
+      "schema_id (updated to ..._rev2_sealed.v1)",
+      "authored_at_utc (updated)"
+    ],
+    "preserved_unchanged_from_v1": [
+      "algo_version_for_run_id (s11_d1_v0_1_0)",
+      "candidate_record_id (s11-d1-mnq-c0-single-instrument-databento-long-history)",
+      "candidate_purpose",
+      "phase_prefix (PHASE2-S11-D1-MNQ-SI)",
+      "parent_references (S10-D1 + S10-D2 chain pins)",
+      "data_requirements (MNQ.c.0 CSV sha pin, IS/OOS windows, schema)",
+      "is_oos_split_plan",
+      "minimum_trade_count_requirements (K9 threshold = 100, inviolate)",
+      "entry_exit_logic_boundary_locked_at_seal (Donchian 55/20, Wilder ATR(20), 2N stop, 1% risk, max_units=1)",
+      "cost_assumptions_locked_at_seal (commission, fees, slippage, cost-stress tiers byte-inherited from S10-D2)",
+      "rejection_rules (K-gates K1-K12, DR rules DR2-DR5, A-gates A1-A10)",
+      "promotion_rules (live block permanent, FRC never, etc.)",
+      "intentional_differences_from_s10_d2",
+      "s10_d2_lessons_inherited_explicitly",
+      "why_mnq_c0_single_instrument_fallback_is_being_tested",
+      "files_allowed_to_be_created_or_modified",
+      "files_explicitly_forbidden_from_modification_this_turn_and_all_future_s11_d1_turns",
+      "All p*_requires_separate_authorization flags",
+      "no_phase_pre_approved_by_this_seal",
+      "exact_next_phase_authorized_by_this_seal (= NONE)",
+      "labels, status_fields"
+    ],
+    "rev2_artifact": {
+      "commit": "c110fd4",
+      "json_path": "reports/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec_rev2_sealed.json",
+      "md_path": "docs/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec_rev2.md",
+      "seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d"
+    },
+    "rev2_condition_e_literal": "(e) OOS trade_curve_maxdd_pct >= -30% (equivalently |trade_curve_maxdd_pct| <= 30%; i.e., the realized OOS drawdown shall not exceed 30% in magnitude)",
+    "substantive_change_summary": "Exactly one nested string field changed: k9_and_oos_confirmation_rules.oos_confirmation_definition. The condition (e) sign/inequality was corrected from 'OOS trade_curve_maxdd_pct <= -30%' (broken; passes large drawdowns, fails small drawdowns) to 'OOS trade_curve_maxdd_pct >= -30% (equivalently |trade_curve_maxdd_pct| <= 30%; i.e., the realized OOS drawdown shall not exceed 30% in magnitude)' (correct; passes small drawdowns, fails large drawdowns). No threshold changed (still 30%). No new gate was added. No gate was removed. No threshold was loosened. All other Tier-N fields (strategy_definition, data_requirements, is_oos_split_plan, minimum_trade_count_requirements, rejection_rules, promotion_rules, cost_assumptions_locked_at_seal, entry_exit_logic_boundary_locked_at_seal, files_allowed/forbidden, parent_references, s10_d2_lessons_inherited_explicitly, intentional_differences_from_s10_d2, why_mnq_c0_..., hard_boundaries, posture invariants) are byte-equivalent between v1 and rev2 (canonical-JSON comparison embedded in rev2's body under canonical_top_level_keys_that_differ_from_v1).",
+    "substantive_changes_count": 1,
+    "v1_artifact": {
+      "commit": "9c63088",
+      "json_path": "reports/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec_sealed.json",
+      "md_path": "docs/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec.md",
+      "seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24"
+    },
+    "v1_condition_e_literal": "(e) OOS trade_curve_maxdd_pct <= -30%"
+  },
+  "section_4_impact_of_drawdown_condition_fix": {
+    "executive_summary": "The fix is a CORRECTNESS correction to an OOS CONFIRMATION criterion. It is NOT a change to execution eligibility, NOT a change to safety posture, and NOT merely a clarification in the soft sense. It strictly is: a correction of a previously-inverted acceptance-gate predicate that, if left uncorrected, would have systematically flipped the verdict label that any future P10 OOS gate evaluation would emit for condition (e) specifically.",
+    "impact_on_clarification_vs_correction_classification": {
+      "classification": "SUBSTANTIVE CORRECTION (acceptance-gate predicate previously inverted; now restored to intended semantics). NOT a 'mere clarification' because v1's literal text, taken at face value by any conforming evaluator, produces a different CONFIRMATION verdict for the same input data than rev2 does for a wide range of plausible OOS outcomes.",
+      "implication_for_authoring_discipline": "Per P1 plan-lock clause 'no_threshold_loosening_under_any_circumstance: True', the fix must not loosen any threshold. Rev2 verifies this: the 30% threshold is unchanged; only the sign/inequality is corrected. The fix is a strict CORRECTNESS restoration, not a loosening. This is consistent with P1's lock-action clause that 'any change [to Tier-N spec] requires a fresh _revN_ Tier-N spec under a separate authorization' -- rev2 IS such a _revN_.",
+      "is_pure_clarification": false,
+      "is_substantive_correction": true
+    },
+    "impact_on_execution_eligibility": {
+      "execution_eligibility_changed_by_rev2": false,
+      "explanation": "Execution eligibility = whether P3 BUILD / P4 smoke / P6 IS / P6.5 cost-stress / P10 OOS / P11 phases are authorized to run. v1 and rev2 are equally non-authorizing of any execution phase (both have no_phase_pre_approved_by_this_seal=True, exact_next_phase_authorized_by_this_seal=NONE, and all p*_requires_separate_authorization=True flags). The condition (e) fix does not advance the lifecycle and does not unblock any phase boundary."
+    },
+    "impact_on_in_sample_phase": {
+      "explanation": "Condition (e) lives in OOS_CONFIRMATION_DEFINITION only. P6 IS diagnostic uses the A-gate / K-gate grid (A1-A10 + K1-K12), not the OOS confirmation definition. Rev2 does not change any A-gate, K-gate, or DR-rule threshold. P6 IS verdicts under v1-anchored or rev2-anchored P3 would be byte-identical for the same input data.",
+      "is_phase_evaluation_changed_by_rev2": false
+    },
+    "impact_on_oos_confirmation_outcome": {
+      "explanation": "WITHOUT rev2 (i.e., if a future P10 gate evaluated the literal v1 condition (e)): a 'good' OOS result with maxdd around -12% would FAIL condition (e) (because '-12 <= -30' is False) and the 8-condition AND chain for CONFIRMED would not be satisfied. Conversely, a 'bad' OOS result with maxdd around -35% would PASS condition (e) but would still fail to be CONFIRMED because either K4 (at -50%) or A4 (at -30% magnitude) would fire elsewhere; in addition, the OOS_KILLED definition triggers if K4 fires. So the practical consequence of v1 condition (e) is that CONFIRMED is essentially unreachable under any realistic outcome, and the verdict will land in the INDETERMINATE or KILLED bucket regardless. WITH rev2: condition (e) correctly accepts shallow drawdowns and rejects deep ones, restoring the originally-intended CONFIRMED pathway. The fix is necessary to make the OOS_CONFIRMED outcome reachable; without it, OOS_CONFIRMED is effectively dead code in the verdict logic.",
+      "no_safety_floor_movement_in_either_direction": true,
+      "no_threshold_loosening_in_either_direction": true,
+      "rev2_condition_e_restores_intended_confirmed_pathway": true,
+      "v1_condition_e_makes_oos_confirmed_effectively_unreachable": true,
+      "verdict_label_logic_changed_by_rev2": true
+    },
+    "impact_on_p10_oos_phase": {
+      "p10_evaluation_changed_by_rev2": true,
+      "scope_of_change": "ONLY the OOS_CONFIRMATION_DEFINITION condition (e) predicate. All other P10 evaluation logic (K-gates at OOS, A-gates at OOS, K9 sample-size check, OOS_KILLED definition triggered by K6/K7/K8/K1/K2/K4) is unchanged. The change is local to a single AND-chain predicate within OOS_CONFIRMATION."
+    },
+    "impact_on_p6_5_cost_stress_phase": {
+      "explanation": "P6.5 cost-stress sweep uses the DR2-DR5 rules + K12. Rev2 does not change any DR rule or K12 threshold. P6.5 verdicts under v1-anchored or rev2-anchored P3 would be byte-identical for the same input data.",
+      "p6_5_evaluation_changed_by_rev2": false
+    },
+    "impact_on_safety_posture": {
+      "explanation": "Safety posture = the K-gate / A-gate / DR-rule grid that triggers FAIL_SAFETY or INSUFFICIENT_SAMPLE verdicts. The relevant drawdown safety floor is K4 ('|maxdd_pct| > 50%' -> FAIL_SAFETY), inherited byte-equivalent from S10-D2 in both v1 and rev2. P1 plan-lock (anchored to v1) additionally tightens A4 to '|maxdd_pct| <= 30%' -> pass / FAIL_SAFETY at IS-time for single-instrument concentration. Both safety gates (K4 + A4) are correctly magnitude-based in BOTH v1 and rev2 and BOTH P1 plan-lock anchors. The condition (e) under discussion lives inside OOS_CONFIRMATION_DEFINITION (an 8-condition AND chain determining whether OOS is CONFIRMED, i.e., whether the C7 verdict could be READY_FOR_LONGER_BACKTEST), NOT inside any safety gate. A broken condition (e) does NOT make any outcome unsafe; it makes the CONFIRMATION verdict incorrect.",
+      "k4_floor_50_pct_magnitude_unchanged": true,
+      "p1_a4_floor_30_pct_magnitude_unchanged": true,
+      "safety_gates_byte_equivalent_in_v1_and_rev2": true,
+      "safety_posture_changed_by_rev2": false
+    },
+    "summary_table": {
+      "cost_stress_tiers": "UNCHANGED (S0/S1/S2/S3/S4 byte-equivalent to S10-D2)",
+      "data_window": "UNCHANGED (IS 2019-05-13 to 2023-12-29; OOS 2024-01-02 to 2025-12-30)",
+      "execution_eligibility": "UNCHANGED (rev2 does not advance any phase)",
+      "frc_status": "UNCHANGED (NEVER_GRANTED)",
+      "k9_threshold_inviolate": "UNCHANGED (still 100)",
+      "live_block_status": "UNCHANGED (BLOCKED_AT_6_GATES permanently)",
+      "p10_oos_CONFIRMED_logic": "CORRECTED (rev2 makes CONFIRMED pathway reachable; v1 made it effectively unreachable)",
+      "p10_oos_indeterminate_logic": "UNCHANGED",
+      "p10_oos_killed_logic": "UNCHANGED",
+      "p6_5_cost_stress_verdict_logic": "UNCHANGED",
+      "p6_is_diagnostic_verdict_logic": "UNCHANGED",
+      "promotion_path": "UNCHANGED (closed)",
+      "safety_posture": "UNCHANGED (K4 at 50%, A4 at 30% magnitude; both byte-equivalent in v1 and rev2)",
+      "strategy_logic": "UNCHANGED (Donchian 55/20, Wilder ATR(20), 2N stop, 1% risk, max_units=1, AMB6 NONE)",
+      "symbols": "UNCHANGED (MNQ.c.0 only)"
+    }
+  },
+  "section_5_anchor_recommendation_for_future_p3": {
+    "alternative_HALT_S11_D1_lifecycle": "If operator decides the S11-D2 vs S10-D2 K9-sample-size structural risk (acknowledged in v1 and rev2's k9_risk_disclosure) is reason enough to halt without running P3, the lifecycle can be parked at the current state (v1 sealed + P1 sealed + P2 sealed + rev2 sealed + clarification memo sealed + this re-anchoring memo sealed). No further phase is required. Operator types e.g. 'Authorize S11-D1 lifecycle halt at P2.' Most conservative outcome; preserves all sealed artifacts as historical record without committing to a multi-week P3-through-P11 execution that is expected to land in INSUFFICIENT_SAMPLE.",
+    "alternative_sequence_NOT_RECOMMENDED": "Skip P1_rev_M / P2_rev_M and author P3 BUILD directly with explicit rev2 anchoring. This works in principle (P3 can anchor whatever Tier-N seal the operator specifies) but creates a discontinuity: P1 + P2 anchor v1; P3 anchors rev2. The chain-of-custody report at P3 BUILD would have to document the divergence, which is uglier than the 3-step re-anchoring sequence above.",
+    "operator_must_still_type_separate_authorization": true,
+    "preferred_authorization_sequence_documented_only_not_pre_approved": [
+      "1. Operator authors P1_rev_M plan-lock artifact that anchors rev2 (commit c110fd4, seal 46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d) instead of v1. Authorization phrase example: 'Authorize S11-D1 P1_rev_M plan-lock anchoring rev2 Tier-N spec.' Pre-condition: this re-anchoring memo (or equivalent) is on record. The new P1_rev_M artifact lives at a non-colliding path (e.g., reports/s11_d1_mnq_c0_single_instrument_databento_long_history_p1_rev_m_plan_lock_sealed.json + .md).",
+      "2. Operator authors P2_rev_M phase-2 plan artifact that anchors rev2 + P1_rev_M. Authorization phrase example: 'Authorize S11-D1 P2_rev_M phase-2 plan anchoring rev2 + P1_rev_M.' Non-colliding path.",
+      "3. Operator authorizes P3 BUILD with explicit anchor to rev2 + P1_rev_M + P2_rev_M. Authorization phrase example: 'Authorize S11-D1 P3 BUILD anchoring rev2.' The runner harness, drivers, tests, and build reports all pin rev2's seal (46659b4a...) rather than v1's (077e29e6...). The OOS driver implements the corrected condition (e) magnitude-based predicate.",
+      "This 3-step sequence keeps the original v1 + P1 + P2 chain byte-stable as historical record while routing all forward work through the rev2-anchored chain. Each step requires its own separate operator authorization phrase."
+    ],
+    "rationale": [
+      "Rev2 contains a strict correctness restoration of the OOS confirmation predicate, with zero threshold movement. Anchoring P3 to v1 would propagate v1's broken condition (e) into the P3 OOS driver source code, requiring either (a) the driver to implement the broken condition verbatim (then a future code patch to fix it, creating spec-vs-code divergence history), or (b) the driver to silently implement the corrected condition while the anchor still binds v1 (violating K7-class discipline that the implementation must match the sealed spec verbatim).",
+      "Rev2 is byte-equivalent to v1 in all other Tier-N fields. The diff is auditable and machine-verifiable (canonical_top_level_keys_that_differ_from_v1 list embedded in rev2's body).",
+      "Anchoring P3 to rev2 also requires re-anchoring P1 and P2 (or authoring P1_rev_M and P2_rev_M sibling plan-lock artifacts that explicitly anchor rev2). This memo does NOT perform that re-anchoring; it documents that the re-anchoring would be necessary as a precondition to a clean rev2-anchored P3.",
+      "The alternative (anchor P3 to v1, defer the rev2 binding) creates a documented-but-deferred defect in the binding chain. This violates the spirit of the sealed-artifact discipline, even if not its letter."
+    ],
+    "recommendation": "ANCHOR_FUTURE_P3_TO_REV2",
+    "recommendation_is_advisory_only_not_self_authorizing": true,
+    "recommendation_strength": "STRONG"
+  },
+  "section_6_posture_invariants_attested_unchanged_by_this_memo": {
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "frc_granted": false,
+    "live_promotion_path_closed": true,
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_strategy_optimization_authorized": true,
+    "trading_status": "PAUSED",
+    "verdict_never_means_live_ready": true
+  }
+}
