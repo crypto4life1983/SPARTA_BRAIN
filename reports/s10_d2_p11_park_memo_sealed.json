@@ -1,0 +1,341 @@
+{
+  "algo_version_for_run_id": "s10_d2_v0_1_0",
+  "authored_at_utc": "2026-05-27T03:45:29.410279Z",
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "chain_evidence_summary": {
+    "p10_oos_gate": {
+      "all_safety_zero": true,
+      "c7_verdict": "INSUFFICIENT_SAMPLE",
+      "closed_trades": 53,
+      "expectancy": 2140.572359798117,
+      "k_fires": 1,
+      "k_fires_names": [
+        "K9_closed_trades_lt_100"
+      ],
+      "monkey_patches_applied": 0,
+      "net_pnl": 113450.3350693002,
+      "oos_qualitative_verdict": "OOS_INDETERMINATE_BUT_DIRECTIONALLY_CONSISTENT",
+      "oos_window": [
+        "2023-01-01",
+        "2025-12-31"
+      ],
+      "seal": "s10_d2_p10_oos_gate_sealed.json",
+      "seal_sha256": "4038e5334feba9ea61b91dcb47287a7a8f9f8fdfd8ad35990866bc9fbd106137",
+      "sharpe_proxy": 0.10051032603779608,
+      "trade_curve_maxdd_pct": -12.95739439763902,
+      "win_rate_pct": 33.9622641509434,
+      "wr_gap_pp": 6.519369348847115
+    },
+    "p6_5_cost_stress": {
+      "a8": "PASS",
+      "k12": "not_fired",
+      "matrix_verdict": "READY_FOR_NEXT_PHASE",
+      "per_tier_summary": {
+        "S0": {
+          "closed_trades": 200,
+          "dr_fires": [],
+          "expectancy": 4936.208961572274,
+          "max_dd_pct": -27.974029416679908,
+          "net_pnl": 987241.7923144549,
+          "sharpe": 0.14501965117253296,
+          "source": "EXECUTED_THIS_TURN_V2_RERUN"
+        },
+        "S1": {
+          "closed_trades": 200,
+          "dr_fires": [],
+          "expectancy": 4865.489302337149,
+          "max_dd_pct": -28.305996161770587,
+          "net_pnl": 973097.8604674297,
+          "sharpe": 0.14311192966266303,
+          "source": "BASELINE_READ_FROM_P6_SEAL"
+        },
+        "S2": {
+          "closed_trades": 200,
+          "dr_fires": [],
+          "expectancy": 4569.246671770833,
+          "max_dd_pct": -29.759133659674404,
+          "net_pnl": 913849.3343541665,
+          "sharpe": 0.14003399758896373,
+          "source": "EXECUTED_THIS_TURN_V2_RERUN"
+        },
+        "S3": {
+          "closed_trades": 200,
+          "dr_fires": [],
+          "expectancy": 4122.114682297307,
+          "max_dd_pct": -30.348316612531956,
+          "net_pnl": 824422.9364594615,
+          "sharpe": 0.1300411761461735,
+          "source": "EXECUTED_THIS_TURN_V2_RERUN"
+        },
+        "S4": {
+          "closed_trades": 200,
+          "dr_fires": [],
+          "expectancy": 2839.3620267964325,
+          "max_dd_pct": -36.92630600470151,
+          "net_pnl": 567872.4053592865,
+          "sharpe": 0.10557617333749131,
+          "source": "EXECUTED_THIS_TURN_V2_RERUN"
+        }
+      },
+      "seal": "s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_cost_stress_matrix_result_sealed.json",
+      "seal_sha256": "f9a34674de4f7fdf8098b39959032d152bf2282e9ad57cedd68bc33cee2099ab",
+      "total_dr_fires": 0
+    },
+    "p6_is": {
+      "all_safety_zero": true,
+      "closed_trades": 200,
+      "expectancy": 4865.489302337149,
+      "in_sample_window": [
+        "2013-01-01",
+        "2022-12-30"
+      ],
+      "k_fires": 0,
+      "net_pnl": 973097.8604674297,
+      "no_pyramid_held": true,
+      "seal": "s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_in_sample_diagnostic_result_sealed.json",
+      "seal_sha256": "e6cdc7c68a9e2b7b6d749b73ff433e585c9de55890af5dce3dca51d74430c1b8",
+      "sharpe_proxy": 0.14311192966266303,
+      "trade_curve_maxdd_pct": -28.305996161770587,
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "win_rate_pct": 35.0,
+      "wr_gap_pp": 10.478591202045537
+    },
+    "p7_decision_memo": {
+      "executive_decision_excerpt": "Advance S10-D2 to the P10 OOS gate as the next research action. P6 IS produced a clean READY_FOR_LONGER_BACKTEST verdict (200 closed trades, 0 safety counters firing, 0 K-gates fired, no-pyramid invariant held, A1..A10 evaluated gates passing). P6.5 cost-stress matrix produced a clean READY_FOR_NEXT_PHASE verdict (A8 PASS, K12 not fired, 0 DR fires across all 4 non-baseline tiers S0/S2/S3/S4; mono...",
+      "recommended_next_phase": "ADVANCE_TO_P10_OOS_GATE",
+      "seal": "s10_d2_p7_decision_memo_sealed.json",
+      "seal_sha256": "87baa6e8c4cc1eb47c1345b97990eab86d5cefb37636e9fe57a029506d398c05"
+    }
+  },
+  "commit_candidate_summary": {
+    "commit_body_summary": "S10-D2 PARKED under PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED. Full chain (P6 IS + P6.5 cost-stress + P7 decision memo + P10 OOS gate) sealed and verified. OOS was directionally consistent (positive sharpe/expectancy/PnL; safety zero) but K9 fired on insufficient sample (53 trades < 100). No advance, no kill, no promotion. Four future research options documented as options-only (not pre-approved).",
+    "commit_subject": "Seal S10-D2 P11 PARK memo",
+    "files_authorized_by_operator": [
+      "reports/s10_d2_p11_park_memo_sealed.json",
+      "reports/s10_d2_p11_park_memo_sealed.md"
+    ],
+    "files_not_to_be_staged": [
+      "brain_memory/projects/trading_bot/lessons.md (long-running parallel-session dirty file; not mine)",
+      "any other unrelated tracked file"
+    ],
+    "pathspec_commit_mode_required": true,
+    "verification_required_before_commit": "git status --short -uall must show ONLY the 2 new authorized files staged"
+  },
+  "comparison_vs_s8_d1_park_precedent": {
+    "common_lesson": [
+      "Both candidates produced clean IS verdicts.",
+      "Both candidates were directionally consistent in OOS.",
+      "Both candidates parked under different binding-constraint roots.",
+      "Both candidates explicitly remained BLOCKED_AT_6_GATES with respect to live promotion.",
+      "Neither candidate produced a 'profitable proven' claim."
+    ],
+    "difference": "s8-D1 parked due to capital-sizing structural under-allocation. S10-D2 parked due to sample-size structural insufficiency on a 3-year OOS window. The S10-D2 sizing fix succeeded in producing comparable per-year trade density; what S10-D2 needed and did not have was a longer OOS window (more market history).",
+    "s10_d2_reason": "OOS sample insufficient (K9 fired at 53 < 100 trades over 3 years). S10-D2 explicitly raised starting cash to $500,000 to address the s8-D1 sizing problem; that fix succeeded (OOS trade frequency consistent with IS), but the OOS WINDOW LENGTH itself was the binding constraint, not sizing.",
+    "s8_d1_park_commit": "6e7b491",
+    "s8_d1_park_status": "PARKED_SAFE_BUT_NOT_MONEY_PROVEN_OOS_SIZING_UNDERSIZED",
+    "s8_d1_reason": "Capital-vs-contract-size mismatch in OOS: at $100k starting cash with full-size futures contracts, sizing produced 0 contracts for most signals, making OOS structurally undersized."
+  },
+  "executive_park_decision": "S10-D2 (cross-asset Donchian no-pyramid reparam-cap NQ+GC+ZN+CL at $500,000 starting cash) is PARKED under PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED. The full chain passed cleanly through P6 IS (READY_FOR_LONGER_BACKTEST; 200 closed trades; all safety counters zero), P6.5 cost-stress matrix (READY_FOR_NEXT_PHASE; A8 PASS; K12 not fired; 0 DR fires across S0/S2/S3/S4), and P7 decision memo (ADVANCE_TO_P10_OOS_GATE). At P10 OOS, the candidate produced a directionally-consistent result (positive sharpe, expectancy, net PnL; all safety counters zero; max DD actually improved vs IS) but K9 fired because closed_trades=53 over the 3-year OOS window is below the 100-trade threshold required to statistically confirm the IS edge. The C7 verdict was INSUFFICIENT_SAMPLE; the OOS qualitative verdict was OOS_INDETERMINATE_BUT_DIRECTIONALLY_CONSISTENT. This is neither a confirmation nor a refutation — it is an absence of refutation under a structurally small sample. The conservative lifecycle action is PARK: do not promote, do not kill, do not re-tune.",
+  "explicit_blocked_actions": [
+    "DO NOT advance S10-D2 to live trading.",
+    "DO NOT advance S10-D2 to paper trading via broker connection.",
+    "DO NOT modify any sealed Tier-N / plan-lock / phase-2 / P3 / P3.5 / P3.6 / P4 / P6 / P6.5 / P7 / P10 file.",
+    "DO NOT modify in_sample_driver.py, out_of_sample_driver.py, main.py, execution_guard.py, or any other S10-D2 source file in response to this PARK decision.",
+    "DO NOT change Donchian periods, ATR multiplier, risk %, max_units, AMB6 filter, starting_cash, cost-tier definitions, or any other strategy parameter to make a future verdict cleaner.",
+    "DO NOT relax K9 threshold to 'confirm' OOS.",
+    "DO NOT re-run OOS with different parameters or different cost tiers without a fresh sealed authorization that documents the research hypothesis.",
+    "DO NOT pre-emptively author S11-D1 Tier-N specification without a separate operator authorization.",
+    "DO NOT make any profitability claim outside this conservative PARK framing.",
+    "DO NOT touch obsidian-trade-logger.",
+    "DO NOT mutate review_queue.json.",
+    "DO NOT touch brain_memory/projects/trading_bot/lessons.md.",
+    "DO NOT revive S8-D1, S7-D1, D5, B005_001, or NKE in response to this PARK.",
+    "DO NOT call Databento API, QuantConnect, or any broker/exchange/wallet API in response to this PARK."
+  ],
+  "future_research_options_only_no_pre_approval": {
+    "all_options_require_separate_fresh_sealed_authorization": true,
+    "no_option_is_pre_approved_by_this_memo": true,
+    "options": {
+      "option_1_s11_d1_mnq_c_0_single_instrument_fallback": {
+        "description": "Switch research focus to the parallel-session S11-D1 MNQ.c.0 single-instrument selection plan (committed at 556ab3f). A single-instrument design may produce different OOS trade-density dynamics worth investigating.",
+        "prerequisites_for_authorization": [
+          "Operator review of the S11-D1 selection plan at commit 556ab3f.",
+          "Fresh AUTHORIZE S11-D1 Tier-N specification turn with full enumerated scope."
+        ],
+        "preserves_s10_d2_sealed_chain": true
+      },
+      "option_2_longer_oos_window": {
+        "description": "Wait for additional months of OOS market data (e.g., 2026+ as it becomes available) and re-attempt the OOS gate with a larger sample. Could push closed-trade count above the K9 threshold of 100 by extending the window.",
+        "prerequisites_for_authorization": [
+          "Wait for sufficient additional OOS history to accumulate.",
+          "Fresh AUTHORIZE turn for a sealed Databento fetch extension (OOS-only).",
+          "Fresh AUTHORIZE S10-D2 P10-rerun turn after the extended OOS cache is sealed."
+        ],
+        "preserves_s10_d2_sealed_chain": true
+      },
+      "option_3_oos_cost_stress_sweep": {
+        "description": "Run cost-stress matrix S0/S1/S2/S3/S4 against OOS data (analog of P6.5 but on OOS instead of IS). Would test robustness of the OOS result under cost variation. Same K9 sample-size constraint would still apply to each tier.",
+        "prerequisites_for_authorization": [
+          "Fresh AUTHORIZE turn explicitly framing OOS cost-stress as a research diagnostic (not as a re-evaluation of the OOS verdict).",
+          "Expected ~80s per tier x 4 non-baseline tiers + S1 baseline = ~6-7 min wall."
+        ],
+        "preserves_s10_d2_sealed_chain": true
+      },
+      "option_4_fresh_candidate_different_markets_or_regime_overlay": {
+        "description": "Author a fresh candidate (different candidate_record_id) with different market selection, regime overlay, or signal design. Treat S10-D2 lessons as inputs to the design but do not modify S10-D2 itself.",
+        "prerequisites_for_authorization": [
+          "Fresh AUTHORIZE Tier-N specification for the new candidate with full enumerated scope.",
+          "S10-D2 sealed chain remains as the parent / predecessor reference."
+        ],
+        "preserves_s10_d2_sealed_chain": true
+      }
+    }
+  },
+  "hard_boundaries_held": {
+    "no_backtest": true,
+    "no_broker_adapter_touched": true,
+    "no_broker_exchange_api": true,
+    "no_commit_in_orchestrator": true,
+    "no_d5_b005_001_nke_revival": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_db_historical": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_confirmation_claim": true,
+    "no_oos_inspection_beyond_sealed_p10": true,
+    "no_paper_trading": true,
+    "no_pre_approval_of_any_successor": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_qc_runtime": true,
+    "no_re_tuning": true,
+    "no_review_queue_mutation": true,
+    "no_s11_d1_started": true,
+    "no_s8_d1_or_s7_d1_revival": true,
+    "no_scheduler_change": true,
+    "no_source_modification": true,
+    "no_strategy_execution": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true
+  },
+  "inherited_seals": {
+    "p10_oos_gate_seal_sha256": "4038e5334feba9ea61b91dcb47287a7a8f9f8fdfd8ad35990866bc9fbd106137",
+    "p3_5_scaffold_completion_seal_sha256": "66d38f359b54882b3107c4ad4291673d63f05f5b0d3daa19088b4a4c76469261",
+    "p3_6_oos_driver_build_seal_sha256": "c7d9d7888f2bc5df6850ab37f9bde0b95c3c794486382c4b0d45f32b6bd1b73d",
+    "p3_build_in_sample_driver_report_seal_sha256": "ddd604c96508a0ab835bcbae6e72fabc2993cd3f0dc459898ca326617dd96443",
+    "p3_build_runner_report_seal_sha256": "1eb04aa312f4053134c1e9387be7716aa4564c019168ee2cedcf789063d96405",
+    "p4_smoke_seal_sha256": "c31ded81f9a2883586883aadda4d64d629a047917fcebd56169ca42eccf4fdde",
+    "p6_5_cost_stress_matrix_seal_sha256": "f9a34674de4f7fdf8098b39959032d152bf2282e9ad57cedd68bc33cee2099ab",
+    "p6_is_diagnostic_seal_sha256": "e6cdc7c68a9e2b7b6d749b73ff433e585c9de55890af5dce3dca51d74430c1b8",
+    "p7_decision_memo_seal_sha256": "87baa6e8c4cc1eb47c1345b97990eab86d5cefb37636e9fe57a029506d398c05",
+    "phase2_plan_seal_sha256": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LIFECYCLE_PARK_DECISION",
+    "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NO_FRC_GRANTED",
+    "NO_NEXT_STEP_PRE_APPROVED"
+  ],
+  "live_promotion_path_closed": true,
+  "live_trading_remains_blocked_at_6_gates_permanently": true,
+  "no_oos_confirmation_claim": true,
+  "no_profitability_claim": true,
+  "oos_vs_is_comparison": {
+    "interpretation": "The OOS edge appears to have survived in direction but degraded in magnitude. Whether the magnitude degradation reflects regime shift, sample noise, or true edge decay is INDETERMINATE from a 3-year OOS window with 53 closed trades. The conservative reading is that the strategy did not refute itself but also did not statistically confirm itself.",
+    "is_baseline_window": [
+      "2013-01-01",
+      "2022-12-30"
+    ],
+    "is_years": 10,
+    "oos_window": [
+      "2023-01-01",
+      "2025-12-31"
+    ],
+    "oos_years": 3,
+    "ratios": {
+      "expectancy_ratio": 0.4399500701337249,
+      "sharpe_ratio": 0.7023196897331654,
+      "trades_per_year_oos_vs_is": 0.8833333333333334
+    },
+    "what_degraded": [
+      "Per-trade expectancy: OOS ~0.44x of IS magnitude.",
+      "Per-trade sharpe proxy: OOS ~0.70x of IS magnitude.",
+      "Net PnL per year: OOS ~0.39x of IS magnitude.",
+      "Closed-trade count: 53 vs 200, leaving sample below K9 threshold of 100."
+    ],
+    "what_survived": [
+      "Direction of edge (positive sharpe, expectancy, net PnL).",
+      "All safety counters held zero across IS + 5 cost tiers + OOS.",
+      "No-pyramid invariant held across all phases.",
+      "Starting cash invariant ($500,000) held across all phases.",
+      "Trade frequency roughly consistent (17.7 OOS/year vs 20 IS/year ≈ 0.88x).",
+      "Max drawdown actually improved (OOS -12.96% vs IS -28.31%)."
+    ]
+  },
+  "park_status_decision_logic": [
+    "P6 IS was clean enough to advance to cost-stress: 200 trades, all safety zero, 0 K-gates fired, all A-gates passed.",
+    "P6.5 cost-stress matrix was clean enough to advance to OOS: matrix verdict READY_FOR_NEXT_PHASE; A8 PASS; K12 not fired; 0 DR fires.",
+    "P7 correctly advanced to OOS gate as the next research truth-test.",
+    "P10 OOS produced directionally-consistent metrics but K9 fired (closed_trades=53 < 100 threshold).",
+    "Safety counters remained zero across IS + 5 cost tiers + OOS. No-pyramid invariant held everywhere. Starting cash invariant held.",
+    "OOS sample was structurally limited by the available 3-year OOS window vs the 10-year IS window — this is a function of available history, not a function of the strategy.",
+    "Positive OOS direction is encouraging but is NOT proof.",
+    "Therefore the conservative lifecycle decision is PARK — not ADVANCE, not KILL, not PROMOTE."
+  ],
+  "park_status_enum": "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+  "park_status_enum_allowed": [
+    "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "PARKED_SAFE_BUT_NOT_MONEY_PROVEN_OOS_SIZING_UNDERSIZED",
+    "PARKED_OOS_REFUTED",
+    "PARKED_PENDING_LONGER_OOS_WINDOW"
+  ],
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC",
+  "report_kind": "S10-D2 P11 PARK memo (sealed lifecycle decision; synthesis of P6 IS + P6.5 + P7 + P10)",
+  "report_seal_sha256": "e121b82b411697c7d06bbe9ee1cc2df29c04df76712873ed0fbfd76f25fab1cb",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "status_fields": {
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "verdict_never_means_live_ready": true,
+  "what_the_park_does_NOT_mean": [
+    "Does NOT mean the strategy is live-ready or paper-ready.",
+    "Does NOT mean OOS results 'confirm' the IS edge.",
+    "Does NOT mean future P&L will resemble IS or OOS P&L.",
+    "Does NOT mean threshold loosening or re-tuning is in scope.",
+    "Does NOT mean any successor candidate (S11-D1, longer OOS, OOS cost-stress, fresh candidate) is pre-approved.",
+    "Does NOT lift the permanent 6-gate live-block.",
+    "Does NOT promote this candidate beyond research-diagnostic status.",
+    "Does NOT make any profitability claim.",
+    "Does NOT shorten any future research-validation requirement."
+  ],
+  "what_the_park_means": [
+    "S10-D2 has been carefully and conservatively evaluated through the full sealed IS + cost-stress + OOS lifecycle.",
+    "All safety guards held throughout; no safety K-gate fired anywhere.",
+    "The candidate is intellectually 'still alive' in the sense that no evidence has refuted the IS-derived hypothesis — but the OOS evidence is not statistically sufficient to confirm it.",
+    "The PARK preserves all sealed artifacts (10 commits across the chain) for future reference, comparison, or successor candidate design.",
+    "Any future continuation must come through a separate fresh sealed authorization."
+  ],
+  "why_park_not_advance": [
+    "OOS closed-trade count (53) is below K9 threshold of 100. A1 acceptance gate FAILED.",
+    "Advancing to live/paper promotion paths is permanently blocked at 6 gates regardless.",
+    "Advancing to P10.5 / P11.5 / similar would require a fresh sealed authorization with a documented research hypothesis (e.g., longer OOS window, cost-stress OOS).",
+    "The chain-of-custody framework is explicit: lacking statistical confirmation is not a basis for advancement."
+  ],
+  "why_park_not_kill": [
+    "Safety counters held zero across IS + 5 cost tiers + OOS — no safety K-gate fired.",
+    "Performance K-gates K1/K2/K4 did NOT fire on OOS (sharpe>0, expectancy>0, |maxdd|<50%).",
+    "OOS direction is consistent with IS edge; magnitude degraded but stayed positive.",
+    "Killing the candidate would discard usable evidence — the chain ran cleanly and produced an interpretable INDETERMINATE result.",
+    "PARK preserves the chain artifacts for future cross-reference and successor design."
+  ]
+}
