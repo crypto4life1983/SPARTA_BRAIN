@@ -1,0 +1,371 @@
+{
+  "schema_id": "sparta.external_research_hunter.s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_l1_carry_supplement_sealed.v1",
+  "candidate_record_id": "s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history",
+  "phase_prefix": "PHASE2-S13-D1-MNQ-RSI-2-BIDIR",
+  "phase": "P1_L1_CARRY_FORWARD_SUPPLEMENT",
+  "lifecycle_state": "S13_D1_P1_L1_CARRY_FORWARD_SUPPLEMENT_SEALED",
+  "title": "s13-d1 P1 plan-lock L1-carry-forward supplement (supplement-only; not a P1 rewrite; not a P1_rev_M; not a P2 authorization; attaches REC1_T1_BINDING_K9_DISCLOSURE + L1-discount memo cross-reference to the P1 chain step before any P2 turn)",
+  "report_kind": "Sealed supplement attaching REC1_T1_BINDING_K9_DISCLOSURE (verbatim from L1-gap addendum e2ae683) and cross-references to L1-discount memo 2869945 + addendum e2ae683 directly to the s13-d1 P1 plan-lock chain step at 005cb8a. Defensive against parallel-session autonomous-progression pattern where future P2 may be auto-authored inheriting only P1's content (which predates the addendum and lacks the formal L1 framework). Mandates byte-equivalent carry of REC1_T1 through P2/P3/P4/P6/P6.5/P7/P10/P11. No code, no build, no execution, no signal, no fetch, no CSV read.",
+  "authored_at_utc": "2026-05-27T17:23:11.233507+00:00",
+  "binding": true,
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "SUPPLEMENT_ONLY",
+    "NOT_A_P1_REWRITE",
+    "NOT_A_P1_REV_M",
+    "NOT_A_P2_AUTHORIZATION",
+    "L1_CARRY_FORWARD_BEFORE_P2",
+    "REC1_T1_BINDING_K9_DISCLOSURE_ATTACHED_TO_P1_CHAIN_STEP",
+    "BYTE_EQUIVALENT_CARRY_THROUGH_ALL_FUTURE_S13_D1_PHASES_MANDATED",
+    "S12_D1_TERMINAL_PARK_PRESERVED",
+    "PARALLEL_SEAL_B_CHAIN_NOT_ANCHORED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_LIVE_READINESS_CLAIM",
+    "NO_OOS_CONFIRMATION_CLAIM",
+    "NO_K9_RELAXATION",
+    "NO_REC1_DEMOTION",
+    "NO_DR_REDEFINITION",
+    "NO_P2_AUTHORIZED",
+    "NO_P3_BUILD_AUTHORIZED",
+    "NO_PHASE_PRE_APPROVED"
+  ],
+  "operator_authorization_phrase": "Authorize a short S13-D1 P1 L1 carry-forward supplement only",
+  "supplement_status_attestation": {
+    "is_supplement_only": true,
+    "is_p1_rewrite": false,
+    "is_p1_rev_m": false,
+    "is_p2_authorization": false,
+    "is_p3_build_authorization": false,
+    "is_any_phase_authorization": false,
+    "modifies_005cb8a_p1": false,
+    "modifies_262491c_seal": false,
+    "modifies_e2ae683_addendum": false,
+    "modifies_2869945_l1_memo": false,
+    "supplement_role": "Attaches REC1_T1_BINDING_K9_DISCLOSURE + cross-references to the L1-gap addendum (e2ae683) and L1-discount memo (2869945) directly to the s13-d1 P1 plan-lock chain step at 005cb8a. Defensive against parallel-session autonomous-progression pattern where future P2 may be authored inheriting only P1's content (P1 predates the addendum and lacks the formal L1 framework). This supplement makes the L1 link visible at the chain level to any future P2-authoring turn."
+  },
+  "p1_acceptance": {
+    "p1_commit": "005cb8a",
+    "p1_seal_sha256": "1cac253cbbbf4cdab87e777edbe0bca00739e925de382bd1d687faae9731052c",
+    "p1_json_path": "reports/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_plan_lock_sealed.json",
+    "p1_md_path": "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_plan_lock.md",
+    "structurally_valid": true,
+    "p1_self_verifies": true,
+    "p1_seal_self_verify_evidence": "Recomputed via canonical LESSON_HUNTER_004 recipe; declared seal matches recomputed seal (1cac253cbbbf4cdab87e777edbe0bca00739e925de382bd1d687faae9731052c).",
+    "operator_acceptance_phrase": "Accept S13-D1 P1 005cb8a as structurally valid"
+  },
+  "p1_anchors_seal_attestation": {
+    "p1_parent_references_tier_n_spec_commit": "262491c",
+    "p1_parent_references_tier_n_spec_seal_sha256": "2f9d176388fe0b66c9ced19f33c68e079bb08112f3d52f3f20a9aba7d91bf775",
+    "seal_byte_equivalent_inheritance_verified": true,
+    "seal_anchor_count_in_p1_body": 7,
+    "anchoring_attested": true
+  },
+  "p1_authorization_scope_attestation": {
+    "p1_explicit_next_phase_requirement": {
+      "next_phase_is_p2_phase_2_plan_identifies_what_next_phase_would_be_only": true,
+      "p2_phase_2_plan_requires_separate_authorization_phrase": "Authorize s13 D1 MNQ.c.0 P2 phase-2 plan only",
+      "p3_build_requires_separate_authorization": true,
+      "p4_smoke_requires_separate_authorization": true,
+      "p6_is_requires_separate_authorization": true,
+      "p6_5_cost_stress_requires_separate_authorization": true,
+      "p7_decision_memo_requires_separate_authorization": true,
+      "p10_oos_gate_requires_separate_authorization": true,
+      "p11_lifecycle_decision_requires_separate_authorization": true,
+      "no_phase_beyond_p2_pre_approved_by_p1": true,
+      "no_phase_pre_approval_beyond_plan_lock_boundary": true
+    },
+    "p1_does_not_authorize_p2": true,
+    "p1_does_not_authorize_p3": true,
+    "p1_does_not_authorize_build": true,
+    "p1_does_not_authorize_execution": true,
+    "p1_does_not_authorize_test_run": true
+  },
+  "p1_timeline_and_gap_explanation": {
+    "p1_authored_before_addendum": true,
+    "p1_authored_before_l1_discount_memo": false,
+    "p1_authored_before_supplement_authoring_turn": true,
+    "p1_timeline_evidence": "P1 commit 005cb8a was authored at parallel-session UTC time inheriting byte-equivalent from SEAL 262491c (which itself predates the L1-gap addendum e2ae683 by definition since 262491c was authored before the addendum's authorization). The L1-discount memo 2869945 predates both, but P1's author did not cross-reference it. The L1-gap addendum e2ae683 was committed AFTER P1 005cb8a, making it timeline-impossible for P1 to reference the addendum at authoring time.",
+    "p1_lacks_formal_l1_addendum_cross_reference": true,
+    "p1_lacks_formal_l1_framework_2x_3x_tables": true,
+    "p1_lacks_rec1_t1_naming": true,
+    "p1_lacks_l1_memo_2869945_cross_reference": true,
+    "p1_carries_partial_rec1_equivalent_byte_equivalent_from_seal": true,
+    "p1_carries_25_per_year_tripwire": true,
+    "this_supplement_closes_the_p1_cross_reference_gap": true,
+    "this_supplement_does_not_modify_p1": true
+  },
+  "rec1_t1_binding_k9_disclosure_attached_to_p1_chain_step": {
+    "attachment_chain_step": "005cb8a (s13-d1 P1 plan-lock)",
+    "source_addendum": "e2ae683 (s13-d1 L1-gap closure addendum)",
+    "source_addendum_seal_sha256": "769eac9954e3da940d09913b63a6095e2d807da9f7b4d3291d7dc67236a64055",
+    "rec1_t1_binding_text_verbatim": "REC1_T1 (binding): Under the L1 epistemic-discount framework (memo 2869945 seal e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3), the T1 RSI(2) bi-directional MNQ.c.0 trade-rate estimate of 50-65 trades/year is classified as HEURISTIC_ESTIMATE_L1_DISCOUNT_APPLIES pending operator-supplied specific citation or hand-count validation. At the 2x conservative discount (25-32.5 trades/year), OOS K9 (>= 50/y over 2.0y = 100 trades) FIRES; expected OOS verdict is OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED. At the 3x conservative discount (16.7-21.7 trades/year), BOTH IS K9 and OOS K9 fire; expected IS verdict is INSUFFICIENT_SAMPLE analogous to s12-d1 PARK at ecbd001 (48 closed trades < K9=100). The chain shall NOT relax K9 at any phase. The 25/y tripwire identified in DRAFT 8fcefaf §10.2 is the 2x discount low-end and remains the parking trigger. Pursuing s13-d1 without independent source validation of the 50-65/y estimate accepts the structural likelihood of OOS PARK (under 2x discount) or IS PARK (under 3x discount) outcomes analogous to s12-d1.",
+    "byte_equivalent_to_e2ae683_rec1_t1_binding": true,
+    "rec1_t1_relaxation_authorized": false,
+    "rec1_t1_demotion_to_advisory_authorized": false,
+    "rec1_t1_threshold_modification_authorized": false
+  },
+  "cross_references_binding": {
+    "l1_gap_addendum": {
+      "commit": "e2ae683",
+      "seal_sha256": "769eac9954e3da940d09913b63a6095e2d807da9f7b4d3291d7dc67236a64055",
+      "json_path": "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_draft_l1_gap_closure_addendum_sealed.json",
+      "md_path": "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_draft_l1_gap_closure_addendum_sealed.md",
+      "role": "Primary source of REC1_T1 binding + formal L1 2x/3x discount tables."
+    },
+    "l1_discount_memo": {
+      "commit": "2869945",
+      "seal_sha256": "e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3",
+      "json_path": "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.json",
+      "md_path": "reports/external_research_hunter/next_track_selection_plan_revision_l1_discount_memo_sealed.md",
+      "role": "Origin of L1 epistemic-discount framework (2x/3x factors + source-class taxonomy)."
+    }
+  },
+  "rec1_t1_byte_equivalent_carry_mandate": {
+    "mandate_is_binding": true,
+    "mandate_load_bearing": true,
+    "future_phases_required_to_carry_rec1_t1_byte_equivalent": [
+      {
+        "phase": "P2",
+        "description": "S13-D1 P2 phase-2 plan",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P3",
+        "description": "S13-D1 P3 BUILD (runner harness + IS/OOS drivers + tests + sealed build reports)",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P4",
+        "description": "S13-D1 P4 synthetic smoke",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P6",
+        "description": "S13-D1 P6 IS diagnostic",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P6.5",
+        "description": "S13-D1 P6.5 cost-stress matrix",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P7",
+        "description": "S13-D1 P7 decision memo",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P10",
+        "description": "S13-D1 P10 OOS gate",
+        "must_carry_rec1_t1_byte_equivalent": true
+      },
+      {
+        "phase": "P11",
+        "description": "S13-D1 P11 lifecycle decision",
+        "must_carry_rec1_t1_byte_equivalent": true
+      }
+    ],
+    "byte_equivalent_means": "REC1_T1 verbatim text shall appear in each future phase's sealed JSON body in a field that is included in the canonical seal computation. Cross-reference to e2ae683 (seal 769eac99...) and 2869945 (seal e41690d6...) shall be present in the same body. Any future phase that fails to carry REC1_T1 byte-equivalent without explicit operator override is a chain-integrity defect and shall trigger a carry-forward supplement of its own (analogous to this supplement) before the next phase is authored."
+  },
+  "recommended_future_p2_authorization_language": {
+    "recommended_phrase_verbatim": "Authorize s13 D1 MNQ.c.0 P2 phase-2 plan only. Carry REC1_T1_BINDING_K9_DISCLOSURE byte-equivalent per addendum e2ae683.",
+    "rationale": "The 'only' clause restricts scope to P2 (no P3 or beyond). The 'Carry REC1_T1...' clause makes the byte-equivalent carry mandate explicit at operator-authorization time, providing an extra-strong signal to any P2-authoring turn (parallel or otherwise) that REC1_T1 must appear in the P2 sealed body.",
+    "alternative_phrase_if_operator_prefers": "Authorize S13-D1 P2 phase-2 plan only. Anchors to P1 005cb8a and L1 carry supplement (this memo). Carry REC1_T1 from e2ae683 byte-equivalent.",
+    "alternative_phrases_NOT_recommended": [
+      "Authorize s13 D1 MNQ.c.0 P2 phase-2 plan only (WITHOUT REC1_T1 clause -- risks parallel auto-author inheriting partial REC1-equivalent from P1 without seeing this supplement)",
+      "Authorize next phase of s13-d1 (too vague; allows scope creep)"
+    ]
+  },
+  "s12_d1_terminal_preservation_attestation": {
+    "s12_d1_lifecycle_state": "PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_chain_byte_stable_at_head": true,
+    "s12_d1_runner_harness_files_modified_by_this_supplement": false,
+    "s12_d1_seal_a_chain_modified_by_this_supplement": false,
+    "s12_d1_revival_authorized_by_this_supplement": false,
+    "s12_d1_remains_terminal_for_its_candidate_record_id": true
+  },
+  "no_p2_no_p3_no_build_no_execution_authorized_attestation": {
+    "supplement_is_documentation_only": true,
+    "no_p2_authorized_by_this_supplement": true,
+    "no_p3_authorized_by_this_supplement": true,
+    "no_p3_build_authorized_by_this_supplement": true,
+    "no_p4_authorized_by_this_supplement": true,
+    "no_p6_authorized_by_this_supplement": true,
+    "no_p6_5_authorized_by_this_supplement": true,
+    "no_p7_authorized_by_this_supplement": true,
+    "no_p10_authorized_by_this_supplement": true,
+    "no_p11_authorized_by_this_supplement": true,
+    "no_test_run_authorized_by_this_supplement": true,
+    "no_diagnostic_run_authorized_by_this_supplement": true,
+    "no_signal_computation_authorized_by_this_supplement": true,
+    "no_data_fetch_authorized_by_this_supplement": true,
+    "no_csv_read_during_authoring": true,
+    "no_strategy_logic_authored_or_modified": true,
+    "no_phase_pre_approved_by_this_supplement": true
+  },
+  "parent_references": {
+    "s13_d1_plan_commit": "5e57984",
+    "s13_d1_draft_commit": "8fcefaf",
+    "s13_d1_seal_commit": "262491c",
+    "s13_d1_seal_sha256": "2f9d176388fe0b66c9ced19f33c68e079bb08112f3d52f3f20a9aba7d91bf775",
+    "s13_d1_p1_commit": "005cb8a",
+    "s13_d1_p1_seal_sha256": "1cac253cbbbf4cdab87e777edbe0bca00739e925de382bd1d687faae9731052c",
+    "l1_discount_memo_commit": "2869945",
+    "l1_discount_memo_seal_sha256": "e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3",
+    "l1_gap_addendum_commit": "e2ae683",
+    "l1_gap_addendum_seal_sha256": "769eac9954e3da940d09913b63a6095e2d807da9f7b4d3291d7dc67236a64055",
+    "selection_plan_commit": "0e3f9d4",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_p6_is_diagnostic_commit": "9241ed6",
+    "s12_d1_seal_commit": "66bbbd1",
+    "s11_d1_v1_commit": "9c63088",
+    "s11_d1_rev2_commit": "c110fd4",
+    "s10_d2_park_commit": "23c7164",
+    "s10_d1_park_commit": "1a9acec",
+    "mnq_c0_csv_path_reference_only_not_read": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_sha256_reference_only_not_read": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e"
+  },
+  "non_anchored_acknowledgements": {
+    "parallel_seal_b_chain": {
+      "seal_b_commit": "9ce4d66",
+      "p1_b_commit": "bd7245e",
+      "p2_b_commit": "2b27acc",
+      "p3_b_commit": "b97331a",
+      "p4_b_commit": "8cfdeb1",
+      "p6_b_commit": "8621c32",
+      "p11_b_commit": "ce279cf",
+      "status": "PARALLEL_SEAL_B_CHAIN_ACKNOWLEDGED_NOT_ANCHORED"
+    }
+  },
+  "posture_invariants": {
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc_status": "NEVER_GRANTED",
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "profitability_claim_made": false,
+    "live_readiness_claim_made": false,
+    "oos_confirmation_claim_made": false,
+    "paper_ready_claim_made": false,
+    "money_proven_claim_made": false,
+    "k9_threshold_relaxed": false,
+    "rec1_binding_demoted": false,
+    "rec1_t1_binding_demoted": false,
+    "permanent_live_block": true,
+    "research_diagnostic_only": true,
+    "no_strategy_optimization_authorized": true,
+    "no_dr_redefinition_post_seal": true
+  },
+  "hard_boundaries_held_this_supplement_turn": {
+    "supplement_only_no_p1_rewrite": true,
+    "supplement_only_no_p1_rev_m": true,
+    "supplement_only_no_p2_authorization": true,
+    "supplement_only_no_p3_build_authorization": true,
+    "supplement_only_no_seal_authoring": true,
+    "supplement_only_no_build": true,
+    "supplement_only_no_tests": true,
+    "supplement_only_no_diagnostics": true,
+    "supplement_only_no_signal_computation": true,
+    "supplement_only_no_csv_read": true,
+    "supplement_only_no_data_fetch": true,
+    "supplement_only_no_databento_call": true,
+    "supplement_only_no_databento_api_key_access": true,
+    "supplement_only_no_network_call": true,
+    "supplement_only_no_strategy_logic_modification": true,
+    "no_modification_of_005cb8a_p1": true,
+    "no_modification_of_262491c_seal": true,
+    "no_modification_of_8fcefaf_draft": true,
+    "no_modification_of_5e57984_plan": true,
+    "no_modification_of_e2ae683_addendum": true,
+    "no_modification_of_2869945_l1_memo": true,
+    "no_modification_of_s12_d1_p11_park_at_ecbd001": true,
+    "no_modification_of_s12_d1_seal_a_chain": true,
+    "no_modification_of_s11_d1_artifacts": true,
+    "no_modification_of_s10_d1_artifacts": true,
+    "no_modification_of_s10_d2_artifacts": true,
+    "no_modification_of_parallel_seal_b_chain": true,
+    "no_modification_of_runner_harness_files": true,
+    "no_modification_of_drivers": true,
+    "no_modification_of_cache_or_data_directory": true,
+    "no_command_center_files_touched": true,
+    "no_lessons_md_touched": true,
+    "no_tmp_build_s12_d1_seal_artifacts_py_touched": true,
+    "no_tmp_run_s12_d1_p6_is_diagnostic_py_touched": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_p2_authored": true,
+    "no_s13_d1_p3_build_authored": true,
+    "no_s13_d1_any_later_phase_authored": true,
+    "no_k9_relaxation": true,
+    "no_rec1_demotion": true,
+    "no_rec1_t1_demotion": true,
+    "no_dr_redefinition": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true,
+    "no_self_authorization_to_run_anything": true,
+    "no_phase_pre_approved_by_this_supplement": true,
+    "no_staging": true,
+    "no_commit": true
+  },
+  "negative_invariants": {
+    "claims_money_proven": false,
+    "claims_live_ready": false,
+    "claims_paper_ready_for_broker_routing": false,
+    "claims_strategy_optimized": false,
+    "claims_oos_confirmed": false,
+    "claims_t1_will_clear_k9_oos": false,
+    "claims_t1_estimate_is_validated": false,
+    "claims_p2_authorized": false,
+    "claims_p3_authorized": false,
+    "claims_build_authorized": false,
+    "claims_seal_or_p1_rewritten": false,
+    "claims_s12_d1_revived": false,
+    "schema_id_silently_bumped": false,
+    "rec1_oos_k9_risk_disclosure_demoted_to_advisory": false,
+    "rec1_t1_binding_demoted_to_advisory": false,
+    "s12_d1_seal_a_chain_modified": false,
+    "parallel_seal_b_chain_modified": false,
+    "p1_005cb8a_modified": false,
+    "seal_262491c_modified": false,
+    "addendum_e2ae683_modified": false,
+    "memo_2869945_modified": false
+  },
+  "next_phase_requirements": {
+    "no_phase_pre_approved_by_this_supplement": true,
+    "p2_authorization_requires_separate_operator_phrase": true,
+    "p2_authorization_phrase_recommended_to_include_rec1_t1_clause": true,
+    "recommended_p2_phrase": "Authorize s13 D1 MNQ.c.0 P2 phase-2 plan only. Carry REC1_T1_BINDING_K9_DISCLOSURE byte-equivalent per addendum e2ae683.",
+    "all_subsequent_phases_require_separate_authorization": true,
+    "all_subsequent_phases_must_carry_rec1_t1_byte_equivalent": true
+  },
+  "files_touched_during_this_supplement_authoring": {
+    "tracked_files_modified": [],
+    "tracked_files_added": [],
+    "untracked_files_created_by_this_supplement_authoring": [
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_l1_carry_supplement_sealed.json",
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_l1_carry_supplement_sealed.md"
+    ],
+    "helper_script_to_delete_after_seal_verify": ".tmp_author_s13_d1_p1_l1_carry_supplement.py",
+    "not_staged_not_committed": true,
+    "no_network_calls_no_data_fetch_no_csv_read_no_signal_compute": true
+  },
+  "final_status_list": [
+    "supplement_role: ATTACH_REC1_T1_BINDING_TO_P1_CHAIN_STEP_BEFORE_P2",
+    "p1_acceptance: structurally_valid",
+    "p1_anchors_seal_262491c: byte-equivalent",
+    "p1_does_not_authorize_p2_p3_build_execution: TRUE",
+    "rec1_t1_binding_attached_to_p1_chain: TRUE (verbatim from e2ae683)",
+    "cross_reference_e2ae683: 769eac9954e3da940d09913b63a6095e2d807da9f7b4d3291d7dc67236a64055",
+    "cross_reference_2869945: e41690d6b1ecd824fa5521525f64cdd13e3e558c6b8a93123e4a83f1d515c5b3",
+    "rec1_t1_byte_equivalent_carry_mandate: P2 / P3 / P4 / P6 / P6.5 / P7 / P10 / P11",
+    "recommended_p2_phrase: 'Authorize s13 D1 MNQ.c.0 P2 phase-2 plan only. Carry REC1_T1_BINDING_K9_DISCLOSURE byte-equivalent per addendum e2ae683.'",
+    "s12_d1_terminal_park_preserved: TRUE",
+    "no_p2_no_p3_no_build_no_execution_authorized: TRUE",
+    "trading_status: PAUSED",
+    "live_status: BLOCKED_AT_6_GATES",
+    "frc_status: NEVER_GRANTED"
+  ],
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "report_seal_sha256": "a99898a49fe3b5939e7181dbd27644e6aec8491554e925a64b15bffb8160aa0e"
+}
