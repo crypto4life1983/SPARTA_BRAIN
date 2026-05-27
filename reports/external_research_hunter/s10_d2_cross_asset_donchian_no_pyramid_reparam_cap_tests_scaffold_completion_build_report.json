@@ -1,0 +1,112 @@
+{
+  "algo_version_for_run_id": "s10_d2_v0_1_0",
+  "authored_at_utc": "2026-05-27T01:11:43.457405Z",
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "files_authored": {
+    "conftest_py": {
+      "byte_count": 364,
+      "byte_identical_to_s8_d1": false,
+      "diff_scope": "docstring-only rename (1 minus / 1 plus line)",
+      "path": "external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness/tests/conftest.py",
+      "s10_d2_sha256": "b2b796c9d6a4b9d40c6f7634eaa82eb2eec8ad978ab722496dce6c3492de187a",
+      "s8_d1_sha256": "4fa1e131e951f9476681b57efa16e20e9377a8f1f9a1e1dd11e7762a9ed72696",
+      "s8_d1_source_path": "external_research_hunter/s8_d1_cross_asset_donchian_no_pyramid_runner_harness/tests/conftest.py",
+      "static_validation": {
+        "ast_parse": "OK",
+        "compile": "OK",
+        "forbidden_top_imports": [],
+        "imports_observed_at_top_level": [
+          "pathlib.Path",
+          "pytest"
+        ]
+      }
+    },
+    "fixtures_csv": [
+      {
+        "byte_count": 5499,
+        "byte_identical": true,
+        "name": "synthetic_nq_daily.csv",
+        "row_count_excluding_header": 60,
+        "s10_d2_sha256": "d906f00cf4f395a3d3be149a244568a6f7f7067bae687faf6f15242ca0ecdb3b",
+        "s8_d1_sha256": "d906f00cf4f395a3d3be149a244568a6f7f7067bae687faf6f15242ca0ecdb3b",
+        "synthetic_marker_present_all_rows": true
+      },
+      {
+        "byte_count": 5259,
+        "byte_identical": true,
+        "name": "synthetic_gc_daily.csv",
+        "row_count_excluding_header": 60,
+        "s10_d2_sha256": "c77c04921dbaf4799c1f6451461973dda1675ce7313149da4f407246fa2f6a36",
+        "s8_d1_sha256": "c77c04921dbaf4799c1f6451461973dda1675ce7313149da4f407246fa2f6a36",
+        "synthetic_marker_present_all_rows": true
+      },
+      {
+        "byte_count": 5019,
+        "byte_identical": true,
+        "name": "synthetic_zn_daily.csv",
+        "row_count_excluding_header": 60,
+        "s10_d2_sha256": "bde24035c9c8fa35722abe68cfcb7a2febf265ceabe26dbb0f8eefdc0940eb27",
+        "s8_d1_sha256": "bde24035c9c8fa35722abe68cfcb7a2febf265ceabe26dbb0f8eefdc0940eb27",
+        "synthetic_marker_present_all_rows": true
+      },
+      {
+        "byte_count": 4779,
+        "byte_identical": true,
+        "name": "synthetic_cl_daily.csv",
+        "row_count_excluding_header": 60,
+        "s10_d2_sha256": "3bbe0eb8535f90ec5dd59779a48efa1a3f25b78ac538e2344dab33ab9850d014",
+        "s8_d1_sha256": "3bbe0eb8535f90ec5dd59779a48efa1a3f25b78ac538e2344dab33ab9850d014",
+        "synthetic_marker_present_all_rows": true
+      }
+    ]
+  },
+  "fixture_loader_refuses_non_synthetic": true,
+  "fixture_loader_safety_marker": "SYNTHETIC_PHASE2_SMOKE_FIXTURE",
+  "guard_byte_stability": {
+    "drift_detected": false,
+    "guarded_count": 24,
+    "s10_d2_p3_build_files_stable": true,
+    "s7_d1_files_stable": true,
+    "s8_d1_files_stable": true,
+    "test_smoke_t1_t15_py_stable": true
+  },
+  "hard_boundaries_held": {
+    "no_backtest": true,
+    "no_broker_adapter_touched": true,
+    "no_commit": true,
+    "no_d5_b005_001_nke_revival": true,
+    "no_databento_api_call": true,
+    "no_db_historical": true,
+    "no_dbn_decode": true,
+    "no_fetch": true,
+    "no_in_sample_driver_run": true,
+    "no_live_trading": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_inspection": true,
+    "no_p3_build_file_modified": true,
+    "no_paper_trading": true,
+    "no_profitability_claim": true,
+    "no_pytest_run": true,
+    "no_qc_call": true,
+    "no_review_queue_mutation": true,
+    "no_s7_d1_modified": true,
+    "no_s8_d1_modified": true,
+    "no_scheduler_change": true,
+    "no_smoke_run": true,
+    "no_test_smoke_modified": true
+  },
+  "inherited_seals": {
+    "p3_build_in_sample_driver_report_seal_sha256": "ddd604c96508a0ab835bcbae6e72fabc2993cd3f0dc459898ca326617dd96443",
+    "p3_build_runner_report_seal_sha256": "1eb04aa312f4053134c1e9387be7716aa4564c019168ee2cedcf789063d96405",
+    "phase2_plan_seal_sha256": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "next_step_recommendation": "AUTHORIZE COMMIT ONLY - S10-D2 P3.5 BUILD-EXTENSION files (7 files via pathspec)",
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC",
+  "report_kind": "S10-D2 P3.5 BUILD-EXTENSION tests-scaffold-completion",
+  "report_seal_sha256": "66d38f359b54882b3107c4ad4291673d63f05f5b0d3daa19088b4a4c76469261",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "turn_reason": "P3 BUILD allowed-file list omitted conftest.py and tests/fixtures/*.csv. test_smoke_t1_t15.py references fixtures_dir pytest fixture and synthetic_*_daily.csv files that must exist before P4 smoke run can execute. This P3.5 BUILD-EXTENSION turn adds those 5 prerequisite files (conftest + 4 CSVs) without modifying any of the 10 already-committed P3 BUILD files. No execution. No commit."
+}
