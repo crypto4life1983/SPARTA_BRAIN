@@ -1,0 +1,204 @@
+{
+  "authored_at_utc": "2026-05-27T15:27:22.996670Z",
+  "binding": true,
+  "build_scope": "runner harness package + test scaffold + synthetic fixture",
+  "candidate_record_id": "s12-d1-mnq-c0-single-instrument-donchian-15-8-databento-long-history",
+  "config_locked_strategy_params": {
+    "atr_method": "Wilder",
+    "atr_period": 20,
+    "dollar_per_point": 2.0,
+    "donchian_entry_period_n": 15,
+    "donchian_exit_period_n": 8,
+    "eod_cancel_time": [
+      16,
+      0
+    ],
+    "max_total_units": 1,
+    "max_units_per_market": 1,
+    "pyramid_method": "NONE",
+    "risk_pct_per_trade": 0.01,
+    "rth_safe_window_close": [
+      16,
+      0
+    ],
+    "rth_safe_window_open": [
+      9,
+      30
+    ],
+    "starting_cash_mnq_equivalent": 100000,
+    "stop_multiplier_in_atr": 2.0,
+    "tick_size_points": 0.25,
+    "tick_value_usd": 0.5,
+    "verdict_min_closed_trades": 100
+  },
+  "files_authored": {
+    "runner_execution_guard_py": {
+      "exports": [
+        "assert_seal_inheritance (K8)",
+        "assert_no_forbidden_order_paths",
+        "assert_rec1_binding_preserved",
+        "assert_locked_strategy_params",
+        "assert_boundary_alignment (C4)",
+        "assert_no_corporate_actions_for_futures (C5)",
+        "full_guard_check (rollup; T15)"
+      ],
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/execution_guard.py",
+      "sha256": "86107392173445bddaeea9fbcdd3d314bcbc0c9c61636408f73a0cd356ad4b42"
+    },
+    "runner_init_py": {
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/__init__.py",
+      "sha256": "5ab60a22596596a8c4a28b3e50162568b60aa92811e54f9d59b0deb3eb8c866c"
+    },
+    "runner_main_py": {
+      "exports": [
+        "CONFIG (locked-params dict)",
+        "Algo (QC-compatible class; instantiable without QC)",
+        "wilder_atr, compute_true_range, donchian_channels",
+        "long_entry_signal, short_entry_signal, long_exit_signal, short_exit_signal",
+        "compute_stop_price, compute_unit_contracts",
+        "add_pyramid_unit (raises RuntimeError per T7b)"
+      ],
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/main.py",
+      "sha256": "602dbdcf3afec7bbb0f2ca2be3af9539862b255f224aba93eed8c49072dc9a81"
+    },
+    "tests_conftest_py": {
+      "env_guards": [
+        "HTTP_PROXY=invalid",
+        "HTTPS_PROXY=invalid",
+        "DATABENTO_API_KEY popped"
+      ],
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/conftest.py",
+      "sha256": "b0ea29c0c712bfba06e7c632cc1c3985511873cc5fc9cc41578e2d71afb95bc3"
+    },
+    "tests_fixture_synthetic_mnq_daily_csv": {
+      "design": "30 flat baseline bars + 20 uptrend + 20 pullback + 20 flat tail",
+      "marker": "SYNTHETIC_PHASE2_SMOKE_FIXTURE",
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/fixtures/synthetic_mnq_daily.csv",
+      "row_count": 90,
+      "sha256": "72a92ed98943eb6b7e6d8191266ea6d209d43e05629a44fa8c1bb3544cd25e1c"
+    },
+    "tests_init_py": {
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/__init__.py",
+      "sha256": "b5abb6d33fe95a965994330c6ef5bff928ba0ab89ee67da0f812f00856b6e518"
+    },
+    "tests_test_smoke_t1_t15_py": {
+      "execution_status": "NOT_RUN_AT_P3_BUILD (P4 smoke requires separate operator authorization)",
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/test_smoke_t1_t15.py",
+      "sha256": "8a08d7fdc9111dfa46cf364f8af3b828027b3e4511b0b485ce94609640a9cc22",
+      "test_count_authored": 17,
+      "tests": [
+        "T1_module_imports_clean",
+        "T2_runner_class_instantiable",
+        "T3_wilder_atr_synthetic",
+        "T4_donchian_15_8_synthetic",
+        "T5_entry_trigger_synthetic_breakout",
+        "T6_stop_placement_at_2n",
+        "T7_pyramid_trigger_at_05n",
+        "T7b_add_pyramid_unit_raises_under_max_units_1",
+        "T7c_starting_cash_invariant_100000",
+        "T8_exit_on_donchian_8_reversal",
+        "T9_portfolio_cap_uses_unit_count_not_contract_count",
+        "T10_sizing_1pct_floor",
+        "T11_skip_when_contract_count_lt_one",
+        "T12_rth_only_filter_attested",
+        "T13_roll_cost_modeled_1_spread_tick",
+        "T14_cost_stress_matrix_S0_S1_S2_S3_S4",
+        "T15_validator_harness_pass_on_synthetic"
+      ]
+    }
+  },
+  "hard_boundaries_held_this_p3_build_runner_turn": {
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_brokerage_connection": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_databento_api_key_access": true,
+    "no_dr_redefinition": true,
+    "no_is_diagnostic_execution": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_parallel_session_seal_at_9ce4d66": true,
+    "no_modification_of_phase_2_safety_contract_template": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_s12_d1_p1_plan_lock_at_d8bd359": true,
+    "no_modification_of_s12_d1_p2_phase2_plan_at_0b8d948": true,
+    "no_modification_of_s12_d1_seal_at_66bbbd1": true,
+    "no_network_call": true,
+    "no_oos_inspection": true,
+    "no_p4_smoke_execution": true,
+    "no_paper_trading": true,
+    "no_qc_runtime": true,
+    "no_rec1_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_invoked": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true
+  },
+  "inherited_constraints_block": [
+    "REC1 (binding): OOS K9 EXPECTED TO FIRE. Implied OOS trade count over 2.0y at IS rate is approximately 35-87 trades, below K9 = 100. If OOS K9 fires, the OOS verdict will be OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE analogous to S10-D2 P11 PARK at 23c7164. The chain shall NOT relax K9 at OOS; the appropriate response is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and park the candidate. Pursuing s12-d1 accepts the structural likelihood of an OOS PARK outcome.",
+    "K9_THRESHOLD_INVIOLATE: closed_trades >= 100; no relaxation at any phase",
+    "DONCHIAN_15_8_LOCKED_AT_PLAN_NO_RETREAT_TO_55_20",
+    "MECHANIC_FAMILY_F1_LOCKED_AT_PLAN_NO_REOPENING_AT_DRAFT_OR_SEAL",
+    "DR10_RISK_ELEVATED_MITIGATED_VIA_DA4_B_START_CASH_100K",
+    "C5_CORPORATE_ACTION_STRUCTURALLY_ABSENT_FUTURES",
+    "TIER_N_SPEC_LOCKED_BYTE_EQUIVALENT_AT_66BBBD1",
+    "P1_PLAN_LOCK_LOCKED_BYTE_EQUIVALENT_AT_D8BD359",
+    "P2_PHASE_2_PLAN_LOCKED_BYTE_EQUIVALENT_AT_0B8D948",
+    "PARALLEL_SEAL_AT_9CE4D66_ACKNOWLEDGED_NOT_ANCHORED",
+    "EXPECTED_TERMINAL_VERDICT_PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P3_BUILD_RUNNER_REPORT_SEALED",
+    "S12_D1_MNQ_DONCHIAN_15_8_FRESH_CANDIDATE",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NO_FRC_GRANTED",
+    "NO_PROFITABILITY_CLAIM",
+    "REC1_OOS_K9_RISK_DISCLOSURE_BINDING",
+    "TESTS_AUTHORED_NOT_RUN_AT_P3_BUILD",
+    "P4_SMOKE_REQUIRES_SEPARATE_AUTHORIZATION"
+  ],
+  "lifecycle_state": "P3_BUILD_RUNNER_REPORT_SEALED",
+  "next_phase_requirements": {
+    "no_phase_pre_approved_by_this_report": true,
+    "p10_oos_gate_requires_separate_authorization": true,
+    "p4_authorization_phrase": "Authorize s12 D1 MNQ.c.0 P4 synthetic smoke only",
+    "p4_synthetic_smoke_requires_separate_authorization": true,
+    "p6_is_diagnostic_requires_separate_authorization": true
+  },
+  "parent_references": {
+    "mnq_c0_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "p1_plan_lock_commit": "d8bd359",
+    "p1_plan_lock_seal_sha256": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+    "p2_phase2_plan_commit": "0b8d948",
+    "p2_phase2_plan_seal_sha256": "689dd3d06c0e2518ab5f6105544cb3d38194027647de10940da976e427c8efa9",
+    "s10_d1_mnq_mgc_park_commit": "1a9acec",
+    "s10_d2_park_commit": "23c7164",
+    "s11_d1_rev2_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "s11_d1_v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "tier_n_spec_commit": "66bbbd1",
+    "tier_n_spec_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+  },
+  "phase_prefix": "PHASE2-S12-D1-MNQ-DONCHIAN-15-8",
+  "report_kind": "S12-D1 P3 BUILD runner harness report (sealed; binding; documents the runner_harness package source + test scaffold + synthetic fixture authored at P3 BUILD; no execution; no signal computation; no backtest)",
+  "report_seal_sha256": "0bbcf04cb48ec4f4989aa105b033a29d7cc20e3a09351947ce93534694115c15",
+  "schema_id": "sparta.external_research_hunter.s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P3_BUILD_REPORT_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_oos_k9_risk_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "test_execution_status": "NOT_RUN (P4 synthetic smoke requires separate operator authorization)"
+}

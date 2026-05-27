@@ -1,0 +1,122 @@
+{
+  "authored_at_utc": "2026-05-27T15:27:22.996670Z",
+  "binding": true,
+  "build_scope": "out_of_sample_driver.py (OOS-window filter + sha verification + run_out_of_sample stub + REC1 binding reminder)",
+  "candidate_record_id": "s12-d1-mnq-c0-single-instrument-donchian-15-8-databento-long-history",
+  "execution_status_at_p3_build": "NOT_RUN (P10 OOS gate requires separate operator authorization phrase: 'Authorize s12 D1 MNQ.c.0 P10 OOS gate only' AFTER P6 IS verdict is ELIGIBLE_FOR_OOS)",
+  "files_authored": {
+    "out_of_sample_driver_py": {
+      "exports": [
+        "verify_csv_sha256 (fail-loud sha mismatch -> S12_D1_MNQ_CSV_SHA_MISMATCH)",
+        "filter_rows_to_oos_window (OOS window date filter)",
+        "run_out_of_sample (stub; raises P10_OOS_NOT_AUTHORIZED at P3 BUILD)"
+      ],
+      "hardcoded_constants": {
+        "CSV_PATH_HARDCODED": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+        "CSV_SHA256_HARDCODED": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+        "OUT_OF_SAMPLE_END": "datetime.date(2025, 12, 30)",
+        "OUT_OF_SAMPLE_START": "datetime.date(2024, 1, 2)"
+      },
+      "path": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/out_of_sample_driver.py",
+      "sha256": "65ba90f9e22695f250a3ee6402f52be410e618356e636072acd80809387ea91e"
+    }
+  },
+  "hard_boundaries_held_this_p3_build_oos_driver_turn": {
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_brokerage_connection": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_databento_api_key_access": true,
+    "no_dr_redefinition": true,
+    "no_is_diagnostic_execution": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_parallel_session_seal_at_9ce4d66": true,
+    "no_modification_of_phase_2_safety_contract_template": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_s12_d1_p1_plan_lock_at_d8bd359": true,
+    "no_modification_of_s12_d1_p2_phase2_plan_at_0b8d948": true,
+    "no_modification_of_s12_d1_seal_at_66bbbd1": true,
+    "no_network_call": true,
+    "no_oos_inspection": true,
+    "no_p4_smoke_execution": true,
+    "no_paper_trading": true,
+    "no_qc_runtime": true,
+    "no_rec1_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_invoked": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true
+  },
+  "inherited_constraints_block": [
+    "REC1 (binding): OOS K9 EXPECTED TO FIRE. Implied OOS trade count over 2.0y at IS rate is approximately 35-87 trades, below K9 = 100. If OOS K9 fires, the OOS verdict will be OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE analogous to S10-D2 P11 PARK at 23c7164. The chain shall NOT relax K9 at OOS; the appropriate response is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and park the candidate. Pursuing s12-d1 accepts the structural likelihood of an OOS PARK outcome.",
+    "K9_THRESHOLD_INVIOLATE: closed_trades >= 100; no relaxation at any phase",
+    "DONCHIAN_15_8_LOCKED_AT_PLAN_NO_RETREAT_TO_55_20",
+    "MECHANIC_FAMILY_F1_LOCKED_AT_PLAN_NO_REOPENING_AT_DRAFT_OR_SEAL",
+    "DR10_RISK_ELEVATED_MITIGATED_VIA_DA4_B_START_CASH_100K",
+    "C5_CORPORATE_ACTION_STRUCTURALLY_ABSENT_FUTURES",
+    "TIER_N_SPEC_LOCKED_BYTE_EQUIVALENT_AT_66BBBD1",
+    "P1_PLAN_LOCK_LOCKED_BYTE_EQUIVALENT_AT_D8BD359",
+    "P2_PHASE_2_PLAN_LOCKED_BYTE_EQUIVALENT_AT_0B8D948",
+    "PARALLEL_SEAL_AT_9CE4D66_ACKNOWLEDGED_NOT_ANCHORED",
+    "EXPECTED_TERMINAL_VERDICT_PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P3_BUILD_OOS_DRIVER_REPORT_SEALED",
+    "S12_D1_MNQ_DONCHIAN_15_8_FRESH_CANDIDATE",
+    "REC1_OOS_K9_RISK_DISCLOSURE_BINDING",
+    "OOS_DRIVER_RUN_OUT_OF_SAMPLE_STUB_RAISES_AT_P3_BUILD",
+    "P10_OOS_REQUIRES_SEPARATE_AUTHORIZATION",
+    "OOS_K9_STRUCTURALLY_UNREACHABLE_EXPECTED_TERMINAL_OOS_PARK"
+  ],
+  "lifecycle_state": "P3_BUILD_OOS_DRIVER_REPORT_SEALED",
+  "oos_driver_invariants_p1_section_10": {
+    "test_both_drivers_use_same_runner_main_module": "authored (sys.modules identity check)",
+    "test_oos_driver_cache_path_points_to_csv": "authored",
+    "test_oos_driver_databento_import_is_function_local": "authored (any databento mention must be indented)",
+    "test_oos_driver_does_not_have_is_window_constants": "authored (asserts no IN_SAMPLE_START/END on OOS module)",
+    "test_oos_driver_does_not_have_run_in_sample_function": "authored (asserts no run_in_sample attribute on OOS module)",
+    "test_oos_driver_does_not_instantiate_db_historical": "authored (regex against db.Historical and Historical patterns)",
+    "test_oos_driver_does_not_reference_is_dates_in_source": "authored (word-boundary regex `\\b(2019|2023)\\b`; CSV filename '20190513' does not match)",
+    "test_oos_driver_no_top_level_forbidden_imports": "authored (regex against module-level import patterns)",
+    "test_oos_driver_window_end_is_2025_12_30": "authored",
+    "test_oos_driver_window_start_is_2024_01_02": "authored",
+    "test_oos_run_function_signature_matches_is": "authored (inspect.signature equality)",
+    "test_runner_main_config_strategy_params_unchanged": "authored (CONFIG byte-identical across drivers; main is source of truth)"
+  },
+  "parent_references": {
+    "mnq_c0_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "p1_plan_lock_commit": "d8bd359",
+    "p1_plan_lock_seal_sha256": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+    "p2_phase2_plan_commit": "0b8d948",
+    "p2_phase2_plan_seal_sha256": "689dd3d06c0e2518ab5f6105544cb3d38194027647de10940da976e427c8efa9",
+    "s10_d1_mnq_mgc_park_commit": "1a9acec",
+    "s10_d2_park_commit": "23c7164",
+    "s11_d1_rev2_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "s11_d1_v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "tier_n_spec_commit": "66bbbd1",
+    "tier_n_spec_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+  },
+  "phase_prefix": "PHASE2-S12-D1-MNQ-DONCHIAN-15-8",
+  "rec1_binding_explicit_in_oos_driver_docstring_and_stub": true,
+  "report_kind": "S12-D1 P3 BUILD out-of-sample driver report (sealed; binding; structural skeleton + hardcoded OOS-window constants + REC1 binding; NO execution at P3 BUILD)",
+  "report_seal_sha256": "30fbfbd113d64d01dfcb95645b3f70310ba5d31cdb7e49640a4c99efd0ebc946",
+  "schema_id": "sparta.external_research_hunter.s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_out_of_sample_driver_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P3_BUILD_REPORT_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_oos_k9_risk_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  }
+}
