@@ -1,0 +1,287 @@
+{
+  "schema": "sparta.external_research_hunter.step02c_holiday_aware_audit_refinement_report.v1",
+  "phase": "S10_D1_MNQ_MGC_STEP02C_HOLIDAY_AWARE_AUDIT_REFINEMENT_REPORT",
+  "report_date_utc": "2026-05-27",
+  "authorization": "Authorize s10 D1 MNQ+MGC Step 02c holiday-aware audit refinement only.",
+  "controller_session": "THIS_SESSION_REFINEMENT_RUN_LOCALLY_BY_CONTROLLER",
+  "candidate_record_id": "s10-d1-cross-asset-trend-or-meanrev-mnq-mgc-databento-long-history",
+  "sealed_spec_commit_anchor": "9040429",
+  "predecessor_strict_audit_commit_anchor": "9bdde45",
+  "audit_verdict_holiday_aware": "DR9_FIRED_AUDIT_FAIL_HOLIDAY_AWARE",
+  "audit_verdict_strict_for_comparison": "DR9_FIRED_AUDIT_FAIL",
+  "verdict_changed_by_refinement": true,
+  "any_dr9_fire_holiday_aware": true,
+  "any_dr9_fire_strict": true,
+  "audit_script": {
+    "path": "tools/operator_side/s10_d1_mnq_mgc_step02c_audit_holiday_aware.py",
+    "bytes": 20068,
+    "sha256": "9f963d878a00dafa3237da13a29a9190682e749fe772fd2b07ba4a00fb759c31",
+    "py_compile_passed": true,
+    "exit_code_observed": 0
+  },
+  "report_md": {
+    "path": "reports/external_research_hunter/s10_d1_mnq_mgc_step02c_audit_holiday_aware_report.md",
+    "bytes": 14630,
+    "sha256": "d84f5ec3c5e0f8ef24b86aff5217264cc0dfe61cde68dcbf4e5021ca05a2a0ed"
+  },
+  "sealed_dr9_thresholds_locked_at_seal_unchanged": {
+    "DR9_MIN_PCT_EXPECTED_TRADING_DAYS": 0.95,
+    "DR9_MAX_CONSECUTIVE_ABS_LOG_RETURN": 0.3,
+    "DR9_MAX_MISSING_OBSERVATIONS": 5,
+    "DR9_MAX_CONSECUTIVE_VIOLATION_THRESHOLD": 5
+  },
+  "us_cme_federal_holiday_list_entries_count_2019_2023": 46,
+  "audit_summary_from_script_verbatim": {
+    "any_dr9_fire_holiday_aware": true,
+    "any_dr9_fire_strict": true,
+    "audit_results": [
+      {
+        "columns_observed_count": 10,
+        "csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+        "csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+        "csv_sha256_matches_manifest": true,
+        "dr9_evaluation": {
+          "consecutive_abs_log_return_violation_count": 0,
+          "consecutive_abs_log_return_violation_threshold": 5,
+          "consecutive_violation_pass": true,
+          "dr9_fire_decision_holiday_aware": "clean",
+          "dr9_fire_decision_strict_for_comparison": "clean",
+          "dr9_min_pct_expected_trading_days_threshold": 0.95,
+          "dr9_would_fire_holiday_aware": false,
+          "dr9_would_fire_strict_for_comparison": false,
+          "holiday_aware_missing_observations_count": 0,
+          "holiday_aware_missing_observations_pass": true,
+          "holiday_explained_gap_count": 0,
+          "is_pct_observed": 1.2365,
+          "is_pct_pass": true,
+          "missing_observations_threshold": 5,
+          "strict_missing_observations_count": 0,
+          "strict_missing_observations_pass": true
+        },
+        "expected_is_trading_days_calendar_baseline": 1167,
+        "first_date": "2019-05-13",
+        "is_consecutive_abs_log_return_violation_count": 0,
+        "is_consecutive_violation_dates": [],
+        "is_max_abs_log_return_observed": 0.116365,
+        "is_pct_observed": 1.2365,
+        "is_window_data_quality_gap_count_after_holiday_exclusion": 0,
+        "is_window_gap_records": [],
+        "is_window_holiday_explained_gap_count": 0,
+        "is_window_row_count": 1443,
+        "is_window_strict_gap_count_above_5_days": 0,
+        "last_date": "2025-12-29",
+        "oos_window_row_count_LOCKED_NOT_INSPECTED_FOR_RETURNS": 622,
+        "required_columns_all_present": true,
+        "required_columns_missing": [],
+        "row_count_manifest": 2066,
+        "row_count_matches_manifest": true,
+        "row_count_observed": 2066,
+        "rows_after_oos_window_end": 0,
+        "rows_before_is_window_start": 0,
+        "symbol": "MNQ.c.0"
+      },
+      {
+        "columns_observed_count": 10,
+        "csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MGC_c_0_ohlcv_1d_20190513_20251230.csv",
+        "csv_sha256": "79618abec8c34e59f0cc52420afc455c0d7dbdf13bf96605224e27247c9ccc4b",
+        "csv_sha256_matches_manifest": true,
+        "dr9_evaluation": {
+          "consecutive_abs_log_return_violation_count": 0,
+          "consecutive_abs_log_return_violation_threshold": 5,
+          "consecutive_violation_pass": true,
+          "dr9_fire_decision_holiday_aware": "fire",
+          "dr9_fire_decision_strict_for_comparison": "fire",
+          "dr9_min_pct_expected_trading_days_threshold": 0.95,
+          "dr9_would_fire_holiday_aware": true,
+          "dr9_would_fire_strict_for_comparison": true,
+          "holiday_aware_missing_observations_count": 7,
+          "holiday_aware_missing_observations_pass": false,
+          "holiday_explained_gap_count": 1,
+          "is_pct_observed": 1.0686,
+          "is_pct_pass": true,
+          "missing_observations_threshold": 5,
+          "strict_missing_observations_count": 8,
+          "strict_missing_observations_pass": false
+        },
+        "expected_is_trading_days_calendar_baseline": 1167,
+        "first_date": "2019-05-13",
+        "is_consecutive_abs_log_return_violation_count": 0,
+        "is_consecutive_violation_dates": [],
+        "is_max_abs_log_return_observed": 0.071343,
+        "is_pct_observed": 1.0686,
+        "is_window_data_quality_gap_count_after_holiday_exclusion": 7,
+        "is_window_gap_records": [
+          {
+            "gap_calendar_days": 7,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2019-08-26",
+            "prev_observed_date": "2019-08-19"
+          },
+          {
+            "gap_calendar_days": 6,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2020-10-26",
+            "prev_observed_date": "2020-10-20"
+          },
+          {
+            "gap_calendar_days": 7,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2021-10-22",
+            "prev_observed_date": "2021-10-15"
+          },
+          {
+            "gap_calendar_days": 7,
+            "holiday_explained": true,
+            "holidays_in_span": [
+              "2022-06-20"
+            ],
+            "next_observed_date": "2022-06-24",
+            "prev_observed_date": "2022-06-17"
+          },
+          {
+            "gap_calendar_days": 17,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2022-10-24",
+            "prev_observed_date": "2022-10-07"
+          },
+          {
+            "gap_calendar_days": 7,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2023-08-25",
+            "prev_observed_date": "2023-08-18"
+          },
+          {
+            "gap_calendar_days": 7,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2023-10-20",
+            "prev_observed_date": "2023-10-13"
+          },
+          {
+            "gap_calendar_days": 6,
+            "holiday_explained": false,
+            "holidays_in_span": [],
+            "next_observed_date": "2023-10-29",
+            "prev_observed_date": "2023-10-23"
+          }
+        ],
+        "is_window_holiday_explained_gap_count": 1,
+        "is_window_row_count": 1247,
+        "is_window_strict_gap_count_above_5_days": 8,
+        "last_date": "2025-12-28",
+        "oos_window_row_count_LOCKED_NOT_INSPECTED_FOR_RETURNS": 566,
+        "required_columns_all_present": true,
+        "required_columns_missing": [],
+        "row_count_manifest": 1814,
+        "row_count_matches_manifest": true,
+        "row_count_observed": 1814,
+        "rows_after_oos_window_end": 0,
+        "rows_before_is_window_start": 0,
+        "symbol": "MGC.c.0"
+      }
+    ],
+    "audit_run_utc": "2026-05-27T01:28:50.256587+00:00",
+    "manifest_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/s10_d1_mnq_mgc_step02b_fetch_manifest.json",
+    "manifest_sha256": "d6cf8c8b4cc81ff0b85085db5bc83b02b3bf795887b6a49ca71898b77c926225",
+    "operator_reported_reduced_quality_days": [
+      "2020-02-27",
+      "2020-02-28",
+      "2020-06-30"
+    ],
+    "us_cme_federal_holiday_list_entries_count_2019_2023": 46,
+    "verdict_holiday_aware": "DR9_FIRED_AUDIT_FAIL_HOLIDAY_AWARE",
+    "verdict_strict_for_comparison": "DR9_FIRED_AUDIT_FAIL"
+  },
+  "mgc_gap_classification_summary": {
+    "total_strict_gaps_above_5_days": 8,
+    "holiday_explained_gaps": 1,
+    "data_quality_gaps_after_holiday_exclusion": 7,
+    "data_quality_gap_pattern_observed_informational": "Mid-August and mid-October gaps across multiple years; 17-day gap October 2022 anomalous; consistent with CME gold futures continuous-front-month stitch thinning around quarterly roll cycles.",
+    "holiday_aware_count_still_exceeds_threshold_5": true,
+    "dr9_fire_robust_to_refinement": true
+  },
+  "heuristic_limitations_disclosed": {
+    "good_friday_observance_varies_by_cme_product": true,
+    "emergency_closures_not_enumerated": "e.g., 9/11 closure, weather closures, exchange-specific outages are NOT in the embedded holiday list",
+    "easter_monday_not_observed_in_us": true,
+    "holiday_list_is_a_refinement_not_a_guarantee": true
+  },
+  "operator_reported_reduced_quality_days": [
+    "2020-02-27",
+    "2020-02-28",
+    "2020-06-30"
+  ],
+  "operator_reported_reduced_quality_days_findings": {
+    "all_within_is_window": true,
+    "consecutive_abs_log_return_violation_triggered_by_these_dates": false,
+    "max_abs_log_return_observed_mnq": 0.116365,
+    "max_abs_log_return_observed_mgc": 0.071343,
+    "informational_only_did_not_cause_dr9_fire": true
+  },
+  "oos_window_structural_row_counts_no_return_analysis": {
+    "MNQ.c.0_oos_row_count": 622,
+    "MGC.c.0_oos_row_count": 566,
+    "returns_computed_over_oos_window": false,
+    "sharpe_or_pnl_or_drawdown_or_winrate_computed_over_oos_window": false,
+    "oos_inspection_blocked_at_in_sample_invariant_held": true
+  },
+  "audit_run_boundaries_held": {
+    "local_file_reads_only": true,
+    "no_databento_call": true,
+    "no_network_io": true,
+    "no_databento_api_key_access": true,
+    "no_oos_return_summary": true,
+    "no_strategy_performance_evaluation": true,
+    "no_sharpe_or_pnl_or_drawdown_or_winrate_computation": true,
+    "abs_log_return_computed_only_for_dr9_outlier_check": true,
+    "no_row_content_printed_only_metadata_and_dr9_metrics": true,
+    "no_review_queue_mutation": true,
+    "no_idea_memory_mutation": true,
+    "no_sealed_artifact_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "sealed_spec_commit_anchor_cross_checked_against_manifest": true,
+    "sealed_spec_commit_anchor_value": "9040429",
+    "sealed_dr9_threshold_NOT_modified": true,
+    "only_operationalization_changed": true,
+    "no_dr_redefinition_post_seal_invariant_held": true,
+    "no_strategy_optimization_authorized_invariant_held": true,
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc": "NEVER_GRANTED"
+  },
+  "narrowed_operator_forward_paths_no_recommendation_among_them": [
+    {
+      "path": "A",
+      "label": "Park candidate under DR9 INCONCLUSIVE_HOLD (now-default-since-Path-B-exhausted)",
+      "proposed_authorization_phrase": "Authorize s10 D1 MNQ+MGC candidate park under DR9 INCONCLUSIVE_HOLD.",
+      "outcome": "Candidate archived without further build phases. Full park memo authored separately. DR9 fire is robust to the holiday-aware refinement.",
+      "rationale_strength_after_refinement": "HIGH"
+    },
+    {
+      "path": "C",
+      "label": "Pivot to alternative track (selection-plan revision)",
+      "proposed_authorization_phrase": "Authorize alternative track selection plan revision only.",
+      "outcome": "Revise docs/next_research_track_selection_plan_after_s9_park.md to consider a different track. Options include MNQ-only single-instrument candidate (MNQ passed both audit variants cleanly), or a different 2-symbol futures basket, or a return to ETF-proxy with a different mechanic.",
+      "must_be_fresh_candidate_not_revision_of_s10_d1_or_b006_nnn": true
+    },
+    {
+      "path": "B+",
+      "label": "Try yet-deeper audit refinement (documented for completeness only; NOT recommended)",
+      "speculative_only": true,
+      "rationale_against": "The 7 remaining data-quality gaps are dispersed across mid-August and mid-October over multiple years with one 17-day October 2022 anomaly. They do not cluster around any simple calendar window. Further refinement is unlikely to recover the DR9 fire."
+    }
+  ],
+  "this_report_does_not_recommend_among_paths": true,
+  "is_sealed": true,
+  "is_live_approved": false,
+  "is_profit_proof": false,
+  "frc_granted": false,
+  "is_candidate_promoted": false,
+  "report_seal_sha256": "5f0258117cf35afa17ada593d464a0fc941e87c95bc52b76d54b8d719ee34686",
+  "seal_method": "sha256(json.dumps(body, sort_keys=True, separators=(',',':'), ensure_ascii=False)) excluding report_seal_sha256+seal_method"
+}
