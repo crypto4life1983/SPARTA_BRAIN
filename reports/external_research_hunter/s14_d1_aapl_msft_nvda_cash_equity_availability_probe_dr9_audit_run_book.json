@@ -1,0 +1,491 @@
+{
+  "adjustment_convention_precommit_required_at_seal": {
+    "binding_precommit_required": true,
+    "controller_advisory_for_s14_d1_cash_equity_rsi_3_bidir": "Split-only is likely more appropriate for RSI mean-reversion mechanics (preserves the actual price jumps that signal mechanic responds to); dividend jumps on ex-div date are small relative to typical price moves on AAPL/MSFT/NVDA so should not materially affect signal generation. Operator final decision at SEAL.",
+    "implications": {
+      "split_only": "Closer to actual traded prices; dividends appear as instant downward jumps on ex-div date; bid-ask spread + slippage more reliable; commonly used for short-term trading strategies",
+      "split_plus_dividend": "Smooth total-return series; no dividend jumps; commonly used for long-term performance research; can mask dividend yield contribution in strategy edge"
+    },
+    "mixing": "FORBIDDEN (entire history must use single convention; cannot mix split-only for one symbol and split+dividend for another)",
+    "options": [
+      "split-only adjusted (raw close × split factor; dividends NOT adjusted into price)",
+      "split+dividend adjusted (total-return convention; dividends + splits both adjusted into price)"
+    ],
+    "switch_post_seal": "FORBIDDEN (cannot switch convention post-SEAL; would alter signal generation on dividend dates)"
+  },
+  "authored_at_utc": "2026-05-27T23:24:13.694509Z",
+  "authorization_phrase": "Authorize s14-d1-cash-equity multi-name OHLCV availability probe + DR9 audit framework only.",
+  "contingency_paths": [
+    {
+      "contingency": "all_3_symbols_pass_dr9",
+      "next_authorization_at_separate_turn": "Authorize s14-d1-cash-equity Tier-N spec DRAFT only — bound by DR10 v2."
+    },
+    {
+      "contingency": "1_symbol_fails_dr9",
+      "description": "One of AAPL/MSFT/NVDA fails DR9 (most likely NVDA due to large 10:1 split mishandling).",
+      "next_authorization_at_separate_turn": "Authorize s14-d1-cash-equity shrunk-basket Tier-N spec PLAN only — bound by DR10 v2.",
+      "note": "Fresh candidate_record_id required (e.g., s14-d1-aapl-msft-cash-equity-... if NVDA fails). Substitution forbidden."
+    },
+    {
+      "contingency": "2_or_3_symbols_fail_dr9",
+      "description": "Two or more fail. Single-name K9 OOS borderline-fails (~25-35/y < 50/y); revert to single-name-with-explicit-K9-borderline-acceptance OR pivot to different universe.",
+      "next_authorization_at_separate_turn": "Authorize s14-d1-cash-equity universe revision to alternative shortlist — bound by DR10 v2."
+    },
+    {
+      "contingency": "any_INCONCLUSIVE_HOLD",
+      "description": "DR9 returns ambiguous outcome on any symbol.",
+      "next_authorization_at_separate_turn": "Operator manual review + decision; no auto-progression."
+    },
+    {
+      "contingency": "vendor_fetch_fails",
+      "description": "Vendor API down / quota exceeded / network error. No partial data accepted.",
+      "next_authorization_at_separate_turn": "Operator retries with different vendor or same vendor at later time; this RUN_BOOK remains the reference framework."
+    }
+  ],
+  "controller_advisory_vendor_preference": {
+    "operator_selects_vendor_at_step_1_of_unblock_path": true,
+    "primary_rationale": "Free tier includes full historical depth (no s14-d1 5y window blocker); both adjusted and unadjusted columns in single response (operator can defer adjustment-convention choice to SEAL); generous rate limits for 3-name × 1 historical fetch; well-respected data quality reputation",
+    "primary_recommendation": "Tiingo",
+    "recommendation_not_binding": true,
+    "secondary_rationale": "If operator wants zero-setup (no API key registration); admissible for diagnostic-only research with sha256 pinning at fetch time; quality adequate for modern (post-2010) history; understood quality variability is the trade-off",
+    "secondary_recommendation": "yfinance",
+    "tertiary_options": [
+      "Alpha Vantage",
+      "Polygon paid tier",
+      "Other paid vendor"
+    ],
+    "tertiary_rationale": "Alpha Vantage admissible but verify current free-tier adjusted-endpoint availability; Polygon paid required if operator already has it; other paid vendors overkill for diagnostic scale"
+  },
+  "document_type": "RUN_BOOK_NOT_SEALED",
+  "dr9_audit_framework_cash_equity_adapted": {
+    "adaptations_from_futures_to_cash_equity": [
+      "gap_continuity: unchanged (rows present per expected NYSE trading day; calendar = NYSE/NASDAQ US equity, NOT CME Globex)",
+      "max_gap_ratio: unchanged",
+      "roll_event_count: NOT_APPLICABLE_CASH_EQUITY (cash equity does not have futures rolls; this branch structurally absent for s14-d1-cash-equity)",
+      "quality_violation_count: unchanged (OHLC sanity + ts monotonic + no duplicates)",
+      "NEW: documented_split_event_consistency: vendor must apply known splits per chosen adjustment convention (load-bearing for NVDA 2024-06-10 10:1 split)",
+      "OPTIONAL/INFORMATIONAL: dividend_event_count (tracked for audit but not a DR9 fail condition unless adjustment convention chosen as split+dividend and vendor misapplies)"
+    ],
+    "audit_result_schema_per_instrument": {
+      "csv_path": "string",
+      "csv_sha256": "string (verified at audit turn)",
+      "documented_split_event_consistency": "PASS / FAIL / INCONCLUSIVE_HOLD",
+      "dr9_failure_branches_if_any": "array of branch names that failed",
+      "dr9_per_instrument_status": "PASS / FAIL / INCONCLUSIVE_HOLD",
+      "expected_trading_days_nyse_calendar": "integer",
+      "first_date": "ISO date",
+      "gap_continuity": "float in [0,1]",
+      "last_date": "ISO date",
+      "max_gap_ratio": "float in [0,1]",
+      "quality_violation_count": "integer",
+      "row_count": "integer",
+      "splits_in_window": "array (e.g., [{date, ratio, applied_per_convention}])",
+      "symbol": "string"
+    },
+    "per_instrument_check_procedure": [
+      "Step 1: Verify the captured CSV exists at the expected path",
+      "Step 2: Verify CSV sha256 against the recorded value in the operator-captured fetch manifest",
+      "Step 3: Parse CSV; verify schema matches the manifest-declared schema (date, open, high, low, close, volume, optional adjusted_close)",
+      "Step 4: Determine NYSE/NASDAQ trading day count between first_ts and last_ts using a public US equity trading calendar (avoid weekend + US holidays; the NYSE calendar is widely available in pandas_market_calendars or similar libraries)",
+      "Step 5: Compute gap_continuity = rows_present / expected_trading_days. Threshold: >= 0.95",
+      "Step 6: Compute max_gap_ratio = max(consecutive missing trading days) / total trading days. Threshold: <= 0.30",
+      "Step 7: Count quality_violation_count = total checks failed across (OHLC sanity: low<=open<=high AND low<=close<=high; volume>=0; ts_event monotonic; no duplicate ts_event). Threshold: <= 5",
+      "Step 8: Verify documented_split_event_consistency: for each known split in the window (AAPL 2020-08-31 4:1; NVDA 2021-07-20 4:1; NVDA 2024-06-10 10:1; MSFT none) check that the CSV's price series shows EITHER (a) a clean ~25% jump (4:1 split) / ~10% (10:1 split) at the ex-split date (if unadjusted) OR (b) NO discontinuity at the ex-split date (if adjusted). Mixed/partial application FAILS this check.",
+      "Step 9: Aggregate: per-instrument DR9 status = PASS if ALL applicable thresholds met; FAIL otherwise. INCONCLUSIVE_HOLD if any threshold is ambiguous."
+    ],
+    "thresholds_carried_from_s10_d1_with_cash_equity_adaptations": {
+      "documented_split_event_consistency": "PASS_IF_ALL_KNOWN_SPLITS_APPLIED_PER_CHOSEN_ADJUSTMENT_CONVENTION",
+      "gap_continuity_min": 0.95,
+      "max_gap_ratio_max": 0.3,
+      "quality_violation_count_max": 5,
+      "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+    },
+    "thresholds_immutable_per_no_dr_redefinition_post_seal": true
+  },
+  "expected_output_directory": "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/",
+  "expected_output_files": [
+    "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230_<adj_convention>.csv",
+    "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/MSFT_ohlcv_1d_20190102_20251230_<adj_convention>.csv",
+    "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/NVDA_ohlcv_1d_20190102_20251230_<adj_convention>.csv",
+    "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/s14_d1_cash_equity_step02b_fetch_manifest.json"
+  ],
+  "explicit_exclusions_this_turn": [
+    "No vendor API call by controller (no yfinance call, no Polygon call, no Tiingo call, no Alpha Vantage call, no paid-vendor call)",
+    "No DATABENTO_API_KEY or any other API-key access",
+    "No network IO",
+    "No data fetch",
+    "No DR9 audit RESULTS sealed (only the framework is pre-authored; results require operator-captured CSVs at a future turn)",
+    "No DRAFT",
+    "No SEAL (this RUN_BOOK is not a sealed artifact)",
+    "No BUILD",
+    "No backtest",
+    "No simulator",
+    "No signal computation",
+    "No OOS inspection",
+    "No live trading",
+    "No broker / exchange API",
+    "No Strategy Lab promotion",
+    "No candidate promotion",
+    "No s13-d1 / s12-d1 / parked-candidate revival",
+    "No `brain_memory/projects/trading_bot/lessons.md` modification or staging",
+    "No modification of any existing sealed artifact"
+  ],
+  "filename_convention_note": "<adj_convention> in filename = 'split_only' OR 'split_plus_dividend' (matches the precommitted convention at SEAL)",
+  "hard_boundaries_held_this_run_book_turn": {
+    "binding_adjustment_convention_selection_pending_operator_decision": true,
+    "binding_dr9_outcomes_pending_operator_captured_csvs": true,
+    "binding_vendor_selection_pending_operator_decision": true,
+    "controller_vendor_recommendation_is_advisory_not_binding": true,
+    "dr9_audit_framework_pre_authored_only_no_per_symbol_outcome": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_candidate_promotion": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_claude_md_modification": true,
+    "no_data_fetch": true,
+    "no_databento_api_key_access": true,
+    "no_dr9_audit_RESULTS_sealed": true,
+    "no_dr9_audit_RUN_executed": true,
+    "no_draft": true,
+    "no_gitignore_modification": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_other_api_key_access": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_s14_d1_cash_equity_plan_modification": true,
+    "no_s14_d1_multi_instrument_plan_modification": true,
+    "no_s14_d1_multi_instrument_run_book_modification": true,
+    "no_seal": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "no_vendor_api_call_by_controller": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "is_a_sealed_artifact": false,
+  "labels": [
+    "S14_D1_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_RUN_BOOK",
+    "NOT_A_SEAL",
+    "PENDING_OPERATOR_VENDOR_SELECTION",
+    "PENDING_OPERATOR_FETCH",
+    "VENDOR_COMPARISON_PROVIDED",
+    "DR9_AUDIT_FRAMEWORK_CASH_EQUITY_ADAPTED_PRE_AUTHORED",
+    "ADJUSTMENT_CONVENTION_PRECOMMIT_REQUIRED_AT_SEAL",
+    "LESSONS_MD_NOT_TOUCHED",
+    "NO_BACKTEST_NO_FETCH_NO_NETWORK",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "DR10_V2_BINDING_FOR_S14_PLUS"
+  ],
+  "lifecycle_state": "S14_D1_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "manifest_schema_pre_authored": {
+    "boundaries_held_required": [
+      "vendor_api_key_read_from_env_only (if applicable; n/a for yfinance)",
+      "vendor_api_key_never_printed_or_logged_or_saved",
+      "no_signal_computation",
+      "no_backtest",
+      "no_simulator_run",
+      "no_oos_inspection_by_this_fetch",
+      "no_review_queue_mutation",
+      "no_strategy_lab_promotion",
+      "no_live_trading",
+      "raw_csv_only_written_to_approved_directory"
+    ],
+    "per_symbol_entry_required_fields": [
+      "symbol",
+      "output_path",
+      "output_filename",
+      "row_count",
+      "size_bytes",
+      "sha256 (verified at fetch; bound by controller at audit turn)",
+      "first_timestamp",
+      "last_timestamp",
+      "vendor",
+      "schema",
+      "adjustment_convention",
+      "start",
+      "end",
+      "known_splits_in_window (per-symbol; AAPL 2020-08-31 4:1; MSFT none; NVDA 2021-07-20 4:1 + 2024-06-10 10:1)",
+      "splits_applied_by_vendor (bool; controller verifies at audit turn)",
+      "vendor_specific_notes (optional)"
+    ],
+    "required_top_level_fields": [
+      "schema",
+      "candidate_record_id (= 's14-d1-aapl-msft-nvda-cash-equity-rsi-3-bi-directional-large-cap-long-history')",
+      "sealed_spec_commit_anchor (will be the future Tier-N SEAL commit hash; placeholder at fetch time)",
+      "vendor (= operator-selected vendor name from {yfinance, polygon, tiingo, alpha_vantage, paid:<name>})",
+      "vendor_endpoint (vendor-specific URL or library function)",
+      "adjustment_convention (= 'split_only' OR 'split_plus_dividend')",
+      "schema (= 'ohlcv-daily')",
+      "start_date_inclusive (= '2019-01-02')",
+      "end_date_inclusive (= '2025-12-30')",
+      "is_window_start (= '2019-01-02')",
+      "is_window_end (= '2023-12-29')",
+      "oos_window_start_LOCKED_NOT_INSPECTED (= '2024-01-02')",
+      "oos_window_end_LOCKED_NOT_INSPECTED (= '2025-12-30')",
+      "fetch_run_utc (ISO UTC timestamp of fetch)",
+      "symbols (array of per-symbol entries)",
+      "boundaries_held (per-fetch attestations; same structure as s10-d1 manifest)"
+    ],
+    "schema_id_proposal": "sparta.s14.cash_equity.step02b_fetch_manifest.v1"
+  },
+  "operator_side_fetch_run_book": {
+    "executor": "operator (vendor-specific credentials / API keys in operator's environment only; controller never reads)",
+    "step_1_operator_selects_vendor": {
+      "controller_advisory": "Tiingo recommended (see vendor_comparison + controller_advisory_vendor_preference)",
+      "operator_decision_required_before_step_2": true,
+      "options": [
+        "yfinance",
+        "Polygon free tier",
+        "Tiingo",
+        "Alpha Vantage",
+        "Paid vendor (Polygon paid / IEX Cloud / Refinitiv / Bloomberg)"
+      ]
+    },
+    "step_2_operator_selects_adjustment_convention": {
+      "controller_advisory_for_rsi_3_bidir": "split_only likely more appropriate (preserves price jumps; closer to traded prices)",
+      "operator_decision_required_before_step_3": true,
+      "options": [
+        "split_only",
+        "split_plus_dividend"
+      ],
+      "post_seal_switch_forbidden": true
+    },
+    "step_3_operator_fetches_data": {
+      "for_each_of_AAPL_MSFT_NVDA": [
+        "Fetch daily OHLCV from selected vendor over window 2019-01-02 to 2025-12-30 inclusive",
+        "Apply selected adjustment convention",
+        "Save to data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/<symbol>_ohlcv_1d_20190102_20251230_<adj>.csv",
+        "Compute sha256 of the saved CSV"
+      ]
+    },
+    "step_4_operator_writes_manifest": {
+      "must_include_all_required_fields": true,
+      "path": "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/s14_d1_cash_equity_step02b_fetch_manifest.json",
+      "schema": "sparta.s14.cash_equity.step02b_fetch_manifest.v1 (see manifest_schema_pre_authored above)"
+    },
+    "step_5_operator_verifies_and_re_issues_authorization": {
+      "controller_action_at_re_issue": "Verify captured artifact shas + perform DR9 audit per §3 + seal result",
+      "operator_re_issued_authorization": "Authorize s14-d1-cash-equity multi-name OHLCV availability probe + DR9 audit RESULT SEALING only.",
+      "verification_required": "All 3 CSVs exist at expected paths + manifest exists with sha256 entries for each CSV + adjustment convention recorded"
+    }
+  },
+  "parent_references": {
+    "candidate_record_id": "s14-d1-aapl-msft-nvda-cash-equity-rsi-3-bi-directional-large-cap-long-history",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "s10_d1_fetch_manifest_model_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/s10_d1_mnq_mgc_step02b_fetch_manifest.json",
+    "s10_d1_fetch_manifest_sha256": "c4b7d2d064a601ce01e0c30190630640d27db0ef1cd9c5c5d8324b16655fc43b",
+    "s14_d1_cash_equity_tier_n_spec_plan_commit": "a6cbafd",
+    "s14_d1_cash_equity_tier_n_spec_plan_file_sha256": "6a3a186aa665829abca3e5a40b770ae8df44438f2f0f888a4f482cebda8a5bdd",
+    "s14_d1_multi_instrument_run_book_md_sha256": "96b2304fba53dd88f3e7cc1db8088008aa3537d5eeedb20569dbd3df61df6d3c",
+    "s14_d1_multi_instrument_run_book_model_commit": "13ff641"
+  },
+  "report_date_utc": "2026-05-27T23:24:13.694509Z",
+  "report_kind": "RUN_BOOK / vendor comparison + operator-side fetch instructions + pre-authored DR9 audit framework for AAPL/MSFT/NVDA cash-equity OHLCV. NOT a sealed artifact. Status PENDING operator-side vendor selection + fetch.",
+  "schema_id": "sparta.external_research_hunter.s14_d1_cash_equity_availability_probe_dr9_audit_run_book.v1",
+  "scope_of_this_run_book": [
+    "Controller-side vendor comparison: yfinance / Polygon (free + paid) / Tiingo / Alpha Vantage / paid vendor — admissibility + trade-offs analysis",
+    "Pre-authored OHLCV fetch requirements: dataset semantics, schema, adjustment convention precommit, window parameters",
+    "Expected output paths + manifest schema (analogous to s10-d1 fetch manifest model)",
+    "Pre-authored DR9 audit framework adapted for cash equity (no continuous-stitch; splits/dividends instead; NYSE/NASDAQ trading calendar)",
+    "Per-symbol risk assessment: AAPL/MSFT/NVDA corporate actions in window (notably NVDA 10:1 split 2024-06-10 is load-bearing)",
+    "Contingency tree per s14-d1-cash-equity PLAN §3.2 (vendor failure / DR9 failure / partial data)",
+    "Future result-sealing scope: separate authorization required for sealing the audit result after operator-side fetch completes"
+  ],
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cash_equity_lifecycle_state": "S14_D1_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+    "s14_d1_multi_instrument_lifecycle_state": "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH (sibling; gate-blocked at Databento fetch unavailability)",
+    "trading_status": "PAUSED"
+  },
+  "symbols_to_probe": [
+    {
+      "cik": "0000320193",
+      "common_history_start_for_5y_is_window": "2019-01-02 (well within historical depth on all candidate vendors)",
+      "controller_advisory_availability_estimate": "EXPECTED AVAILABLE on all candidate vendors with clean data",
+      "exchange": "NASDAQ",
+      "expected_dr9_outcome": "EXPECTED PASS (high liquidity; clean historical record)",
+      "ipo_date_approx": "1980-12-12",
+      "known_corporate_actions_2019_2025": [
+        "Stock splits: AAPL 4:1 on 2020-08-31; no other splits in window",
+        "Dividends: regular quarterly ~$0.20-0.25/share; split-adjusted convention dependent"
+      ],
+      "name": "Apple Inc.",
+      "risk_factors": "Low (mega-cap with well-documented corporate actions)",
+      "symbol": "AAPL"
+    },
+    {
+      "cik": "0000789019",
+      "common_history_start_for_5y_is_window": "2019-01-02 (well within historical depth)",
+      "controller_advisory_availability_estimate": "EXPECTED AVAILABLE on all candidate vendors with clean data",
+      "exchange": "NASDAQ",
+      "expected_dr9_outcome": "EXPECTED PASS (high liquidity; no splits in window; clean record)",
+      "ipo_date_approx": "1986-03-13",
+      "known_corporate_actions_2019_2025": [
+        "Stock splits: NONE in 2019-2025 window (last split 2003)",
+        "Dividends: regular quarterly; split-adjusted convention dependent"
+      ],
+      "name": "Microsoft Corp.",
+      "risk_factors": "Very low (no splits in our window; minimal corporate-action complexity)",
+      "symbol": "MSFT"
+    },
+    {
+      "cik": "0001045810",
+      "common_history_start_for_5y_is_window": "2019-01-02 (well within historical depth)",
+      "controller_advisory_availability_estimate": "EXPECTED AVAILABLE on all candidate vendors with clean data",
+      "exchange": "NASDAQ",
+      "expected_dr9_outcome": "EXPECTED PASS but the 10:1 split in 2024-06-10 is the LOAD-BEARING audit check — must verify vendor applies it correctly per chosen adjustment convention",
+      "ipo_date_approx": "1999-01-22",
+      "known_corporate_actions_2019_2025": [
+        "Stock splits: NVDA 4:1 on 2021-07-20; NVDA 10:1 on 2024-06-10 (LARGE recent split — critical to verify vendor applies correctly per chosen adjustment convention)",
+        "Dividends: small regular quarterly until 2024 paused / changed"
+      ],
+      "name": "NVIDIA Corp.",
+      "risk_factors": "Moderate (recent large 10:1 split is the load-bearing audit concern; vendors that mis-apply it would produce ~$1300/share pre-split prices that wreck RSI calculation)",
+      "symbol": "NVDA"
+    }
+  ],
+  "title": "s14-d1-cash-equity availability probe + DR9 audit RUN_BOOK (NOT a SEAL; controller-side vendor comparison + pre-authored DR9 audit framework + operator-side fetch instructions for AAPL/MSFT/NVDA)",
+  "vendor_comparison": [
+    {
+      "adjustment_convention_configurable": true,
+      "adjustment_convention_default": "split+dividend adjusted (yfinance default); unadjusted available via auto_adjust=False",
+      "cons": [
+        "Quality variability is the main concern; recommend sha256 of fetched CSV pinned at fetch time to detect future drift",
+        "Yahoo Finance is unofficial/scraping-based; could break without notice",
+        "Not appropriate for production-quality bind"
+      ],
+      "controller_advisory_recommendation": "ADMISSIBLE for diagnostic-only research; precommit adjustment convention + pin sha256 at fetch time to detect future drift",
+      "cost": "FREE",
+      "data_coverage": "AAPL/MSFT/NVDA: full history back to IPO (AAPL 1980, MSFT 1986, NVDA 1999); daily OHLCV reliable on major equities",
+      "free_tier_limits": "no formal limit but rate-limited / can be throttled by Yahoo; recommended < 1 req/sec",
+      "known_quality_issues": [
+        "Historical data quality varies; documented edge cases (e.g., stock splits in early years sometimes mis-applied)",
+        "Yahoo can serve different historical values across requests (rare but documented)",
+        "No SLA; rate-limit changes without notice"
+      ],
+      "paid_tier_available": false,
+      "pros": [
+        "Easiest install (`pip install yfinance`); minimal setup",
+        "No API key required",
+        "Adequate quality for most modern history (post-2010 generally clean)"
+      ],
+      "type": "Python library wrapping Yahoo Finance",
+      "vendor": "yfinance"
+    },
+    {
+      "adjustment_convention_configurable": true,
+      "adjustment_convention_default": "configurable: adjusted=true/false query parameter; defaults to adjusted",
+      "cons": [
+        "Free tier 2y history limit is INSUFFICIENT for our 5y IS window (2019-01-02 to 2023-12-29)",
+        "Paid tier required for full s14-d1 window — operator-cost decision",
+        "5 calls/min rate limit OK for 3 names × 1 historical fetch"
+      ],
+      "controller_advisory_recommendation": "EXCELLENT QUALITY but free tier insufficient for s14-d1's 5y window; admissible only if operator authorizes paid tier OR shortens IS window to ~2y (which would weaken K9 IS margin)",
+      "cost": "FREE tier; paid tiers available",
+      "data_coverage": "AAPL/MSFT/NVDA: 30+ year history on paid tier; 2y on free tier (LIMITING for our 5y IS window requirement)",
+      "free_tier_limits": "5 calls/min on free tier; 2y of historical data on free tier (insufficient for s14-d1 5y IS window — NEEDS PAID TIER)",
+      "known_quality_issues": [
+        "Generally high quality; data provided by official exchanges",
+        "Free tier 2y limit is the main blocker for our 5y IS window"
+      ],
+      "paid_tier_available": true,
+      "pros": [
+        "High quality reference data (official exchange aggregation)",
+        "Configurable adjustment convention",
+        "Well-documented REST API"
+      ],
+      "type": "REST API; official broker data aggregator",
+      "vendor": "Polygon free tier"
+    },
+    {
+      "adjustment_convention_configurable": true,
+      "adjustment_convention_default": "configurable: adjClose vs close columns; both available in single response",
+      "cons": [
+        "Requires free API key registration (operator-side; controller doesn't access)",
+        "Smaller community than yfinance — less troubleshooting context"
+      ],
+      "controller_advisory_recommendation": "RECOMMENDED PRIMARY for s14-d1-cash-equity: high quality + full historical depth on free tier + both adjustment conventions in single fetch",
+      "cost": "FREE tier; paid tiers available",
+      "data_coverage": "AAPL/MSFT/NVDA: full history back to IPO; well-known clean historical record",
+      "free_tier_limits": "500 unique symbols/hour on free tier; 1000 requests/hour; 30y+ daily history included",
+      "known_quality_issues": [
+        "Generally very high quality; widely respected in retail quant community",
+        "Free tier rate limits are generous for our 3-name × 1 historical fetch use case"
+      ],
+      "paid_tier_available": true,
+      "pros": [
+        "High data quality reputation",
+        "Free tier includes full historical depth (no s14-d1 window blocker)",
+        "Both adjusted and unadjusted columns in single response (no need to choose convention at fetch — can defer to SEAL)",
+        "Free API key registration is fast"
+      ],
+      "type": "REST API; well-respected data quality reputation",
+      "vendor": "Tiingo"
+    },
+    {
+      "adjustment_convention_configurable": true,
+      "adjustment_convention_default": "TIME_SERIES_DAILY (unadjusted) vs TIME_SERIES_DAILY_ADJUSTED (split-only or split+dividend depending on endpoint)",
+      "cons": [
+        "Tight rate limits (5 calls/min)",
+        "TIME_SERIES_DAILY_ADJUSTED on free tier was deprecated in 2024; only paid tier now has adjusted",
+        "Requires verification of current free-tier endpoint availability before operator commits"
+      ],
+      "controller_advisory_recommendation": "ADMISSIBLE but verify current free-tier endpoint availability for adjusted data; Tiingo may be lower-friction overall",
+      "cost": "FREE tier; paid tiers available",
+      "data_coverage": "AAPL/MSFT/NVDA: 20y+ daily on free tier (sufficient for s14-d1 5y IS window)",
+      "free_tier_limits": "5 calls/min, 500 calls/day on free tier; 20y+ historical daily on free tier",
+      "known_quality_issues": [
+        "Generally high quality",
+        "5 calls/min is tight but OK for 3-name × 1 historical fetch (~3 calls total)"
+      ],
+      "paid_tier_available": true,
+      "pros": [
+        "Free tier includes 20y+ depth",
+        "Multiple adjustment-convention endpoints",
+        "Free API key registration"
+      ],
+      "type": "REST API",
+      "vendor": "Alpha Vantage"
+    },
+    {
+      "adjustment_convention_configurable": true,
+      "adjustment_convention_default": "vendor-specific; all support both conventions",
+      "cons": [
+        "Cost; overkill for diagnostic-only research at this scale",
+        "Operator decision on cost-benefit"
+      ],
+      "controller_advisory_recommendation": "OVERKILL for diagnostic-only at this scale; admissible if operator already has paid access; otherwise free-tier options (Tiingo recommended) are sufficient",
+      "cost": "PAID ($30-thousands/mo depending on vendor)",
+      "data_coverage": "Full historical; institutional reliability; SLAs",
+      "free_tier_limits": "n/a (paid)",
+      "known_quality_issues": [
+        "Highest quality available",
+        "Cost is the primary trade-off"
+      ],
+      "paid_tier_available": true,
+      "pros": [
+        "SLA + reliability",
+        "Best historical data quality",
+        "No rate-limit concerns"
+      ],
+      "type": "REST API / direct feed; institutional-grade",
+      "vendor": "Paid vendor (Polygon paid / IEX Cloud / Refinitiv / Bloomberg)"
+    }
+  ]
+}
