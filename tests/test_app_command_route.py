@@ -341,3 +341,87 @@ def test_app_command_block_template_has_no_form_or_input():
     assert "xmlhttprequest" not in lower
     assert "method:\"post\"" not in lower
     assert "method: 'post'" not in lower
+
+
+# --- phase-inference: NEXT must respect later-COMPLETE phases ------------
+# Bug fix: a missing phase can be NEXT only if no higher-numbered phase
+# is already COMPLETE. If later phases are COMPLETE (lifecycle terminal-
+# archived but an earlier phase was implicit off-disk), earlier missing
+# phases are PENDING, not NEXT.
+
+def _phase_fixture_artifacts(tmp_path, phases_present):
+    """Build a list of fake artifact Paths matching the requested phase
+    numbers. Uses the canonical filename fragments from _COMMAND_PHASE_DEFS
+    so the inference function recognizes them.
+    """
+    import app as app_module
+    out = []
+    defs = {p: fragments for p, _label, fragments in app_module._COMMAND_PHASE_DEFS}
+    for ph in phases_present:
+        # Use the first fragment for each phase, mounted on a fake b006_999
+        # filename. Fragments end with "." or describe a directory; pick one
+        # that's safe as a filename.
+        frag = defs[ph][0]
+        # If fragment ends with ".", append "md" to make a complete filename.
+        # If it doesn't (e.g. "_qc_run_capture"), use it as a bare name.
+        if frag.endswith("."):
+            name = f"b006_999{frag}md"
+        else:
+            name = f"b006_999{frag}"
+        fake = tmp_path / name
+        fake.write_bytes(b"")  # empty file is enough; inference only matches name
+        out.append(fake)
+    return out
+
+
+def test_phase_inference_terminal_lifecycle_no_NEXT(tmp_path):
+    """Phases 1-8 COMPLETE, phase 0 missing (B006_002 shape). The fix:
+    no row may be NEXT; phase 0 must be PENDING; phases 1-8 COMPLETE."""
+    import app as app_module
+    arts = _phase_fixture_artifacts(tmp_path, phases_present=list(range(1, 9)))
+    rows = app_module._command_infer_phases(arts)
+    statuses = {row.phase: row.status for row in rows}
+    assert statuses[0] == "PENDING", f"phase 0 should be PENDING, got {statuses[0]}"
+    for p in range(1, 9):
+        assert statuses[p] == "COMPLETE", (
+            f"phase {p} should be COMPLETE, got {statuses[p]}"
+        )
+    next_rows = [r for r in rows if r.status == "NEXT"]
+    assert next_rows == [], (
+        f"terminal lifecycle must have no NEXT row; got {next_rows}"
+    )
+
+
+def test_phase_inference_midstream_NEXT_is_first_missing_after_last_complete(tmp_path):
+    """Phases 0-2 COMPLETE, 3-8 missing. Phase 3 must be NEXT (the
+    smallest missing > last-COMPLETE-index), phases 4-8 PENDING."""
+    import app as app_module
+    arts = _phase_fixture_artifacts(tmp_path, phases_present=[0, 1, 2])
+    rows = app_module._command_infer_phases(arts)
+    statuses = {row.phase: row.status for row in rows}
+    for p in (0, 1, 2):
+        assert statuses[p] == "COMPLETE", (
+            f"phase {p} should be COMPLETE, got {statuses[p]}"
+        )
+    assert statuses[3] == "NEXT", f"phase 3 should be NEXT, got {statuses[3]}"
+    for p in (4, 5, 6, 7, 8):
+        assert statuses[p] == "PENDING", (
+            f"phase {p} should be PENDING, got {statuses[p]}"
+        )
+    next_rows = [r for r in rows if r.status == "NEXT"]
+    assert len(next_rows) == 1
+
+
+def test_phase_inference_empty_lifecycle_NEXT_is_phase_zero(tmp_path):
+    """No artifacts at all. Phase 0 must be NEXT, phases 1-8 PENDING.
+    Locks in that the empty-lifecycle behaviour is unchanged by the fix."""
+    import app as app_module
+    rows = app_module._command_infer_phases([])
+    statuses = {row.phase: row.status for row in rows}
+    assert statuses[0] == "NEXT", f"phase 0 should be NEXT, got {statuses[0]}"
+    for p in range(1, 9):
+        assert statuses[p] == "PENDING", (
+            f"phase {p} should be PENDING, got {statuses[p]}"
+        )
+    next_rows = [r for r in rows if r.status == "NEXT"]
+    assert len(next_rows) == 1

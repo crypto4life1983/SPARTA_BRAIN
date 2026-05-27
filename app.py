@@ -6817,17 +6817,34 @@ def _command_collect_artifacts(reports_dir, lifecycle_id):
 
 
 def _command_infer_phases(artifact_paths):
-    """Walk the phase ladder; mark each phase COMPLETE/NEXT/PENDING."""
+    """Walk the phase ladder; mark each phase COMPLETE/NEXT/PENDING.
+
+    Two-pass rule: a missing phase can only be NEXT if no higher-numbered
+    phase is already COMPLETE. If later phases are COMPLETE (e.g. the
+    lifecycle is terminal-archived but an earlier phase was handled
+    implicitly off-disk), earlier missing phases are PENDING, not NEXT.
+    """
     names_lc = [p.name.lower() for p in artifact_paths]
-    rows = []
-    next_marked = False
-    for phase, label, fragments in _COMMAND_PHASE_DEFS:
+    # Pass 1: figure out which phases have a matching artifact, and the
+    # highest-numbered phase index that is COMPLETE (-1 if none).
+    complete_by_phase = {}
+    highest_complete = -1
+    for phase, _label, fragments in _COMMAND_PHASE_DEFS:
         has_any = any(
             any(frag.lower() in name for frag in fragments) for name in names_lc
         )
-        if has_any:
+        complete_by_phase[phase] = has_any
+        if has_any and phase > highest_complete:
+            highest_complete = phase
+    # Pass 2: assign statuses. NEXT is the smallest missing phase that is
+    # strictly greater than highest_complete (so a missing phase before any
+    # later COMPLETE phase is always PENDING, never NEXT).
+    rows = []
+    next_marked = False
+    for phase, label, _fragments in _COMMAND_PHASE_DEFS:
+        if complete_by_phase[phase]:
             status = "COMPLETE"
-        elif not next_marked:
+        elif phase > highest_complete and not next_marked:
             status = "NEXT"
             next_marked = True
         else:
