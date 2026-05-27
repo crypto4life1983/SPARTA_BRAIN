@@ -6971,6 +6971,98 @@ async def page_command(request: Request):
 # === END SPARTA Trading Command Center v1 block ============================
 
 
+# ===========================================================================
+# SPARTA Trade Intelligence Journal v1 (read-only viewer)
+#
+# Mirrors the /command pattern: GET-only, localhost-only, no forms, no
+# inputs, no mutating buttons, no broker / API / order / scheduler / live
+# trading affordances. Reads the external obsidian-trade-logger project
+# strictly read-only via tools/trade_journal_adapter.py.
+#
+# If the adapter raises, the route fail-closes with status=ERROR and
+# renders the page anyway so the operator can see what went wrong.
+# ===========================================================================
+
+
+def _journal_empty_payload(status: str, *, errors: list[str]) -> dict:
+    """Fallback payload when the adapter is unimportable or raises.
+
+    Kept inline in app.py so a broken adapter cannot prevent the route
+    from rendering the safety pills and an ERROR banner.
+    """
+    from datetime import datetime as _dt, timezone as _tz
+    return {
+        "status": status,
+        "posture": {
+            "trading": "PAUSED",
+            "live_status": "BLOCKED_AT_6_GATES",
+            "read_only": True,
+            "external_project": "READ_ONLY",
+            "broker_api": "DISCONNECTED",
+        },
+        "generated_at": _dt.now(_tz.utc).isoformat(),
+        "external_root": "",
+        "external_root_exists": False,
+        "summary": {
+            "strategy_count": 0,
+            "symbol_count": 0,
+            "trade_count": 0,
+            "closed_trade_count": 0,
+            "open_trade_count": 0,
+            "source": "none",
+        },
+        "scorecards": [],
+        "strategy_metrics": [],
+        "symbol_metrics": [],
+        "gates": [],
+        "daily_pnl_correlation": {"status": "MISSING", "reason": "adapter_unavailable"},
+        "weekday_performance": {"status": "MISSING", "reason": "adapter_unavailable"},
+        "month_performance": {"status": "MISSING", "reason": "adapter_unavailable"},
+        "risk_of_ruin": {"status": "MISSING", "reason": "adapter_unavailable"},
+        "monte_carlo_summary": {"status": "MISSING", "reason": "adapter_unavailable"},
+        "missing": ["adapter_unavailable_or_failed"],
+        "errors": list(errors),
+    }
+
+
+@app.get("/journal", response_class=HTMLResponse)
+async def page_journal(request: Request):
+    """SPARTA Trade Intelligence Journal v1 — read-only viewer.
+
+    GET-only. Localhost-only. No writes anywhere. No order placement.
+    No broker connections. Fail-closed if the adapter fails.
+    """
+    payload: dict
+    try:
+        # Import inside the handler so a broken adapter cannot block app
+        # import-time. Re-imported each request: the adapter is cheap and
+        # this lets tests monkeypatch it cleanly.
+        from tools import trade_journal_adapter as _tja
+        payload = _tja.load_payload()
+        if not isinstance(payload, dict):
+            payload = _journal_empty_payload(
+                "ERROR",
+                errors=[f"adapter_returned_non_dict:{type(payload).__name__}"],
+            )
+    except Exception as exc:  # noqa: BLE001 — fail-closed render
+        payload = _journal_empty_payload(
+            "ERROR",
+            errors=[f"{type(exc).__name__}: {exc}"],
+        )
+
+    return templates.TemplateResponse(
+        "journal.html",
+        {
+            "request": request,
+            "page": "journal",
+            "payload": payload,
+        },
+    )
+
+
+# === END SPARTA Trade Intelligence Journal v1 block ========================
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="127.0.0.1", port=8765, reload=False)

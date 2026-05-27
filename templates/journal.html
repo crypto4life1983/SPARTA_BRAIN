@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+{% block title %}SPARTA Trade Intelligence Journal{% endblock %}
+
+{% block content %}
+<style>
+  .tj-wrap { font-family: ui-monospace, Menlo, Consolas, monospace;
+             color:#e6edf3; padding: 8px 0 32px; }
+  .tj-h1 { font-size: 1.35rem; margin: 0 0 4px; color:#e6edf3; }
+  .tj-sub { color:#8b949e; font-size:.85rem; margin: 0 0 12px; }
+  .tj-pills { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0 18px;
+              font-size:.78rem; }
+  .tj-pills .pill { background:#161b22; border:1px solid #30363d;
+                    padding:5px 10px; border-radius:6px; color:#e6edf3; }
+  .tj-pill-readonly { background:#0d1f1a; border-color:#1f5a3a;
+                      color:#3fb950; }
+  .tj-pill-paused { background:#2a1f06; border-color:#6a5210;
+                    color:#f5d27a; }
+  .tj-pill-blocked { background:#3d1f1f; border-color:#6e2e2e;
+                     color:#ff7b72; }
+  .tj-pill-disconnected { background:#161b22; border-color:#30363d;
+                          color:#8b949e; }
+  .tj-section { background:#0d1117; border:1px solid #30363d;
+                border-radius:8px; padding:14px 16px; margin: 14px 0; }
+  .tj-section h2 { font-size: 1.05rem; margin: 0 0 4px; color:#58a6ff;
+                   letter-spacing:.3px; }
+  .tj-desc { color:#8b949e; font-size:.82rem; margin: 0 0 10px; }
+  .tj-status { display:inline-block; padding:2px 8px; border-radius:4px;
+               font-size:.72rem; margin-left:8px; vertical-align:middle;
+               text-transform:uppercase; letter-spacing:.5px; }
+  .tj-status-OK              { background:#0d1f1a; color:#3fb950;
+                               border:1px solid #1f5a3a; }
+  .tj-status-MISSING         { background:#161b22; color:#d29922;
+                               border:1px solid #6a5210; }
+  .tj-status-ERROR           { background:#3d1f1f; color:#ff7b72;
+                               border:1px solid #6e2e2e; }
+  .tj-status-BLOCKED         { background:#2a1f06; color:#f5d27a;
+                               border:1px solid #6a5210; }
+  .tj-status-OBSERVATION_ONLY { background:#2a1f06; color:#f5d27a;
+                                border:1px solid #6a5210; }
+  .tj-status-OBSERVATION_THRESHOLDS_MET { background:#0d1f1a; color:#3fb950;
+                                          border:1px solid #1f5a3a; }
+  .tj-eq-summary { padding: 10px 12px; background:#161b22;
+                   border:1px solid #30363d; border-radius:6px;
+                   font-size:.84rem; margin-bottom: 10px; }
+  .tj-eq-summary .lbl { color:#8b949e; font-size:.7rem;
+                        text-transform:uppercase; letter-spacing:.5px;
+                        display:block; margin-bottom:4px; }
+  .tj-eq-summary .val { color:#f5d27a; font-size: 1.0rem;
+                        font-weight:600; letter-spacing:.4px; }
+  .tj-eq-reasons { margin: 6px 0 0; padding-left: 18px; }
+  .tj-eq-reasons li { color:#8b949e; font-size:.74rem;
+                      margin-bottom: 2px; word-break:break-word; }
+  .tj-eq-explainer { color:#8b949e; font-size:.74rem; margin: 8px 0 0;
+                     font-style: italic; }
+  table.tj-table { width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.tj-table th, table.tj-table td { text-align:left; padding:4px 8px;
+                                          border-bottom:1px solid #21262d;
+                                          vertical-align:top;
+                                          word-break:break-word; }
+  table.tj-table th { color:#8b949e; font-weight:600; }
+  .tj-empty { color:#d29922; padding: 12px; background:#161b22;
+              border:1px dashed #d2992288; border-radius:6px;
+              font-size:.85rem; }
+  .tj-error { color:#ff7b72; padding: 12px; background:#1f1313;
+              border:1px solid #6e2e2e; border-radius:6px;
+              font-size:.85rem; }
+  .tj-summary-grid { display:grid; grid-template-columns: repeat(auto-fit,
+                     minmax(150px, 1fr)); gap: 10px; }
+  .tj-summary-card { background:#161b22; border:1px solid #30363d;
+                     border-radius:6px; padding:10px 12px; }
+  .tj-summary-card .lbl { color:#8b949e; font-size:.7rem;
+                          text-transform:uppercase; letter-spacing:.5px;
+                          display:block; margin-bottom:4px; }
+  .tj-summary-card .val { color:#e6edf3; font-size: 1.05rem;
+                          font-weight:600; }
+  .tj-gate-strip { display:flex; gap:8px; flex-wrap:wrap; }
+  .tj-gate { background:#161b22; border:1px solid #30363d;
+             border-radius:6px; padding:8px 10px; font-size:.78rem;
+             min-width: 200px; }
+  .tj-gate .gate-name { color:#58a6ff; font-weight:600; }
+  .tj-gate .gate-detail { color:#8b949e; font-size:.72rem;
+                          margin-top:3px; }
+  .tj-corr { font-size:.72rem; }
+  .tj-corr td { text-align:center; }
+  .tj-corr th { text-align:center; color:#8b949e; }
+  .tj-foot { color:#8b949e; font-size:.72rem; margin-top: 22px;
+             padding-top: 10px; border-top:1px solid #21262d; }
+  .tj-mono-small { font-size:.7rem; color:#8b949e; }
+  .tj-warn-list { margin: 0; padding-left: 18px; }
+  .tj-warn-list li { color:#d29922; font-size:.76rem;
+                     margin-bottom: 3px; word-break: break-word; }
+  .tj-err-list { margin: 0; padding-left: 18px; }
+  .tj-err-list li { color:#ff7b72; font-size:.76rem;
+                    margin-bottom: 3px; word-break: break-word; }
+</style>
+
+<div class="tj-wrap">
+  <h1 class="tj-h1">SPARTA Trade Intelligence Journal</h1>
+  <p class="tj-sub">
+    Read-only viewer. GET-only. Localhost-only. No trade affordance, no
+    fetch, no broker, no optimization. Missing data is shown as MISSING
+    &mdash; never fabricated.
+  </p>
+
+  <div class="tj-pills" aria-label="Posture invariants">
+    <span class="pill tj-pill-readonly">READ ONLY</span>
+    <span class="pill tj-pill-paused">Trading PAUSED</span>
+    <span class="pill tj-pill-blocked">Live BLOCKED_AT_6_GATES</span>
+    <span class="pill tj-pill-disconnected">External project read-only</span>
+    <span class="pill tj-pill-disconnected">No broker/API connection</span>
+  </div>
+
+  {# ---------- 1. Data status ---------- #}
+  <section class="tj-section" aria-label="Data status">
+    <h2>
+      Data status
+      <span class="tj-status tj-status-{{ payload.status }}">{{ payload.status }}</span>
+    </h2>
+    <table class="tj-table">
+      <tbody>
+        <tr>
+          <td style="width: 220px">External root</td>
+          <td><span class="tj-mono-small">{{ payload.external_root or '&mdash;' }}</span></td>
+        </tr>
+        <tr>
+          <td>External root exists</td>
+          <td>{{ 'yes' if payload.external_root_exists else 'no' }}</td>
+        </tr>
+        <tr>
+          <td>Generated at (UTC)</td>
+          <td><span class="tj-mono-small">{{ payload.generated_at }}</span></td>
+        </tr>
+        <tr>
+          <td>Data source</td>
+          <td>{{ payload.summary.source }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  {# ---------- 2. Summary cards ---------- #}
+  <section class="tj-section" aria-label="Summary cards">
+    <h2>Summary</h2>
+    {% if payload.status == 'ERROR' %}
+      <div class="tj-error">
+        ERROR &mdash; adapter failed. Fail-closed: no fabricated values rendered.
+      </div>
+    {% else %}
+      <div class="tj-summary-grid">
+        <div class="tj-summary-card">
+          <span class="lbl">Strategies</span>
+          <span class="val">{{ payload.summary.strategy_count }}</span>
+        </div>
+        <div class="tj-summary-card">
+          <span class="lbl">Symbols</span>
+          <span class="val">{{ payload.summary.symbol_count }}</span>
+        </div>
+        <div class="tj-summary-card">
+          <span class="lbl">Trades total</span>
+          <span class="val">{{ payload.summary.trade_count }}</span>
+        </div>
+        <div class="tj-summary-card">
+          <span class="lbl">Closed</span>
+          <span class="val">{{ payload.summary.closed_trade_count }}</span>
+        </div>
+        <div class="tj-summary-card">
+          <span class="lbl">Open</span>
+          <span class="val">{{ payload.summary.open_trade_count }}</span>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  {# ---------- 3. Evidence Quality (explainer) ---------- #}
+  <section class="tj-section" aria-label="Evidence Quality">
+    {% set eq = payload.evidence_quality %}
+    <h2>
+      Evidence Quality
+      {% if eq and eq.final_state %}
+        <span class="tj-status tj-status-{{ eq.final_state }}">{{ eq.final_state }}</span>
+      {% else %}
+        <span class="tj-status tj-status-MISSING">MISSING</span>
+      {% endif %}
+    </h2>
+    <p class="tj-desc">
+      Read-only sample-size explainer. The scorecards above reflect the
+      current trades.db (read-only), but small samples mean per-strategy
+      and portfolio metrics are <strong>not yet statistically
+      meaningful</strong>. This section lists threshold gates; it is
+      descriptive only &mdash; no readiness claim, no proposed action.
+    </p>
+
+    {% if not eq or eq.final_state == 'MISSING' %}
+      <div class="tj-empty">
+        MISSING: evidence quality not computed (no data loaded).
+      </div>
+    {% else %}
+      <div class="tj-eq-summary">
+        <span class="lbl">Final state</span>
+        <span class="val">{{ eq.final_state }}</span>
+        {% if eq.final_state_reason %}
+          <ul class="tj-eq-reasons">
+            {% for r in eq.final_state_reason %}
+              <li>{{ r }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <table class="tj-table">
+        <thead>
+          <tr>
+            <th>Check</th>
+            <th>Label</th>
+            <th style="width: 5.5rem">Status</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in eq.checks %}
+            <tr>
+              <td>{{ c.name }}</td>
+              <td><span class="tj-mono-small">{{ c.label }}</span></td>
+              <td><span class="tj-status tj-status-{{ c.status }}">{{ c.status }}</span></td>
+              <td>{{ c.detail }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <p class="tj-eq-explainer">
+        Thresholds: per-strategy min closed = {{ eq.thresholds.per_strategy_min_closed }};
+        Monte Carlo min closed = {{ eq.thresholds.monte_carlo_min_trades }};
+        Risk-of-ruin min closed = {{ eq.thresholds.risk_of_ruin_min_trades }};
+        Daily correlation min unique close-days = {{ eq.thresholds.daily_correlation_min_days }};
+        Observation-only ceiling = {{ eq.thresholds.observation_total_closed }} total closed trades.
+      </p>
+    {% endif %}
+  </section>
+
+  {# ---------- 4. Unified gate strip ---------- #}
+  <section class="tj-section" aria-label="Unified gate strip">
+    <h2>Unified gate strip</h2>
+    <p class="tj-desc">
+      Read-only echo of existing gate state files in the external project.
+      The journal never decides; it only displays.
+    </p>
+    {% if not payload.gates %}
+      <div class="tj-empty">MISSING: no gate state files found.</div>
+    {% else %}
+      <div class="tj-gate-strip">
+        {% for gate in payload.gates %}
+          <div class="tj-gate">
+            <div>
+              <span class="gate-name">{{ gate.name }}</span>
+              <span class="tj-status tj-status-{{ gate.status }}">{{ gate.status }}</span>
+            </div>
+            <div class="gate-detail">{{ gate.detail }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  {# ---------- 4. Strategy scorecard table ---------- #}
+  <section class="tj-section" aria-label="Strategy scorecard">
+    <h2>Strategy scorecard</h2>
+    {% if not payload.scorecards %}
+      <div class="tj-empty">MISSING: no strategy scorecard rows.</div>
+    {% else %}
+      <table class="tj-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Closed</th>
+            <th>Win rate</th>
+            <th>Expectancy R</th>
+            <th>Profit factor</th>
+            <th>Data quality</th>
+            <th>Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in payload.scorecards %}
+            <tr>
+              <td>{{ row.strategy }}</td>
+              <td>{{ row.closed_trades if row.closed_trades is not none else '&mdash;' }}</td>
+              <td>{{ row.win_rate if row.win_rate is not none else '&mdash;' }}</td>
+              <td>{{ row.expectancy_R if row.expectancy_R is not none else '&mdash;' }}</td>
+              <td>{{ row.profit_factor if row.profit_factor is not none else '&mdash;' }}</td>
+              <td>{{ row.data_quality or '&mdash;' }}</td>
+              <td>{{ row.confidence_label or '&mdash;' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 5. Symbol performance table ---------- #}
+  <section class="tj-section" aria-label="Symbol performance">
+    <h2>Symbol performance</h2>
+    {% if not payload.symbol_metrics %}
+      <div class="tj-empty">MISSING: no per-symbol metrics.</div>
+    {% else %}
+      <table class="tj-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Best strategy</th>
+            <th>Worst strategy</th>
+            <th>Exposure attempts</th>
+            <th>Blocked attempts</th>
+            <th>Open lock</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in payload.symbol_metrics %}
+            <tr>
+              <td>{{ row.symbol }}</td>
+              <td>{{ row.best_strategy or '&mdash;' }}</td>
+              <td>{{ row.worst_strategy or '&mdash;' }}</td>
+              <td>{{ row.total_exposure_attempts if row.total_exposure_attempts is not none else '&mdash;' }}</td>
+              <td>{{ row.blocked_attempts if row.blocked_attempts is not none else '&mdash;' }}</td>
+              <td>{{ 'yes' if row.open_lock else 'no' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 6. Correlation matrix ---------- #}
+  <section class="tj-section" aria-label="Daily P&amp;L correlation">
+    <h2>
+      Daily P&amp;L correlation
+      <span class="tj-status tj-status-{{ payload.daily_pnl_correlation.status }}">{{ payload.daily_pnl_correlation.status }}</span>
+    </h2>
+    {% if payload.daily_pnl_correlation.status != 'OK' %}
+      <div class="tj-empty">
+        MISSING: {{ payload.daily_pnl_correlation.reason }}
+      </div>
+    {% else %}
+      <p class="tj-desc">
+        Pairwise Pearson correlation of daily P&amp;L (USD) per strategy,
+        across {{ payload.daily_pnl_correlation.day_count }} unique close days.
+      </p>
+      <table class="tj-table tj-corr">
+        <thead>
+          <tr>
+            <th></th>
+            {% for s in payload.daily_pnl_correlation.strategies %}
+              <th>{{ s }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in payload.daily_pnl_correlation.matrix %}
+            <tr>
+              <th>{{ row.strategy }}</th>
+              {% for v in row['values'] %}
+                <td>{{ v if v is not none else '&mdash;' }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 7. Monte Carlo summary ---------- #}
+  <section class="tj-section" aria-label="Monte Carlo summary">
+    <h2>
+      Monte Carlo summary
+      <span class="tj-status tj-status-{{ payload.monte_carlo_summary.status }}">{{ payload.monte_carlo_summary.status }}</span>
+    </h2>
+    {% if payload.monte_carlo_summary.status != 'OK' %}
+      <div class="tj-empty">
+        MISSING: {{ payload.monte_carlo_summary.reason }}
+      </div>
+    {% else %}
+      <p class="tj-desc">
+        Bootstrap resample of {{ payload.monte_carlo_summary.trade_count }}
+        closed pnl_R values, {{ payload.monte_carlo_summary.runs }} runs.
+        Method: {{ payload.monte_carlo_summary.method }}.
+      </p>
+      <table class="tj-table">
+        <thead>
+          <tr><th>Metric</th><th>p5</th><th>p50</th><th>p95</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Final equity (R)</td>
+            <td>{{ payload.monte_carlo_summary.final_R_p5 }}</td>
+            <td>{{ payload.monte_carlo_summary.final_R_p50 }}</td>
+            <td>{{ payload.monte_carlo_summary.final_R_p95 }}</td>
+          </tr>
+          <tr>
+            <td>Max drawdown (R)</td>
+            <td>{{ payload.monte_carlo_summary.max_dd_R_p5 }}</td>
+            <td>{{ payload.monte_carlo_summary.max_dd_R_p50 }}</td>
+            <td>{{ payload.monte_carlo_summary.max_dd_R_p95 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 8. Risk of ruin ---------- #}
+  <section class="tj-section" aria-label="Risk of ruin">
+    <h2>
+      Risk of ruin
+      <span class="tj-status tj-status-{{ payload.risk_of_ruin.status }}">{{ payload.risk_of_ruin.status }}</span>
+    </h2>
+    {% if payload.risk_of_ruin.status != 'OK' %}
+      <div class="tj-empty">
+        MISSING: {{ payload.risk_of_ruin.reason }}
+      </div>
+    {% else %}
+      <p class="tj-desc">
+        Simulation: {{ payload.risk_of_ruin.runs }} runs of
+        {{ payload.risk_of_ruin.path_length }}-trade paths, risking
+        {{ payload.risk_of_ruin.risk_pct_per_trade }}% per trade. Ruin =
+        equity falls to {{ payload.risk_of_ruin.ruin_drawdown_pct }}% below
+        peak.
+      </p>
+      <table class="tj-table">
+        <tbody>
+          <tr><td style="width: 240px">Risk of ruin (% of paths)</td>
+            <td><strong>{{ payload.risk_of_ruin.risk_of_ruin_pct }}%</strong></td></tr>
+          <tr><td>Closed trades sampled</td>
+            <td>{{ payload.risk_of_ruin.trade_count }}</td></tr>
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 9. Weekday performance ---------- #}
+  <section class="tj-section" aria-label="Weekday performance">
+    <h2>
+      Weekday performance
+      <span class="tj-status tj-status-{{ payload.weekday_performance.status }}">{{ payload.weekday_performance.status }}</span>
+    </h2>
+    {% if payload.weekday_performance.status != 'OK' %}
+      <div class="tj-empty">
+        MISSING: {{ payload.weekday_performance.reason }}
+      </div>
+    {% else %}
+      <table class="tj-table">
+        <thead>
+          <tr><th>Weekday</th><th>Trades</th><th>Avg R</th><th>Win rate</th><th>Sum R</th></tr>
+        </thead>
+        <tbody>
+          {% for r in payload.weekday_performance.rows %}
+            <tr>
+              <td>{{ r.label }}</td>
+              <td>{{ r.trades }}</td>
+              <td>{{ r.avg_R if r.avg_R is not none else '&mdash;' }}</td>
+              <td>{{ r.win_rate if r.win_rate is not none else '&mdash;' }}</td>
+              <td>{{ r.sum_R if r.sum_R is not none else '&mdash;' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 10. Month performance ---------- #}
+  <section class="tj-section" aria-label="Month performance">
+    <h2>
+      Month performance
+      <span class="tj-status tj-status-{{ payload.month_performance.status }}">{{ payload.month_performance.status }}</span>
+    </h2>
+    {% if payload.month_performance.status != 'OK' %}
+      <div class="tj-empty">
+        MISSING: {{ payload.month_performance.reason }}
+      </div>
+    {% else %}
+      <table class="tj-table">
+        <thead>
+          <tr><th>Month</th><th>Trades</th><th>Avg R</th><th>Win rate</th><th>Sum R</th></tr>
+        </thead>
+        <tbody>
+          {% for r in payload.month_performance.rows %}
+            <tr>
+              <td>{{ r.label }}</td>
+              <td>{{ r.trades }}</td>
+              <td>{{ r.avg_R if r.avg_R is not none else '&mdash;' }}</td>
+              <td>{{ r.win_rate if r.win_rate is not none else '&mdash;' }}</td>
+              <td>{{ r.sum_R if r.sum_R is not none else '&mdash;' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  {# ---------- 11. Missing / warnings ---------- #}
+  <section class="tj-section" aria-label="Missing data and warnings">
+    <h2>Missing data &amp; warnings</h2>
+    {% if not payload.missing and not payload.errors %}
+      <p class="tj-desc">No missing-data flags reported by the adapter.</p>
+    {% endif %}
+    {% if payload.missing %}
+      <div class="tj-desc">Missing inputs:</div>
+      <ul class="tj-warn-list">
+        {% for m in payload.missing %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if payload.errors %}
+      <div class="tj-desc" style="margin-top:8px">Errors (fail-closed; nothing fabricated):</div>
+      <ul class="tj-err-list">
+        {% for e in payload.errors %}
+          <li>{{ e }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <div class="tj-foot">
+    Read-only &middot; localhost &middot; v1 trade intelligence journal &middot;
+    no broker, no order, no scheduler, no fabricated values.
+  </div>
+</div>
+{% endblock %}
