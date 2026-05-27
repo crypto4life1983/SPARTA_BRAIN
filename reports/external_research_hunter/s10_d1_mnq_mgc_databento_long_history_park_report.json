@@ -1,0 +1,305 @@
+{
+  "schema": "sparta.s10.mnq_mgc.databento_long_history_park_report.v1",
+  "phase": "S10_D1_MNQ_MGC_DATABENTO_LONG_HISTORY_PARK_REPORT_TERMINAL",
+  "report_date_utc": "2026-05-27",
+  "authorization": "Authorize s10 D1 MNQ+MGC candidate park under DR9 INCONCLUSIVE_HOLD.",
+  "controller_session": "THIS_SESSION",
+  "candidate_record_id": "s10-d1-cross-asset-trend-or-meanrev-mnq-mgc-databento-long-history",
+  "candidate_family": "F1_long_plus_short_bi_directional_donchian_trend_no_pyramid_atr_stop",
+  "sealed_universe": [
+    "MNQ.c.0",
+    "MGC.c.0"
+  ],
+  "sealed_dataset": "GLBX.MDP3",
+  "sealed_schema": "ohlcv-1d",
+  "sealed_stype_in": "continuous",
+  "is_window_start": "2019-05-13",
+  "is_window_end": "2023-12-29",
+  "oos_window_start_LOCKED_NEVER_INSPECTED": "2024-01-02",
+  "oos_window_end_LOCKED_NEVER_INSPECTED": "2025-12-30",
+  "spec_seal_anchor_commit": "9040429",
+  "spec_seal_sha256": "589ec42153c2c544474424dad03fc22a385c3fe8e0625e0dc5b13bfecec0cb6e",
+  "terminal_verdict": "INCONCLUSIVE_HOLD",
+  "terminal_verdict_explanation": "DR9 mnq_mgc_data_continuity_integrity_check fired on MGC.c.0's missing_observations criterion under both audit variants. Per sealed-spec section 11 DR9 severity mapping, the closed-enum verdict is INCONCLUSIVE_HOLD.",
+  "verdict_driver_dr": "DR9",
+  "verdict_driver_criterion": "missing_observations",
+  "verdict_driver_symbol": "MGC.c.0",
+  "fire_robust_to_holiday_aware_refinement": true,
+  "lifecycle_chain_commits": [
+    {
+      "step": 1,
+      "commit": "2ec9330",
+      "phase": "next_research_track_selection_plan_after_s9_park"
+    },
+    {
+      "step": 2,
+      "commit": "5c13821",
+      "phase": "t8_etf_proxy_family_park_memo_plus_s10_d1_tier_n_PLAN"
+    },
+    {
+      "step": 3,
+      "commit": "a95d7f0",
+      "phase": "s10_d1_tier_n_spec_DRAFT"
+    },
+    {
+      "step": 4,
+      "commit": "9040429",
+      "phase": "s10_d1_tier_n_spec_SEAL"
+    },
+    {
+      "step": 5,
+      "commit": "a8df18b",
+      "phase": "step_02b_databento_fetch_package_authored_not_run"
+    },
+    {
+      "step": 6,
+      "commit": "0736976",
+      "phase": "step_02b_fetch_script_dataframe_normalization_patch"
+    },
+    {
+      "step": 7,
+      "commit": "off-controller",
+      "phase": "operator_ran_step_02b_fetch_safe_paste_back"
+    },
+    {
+      "step": 8,
+      "commit": "9bdde45",
+      "phase": "step_02c_raw_data_audit_strict_verdict_DR9_FIRED_AUDIT_FAIL"
+    },
+    {
+      "step": 9,
+      "commit": "0e124e3",
+      "phase": "step_02c_holiday_aware_audit_refinement_verdict_DR9_FIRED_AUDIT_FAIL_HOLIDAY_AWARE"
+    },
+    {
+      "step": 10,
+      "commit": "THIS_TURN",
+      "phase": "candidate_park_report_terminal"
+    }
+  ],
+  "audit_evidence_chain": {
+    "strict_audit": {
+      "commit": "9bdde45",
+      "verdict": "DR9_FIRED_AUDIT_FAIL",
+      "mgc_missing_obs_count": 8,
+      "dr9_threshold": 5,
+      "report_seal_sha256": "fd5cd136891638d2a1338850b616d000b969c7b46ce8c12365ba9498855e5865"
+    },
+    "holiday_aware_audit_refinement": {
+      "commit": "0e124e3",
+      "verdict": "DR9_FIRED_AUDIT_FAIL_HOLIDAY_AWARE",
+      "mgc_missing_obs_count_after_holiday_exclusion": 7,
+      "holiday_explained_gap_count": 1,
+      "dr9_threshold": 5,
+      "us_cme_federal_holiday_entries_2019_2023": 46,
+      "report_seal_sha256": "5f0258117cf35afa17ada593d464a0fc941e87c95bc52b76d54b8d719ee34686"
+    },
+    "both_audits_agree_dr9_fires": true,
+    "dr9_threshold_NOT_modified_only_operationalization_changed_in_refinement": true
+  },
+  "mgc_gap_classification_table": [
+    {
+      "prev_observed_date": "2019-08-19",
+      "next_observed_date": "2019-08-26",
+      "gap_calendar_days": 7,
+      "holiday_explained": false,
+      "holidays_in_span": []
+    },
+    {
+      "prev_observed_date": "2020-10-20",
+      "next_observed_date": "2020-10-26",
+      "gap_calendar_days": 6,
+      "holiday_explained": false,
+      "holidays_in_span": []
+    },
+    {
+      "prev_observed_date": "2021-10-15",
+      "next_observed_date": "2021-10-22",
+      "gap_calendar_days": 7,
+      "holiday_explained": false,
+      "holidays_in_span": []
+    },
+    {
+      "prev_observed_date": "2022-06-17",
+      "next_observed_date": "2022-06-24",
+      "gap_calendar_days": 7,
+      "holiday_explained": true,
+      "holidays_in_span": [
+        "2022-06-20"
+      ]
+    },
+    {
+      "prev_observed_date": "2022-10-07",
+      "next_observed_date": "2022-10-24",
+      "gap_calendar_days": 17,
+      "holiday_explained": false,
+      "holidays_in_span": [],
+      "note": "anomalous_largest_single_gap"
+    },
+    {
+      "prev_observed_date": "2023-08-18",
+      "next_observed_date": "2023-08-25",
+      "gap_calendar_days": 7,
+      "holiday_explained": false,
+      "holidays_in_span": []
+    },
+    {
+      "prev_observed_date": "2023-10-13",
+      "next_observed_date": "2023-10-20",
+      "gap_calendar_days": 7,
+      "holiday_explained": false,
+      "holidays_in_span": []
+    },
+    {
+      "prev_observed_date": "2023-10-23",
+      "next_observed_date": "2023-10-29",
+      "gap_calendar_days": 6,
+      "holiday_explained": false,
+      "holidays_in_span": []
+    }
+  ],
+  "structural_pattern_observed_informational_not_a_sealed_metric": {
+    "mid_october_gaps_across_years": [
+      "2020",
+      "2021",
+      "2023x2"
+    ],
+    "mid_august_gaps_across_years": [
+      "2019",
+      "2023"
+    ],
+    "anomalous_long_gap_oct_2022_calendar_days": 17,
+    "plausible_reading": "MGC.c.0's Databento continuous-front-month stitch exhibits thin coverage around CME gold-futures quarterly roll cycles, particularly in mid-August and mid-October.",
+    "is_a_data_availability_finding_not_a_heuristic_artifact": true
+  },
+  "per_symbol_breakdown": {
+    "MNQ.c.0_clean_under_both_audit_variants": {
+      "row_count": 2066,
+      "is_window_rows": 1443,
+      "oos_window_rows_structural_only_no_return_analysis": 622,
+      "is_pct_observed": 1.2365,
+      "calendar_gaps_above_5_days_strict": 0,
+      "holiday_explained_gaps": 0,
+      "holiday_aware_missing_obs_count": 0,
+      "consecutive_abs_log_return_violation_count": 0,
+      "max_single_day_abs_log_return_observed": 0.116365,
+      "dr9_fire_decision_strict": "clean",
+      "dr9_fire_decision_holiday_aware": "clean",
+      "clean_leg_finding_preserved_for_future_fresh_candidate_ids": true
+    },
+    "MGC.c.0_dr9_fires_under_both_audit_variants": {
+      "row_count": 1814,
+      "is_window_rows": 1247,
+      "oos_window_rows_structural_only_no_return_analysis": 566,
+      "is_pct_observed": 1.0686,
+      "calendar_gaps_above_5_days_strict": 8,
+      "holiday_explained_gaps": 1,
+      "holiday_aware_missing_obs_count": 7,
+      "consecutive_abs_log_return_violation_count": 0,
+      "max_single_day_abs_log_return_observed": 0.071343,
+      "dr9_fire_decision_strict": "fire",
+      "dr9_fire_decision_holiday_aware": "fire",
+      "responsible_for_candidate_park": true
+    }
+  },
+  "captured_artifacts_byte_record_read_only": {
+    "mnq_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "mgc_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MGC_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mgc_csv_sha256": "79618abec8c34e59f0cc52420afc455c0d7dbdf13bf96605224e27247c9ccc4b",
+    "manifest_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/s10_d1_mnq_mgc_step02b_fetch_manifest.json",
+    "manifest_sha256": "d6cf8c8b4cc81ff0b85085db5bc83b02b3bf795887b6a49ca71898b77c926225",
+    "raw_csv_files_are_untracked_in_git_by_design": true
+  },
+  "permanent_labels_for_this_candidate": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "DR9_FIRED_ROBUST_TO_HOLIDAY_AWARE_REFINEMENT",
+    "LIVE_TRADING_BLOCKED",
+    "STRATEGY_LAB_PROMOTION_BLOCKED",
+    "BROKER_INTEGRATION_BLOCKED",
+    "OOS_INSPECTION_BLOCKED",
+    "DO_NOT_RESCUE_THIS_SPEC",
+    "DO_NOT_ITERATE_S10_D1_MNQ_MGC_PARAMETERS_WITHOUT_REVN_SPEC",
+    "NO_SUBSTITUTION_OF_MCL_OR_OTHER_SYMBOL_INTO_THIS_CANDIDATE",
+    "MNQ_C_0_CLEAN_LEG_FINDING_PRESERVED_FOR_FUTURE_FRESH_CANDIDATES"
+  ],
+  "what_this_park_does_not_mean": {
+    "s10_d1_research_direction_terminated": false,
+    "mnq_c_0_has_data_quality_issues": false,
+    "sealed_tier_n_spec_has_bugs": false,
+    "audit_heuristic_was_unfair": false,
+    "dr9_threshold_optimization_could_rescue": false
+  },
+  "negative_invariants_held": {
+    "no_live_trading": true,
+    "no_strategy_lab_promotion": true,
+    "no_review_queue_mutation": true,
+    "no_brokerage_connection": true,
+    "no_external_network_this_turn": true,
+    "no_databento_this_turn": true,
+    "no_databento_api_key_access_this_turn": true,
+    "no_yfinance_call_this_turn": true,
+    "no_qc_or_lean_call_this_turn": true,
+    "no_production_signal": true,
+    "no_strategy_optimization_authorized": true,
+    "no_profitability_claim": true,
+    "no_dr_redefinition_post_seal": true,
+    "no_universe_membership_logic_this_turn": true,
+    "no_warmup_order_submission_this_turn": true,
+    "no_b006_NNN_AND_s7_AND_s9_sealed_artifact_mutation": true,
+    "no_mutation_of_lessons_md": true,
+    "no_staging_of_lessons_md": true,
+    "no_branch_change_no_branch_creation_no_git_push": true,
+    "no_modification_of_sealed_tier_n_spec_this_turn": true,
+    "no_modification_of_audit_scripts_or_audit_reports_this_turn": true,
+    "no_modification_of_captured_raw_csvs_or_manifest_this_turn": true
+  },
+  "no_live_status_carried_forward": {
+    "trading": "PAUSED",
+    "live_mode": "BLOCKED_AT_6_GATES",
+    "frc": "NEVER_GRANTED",
+    "six_gate_live_block_permanent_for_this_candidate_independent_of_future_re_interpretation": true,
+    "all_19_sealed_spec_runtime_invariants_at_seal_remain_true": true
+  },
+  "recommended_next_paths_three_separately_authorized_this_report_does_not_recommend_among_them": [
+    {
+      "path": "A1",
+      "label": "Fresh candidate id (e.g., MNQ-only single-instrument OR MNQ + alternate second symbol)",
+      "proposed_authorization_phrase": "Authorize next-research-track selection plan after s10 D1 MNQ+MGC park.",
+      "must_be_fresh_candidate_id_not_revision": true,
+      "rationale": "MNQ.c.0 passed both audit variants cleanly; the data-availability issue is specific to MGC.c.0's continuous-stitch. A fresh candidate id can leverage the MNQ-clean-leg finding."
+    },
+    {
+      "path": "A2",
+      "label": "Defer or pause all trading-bot work",
+      "proposed_authorization_phrase": "Acknowledge s10 D1 park; pause trading-bot track.",
+      "rationale": "Trading-bot arc enters holding state with one family-level park (SPY/TLT/GLD/USO via T8) and one single-mechanic candidate park (s10 D1 MNQ+MGC via this report)."
+    },
+    {
+      "path": "A3",
+      "label": "Optional terminal lesson append to lessons.md",
+      "proposed_authorization_phrase": "Authorize s10 D1 MNQ+MGC park terminal lesson append to lessons.md only.",
+      "blocked_until_separately_authorized_because_lessons_md_is_dirty_and_unstaged": true,
+      "operator_must_explicitly_authorize_touching_lessons_md": true
+    }
+  ],
+  "operator_guidance_quoted_informational": "After parking, the best next idea is likely a fresh MNQ-only candidate or MNQ with a better second symbol, because MNQ passed both audits cleanly. But that must be a new candidate ID, not a revision of this failed one.",
+  "files_written_this_park_turn": [
+    "reports/external_research_hunter/s10_d1_mnq_mgc_databento_long_history_park_report.md",
+    "reports/external_research_hunter/s10_d1_mnq_mgc_databento_long_history_park_report.json"
+  ],
+  "report_md_artifact": {
+    "path": "reports/external_research_hunter/s10_d1_mnq_mgc_databento_long_history_park_report.md",
+    "bytes": 20513,
+    "sha256": "f09fa359d11ce00ecba06aed2bea3abebfc4c29e95b8e72d91c2b615b063073c"
+  },
+  "is_sealed": true,
+  "is_live_approved": false,
+  "is_profit_proof": false,
+  "frc_granted": false,
+  "is_candidate_promoted": false,
+  "is_terminal": true,
+  "do_not_rescue_this_spec": true,
+  "report_seal_sha256": "32c1a87146264197fd852e53ba45baf6d6d45e40355b716e5a4d41a08edf1b2f",
+  "seal_method": "sha256(json.dumps(body, sort_keys=True, separators=(',',':'), ensure_ascii=False)) excluding report_seal_sha256+seal_method"
+}
