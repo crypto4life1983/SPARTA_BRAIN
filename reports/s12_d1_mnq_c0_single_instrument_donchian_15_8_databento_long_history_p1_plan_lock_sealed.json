@@ -1,0 +1,543 @@
+{
+  "authored_at_utc": "2026-05-27T14:56:04.217249Z",
+  "binding": true,
+  "candidate_record_id": "s12-d1-mnq-c0-single-instrument-donchian-15-8-databento-long-history",
+  "cost_tier_definitions_locked": {
+    "baseline_costs_S1_1x_scalar": {
+      "commission_per_round_trip": 0.74,
+      "fees_per_round_trip": 0.36,
+      "slippage_entry_ticks": 1,
+      "slippage_exit_ticks": 1,
+      "slippage_stop_ticks": 1
+    },
+    "cost_stress_tiers": [
+      {
+        "cost_scalar": 0.0,
+        "note": "zero-cost ideal",
+        "slippage_scalar": 0.0,
+        "tier": "S0"
+      },
+      {
+        "cost_scalar": 1.0,
+        "note": "baseline retail (DEFAULT)",
+        "slippage_scalar": 1.0,
+        "tier": "S1"
+      },
+      {
+        "cost_scalar": 1.5,
+        "note": "stressed retail",
+        "slippage_scalar": 1.5,
+        "tier": "S2"
+      },
+      {
+        "cost_scalar": 2.0,
+        "note": "adversarial",
+        "slippage_scalar": 2.0,
+        "tier": "S3"
+      },
+      {
+        "cost_scalar": 3.0,
+        "note": "extreme adversarial",
+        "slippage_scalar": 3.0,
+        "tier": "S4"
+      }
+    ]
+  },
+  "explicit_next_phase_requirement": {
+    "next_phase_is_p2_phase_2_plan": true,
+    "next_phase_pre_approved_by_this_plan_lock": false,
+    "no_phase_beyond_p2_pre_approved_by_this_plan_lock": true,
+    "p10_oos_gate_requires_separate_authorization": true,
+    "p11_lifecycle_decision_requires_separate_authorization": true,
+    "p2_phase_2_plan_requires_separate_authorization": true,
+    "p2_phase_2_plan_requires_separate_authorization_phrase": "Authorize s12 D1 MNQ.c.0 P2 phase-2 plan only",
+    "p2_phase_2_plan_template_source": "docs/phase2_safety_contract_template.md C1-C8 byte-equivalent with single-instrument adaptations",
+    "p3_build_requires_separate_authorization": true,
+    "p4_smoke_requires_separate_authorization": true,
+    "p6_5_cost_stress_requires_separate_authorization": true,
+    "p6_is_requires_separate_authorization": true,
+    "p7_decision_memo_requires_separate_authorization": true,
+    "this_p1_authoring_sealing_commit_completes_here": true
+  },
+  "files_explicitly_forbidden_during_all_s12_d1_phases": [
+    "All s11-d1 v1 sealed artifacts (commit 9c63088 spec MD + JSON; sha 077e29e6...)",
+    "All s11-d1 rev2 sealed artifacts (commit c110fd4; sha 46659b4a...)",
+    "All s11-d1 P1 plan-lock sealed artifacts (commit 7d86486)",
+    "All s11-d1 P2 phase-2 plan sealed artifacts (commit f64f984)",
+    "s11-d1 clarification memo (commit d13b56a; sha eda08ace...)",
+    "All s10-D2 sealed artifacts (commit 23c7164 PARK and full S10-D2 chain)",
+    "All s10-D1 MNQ+MGC artifact OTHER than the sealed MNQ.c.0 CSV at the audit-clean path",
+    "All s10-D1 source files (loaders, validators, signal modules, simulators, aggregators, fetch tools, audit tools)",
+    "All s9 RSI-2 ETF-proxy sealed artifacts",
+    "All s7 D1 ETF-proxy sealed artifacts",
+    "All B005_NNN sealed artifacts",
+    "All B006_001 sealed artifacts",
+    "All B006_002 sealed artifacts",
+    "All s8-D1 cross-asset Donchian sealed artifacts",
+    "T8 ETF-proxy family-park memo",
+    "S10-D1 micro availability probe memo",
+    "next_research_track_selection_plan_*.md files (parallel-session selection plans)",
+    "review_queue.json",
+    "production idea_memory directory",
+    "All Strategy Lab artifacts",
+    "All ORB branch artifacts and Step 30 cost constants",
+    "obsidian-trade-logger or any obsidian-related directory/file",
+    "brain_memory/projects/trading_bot/lessons.md (long-running parallel-session dirty file; explicitly off-limits in EVERY S12-D1 phase unless a separate authorization names it as the target)",
+    "app.py, templates/base.html, or any web/UI file modified by parallel sessions",
+    "CLAUDE.md, docs/decisions.md (if exists), RUNBOOK, pipeline_manifest, .gitignore",
+    "The s12-d1 SEAL Tier-N spec files at 66bbbd1 (docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec.md + reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_sealed.json) — LOCKED at SEAL; modification requires fresh _revN_ Tier-N spec under separate authorization",
+    "Parallel-session SEAL artifacts at commit 9ce4d66 (docs/..._tier_n_spec.md and reports/external_research_hunter/..._tier_n_spec_sealed.{json,md} at shorter-path naming) — operator preserved this P1's source-of-truth SEAL at 66bbbd1; parallel SEAL is byte-stable and off-limits to this P1 chain",
+    "Parallel-session DRAFT review at commit 07be7fc",
+    "Parallel-session OOS K9 addendum memo at commit 538eaf3",
+    "Parallel-session S10-D2 vs S11-D1 comparison memo at commit 1bf45bc",
+    "This P1 plan-lock document itself once committed — any change requires fresh _revN_ plan-lock under separate authorization",
+    "Any file outside the s12-d1 candidate_record_id namespace"
+  ],
+  "git_staging_commit_protocol_locked": {
+    "always_on_invariants": {
+      "no_amend_without_explicit_authorization": true,
+      "no_branch_creation_without_explicit_authorization": true,
+      "no_force_push": true,
+      "no_rebase_without_explicit_authorization": true,
+      "no_remote_push_without_explicit_authorization": true,
+      "pathspec_only_at_every_phase": true
+    },
+    "commit_pattern_forbidden": [
+      "git commit -a",
+      "git commit --no-verify",
+      "git commit --amend (without explicit authorization)"
+    ],
+    "commit_pattern_required": "git commit -m '<descriptive message>' (or via -F file)",
+    "post_commit_verification_required": [
+      "Run: git show --name-status HEAD",
+      "Verify: every committed path matches an authorized path",
+      "Verify: no unrelated files in the commit",
+      "Run: git status --short"
+    ],
+    "post_stage_verification_required": [
+      "Run: git diff --cached --name-status",
+      "Verify: staged count == authorized count for this phase",
+      "Verify: every staged path matches an authorized path",
+      "Halt if either check fails"
+    ],
+    "pre_stage_check_required_at_every_phase": [
+      "Run: git status --short",
+      "Run: git diff --cached --name-status",
+      "Halt if any parallel-session file is staged",
+      "Halt if app.py / templates/base.html / lessons.md are staged",
+      "Halt if any unrelated tracked file is in the index"
+    ],
+    "staging_pattern_forbidden": [
+      "git add .",
+      "git add -A",
+      "git add *",
+      "git add <directory>"
+    ],
+    "staging_pattern_required": "git add -- <exact authorized file paths>"
+  },
+  "hard_boundaries_held_this_p1_plan_lock_turn": {
+    "no_app_py_touched": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_commit_in_orchestrator": true,
+    "no_d5_b005_001_nke_revival": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_dr_redefinition": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_parallel_session_seal_at_9ce4d66": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_s12_d1_draft_at_7e9c867": true,
+    "no_modification_of_s12_d1_plan_at_b4eac65": true,
+    "no_modification_of_s12_d1_seal_at_66bbbd1": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_inspection": true,
+    "no_paper_trading": true,
+    "no_phase_pre_approval_beyond_plan_lock": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_qc_runtime": true,
+    "no_review_queue_mutation": true,
+    "no_s10_d1_modification": true,
+    "no_s10_d2_modification": true,
+    "no_s10_d2_revival": true,
+    "no_safety_gate_relaxation": true,
+    "no_source_modification": true,
+    "no_strategy_build": true,
+    "no_templates_base_html_touched": true,
+    "no_threshold_loosening": true,
+    "no_tier_n_spec_modification": true,
+    "no_unrelated_tracked_file_modified": true,
+    "preserves_seal_at_66bbbd1_as_source_of_truth_per_operator_authorization": true,
+    "rec1_oos_k9_risk_disclosure_carried_byte_equivalent": true
+  },
+  "implementation_files_allowed_for_p3_build": {
+    "creation_pattern": "P3 BUILD may be split into 3 sub-phases (P3-RUNNER + P3-IS-DRIVER + P3-OOS-DRIVER) each separately authorized; OR combined under a single authorization. P1 plan-lock recommends including test scaffold in original P3 BUILD to avoid the S10-D2-style P3.5 retrofit pattern.",
+    "sealed_build_report_files_6": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_build_report.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_build_report.md",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_in_sample_driver_build_report.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_in_sample_driver_build_report.md",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_out_of_sample_driver_build_report.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_out_of_sample_driver_build_report.md"
+    ],
+    "source_files_5": [
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/__init__.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/main.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/execution_guard.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/in_sample_driver.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/out_of_sample_driver.py"
+    ],
+    "test_scaffold_files_5": [
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/__init__.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/conftest.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/fixtures/synthetic_mnq_daily.csv",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/test_smoke_t1_t15.py",
+      "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/test_oos_driver_invariants.py"
+    ],
+    "test_scaffold_inclusion_recommendation": "include in P3 BUILD directly to avoid S10-D2 P3.5 retrofit pattern",
+    "total_allowed_file_count": 16
+  },
+  "input_data_path_and_sha_requirement": {
+    "alternate_schema_authorized": false,
+    "alternate_symbols_authorized": false,
+    "alternate_vendor_authorized": false,
+    "build_phase_must_fail_loudly_if_sha_mismatch": true,
+    "build_phase_must_verify_csv_sha_at_runtime": true,
+    "fail_loud_error_class_name": "S12_D1_MNQ_CSV_SHA_MISMATCH",
+    "fresh_fetch_authorized_by_this_plan_lock": false,
+    "fresh_fetch_required": false,
+    "primary_access": "READ-ONLY; byte-equivalent reuse from s10-D1 sealed fetch",
+    "primary_format": "CSV (per s10-D1 fetch tool output schema; daily bars with ts_event index)",
+    "primary_observed_window": [
+      "2019-05-13",
+      "2025-12-29"
+    ],
+    "primary_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "primary_row_count": 2066,
+    "primary_sha256_required": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "secondary_data_authorized": false
+  },
+  "is_oos_split_enforcement": {
+    "drivers_are_authored_at_p3_build_as_siblings": true,
+    "in_sample_driver_constants": {
+      "CSV_PATH_HARDCODED": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+      "CSV_SHA256_HARDCODED": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+      "IN_SAMPLE_END": "datetime.date(2023, 12, 29)",
+      "IN_SAMPLE_START": "datetime.date(2019, 5, 13)"
+    },
+    "in_sample_driver_filters_to_is_window_only": true,
+    "is_window_end": "2023-12-29",
+    "is_window_start": "2019-05-13",
+    "locked_at_seal": true,
+    "no_p3_5_retrofit_planned_for_oos_driver": true,
+    "oos_inspection_during_is_phase_blocked_by_separate_files": true,
+    "oos_window_end": "2025-12-30",
+    "oos_window_start": "2024-01-02",
+    "out_of_sample_driver_constants": {
+      "CSV_PATH_HARDCODED": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+      "CSV_SHA256_HARDCODED": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+      "OUT_OF_SAMPLE_END": "datetime.date(2025, 12, 30)",
+      "OUT_OF_SAMPLE_START": "datetime.date(2024, 1, 2)"
+    },
+    "out_of_sample_driver_filters_to_oos_window_only": true
+  },
+  "k9_and_sample_size_rules": {
+    "expected_is_trade_count_estimate": "Donchian-15/8 bi-directional on MNQ.c.0 over 4.6y IS expected ~80 (low) / 140 (central) / 200 (high) portfolio trades; ~3-4x s11-d1 v1's Donchian-55/20 expectation of 25-50 trades",
+    "expected_oos_trade_count_estimate_REC1_carried": "Implied OOS over 2.0y at IS rate: ~35 (low) / 61 (central) / 87 (high) trades, all below K9=100; OOS K9 STRUCTURALLY UNREACHABLE",
+    "if_k9_fires_at_is": "Verdict at IS shall be INSUFFICIENT_SAMPLE (NOT FAIL_SAFETY). Chain shall NOT relax K9. Operator decides between (a) continuing to P10 OOS despite IS being undersampled, (b) parking S12-D1 with PARK memo at IS stage, or (c) selecting a different mechanic family in a fresh candidate.",
+    "if_k9_fires_at_oos": "Verdict at OOS shall be INSUFFICIENT_SAMPLE / OOS_INDETERMINATE. Chain shall NOT relax K9. Appropriate response is to park S12-D1 with PARK memo analogous to S10-D2 P11 PARK at PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED. This is the EXPECTED terminal verdict per REC1 disclosure carried byte-equivalent from SEAL.",
+    "k9_relaxation_at_any_phase_forbidden": true,
+    "k9_risk_at_is_phase": "borderline_at_lower_bound_80_below_K9_central_140_clears_high_200_clears_with_margin",
+    "k9_risk_at_oos_phase": "STRUCTURALLY_UNREACHABLE_across_entire_DRAFT_documented_band_low_35_central_61_high_87_all_below_K9_100",
+    "k9_threshold": 100,
+    "k9_threshold_modification_forbidden": true,
+    "rec1_carried_byte_equivalent_from_seal": true
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P1_PLAN_LOCK_SEALED",
+    "S12_D1_MNQ_DONCHIAN_15_8_FRESH_CANDIDATE",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NO_FRC_GRANTED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_PHASE_PRE_APPROVED_BEYOND_THIS_PLAN_LOCK",
+    "K9_THRESHOLD_INVIOLATE",
+    "OOS_K9_STRUCTURALLY_UNREACHABLE_REC1_CARRIED",
+    "DR10_RISK_ELEVATED_MITIGATED_VIA_DA4_B_START_CASH_100K",
+    "DONCHIAN_15_8_LOCKED_AT_PLAN_NO_RETREAT_TO_55_20",
+    "MECHANIC_FAMILY_F1_LOCKED_AT_PLAN_NO_REOPENING",
+    "TIER_N_SPEC_LOCKED_BYTE_EQUIVALENT_AT_66BBBD1",
+    "PARALLEL_SEAL_AT_9CE4D66_ACKNOWLEDGED_NOT_ANCHORED",
+    "ADDENDUM_MEMO_REC1_CARRIED_BYTE_EQUIVALENT_FROM_SEAL"
+  ],
+  "lifecycle_state": "P1_PLAN_LOCK_SEALED",
+  "output_artifact_plan_per_phase": {
+    "deviation_requires_per_phase_explicit_authorization": true,
+    "naming_locked_at_p1": true,
+    "p10_oos_gate_future": [
+      "reports/s12_d1_p10_oos_gate_sealed.json",
+      "reports/s12_d1_p10_oos_gate_sealed.md"
+    ],
+    "p11_lifecycle_decision_future": [
+      "reports/s12_d1_p11_lifecycle_memo_sealed.json",
+      "reports/s12_d1_p11_lifecycle_memo_sealed.md"
+    ],
+    "p1_plan_lock_this_turn": [
+      "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p1_plan_lock.md",
+      "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p1_plan_lock_sealed.json"
+    ],
+    "p2_phase2_plan_future": [
+      "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p2_phase2_plan.md",
+      "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p2_phase2_plan_sealed.json"
+    ],
+    "p3_build_future_see_section_implementation_files": "see implementation_files_allowed_for_p3_build",
+    "p4_smoke_future": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_smoke_t1_t15_report.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_smoke_t1_t15_report.md"
+    ],
+    "p6_5_cost_stress_future": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_cost_stress_matrix_result_sealed.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_cost_stress_matrix_result_sealed.md"
+    ],
+    "p6_is_future": [
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_in_sample_diagnostic_result_sealed.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_in_sample_diagnostic_result_sealed.md"
+    ],
+    "p7_decision_memo_future": [
+      "reports/s12_d1_p7_decision_memo_sealed.json",
+      "reports/s12_d1_p7_decision_memo_sealed.md"
+    ]
+  },
+  "parallel_session_seal_acknowledgment": {
+    "operator_decision_at_p1_authorization": "preserve SEAL at 66bbbd1 (this P1 chain) as source of truth; parallel SEAL at 9ce4d66 is byte-stable not modified by this P1",
+    "parallel_seal_commit": "9ce4d66",
+    "parallel_seal_message": "Seal S12-D1 Tier-N spec at operator-authorized paths (DA4=B; C1.A + C1.D affirmed)",
+    "parallel_seal_paths": [
+      "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_tier_n_spec.md",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_tier_n_spec_sealed.json",
+      "reports/external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_tier_n_spec_sealed.md"
+    ],
+    "this_p1_does_NOT_modify_parallel_seal": true,
+    "this_p1_does_NOT_supersede_parallel_seal": true,
+    "this_p1_only_anchors_to_seal_at_66bbbd1": true
+  },
+  "parent_references": {
+    "mnq_c0_csv_observed_window": [
+      "2019-05-13",
+      "2025-12-29"
+    ],
+    "mnq_c0_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_row_count": 2066,
+    "mnq_c0_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "s10_d1_mnq_mgc_park_commit": "1a9acec",
+    "s10_d1_mnq_mgc_park_report_seal_sha256": "32c1a87146264197fd852e53ba45baf6d6d45e40355b716e5a4d41a08edf1b2f",
+    "s10_d2_park_commit": "23c7164",
+    "s10_d2_park_status": "PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "s11_d1_clarification_memo_commit": "d13b56a",
+    "s11_d1_p1_plan_lock_commit": "7d86486",
+    "s11_d1_p2_phase_2_plan_commit": "f64f984",
+    "s11_d1_rev2_commit": "c110fd4",
+    "s11_d1_rev2_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "s11_d1_v1_spec_commit": "9c63088",
+    "s11_d1_v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "s12_d1_draft_commit": "7e9c867",
+    "s12_d1_plan_commit": "b4eac65",
+    "tier_n_spec_commit": "66bbbd1",
+    "tier_n_spec_json_path": "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_sealed.json",
+    "tier_n_spec_md_path": "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec.md",
+    "tier_n_spec_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+  },
+  "phase_prefix": "PHASE2-S12-D1-MNQ-DONCHIAN-15-8",
+  "promotion_rules_locked": {
+    "diagnostic_only_not_live_grade_label": true,
+    "live_promotion_blocked_at_6_gates_permanently": true,
+    "no_profitability_claim": true,
+    "no_verdict_unblocks_frc": true,
+    "no_verdict_unblocks_live": true,
+    "no_verdict_unblocks_paper_via_broker": true,
+    "no_verdict_unblocks_review_queue_mutation": true,
+    "no_verdict_unblocks_strategy_lab_promotion": true,
+    "permanent_live_block": true,
+    "permanent_paper_block_via_broker_api": true,
+    "promotion_at_any_stage_is_OUT_OF_SCOPE": true,
+    "research_diagnostic_only": true
+  },
+  "rejection_rules_locked": {
+    "a_gates_p6_is": {
+      "A10_cap_binding_events_eq_0": "fail -> FAIL_SAFETY",
+      "A1_closed_trades_ge_100": "fail -> INSUFFICIENT_SAMPLE",
+      "A2_sharpe_proxy_gt_0": "fail -> FAIL_SAFETY",
+      "A3_expectancy_gt_0": "fail -> FAIL_SAFETY",
+      "A4_trade_curve_maxdd_pct_magnitude_le_50": "fail -> FAIL_SAFETY (50% per DA5=A; byte-equivalent from s11-d1 v1 K4 formula)",
+      "A5": "NOT APPLICABLE (single instrument; no portfolio_wr_gap diversification claim possible)",
+      "A6_no_pyramid_attestation_pass": "fail -> FAIL_SAFETY",
+      "A7_effective_independent_bets": "NOT APPLICABLE (trivially 1)",
+      "A8_cost_stress_S0_S4_run": "evaluated at P6.5",
+      "A9_phase2_c1_c8_inheritance_attestable": "fail -> FAIL_SAFETY"
+    },
+    "dr_rules_p6_5_cost_stress_sweep": {
+      "DR10_turnover_cost_explosion": "fires if annual_turnover > 0.50 OR S2 cost drag > 0.05; ELEVATED prior probability vs s11-d1 v1; mitigated via DA4=B START_CASH=$100k",
+      "DR2_tier_net_pnl_le_0": "fires if any non-baseline tier net_pnl <= 0",
+      "DR3_tier_sharpe_proxy_le_0": "fires if any non-baseline tier sharpe <= 0",
+      "DR4_tier_expectancy_le_0": "fires if any non-baseline tier expectancy <= 0",
+      "DR5_tier_closed_trades_lt_100": "fires if any non-baseline tier closed_trades < 100"
+    },
+    "invariants": {
+      "fail_safety_terminal": true,
+      "no_dr_redefinition_post_seal": true,
+      "no_filter_introduction_post_seal": true,
+      "no_starting_cash_modification": true,
+      "no_strategy_parameter_modification": true,
+      "no_threshold_loosening": true,
+      "no_universe_widening": true
+    },
+    "k_gates": {
+      "K10_avg_pairwise_corr": "NOT APPLICABLE (single instrument)",
+      "K11_cap_binding_events": "NOT APPLICABLE (F1 no leverage cap)",
+      "K12_DR_fires_on_cost_stress": "evaluated at P6.5 cost-stress sweep",
+      "K1_sharpe_proxy_lt_0": "FAIL_SAFETY trigger",
+      "K2_expectancy_le_0": "FAIL_SAFETY trigger",
+      "K4_trade_curve_maxdd_magnitude_gt_50": "FAIL_SAFETY trigger (|maxdd_pct| > 50% per DA5=A)",
+      "K6_safety_warning_count_gt_0": "FAIL_SAFETY trigger (NOT APPLICABLE for s12-d1 single-instrument K6 per-symbol dispersion semantically)",
+      "K7_correlation_or_filter_silently_introduced": "FAIL_SAFETY trigger",
+      "K8_sealed_parent_drift": "FAIL_SAFETY trigger (parent seal mismatch; embedded TIER_N_SPEC_SEAL_SHA256 must match)",
+      "K9_closed_trades_lt_100": "INSUFFICIENT_SAMPLE trigger (NOT FAIL_SAFETY)"
+    }
+  },
+  "report_kind": "S12-D1 P1 plan-lock (sealed; binding; anchors to s12-d1 Tier-N spec SEAL at commit 66bbbd1 sha 07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48 as operator-confirmed source of truth, NOT the parallel-session SEAL at commit 9ce4d66 which lives at different paths under reports/external_research_hunter/)",
+  "report_seal_sha256": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+  "schema_id": "sparta.external_research_hunter.s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_p1_plan_lock_sealed.v1",
+  "seal_hash_protocol_locked": {
+    "canonical_form": "json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str)",
+    "embedded_constants_in_drivers_validated_via_assert_seal_inheritance": {
+      "PHASE2_PLAN_SEAL_SHA256": "(will be populated at P2 commit under separate authorization)",
+      "PLAN_LOCK_SEAL_SHA256": "(will be populated at P1 commit; this file's seal)",
+      "PREDECESSOR_PARK_REF_S10_D1": "1a9acec",
+      "PREDECESSOR_PARK_REF_S10_D2": "23c7164",
+      "PREDECESSOR_SEAL_REF_S11_D1_REV2": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+      "PREDECESSOR_SEAL_REF_S11_D1_V1": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+      "REC1_OOS_K9_DISCLOSURE_CARRIED_FROM_SEAL": true,
+      "TIER_N_SPEC_SEAL_SHA256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+    },
+    "encoding": "utf-8",
+    "excluded_keys": [
+      "report_seal_sha256",
+      "seal_method"
+    ],
+    "hash_algorithm": "sha256",
+    "reseal_mismatch_error_class": "SEAL_ROUNDTRIP_FAIL",
+    "reseal_verify_required_after_write": true,
+    "seal_method": "LESSON_HUNTER_004 canonical roundtrip"
+  },
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P1_PLAN_LOCK_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "strategy_mechanic_boundaries_locked": {
+    "amb6_filter": "NONE",
+    "atr_method": "Wilder",
+    "atr_period": 20,
+    "contract_multiplier_note": "MNQ: $2 * Nasdaq-100 index value per point",
+    "correlation_filter": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+    "daily_bars_only": true,
+    "dollar_per_point": 2.0,
+    "donchian_entry_period_n": 15,
+    "donchian_exit_period_n": 8,
+    "donchian_lock_origin": "LOCKED at PLAN (commit b4eac65) -- load-bearing departure from s11-d1 v1's 55/20",
+    "intraday_data_used": false,
+    "leverage_cap": "NONE_implicit_via_per_trade_risk_sizing_only_no_separate_C4",
+    "max_total_units": 1,
+    "max_units_per_market": 1,
+    "mechanic_family": "F1 long+short bi-directional Donchian, no pyramid, ATR-stop, 1% per-trade risk",
+    "modification_post_build_forbidden": true,
+    "modification_requires_fresh_candidate_record_id": true,
+    "pyramid_method": "NONE",
+    "regime_overlay": "NONE",
+    "risk_pct_per_trade": 0.01,
+    "roll_method": "Continuous front-month per Databento stype_in=continuous; no operator-side roll override",
+    "rth_window_et": {
+      "close_h": 16,
+      "close_m": 0,
+      "open_h": 9,
+      "open_m": 30,
+      "tz": "America/New_York"
+    },
+    "starting_cash_invariant_error_class": "S12_D1_STARTING_CASH_INVARIANT_VIOLATION",
+    "starting_cash_mnq_equivalent": 100000,
+    "starting_cash_origin": "DA4=B revised at SEAL from DRAFT-default $50k to $100k for DR10 mitigation",
+    "stop_multiplier_in_atr": 2.0,
+    "tick_size_points": 0.25,
+    "tick_value_usd": 0.5,
+    "vol_targeting": "NONE"
+  },
+  "test_plan_p4_synthetic_smoke": {
+    "invocation_pattern": "constrained --rootdir/--confcutdir to tests/ subtree (lesson from S10-D2 P4 ghost-hydra directory blocker)",
+    "loader_side_marker": "SYNTHETIC_PHASE2_SMOKE_FIXTURE (loader-side guard)",
+    "oos_driver_invariants_tests_required": {
+      "test_both_drivers_use_same_runner_main_module": "lazy-import resolves to same module object",
+      "test_oos_driver_cache_path_points_to_csv": "oos_driver.CSV_PATH == sealed MNQ CSV",
+      "test_oos_driver_databento_import_is_function_local": "import databento as db inside function only if present",
+      "test_oos_driver_does_not_have_is_window_constants": "no IN_SAMPLE_START/END constants leak",
+      "test_oos_driver_does_not_have_run_in_sample_function": "no run_in_sample function on OOS driver",
+      "test_oos_driver_does_not_instantiate_db_historical": "no db.Historical() call (s12-d1 reuses sealed CSV; no fresh fetch authorized)",
+      "test_oos_driver_does_not_reference_is_dates_in_source": "no 2019/2023 dates in OOS driver source",
+      "test_oos_driver_no_top_level_forbidden_imports": "no top-level databento/QC/AlgorithmImports",
+      "test_oos_driver_window_end_is_2025_12_30": "OUT_OF_SAMPLE_END == datetime.date(2025, 12, 30)",
+      "test_oos_driver_window_start_is_2024_01_02": "OUT_OF_SAMPLE_START == datetime.date(2024, 1, 2)",
+      "test_oos_run_function_signature_matches_is": "same parameter names and defaults",
+      "test_runner_main_config_strategy_params_unchanged": "CONFIG strategy params byte-identical across drivers; donchian_entry_period_n=15, donchian_exit_period_n=8, starting_cash=100000"
+    },
+    "pytest_run_protocol_at_p4": {
+      "env_guards": "PYTHONPATH=C:\\\\SPARTA_BRAIN; HTTP_PROXY=invalid; DATABENTO_API_KEY popped",
+      "expected_wall": "~1s (synthetic; no real data decode)",
+      "invocation_pattern": "python -u -m pytest <test_file> -v --no-header --tb=short -p no:cacheprovider --rootdir <tests_dir> --confcutdir <tests_dir> --import-mode=importlib",
+      "verdict_threshold": "all tests PASSED; any FAIL -> P4 verdict FAIL"
+    },
+    "synthetic_fixture": "external_research_hunter/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_runner_harness/tests/fixtures/synthetic_mnq_daily.csv",
+    "test_battery_name": "S12-D1 P4 synthetic smoke (T1-T15 + T7b + T7c) adapted for Donchian-15/8 + START_CASH $100k",
+    "test_count_min": 17,
+    "tests_required_t1_through_t15_plus_t7b_t7c": {
+      "T10_sizing_1pct_floor": "compute_unit_contracts returns floor((0.01 * 100000) / (ATR_entry * 0.5)) for s12-d1 START_CASH=$100k",
+      "T11_skip_when_contract_count_lt_one": "tiny equity returns 0 contracts",
+      "T12_rth_only_filter_attested": "RTH window 09:30-16:00 ET in CONFIG",
+      "T13_roll_cost_modeled_1_spread_tick": "tick_value_usd=0.50 in CONFIG",
+      "T14_cost_stress_matrix_S0_S1_S2_S3_S4": "5 tiers in CONFIG['cost_stress_tiers']",
+      "T15_validator_harness_pass_on_synthetic": "execution_guard.full_guard_check returns overall_pass=True on synthetic algo proxy",
+      "T1_module_imports_clean": "main + execution_guard + drivers importable without QC/databento at module level",
+      "T2_runner_class_instantiable": "main.Algo() Initialize() succeeds without QC runtime",
+      "T3_wilder_atr_synthetic": "ATR(20) on constant 21-bar TR series returns 2.0",
+      "T4_donchian_15_8_synthetic": "Donchian-15 high/low and Donchian-8 high/low on synthetic series match max/min (s12-d1-specific; adapted from s11-d1 T4_donchian_55_20)",
+      "T5_entry_trigger_synthetic_breakout": "synthetic 15-day breakout bar triggers long entry (s12-d1-specific Donchian-15)",
+      "T6_stop_placement_at_2n": "stop = entry - 2 * N for long (ATR-20 based)",
+      "T7_pyramid_trigger_at_05n": "pyramid trigger COMPUTED at +0.5N (but invocation forbidden)",
+      "T7b_add_pyramid_unit_raises_under_max_units_1": "add_pyramid_unit raises RuntimeError when max_units=1",
+      "T7c_starting_cash_invariant_100000": "CONFIG['starting_cash_mnq_equivalent'] == 100_000 (s12-d1-specific S-STOP; DA4=B; adapted from s11-d1 T7c_starting_cash_invariant_50000)",
+      "T8_exit_on_donchian_8_reversal": "Donchian-8 reversal triggers exit (s12-d1-specific; adapted from s11-d1 T8_exit_on_donchian_20_reversal)",
+      "T9_portfolio_cap_uses_unit_count_not_contract_count": "max_total_units=1 enforced"
+    }
+  },
+  "tier_n_spec_inheritance": {
+    "operator_confirmation_phrase": "Preserve the SEAL at commit 66bbbd1 as source of truth, including REC1 oos_k9_risk_disclosure",
+    "parallel_session_seal_at_9ce4d66_acknowledged_not_anchored": true,
+    "parallel_session_seal_at_9ce4d66_byte_stable_not_modified_by_this_p1": true,
+    "rec1_oos_k9_risk_disclosure_carried_byte_equivalent": true,
+    "tier_n_spec_commit": "66bbbd1",
+    "tier_n_spec_json_path": "reports/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec_sealed.json",
+    "tier_n_spec_md_path": "docs/s12_d1_mnq_c0_single_instrument_donchian_15_8_databento_long_history_tier_n_spec.md",
+    "tier_n_spec_modification_forbidden": true,
+    "tier_n_spec_modification_requires_fresh_revN": true,
+    "tier_n_spec_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48"
+  }
+}
