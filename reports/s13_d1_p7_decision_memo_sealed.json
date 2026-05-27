@@ -1,0 +1,360 @@
+{
+  "authored_at_utc": "2026-05-27T18:56:09.265022Z",
+  "binding": true,
+  "candidate_archival_state": {
+    "archival_phase": "P7_DECISION_MEMO",
+    "archival_reason": "REJECT_FAST at P6.5 driven by DR10 turnover_cost_explosion (canonical annual_turnover>0.50 branch)",
+    "archived": true,
+    "candidate_lifecycle_terminal": true,
+    "lifecycle_terminal_per_seal_clause": "fail_safety_outcomes_terminal_for_this_candidate_record_id=True",
+    "no_frc_grant_in_this_lifecycle": true,
+    "no_live_promotion_in_this_lifecycle": true,
+    "no_oos_inspection_in_this_lifecycle": true,
+    "no_strategy_lab_in_this_lifecycle": true,
+    "rec1_equivalent_oos_k9_disclosure_remains_binding_for_future_unrelated_candidates": true
+  },
+  "candidate_lifecycle_terminal": true,
+  "candidate_record_id": "s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history",
+  "config_used_at_p7_authoring": {
+    "candidate_record_id": "s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history",
+    "p2_phase2_plan_seal": "b181ce834f5eacd2fb9f6766d6ce9404a86ecfe3d2787c7e4899d3e47ba57ec6",
+    "p3_is_driver_build_report_seal_sha256": "c4dc64bce87a6697ed7eeda3606dbe8247f21ad4a0fa3f753363872217f33e0a",
+    "p3_oos_driver_build_report_seal_sha256": "dd63e967fe70d12df56ac81cb5c85584194bb39a83288da0bd9de62974d092f6",
+    "p3_runner_build_report_seal_sha256": "6c8875cb791765193f6494183614c2c78e63b1ef9a53d1375a6dc44a235eb4a6",
+    "p4_smoke_seal_sha256": "35b803450d5dd55466b0c0cc94a6e6793e0405a6b4876d80df709c4ca7fcf8fc",
+    "p6_5_cost_stress_seal_sha256": "2bb04d5f8d3afbc58770ef748be9b4ce81358b6b6c7a7e892168cb7a77d53c51",
+    "p6_is_diagnostic_seal_sha256": "dc480c714c27711a542b47eccc08d74189081c58066ecbc4c27237ac2425de83",
+    "phase_prefix": "PHASE2-S13-D1-MNQ-RSI-2-BIDIR",
+    "plan_lock_seal": "1cac253cbbbf4cdab87e777edbe0bca00739e925de382bd1d687faae9731052c",
+    "primary_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "primary_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "tier_spec_seal": "2f9d176388fe0b66c9ced19f33c68e079bb08112f3d52f3f20a9aba7d91bf775"
+  },
+  "favorable_economics_recorded_but_not_overriding": {
+    "all_tiers_edge_positive_a2_and_a3": true,
+    "important_note": "These favorable readings DO NOT change the verdict. The strategy is profitable at every cost-stress tier and clears K9 trade count, but the SEAL's DR10 turnover-cost-explosion rule is unambiguous and is the binding precedence ahead of A-gates/K-gates.",
+    "is_trade_count_p6": 159,
+    "is_trades_clear_k9": true,
+    "k9_inviolate_threshold": 100,
+    "no_dr3_zero_cost_only_survival": true,
+    "no_dr5_tier_flip": true,
+    "s0_to_s4_expectancy_degradation_pct": 23.0917,
+    "s0_to_s4_sharpe_proxy_degradation_pct": 19.1593,
+    "s4_still_profitable_net_pnl_usd": 79058.33,
+    "summary": "REJECT_FAST is binding under DR10's canonical letter regardless of these favorable IS economics. Per SEAL: fail_safety_outcomes_terminal_for_this_candidate_record_id=True; no_dr_redefinition_post_seal=True. Numbers below are RECORD-ONLY, NOT money-proven, NOT live-ready, NOT promotable.",
+    "tier_compact": [
+      {
+        "annual_turnover": 88.3634,
+        "closed_trades_count": 159,
+        "cost_drag_fraction_of_start_cash": 0.0,
+        "cost_scalar": 0.0,
+        "edge_positive_a2_and_a3": true,
+        "expectancy_per_trade_usd": 646.51,
+        "max_drawdown_pct": 0.152323,
+        "net_pnl_usd": 102795.23,
+        "sharpe_proxy_per_trade": 0.1237,
+        "slippage_scalar": 0.0,
+        "tier": "S0"
+      },
+      {
+        "annual_turnover": 84.7851,
+        "closed_trades_count": 159,
+        "cost_drag_fraction_of_start_cash": 0.015614,
+        "cost_scalar": 1.0,
+        "edge_positive_a2_and_a3": true,
+        "expectancy_per_trade_usd": 540.73,
+        "max_drawdown_pct": 0.176842,
+        "net_pnl_usd": 85975.59,
+        "sharpe_proxy_per_trade": 0.1076,
+        "slippage_scalar": 1.0,
+        "tier": "S1"
+      },
+      {
+        "annual_turnover": 84.9512,
+        "closed_trades_count": 159,
+        "cost_drag_fraction_of_start_cash": 0.023467,
+        "cost_scalar": 1.5,
+        "edge_positive_a2_and_a3": true,
+        "expectancy_per_trade_usd": 550.09,
+        "max_drawdown_pct": 0.17155,
+        "net_pnl_usd": 87464.25,
+        "sharpe_proxy_per_trade": 0.1096,
+        "slippage_scalar": 1.5,
+        "tier": "S2"
+      },
+      {
+        "annual_turnover": 84.4207,
+        "closed_trades_count": 159,
+        "cost_drag_fraction_of_start_cash": 0.031101,
+        "cost_scalar": 2.0,
+        "edge_positive_a2_and_a3": true,
+        "expectancy_per_trade_usd": 523.31,
+        "max_drawdown_pct": 0.176128,
+        "net_pnl_usd": 83206.05,
+        "sharpe_proxy_per_trade": 0.1046,
+        "slippage_scalar": 2.0,
+        "tier": "S3"
+      },
+      {
+        "annual_turnover": 83.7458,
+        "closed_trades_count": 159,
+        "cost_drag_fraction_of_start_cash": 0.046305,
+        "cost_scalar": 3.0,
+        "edge_positive_a2_and_a3": true,
+        "expectancy_per_trade_usd": 497.22,
+        "max_drawdown_pct": 0.185689,
+        "net_pnl_usd": 79058.33,
+        "sharpe_proxy_per_trade": 0.1,
+        "slippage_scalar": 3.0,
+        "tier": "S4"
+      }
+    ]
+  },
+  "framework_reading": {
+    "lessons_eligible_for_lessons_md_in_a_separate_authorization": [
+      "LESSON_S13_D1_001 (eligible; NOT written this turn): DR10 turnover>0.50 branch is intrinsic to high-frequency RSI(2) bi-directional and analogous mean-reversion families; mitigation via DA4 capital-base scaling addresses the cost_drag branch but not the turnover branch.",
+      "LESSON_S13_D1_002 (eligible; NOT written this turn): A REJECT_FAST verdict at P6.5 is binding even when (a) IS K9 clears, (b) all A-gates pass, (c) all cost-stress tiers stay edge-positive, and (d) no other DR fires. The DR precedence chain is upstream of K-gates and A-gates by SEAL design.",
+      "LESSON_S13_D1_003 (eligible; NOT written this turn): Future high-frequency candidates in this framework must either (i) lower trade frequency below 0.50 annual_turnover-equivalent (structural redesign, not a SEAL relaxation), or (ii) propose a framework-level DR10 revision via SEAL revision (NOT a post-SEAL re-interpretation), or (iii) accept that the family is structurally rejected.",
+      "WARNING (eligible; NOT written this turn): These lessons would be written to brain_memory/projects/trading_bot/lessons.md only under a separate explicit operator authorization ('Authorize s13-d1 P7 lessons.md update.' or similar). This P7 memo deliberately does NOT touch lessons.md."
+    ],
+    "what_this_outcome_demonstrates": [
+      "DR10's annual_turnover>0.50 branch is structurally hostile to RSI(2) bi-directional (and any similar high-frequency mean-reversion family) at any practical capital base, because the turnover ratio is invariant under proportional capital+contract scaling.",
+      "DA4=C capital-base scaling mitigates the cost_drag branch of DR10 (as the SEAL intended) but cannot mitigate the turnover branch. Sealed DR10 is OR-disjunctive, so a mitigated cost_drag branch does not prevent firing when the turnover branch is satisfied.",
+      "The SEAL anticipated this: it labeled DR10 as ELEVATED prior probability for the RSI 50-65 trades/y family. The P6.5 result confirms the prior.",
+      "Per SEAL no_dr_redefinition_post_seal=True: the DR10 turnover threshold cannot be reinterpreted or relaxed post-SEAL. Treating positive-edge economics or K9-clearing as overriding a fail-closed DR is exactly the failure mode that LESSON_B006_002_002 captured (favorable numbers do not override fail-closed verdicts by design).",
+      "K9 trade-count clearance and positive A-gates are necessary but NOT sufficient for OOS progression: an upstream DR rule firing terminates the lifecycle at P7 ahead of K-gate/A-gate consideration."
+    ],
+    "what_this_outcome_does_NOT_demonstrate": [
+      "The strategy lost money on IS (it did not; net PnL positive at every cost tier, including S4 at $79,058).",
+      "OOS K9 would have fired (REC1-equivalent indicated OOS K9 was reachable; the candidate did not reach P10).",
+      "The SEAL was wrong (the SEAL explicitly anticipated DR10 was ELEVATED for this family and applied DA4=C mitigation specifically to the cost_drag branch).",
+      "RSI(2) is fundamentally non-viable (it could be viable in a framework that does not gate on annual_turnover>0.50; under THIS framework with DR10 as locked, this family is structurally rejected)."
+    ]
+  },
+  "hard_boundaries_held_this_p7_turn": {
+    "c6_inherited_constraints_block_carried_verbatim_into_p7_memo": true,
+    "candidate_lifecycle_marked_terminal": true,
+    "no_broker_exchange_api": true,
+    "no_candidate_promotion_to_strategy_lab": true,
+    "no_data_fetch": true,
+    "no_dr10_modification": true,
+    "no_dr_redefinition_post_seal": true,
+    "no_frc_grant": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_block_relaxation": true,
+    "no_live_trading": true,
+    "no_modification_of_p3_source_files": true,
+    "no_modification_of_parallel_session_seal_chain": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_s12_d1_sealed_chain": true,
+    "no_modification_of_s13_d1_p1_at_005cb8a": true,
+    "no_modification_of_s13_d1_p2_at_beecd87": true,
+    "no_modification_of_s13_d1_p3_build_at_24625c6": true,
+    "no_modification_of_s13_d1_p4_smoke_at_c44fb13": true,
+    "no_modification_of_s13_d1_p6_5_at_15c4fb1": true,
+    "no_modification_of_s13_d1_p6_at_3fa479a": true,
+    "no_modification_of_s13_d1_seal_at_262491c": true,
+    "no_network_call": true,
+    "no_oos_data_read": true,
+    "no_oos_inspection": true,
+    "no_p10_oos_gate": true,
+    "no_paper_trading_via_broker": true,
+    "no_qc_runtime": true,
+    "no_rec1_equivalent_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s12_d1_terminal_park": true,
+    "no_rsi_threshold_modification": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_lab_promotion": true,
+    "no_threshold_loosening": true,
+    "no_turnover_threshold_reinterpretation": true,
+    "no_unrelated_tracked_file_modified": true,
+    "p6_5_dr10_firing_recorded_verbatim_from_parent": true,
+    "rec1_equivalent_oos_k9_disclosure_carried_binding": true
+  },
+  "inherited_constraints_block_VERBATIM_FROM_P2_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable at lower bound with thin margin (~50-65 trades/year vs 50/year floor). If observed IS rate falls below 25/year on RSI(2) bi-directional, OOS K9 unreachability becomes structurally probable. The s9 RSI-2 baseline observed 414 trades over long-only 4-ETF window; if MNQ.c.0 bi-directional rate falls below half that proportional rate, OOS K9 fires. If OOS K9 fires, the OOS verdict shall be OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE analogous to S10-D2 P11 PARK at 23c7164 and s12-d1 P11 park at ecbd001. The chain shall NOT relax K9 at OOS; the appropriate response is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and park the candidate. Pursuing s13-d1 accepts the structural possibility of an OOS PARK outcome if the IS rate falls below the DRAFT-estimated 50-65/y band.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%); REVISED at SEAL from default 1.0% for DR3 mitigation",
+    "DA4=C (BINDING): START_CASH_USD = 200000 ($200k); REVISED at SEAL from default $100k for DR10 mitigation",
+    "K9-reachability discipline (NEW framework standard from 0e3f9d4) applied at PLAN+DRAFT+SEAL+P1+P2+P3+P4+P6; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades >= 100; no relaxation at any phase",
+    "Mechanic family F3 RSI(2) bi-directional mean-reversion LOCKED at PLAN",
+    "RSI thresholds 10/50/90/50 LOCKED at PLAN; modification post-SEAL FORBIDDEN per RF13",
+    "DR3 risk ELEVATED (RSI lineage s9 falsification precedent); mitigated via DA3=B",
+    "DR10 risk ELEVATED (high-frequency turnover ~50-65 trades/y); mitigated via DA4=C ($200k START_CASH)",
+    "Tier-N spec LOCKED byte-equivalent at 262491c",
+    "P1 plan-lock LOCKED byte-equivalent at 005cb8a",
+    "s12-d1 terminal park (PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS at ecbd001) preserved unchanged",
+    "All parallel-session shorter-path sealed artifacts byte-stable; not anchored by this chain",
+    "Expected terminal verdict if OOS K9 fires: PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+    "P6 PASS does NOT imply READY_FOR_LONGER_BACKTEST at OOS",
+    "P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless of any verdict"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P7_DECISION_MEMO_SEALED",
+    "S13_D1_MNQ_RSI_2_BI_DIRECTIONAL_FRESH_CANDIDATE",
+    "NOT_LIVE_READY",
+    "VERDICT_REJECT_FAST",
+    "DR10_TURNOVER_BRANCH_BINDING",
+    "REC1_EQUIVALENT_OOS_K9_DISCLOSURE_BINDING",
+    "C6_INHERITED_CONSTRAINTS_BLOCK_CARRIED_VERBATIM",
+    "CANDIDATE_LIFECYCLE_TERMINAL",
+    "NO_DR_REDEFINITION_POST_SEAL",
+    "P10_OOS_BLOCKED_BY_P6_5_REJECT_FAST",
+    "LESSONS_MD_NOT_TOUCHED_THIS_PHASE"
+  ],
+  "lifecycle_state": "P7_DECISION_MEMO_SEALED_CANDIDATE_TERMINAL",
+  "memo_run_id": "PHASE2-S13-D1-P7-232c5155f694",
+  "negative_invariants": {
+    "candidate_promotion_attempted": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "claims_paper_ready_for_broker_routing": false,
+    "claims_strategy_optimized": false,
+    "dr10_modified_in_this_phase": false,
+    "dr10_redefined_post_seal_in_this_phase": false,
+    "lessons_md_touched_in_this_phase": false,
+    "oos_inspected_in_this_phase": false,
+    "rec1_equivalent_oos_k9_risk_disclosure_demoted_to_advisory": false,
+    "rsi_thresholds_silently_modified": false,
+    "s11_d1_sealed_artifacts_modified": false,
+    "s12_d1_sealed_chain_modified": false,
+    "s13_d1_seal_p1_p2_p3_p4_p6_p6_5_modified": false,
+    "schedule_created": false,
+    "turnover_threshold_reinterpreted_in_this_phase": false
+  },
+  "non_drivers_recorded_for_audit": [
+    {
+      "fires": false,
+      "outcome_p6_5": "DOES_NOT_FIRE",
+      "rule": "DR3"
+    },
+    {
+      "fires": false,
+      "outcome_p6_5": "DOES_NOT_FIRE",
+      "rule": "DR5"
+    },
+    {
+      "canonical_evaluable_at_p6_5_is_only": false,
+      "outcome_p6_5": "DEFERRED_TO_OOS_P10_FOR_CANONICAL_EVALUATION",
+      "provisional_is_only_fires": false,
+      "rule": "DR2"
+    },
+    {
+      "canonical_evaluable_at_p6_5_is_only": false,
+      "outcome_p6_5": "NOT_EVALUABLE_AT_P6_5_IS_ONLY; DEFERRED_TO_P10_OOS_GATE",
+      "rule": "DR4"
+    },
+    {
+      "binding_evaluation_scope": "DR3 + DR5 strictly at IS; DR2 provisional only; DR4 deferred",
+      "binding_fires": false,
+      "outcome_p6_5": "DOES_NOT_FIRE_AT_P6_5_IS_ONLY",
+      "rule": "K12"
+    }
+  ],
+  "operator_decision_paths_post_p7": [
+    {
+      "default_recommended": true,
+      "description": "Honor the REJECT_FAST verdict as terminal. No further work on this candidate_record_id. No P10 OOS, no Strategy Lab, no FRC, no live. Catalog the candidate as ARCHIVED.",
+      "path_id": "A_PARK",
+      "requires_separate_authorization": false,
+      "title": "Park s13-d1 RSI(2) bi-directional permanently for this framework"
+    },
+    {
+      "description": "Author a new SEAL for a candidate that targets annual_turnover < 0.50 by structural design (e.g., daily-bar swing rules, multi-bar holding periods, higher RSI entry thresholds, or a different mechanic family entirely). NOT a patch on s13-d1.",
+      "explicit_forbiddens": [
+        "no s13-d1 sealed-artifact mutation",
+        "no DR10 redefinition",
+        "no turnover threshold loosening",
+        "no parameter iteration to seek lower turnover under same SEAL"
+      ],
+      "path_id": "B_NEW_CANDIDATE_LOWER_FREQUENCY",
+      "requires_separate_authorization": true,
+      "title": "Start a fresh candidate with lower trade frequency"
+    },
+    {
+      "description": "If the operator believes DR10's annual_turnover branch is mis-specified (e.g., should be benchmarked against cost_drag impact rather than raw turnover ratio), this requires a NEW SEAL turn that explicitly revises DR10's definition with a new threshold, justification, and audit trail. POST-SEAL re-interpretation of DR10 within s13-d1 is FORBIDDEN by no_dr_redefinition_post_seal=True.",
+      "explicit_forbiddens": [
+        "no in-place modification of s13-d1 SEAL",
+        "no s13-d1 sealed-artifact mutation",
+        "no silent threshold change"
+      ],
+      "path_id": "C_FRAMEWORK_LEVEL_DR10_REVISION",
+      "requires_separate_authorization": true,
+      "title": "Propose a framework-level DR10 revision via SEAL revision (NOT a re-interpretation)"
+    },
+    {
+      "description": "Keep the P7 sealed memo on file; no Path A/B/C action initiated yet.",
+      "path_id": "D_DEFER",
+      "requires_separate_authorization": false,
+      "title": "Defer / pause"
+    }
+  ],
+  "parent_references": {
+    "mnq_c0_csv_path_at_load": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "p1_plan_lock_commit": "005cb8a",
+    "p2_phase2_plan_commit": "beecd87",
+    "p2_phase2_plan_file_sha256": "cd04ca549c6d37c107812782c12822e3cf1922614029d30eee2ca59666b83ee1",
+    "p3_build_commit": "24625c6",
+    "p4_smoke_commit": "c44fb13",
+    "p6_5_cost_stress_commit": "15c4fb1",
+    "p6_5_cost_stress_file_sha256": "00f0ca95e8fdcaf52a7095330d15315f0dd31a7c9d6d0b56541f5cfc76652ca3",
+    "p6_is_diagnostic_commit": "3fa479a",
+    "p6_is_diagnostic_file_sha256": "7b79d738dc5c797b8b4775ca4b8ce7929961fd5804779e75014b9420d20e5d3c",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "tier_n_spec_commit": "262491c"
+  },
+  "phase": "P7_DECISION_MEMO",
+  "phase_prefix": "PHASE2-S13-D1-MNQ-RSI-2-BIDIR",
+  "report_date_utc": "2026-05-27T18:56:09.265022Z",
+  "report_kind": "S13-D1 P7 decision memo: formalizes REJECT_FAST verdict driven by DR10 turnover_cost_explosion firing at P6.5 cost-stress (IS), notwithstanding favorable A-gate / K-gate outcomes and K9-clearing trade count, with C6 inherited_constraints_block carried verbatim and no_dr_redefinition_post_seal honored",
+  "report_seal_sha256": "f68dd92b00fd6c08b76a445b54ddab66555f41bd4f1eca6588977f1240de8af8",
+  "safety_fix_attestations": {
+    "c1_live_mode_refusal_implemented": true,
+    "c2_engine_truth_run_id_used": true,
+    "c3_safety_counters_set_membership_pattern": true,
+    "c4_boundary_alignment_eod_equals_rth_close": true,
+    "c5_corporate_action_structurally_absent_futures": true,
+    "c6_diagnostic_output_schema_v1": true,
+    "c7_verdict_closed_enum_strict": true,
+    "c8_lifecycle_states_permanent_attributes_carried": true,
+    "rec1_equivalent_oos_k9_disclosure_carried_binding": true
+  },
+  "schema_id": "sparta.research.s13_d1_p7_decision_memo_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "backtest_diagnostic_only": true,
+    "candidate_lifecycle_terminal": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P7_DECISION_MEMO_SEALED_CANDIDATE_TERMINAL",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s13-d1 P7 decision memo (sealed; binding; candidate-lifecycle TERMINAL by DR10 REJECT_FAST at P6.5)",
+  "verdict_drivers": [
+    {
+      "annual_turnover_branch_fires": true,
+      "branch_fired": "annual_turnover>0.50",
+      "definition_canonical_from_seal": "annual_turnover>0.50 OR S2_cost_drag>0.05 byte-equivalent (DA14=A) -> REJECT_FAST",
+      "mitigation_note": "DA4=C $200k START_CASH structurally halves per-dollar cost-drag pressure (S2 cost_drag 2.35% < 5% threshold = mitigated). DA4=C does NOT reduce the annual_turnover ratio because contracts scale proportionally with equity; total_notional/start_cash is invariant under capital rescaling. The turnover branch is intrinsic to the RSI(2) bi-directional mechanic family at the observed 34.34 trades/y rate.",
+      "name": "turnover_cost_explosion",
+      "observed_annual_turnover_s1": 84.7851,
+      "observed_s2_cost_drag": 0.023467,
+      "precedence_chain_at_seal": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+      "precedence_position_at_seal": 4,
+      "rule": "DR10",
+      "s2_cost_drag_branch_fires": false,
+      "threshold_annual_turnover": 0.5,
+      "threshold_s2_cost_drag": 0.05
+    }
+  ],
+  "verdict_formalized": "REJECT_FAST"
+}
