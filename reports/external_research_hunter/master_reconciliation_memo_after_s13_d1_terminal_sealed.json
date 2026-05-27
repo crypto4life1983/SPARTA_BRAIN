@@ -1,0 +1,499 @@
+{
+  "schema_id": "sparta.research_orchestrator.master_reconciliation_memo_after_s13_d1_terminal_sealed.v1",
+  "candidate_record_id": "N_A_MASTER_RECONCILIATION_MEMO_NOT_A_CANDIDATE",
+  "phase_prefix": "PHASE2-MASTER-RECONCILIATION",
+  "phase": "MASTER_RECONCILIATION_MEMO",
+  "lifecycle_state": "MASTER_RECONCILIATION_MEMO_AFTER_S13_D1_TERMINAL_SEALED",
+  "title": "Master reconciliation memo after S13-D1 terminal REJECT_FAST by DR10 (PLAN-only; surfaces the strategic intent question before T1/T6/halt selection; no candidate authoring; no DR10 revision; no execution)",
+  "report_kind": "Sealed PLAN-only master reconciliation memo synthesizing the 8 consecutive parked/rejected Phase-2 candidates, the s13-d1 terminal outcome, the K9-and-DR10 retail-scale incompatibility identified in framework investigation 28cbaea, and the three-way strategic choice between T1 cash-equity nano-sizing, T6 framework DR10 revision, and halting trading-bot research. Surfaces the strategic-intent question the operator has not yet been asked explicitly. Provides final recommendation with strength.",
+  "authored_at_utc": "2026-05-27T19:46:16.871415+00:00",
+  "binding": true,
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "PLAN_ONLY",
+    "MASTER_RECONCILIATION_MEMO",
+    "NO_CANDIDATE_AUTHORED",
+    "NO_DR10_REVISION",
+    "NO_EXECUTION",
+    "EIGHT_CONSECUTIVE_PHASE_2_PARKS_OR_REJECTS_DOCUMENTED",
+    "K9_AND_DR10_RETAIL_SCALE_INCOMPATIBILITY_FORMALIZED",
+    "STRATEGIC_INTENT_QUESTION_SURFACED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_LIVE_READINESS_CLAIM",
+    "NO_OOS_CONFIRMATION_CLAIM",
+    "K9_THRESHOLD_INVIOLATE",
+    "DR10_NOT_MODIFIED",
+    "ALL_SEALED_ARTIFACTS_BYTE_STABLE"
+  ],
+  "operator_authorization_phrase": "Authorize master reconciliation memo before T1 / T6 / halt selection",
+  "section_1_parked_rejected_pattern": {
+    "summary": "Eight consecutive Phase-2 candidates have terminated without producing a money-proven artifact. The terminations span five distinct mechanic families (trend-with-pyramid, RSI mean-reversion, vol-targeting, trend-no-pyramid, mean-reversion-bi-directional) and five distinct universes (4-ETF basket, SPY single, MNQ+MGC, 4-market futures, MNQ single). The structural common denominator is daily-bar resolution + retail-scale start_cash + a fixed set of risk gates (K9 = 100, DR10 turnover threshold 0.50, etc.). This pattern is informational; it does NOT modify any sealed verdict.",
+    "candidates": [
+      {
+        "id": "s7-D1",
+        "mechanic": "Donchian + pyramid",
+        "universe": "4-ETF basket (SPY/TLT/GLD/USO)",
+        "outcome": "PARKED — concentration / USO dominance pathology",
+        "binding_failure": "A7_effective_independent_bets / portfolio concentration"
+      },
+      {
+        "id": "s9",
+        "mechanic": "RSI(2) long-only",
+        "universe": "4-ETF basket (SPY/TLT/GLD/USO)",
+        "outcome": "PARKED — SAFE_BUT_NOT_MONEY_PROVEN",
+        "binding_failure": "DR2/DR3 cost-stress turned edge negative; S0 net PnL -$1,211 over 414 trades"
+      },
+      {
+        "id": "B006_001",
+        "mechanic": "SPY vol-targeting (no leverage cap enforcement)",
+        "universe": "SPY",
+        "outcome": "REJECTED — DR11 leverage-cap bound rate > 10%",
+        "binding_failure": "DR11 (C4 SPY leverage-cap)"
+      },
+      {
+        "id": "B006_002",
+        "mechanic": "SPY vol-targeting (with C4 enforcement)",
+        "universe": "SPY",
+        "outcome": "REJECTED — verdict REJECT_FAST",
+        "binding_failure": "C4 SPY-specific safety rule; warmup-window order pathology"
+      },
+      {
+        "id": "s10-d1",
+        "mechanic": "Donchian on MNQ + MGC",
+        "universe": "MNQ.c.0 + MGC.c.0",
+        "outcome": "PARKED — INCONCLUSIVE_HOLD",
+        "binding_failure": "DR9 MGC.c.0 continuous-stitch data integrity"
+      },
+      {
+        "id": "s10-d2",
+        "mechanic": "Donchian-55/20",
+        "universe": "4-market futures basket",
+        "outcome": "PARKED — PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED",
+        "binding_failure": "K9 OOS (53 trades < 100)"
+      },
+      {
+        "id": "s12-d1",
+        "mechanic": "Donchian-15/8",
+        "universe": "MNQ.c.0 single",
+        "outcome": "PARKED — PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS",
+        "binding_failure": "K9 IS (48 trades < 100)"
+      },
+      {
+        "id": "s13-d1",
+        "mechanic": "RSI(2) bi-directional",
+        "universe": "MNQ.c.0 single",
+        "outcome": "TERMINAL REJECT_FAST",
+        "binding_failure": "DR10 turnover branch (annual_turnover 84.79 >> 0.50); K9 had cleared at 159 trades"
+      }
+    ],
+    "count_total": 8,
+    "count_parked": 5,
+    "count_rejected": 3,
+    "binding_failures_breakdown": {
+      "K9_sample_size": [
+        "s10-d2",
+        "s12-d1"
+      ],
+      "DR10_turnover_branch": [
+        "s13-d1"
+      ],
+      "DR2_DR3_cost_stress": [
+        "s9"
+      ],
+      "DR9_data_integrity": [
+        "s10-d1"
+      ],
+      "DR11_leverage_cap_or_C4_safety": [
+        "B006_001",
+        "B006_002"
+      ],
+      "concentration_pathology": [
+        "s7-D1"
+      ]
+    },
+    "interpretation_neutral": "Five different failure modes across eight candidates. No single mechanic or universe is the common defect — each candidate failed for its own specific reason. Whether the framework's gate set is correctly calibrated for the operator's actual research intent is the question section 10 surfaces."
+  },
+  "section_2_s13_d1_terminal_result": {
+    "candidate_record_id": "s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history",
+    "p6_is_diagnostic": {
+      "commit": "3fa479a",
+      "seal_sha256": "dc480c714c27711a542b47eccc08d74189081c58066ecbc4c27237ac2425de83",
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "closed_trades_count": 159,
+      "k9_threshold": 100,
+      "k9_status": "PASSED (159 > 100; margin 1.59x)",
+      "a_gates": "A1/A2/A3/A4 ALL PASS",
+      "net_pnl_usd": 85975.59,
+      "max_drawdown_pct": 0.176842,
+      "sharpe_annualized": 0.5503,
+      "annual_turnover_observed": 84.7851,
+      "trades_per_year_observed": 34.34,
+      "csv_sha_verified_at_load": true,
+      "real_sealed_csv_used": true
+    },
+    "p6_5_cost_stress": {
+      "commit": "15c4fb1",
+      "seal_sha256": "2bb04d5f8d3afbc5",
+      "verdict": "REJECT_FAST",
+      "dr10_fire_branch": "annual_turnover > 0.50 (observed 84.79; 169.6x above threshold)",
+      "dr10_cost_drag_branch": "S2_cost_drag = 2.35% (BELOW 5% threshold; did NOT fire)",
+      "s0_s4_sweep": "edge positive at every cost-stress tier",
+      "s0_to_s4_sharpe_degradation_pct": 13,
+      "below_50pct_dr2_threshold": true,
+      "oos_never_read": true
+    },
+    "p7_decision_memo": {
+      "commit": "cc1817b",
+      "seal_sha256": "f68dd92b00fd6c08b76a445b54ddab66555f41bd4f1eca6588977f1240de8af8",
+      "lifecycle_disposition": "P7_DECISION_MEMO_SEALED_CANDIDATE_TERMINAL",
+      "dr10_modification": false,
+      "p10_oos_authorized": false,
+      "strategy_lab_invoked": false
+    },
+    "p10_oos_gate_status": "NOT_RUN (terminal upstream; OOS window 2024-01-02 -> 2025-12-30 preserved unread)",
+    "p11_standalone_park_memo_status": "NOT_AUTHORED_STANDALONE (lifecycle disposition folded into P7 + T1/parallel disposition memo cba0f47)",
+    "terminal_state_summary": "S13-D1 PASSED every prior gate (SEAL, P1, P2, P3 BUILD, P4 synthetic smoke, P6 IS K9) and was profitable at every cost-stress tier (S0-S4), but the P6.5 cost-stress matrix revealed observed annual_turnover = 84.79, which fires DR10's turnover branch (threshold 0.50). Per locked DR rules, REJECT_FAST is terminal. The candidate's terminal status is byte-equivalent and binding under the SEAL's no_dr_redefinition_post_seal=True invariant."
+  },
+  "section_3_4_5_6_k9_and_dr10_incompatibility": {
+    "k9_constraint": {
+      "rule": "K9 fires iff total closed_trades < 100 across the diagnostic window",
+      "binding_window": "OOS (~2.0 years); requires >= 50 trades/year on average",
+      "rationale": "K9 is a sample-size sufficiency floor. With < 100 closed trades, point estimates of edge metrics (sharpe, expectancy, win rate) are too noisy to distinguish skill from luck."
+    },
+    "dr10_constraint": {
+      "rule": "DR10 fires iff annual_turnover > 0.50 OR S2_cost_drag > 0.05",
+      "or_disjunctive": true,
+      "turnover_branch_definition": "annual_turnover = total_round_trip_notional / start_cash / years",
+      "cost_drag_branch_definition": "S2_cost_drag = total_costs_at_S2_tier / start_cash",
+      "rationale": "DR10's original name is 'turnover_cost_explosion' — flags strategies whose cost burden could explode under stress. The turnover branch acts as a structural proxy (high turnover => high stressor exposure even if current costs are low)."
+    },
+    "key_formula_derivation": {
+      "step_1_annual_turnover": "annual_turnover = 2 * per_trade_notional * trades_per_year / start_cash",
+      "step_2_dr10_clearance": "DR10 clears iff 2 * per_trade_notional * trades_per_year <= 0.50 * start_cash",
+      "step_3_isolate_notional": "per_trade_notional <= 0.25 * start_cash / trades_per_year",
+      "step_4_apply_k9": "Substitute trades_per_year >= 50 (K9 OOS floor)",
+      "step_5_joint_constraint": "per_trade_notional <= 0.005 * start_cash = 0.5% of start_cash",
+      "key_result_human_readable": "To satisfy BOTH K9 (>= 50 trades/year) AND DR10 (annual_turnover <= 0.50), the per-trade notional must be <= 0.5% of start_cash."
+    },
+    "per_trade_notional_max_by_start_cash": {
+      "100k": 500,
+      "200k": 1000,
+      "500k": 2500,
+      "1M": 5000,
+      "5M": 25000,
+      "10M": 50000
+    },
+    "futures_structural_failure_at_retail": {
+      "explanation": "Liquid futures contracts have a minimum-unit notional that is large relative to retail-scale capital. MNQ.c.0 = ~$30,000/contract. MES.c.0 = ~$26,000/contract. ZN.c.0 = ~$110,000/contract. NONE of these can satisfy the 0.5%-of-start_cash constraint at retail capital. Even at $5M start_cash, MNQ.c.0 is borderline (1 contract = 0.6% of cash > 0.5% constraint). Only at $10M+ does MNQ become unambiguously feasible. This is contract-quantization, not a soft sizing choice.",
+      "verdict_for_active_futures_at_retail": "Structurally rejected by the K9 + DR10 joint constraint at $100k - $5M. No active-trading mechanic on any liquid futures contract can simultaneously clear both gates at retail capital."
+    },
+    "cash_equity_nano_sizing_can_pass_but_meaningless": {
+      "explanation": "Cash equities and ETFs have share-level granularity, so per-trade notional can be made arbitrarily small (subject to lot-size minimums). At $200k start_cash with the 0.5%-of-cash cap = $1,000 per trade, this translates to ~5 shares of a $200 stock or ~2 shares of SPY @ $500.",
+      "at_smaller_risk_pct": {
+        "0_5_pct_risk": "12-25x DR10 turnover (FAILS)",
+        "0_05_pct_risk": "1.2-2.0x turnover (FAILS)",
+        "0_01_pct_risk": "0.24-0.40x turnover (CLEARS — $800 per position on $200k)",
+        "0_005_pct_risk": "0.10-0.20x turnover (CLEARS WITH MARGIN — $400 per position)"
+      },
+      "operational_meaning_concern": "0.005% - 0.01% risk per trade means $10-$20 risk per position on $200k. Each position is ~$400-$800 of notional. At 50+ trades/year across 1-3 names, total annual flow is $20k-$240k against a $200k account. Transaction costs (commissions, half-bid-ask, slippage) become dominant fractions of position size at this scale. The strategy may 'clear the gate' mathematically but produce zero or negative real-money edge at the sizes the gate forces.",
+      "verdict_for_nano_sized_cash_equity": "Technically passes K9 + DR10. Operationally questionable as a real-money research target. Acts more as a framework-compliance exercise than a money-strategy discovery exercise."
+    }
+  },
+  "section_7_three_strategic_paths": {
+    "path_a_t1_cash_equity_nano_sizing": {
+      "what": "Author a fresh candidate (e.g., s14-d1-spx-single-name-rsi-3-bidir-cash-equity-fine-sizing) with explicit nano-sizing precommitment at PLAN time (0.005% - 0.01% risk per trade).",
+      "framework_change_required": false,
+      "produces_research_at_realistic_scale": false,
+      "data_scope_friction": "MEDIUM (new fetch + new audit phase for cash-equity universe)",
+      "honest_summary": "Satisfies the framework's existing gates by trading at sizes too small to be operationally relevant. Generates sealed lifecycle artifacts but the diagnostic answer ('yes, this works at $800/trade on $200k') doesn't translate to real-money operational use. The research is real but the research question is narrow.",
+      "operator_intent_implied": "The operator's research goal is to keep the framework's lifecycle producing artifacts and to characterize behavior at the boundary the framework allows."
+    },
+    "path_b_t6_framework_dr10_revision_investigation": {
+      "what": "Author a heavyweight framework-level SEAL revision turn that selects one of governance options A-G from investigation plan 28cbaea, with justification, audit trail, and a new sealed framework artifact.",
+      "framework_change_required": true,
+      "produces_research_at_realistic_scale": true,
+      "data_scope_friction": "NONE (framework-level only; no new data)",
+      "honest_summary": "Addresses the root cause (DR10 calibration vs research intent) rather than working around it. Heavyweight (audit of prior DR10-binding candidates, justification of new threshold/rule shape, fresh framework SEAL). Preserves byte-equivalence of all prior sealed candidates. The result is a framework that better matches the research intent — or a documented operator decision to keep DR10 as-is after explicit review.",
+      "operator_intent_implied": "The operator's research goal is to discover trading strategies operable at retail-scale capital, and the current DR10 calibration may have been mis-set for that goal. Worth investigating and either confirming or revising."
+    },
+    "path_c_halt_trading_research": {
+      "what": "Pause trading-bot research-track indefinitely. No new candidate authoring. No DR10 revision. The framework remains as-is. Other (non-trading) SPARTA tracks proceed unaffected.",
+      "framework_change_required": false,
+      "produces_research_at_realistic_scale": "n/a",
+      "data_scope_friction": "NONE",
+      "honest_summary": "Acknowledges that 8 consecutive PARKs + the empirically-validated DR10 incompatibility finding constitute pattern-level evidence that the trading-bot track in its current shape is not producing money-proven candidates. Pause for reflection or reallocate capital/attention to other SPARTA tracks (Hydra Video, YouTube growth, affiliate, moving company operations) where the operator may have higher leverage.",
+      "operator_intent_implied": "Trading-bot is not the project's actual North Star or has lower marginal value than other tracks. The 8-PARK pattern is evidence enough to stop without further lifecycle work."
+    }
+  },
+  "section_8_t6_governance_options_from_28cbaea": {
+    "source": "investigation plan 28cbaea section 7 (read-only carry; not a recommendation)",
+    "option_a_status_quo": {
+      "change": "None; DR10 stays at 0.50",
+      "s13_d1_hypothetical": "REJECT_FAST (unchanged)",
+      "migration_cost": "ZERO",
+      "framework_integrity_preservation": "STRONGEST (no change)",
+      "operational_implication": "active-trading at retail rejected; framework targets buy-and-hold + institutional scale"
+    },
+    "option_b_raise_threshold": {
+      "change": "Raise 0.50 to scalar value (e.g., 5, 25, 100)",
+      "s13_d1_hypothetical_at_100": "Would NOT have fired",
+      "migration_cost": "MODERATE",
+      "framework_integrity_preservation": "MEDIUM (depends on calibration anchor; needs academic or empirical justification)",
+      "operational_implication": "Permits more active-trading candidates; threshold becomes a calibration parameter rather than structural constraint"
+    },
+    "option_c_drop_turnover_branch_keep_cost_drag": {
+      "change": "Drop the OR-turnover branch; keep S2_cost_drag > 0.05 only",
+      "s13_d1_hypothetical": "Would NOT have fired (cost-drag 2.35% < 5%)",
+      "migration_cost": "LOW (single-branch removal)",
+      "framework_integrity_preservation": "ACCEPTABLE (loses raw-turnover signal but preserves the original 'cost-explosion' intent; other DRs DR2/DR5 provide partial overlap)",
+      "operational_implication": "Permits strategies with high turnover but low total cost (e.g., commission-free micro-futures at deep liquidity)"
+    },
+    "option_d_asset_class_specific": {
+      "change": "Per-asset-class thresholds (futures vs equity vs ETF)",
+      "s13_d1_hypothetical": "Depends on per-class choice",
+      "migration_cost": "HIGH (audit + justification per class)",
+      "framework_integrity_preservation": "MEDIUM-LOW (parameter proliferation; harder to defend each per-class threshold)",
+      "operational_implication": "Honest about asset-class structural differences but governance complexity grows"
+    },
+    "option_e_capital_scale_normalize": {
+      "change": "Threshold scales with start_cash (e.g., 0.50 * $1M / start_cash)",
+      "s13_d1_hypothetical": "Unchanged at $200k (effective threshold 2.5; 84.79 still fires)",
+      "migration_cost": "MODERATE",
+      "framework_integrity_preservation": "LOW (direction-of-normalization is counter-intuitive per investigation plan 28cbaea section 7.5)",
+      "operational_implication": "Investigation flags this option as having a direction problem; not recommended"
+    },
+    "option_f_or_to_and": {
+      "change": "Replace OR with AND of the two branches",
+      "s13_d1_hypothetical": "Would NOT have fired (cost arm doesn't fire)",
+      "migration_cost": "LOW (single-character change)",
+      "framework_integrity_preservation": "WEAKENS (removes ability to fire on raw turnover alone; a strategy with 1000x turnover but zero costs would pass)",
+      "operational_implication": "Significant erosion of the turnover-signal aspect of DR10"
+    },
+    "option_g_defer": {
+      "change": "None; revisit later",
+      "s13_d1_hypothetical": "n/a",
+      "migration_cost": "ZERO",
+      "framework_integrity_preservation": "STRONGEST (no change; explicit deferral)",
+      "operational_implication": "Trading-bot track pauses pending future research / framework maturation"
+    },
+    "across_all_options_invariant": "Per no_dr_redefinition_post_seal=True and fail_safety_outcomes_terminal_for_this_candidate_record_id=True, s13-d1's REJECT_FAST verdict and terminal lifecycle status are byte-equivalent and binding under the OLD DR10 regardless of which option is selected. A future SEAL revision (if any) applies only to NEW SEAL turns going forward (e.g., s14+). Past sealed candidates retain their old DR10 verdicts byte-equivalent."
+  },
+  "section_9_framework_integrity_vs_operational_usefulness": {
+    "framing": "These are two genuinely different dimensions and a path can be high on one and low on the other. The operator's strategic intent (section 10) decides the weighting.",
+    "preserving_strict_rules": {
+      "description": "Keep DR10 at 0.50 (Option A or G). Accept that retail-scale active trading is structurally rejected. The framework's discipline is the value; the framework correctly identifies that retail-scale active trading is high-risk territory and refuses to validate it.",
+      "pros": [
+        "Strongest framework-integrity signal",
+        "No 'moving the goalposts' perception risk",
+        "Honest about the operator's actual research universe (whatever passes both K9 + DR10 at unmodified thresholds)"
+      ],
+      "cons": [
+        "Trading-bot research effectively constrained to buy-and-hold + institutional-scale OR nano-sized cash equity",
+        "May be perceived as a framework misalignment with operator intent if intent is active retail trading"
+      ]
+    },
+    "revising_miscalibrated_rules": {
+      "description": "Acknowledge that the 0.50 turnover threshold was calibrated for institutional buy-and-hold and revise it (or drop the turnover branch, or asset-class-specialize). Author a fresh framework SEAL with audit trail. Preserves byte-equivalence of all prior candidates' verdicts.",
+      "pros": [
+        "Aligns framework with stated research intent (if intent is active retail trading)",
+        "Empirically grounded (the s13-d1 finding + 8-PARK pattern provide evidence)",
+        "Investigation plan 28cbaea has already done the math + governance scoping; the heavy lifting is done"
+      ],
+      "cons": [
+        "Heavyweight turn",
+        "Requires defensible threshold anchor (academic, institutional CTA norm, or sealed empirical study)",
+        "Each option has its own risks (e.g., Option F substantively weakens, Option E direction-wrong)"
+      ]
+    },
+    "avoiding_rule_relaxation_just_to_pass": {
+      "description": "Distinct from BOTH options above: do NOT relax DR10 just to make the next candidate pass. Any DR10 revision must be principled (have a defensible anchor) and not just be 'I needed s14-d1 to clear, so I moved the threshold'. This is the integrity guard against converting a research project into a rationalization project.",
+      "operator_self_check_question": "If I'm revising DR10, would I have authored the SAME revision a year ago before s13-d1 fired DR10? If yes -> principled. If no -> rationalization risk.",
+      "investigation_plan_already_addresses_this": "Investigation plan 28cbaea Section 8 explicitly forbids 'silent threshold change' and requires sealed framework-level audit trail for any revision. The operator-typed authorization phrase + the heavyweight SEAL turn provide the procedural integrity guard."
+    }
+  },
+  "section_10_strategic_intent_question": {
+    "question_verbatim": "Is the goal of the trading-bot research track to (A) discover money-strategies that the operator can actually trade at retail capital, OR (B) characterize where the SPARTA framework's discipline accepts or rejects various strategies as a research-into-research-itself exercise?",
+    "why_this_question_matters": "Under reading (A), the framework's job is to validate strategies the operator would actually deploy. If the framework's gates structurally reject every candidate that's operationally meaningful at retail capital, the framework is misaligned with the goal — T6 (revise DR10 with principled anchor) becomes the honest response.\n\nUnder reading (B), the framework's job is to be the discipline; the value is in the gating itself. T1 nano-sizing or halt (no candidate authoring) are both honest responses, and T6 might actually be inappropriate (because changing the rules undermines the discipline-as-value position).\n\nThe operator has not yet been asked this question explicitly. The 8-PARK pattern + DR10 finding + investigation plan all surface implicitly that the answer matters. This memo is the moment to surface it explicitly.",
+    "neither_answer_is_wrong": "Reading (A) is a legitimate research goal. Reading (B) is also a legitimate research goal. They are different projects. The operator may choose either. The trouble is having an implicit choice that doesn't get articulated, which leads to spending lifecycle effort on candidates that are predetermined to PARK under whichever answer is implicit.",
+    "third_legitimate_answer_halt": "Reading (C): trading-bot research is not the project's actual North Star. Other SPARTA tracks (Hydra Video, YouTube growth, affiliate, moving company operations) may produce more marginal value per unit of operator attention. Halt trading-bot research and reallocate. This is also a legitimate answer.",
+    "operator_must_answer_before_authoring_any_t1_or_t6_or_halt": true
+  },
+  "section_11_final_recommendation": {
+    "primary_recommendation": "ANSWER_THE_STRATEGIC_INTENT_QUESTION_EXPLICITLY_BEFORE_CHOOSING_T1_OR_T6_OR_HALT",
+    "strength": "STRONG",
+    "rationale": "The three paths (T1 cash-equity nano-sizing, T6 framework DR10 revision, halt trading research) are NOT substitutable. Each is the right answer to a different strategic intent:\n  - T1 nano-sizing is right if intent is 'keep framework lifecycle generating     artifacts' (reading B)\n  - T6 SEAL revision is right if intent is 'discover retail-scale operable     strategies' (reading A)\n  - Halt is right if intent is 'trading-bot is not the highest-leverage track'     (reading C)\nChoosing T1 or T6 or halt without first stating intent risks producing more predictable terminal lifecycle work (framework waste; T-FORBID-12 territory).",
+    "if_operator_chooses_reading_a_active_retail_trading": {
+      "recommended_next": "T6 framework DR10 revision investigation (path B)",
+      "specific_option_within_T6": "Option C (drop turnover branch, keep cost-drag) is the most-integrity-preserving change that addresses the root cause. The original DR10 name 'turnover_cost_explosion' implies cost was the load-bearing concern; the turnover branch was a structural proxy. Dropping the proxy while keeping the cost test is a principled simplification. Alternative: Option B (raise threshold) anchored to academic CTA-norm turnover (5-20x is typical for systematic CTA strategies)."
+    },
+    "if_operator_chooses_reading_b_discipline_as_value": {
+      "recommended_next": "T1 cash-equity nano-sizing (path A), OR Option A status-quo confirmation",
+      "rationale": "If discipline-as-value, T1 honestly produces sealed lifecycle artifacts at the boundary the framework allows. Option A (formally confirm DR10 stays at 0.50 after explicit review) is also clean: documents the trade-off as accepted, no SEAL revision, future candidates author against unchanged framework."
+    },
+    "if_operator_chooses_reading_c_halt": {
+      "recommended_next": "Halt trading-bot research (path C)",
+      "rationale": "Stop sealed-artifact authoring on the trading-bot track. Preserve all existing sealed chains as historical record. Reallocate operator attention to other SPARTA tracks where leverage is higher. This is the honest response if trading-bot is not the actual priority."
+    },
+    "what_this_memo_does_NOT_recommend": [
+      "Authoring T1 without intent statement (risks generating operationally-irrelevant artifacts)",
+      "Authoring T6 SEAL revision without intent statement (risks rule-relaxation perception)",
+      "Halting without intent statement (risks regret if trading-bot was actually the priority)",
+      "Modifying DR10 within any existing sealed candidate (forbidden by no_dr_redefinition_post_seal)",
+      "Reviving s13-d1 (forbidden by terminal state)",
+      "Authoring another candidate that fails DR10-reachability at PLAN time (T-FORBID-12)"
+    ]
+  },
+  "section_12_posture_invariants": {
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc_status": "NEVER_GRANTED",
+    "advisory_label_permanent": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "profitability_claim_made": false,
+    "live_readiness_claim_made": false,
+    "oos_confirmation_claim_made": false,
+    "paper_ready_claim_made": false,
+    "money_proven_claim_made": false,
+    "k9_threshold_relaxed": false,
+    "rec1_binding_demoted": false,
+    "rec1_t1_binding_demoted": false,
+    "dr10_modified_by_this_memo": false,
+    "permanent_live_block": true,
+    "research_diagnostic_only": true,
+    "no_strategy_optimization_authorized": true,
+    "no_dr_redefinition_post_seal": true
+  },
+  "parent_references": {
+    "s13_d1_p7_decision_memo_commit": "cc1817b",
+    "s13_d1_p7_decision_memo_seal_sha256": "f68dd92b00fd6c08b76a445b54ddab66555f41bd4f1eca6588977f1240de8af8",
+    "s13_d1_p6_5_cost_stress_commit": "15c4fb1",
+    "s13_d1_p6_is_diagnostic_commit": "3fa479a",
+    "s13_d1_p6_is_diagnostic_seal_sha256": "dc480c714c27711a542b47eccc08d74189081c58066ecbc4c27237ac2425de83",
+    "next_research_track_selection_plan_commit": "30c836e",
+    "next_research_track_selection_plan_path": "docs/next_research_track_selection_plan_after_s13_d1_terminal.md",
+    "framework_dr10_revision_investigation_plan_commit": "28cbaea",
+    "framework_dr10_revision_investigation_plan_path": "docs/framework_dr10_revision_investigation_plan_after_s13_d1_terminal.md",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s11_d1_v1_commit": "9c63088",
+    "s10_d2_park_commit": "23c7164",
+    "s10_d1_park_commit": "1a9acec"
+  },
+  "non_anchored_acknowledgements": {
+    "parallel_seal_b_chain_t1_track": {
+      "status": "OUT_OF_SCOPE_PER_OPERATOR_STANDING_RULE",
+      "note": "The parallel SEAL-B-style T1 RSI MNQ chain (729207f / fb1079a / d7fc7f5 / cba0f47) is not referenced by this memo. The MATERIALLY_SAME_CANDIDATE finding from earlier audit is preserved."
+    }
+  },
+  "hard_boundaries_held_this_memo_turn": {
+    "memo_only_no_candidate_authored": true,
+    "memo_only_no_dr10_revision_authored": true,
+    "memo_only_no_dr10_threshold_proposed_as_binding": true,
+    "memo_only_no_seal_revision_authored": true,
+    "memo_only_no_t1_authorized": true,
+    "memo_only_no_t6_authorized": true,
+    "memo_only_no_halt_authorized": true,
+    "memo_only_no_build": true,
+    "memo_only_no_tests": true,
+    "memo_only_no_diagnostics": true,
+    "memo_only_no_signal_computation": true,
+    "memo_only_no_csv_read": true,
+    "memo_only_no_data_fetch": true,
+    "memo_only_no_databento_call": true,
+    "memo_only_no_databento_api_key_access": true,
+    "memo_only_no_network_call": true,
+    "memo_only_no_strategy_logic_modification": true,
+    "no_modification_of_any_sealed_artifact": true,
+    "no_modification_of_s13_d1_chain": true,
+    "no_modification_of_s12_d1_chain": true,
+    "no_modification_of_s11_d1_chain": true,
+    "no_modification_of_s10_d1_or_s10_d2_chain": true,
+    "no_modification_of_s9_or_s7_d1_chain": true,
+    "no_modification_of_B005_or_B006_chain": true,
+    "no_modification_of_phase_2_safety_contract_template": true,
+    "no_modification_of_30c836e_next_track_selection_plan": true,
+    "no_modification_of_28cbaea_dr10_revision_investigation_plan": true,
+    "no_modification_of_parallel_seal_b_chain": true,
+    "no_modification_of_runner_harness_files": true,
+    "no_modification_of_drivers": true,
+    "no_modification_of_cache_or_data_directory": true,
+    "no_command_center_files_touched": true,
+    "no_lessons_md_touched": true,
+    "no_tmp_build_s12_d1_seal_artifacts_py_touched": true,
+    "no_tmp_run_s12_d1_p6_is_diagnostic_py_touched": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_k9_relaxation": true,
+    "no_dr10_relaxation": true,
+    "no_rec1_demotion": true,
+    "no_rec1_t1_demotion": true,
+    "no_dr_redefinition": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true,
+    "no_self_authorization_to_run_anything": true,
+    "no_phase_pre_approved_by_this_memo": true,
+    "no_staging": true,
+    "no_commit": true
+  },
+  "negative_invariants": {
+    "claims_money_proven": false,
+    "claims_live_ready": false,
+    "claims_paper_ready": false,
+    "claims_strategy_optimized": false,
+    "claims_oos_confirmed": false,
+    "claims_dr10_should_be_revised": false,
+    "claims_dr10_should_remain_unchanged": false,
+    "claims_t1_is_correct_choice": false,
+    "claims_t6_is_correct_choice": false,
+    "claims_halt_is_correct_choice": false,
+    "claims_any_specific_t6_option_is_correct": false,
+    "any_sealed_artifact_modified": false,
+    "s13_d1_revived": false,
+    "s12_d1_revived": false
+  },
+  "next_phase_requirements": {
+    "no_phase_pre_approved_by_this_memo": true,
+    "operator_must_state_strategic_intent_before_t1_t6_or_halt_authorization": true,
+    "recommended_next_operator_actions": [
+      "OPERATOR_STATES_STRATEGIC_INTENT (reading A, B, or C; can be one sentence)",
+      "Then one of:",
+      "  - Authorize T1 cash-equity single-name RSI(3) bi-directional Tier-N spec PLAN only -- nano-sizing precommit",
+      "  - Authorize framework-level DR10 SEAL revision to Option C (drop turnover branch, keep cost-drag) only",
+      "  - Authorize framework-level DR10 SEAL revision to Option B (raise threshold to <value>) only",
+      "  - Authorize framework-level confirmation that DR10 remains at 0.50 (Option A; status quo)",
+      "  - Defer / Pause trading-bot track"
+    ]
+  },
+  "files_touched_during_this_memo_authoring": {
+    "tracked_files_modified": [],
+    "tracked_files_added": [],
+    "untracked_files_created_by_this_memo_authoring": [
+      "reports/external_research_hunter/master_reconciliation_memo_after_s13_d1_terminal_sealed.json",
+      "reports/external_research_hunter/master_reconciliation_memo_after_s13_d1_terminal_sealed.md"
+    ],
+    "helper_script_to_delete_after_seal_verify": ".tmp_author_master_reconciliation_memo.py",
+    "not_staged_not_committed": true,
+    "no_network_calls_no_data_fetch_no_csv_read_no_signal_compute": true
+  },
+  "final_status_list": [
+    "memo_kind: MASTER_RECONCILIATION_MEMO_AFTER_S13_D1_TERMINAL",
+    "candidates_documented: s7_D1 / s9 / B006_001 / B006_002 / s10_d1 / s10_d2 / s12_d1 / s13_d1 (8 total)",
+    "s13_d1_summary: P6 IS K9 PASSED (159 trades) -> P6.5 DR10 turnover REJECT_FAST -> terminal",
+    "k9_and_dr10_joint_constraint: per_trade_notional <= 0.5% of start_cash",
+    "at_200k_start_cash_max_notional_per_trade: $1,000",
+    "futures_feasibility_at_retail: NO (MNQ.c.0 1 contract = $30k = 30x over)",
+    "cash_equity_nano_sizing_clears_at_0_01_pct_risk: $800 per position on $200k",
+    "three_strategic_paths: T1_cash_equity_nano_sizing / T6_framework_dr10_revision / halt",
+    "strategic_intent_question_surfaced: yes (reading A active-retail / B discipline-as-value / C halt-not-priority)",
+    "primary_recommendation: ANSWER_THE_STRATEGIC_INTENT_QUESTION_FIRST",
+    "recommendation_strength: STRONG",
+    "no_t1_authorized: TRUE",
+    "no_t6_authorized: TRUE",
+    "no_halt_authorized: TRUE",
+    "no_dr10_modification: TRUE",
+    "no_sealed_artifact_modification: TRUE",
+    "trading_status: PAUSED",
+    "live_status: BLOCKED_AT_6_GATES",
+    "frc_status: NEVER_GRANTED"
+  ],
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "report_seal_sha256": "e2714c8e379f0391920d890f65c9f4d525971ea5ca5261c6c9756e003aba3349"
+}
