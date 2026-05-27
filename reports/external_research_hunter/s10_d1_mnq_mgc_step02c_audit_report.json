@@ -1,0 +1,224 @@
+{
+  "schema": "sparta.external_research_hunter.step02c_raw_data_audit_report.v1",
+  "phase": "S10_D1_MNQ_MGC_STEP02C_RAW_DATA_AUDIT_REPORT",
+  "report_date_utc": "2026-05-27",
+  "authorization": "Interpreted from operator's brief 'autorize ok' as 'Authorize s10 D1 MNQ+MGC Step 02c raw-data audit only.'",
+  "controller_session": "THIS_SESSION_AUDIT_RUN_LOCALLY_BY_CONTROLLER",
+  "candidate_record_id": "s10-d1-cross-asset-trend-or-meanrev-mnq-mgc-databento-long-history",
+  "sealed_spec_commit_anchor": "9040429",
+  "audit_verdict": "DR9_FIRED_AUDIT_FAIL",
+  "audit_any_dr9_fire": true,
+  "audit_script": {
+    "path": "tools/operator_side/s10_d1_mnq_mgc_step02c_audit_raw_data.py",
+    "bytes": 15285,
+    "sha256": "b53b917f969405c679df337d4677498d6cea3e80cf0124d7f6299f5ef3a2a406",
+    "py_compile_passed": true,
+    "exit_code_observed": 0
+  },
+  "report_md": {
+    "path": "reports/external_research_hunter/s10_d1_mnq_mgc_step02c_audit_report.md",
+    "bytes": 14428,
+    "sha256": "cdd5ce88275e32804f0a24ab6f21e6e257c93422331f8fe0f2c9f0bd0d66ad0a"
+  },
+  "sealed_dr9_thresholds_locked_at_seal": {
+    "DR9_MIN_PCT_EXPECTED_TRADING_DAYS": 0.95,
+    "DR9_MAX_CONSECUTIVE_ABS_LOG_RETURN": 0.3,
+    "DR9_MAX_MISSING_OBSERVATIONS": 5,
+    "DR9_MAX_CONSECUTIVE_VIOLATION_THRESHOLD": 5
+  },
+  "audit_summary_from_script_verbatim": {
+    "any_dr9_fire": true,
+    "audit_results": [
+      {
+        "columns_observed_count": 10,
+        "csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+        "csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+        "csv_sha256_matches_manifest": true,
+        "dr9_evaluation": {
+          "consecutive_abs_log_return_violation_count": 0,
+          "consecutive_abs_log_return_violation_threshold": 5,
+          "consecutive_violation_pass": true,
+          "dr9_fire_decision": "clean",
+          "dr9_min_pct_expected_trading_days_threshold": 0.95,
+          "dr9_would_fire": false,
+          "is_pct_observed": 1.2365,
+          "is_pct_pass": true,
+          "missing_observations_count": 0,
+          "missing_observations_pass": true,
+          "missing_observations_threshold": 5
+        },
+        "dr9_max_consecutive_violation_threshold": 5,
+        "dr9_max_missing_observations_threshold": 5,
+        "expected_is_trading_days_calendar_baseline": 1167,
+        "expected_oos_trading_days_calendar_baseline": 503,
+        "first_date": "2019-05-13",
+        "is_consecutive_abs_log_return_violation_count": 0,
+        "is_consecutive_violation_dates": [],
+        "is_max_abs_log_return_observed": 0.116365,
+        "is_pct_observed": 1.2365,
+        "is_window_calendar_gaps_above_5_days_count": 0,
+        "is_window_row_count": 1443,
+        "last_date": "2025-12-29",
+        "oos_pct_observed_structural_only": 1.2366,
+        "oos_window_row_count_LOCKED_NOT_INSPECTED_FOR_RETURNS": 622,
+        "required_columns_all_present": true,
+        "required_columns_missing": [],
+        "row_count_manifest": 2066,
+        "row_count_matches_manifest": true,
+        "row_count_observed": 2066,
+        "rows_after_oos_window_end": 0,
+        "rows_before_is_window_start": 0,
+        "symbol": "MNQ.c.0"
+      },
+      {
+        "columns_observed_count": 10,
+        "csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MGC_c_0_ohlcv_1d_20190513_20251230.csv",
+        "csv_sha256": "79618abec8c34e59f0cc52420afc455c0d7dbdf13bf96605224e27247c9ccc4b",
+        "csv_sha256_matches_manifest": true,
+        "dr9_evaluation": {
+          "consecutive_abs_log_return_violation_count": 0,
+          "consecutive_abs_log_return_violation_threshold": 5,
+          "consecutive_violation_pass": true,
+          "dr9_fire_decision": "fire",
+          "dr9_min_pct_expected_trading_days_threshold": 0.95,
+          "dr9_would_fire": true,
+          "is_pct_observed": 1.0686,
+          "is_pct_pass": true,
+          "missing_observations_count": 8,
+          "missing_observations_pass": false,
+          "missing_observations_threshold": 5
+        },
+        "dr9_max_consecutive_violation_threshold": 5,
+        "dr9_max_missing_observations_threshold": 5,
+        "expected_is_trading_days_calendar_baseline": 1167,
+        "expected_oos_trading_days_calendar_baseline": 503,
+        "first_date": "2019-05-13",
+        "is_consecutive_abs_log_return_violation_count": 0,
+        "is_consecutive_violation_dates": [],
+        "is_max_abs_log_return_observed": 0.071343,
+        "is_pct_observed": 1.0686,
+        "is_window_calendar_gaps_above_5_days_count": 8,
+        "is_window_row_count": 1247,
+        "last_date": "2025-12-28",
+        "oos_pct_observed_structural_only": 1.1252,
+        "oos_window_row_count_LOCKED_NOT_INSPECTED_FOR_RETURNS": 566,
+        "required_columns_all_present": true,
+        "required_columns_missing": [],
+        "row_count_manifest": 1814,
+        "row_count_matches_manifest": true,
+        "row_count_observed": 1814,
+        "rows_after_oos_window_end": 0,
+        "rows_before_is_window_start": 0,
+        "symbol": "MGC.c.0"
+      }
+    ],
+    "audit_run_utc": "2026-05-27T01:21:19.919578+00:00",
+    "manifest_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/s10_d1_mnq_mgc_step02b_fetch_manifest.json",
+    "manifest_sha256": "d6cf8c8b4cc81ff0b85085db5bc83b02b3bf795887b6a49ca71898b77c926225",
+    "operator_reported_reduced_quality_days": [
+      "2020-02-27",
+      "2020-02-28",
+      "2020-06-30"
+    ],
+    "verdict": "DR9_FIRED_AUDIT_FAIL"
+  },
+  "heuristic_limitation_disclosed": {
+    "topic": "missing_observations operationalization",
+    "implementation_in_this_audit": "Count distinct calendar-day gaps > 5 between consecutive observed dates within the IS window.",
+    "limitation": "Heuristic does not exclude gaps explained by known US/CME federal-holiday closures. An unknown subset of the 8 MGC.c.0 gaps may be holiday-driven (e.g., Thanksgiving long weekends, Christmas-New-Year transitions) rather than actual missing observations.",
+    "alternative_holiday_aware_audit_possible_under_separate_authorization": true,
+    "alternative_does_not_modify_sealed_dr9_threshold_only_changes_operationalization": true
+  },
+  "operator_reported_reduced_quality_days": [
+    "2020-02-27",
+    "2020-02-28",
+    "2020-06-30"
+  ],
+  "operator_reported_reduced_quality_days_findings": {
+    "all_within_is_window": true,
+    "consecutive_abs_log_return_violation_triggered_by_these_dates": false,
+    "max_abs_log_return_observed_mnq": 0.116365,
+    "max_abs_log_return_observed_mgc": 0.071343,
+    "informational_only_did_not_cause_dr9_fire": true
+  },
+  "oos_window_structural_row_counts_no_return_analysis": {
+    "MNQ.c.0_oos_row_count": 622,
+    "MGC.c.0_oos_row_count": 566,
+    "returns_computed_over_oos_window": false,
+    "sharpe_or_pnl_or_drawdown_or_winrate_computed_over_oos_window": false,
+    "oos_inspection_blocked_at_in_sample_invariant_held": true
+  },
+  "audit_run_boundaries_held": {
+    "local_file_reads_only": true,
+    "no_databento_call": true,
+    "no_network_io": true,
+    "no_databento_api_key_access": true,
+    "no_oos_return_summary": true,
+    "no_strategy_performance_evaluation": true,
+    "no_sharpe_or_pnl_or_drawdown_or_winrate_computation": true,
+    "abs_log_return_computed_only_for_dr9_outlier_check_not_for_strategy_claim": true,
+    "no_row_content_printed_only_counts_shas_timestamps_and_dr9_metrics": true,
+    "no_review_queue_mutation": true,
+    "no_idea_memory_mutation": true,
+    "no_sealed_artifact_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "sealed_spec_commit_anchor_cross_checked_against_manifest": true,
+    "sealed_spec_commit_anchor_value": "9040429",
+    "trading_status": "PAUSED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "frc": "NEVER_GRANTED",
+    "no_strategy_optimization_authorized": true,
+    "no_dr_redefinition_post_seal": true
+  },
+  "three_operator_forward_paths_no_recommendation_among_them": [
+    {
+      "path": "A",
+      "label": "Accept strict-DR9 verdict; park candidate under DR9_FIRED_INCONCLUSIVE_HOLD",
+      "proposed_authorization_phrase": "Authorize s10 D1 MNQ+MGC candidate park under DR9 INCONCLUSIVE_HOLD.",
+      "outcome": "Candidate archived without further build phases; full park memo authored separately",
+      "pros": [
+        "Most conservative",
+        "Respects strict interpretation of sealed threshold",
+        "Consistent with no_strategy_optimization_authorized"
+      ],
+      "cons": [
+        "Parks candidate where some unknown fraction of gap count is likely holiday-driven"
+      ]
+    },
+    {
+      "path": "B",
+      "label": "Authorize holiday-aware audit refinement",
+      "proposed_authorization_phrase": "Authorize s10 D1 MNQ+MGC Step 02c holiday-aware audit refinement only.",
+      "outcome": "New audit script with hardcoded US/CME federal-holiday list excludes holiday-explained gaps from missing_observations count; re-evaluates DR9",
+      "sealed_dr9_threshold_remains_locked_only_operationalization_changes": true,
+      "pros": [
+        "More faithful to spirit of DR9 (catches genuine data gaps not market holidays)"
+      ],
+      "cons": [
+        "Introduces new heuristic at audit time",
+        "Holiday list is brittle (Good Friday / exchange-specific closures / emergency closures)",
+        "If MGC still fires under refined audit, candidate is still parked"
+      ]
+    },
+    {
+      "path": "C",
+      "label": "Authorize alternative-track selection plan revision",
+      "proposed_authorization_phrase": "Authorize alternative track selection plan revision only.",
+      "outcome": "Revise docs/next_research_track_selection_plan_after_s9_park.md to consider a different track (T1-T10)",
+      "pros": [
+        "Pivots away from MNQ+MGC universe if data quality is structural"
+      ],
+      "cons": [
+        "Extends time-to-completion of trading-bot research arc"
+      ]
+    }
+  ],
+  "this_report_does_not_recommend_among_path_A_B_C": true,
+  "is_sealed": true,
+  "is_live_approved": false,
+  "is_profit_proof": false,
+  "frc_granted": false,
+  "is_candidate_promoted": false,
+  "report_seal_sha256": "fd5cd136891638d2a1338850b616d000b969c7b46ce8c12365ba9498855e5865",
+  "seal_method": "sha256(json.dumps(body, sort_keys=True, separators=(',',':'), ensure_ascii=False)) excluding report_seal_sha256+seal_method"
+}
