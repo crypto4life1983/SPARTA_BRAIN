@@ -1,0 +1,165 @@
+{
+  "alternative_paths_each_separate_authorization": [
+    {
+      "authorization_phrase": "Defer / Pause s14-d1 multi-instrument availability probe + DR9 audit.",
+      "description": "Keep the RUN_BOOK on file; no operator fetch initiated. Trading-bot research track pauses on s14-d1.",
+      "path_id": "defer"
+    },
+    {
+      "authorization_phrase": "Authorize s14-d1 cash-equity 3-name basket RSI(3) bi-directional Tier-N spec PLAN only — bound by DR10 v2.",
+      "description": "Skip the multi-instrument micro-futures fetch entirely; revert to the T2 rev2 cash-equity basket alternative documented in the post-s13-d1 rev2 next-track selection plan. Requires fresh Tier-N spec PLAN turn (operator-side OHLCV fetch for selected names also required at later phase).",
+      "path_id": "revert_to_t2_rev2"
+    }
+  ],
+  "authored_at_utc": "2026-05-27T20:37:41.387770Z",
+  "authorization_phrase_typed_by_operator": "Authorize s14-d1 multi-instrument availability probe + DR9 audit RESULT SEALING only.",
+  "controller_decision": "DECLINED_FAIL_CLOSED",
+  "decline_reason": "All 4 prerequisite operator-captured artifacts specified in RUN_BOOK §4.2 are MISSING from disk. The directory data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/ does not exist. Result-sealing binds captured CSV sha256 into a permanent sealed result; without captured CSVs the only options are fabrication (forbidden), placeholder-sealing (fake seal), or controller-side fetch (forbidden by no_databento_call + no_databento_api_key_access + no_network_io). All three forbidden options would violate framework integrity. Fail-closed is the correct outcome.",
+  "document_type": "AUTHORIZATION_DECLINED_MEMO_NOT_SEALED",
+  "expected_directory_exists": false,
+  "expected_directory_path": "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/",
+  "hard_boundaries_held_this_decline_memo_turn": {
+    "controller_advisory_probe_outcomes_from_prior_run_book_remain_non_binding": true,
+    "dr9_audit_framework_remains_pre_authored_only": true,
+    "lifecycle_state_unchanged_from_prior_run_book": true,
+    "no_audit_result_sealed": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_candidate_promotion": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_claude_md_modification": true,
+    "no_data_fetch": true,
+    "no_databento_api_key_access": true,
+    "no_databento_call": true,
+    "no_dr9_audit_run_executed": true,
+    "no_dr_redefinition_post_seal_for_existing_candidates": true,
+    "no_fabricated_dr9_outcomes": true,
+    "no_frc_grant": true,
+    "no_gitignore_modification": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_block_relaxation": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_framework_dr10_revision_seal_v2_at_78cd22e": true,
+    "no_modification_of_s11_d1_chain": true,
+    "no_modification_of_s12_d1_chain": true,
+    "no_modification_of_s13_d1_chain": true,
+    "no_modification_of_s14_d1_plan_at_5376de7": true,
+    "no_modification_of_s14_d1_run_book_at_13ff641": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_parked_candidate_revival": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_placeholder_seal": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_seal_authored": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_invocation": true,
+    "no_strategy_lab_promotion": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "is_a_sealed_artifact": false,
+  "labels": [
+    "AUTHORIZATION_DECLINED_FAIL_CLOSED",
+    "S14_D1_RESULT_SEALING_DECLINED",
+    "PREREQUISITE_OPERATOR_CAPTURED_ARTIFACTS_MISSING",
+    "NOT_A_SEAL",
+    "PENDING_OPERATOR_FETCH",
+    "NO_FABRICATED_DR9_OUTCOMES",
+    "NO_PLACEHOLDER_SEAL",
+    "S14_D1_LIFECYCLE_STATE_UNCHANGED",
+    "LESSONS_MD_NOT_TOUCHED",
+    "BYTE_EQUIVALENT_PATTERN_TO_PRIOR_B006_002_RESULT_SEALING_DECLINE"
+  ],
+  "lifecycle_state": "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "lifecycle_state_unchanged_from_prior_run_book": true,
+  "missing_prerequisite_artifacts": [
+    {
+      "exists_on_disk": false,
+      "exists_on_disk_verified_at_memo_authoring": false,
+      "expected_path": "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/MES_c_0_ohlcv_1d_20190513_20251230.csv",
+      "kind": "CSV",
+      "symbol": "MES.c.0"
+    },
+    {
+      "exists_on_disk": false,
+      "exists_on_disk_verified_at_memo_authoring": false,
+      "expected_path": "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/MYM_c_0_ohlcv_1d_20190513_20251230.csv",
+      "kind": "CSV",
+      "symbol": "MYM.c.0"
+    },
+    {
+      "exists_on_disk": false,
+      "exists_on_disk_verified_at_memo_authoring": false,
+      "expected_path": "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/M2K_c_0_ohlcv_1d_20190513_20251230.csv",
+      "kind": "CSV",
+      "symbol": "M2K.c.0"
+    },
+    {
+      "exists_on_disk": false,
+      "exists_on_disk_verified_at_memo_authoring": false,
+      "expected_path": "data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/s14_d1_mes_mym_m2k_step02b_fetch_manifest.json",
+      "kind": "manifest",
+      "symbol": "n/a"
+    }
+  ],
+  "parent_references": {
+    "candidate_record_id": "s14-d1-mnq-mes-mym-m2k-multi-instrument-rsi-2-bi-directional-databento-long-history",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "s14_d1_run_book_commit": "13ff641",
+    "s14_d1_run_book_json_path": "reports/external_research_hunter/s14_d1_mnq_mes_mym_m2k_multi_instrument_availability_probe_dr9_audit_run_book.json",
+    "s14_d1_run_book_json_sha256_at_decline_authoring": "75e576134618609158500b1e9fd86be735f88a283b60803b108fcfd2ce845c68",
+    "s14_d1_run_book_md_path": "reports/external_research_hunter/s14_d1_mnq_mes_mym_m2k_multi_instrument_availability_probe_dr9_audit_run_book.md",
+    "s14_d1_run_book_md_sha256_at_decline_authoring": "96b2304fba53dd88f3e7cc1db8088008aa3537d5eeedb20569dbd3df61df6d3c",
+    "s14_d1_tier_n_spec_plan_commit": "5376de7",
+    "s14_d1_tier_n_spec_plan_file_sha256": "be53ca7ecbb05ee4e243f15a98bf4e0208910d726e12ef787465544855f5f28f"
+  },
+  "report_date_utc": "2026-05-27T20:37:41.387770Z",
+  "report_kind": "Authorization decline memo (fail-closed). NOT a SEAL. Records that the operator-typed 'Authorize s14-d1 multi-instrument availability probe + DR9 audit RESULT SEALING only.' was DECLINED by the controller because none of the prerequisite operator-captured artifacts specified in the RUN_BOOK §4.2 exist on disk.",
+  "schema_id": "sparta.external_research_hunter.s14_d1_multi_instrument_availability_probe_dr9_audit_result_sealing_authorization_declined_memo.v1",
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal_for_existing_candidates": true,
+    "no_strategy_optimization_authorized": true,
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_lifecycle_state": "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+    "trading_status": "PAUSED"
+  },
+  "title": "s14-d1 multi-instrument availability probe + DR9 audit RESULT SEALING authorization DECLINED — prerequisite operator-captured artifacts missing (fail-closed)",
+  "unblock_path": [
+    "Step 1 (operator action; outside controller scope): Operator executes the Databento fetch per RUN_BOOK §4 (executor = operator; DATABENTO_API_KEY in operator's environment only; controller never reads). The 4 expected files must land at the expected paths under data/s14_d1_mnq_mes_mym_m2k_databento_long_history/raw/.",
+    "Step 2 (operator confirmation): Operator verifies each CSV exists at the expected path and the manifest file exists with sha256 entries for each CSV (per RUN_BOOK §4.5).",
+    "Step 3 (operator-issued authorization): Operator re-issues the authorization phrase `Authorize s14-d1 multi-instrument availability probe + DR9 audit RESULT SEALING only.` Controller can then verify captured artifact shas + perform the pre-authored DR9 audit per RUN_BOOK §3 + seal the result.",
+    "If at any point the operator aborts the fetch (e.g., Databento availability error, API rate limit, network issue): do NOT modify the RUN_BOOK; re-attempt the fetch with a clean environment."
+  ],
+  "what_this_memo_does_NOT_do": [
+    "Does NOT seal any audit result.",
+    "Does NOT fabricate DR9 outcomes.",
+    "Does NOT perform any DR9 audit (no source data to audit).",
+    "Does NOT make a Databento call.",
+    "Does NOT access DATABENTO_API_KEY.",
+    "Does NOT promote s14-d1 to DRAFT or any subsequent phase.",
+    "Does NOT modify any existing sealed artifact (s11-d1 / s12-d1 / s13-d1 / framework_dr10_revision_seal_v2 all byte-stable; s14-d1 PLAN at 5376de7 byte-stable; s14-d1 RUN_BOOK at 13ff641 byte-stable).",
+    "Does NOT revive s13-d1 / s12-d1 / any parked candidate.",
+    "Does NOT advance the s14-d1 lifecycle state (state remains S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH).",
+    "Does NOT modify brain_memory/projects/trading_bot/lessons.md."
+  ],
+  "why_this_decline_is_correct": [
+    "Result-sealing binds the captured CSV sha256 into a permanent sealed audit result. Without captured CSVs, a sealed result would have no real binding (it would either bind to non-existent files or bind to fabricated values).",
+    "Per s14-d1 PLAN hard boundaries and framework-wide invariants: no_databento_call + no_databento_api_key_access + no_network_io are immutable for the controller. The controller cannot perform the fetch unilaterally; that is operator-side action only.",
+    "Per framework invariants no_profitability_claim + no fabrication: the controller cannot synthesize DR9 audit results without source CSVs. Pretending all 3 symbols pass DR9 without auditing actual data would be a fabricated seal.",
+    "Sealing an empty placeholder would create a fake seal with no binding evidentiary content — would violate framework integrity and create a precedent for empty seals.",
+    "The fail-closed decline is the intentional gate behavior documented in the RUN_BOOK §4.5 (post-fetch action requires operator to confirm all 4 files exist before requesting result-sealing).",
+    "This pattern is byte-equivalent to the prior B006_002 result-sealing decline (recorded in this session's brain memory at decisions.md entry for 2026-05-26 'B006_002 result-sealing authorization DECLINED - prerequisite missing'). The framework discipline is consistent."
+  ]
+}
