@@ -1,0 +1,681 @@
+{
+  "algo_version_for_run_id": "s13_d1_v0_1_0",
+  "authored_at_utc": "2026-05-27T16:55:13.507655Z",
+  "binding": true,
+  "candidate_purpose": "Author a sealed Tier-N specification for a single-instrument MNQ.c.0 fresh-candidate research diagnostic using the Connors RSI(2) bi-directional mean-reversion mechanic (F3). Selected per selection-plan revision after s12-d1 park (0e3f9d4; T1 at 41/50). The only track that clears K9 at BOTH IS AND OOS under the new K9-reachability discipline. Tests whether RSI(2) bi-directional on single-instrument MNQ.c.0 futures produces a structurally different result from the s9 long-only ETF-proxy falsification. Research diagnostic only. No promotion. No live trading. No FRC. No profitability claim.",
+  "candidate_record_id": "s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history",
+  "cost_assumptions_locked_at_seal": {
+    "commission_per_round_trip_default_DA8_resolved_to_A": 0.74,
+    "cost_stress_tiers_DA7_resolved_to_A": "five_tier_S0_S1_S2_S3_S4_byte_equivalent_from_s12_d1_chain",
+    "cost_stress_tiers_detail": [
+      {
+        "cost_scalar": 0.0,
+        "note": "zero-cost ideal",
+        "slippage_scalar": 0.0,
+        "tier": "S0"
+      },
+      {
+        "cost_scalar": 1.0,
+        "note": "baseline retail",
+        "slippage_scalar": 1.0,
+        "tier": "S1"
+      },
+      {
+        "cost_scalar": 1.5,
+        "note": "stressed retail",
+        "slippage_scalar": 1.5,
+        "tier": "S2"
+      },
+      {
+        "cost_scalar": 2.0,
+        "note": "adversarial",
+        "slippage_scalar": 2.0,
+        "tier": "S3"
+      },
+      {
+        "cost_scalar": 3.0,
+        "note": "extreme adversarial",
+        "slippage_scalar": 3.0,
+        "tier": "S4"
+      }
+    ],
+    "dollar_per_point": 2.0,
+    "fees_per_round_trip_default_DA9_resolved_to_A": 0.36,
+    "s0_edge_pre_registration_at_seal": "OPEN_QUESTION_no_a_priori_claim_acceptance_threshold_S0_net_pnl_positive_after_K9_trades_s9_falsification_does_not_transfer_to_MNQ_futures_by_first_principles",
+    "slippage_entry_ticks_default_DA10_resolved_to_A": 1,
+    "slippage_exit_ticks_default_DA10_resolved_to_A": 1,
+    "slippage_stop_ticks_default_DA10_resolved_to_A": 1,
+    "start_cash_usd_DA4_resolved_to_C_REVISED_FROM_DRAFT_DEFAULT_A": 200000,
+    "start_cash_usd_revision_rationale": "DA4=C revises START_CASH from default $100,000 (carried byte-equivalent from s12-d1 DA4=B) to $200,000 -- doubling the capital base. With per-trade risk pct fixed at 0.5% (DA3=B), the absolute risk per trade is $1,000 (vs $1,000 at s12-d1 baseline; same absolute risk but on doubled capital base). Crucially, this HALVES the per-dollar commission/slippage pressure: total round-trip cost ($2.10/contract) as a fraction of $200k cash is half what it is on $100k cash. This is the most aggressive DR10 mitigation lever available without modifying DR10 thresholds (which is forbidden per no_dr_redefinition_post_seal).",
+    "tick_size_points": 0.25,
+    "tick_value_usd": 0.5,
+    "warmup_days_DA11_resolved_to_A": 220,
+    "warmup_days_formula": "MAX(longest_lookback_in_mechanic, 220); longest s13-d1 lookback is ATR(20) so floor at 220"
+  },
+  "data_requirements": {
+    "audit_pre_existing": true,
+    "controller_side_databento_call_authorized_any_phase": false,
+    "databento_api_key_access_required_any_phase": false,
+    "dataset": "GLBX.MDP3",
+    "fresh_fetch_authorized_by_this_spec": false,
+    "fresh_fetch_required": false,
+    "primary_artifact": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "primary_artifact_row_count_required": 2066,
+    "primary_artifact_sha256_required": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "primary_artifact_window_observed": [
+      "2019-05-13",
+      "2025-12-29"
+    ],
+    "schema": "ohlcv-1d",
+    "stype_in": "continuous",
+    "symbol": "MNQ.c.0",
+    "vendor": "Databento"
+  },
+  "draft_ambiguities_resolved_at_seal": {
+    "DA1": {
+      "notes": "Wilder ATR(20)",
+      "operator_choice": "A",
+      "resolved_value": 20,
+      "topic": "ATR stop window P"
+    },
+    "DA10": {
+      "notes": "LOCKED byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": "1/1/1",
+      "topic": "Slippage entry/stop/exit ticks"
+    },
+    "DA11": {
+      "notes": "MAX(longest_lookback, 220)",
+      "operator_choice": "A",
+      "resolved_value": 220,
+      "topic": "WARMUP_DAYS"
+    },
+    "DA12": {
+      "notes": "LOCKED byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": "09:30-16:00 ET America/New_York",
+      "topic": "RTH window"
+    },
+    "DA13": {
+      "notes": "LOCKED non-negotiable",
+      "operator_choice": "A",
+      "resolved_value": [
+        0.95,
+        0.3,
+        5,
+        5
+      ],
+      "topic": "DR9 thresholds"
+    },
+    "DA14": {
+      "notes": "LOCKED non-negotiable per no_dr_redefinition_post_seal; mitigated via DA4=C $200k START_CASH",
+      "operator_choice": "A",
+      "resolved_value": "annual_turnover_threshold=0.50 AND s2_cost_drag_threshold=0.05",
+      "topic": "DR10 thresholds"
+    },
+    "DA2": {
+      "notes": "2N stop",
+      "operator_choice": "A",
+      "resolved_value": 2.0,
+      "topic": "ATR stop multiplier K"
+    },
+    "DA3": {
+      "default_at_draft": "A_1pct",
+      "notes": "REVISED FROM DRAFT DEFAULT 1.0% to 0.5% for DR3 risk mitigation (s9 RSI lineage cost-erosion precedent)",
+      "operator_choice": "B",
+      "resolved_value": 0.005,
+      "topic": "Per-trade risk percentage"
+    },
+    "DA4": {
+      "default_at_draft": "A_100000",
+      "notes": "REVISED FROM DRAFT DEFAULT $100k to $200k for DR10 risk mitigation (RSI high-frequency turnover); halves per-dollar cost pressure",
+      "operator_choice": "C",
+      "resolved_value": 200000,
+      "topic": "START_CASH_USD"
+    },
+    "DA5": {
+      "notes": "50% magnitude byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": 0.5,
+      "topic": "K4 max-drawdown threshold (magnitude)"
+    },
+    "DA6": {
+      "notes": "LOCKED",
+      "operator_choice": "A",
+      "resolved_value": "sparta.s13.d1.mnq_c0.rsi_2_bidir.diagnostic_run_report.v1",
+      "topic": "Output schema name"
+    },
+    "DA7": {
+      "notes": "LOCKED non-negotiable per no_dr_redefinition_post_seal",
+      "operator_choice": "A",
+      "resolved_value": "5-tier S0/S1/S2/S3/S4",
+      "topic": "Cost-stress tier set"
+    },
+    "DA8": {
+      "notes": "LOCKED byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": 0.74,
+      "topic": "Commission per round-trip"
+    },
+    "DA9": {
+      "notes": "LOCKED byte-equivalent",
+      "operator_choice": "A",
+      "resolved_value": 0.36,
+      "topic": "Fees per round-trip"
+    }
+  },
+  "entry_exit_logic_boundary_locked_at_seal": {
+    "amb6_filter": "NONE",
+    "atr_method": "Wilder",
+    "atr_stop_multiplier_K_DA2_resolved_to_A": 2.0,
+    "atr_window_days_P_DA1_resolved_to_A": 20,
+    "contract_multiplier_description": "MNQ: $2 * Nasdaq-100 index value per point",
+    "correlation_filter": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+    "daily_bars_only": true,
+    "dollar_per_point": 2.0,
+    "intraday_data_used": false,
+    "leverage_cap": "NONE_implicit_via_per_trade_risk_sizing_only_no_separate_C4",
+    "logic_modification_post_seal_forbidden": true,
+    "logic_modification_requires_fresh_candidate_record_id": true,
+    "long_entry_signal": "RSI(2) < 10 (oversold)",
+    "long_exit_signal": "RSI(2) > 50 (mean-reversion complete) OR stop hit",
+    "max_units_per_market": 1,
+    "mechanic_family": "F3_rsi_2_bi_directional_mean_reversion_no_pyramid_atr_stop",
+    "mechanic_family_lock_origin": "LOCKED at PLAN (commit 5e57984); DRAFT did NOT reopen mechanic-family menu",
+    "no_pyramid_per_signal_invariant": true,
+    "per_trade_risk_pct_DA3_resolved_to_B_REVISED_FROM_DRAFT_DEFAULT_A": 0.005,
+    "per_trade_risk_pct_revision_rationale": "DA3=B revises per-trade risk from default 1.0% (carried byte-equivalent from s12-d1) to 0.5%, halving per-trade cost-drag intensity. This mitigates DR3 risk (zero-cost-only survival) inherited from the s9 RSI-2 ETF-proxy falsification precedent. RSI mean-reversion mechanics historically show S0-positive but S1+ cost-erosion; lower per-trade risk reduces the absolute cost-drag per trade and provides a structural cushion against DR3 fire under cost-stress sweep.",
+    "position_sizing_formula": "contracts = floor((per_trade_risk_pct * equity) / (ATR_entry * tick_value_usd)) with per_trade_risk_pct = 0.005",
+    "pyramid_method": "NONE",
+    "regime_overlay": "NONE",
+    "roll_method": "Databento native continuous-front-month synthesis (stype_in=continuous); vendor-side; byte-equivalent from s12-d1 chain",
+    "rsi_long_entry_threshold": 10,
+    "rsi_long_exit_threshold": 50,
+    "rsi_method": "Connors RSI(2) using Wilder smoothing on close-to-close returns",
+    "rsi_period": 2,
+    "rsi_short_entry_threshold": 90,
+    "rsi_short_exit_threshold": 50,
+    "rsi_thresholds_lock_origin": "LOCKED at PLAN (10/50/90/50); DRAFT did NOT reopen; threshold modification post-SEAL FORBIDDEN per RF13",
+    "rth_window_DA12_resolved_to_A": {
+      "close_h": 16,
+      "close_m": 0,
+      "open_h": 9,
+      "open_m": 30,
+      "tz": "America/New_York"
+    },
+    "short_entry_signal": "RSI(2) > 90 (overbought)",
+    "short_exit_signal": "RSI(2) < 50 (mean-reversion complete) OR stop hit",
+    "side_long_plus_short_bi_directional": true,
+    "stop_method": "2 * Wilder ATR(20) below entry (long) or above entry (short); set at entry; trail/lock byte-equivalent to s12-d1 chain",
+    "tick_size_points": 0.25,
+    "tick_value_usd": 0.5,
+    "vol_targeting": "NONE"
+  },
+  "exact_next_phase_authorized_by_this_seal": "NONE",
+  "files_allowed_to_be_created_or_modified": {
+    "p10_oos_gate_future": [
+      "reports/s13_d1_p10_oos_gate_sealed.json",
+      "reports/s13_d1_p10_oos_gate_sealed.md"
+    ],
+    "p11_lifecycle_decision_future": [
+      "reports/s13_d1_p11_lifecycle_memo_sealed.json",
+      "reports/s13_d1_p11_lifecycle_memo_sealed.md"
+    ],
+    "p1_plan_lock_future": [
+      "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_plan_lock.md",
+      "reports/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p1_plan_lock_sealed.json"
+    ],
+    "p2_phase2_plan_future": [
+      "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p2_phase2_plan.md",
+      "reports/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_p2_phase2_plan_sealed.json"
+    ],
+    "p3_build_future_files_to_be_specified_at_p1_plan_lock": [
+      "external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_runner_harness/* (runner sources + tests scaffolds)",
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_*_build_report.{json,md} (sealed BUILD reports)"
+    ],
+    "p4_synthetic_smoke_future": [
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_smoke_t1_t15_report.json",
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_smoke_t1_t15_report.md"
+    ],
+    "p6_5_cost_stress_future": [
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_cost_stress_matrix_result_sealed.json",
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_cost_stress_matrix_result_sealed.md"
+    ],
+    "p6_is_diagnostic_future": [
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_in_sample_diagnostic_result_sealed.json",
+      "reports/external_research_hunter/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_in_sample_diagnostic_result_sealed.md"
+    ],
+    "p7_decision_memo_future": [
+      "reports/s13_d1_p7_decision_memo_sealed.json",
+      "reports/s13_d1_p7_decision_memo_sealed.md"
+    ],
+    "this_seal_turn_creates_exactly": [
+      "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec.md",
+      "reports/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec_sealed.json"
+    ]
+  },
+  "files_explicitly_forbidden_from_modification": [
+    "s12-d1 SEAL at commit 66bbbd1 (sha 07c3200b...)",
+    "s12-d1 P1 plan-lock at commit d8bd359 (sha eb72798e...)",
+    "s12-d1 P2 phase-2 plan at commit 0b8d948 (sha 689dd3d0...)",
+    "s12-d1 P3 BUILD at commit 91e740e (3 sealed reports + 10 source/test files)",
+    "s12-d1 P4 smoke at commit ea78845 (sha 6d2bff4d...)",
+    "s12-d1 P6 IS diagnostic at commit 9241ed6 (sha 33c91592...)",
+    "s12-d1 P11 lifecycle park memo at commit ecbd001 (sha b9722d42...; TERMINAL park)",
+    "all s11-d1 v1/P1/P2/clarification/rev2 sealed artifacts",
+    "all S10-D2 sealed artifacts (PARKED at 23c7164)",
+    "all s10-D1 MNQ+MGC sealed artifacts (1a9acec park)",
+    "all s9 RSI-2 ETF-proxy sealed artifacts (PARKED_SAFE_BUT_NOT_MONEY_PROVEN)",
+    "all s7-D1 ETF-proxy sealed artifacts",
+    "all B005_NNN sealed artifacts",
+    "all B006_001 / B006_002 sealed artifacts",
+    "all s8-D1 sealed artifacts",
+    "T8 ETF-proxy family-park memo",
+    "phase-2 safety-contract template (docs/phase2_safety_contract_template.md/.json)",
+    "selection-plan revision after s12-d1 park at commit 0e3f9d4",
+    "all parallel-session sealed artifacts (alternate chain at shorter paths)",
+    "review_queue.json",
+    "production idea_memory directory",
+    "all Strategy Lab artifacts",
+    "all ORB branch artifacts and Step 30 cost constants",
+    "obsidian-trade-logger / obsidian directory and contents",
+    "brain_memory/projects/trading_bot/lessons.md (dirty + unstaged from prior controller-session appends; explicitly off-limits in EVERY S13-D1 phase)",
+    "CLAUDE.md, RUNBOOK, pipeline_manifest, .gitignore",
+    "any candidate_record_id namespace other than s13-d1-mnq-c0-single-instrument-rsi-2-bi-directional-databento-long-history"
+  ],
+  "fresh_candidate_attestation": {
+    "first_principles_burden_satisfied_vs_each_predecessor": true,
+    "is_a_b006_001_revision": false,
+    "is_a_b006_002_revision": false,
+    "is_a_s10_d1_revision": false,
+    "is_a_s10_d2_revision": false,
+    "is_a_s11_d1_revision": false,
+    "is_a_s12_d1_revN_revision": false,
+    "is_a_s12_d1_revision": false,
+    "is_a_s7_d1_revision": false,
+    "is_a_s9_revision": false,
+    "is_a_t8_revision": false,
+    "s11_d1_v1_p1_p2_clarification_rev2_byte_stable_unmodified_by_this_seal": true,
+    "s12_d1_terminal_park_preserved_unmodified_by_this_seal": true
+  },
+  "hard_boundaries_held_this_seal_turn": {
+    "k9_reachability_discipline_carried_byte_equivalent_from_plan_and_draft": true,
+    "no_backtest": true,
+    "no_branch_change": true,
+    "no_broker_call": true,
+    "no_brokerage_connection": true,
+    "no_build": true,
+    "no_cache_mutation": true,
+    "no_candidate_promoted": true,
+    "no_code_modification": true,
+    "no_commit_in_orchestrator": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_databento_api_key_access": true,
+    "no_dr_redefinition_post_seal": true,
+    "no_external_network_call": true,
+    "no_frc_grant": true,
+    "no_git_push": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_readiness_claim": true,
+    "no_live_trading": true,
+    "no_modification_of_any_sealed_predecessor": true,
+    "no_modification_of_brain_memory_projects_trading_bot_lessons_md": true,
+    "no_modification_of_phase_2_safety_contract_template": true,
+    "no_modification_of_s11_d1_sealed_artifacts": true,
+    "no_modification_of_s12_d1_seal_p1_p2_p3_p4_p6_p11_chain": true,
+    "no_modification_of_selection_plan_at_0e3f9d4": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_computation": true,
+    "no_oos_inspection": true,
+    "no_optimization": true,
+    "no_p10_authorization": true,
+    "no_p11_authorization": true,
+    "no_p1_authorization": true,
+    "no_p2_authorization": true,
+    "no_p3_authorization": true,
+    "no_p4_authorization": true,
+    "no_p6_5_authorization": true,
+    "no_p6_authorization": true,
+    "no_p7_authorization": true,
+    "no_paper_order_placed": true,
+    "no_paper_trading": true,
+    "no_phase_pre_approval": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_promotion_to_paper": true,
+    "no_qc_runtime": true,
+    "no_real_order_placed": true,
+    "no_rec1_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s12_d1_terminal_park": true,
+    "no_s12_d1_revN_revision_authored_by_this_seal": true,
+    "no_safety_gate_relaxation": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_source_modification": true,
+    "no_strategy_execution": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_optimization_authorized": true,
+    "no_threshold_loosening": true,
+    "no_unrelated_tracked_file_modified": true,
+    "rec1_equivalent_oos_k9_disclosure_carried_byte_equivalent_from_plan_and_draft": true
+  },
+  "intentional_differences_from_s12_d1": {
+    "dr10_risk": {
+      "s12_d1": "elevated_relative_to_s11_d1_baseline",
+      "s13_d1": "FURTHER_ELEVATED_5_to_10x_higher_turnover_mitigated_via_DA4_C"
+    },
+    "dr3_risk": {
+      "s12_d1": "low_F1_trend_no_lineage_history",
+      "s13_d1": "ELEVATED_RSI_lineage_s9_falsification_precedent"
+    },
+    "expected_is_trade_count": {
+      "s12_d1_DRAFT": "80-200",
+      "s12_d1_actual": 48,
+      "s13_d1_estimate": "230-300"
+    },
+    "expected_oos_trade_count": {
+      "s12_d1_implied_at_actual_rate": 21,
+      "s13_d1_estimate": "100-130"
+    },
+    "k9_reachability_at_oos": {
+      "s12_d1": "structurally_unreachable_at_observed_rate",
+      "s13_d1": "clears_at_lower_bound_thin_margin"
+    },
+    "mechanic_family": {
+      "reason": "structurally orthogonal mechanic family; s12-d1 falsification does not transfer",
+      "s12_d1": "F1 Donchian-15/8 trend",
+      "s13_d1": "F3 RSI(2) bi-directional mean-reversion"
+    },
+    "per_trade_risk_pct": {
+      "reason": "DA3=B revised at SEAL; mitigates DR3 risk from s9 RSI lineage",
+      "s12_d1": 0.01,
+      "s13_d1": 0.005
+    },
+    "start_cash_usd": {
+      "reason": "doubled cash base; halves per-dollar cost pressure; most aggressive DR10 mitigation",
+      "s12_d1_DA4_B": 100000,
+      "s13_d1_DA4_C": 200000
+    }
+  },
+  "is_oos_split_plan": {
+    "in_sample_window_end": "2023-12-29",
+    "in_sample_window_length_years_approx": 4.6,
+    "in_sample_window_row_count_audit_confirmed": 1443,
+    "in_sample_window_start": "2019-05-13",
+    "no_parameter_tuning": true,
+    "no_purged_k_fold": true,
+    "no_threshold_loosening": true,
+    "no_train_validate_test_split": true,
+    "no_walk_forward": true,
+    "oos_evaluation_uses_native_oos_driver": true,
+    "oos_inspection_blocked_during_is_phase": true,
+    "out_of_sample_window_end": "2025-12-30",
+    "out_of_sample_window_length_years_approx": 2.0,
+    "out_of_sample_window_row_count_structural_only": 622,
+    "out_of_sample_window_start": "2024-01-02"
+  },
+  "k9_and_oos_confirmation_rules": {
+    "k9_definition": "K9 fires iff closed_trades_portfolio < 100",
+    "k9_evaluated_at_is": true,
+    "k9_evaluated_at_oos": true,
+    "k9_threshold_inviolate": true,
+    "oos_confirmation_definition": "OOS is CONFIRMED only iff ALL of: (a) C7 verdict is READY_FOR_LONGER_BACKTEST, (b) OOS closed_trades >= 100, (c) OOS sharpe > 0, (d) OOS expectancy > 0, (e) OOS trade_curve_maxdd_pct >= -30% (equivalently |trade_curve_maxdd_pct| <= 30%; i.e., the realized OOS drawdown shall not exceed 30% in magnitude), (f) all safety counters zero, (g) no-pyramid invariant held, (h) starting_cash invariant held.",
+    "oos_confirmation_definition_source": "s11_d1_rev2_at_commit_c110fd4_magnitude_based_corrected_form_byte_equivalent",
+    "oos_indeterminate_definition": "K9 fires (closed_trades < 100) AND no safety counter fires AND headline metrics positive; NOT a confirmation",
+    "oos_killed_definition": "any safety K-gate fires OR any performance K-gate fires on OOS",
+    "oos_pass_does_NOT_promote_to_live": true,
+    "oos_pass_does_NOT_promote_to_paper": true,
+    "oos_pass_is_research_diagnostic_only": true
+  },
+  "k9_reachability_discipline_applied_at_seal_per_new_framework_requirement": {
+    "discipline_origin_commit": "0e3f9d4 (selection-plan revision after s12-d1 park)",
+    "framework_requirement": "Every Tier-N spec PLAN/DRAFT/SEAL shall include an explicit K9-reachability table for BOTH IS and OOS windows",
+    "is_k9_reachable": true,
+    "is_window_required_trades_per_year": 21.74,
+    "oos_k9_margin_at_central_estimate": "14% (central 57/y over 50/y floor)",
+    "oos_k9_margin_at_lower_bound": "0% (lower-bound estimate 50/y exactly matches 50/y floor)",
+    "oos_k9_reachable_at_lower_bound": true,
+    "oos_window_required_trades_per_year_BINDING": 50.0,
+    "s13_d1_expected_rate_low_central_high": [
+      50,
+      57,
+      65
+    ]
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "TIER_N_SEALED_SPEC",
+    "S13_D1_MNQ_RSI_2_BI_DIRECTIONAL_FRESH_CANDIDATE",
+    "NOT_LIVE_READY",
+    "NOT_PAPER_READY",
+    "NO_FRC_GRANTED",
+    "NO_PROFITABILITY_CLAIM",
+    "NO_NEXT_PHASE_PRE_APPROVED",
+    "S12_D1_TERMINAL_PARK_PRESERVED",
+    "S12_D1_NOT_REVIVED_NOT_MODIFIED_NOT_REINTERPRETED",
+    "S9_FALSIFICATION_FIRST_PRINCIPLES_BURDEN_SATISFIED",
+    "K9_THRESHOLD_INVIOLATE",
+    "K9_REACHABILITY_DISCIPLINE_APPLIED_AT_PLAN_DRAFT_SEAL",
+    "REC1_EQUIVALENT_OOS_K9_DISCLOSURE_BINDING",
+    "MECHANIC_FAMILY_F3_LOCKED_AT_PLAN_NO_REOPENING",
+    "RSI_2_BI_DIRECTIONAL_THRESHOLDS_10_50_90_50_LOCKED_AT_PLAN_NO_RETREAT",
+    "DA3_B_PER_TRADE_RISK_0_5_PCT_REVISED_AT_SEAL_FOR_DR3_MITIGATION",
+    "DA4_C_START_CASH_200K_REVISED_AT_SEAL_FOR_DR10_MITIGATION",
+    "DR3_RISK_ELEVATED_S9_LINEAGE_MITIGATED_VIA_DA3_B",
+    "DR10_RISK_ELEVATED_HIGH_FREQUENCY_MITIGATED_VIA_DA4_C",
+    "DR_REDEFINITION_POST_SEAL_FORBIDDEN"
+  ],
+  "live_promotion_path_closed": true,
+  "live_trading_remains_blocked_at_6_gates_permanently": true,
+  "minimum_trade_count_requirements": {
+    "comparison_to_s12_d1": "s12_d1_actual_48_IS_trades_OOS_implied_21_unreachable_BUT_s13_d1_RSI_bi_directional_expected_5_to_6x_higher_signal_density_K9_reachable_both_windows",
+    "expected_closed_trades_estimate_2y_OOS_central": 114,
+    "expected_closed_trades_estimate_2y_OOS_high": 130,
+    "expected_closed_trades_estimate_2y_OOS_low": 100,
+    "expected_closed_trades_estimate_4_6y_IS_central": 262,
+    "expected_closed_trades_estimate_4_6y_IS_high": 300,
+    "expected_closed_trades_estimate_4_6y_IS_low": 230,
+    "implied_per_year_trade_rate_low_central_high": [
+      50,
+      57,
+      65
+    ],
+    "k9_fire_response_IS": "DR1_INCONCLUSIVE_HOLD_not_REJECT_FAST_candidate_archived_without_parameter_modification",
+    "k9_fire_response_OOS": "INSUFFICIENT_SAMPLE_or_OOS_INDETERMINATE_park_per_C8_chain_shall_NOT_relax_K9",
+    "k9_risk_at_seal_IS": "LOW_significant_margin_2_3x_to_3_0x_above_21_74_floor",
+    "k9_risk_at_seal_OOS": "LOW_TO_MODERATE_clears_at_lower_bound_50_to_50_match_thin_margin_central_114_and_high_130_clear_with_margin",
+    "k9_threshold_closed_trades_portfolio": 100,
+    "k9_threshold_modification_forbidden": true
+  },
+  "no_oos_confirmation_claim": true,
+  "no_phase_pre_approved_by_this_seal": true,
+  "no_profitability_claim": true,
+  "p10_oos_gate_requires_separate_authorization": true,
+  "p11_lifecycle_decision_requires_separate_authorization": true,
+  "p1_plan_lock_requires_separate_authorization": true,
+  "p2_phase2_plan_requires_separate_authorization": true,
+  "p3_build_requires_separate_authorization": true,
+  "p4_smoke_requires_separate_authorization": true,
+  "p6_5_cost_stress_requires_separate_authorization": true,
+  "p6_is_requires_separate_authorization": true,
+  "p7_decision_memo_requires_separate_authorization": true,
+  "parent_references": {
+    "mnq_c0_csv_path": "data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv",
+    "mnq_c0_csv_row_count": 2066,
+    "mnq_c0_csv_sha256": "8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e",
+    "mnq_c0_csv_window_observed": [
+      "2019-05-13",
+      "2025-12-29"
+    ],
+    "s10_d1_mnq_mgc_park_commit": "1a9acec",
+    "s10_d2_park_commit": "23c7164",
+    "s11_d1_rev2_seal_sha256": "46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d",
+    "s11_d1_v1_spec_seal_sha256": "077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24",
+    "s12_d1_p11_park_commit": "ecbd001",
+    "s12_d1_p11_park_seal_sha256": "b9722d424f6faabea96dc892f811f57826a382263f2d8480e4205c789f3f9dad",
+    "s12_d1_p1_plan_lock_commit": "d8bd359",
+    "s12_d1_p1_plan_lock_seal_sha256": "eb72798eb95c08407ead9c273a650853bd5e871942856f87b48f97f07a640340",
+    "s12_d1_p2_phase2_plan_commit": "0b8d948",
+    "s12_d1_p2_phase2_plan_seal_sha256": "689dd3d06c0e2518ab5f6105544cb3d38194027647de10940da976e427c8efa9",
+    "s12_d1_p6_is_diagnostic_seal_sha256": "33c91592c09860c3ab9469aab38741b7378f54ad56ff3772f9ef6a03ea92156d",
+    "s12_d1_seal_commit": "66bbbd1",
+    "s12_d1_seal_sha256": "07c3200b5e23ab88e864f92926b83ded033a3d66c0e37e8cf8555985ad8f3b48",
+    "s13_d1_draft_commit": "8fcefaf",
+    "s13_d1_draft_path": "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec_DRAFT.md",
+    "s13_d1_plan_commit": "5e57984",
+    "s13_d1_plan_path": "docs/s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec_plan.md",
+    "s9_rsi2_etf_proxy_status": "PARKED_SAFE_BUT_NOT_MONEY_PROVEN (S0 net PnL -$1211 over 414 trades on SPY/TLT/GLD/USO long-only ETF basket)",
+    "selection_plan_after_s12_d1_park_commit": "0e3f9d4",
+    "selection_plan_after_s12_d1_park_path": "docs/next_research_track_selection_plan_after_s12_d1_park.md"
+  },
+  "phase_prefix": "PHASE2-S13-D1-MNQ-RSI-2-BIDIR",
+  "promotion_rules": {
+    "diagnostic_only_not_live_grade_label": true,
+    "live_promotion_blocked_at_6_gates_permanently": true,
+    "no_verdict_unblocks_frc": true,
+    "no_verdict_unblocks_live": true,
+    "no_verdict_unblocks_paper_via_broker": true,
+    "no_verdict_unblocks_review_queue_mutation": true,
+    "no_verdict_unblocks_strategy_lab_promotion": true,
+    "permanent_live_block": true,
+    "permanent_paper_block": true,
+    "promotion_at_any_stage_is_OUT_OF_SCOPE_FOR_THIS_RECORD_ID": true,
+    "research_diagnostic_only": true
+  },
+  "rec1_equivalent_oos_k9_disclosure": {
+    "disclosure_verbatim": "OOS K9 reachable at lower bound with thin margin (~50-65 trades/year vs 50/year floor). If observed IS rate falls below 25/year on RSI(2) bi-directional, OOS K9 unreachability becomes structurally probable. The s9 RSI-2 baseline observed 414 trades over long-only 4-ETF window; if MNQ.c.0 bi-directional rate falls below half that proportional rate, OOS K9 fires. If OOS K9 fires, the OOS verdict shall be OOS_INSUFFICIENT_SAMPLE or PARKED_SAFE_BUT_OOS_INDETERMINATE analogous to S10-D2 P11 PARK at 23c7164 and s12-d1 P11 park at ecbd001. The chain shall NOT relax K9 at OOS; the appropriate response is to seal the INSUFFICIENT_SAMPLE / INDETERMINATE verdict and park the candidate. Pursuing s13-d1 accepts the structural possibility of an OOS PARK outcome if the IS rate falls below the DRAFT-estimated 50-65/y band.",
+    "is_k9_solvable_by_rsi_2_bi_directional_choice": true,
+    "no_chain_response_relaxes_K9_at_OOS": true,
+    "no_threshold_relaxation_authorized_by_this_seal": true,
+    "oos_k9_solvable_by_rsi_2_bi_directional_choice": "BORDERLINE_AT_LOWER_BOUND",
+    "rec1_equivalent_does_not_alter_DA1_through_DA14_resolutions": true,
+    "rec1_equivalent_does_not_alter_DR9_or_DR10_thresholds": true,
+    "rec1_equivalent_is_disclosure_only_not_a_DR_redefinition": true,
+    "rec1_equivalent_priority": "HIGH"
+  },
+  "rejection_rules": {
+    "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+    "dr_rules": {
+      "DR1": "oos_rebalance_count<36 OOS-phase only -> INCONCLUSIVE_HOLD",
+      "DR10": "turnover_cost_explosion annual_turnover>0.50 OR S2_cost_drag>0.05 byte-equivalent (DA14=A) -> REJECT_FAST; ELEVATED prior probability vs s11-d1 v1 and s12-d1 (RSI 50-65 trades/y is 5-10x higher turnover); DA4=C mitigates via 2x capital base",
+      "DR11": "NOT_IN_CHAIN_F3_HAS_NO_LEVERAGE_CAP",
+      "DR2": "oos_metrics_degrade_materially_under_cost_stress -> REJECT_FAST",
+      "DR3": "zero_cost_only_survival (S0>0 AND all S1..S4<=0) -> REJECT_FAST -- HIGHER_PRIOR_PROBABILITY for s13-d1 RSI lineage; DA3=B mitigates",
+      "DR4": "oos_negative_while_is_positive_unexplained -> REJECT_FAST",
+      "DR5": "cost_stress_turns_edge_negative tier flip -> REJECT_FAST or INCONCLUSIVE_HOLD carveout; BINDING for high-frequency",
+      "DR6": "post_warmup_sizing_ambiguity_or_invalid NARROWED post-warmup only -> REJECT_FAST",
+      "DR7": "missing_oos_or_date_window_evidence -> INCONCLUSIVE_HOLD",
+      "DR8": "live_or_order_routing_path_detected at Initialize -> HARD_FAIL_VOIDED",
+      "DR9": "mnq_c0_only_data_continuity_integrity_check thresholds 0.95/0.30/5/5 byte-equivalent (DA13=A) -> INCONCLUSIVE_HOLD"
+    },
+    "fail_safety_outcomes_terminal_for_this_candidate_record_id": true,
+    "k_gate_firing_priority_order": "K8 > K12 > K7 > K9 > K1/K2/K4 > A-gates > ELIGIBLE_FOR_OOS",
+    "k_gates": {
+      "K10_avg_pairwise_corr": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+      "K11_cap_binding_events": "NOT_APPLICABLE_F3_NO_LEVERAGE_CAP",
+      "K12_DR_fires_on_cost_stress": "if any DR2/DR3/DR4/DR5 fires across S0/S2/S3/S4 cost-stress sweep at P6.5-equivalent -> FAIL_SAFETY (MORE LIKELY for s13-d1 given RSI lineage risk)",
+      "K1_sharpe_proxy_lt_0": "if sharpe_proxy_per_trade < 0 at S1 -> FAIL_SAFETY",
+      "K2_expectancy_le_0": "if expectancy_per_trade_usd <= 0 at S1 -> FAIL_SAFETY",
+      "K4_trade_curve_maxdd_pct_magnitude_gt_50": "if |trade_curve_maxdd_pct| > 50% (DA5=A) -> FAIL_SAFETY",
+      "K6_per_symbol_dispersion": "NOT_APPLICABLE_SINGLE_INSTRUMENT",
+      "K7_correlation_or_filter_silently_introduced": "if any filter/regime/correlation gate is introduced post-SEAL -> FAIL_SAFETY",
+      "K8_sealed_parent_drift": "if any sealed parent seal does not match the embedded constant -> FAIL_SAFETY",
+      "K9_closed_trades_lt_100": "if closed_trades_portfolio < 100 -> INSUFFICIENT_SAMPLE (NOT FAIL_SAFETY)"
+    },
+    "no_dr_redefinition_post_seal": true,
+    "no_filter_introduction_post_seal": true,
+    "no_starting_cash_modification_post_seal": true,
+    "no_strategy_parameter_modification_post_seal": true,
+    "no_threshold_loosening": true,
+    "no_universe_widening_post_seal": true,
+    "reject_fast_criteria_RF1_through_RF16": [
+      "RF1: any DR rule fires REJECT_FAST (DR3 + DR5 + DR10 ELEVATED for s13-d1)",
+      "RF2: DR9 fires AND > 5 violations",
+      "RF3: DR6 post-warmup invalid-sizing event count > 0",
+      "RF4: any forbidden-verdict-token in runner output",
+      "RF5: runner attempts SetLiveMode/SetBrokerageModel/DeployAlgorithm or unauthorized network/Databento call at runtime",
+      "RF6: any order-submit attempt while in warmup window",
+      "RF7: runner mutates any s11-d1/s12-d1/s10-d2/s10-d1/s9/s7-d1/B006_NNN/T8/s13-d1 sealed artifact (byte-shift)",
+      "RF8: runner makes a Databento API call at runtime",
+      "RF9: runner caches .dbn.zst files anywhere",
+      "RF10: runner accesses DATABENTO_API_KEY at runtime",
+      "RF11: track silently re-introduces a filter/regime gate/selection rule",
+      "RF12: pyramid mechanism re-introduced in code",
+      "RF13: RSI thresholds silently switched from LOCKED 10/50/90/50 post-SEAL",
+      "RF14: universe widening or symbol substitution attempted at any phase",
+      "RF15: track depends on a survivorship-cherry-pick rule",
+      "RF16: any retroactive re-anchoring or modification of s12-d1 terminal park caused by this candidate"
+    ]
+  },
+  "report_kind": "S13-D1 Tier-N specification (sealed; binding; fresh candidate per selection-plan revision at 0e3f9d4; F3 RSI(2) bi-directional mean-reversion on MNQ.c.0; DA3=B per-trade risk 0.5% AND DA4=C START_CASH $200k revised at SEAL for DR3/DR10 mitigation; K9-reachability discipline + REC1-equivalent OOS disclosure carried byte-equivalent from PLAN/DRAFT)",
+  "report_seal_sha256": "2f9d176388fe0b66c9ced19f33c68e079bb08112f3d52f3f20a9aba7d91bf775",
+  "runtime_invariants": [
+    "no_live_trading",
+    "no_strategy_lab_promotion",
+    "no_review_queue_mutation",
+    "no_brokerage_connection",
+    "no_external_network",
+    "no_databento_at_runtime",
+    "no_production_signal",
+    "no_strategy_optimization_authorized",
+    "no_profitability_claim",
+    "no_universe_membership_logic",
+    "no_dr_redefinition_post_seal",
+    "no_warmup_order_submission",
+    "dr6_warmup_contamination_blocked",
+    "no_continuous_roll_stitch_modification_post_seal",
+    "no_mcl_inclusion_under_long_history_scope",
+    "no_intraday_schema_ingest_under_daily_only_design",
+    "databento_api_key_read_from_env_only_never_logged_or_saved",
+    "no_pyramid_per_signal",
+    "single_instrument_universe_NO_widening_post_seal",
+    "no_substitution_of_any_symbol_into_this_universe_post_seal",
+    "mnq_c0_csv_reuse_byte_equivalent_no_fresh_fetch",
+    "rsi_2_bi_directional_thresholds_locked_at_plan_no_retreat_to_long_only_or_different_thresholds",
+    "mechanic_family_F3_lock_at_plan_no_reopening_at_draft_or_seal",
+    "no_revision_of_s12_d1_terminal_park_via_this_candidate_id",
+    "k9_reachability_discipline_applied_at_plan_time_per_new_framework_requirement"
+  ],
+  "runtime_invariants_count": 25,
+  "s12_d1_lessons_inherited_explicitly": [
+    "K9-reachability analysis MUST be performed at PLAN/DRAFT time with explicit IS AND OOS calculations (NEW framework discipline introduced at selection-plan revision 0e3f9d4)",
+    "Linear-scaling trade-count estimation from single-symbol multi-year baselines to other instruments is unreliable; the DRAFT estimate band should be conservatively wide",
+    "K9 inviolacy is structural; positive headline economics do NOT override K9 verdict semantics (LESSON_B006_002_002 reinforced)",
+    "DA4 (START_CASH) revision does NOT address K9 risk; sizing affects contracts-per-trade not trade-event frequency. K9 risk requires more SIGNALS, not more contracts-per-signal.",
+    "DR10 turnover risk should be calculated at PLAN/DRAFT time for high-frequency mechanics",
+    "P3 source files SHOULD remain byte-stable across P6 execution (simulator-in-tmp/ pattern preserves seal chain integrity)",
+    "REC1-equivalent OOS K9 disclosure should propagate across SEAL -> P1 -> P2 -> P3 -> P4 -> P6 -> P11 chain",
+    "Park is mandatory under C8 when K9 fires; no parameter iteration to seek better trade counts"
+  ],
+  "schema_id": "sparta.external_research_hunter.s13_d1_mnq_c0_single_instrument_rsi_2_bi_directional_databento_long_history_tier_n_spec_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "spec_lifecycle_state": "SEALED",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "spec_lifecycle_state": "SEALED",
+    "trading_status": "PAUSED"
+  },
+  "universe": {
+    "common_history_start": "2019-05-13",
+    "diversification_claim": "NONE",
+    "effective_independent_bets_trivial": 1,
+    "symbol_count": 1,
+    "symbol_substitution_post_seal_forbidden": true,
+    "symbols": [
+      "MNQ.c.0"
+    ],
+    "universe_type": "single_fixed_instrument_continuous_micro_futures",
+    "universe_widening_post_seal_forbidden": true
+  },
+  "verdict_never_means_live_ready": true,
+  "why_rsi_2_bi_directional_fresh_candidate_is_being_tested": "s12-d1 Donchian-15/8 single-instrument K9-mitigation hypothesis was falsified at P6 IS (48 trades vs DRAFT 80-200; PARKED_SAFE_BUT_INSUFFICIENT_SAMPLE_AT_IS at ecbd001). Selection-plan revision after s12-d1 park (0e3f9d4) identified T1 (RSI(2) bi-directional on MNQ.c.0) as the only track scoring 41/50 that clears K9-reachability at BOTH IS and OOS. RSI(2) produces ~50-65 trades/year on MNQ.c.0 (5-6x s12-d1's observed 10/y), structurally crossing the K9 floor at both windows. s9 RSI-2 falsification on long-only SPY/TLT/GLD/USO does NOT transfer because (a) asset class differs, (b) cost surface differs, (c) signal direction differs (bi-directional vs long-only), (d) universe differs. Operator revised at SEAL: DA3=B (per-trade risk 0.5%) AND DA4=C (START_CASH $200k) -- combined revision is the most conservative DR3/DR10 posture mitigating both zero-cost-only-survival risk (DR3; s9 lineage) and turnover-cost-explosion risk (DR10; high-frequency)."
+}
