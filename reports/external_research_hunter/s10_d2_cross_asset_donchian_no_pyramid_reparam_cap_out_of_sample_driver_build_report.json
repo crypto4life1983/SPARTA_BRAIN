@@ -1,0 +1,285 @@
+{
+  "algo_version_for_run_id": "s10_d2_v0_1_0",
+  "authored_at_utc": "2026-05-27T03:16:08.355445Z",
+  "candidate_record_id": "s10-cross-asset-donchian-no-pyramid-reparam-cap-nq-gc-zn-cl",
+  "design_choice": "OPTION_1_SIBLING_DRIVER",
+  "design_rationale": "Authored sibling file out_of_sample_driver.py via mechanical substitution from in_sample_driver.py. Preserves IS driver byte-stable on disk (P3 BUILD sha unchanged), which keeps the chain-of-custody guards across all prior phases clean. Each driver is single-purpose and the diff is fully auditable in git.",
+  "files_authored": {
+    "out_of_sample_driver_py": {
+      "byte_count": 34247,
+      "is_driver_source_is_p3_build_baseline": true,
+      "is_driver_source_sha": "19749ada4d98e1b2dbd7bd226699807d6e1adfbc965d033d1ac58795350f9919",
+      "path": "external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness/out_of_sample_driver.py",
+      "sha256": "7941ff28e0dbad0fae68aff3fd62b21b05fcc8fe1615c251fce1cc01858bf9b4",
+      "static_validation": {
+        "ast_parse": "OK",
+        "compile": "OK",
+        "forbidden_top_imports": [],
+        "is_leakage": [],
+        "required_oos_markers_present": true
+      },
+      "substitutions_applied": [
+        {
+          "kind": "module_docstring_header",
+          "new": "\"\"\"s10 D2 out-of-sample driver -- local Databento DBN decoder + Donchian backtest (P10 OOS gate).",
+          "old": "\"\"\"s10 D2 in-sample driver -- local Databento DBN decoder + Donchian backtest."
+        },
+        {
+          "kind": "auth_comment",
+          "new": "of `run_out_of_sample()` requires a separate operator authorization (P10).",
+          "old": "of `run_in_sample()` requires a separate operator authorization (P6.5)."
+        },
+        {
+          "kind": "CACHE_ROOT",
+          "new": "CACHE_ROOT = Path(r\"C:\\SPARTA_BRAIN\\data\\databento_cache_oos\")",
+          "old": "CACHE_ROOT = Path(r\"C:\\SPARTA_BRAIN\\data\\databento_cache\")"
+        },
+        {
+          "kind": "window_start_const_decl",
+          "new": "OUT_OF_SAMPLE_START = datetime.date(2023, 1, 1)",
+          "old": "IN_SAMPLE_START = datetime.date(2013, 1, 1)"
+        },
+        {
+          "kind": "window_end_const_decl",
+          "new": "OUT_OF_SAMPLE_END   = datetime.date(2025, 12, 31)",
+          "old": "IN_SAMPLE_END   = datetime.date(2022, 12, 30)"
+        },
+        {
+          "kind": "EXPECTED_FILES_PER_ROOT",
+          "new": "EXPECTED_FILES_PER_ROOT = 36",
+          "old": "EXPECTED_FILES_PER_ROOT = 120"
+        },
+        {
+          "kind": "EXPECTED_CACHE_BYTES_dict_block",
+          "new": "EXPECTED_CACHE_BYTES = {\n    \"NQ\": 19_770_364,\n    \"GC\":    540_803,\n    \"ZN\":  8_573_282,\n    \"CL\": 13_779_406,\n}",
+          "old": "EXPECTED_CACHE_BYTES = {\n    \"NQ\": 53_148_359,\n    \"GC\":  2_162_216,\n    \"ZN\": 27_939_222,\n    \"CL\": 46_540_654,\n}"
+        },
+        {
+          "kind": "OUTPUT_DIAGNOSTIC_JSON_path",
+          "new": "OUTPUT_DIAGNOSTIC_JSON = Path(r\"C:\\SPARTA_BRAIN\\reports\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_diagnostic_result_sealed.json\")",
+          "old": "OUTPUT_DIAGNOSTIC_JSON = Path(r\"C:\\SPARTA_BRAIN\\reports\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_in_sample_diagnostic_result_sealed.json\")"
+        },
+        {
+          "kind": "OUTPUT_DIAGNOSTIC_MD_path",
+          "new": "OUTPUT_DIAGNOSTIC_MD   = Path(r\"C:\\SPARTA_BRAIN\\reports\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_diagnostic_result_sealed.md\")",
+          "old": "OUTPUT_DIAGNOSTIC_MD   = Path(r\"C:\\SPARTA_BRAIN\\reports\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_in_sample_diagnostic_result_sealed.md\")"
+        },
+        {
+          "kind": "hard_runtime_checks_comment",
+          "new": "# Hard runtime checks (called by run_out_of_sample BEFORE any DBN decode)",
+          "old": "# Hard runtime checks (called by run_in_sample BEFORE any DBN decode)"
+        },
+        {
+          "kind": "derive_rth_docstring_window",
+          "new": "Window filter: bars whose ET timestamp date in [OUT_OF_SAMPLE_START, OUT_OF_SAMPLE_END]",
+          "old": "Window filter: bars whose ET timestamp date in [IN_SAMPLE_START, IN_SAMPLE_END]"
+        },
+        {
+          "kind": "derive_rth_date_filter",
+          "new": "if not (OUT_OF_SAMPLE_START <= ts_et.date() <= OUT_OF_SAMPLE_END):",
+          "old": "if not (IN_SAMPLE_START <= ts_et.date() <= IN_SAMPLE_END):"
+        },
+        {
+          "kind": "run_function_def",
+          "new": "def run_out_of_sample(*, expected_seals:",
+          "old": "def run_in_sample(*, expected_seals:"
+        },
+        {
+          "kind": "run_docstring",
+          "new": "sizing on NQ + GC + ZN + CL across the out-of-sample window, applies the",
+          "old": "sizing on NQ + GC + ZN + CL across the in-sample window, applies the"
+        },
+        {
+          "kind": "schema_id",
+          "new": "s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_out_of_sample_diagnostic.v1",
+          "old": "s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_in_sample_diagnostic.v1"
+        },
+        {
+          "kind": "window_key_in_return_dict",
+          "new": "\"out_of_sample_window\": {\"start\": OUT_OF_SAMPLE_START.isoformat(), \"end\": OUT_OF_SAMPLE_END.isoformat()},",
+          "old": "\"in_sample_window\": {\"start\": IN_SAMPLE_START.isoformat(), \"end\": IN_SAMPLE_END.isoformat()},"
+        },
+        {
+          "kind": "main_print_1",
+          "new": "print(\"s10 D2 NO-PYRAMID out_of_sample_driver is BUILD-only scaffolding at P3.6.\")",
+          "old": "print(\"s10 D2 NO-PYRAMID in_sample_driver is BUILD-only scaffolding at P3.\")"
+        },
+        {
+          "kind": "main_print_window",
+          "new": "print(f\"Out-of-sample window: {OUT_OF_SAMPLE_START.isoformat()} -> {OUT_OF_SAMPLE_END.isoformat()}\")",
+          "old": "print(f\"In-sample window: {IN_SAMPLE_START.isoformat()} -> {IN_SAMPLE_END.isoformat()}\")"
+        },
+        {
+          "kind": "main_print_import",
+          "new": "\"import out_of_sample_driver\")",
+          "old": "\"import in_sample_driver\")"
+        },
+        {
+          "kind": "main_print_invocation",
+          "new": "print(\"  result = out_of_sample_driver.run_out_of_sample(cost_tier='S1')\")",
+          "old": "print(\"  result = in_sample_driver.run_in_sample(cost_tier='S1')\")"
+        },
+        {
+          "kind": "main_print_exit",
+          "new": "print(\"This script will now exit WITHOUT calling run_out_of_sample().\")",
+          "old": "print(\"This script will now exit WITHOUT calling run_in_sample().\")"
+        }
+      ],
+      "substitutions_count": 21
+    },
+    "test_oos_driver_invariants_py": {
+      "ast_parse_ok": true,
+      "byte_count": 8829,
+      "compile_ok": true,
+      "path": "external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness/tests/test_oos_driver_invariants.py",
+      "sha256": "d6769d4e76d95749feba25455dda6528c89a19321ac24cf599c99704646160d7"
+    }
+  },
+  "guard_byte_stability": {
+    "all_guarded_sources_stable": true,
+    "guarded_count": 13,
+    "is_driver_byte_stable_match": true,
+    "is_driver_byte_stable_through_p3_6": true,
+    "is_driver_sha_baseline": "19749ada4d98e1b2dbd7bd226699807d6e1adfbc965d033d1ac58795350f9919",
+    "is_driver_sha_now": "19749ada4d98e1b2dbd7bd226699807d6e1adfbc965d033d1ac58795350f9919"
+  },
+  "hard_boundaries_held": {
+    "no_commit_in_orchestrator": true,
+    "no_conftest_modified": true,
+    "no_d5_b005_001_nke_revival": true,
+    "no_data_fetch": true,
+    "no_databento_api_call": true,
+    "no_db_historical": true,
+    "no_execution_guard_modified": true,
+    "no_in_sample_driver_modified": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_network_call": true,
+    "no_obsidian_touched": true,
+    "no_oos_execution": true,
+    "no_paper_trading": true,
+    "no_profitability_claim": true,
+    "no_promotion_to_live": true,
+    "no_qc_runtime": true,
+    "no_review_queue_mutation": true,
+    "no_runner_main_modified": true,
+    "no_s8_d1_or_s7_d1_modified": true,
+    "no_strategy_parameter_change": true,
+    "no_synthetic_csv_fixtures_modified": true,
+    "no_test_smoke_t1_t15_modified": true
+  },
+  "inherited_seals": {
+    "p3_5_scaffold_completion_seal_sha256": "66d38f359b54882b3107c4ad4291673d63f05f5b0d3daa19088b4a4c76469261",
+    "p3_build_in_sample_driver_report_seal_sha256": "ddd604c96508a0ab835bcbae6e72fabc2993cd3f0dc459898ca326617dd96443",
+    "p3_build_runner_report_seal_sha256": "1eb04aa312f4053134c1e9387be7716aa4564c019168ee2cedcf789063d96405",
+    "p4_smoke_seal_sha256": "c31ded81f9a2883586883aadda4d64d629a047917fcebd56169ca42eccf4fdde",
+    "p6_5_cost_stress_matrix_seal_sha256": "f9a34674de4f7fdf8098b39959032d152bf2282e9ad57cedd68bc33cee2099ab",
+    "p6_is_diagnostic_seal_sha256": "e6cdc7c68a9e2b7b6d749b73ff433e585c9de55890af5dce3dca51d74430c1b8",
+    "p7_decision_memo_seal_sha256": "87baa6e8c4cc1eb47c1345b97990eab86d5cefb37636e9fe57a029506d398c05",
+    "phase2_plan_seal_sha256": "7a48ad64236971e6fd2a2fa58ab7ab746a71543778ed0a868f3cdf9ff8f74ac3",
+    "plan_lock_seal_sha256": "ba8bf954d44b373c0ffdc38a1cf8f73dec31a9fc538f0b7584a20659d79ea354",
+    "tier_n_spec_seal_sha256": "f5ca5ee63024e9c8b7b1e85762558ec35eb3d4ebb9ce2a160cbe0f1a0e80a679"
+  },
+  "operational_constants_changed_from_is_driver": {
+    "CACHE_ROOT": {
+      "is_value": "C:\\\\SPARTA_BRAIN\\\\data\\\\databento_cache",
+      "oos_value": "C:\\\\SPARTA_BRAIN\\\\data\\\\databento_cache_oos"
+    },
+    "EXPECTED_CACHE_BYTES": {
+      "is_value": {
+        "CL": 46540654,
+        "GC": 2162216,
+        "NQ": 53148359,
+        "ZN": 27939222
+      },
+      "oos_value": {
+        "CL": 13779406,
+        "GC": 540803,
+        "NQ": 19770364,
+        "ZN": 8573282
+      }
+    },
+    "EXPECTED_FILES_PER_ROOT": {
+      "is_value": 120,
+      "oos_value": 36
+    },
+    "OUTPUT_DIAGNOSTIC_JSON_path": {
+      "is_suffix": "in_sample_diagnostic_result_sealed.json",
+      "oos_suffix": "out_of_sample_diagnostic_result_sealed.json"
+    },
+    "OUTPUT_DIAGNOSTIC_MD_path": {
+      "is_suffix": "in_sample_diagnostic_result_sealed.md",
+      "oos_suffix": "out_of_sample_diagnostic_result_sealed.md"
+    },
+    "run_function_name": {
+      "is_name": "run_in_sample",
+      "oos_name": "run_out_of_sample"
+    },
+    "window_end_const_name": {
+      "is_name": "IN_SAMPLE_END",
+      "is_value": "2022-12-30",
+      "oos_name": "OUT_OF_SAMPLE_END",
+      "oos_value": "2025-12-31"
+    },
+    "window_start_const_name": {
+      "is_name": "IN_SAMPLE_START",
+      "is_value": "2013-01-01",
+      "oos_name": "OUT_OF_SAMPLE_START",
+      "oos_value": "2023-01-01"
+    }
+  },
+  "phase_prefix": "PHASE2-S10-D2-XAD-RC",
+  "ready_for_p10_oos_separately_authorized": true,
+  "report_kind": "S10-D2 P3.6 BUILD-EXTENSION: native OOS driver support",
+  "report_seal_sha256": "c7d9d7888f2bc5df6850ab37f9bde0b95c3c794486382c4b0d45f32b6bd1b73d",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip (json.dumps sort_keys=True separators=',:' ensure_ascii=False default=str EXCLUDING report_seal_sha256 + seal_method)",
+  "strategy_parameters_changed_from_is_driver": "NONE — strategy parameters live in runner_main.CONFIG which is shared by both drivers. Donchian 55/20, Wilder ATR(20), 2N stop, 1% risk, max_units=1, AMB6 NONE, no-pyramid invariant, starting_cash=$500,000, S0..S4 cost tiers — ALL UNCHANGED.",
+  "tests_run": {
+    "errored_count": 0,
+    "failed_count": 0,
+    "passed_count": 19,
+    "per_test_verdicts": {
+      "test_both_drivers_share_seal_constants": "PASSED",
+      "test_both_drivers_use_same_runner_main_module": "PASSED",
+      "test_is_driver_source_byte_stable_through_p3_6": "PASSED",
+      "test_oos_driver_cache_root_points_to_oos_dir": "PASSED",
+      "test_oos_driver_databento_import_is_function_local": "PASSED",
+      "test_oos_driver_does_not_have_is_window_constants": "PASSED",
+      "test_oos_driver_does_not_have_run_in_sample_function": "PASSED",
+      "test_oos_driver_does_not_instantiate_db_historical": "PASSED",
+      "test_oos_driver_does_not_reference_is_byte_counts_in_source": "PASSED",
+      "test_oos_driver_does_not_reference_is_cache_dir_in_source": "PASSED",
+      "test_oos_driver_does_not_reference_is_dates_in_source": "PASSED",
+      "test_oos_driver_does_not_reference_run_in_sample_anywhere": "PASSED",
+      "test_oos_driver_expected_cache_bytes_match_oos": "PASSED",
+      "test_oos_driver_expected_files_per_root_is_36": "PASSED",
+      "test_oos_driver_no_top_level_forbidden_imports": "PASSED",
+      "test_oos_driver_window_end_is_2025_12_31": "PASSED",
+      "test_oos_driver_window_start_is_2023_01_01": "PASSED",
+      "test_oos_run_function_signature_matches_is": "PASSED",
+      "test_runner_main_config_strategy_params_unchanged": "PASSED"
+    },
+    "pytest_invocation": [
+      "C:\\Users\\mahmo\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+      "-u",
+      "-m",
+      "pytest",
+      "C:\\SPARTA_BRAIN\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py",
+      "-v",
+      "--no-header",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--rootdir",
+      "C:\\SPARTA_BRAIN\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests",
+      "--confcutdir",
+      "C:\\SPARTA_BRAIN\\external_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests",
+      "--import-mode=importlib"
+    ],
+    "pytest_returncode": 0,
+    "pytest_stderr": "",
+    "pytest_stdout": "============================= test session starts =============================\ncollecting ... collected 19 items\n\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_is_driver_source_byte_stable_through_p3_6 PASSED [  5%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_cache_root_points_to_oos_dir PASSED [ 10%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_window_start_is_2023_01_01 PASSED [ 15%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_window_end_is_2025_12_31 PASSED [ 21%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_expected_files_per_root_is_36 PASSED [ 26%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_expected_cache_bytes_match_oos PASSED [ 31%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_have_is_window_constants PASSED [ 36%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_reference_is_cache_dir_in_source PASSED [ 42%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_reference_is_dates_in_source PASSED [ 47%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_reference_is_byte_counts_in_source PASSED [ 52%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_reference_run_in_sample_anywhere PASSED [ 57%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_have_run_in_sample_function PASSED [ 63%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_runner_main_config_strategy_params_unchanged PASSED [ 68%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_both_drivers_use_same_runner_main_module PASSED [ 73%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_both_drivers_share_seal_constants PASSED [ 78%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_run_function_signature_matches_is PASSED [ 84%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_no_top_level_forbidden_imports PASSED [ 89%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_databento_import_is_function_local PASSED [ 94%]\nexternal_research_hunter\\s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness\\tests\\test_oos_driver_invariants.py::test_oos_driver_does_not_instantiate_db_historical PASSED [100%]\n\n============================= 19 passed in 0.05s ==============================\n",
+    "pytest_wall_seconds": 0.732,
+    "test_file": "external_research_hunter/s10_d2_cross_asset_donchian_no_pyramid_reparam_cap_runner_harness/tests/test_oos_driver_invariants.py"
+  }
+}
