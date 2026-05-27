@@ -1,0 +1,325 @@
+# S11-D1 P3 implementation-plan memo (sealed; planning-only; rev2-anchored)
+
+**Schema:** `sparta.external_research_hunter.s11_d1_p3_implementation_plan_memo.v1`  
+**Phase prefix:** `PHASE2-S11-D1-MNQ-SI-P3-PLAN`  
+**Candidate record id:** `s11-d1-mnq-c0-single-instrument-databento-long-history`  
+**Algo version:** `s11_d1_v0_1_0`  
+**Authored at (UTC):** `2026-05-27T05:23:07Z`  
+**Authorization phrase received:** *"Authorize S11-D1 P3 planning only, anchored to rev2."*  
+**Memo is binding as a plan:** `True`  
+**Memo authorizes execution:** `True` (False = does NOT authorize)  
+**Report seal sha256:** `a8a433b981846654d4f90fc20cad2a8c6d1821bfac04055167d8d76c986f2864`
+
+## Section 1 - Binding anchor is rev2
+
+- Binding Tier-N anchor commit: `c110fd4`
+- Binding Tier-N anchor seal sha256: `46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d`
+- Binding Tier-N anchor paths:
+  - `reports/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec_rev2_sealed.json`
+  - `docs/s11_d1_mnq_c0_single_instrument_databento_long_history_tier_n_spec_rev2.md`
+
+**v1 status in this planning context:** Historical-record-only. v1 (commit 9c63088, seal 077e29e6..) remains byte-stable on disk and remains the on-disk anchor of P1 (commit 7d86486) and P2 (commit f64f984). Under the operator-typed P3 authorization 'anchored to rev2', the future P3 BUILD shall pin rev2's seal (not v1's) in all build-report 'inherited_seals' blocks and in all driver source 'EXPECTED_SEALS' / 'TIER_N_SPEC_SEAL_SHA256' constants. P3 BUILD authoring shall NOT modify v1 on disk.
+
+**v1/P1/P2 re-anchoring to rev2 status:** NOT performed. Under this planning memo's 'P3-direct-rev2-anchor' approach, P1 and P2 remain anchored to v1 on disk. The P3 BUILD report shall explicitly document the v1->rev2 anchor switch at the P3 boundary, citing the P1_rev_M re-anchor memo (commit ec503d4, seal 56adfa13..) as the decision-support record. Alternatively, before P3 BUILD, the operator MAY first authorize P1_rev_M and P2_rev_M plan-lock and phase-2 plan re-anchoring artifacts to produce a clean continuous v1->rev2->P1_rev_M->P2_rev_M->P3 chain; this memo does NOT perform either re-anchor.
+
+**Operator choice at P3 authorization time:** Two acceptable forms of 'Authorize S11-D1 P3 BUILD' both result in rev2-anchored implementation: (a) P3 BUILD with explicit anchor-switch documentation at the P3 boundary (skips P1_rev_M / P2_rev_M; faster); (b) P3 BUILD preceded by P1_rev_M plan-lock authoring and P2_rev_M phase-2 plan authoring (cleaner chain; more authorizations). This memo treats both as acceptable; the operator selects at P3 BUILD authorization time.
+
+## Section 2 - Predecessor commits and seals
+
+| Predecessor | Commit | Seal sha256 | Role |
+|-------------|--------|-------------|------|
+| `v1_tier_n_spec` | `9c63088` | `077e29e62f23dbc31823bad8447e5ef8..` | historical anchor; binds P1 + P2 on disk |
+| `rev2_tier_n_spec` | `c110fd4` | `46659b4a8a73cb72fbe0153efed80aaf..` | binding anchor for this P3 planning memo and future P3 BUILD |
+| `p1_plan_lock` | `7d86486` | - | anchored to v1; introduces A4 30% magnitude gate + K4 50% magnitude gate; gate grid binds at P6 IS / P10 OOS execution time |
+| `p2_phase_2_plan` | `f64f984` | - | anchored to v1 via P1; phase-2 safety contract inheritance |
+| `v1_condition_e_clarification_memo` | `d13b56a` | `eda08aceeb4afd7d4f985a739d6e87b3..` | non-binding documentation hazard flag for v1 oos_confirmation_definition condition (e) inversion |
+| `p1_rev_m_reanchor_memo` | `ec503d4` | `56adfa13d2f176322649ad5af362fac1..` | decision-support memo recommending rev2 anchoring for future P3 |
+| `pre_seal_mechanic_resolution_draft` | `74e254f` | - | retroactive pre-SEAL historical documentation of mechanic family F1 resolution; NOT a binding anchor |
+| `s10_d2_full_chain_terminal_park_reference` | - | - | `PARKED_SAFE_BUT_OOS_INDETERMINATE_K9_FIRED (S10-D2 P11 PARK at commit 23c7164; S10-D2 terminal-lesson sealed report at commit 6895012)` |
+| `s10_d1_data_anchor_reference` | - | - | `MNQ.c.0 CSV sha 8b7b832c62fae1854fbf664db9c79ec953d4462ff6d89896cc39975005dfa23e at data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv (2066 rows; 2019-05-13 to 2025-12-29; audit-clean per S10-D1 step 02c)` |
+| `all_predecessor_seals_re_verifiable_from_on_disk_artifacts` | - | - | `True` |
+| `no_predecessor_seal_modified_by_this_memo` | - | - | `True` |
+
+## Section 3 - P3 scope boundaries
+
+**P3 phase definition:** Per rev2 spec files_allowed_to_be_created_or_modified.future_phases_may_create_each_under_separate_authorization.p3_*, the P3 BUILD phase encompasses authoring the runner harness Python package (5 source files) + the test scaffold (5 test files including fixtures) + 3 sealed build report pairs. P3 does NOT include any of: P4 synthetic smoke battery execution, P6 IS diagnostic execution, P6.5 cost-stress sweep execution, P7 decision memo, P10 OOS gate execution, P11 lifecycle decision. Each of those is a separate subsequent phase with its own authorization requirement.
+
+### In-scope when P3 is authorized (13 file authoring activities)
+
+- Author runner_harness/__init__.py (Python package marker)
+- Author runner_harness/main.py (strategy CONFIG; daily bar loop; signal computation; per-trade state machine)
+- Author runner_harness/execution_guard.py (P3.5-equivalent precondition gates; cache assertions; seal-inheritance assertions)
+- Author runner_harness/in_sample_driver.py (IS-window DBN-equivalent or CSV reader; IS-only filter; runs run_in_sample())
+- Author runner_harness/out_of_sample_driver.py (OOS-window CSV reader; OOS-only filter; runs run_out_of_sample(); embeds rev2's corrected oos_confirmation_definition condition (e) magnitude-based predicate)
+- Author runner_harness/tests/__init__.py
+- Author runner_harness/tests/conftest.py (pytest configuration)
+- Author runner_harness/tests/fixtures/synthetic_mnq_daily.csv (small deterministic test data; ~50 rows; NEVER fetched from Databento)
+- Author runner_harness/tests/test_smoke_t1_t15.py (15 smoke tests for source byte-stability + constants + import safety + no-network)
+- Author runner_harness/tests/test_oos_driver_invariants.py (OOS driver invariants: IS-driver source byte-stable through P3.6; OOS constants are OOS values; no leak of IS paths/dates; rev2 condition (e) magnitude-based)
+- Author runner_build_report sealed JSON + MD (1 pair)
+- Author in_sample_driver_build_report sealed JSON + MD (1 pair)
+- Author out_of_sample_driver_build_report sealed JSON + MD (1 pair, citing rev2 seal as the anchor and confirming condition (e) magnitude-based implementation)
+
+### Out-of-scope at any point during P3
+
+- Any execution of any function in main.py, in_sample_driver.py, or out_of_sample_driver.py beyond import-time and pytest collection-time. (run_in_sample() and run_out_of_sample() shall NOT be invoked at P3.)
+- Any Databento Historical API call. databento library MAY be imported lazily inside load functions, NEVER instantiated as Historical() at P3.
+- Any DATABENTO_API_KEY environment-variable read.
+- Any external network call. P3 BUILD shall include a socket-monkeypatch defense-in-depth pattern (analogous to S10-D2 K10 evaluator) OR shall structurally avoid socket imports.
+- Any modification of v1 spec, rev2 spec, P1 plan-lock, P2 phase-2 plan, clarification memo, P1_rev_M re-anchor memo, or pre-SEAL DRAFT.
+- Any modification of S10-D2, S10-D1, B006_*, S8-D1, S7, S9, B005, NKE, D5, or ORB / Step-30 artifacts.
+- Any modification of brain_memory/projects/trading_bot/lessons.md.
+- Any modification of Command Center files (app.py, templates/command.html, tests/test_app_command_route.py).
+- Any modification of data/databento_cache, data/databento_cache_oos, data/databento_cache_is_only, or the s10-D1 MNQ.c.0 CSV anchor file.
+- Any modification of CLAUDE.md, RUNBOOK, .gitignore, pipeline_manifest.
+- Any modification of review_queue.json or idea_memory.
+- Any commit by the orchestrator without explicit operator commit-approval.
+- Any branch creation, branch switch, or git push.
+
+- P3 planning only at this turn: `True`
+- P3 execution authorized by this memo: `False`
+
+**Operator authorization phrase for future P3 execution (documented only):** 'Authorize S11-D1 P3 BUILD anchored to rev2.' (recommended) OR 'Authorize S11-D1 P1_rev_M plan-lock anchoring rev2 Tier-N spec.' followed by 'Authorize S11-D1 P2_rev_M phase-2 plan anchoring rev2 + P1_rev_M.' followed by 'Authorize S11-D1 P3 BUILD.' (cleaner alternative; per re-anchor memo)
+
+## Section 4 - Files that WOULD be touched in future implementation
+
+**WARNING:** The following file list describes what FUTURE P3 BUILD authorization would create. THIS MEMO DOES NOT CREATE ANY OF THESE FILES. THIS MEMO DOES NOT MODIFY ANY OF THESE FILES. The list is documentation of intent only.
+
+### Source files (5 files in runner_harness/)
+
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/__init__.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/main.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/execution_guard.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/in_sample_driver.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/out_of_sample_driver.py`
+
+### Test files (5 files in runner_harness/tests/)
+
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/tests/__init__.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/tests/conftest.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/tests/fixtures/synthetic_mnq_daily.csv`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/tests/test_smoke_t1_t15.py`
+- `external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_harness/tests/test_oos_driver_invariants.py`
+
+### Sealed build report pairs (3 pairs = 6 files)
+
+- `reports/external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_build_report.json`
+- `reports/external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_runner_build_report.md`
+- `reports/external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_in_sample_driver_build_report.json`
+- `reports/external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_in_sample_driver_build_report.md`
+- `reports/external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_out_of_sample_driver_build_report.json`
+- `reports/external_research_hunter/s11_d1_mnq_c0_single_instrument_databento_long_history_out_of_sample_driver_build_report.md`
+
+- Total files at full P3 completion: **16**
+- Naming locked at rev2 seal per files_allowed block: `True`
+- Deviation requires explicit per-phase authorization: `True`
+- No files in this list touched by this planning memo: `True`
+- No files in this list authorized to exist yet: `True`
+
+## Section 5 - Driver / test / cache / data boundaries
+
+### Drivers at P3
+
+- **`in_sample_driver_module_level_side_effects`**: FORBIDDEN. Importing in_sample_driver shall not call assert_cache_complete() at module top level; not call assert_seal_inheritance() at module top level; not open any file; not import databento at top level (lazy import inside load_dbn_local() only).
+- **`out_of_sample_driver_module_level_side_effects`**: FORBIDDEN. Same rules as IS driver. Additionally: OUT_OF_SAMPLE_START / OUT_OF_SAMPLE_END constants shall reflect rev2's IS/OOS split (IS 2019-05-13..2023-12-29; OOS 2024-01-02..2025-12-30) AND shall implement condition (e) as the magnitude-based predicate (rev2 form: 'maxdd_pct >= -30%' or equivalently '|maxdd_pct| <= 30%').
+- **`main_py_strategy_config_lock`**: All strategy parameters byte-equivalent to rev2 (which is byte-equivalent to v1 for all strategy fields): Donchian 55/20, Wilder ATR(20), 2N stop, 1% risk, max_units_per_market=1, AMB6 NONE filter, no pyramid, no correlation gate.
+- **`execution_guard_lock`**: Implements P3.5-equivalent gates: assert_cache_complete (per-market file count + bytes); assert_seal_inheritance (verifies rev2 seal sha256 + plan-lock seal + phase-2 plan seal + predecessor seal embedded as constants vs expected); fail-closed RuntimeError on mismatch.
+- **`no_function_invocation_at_p3`**: Importing modules is allowed; pytest collection is allowed. INVOKING run_in_sample() OR run_out_of_sample() at P3 is FORBIDDEN. Those are P6 IS / P6.5 cost-stress / P10 OOS phase activities under separate authorization.
+
+### Tests at P3
+
+- **`test_smoke_t1_t15_purpose`**: 15 deterministic synthetic-data smoke tests covering: (a) source byte-stability through P3 BUILD, (b) constants match rev2 values, (c) module-level import-time has no side effects, (d) databento not imported at module top level, (e) socket not opened during pytest collection, (f) DATABENTO_API_KEY not read, (g) cache directories not modified during test collection, (h-o) strategy logic invariants on synthetic fixtures.
+- **`test_oos_driver_invariants_purpose`**: Verifies IS driver source sha-pinned through P3.6; verifies OOS constants are the OOS values (not IS leak); verifies OOS condition (e) is magnitude-based predicate matching rev2's literal text.
+- **`synthetic_mnq_daily_csv_purpose`**: Small deterministic test fixture (~50 rows synthetic; clearly labeled 'NOT REAL MNQ DATA'); used by smoke tests; NEVER referenced by IS/OOS drivers during P6/P10 execution.
+- **`test_runtime_at_p3`**: Pytest invocation MAY be performed to verify all 15 smoke tests + OOS invariant tests pass at P3 BUILD time. Pytest invocation is NOT strategy execution; it's source validation. This is permitted at P3.
+- **`no_real_data_test_at_p3`**: Tests at P3 use synthetic fixtures only. The real MNQ.c.0 CSV (sha 8b7b832c..) is NOT read by P3 tests. Real-data IS run is a P6 phase activity.
+
+### Cache at P3
+
+- **`cache_existence_required`**: False. P3 BUILD does NOT require any cache directory to exist. P3 source code MAY reference data/databento_cache* paths as constants (CACHE_ROOT), but P3 BUILD does NOT read, write, or assert against those caches.
+- **`cache_mutation_at_p3`**: FORBIDDEN. P3 BUILD shall not create, modify, delete, or rename any file under data/, data/databento_cache, data/databento_cache_oos, data/databento_cache_is_only, or data/s10_d1_mnq_mgc_databento_long_history/.
+- **`cache_byte_stability_attestation_at_p3_build_report`**: REQUIRED. The P3 BUILD reports shall include a no_cache_mutation: True invariant in their boundaries_held_this_turn block.
+
+### Data at P3
+
+- **`real_data_read_at_p3`**: False. The only real-data file relevant to S11-D1 is the s10-D1 MNQ.c.0 CSV at data/s10_d1_mnq_mgc_databento_long_history/raw/MNQ_c_0_ohlcv_1d_20190513_20251230.csv (sha 8b7b832c..). P3 BUILD references this path as a constant in driver source but does NOT read its bytes. Reading the CSV happens at P6 IS execution under separate authorization.
+- **`data_modification_at_p3`**: FORBIDDEN. The CSV anchor file is byte-immutable for the lifetime of the S11-D1 candidate; any mutation invalidates the sealed chain.
+- **`no_fresh_databento_fetch_at_p3`**: True. rev2 spec data_requirements.fresh_fetch_authorized_by_this_spec: False; data_requirements.fresh_fetch_required: False. P3 BUILD inherits these invariants.
+- **`no_external_data_source_at_p3`**: True. yfinance / Yahoo Finance / Alpha Vantage / Polygon / Quandl / other vendors: FORBIDDEN at P3.
+
+## Section 6 - Condition (e) interpretation under rev2
+
+**rev2 condition (e) literal text:**
+
+> `(e) OOS trade_curve_maxdd_pct >= -30% (equivalently |trade_curve_maxdd_pct| <= 30%; i.e., the realized OOS drawdown shall not exceed 30% in magnitude)`
+
+**Interpretation for P3 OOS driver implementation:** The OOS driver shall implement condition (e) as a magnitude-based predicate: pass iff abs(trade_curve_maxdd_pct) <= 30. Equivalently, pass iff trade_curve_maxdd_pct >= -30 (since maxdd_pct is non-positive by definition). The driver shall include this predicate ONLY at the OOS_CONFIRMATION evaluation step, NOT at any other phase. Specifically: (a) the predicate does NOT participate in any K-gate or A-gate that triggers FAIL_SAFETY (those are K4 at 50% magnitude and A4 at 30% magnitude, both already correctly magnitude-based in v1 and rev2 byte-equivalent); (b) the predicate does NOT participate in the OOS_KILLED definition (which triggers on safety gates only); (c) the predicate participates ONLY in the 8-condition AND chain that decides OOS_CONFIRMED (i.e., whether C7 can be READY_FOR_LONGER_BACKTEST).
+
+**Test invariant check for condition (e):** The test_oos_driver_invariants.py smoke test shall include an assertion that the OOS driver's source code (or the embedded OOS_CONFIRMATION_DEFINITION constant string) matches rev2's literal text byte-equivalent. Any drift from rev2's text shall fail-closed via the test.
+
+### What the predicate does NOT change
+
+- Strategy logic: unchanged from rev2 (which is unchanged from v1).
+- Safety gates K1/K2/K4/K6/K7/K8/K9/K11: unchanged from rev2 byte-equivalent.
+- A-gates A1-A10: unchanged from rev2 byte-equivalent.
+- DR rules DR2-DR5: unchanged from rev2 byte-equivalent.
+- Cost-stress tier definitions S0/S1/S2/S3/S4: unchanged from rev2 byte-equivalent.
+- IS/OOS window split: unchanged from rev2 byte-equivalent (IS 2019-05-13..2023-12-29; OOS 2024-01-02..2025-12-30).
+- K9 threshold (100): unchanged from rev2 byte-equivalent; INVIOLATE.
+
+**What the predicate DOES change at P10 evaluation time:** Under v1's literal condition (e), a future P10 OOS gate that produced a maxdd around -12% (shallow, good outcome) would have failed condition (e) (-12 <= -30 is False), making OOS_CONFIRMED unreachable for that outcome. Under rev2's corrected condition (e), the same -12% maxdd PASSES condition (e), allowing OOS_CONFIRMED to be reachable when the other 7 conditions (closed_trades >= 100, sharpe > 0, expectancy > 0, safety counters zero, no-pyramid invariant, starting-cash invariant, C7 READY_FOR_LONGER_BACKTEST verdict) also hold.
+
+**K9 floor remains inviolate (and likely to fire):** Independent of condition (e), the K9 closed_trades>=100 requirement is structurally likely to fail at OOS for this candidate (rev2 spec's k9_risk_disclosure: expected IS trades 25-50 over 4.6y => expected OOS trades far fewer over 2.0y). Fixing condition (e) makes OOS_CONFIRMED reachable IN PRINCIPLE; achieving it in practice requires trade count and direction and magnitude all to land favorably, which is a high bar.
+
+## Section 7 - P3 is planning only; does NOT authorize execution
+
+- `this_memo_is_a_plan`: `True`
+- `this_memo_authorizes_p3_build_execution`: `False`
+- `this_memo_authorizes_p4_smoke_execution`: `False`
+- `this_memo_authorizes_p6_is_execution`: `False`
+- `this_memo_authorizes_p6_5_cost_stress_execution`: `False`
+- `this_memo_authorizes_p7_decision_memo_authoring`: `False`
+- `this_memo_authorizes_p10_oos_gate_execution`: `False`
+- `this_memo_authorizes_p11_lifecycle_decision`: `False`
+- `p3_build_execution_requires_separate_operator_authorization_phrase`: `True`
+- `all_subsequent_phases_require_separate_authorization`: `True`
+- `no_lifecycle_state_change_caused_by_this_memo_authorship`: `True`
+- `lifecycle_state_at_memo_authorship_time`: v1 sealed -> P1 sealed (anchored to v1) -> P2 sealed (anchored to v1) -> rev2 sealed (sibling; available for future P1_rev_M re-anchor) -> clarification memo sealed (non-binding) -> P1_rev_M re-anchor memo sealed (decision-support) -> pre-SEAL DRAFT sealed (historical) -> P3 NOT authorized -> this P3 planning memo (sealed; non-executing).
+
+## Section 8 - Go / No-Go recommendation
+
+### Recommendation: **`CONDITIONAL_GO_WITH_EXPLICIT_K9_RISK_ACKNOWLEDGMENT`** (strength: **`MODERATE`**)
+
+### GO arguments
+
+- Implementation is mechanically sound. The runner harness pattern is well-established (S10-D2 has the full template; ~16 files including 5 source + 5 test + 3 sealed build report pairs).
+- Anchoring to rev2 cleanly fixes the v1 condition (e) defect at the source level: the OOS driver source will implement the magnitude-based predicate verbatim. No spec-vs-code divergence.
+- Methodology value: P3 BUILD produces a reusable single-instrument futures-Donchian template that future candidates (S11-D2, S12-D1, etc.) can reference.
+- Sealed-chain discipline preserved: each phase still requires its own authorization, posture invariants stay in force, no live/paper/optimization escape valve introduced.
+- Zero new data fetch: existing s10-D1 MNQ.c.0 CSV is the data anchor; no Databento authorization required for the entire S11-D1 lifecycle.
+- Inheritance from S10-D2's full lifecycle (including OOS execution at commit 15231cb) means the implementation pattern is battle-tested.
+
+### NO-GO arguments
+
+- K9 sample-size risk is structurally high. Rev2 spec's own k9_risk_disclosure admits expected IS closed_trades is 25-50 over 4.6y, well below the K9 threshold of 100. OOS over 2.0y will produce even fewer trades. The most likely terminal verdict is OOS INSUFFICIENT_SAMPLE -- the same verdict S10-D2 received.
+- Time cost: full P3-through-P11 lifecycle is multi-hour work. P3 BUILD alone is ~30-60 minutes to author the 11 source/test files + ~30 minutes for the 3 sealed build report pairs + sealing verification. P4 + P6 + P6.5 + P10 + P11 add further runtime.
+- Opportunity cost: this controller's effort spent on S11-D1 lifecycle is effort not spent on other research tracks (e.g., the T2-T9 alternatives in the s10-D1 selection plan at commit 556ab3f, or a fresh higher-trade-frequency mechanic family).
+- Race-condition load: the parallel session has been highly active on S10-D2 + S11-D1 work throughout this session (10+ commits). Authoring P3 BUILD risks more race-pattern instances (canonical path collisions, duplicate work).
+- The expected INSUFFICIENT_SAMPLE outcome does not unlock any live promotion (live block is permanent for this candidate); the operational value of executing the full lifecycle is the methodology template + a documented INSUFFICIENT_SAMPLE record, not a money-proven strategy.
+
+**Conditional GO framing:** GO if and only if the operator accepts the high probability of OOS INSUFFICIENT_SAMPLE as the expected terminal verdict AND values the methodology / lessons / template-reuse benefits over the multi-hour time cost. The implementation work itself is mechanically sound; the verdict is a separate matter governed by the K9 sample-size structural constraint.
+
+**NO-GO framing:** NO-GO if the operator wants to optimize for time-to-actionable-evidence and would prefer to pick a different mechanic family (F2 vol-targeting, F3 RSI mean-reversion, F4 carry / term-structure) or a different universe (multi-instrument futures basket with higher trade-density potential) under a fresh candidate_record_id. This deferral does NOT require any S11-D1 artifact modification; v1/rev2/P1/P2 and all this-session memos remain on the record as a complete spec candidate that simply was not executed.
+
+- Neither GO nor NO-GO is self-authorized by this memo: `True`
+- Operator decides via separate authorization: `True`
+
+## Hard boundaries (all held this memo turn)
+
+- `no_alpha_vantage_polygon_quandl_or_other_vendor_call`: `True`
+- `no_backtest`: `True`
+- `no_branch_change`: `True`
+- `no_broker_call`: `True`
+- `no_brokerage_connection`: `True`
+- `no_cache_mutation`: `True`
+- `no_candidate_promoted`: `True`
+- `no_data_databento_cache_is_only_modification`: `True`
+- `no_data_databento_cache_modification`: `True`
+- `no_data_databento_cache_oos_modification`: `True`
+- `no_data_fetch`: `True`
+- `no_databento_api_call`: `True`
+- `no_databento_api_key_access`: `True`
+- `no_execution_guard_authored`: `True`
+- `no_external_network_call`: `True`
+- `no_frc_grant`: `True`
+- `no_git_push`: `True`
+- `no_in_sample_driver_authored`: `True`
+- `no_key_leakage`: `True`
+- `no_live_readiness_claim`: `True`
+- `no_live_trading`: `True`
+- `no_main_py_authored`: `True`
+- `no_modification_of_any_b006_artifact`: `True`
+- `no_modification_of_any_s10_d1_artifact`: `True`
+- `no_modification_of_any_s10_d2_artifact`: `True`
+- `no_modification_of_any_s7_or_s8_or_s9_or_b005_or_nke_artifact`: `True`
+- `no_modification_of_app_py`: `True`
+- `no_modification_of_clarification_memo_on_disk`: `True`
+- `no_modification_of_claude_md_or_runbook_or_gitignore`: `True`
+- `no_modification_of_command_center_route`: `True`
+- `no_modification_of_command_center_template`: `True`
+- `no_modification_of_command_center_test`: `True`
+- `no_modification_of_idea_memory`: `True`
+- `no_modification_of_lessons_md`: `True`
+- `no_modification_of_obsidian_trade_logger`: `True`
+- `no_modification_of_orb_step_30_constants`: `True`
+- `no_modification_of_p1_plan_lock_on_disk`: `True`
+- `no_modification_of_p1_rev_m_reanchor_memo_on_disk`: `True`
+- `no_modification_of_p2_phase_2_plan_on_disk`: `True`
+- `no_modification_of_pre_seal_draft_on_disk`: `True`
+- `no_modification_of_rev2_spec_on_disk`: `True`
+- `no_modification_of_review_queue`: `True`
+- `no_modification_of_strategy_lab_artifacts`: `True`
+- `no_modification_of_v1_spec_on_disk`: `True`
+- `no_oos_computation`: `True`
+- `no_oos_confirmation_claim`: `True`
+- `no_oos_inspection_beyond_constants_in_sealed_rev2_text`: `True`
+- `no_out_of_sample_driver_authored`: `True`
+- `no_p10_oos_gate_execution`: `True`
+- `no_p11_lifecycle_decision_authoring`: `True`
+- `no_p3_build_execution`: `True`
+- `no_p4_smoke_execution`: `True`
+- `no_p6_5_cost_stress_execution`: `True`
+- `no_p6_is_execution`: `True`
+- `no_p7_decision_memo_authoring`: `True`
+- `no_paper_order_placed`: `True`
+- `no_paper_trading`: `True`
+- `no_parameter_change`: `True`
+- `no_profitability_claim`: `True`
+- `no_real_order_placed`: `True`
+- `no_runner_harness_source_authored`: `True`
+- `no_s10_d1_mnq_csv_modification`: `True`
+- `no_sealed_build_report_authored`: `True`
+- `no_signal_computation`: `True`
+- `no_simulator_run`: `True`
+- `no_strategy_lab_invoked`: `True`
+- `no_strategy_logic_modification`: `True`
+- `no_synthetic_test_fixture_authored`: `True`
+- `no_test_file_authored`: `True`
+- `no_threshold_loosening`: `True`
+- `no_yfinance_call`: `True`
+
+## Posture invariants (unchanged by this memo)
+
+- `trading_status`: `PAUSED`
+- `live_status`: `BLOCKED_AT_6_GATES`
+- `frc_granted`: `False`
+- `advisory_label_permanent`: `DIAGNOSTIC_ONLY_NOT_LIVE_GRADE`
+- `verdict_never_means_live_ready`: `True`
+- `live_promotion_path_closed`: `True`
+- `no_strategy_optimization_authorized`: `True`
+- `no_profitability_claim`: `True`
+- `no_oos_confirmation_claim`: `True`
+
+## Predecessor seal-chain attestation (drift = 0)
+
+- `all_predecessor_seals_re_verifiable_from_on_disk_artifacts`: `True`
+- `no_predecessor_seal_modified_by_this_memo`: `True`
+- `non_binding_clarification_memo_commit`: `d13b56a`
+- `non_binding_clarification_memo_seal_sha256`: `eda08aceeb4afd7d4f985a739d6e87b3e803daff8da3f645f016b0a56a3af871`
+- `p1_plan_lock_commit`: `7d86486`
+- `p1_rev_m_reanchor_memo_commit`: `ec503d4`
+- `p1_rev_m_reanchor_memo_seal_sha256`: `56adfa13d2f176322649ad5af362fac1d24fdd6a26d5962de21d3253b19fda20`
+- `p2_phase_2_plan_commit`: `f64f984`
+- `pre_seal_draft_commit_for_reference_only`: `74e254f`
+- `rev2_tier_n_spec_commit`: `c110fd4`
+- `rev2_tier_n_spec_seal_sha256`: `46659b4a8a73cb72fbe0153efed80aaf97b40557f8dfed51a9ba3199c243ed8d`
+- `v1_tier_n_spec_commit`: `9c63088`
+- `v1_tier_n_spec_seal_sha256`: `077e29e62f23dbc31823bad8447e5ef8d6f1a8c350d4f0c130c4f8f08be61a24`
+
+## Operator next-step options (documented only; not self-authorized)
+
+- **`AUTHORIZE_S11_D1_P3_BUILD_anchored_to_rev2_direct`**: Authorize P3 BUILD directly with explicit rev2 anchor (skipping P1_rev_M / P2_rev_M re-anchoring). Faster. P3 build report will document the v1->rev2 anchor switch at the P3 boundary. Recommended for time-efficiency.
+- **`AUTHORIZE_P1_REV_M_then_P2_REV_M_then_P3_BUILD`**: Authorize the 3-step clean-chain sequence per re-anchor memo (commit ec503d4). Cleaner audit trail. More authorizations but each is small.
+- **`HALT_S11_D1_LIFECYCLE`**: Defer P3 BUILD indefinitely. Pursue a different candidate (e.g., T2-T9 from selection plan at 556ab3f) or a different mechanic family. Preserves all sealed S11-D1 artifacts as historical record. Conservative if K9 sample-size risk is judged unacceptable for the time investment.
+- **`DEFER_DECISION`**: No further S11-D1 authorization this session. Revisit later. All artifacts remain on disk as sealed record.
+
