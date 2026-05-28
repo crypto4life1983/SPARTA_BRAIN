@@ -1,0 +1,445 @@
+{
+  "authored_at_utc": "2026-05-28T21:50:22.602842Z",
+  "authorization_phrase": "Authorize s16-d1 cash-equity expanded-universe availability probe + DR9 audit framework only.",
+  "contingency_tree": [
+    {
+      "contingency": "all_12_pass_dr9 (5 reused PASS + 7 fresh PASS)",
+      "next_authorization": "Authorize s16-d1 expanded-universe cash-equity availability probe + DR9 audit RESULT SEALING only.",
+      "then": "after RESULT sealed -> Authorize s16-d1 expanded-universe Tier-N spec PLAN only (NON-mean-reversion mechanic; bound by DR10 v2)"
+    },
+    {
+      "contingency": "1-4_fresh_symbols_fail_dr9",
+      "next_authorization": "Authorize s16-d1 shrunk expanded-universe DR9 RESULT SEALING only (drop failing names; basket must retain >= 8 names to preserve trend K9-reachability).",
+      "note": "Fresh candidate_record_id; substitution of a failing name by a NEW name requires its own fetch+DR9 (separate authorization); no silent substitution"
+    },
+    {
+      "contingency": "5+_fresh_symbols_fail_dr9 (basket would drop below 8)",
+      "next_authorization": "Authorize s16-d1 expanded-universe revision to an alternative large-cap shortlist (RUN_BOOK rev only).",
+      "note": "8-name floor protects trend K9-OOS reachability"
+    },
+    {
+      "contingency": "a_split_event_consistency_check_fails (AMZN 20:1 or WMT 3:1 ratio off)",
+      "next_authorization": "Operator manual review of the split application; that symbol is INCONCLUSIVE_HOLD until resolved; do NOT auto-progress",
+      "note": "Most likely cause is a vendor splitFactor stream gap; re-fetch that symbol"
+    },
+    {
+      "contingency": "any_INCONCLUSIVE_HOLD",
+      "next_authorization": "Operator manual review; no auto-progression"
+    },
+    {
+      "contingency": "vendor_fetch_fails (TLS/network)",
+      "next_authorization": "Operator retries Tiingo later; RUN_BOOK remains reference; do NOT create repeated decline memos (brief in-chat reminder only)"
+    }
+  ],
+  "document_type": "RUN_BOOK_NOT_SEALED",
+  "dr10_v2_reachability_logic": {
+    "cash_equity_cost_drag": "per-share commission (~$0.005) + half-bid-ask slippage (~1bp) is a tiny fraction of notional; even a medium/faster breakout at higher turnover keeps S2 cost_drag well under 5% (s14/s15 observed ~0.3-0.9%).",
+    "expected_status": "CLEARS WITH STRONG MARGIN for any reasonable trend/breakout/momentum mechanic on liquid large-caps (cost_drag branch does not fire; AND-conjunction not triggered regardless of turnover).",
+    "rule": "DR10 v2 AND-conjunction (78cd22e): REJECT_FAST only if (annual_turnover>0.50 AND S2_cost_drag>0.05).",
+    "twelve_name_sizing_note": "At $100k start cash across up to N concurrent positions, per-name allocation is smaller -> integer-share rounding slightly coarser for high-priced names (UNH ~$500), but does not threaten DR10 v2; the Tier-N PLAN will lock sizing."
+  },
+  "dr9_audit_framework": {
+    "non_split_corporate_action_notes_informational_only": {
+      "JNJ_Kenvue_spinoff_2023_08": "Under split_only, the Kenvue distribution is NOT adjusted and appears as a one-day price drop (~8-10%). This is a PRICE event flagged INFORMATIONAL (analogous to a large dividend); it is NOT a split-event-consistency fail and NOT a calendar gap. Document explicitly in the DR9 result so the downstream PLAN/BUILD can account for it.",
+      "META_2022_drawdown": "large price decline is a PRICE event, not a data gap/split -> not a DR9 condition.",
+      "dividend_ex_dates": "JPM/XOM/KO/CVX/JNJ have higher dividend yields; under split_only ex-div dates show small downward jumps (<1% of price) -> informational, NOT a DR9 fail condition."
+    },
+    "per_symbol_check_procedure": "Per symbol: (1) verify CSV exists + sha vs manifest; (2) parse schema date,open,high,low,close,volume; (3) compute gap_continuity vs NYSE trading calendar >= 0.95; (4) max_gap_ratio <= 0.30 (largest inter-bar CALENDAR gap; price jumps are NOT gaps); (5) quality_violation_count <= 5 (non-positive prices, high<low, NaN, etc.); (6) documented_split_event_consistency (verify each known split's pre/post ratio ~1.0 under split_only); (7) roll_event_count NOT_APPLICABLE_CASH_EQUITY; (8) aggregate PASS / FAIL / INCONCLUSIVE_HOLD.",
+    "split_event_consistency_requirements": {
+      "AAPL_2020_08_31_4to1": "already verified PASS (ratio ~1.034 under split_only) in cross-sector + all-tech DR9; re-verify if re-fetched",
+      "AMZN_2022_06_06_20to1": "FRESH — MUST verify ratio ~1.0 under split_only across 2022-06-06 (20x factor; the most consequential split-consistency check in the basket)",
+      "NVDA_2021_07_20_4to1_and_2024_06_10_10to1": "both already verified PASS in all-tech DR9; re-verify if re-fetched",
+      "WMT_2024_02_26_3to1": "FRESH — MUST verify ratio ~1.0 under split_only across 2024-02-26 (split is in the OOS window; verification is data-integrity only and does NOT constitute OOS signal inspection)",
+      "no_split_names": "MSFT/JPM/XOM/UNH/KO/META/CVX have no splits in window -> documented_split_event_consistency trivially PASS"
+    },
+    "thresholds_carried_byte_equivalent_from_s14_run_book": {
+      "documented_split_event_consistency": "PASS_IF_ALL_KNOWN_SPLITS_APPLIED_PER_SPLIT_ONLY_CONVENTION",
+      "gap_continuity_min": 0.95,
+      "max_gap_ratio_max": 0.3,
+      "quality_violation_count_max": 5,
+      "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+    },
+    "thresholds_immutable_per_no_dr_redefinition_post_seal": true
+  },
+  "explicit_exclusions_this_turn": [
+    "No vendor API call by controller (no Tiingo/yfinance/any-vendor call)",
+    "No API-key access of any kind",
+    "No network IO",
+    "No data fetch (operator-side at a future authorization)",
+    "No DR9 audit RESULTS sealed (framework pre-authored only)",
+    "No DR9 audit RUN executed",
+    "No DRAFT / SEAL / BUILD / backtest / simulator / signal computation / OOS inspection",
+    "No mechanic selection (deferred to s16 Tier-N PLAN)",
+    "No live trading / broker / Strategy Lab / candidate promotion",
+    "No revival of s15-d1 / s14-d1 / s13-d1 / s12-d1",
+    "No modification of the s14 cross-sector or all-tech captured data (reused read-only)",
+    "No modification of any existing sealed artifact",
+    "No lessons.md modification or staging",
+    "No canonical seal sha256 (this is a RUN_BOOK, not a seal)"
+  ],
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e); binds s14+ candidates incl. s16",
+  "fresh_count": 7,
+  "fresh_fetch_symbols": [
+    "UNH",
+    "WMT",
+    "KO",
+    "META",
+    "AMZN",
+    "JNJ",
+    "CVX"
+  ],
+  "fresh_s16_path": true,
+  "hard_boundaries_held_this_run_book_turn": {
+    "dr9_audit_framework_pre_authored_only": true,
+    "no_api_key_access": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_candidate_promotion": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_claude_md_modification": true,
+    "no_commit_by_this_turn": true,
+    "no_data_fetch": true,
+    "no_dr9_audit_RESULTS_sealed": true,
+    "no_dr9_audit_RUN_executed": true,
+    "no_draft": true,
+    "no_gitignore_modification": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mechanic_selection_deferred_to_plan": true,
+    "no_modification_of_all_tech_captured_data": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_s14_cross_sector_captured_data": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_s14_d1_revival": true,
+    "no_s15_d1_revival": true,
+    "no_seal": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "no_vendor_api_call_by_controller": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "k9_reachability_logic_for_non_mean_reversion_mechanics": {
+    "conclusion_for_plan_time": "A 12-name basket makes a MEDIUM-to-FASTER breakout/trend mechanic K9-reachable at OOS (>=50/y), resolving the s15-selection-plan blocker that killed trend on the 3-name basket. The s16 Tier-N PLAN must still include its own K9-reachability table for the chosen mechanic; slow-trend and monthly-rerank momentum remain borderline and would need a frequency-clearing design choice.",
+    "expected_per_name_round_trips_per_year_by_mechanic": {
+      "faster_channel_breakout_e_g_Donchian_10_5": "~12-20/y per name -> 12 names = ~144-240/y -> CLEARS comfortably (watch DR10 turnover, still non-binding under v2 cost_drag branch)",
+      "medium_breakout_e_g_Donchian_20_10_or_dual_MA_20_50": "~8-15/y per name -> 12 names = ~96-180/y basket -> CLEARS BOTH IS and OOS with margin",
+      "slow_trend_e_g_200d_MA_or_Donchian_55_20": "~3-6/y per name -> 12 names = ~36-72/y basket -> CLEARS IS; BORDERLINE-CLEARS OOS (>=50/y near the high end)",
+      "time_series_or_cross_sectional_momentum_monthly_rerank": "LOW turnover (~12-24 position-changes/y basket) -> likely K9-LIGHT; flag as borderline-to-fail OOS; weekly re-rank improves it"
+    },
+    "k9_inviolate_carried": "closed_trades_basket_summed >= 100; OOS >= 50/y; no relaxation at any phase",
+    "purpose": "The reason to expand to 12 names: make a NON-mean-reversion mechanic K9-reachable (OOS >= 50 trades/y).",
+    "windows": {
+      "is_k9_floor_per_year": 20.0,
+      "is_years": 5.0,
+      "k9_total_floor": 100,
+      "oos_k9_floor_per_year": 50.0,
+      "oos_years": 2.0
+    }
+  },
+  "labels": [
+    "S16_D1_EXPANDED_CROSS_SECTOR_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_RUN_BOOK",
+    "NOT_A_SEAL",
+    "FRESH_S16_PATH",
+    "PENDING_OPERATOR_FETCH_7_NAMES",
+    "5_OF_12_DR9_REUSABLE",
+    "VENDOR_TIINGO_SPLIT_ONLY_PROVEN",
+    "12_NAME_CROSS_SECTOR_K9_CLEARING_TARGET_FOR_NON_MEAN_REVERSION",
+    "AMZN_20to1_WMT_3to1_SPLIT_CONSISTENCY_REQUIRED",
+    "JNJ_KENVUE_SPINOFF_INFORMATIONAL",
+    "DR10_V2_BINDING_FOR_S14_PLUS",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "NO_MEAN_REVERSION_RESKIN_T_FORBID_17_18_CARRIED",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S16_D1_EXPANDED_CROSS_SECTOR_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "low_data_friction_note": "5 of 12 names are ALREADY DR9-PASSED and reusable byte-equivalent (AAPL/JPM/XOM from cross-sector b13af03 result_seal a8ff9126; MSFT/NVDA from all-tech 214bae0 result_seal 1c93d4294e). Only 7 require fresh Tiingo split_only fetch + full DR9.",
+  "motivation": {
+    "forbidden_carried": "No mean-reversion on this universe that would merely re-skin s14/s15 (T-FORBID-17/18 carried); the s16 candidate must be a non-mean-reversion family OR an explicitly-justified different design. This RUN_BOOK does not lock the mechanic.",
+    "this_is_a_data_side_step_only": "This RUN_BOOK establishes whether a K9-clearing, DR10-v2-compatible, clean-corporate-action 12-name universe is AVAILABLE. Mechanic selection (trend vs momentum vs breakout) is deferred to the s16 Tier-N spec PLAN under a separate authorization.",
+    "why_expand_the_universe": "The post-s15 selection plan (343bdac) found the binding tension: on the 3-name AAPL/JPM/XOM daily basket, only mean-reversion clears K9 (frequent signals) and its edge is now exhausted (s14 + s15 both terminal FAIL_SAFETY); non-mean-reversion families (trend/momentum/breakout) are K9-light on 3 names (~6-24/y basket << 50/y OOS floor). Expanding to ~12 names lifts basket trade frequency ~4x, making a NON-mean-reversion candidate K9-reachable WITHOUT reusing the exhausted mean-reversion family."
+  },
+  "operator_side_fetch_run_book": {
+    "executor": "operator (TIINGO_API_KEY in env only; controller never reads)",
+    "expected_output_directory": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/",
+    "expected_output_files": [
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/UNH_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/WMT_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/KO_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/META_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AMZN_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JNJ_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/CVX_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/s16_d1_expanded_cross_sector_cash_equity_step02b_fetch_manifest.json"
+    ],
+    "fetch_boundaries_required": {
+      "no_api_key_printed_or_logged_or_saved": true,
+      "no_backtest": true,
+      "no_live_trading": true,
+      "no_oos_inspection_by_this_fetch": true,
+      "no_review_queue_mutation": true,
+      "no_signal_computation": true,
+      "no_simulator_run": true,
+      "no_strategy_lab_promotion": true,
+      "raw_csv_only_written_to_approved_directory": true,
+      "tiingo_api_key_read_from_env_only": true
+    },
+    "fetch_parameters": {
+      "adjustment_convention": "split_only",
+      "end_date_inclusive": "2025-12-30",
+      "is_window_end": "2023-12-29",
+      "is_window_start": "2019-01-02",
+      "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+      "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+      "reuse_or_refetch": "operator decision per symbol; reuse byte-equivalent (lower friction; DR9 PASS carries by sha-match) OR re-fetch into the s16 dir for self-contained provenance",
+      "start_date_inclusive": "2019-01-02",
+      "symbols_reusable": {
+        "from_all_tech_214bae0": [
+          "MSFT",
+          "NVDA"
+        ],
+        "from_cross_sector_b13af03": [
+          "AAPL",
+          "JPM",
+          "XOM"
+        ]
+      },
+      "symbols_to_fetch_fresh": [
+        "UNH",
+        "WMT",
+        "KO",
+        "META",
+        "AMZN",
+        "JNJ",
+        "CVX"
+      ],
+      "vendor": "tiingo"
+    },
+    "manifest_schema": "sparta.s16.expanded_cross_sector_cash_equity.step02b_fetch_manifest.v1 (same field structure as the s14 cross-sector manifest: per-symbol output_filename/output_path/sha256/size_bytes/row_count/first_timestamp/last_timestamp/known_splits_reference/tiingo_splits_in_window_reported/splits_cross_check_match; top-level vendor/adjustment_convention/window/fetch_run_utc)",
+    "post_fetch_action": "Operator confirms all 12 CSVs + manifest exist at expected paths, then types `Authorize s16-d1 expanded-universe cash-equity availability probe + DR9 audit RESULT SEALING only.`"
+  },
+  "parent_references": {
+    "all_tech_dr9_result_seal_sha256": "1c93d4294e193b25b239fd613f4ff1e9d24a16860376ee31efd7ec2ef01eda40",
+    "all_tech_sibling_draft_commit": "214bae0",
+    "cross_sector_dr9_result_commit": "b13af03",
+    "cross_sector_dr9_result_seal_sha256": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "s14_cross_sector_run_book_model_commit": "4fc06ec",
+    "s14_d1_cross_sector_p7_terminal_commit": "6485ea9",
+    "s15_d1_p7_terminal_commit": "8abcd31",
+    "selection_plan_after_s15_commit": "343bdac"
+  },
+  "report_date_utc": "2026-05-28T21:50:22.602842Z",
+  "report_kind": "RUN_BOOK / operator-side fetch instructions + pre-authored DR9 audit framework for a 12-name expanded cross-sector cash-equity universe. Purpose: find a K9-CLEARING, DR10-v2-compatible universe for a NON-mean-reversion (trend/momentum/breakout) fresh candidate after s14+s15 cross-sector mean-reversion terminals. NOT a sealed artifact. Status PENDING operator-side fetch of 7 fresh names.",
+  "reuse_count": 5,
+  "reuse_dr9_passed_symbols": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "JPM",
+    "XOM"
+  ],
+  "schema_id": "sparta.external_research_hunter.s16_d1_expanded_cross_sector_cash_equity_availability_probe_dr9_audit_run_book.v1",
+  "scope_of_this_run_book": [
+    "Carry the proven Tiingo split_only vendor approach (succeeded for 5 of these 12 names already)",
+    "5 names (AAPL/MSFT/NVDA/JPM/XOM) ALREADY DR9-PASSED and reusable byte-equivalent",
+    "7 names (UNH/WMT/KO/META/AMZN/JNJ/CVX) require fresh operator-side Tiingo split_only fetch + full DR9 audit",
+    "Pre-authored DR9 audit framework (cash-equity adapted; same thresholds as s14 RUN_BOOK; split-event consistency for AMZN 20:1 + WMT 3:1; JNJ Kenvue spin-off informational)",
+    "K9-reachability logic showing a 12-name basket makes a NON-mean-reversion (trend/breakout) mechanic K9-OOS-reachable",
+    "DR10-v2 reachability logic (clears strong margin on liquid large-caps)",
+    "Contingency tree with an 8-name floor to protect trend K9-OOS reachability",
+    "Mechanic selection deferred to the s16 Tier-N spec PLAN"
+  ],
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_cross_sector_lifecycle_terminal": true,
+    "s16_d1_expanded_universe_lifecycle_state": "AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+    "trading_status": "PAUSED"
+  },
+  "symbol_count": 12,
+  "title": "s16-d1 expanded-universe (12-name cross-sector) cash-equity availability probe + DR9 audit RUN_BOOK (NOT a SEAL; 5 names DR9-reusable, 7 fresh Tiingo split_only fetch + DR9 required; fresh s16 path)",
+  "universe_12_names": [
+    {
+      "dr9_status": "ALREADY_PASSED",
+      "exchange": "NASDAQ",
+      "fetch_required": false,
+      "known_splits_in_window": [
+        [
+          "2020-08-31",
+          4.0
+        ]
+      ],
+      "name": "Apple Inc.",
+      "reuse_sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9",
+      "reuse_source": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "risk": "Low (DR9-passed; split applied+verified)",
+      "sector": "Information Technology",
+      "symbol": "AAPL"
+    },
+    {
+      "dr9_status": "ALREADY_PASSED",
+      "exchange": "NASDAQ",
+      "fetch_required": false,
+      "known_splits_in_window": [],
+      "name": "Microsoft Corp.",
+      "reuse_sha256": "CARRY_FROM_ALL_TECH_MANIFEST_VERIFY_AT_AUDIT",
+      "reuse_source": "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv (all-tech DR9-passed; verify sha vs all-tech manifest at audit)",
+      "risk": "Low (DR9-passed in all-tech; no splits in window)",
+      "sector": "Information Technology",
+      "symbol": "MSFT"
+    },
+    {
+      "dr9_status": "ALREADY_PASSED",
+      "exchange": "NASDAQ",
+      "fetch_required": false,
+      "known_splits_in_window": [
+        [
+          "2021-07-20",
+          4.0
+        ],
+        [
+          "2024-06-10",
+          10.0
+        ]
+      ],
+      "name": "NVIDIA Corp.",
+      "reuse_sha256": "CARRY_FROM_ALL_TECH_MANIFEST_VERIFY_AT_AUDIT",
+      "reuse_source": "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv (all-tech DR9-passed; verify sha vs all-tech manifest at audit)",
+      "risk": "Low (DR9-passed in all-tech; both splits applied+verified under split_only)",
+      "sector": "Information Technology",
+      "symbol": "NVDA"
+    },
+    {
+      "dr9_status": "ALREADY_PASSED",
+      "exchange": "NYSE",
+      "fetch_required": false,
+      "known_splits_in_window": [],
+      "name": "JPMorgan Chase & Co.",
+      "reuse_sha256": "8aa244ab7724b292c659c81171bd8d3cf5ce5684d6c69864ee61e0be90238db7",
+      "reuse_source": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+      "risk": "Low (DR9-passed; no splits; div yield ~2-3% small ex-div jumps under split_only)",
+      "sector": "Financials",
+      "symbol": "JPM"
+    },
+    {
+      "dr9_status": "ALREADY_PASSED",
+      "exchange": "NYSE",
+      "fetch_required": false,
+      "known_splits_in_window": [],
+      "name": "Exxon Mobil Corp.",
+      "reuse_sha256": "fbbc462cbfbd11a68b0aed4d0c3fa72312afea5112cebcc24860689f33b7f77c",
+      "reuse_source": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+      "risk": "Low (DR9-passed; no splits; div yield ~3-5% small ex-div jumps under split_only)",
+      "sector": "Energy",
+      "symbol": "XOM"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "UnitedHealth Group Inc.",
+      "risk": "Low (no splits in window; high-priced ~$400-550 -> fewer shares per $ but fine for sizing; high liquidity)",
+      "sector": "Health Care",
+      "symbol": "UNH"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [
+        [
+          "2024-02-26",
+          3.0
+        ]
+      ],
+      "name": "Walmart Inc.",
+      "risk": "MODERATE — 3:1 split 2024-02-26 (IN OOS window); split-event consistency MUST verify ratio ~1.0 under split_only across the split date",
+      "sector": "Consumer Staples",
+      "symbol": "WMT"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "The Coca-Cola Co.",
+      "risk": "Low (no splits in window; div yield ~3% small ex-div jumps under split_only)",
+      "sector": "Consumer Staples",
+      "symbol": "KO"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NASDAQ",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "Meta Platforms Inc.",
+      "risk": "Low (no splits ever); large 2022 drawdown is a PRICE event, NOT a data-gap or split -> not a DR9 fail condition",
+      "sector": "Communication Services",
+      "symbol": "META"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NASDAQ",
+      "fetch_required": true,
+      "known_splits_in_window": [
+        [
+          "2022-06-06",
+          20.0
+        ]
+      ],
+      "name": "Amazon.com Inc.",
+      "risk": "MODERATE — 20:1 split 2022-06-06 (IN IS window); split-event consistency MUST verify ratio ~1.0 under split_only across the split date (large factor -> most important split-consistency check in the basket)",
+      "sector": "Consumer Discretionary",
+      "symbol": "AMZN"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "Johnson & Johnson",
+      "risk": "Low-MODERATE — no splits; but Kenvue spin-off (2023-08) is a NON-split distribution that, under split_only (distributions NOT adjusted), appears as a one-day price drop (~8-10% of JNJ value). This is a PRICE event flagged INFORMATIONAL (like a large dividend), NOT a split-event-consistency fail and NOT a calendar data-gap; document it explicitly in the DR9 result",
+      "sector": "Health Care",
+      "symbol": "JNJ"
+    },
+    {
+      "dr9_status": "FULL_DR9_AUDIT_REQUIRED",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "Chevron Corp.",
+      "risk": "Low (no splits in window; div yield ~3-4% small ex-div jumps under split_only)",
+      "sector": "Energy",
+      "symbol": "CVX"
+    }
+  ],
+  "vendor": {
+    "adjustment_convention": "split_only (Tiingo splitFactor stream; no dividend/distribution adjustment; adjClose/adjVolume ignored)",
+    "api_key": "TIINGO_API_KEY from env only; never printed/logged/saved",
+    "library_installed": "tiingo-0.16.1 (installed during s14 all-tech fetch turn)",
+    "rationale": "PROVEN: Tiingo pure-Python requests transport succeeded for AAPL/MSFT/NVDA/JPM/XOM where yfinance curl_cffi failed TLS CertificateVerifyError on this machine. Same vendor + split_only convention carried.",
+    "vendor": "tiingo"
+  }
+}
