@@ -1,0 +1,200 @@
+{
+  "authored_at_utc": "2026-05-28T22:29:00.487354Z",
+  "binding": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "exit_stop_first_principles_validated_structurally": "T18 confirms assert_trailing_donchian_exit + assert_initial_stop_2atr_not_tight PASS, and that reverting to an oscillator/exit-to-mean exit or a tight mean-reversion stop RAISES. T4/T5/T7/T10 confirm breakout entries, trailing exits, 2xATR stop placement, vol-normalized sizing. STRUCTURAL validation only; trend edge is the P6 IS test.",
+  "files_under_test_anchors": {
+    "execution_guard_py_sha256": "c527dd55b0607e568c7ecbae05d913b33391806a2495e9bcfb28de18f02a4a8b",
+    "in_sample_driver_py_sha256": "2a4669bc31d5ab0c833c6d89b28ecc306ab4ba982df7631cf1f5abf05d0dffce",
+    "main_py_sha256": "e4e24fb2b54bb019a327b8791782eaf63e130a3a8cdd520967c69dc5711715b8",
+    "out_of_sample_driver_py_sha256": "464e19f98bedc6d3a140502dc418b49dbcc00baf851020fe84872ec672f4ac1d",
+    "tests_conftest_py_sha256": "3e00532c353d15bada74fce19207187e95bc8cd788db076cc9275c0e0d011c78",
+    "tests_fixture_csv_sha256": "dcbd01198270e88c0e112331f317945202e548edf8f4c57776907d8c17751094",
+    "tests_test_oos_invariants_py_sha256": "e8e5929826b1ead3b748a39a25fcd839fbaed1d5b1dd9bb190912574d21670ce",
+    "tests_test_smoke_py_sha256": "b6e3de378a18937576aed5cbdfa4885e71d846cb33e829d9d9e5fff1d8bda110"
+  },
+  "fixture_used": {
+    "design": "25 flat + 20 uptrend (Donchian breakout long) + 10 down (trailing exit) + 20 downtrend (short breakout) + 15 up (cover)",
+    "row_count": 90,
+    "synthetic_csv_path": "external_research_hunter/s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_runner_harness/tests/fixtures/synthetic_cross_sector_daily.csv",
+    "synthetic_csv_sha256": "dcbd01198270e88c0e112331f317945202e548edf8f4c57776907d8c17751094"
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "hard_boundaries_held_this_p4_smoke_turn": {
+    "no_backtest": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_is_diagnostic_execution": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_mean_reversion_reskin": true,
+    "no_modification_of_sealed_artifacts": true,
+    "no_network_call": true,
+    "no_oos_execution": true,
+    "no_oos_inspection": true,
+    "no_qc_runtime": true,
+    "no_revival_of_s15_s14_s13_s12": true,
+    "no_sealed_csv_touched": true,
+    "no_signal_computation_against_real_data": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization": true,
+    "tests_used_synthetic_fixture_only_NOT_sealed_csv": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P4_SYNTHETIC_SMOKE_SEALED",
+    "S16_D1_EXPANDED_DONCHIAN_TREND",
+    "12_NAME_EXPANDED_CROSS_SECTOR_BASKET",
+    "NOT_LIVE_READY",
+    "P4_SMOKE_ALL_32_TESTS_PASS",
+    "TRAILING_DONCHIAN_EXIT_AND_2ATR_STOP_GUARDS_VALIDATED",
+    "REC1_EQUIVALENT_OOS_K9_DISCLOSURE_BINDING",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "SEALED_CSV_NOT_TOUCHED_AT_P4",
+    "P6_IS_REQUIRES_SEPARATE_AUTHORIZATION",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "P4_SYNTHETIC_SMOKE_SEALED",
+  "next_phase_requirements": {
+    "p6_is_authorization_phrase": "Authorize s16-d1 expanded-universe trend/breakout P6 IS diagnostic only",
+    "p6_is_requires_separate_authorization": true
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "f95e5e3",
+    "p2_phase2_plan_commit": "f826aea",
+    "p3_build_commit": "2cddb93",
+    "p3_is_driver_build_report_seal_sha256": "0bef46f123038228aca72598d3ed171f14a27e4736c43c40dcd9efc530273fed",
+    "p3_oos_driver_build_report_seal_sha256": "8e87f2e932c6316b1873461c80e778b70665c4a79efe447225dc02f74dd4f5eb",
+    "p3_runner_build_report_seal_sha256": "3eaa25f313f628e53b44c811ab2d6cb0b529cbecd8cb3b86e66264d219658a63",
+    "s16_dr9_result_commit": "245ac0d",
+    "tier_n_spec_seal_commit": "985c569"
+  },
+  "phase": "P4_SYNTHETIC_SMOKE",
+  "phase_prefix": "PHASE2-S16-D1-EXPANDED-DONCHIAN-TREND",
+  "pytest_invocation_protocol": {
+    "command_template": "python -m pytest <test_file> --rootdir <tests_dir> --confcutdir <tests_dir> -p no:cacheprovider --no-header -q",
+    "env_guards_set": {
+      "HTTPS_PROXY": "invalid",
+      "HTTP_PROXY": "invalid",
+      "TIINGO_API_KEY": "popped"
+    },
+    "rootdir_pinned_rationale": "repo root has a malformed sibling dir breaking pytest default rootdir walk; pinning confines collection."
+  },
+  "report_kind": "S16-D1 Donchian trend P4 synthetic smoke report (sealed; 32 tests run from authored P3 BUILD against synthetic fixture; NO sealed CSV used; NO IS/OOS execution; C6 verbatim)",
+  "report_seal_sha256": "f565f074d4f20f6ece28b8dfa13b0b62f9e574a18184186580146dfa15329e21",
+  "schema_id": "sparta.external_research_hunter.s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_smoke_t1_t15_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "sealed_cross_sector_csv_NOT_touched": {
+    "accessed_by_p4_smoke": false,
+    "rationale": "P4 validates structural primitives on synthetic fixture only; the 12 DR9-passed CSVs reserved for P6 IS"
+  },
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P4_SYNTHETIC_SMOKE_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "test_execution_results": {
+    "combined": {
+      "all_pass": true,
+      "combined_wall_time_seconds": 0.11,
+      "total_failed": 0,
+      "total_passed": 32,
+      "total_tests": 32
+    },
+    "oos_driver_invariants_battery": {
+      "error": 0,
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 11,
+      "test_count": 11,
+      "test_file": "external_research_hunter/s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_runner_harness/tests/test_oos_driver_invariants.py",
+      "test_file_sha256": "e8e5929826b1ead3b748a39a25fcd839fbaed1d5b1dd9bb190912574d21670ce",
+      "tests_passed": [
+        "test_oos_driver_registry_points_to_12_csvs",
+        "test_oos_driver_window_2024_2025",
+        "test_oos_driver_no_is_window_constants",
+        "test_oos_driver_no_is_year_tokens_in_source",
+        "test_oos_driver_no_run_in_sample",
+        "test_both_drivers_use_same_main",
+        "test_runner_config_strategy_params_unchanged",
+        "test_oos_run_signature_matches_is",
+        "test_oos_driver_no_top_level_forbidden_imports",
+        "test_oos_driver_no_vendor_client_instantiation",
+        "test_is_driver_has_12_csv_registry"
+      ],
+      "wall_time_seconds": 0.05
+    },
+    "smoke_battery": {
+      "error": 0,
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 21,
+      "test_count": 21,
+      "test_file": "external_research_hunter/s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_runner_harness/tests/test_smoke_t1_t15.py",
+      "test_file_sha256": "b6e3de378a18937576aed5cbdfa4885e71d846cb33e829d9d9e5fff1d8bda110",
+      "tests_passed": [
+        "test_T1_module_imports_clean",
+        "test_T2_runner_class_instantiable",
+        "test_T3_channel_high_low",
+        "test_T4_breakout_entries",
+        "test_T5_trailing_exits",
+        "test_T6_wilder_atr",
+        "test_T7_initial_stop_2atr",
+        "test_T7b_add_pyramid_unit_raises",
+        "test_T7c_starting_cash_invariant_100000",
+        "test_T8_stop_design_is_2atr_not_tight",
+        "test_T9_portfolio_cap",
+        "test_T10_vol_normalized_sizing",
+        "test_T11_skip_when_share_count_lt_one",
+        "test_T12_rth_only_filter_attested",
+        "test_T13_cost_surface",
+        "test_T14_cost_stress_matrix",
+        "test_T15_validator_harness_pass",
+        "test_T16_universe_locked_12name",
+        "test_T17_split_only_convention",
+        "test_T18_trend_exit_stop_guards",
+        "test_T19_donchian_periods_locked"
+      ],
+      "wall_time_seconds": 0.06
+    }
+  },
+  "verdict": "P4_SMOKE_ALL_PASS",
+  "verdict_caveats": [
+    "P4 validates STRUCTURAL primitives + invariants only; NOT IS/OOS performance or trend edge",
+    "The exit/stop redesign is validated structurally (guards fire/reject); whether the basket trends (positive expectancy) is the P6 IS test",
+    "P6 IS remains separately authorized",
+    "REC1-equivalent binding carried",
+    "P4 PASS does NOT imply READY/live-readiness; 6-gate live-block applies"
+  ],
+  "verdict_reasons": [
+    "All 21 smoke tests (Donchian primitives + trailing exit + 2xATR stop + vol sizing + guard rollup + exit/stop-guard T18) PASSED",
+    "All 11 OOS driver invariants PASSED",
+    "Total 32/32 in ~0.11s; synthetic fixture only; 12 sealed CSVs NOT touched",
+    "execution_guard.full_guard_check overall_pass=True incl. assert_trailing_donchian_exit + assert_initial_stop_2atr_not_tight + split_only + universe-lock(12) + no-leverage-cap"
+  ]
+}
