@@ -1,0 +1,457 @@
+{
+  "authored_at_utc": "2026-05-28T23:40:22.609473Z",
+  "authorization_phrase": "Authorize s17-d1 broad-universe cross-sectional momentum availability probe + DR9 audit framework only.",
+  "contingency_tree": [
+    {
+      "contingency": "all_24_pass_dr9 (12 reused PASS + 12 fresh PASS)",
+      "next_authorization": "Authorize s17-d1 broad-universe cross-sectional momentum availability probe + DR9 audit RESULT SEALING only.",
+      "then": "after RESULT sealed -> Authorize s17-d1 broad-universe cross-sectional momentum Tier-N spec PLAN only -- bound by DR10 v2 + walk-forward K13 (PLAN must include K13-per-fold + K9-per-fold reachability tables)"
+    },
+    {
+      "contingency": "1-6_fresh_symbols_fail_dr9",
+      "next_authorization": "Authorize s17-d1 shrunk broad-universe DR9 RESULT SEALING only (drop failing names; basket must retain >= 16 names to preserve cross-sectional ranking breadth)",
+      "note": "no silent substitution; a replacement name needs its own fetch+DR9"
+    },
+    {
+      "contingency": "7+_fresh_symbols_fail_dr9 (basket would drop below 16)",
+      "next_authorization": "Authorize s17-d1 broad-universe revision to an alternative large-cap shortlist (RUN_BOOK rev only)"
+    },
+    {
+      "contingency": "GOOGL_20to1_split_consistency_fails",
+      "next_authorization": "Operator manual review / re-fetch GOOGL; that symbol INCONCLUSIVE_HOLD until resolved; do NOT auto-progress"
+    },
+    {
+      "contingency": "any_INCONCLUSIVE_HOLD",
+      "next_authorization": "Operator manual review; no auto-progression"
+    },
+    {
+      "contingency": "vendor_fetch_fails",
+      "next_authorization": "Operator retries Tiingo later; RUN_BOOK remains reference; no repeated decline memos (brief in-chat reminder only)"
+    }
+  ],
+  "document_type": "RUN_BOOK_NOT_SEALED",
+  "dr10_v2_reachability_logic": {
+    "cash_equity_cost_drag": "per-share commission + ~1bp slippage tiny vs notional; even at higher rebalance cadence S2 cost_drag stays well under 5%",
+    "expected_status": "CLEARS WITH STRONG MARGIN (cost_drag branch does not fire)",
+    "rule": "v2 AND-conjunction (78cd22e): REJECT_FAST only if (turnover>0.50 AND S2_cost_drag>0.05)"
+  },
+  "dr9_audit_framework": {
+    "non_split_corporate_action_notes_informational_only": {
+      "COST_2023_special_dividend": "~$15 special dividend; under split_only NOT adjusted; one-day price drop; INFORMATIONAL",
+      "MRK_Organon_spinoff_2021_06": "non-split distribution; under split_only NOT adjusted; appears as a one-day price drop; INFORMATIONAL, not a split-consistency or gap fail (MRK has no split in window)",
+      "dividend_ex_dates": "higher-yield names show small ex-div jumps (<1% of price); informational, not a DR9 fail"
+    },
+    "per_symbol_check_procedure": "Per symbol: verify CSV exists + sha vs manifest; parse date,open,high,low,close,volume; gap_continuity vs NYSE calendar >=0.95; max_gap_ratio <=0.30 (calendar gaps; price jumps not gaps); quality_violation_count <=5; documented_split_event_consistency (each known split ratio ~1.0 under split_only); roll NOT_APPLICABLE; aggregate PASS/FAIL/INCONCLUSIVE_HOLD.",
+    "split_event_consistency_requirements": {
+      "GOOGL_2022_07_18_20to1": "FRESH -- MUST verify ratio ~1.0 under split_only across 2022-07-18 (20x factor; the most consequential fresh split-consistency check)",
+      "no_split_fresh_names": "V/MA/HD/PG/COST/ABBV/MRK/BAC/CAT/DIS/COP have no splits in window -> documented_split_event_consistency trivially PASS (verify at audit)",
+      "reused_splits": "AAPL 4:1 / NVDA 4:1+10:1 / AMZN 20:1 / WMT 3:1 already verified at 245ac0d; re-verify only if re-fetched"
+    },
+    "thresholds_carried_byte_equivalent_from_s16_run_book": {
+      "documented_split_event_consistency": "PASS_IF_ALL_KNOWN_SPLITS_APPLIED_PER_SPLIT_ONLY_CONVENTION",
+      "gap_continuity_min": 0.95,
+      "max_gap_ratio_max": 0.3,
+      "quality_violation_count_max": 5,
+      "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+    },
+    "thresholds_immutable_per_no_dr_redefinition_post_seal": true
+  },
+  "explicit_exclusions_this_turn": [
+    "No vendor API call by controller",
+    "No API-key access",
+    "No network IO",
+    "No data fetch (operator-side at a future authorization)",
+    "No DR9 RESULTS sealed (framework pre-authored only)",
+    "No DR9 RUN executed",
+    "No mechanic selection (deferred to s17 Tier-N PLAN)",
+    "No DRAFT/SEAL/BUILD/backtest/simulator/signal/OOS",
+    "No live/broker/Strategy Lab/FRC/candidate promotion",
+    "No revival of s16/s15/s14/s13/s12",
+    "No retroactive application of K13 to existing candidates",
+    "No modification of the reused s16 captured data or any sealed artifact",
+    "No lessons.md modification or staging",
+    "No canonical seal (this is a RUN_BOOK, not a seal)"
+  ],
+  "framework_binding": "DR10 v2 AND-conjunction (78cd22e) + walk-forward K13 persistence discipline (52a3b60) -- both bind this s17 candidate",
+  "fresh_s17_path": true,
+  "hard_boundaries_held_this_run_book_turn": {
+    "no_api_key_access": true,
+    "no_backtest": true,
+    "no_build": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr9_audit_RESULTS_sealed": true,
+    "no_dr9_audit_RUN_executed": true,
+    "no_draft": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mechanic_selection_deferred_to_plan": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_reused_s16_captured_data": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_profitability_claim": true,
+    "no_retroactive_k13_application": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s16_s15_s14_s13_s12": true,
+    "no_seal": true,
+    "no_strategy_lab_promotion": true,
+    "no_vendor_api_call_by_controller": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "k9_per_fold_and_k13_reachability_logic": {
+    "binding_concern": "Cross-sectional momentum ROTATION is structurally LOW-TURNOVER (rank + periodic rebalance), so K9-per-fold under the walk-forward K13 discipline (52a3b60) is the load-bearing reachability concern -- NOT raw universe size.",
+    "implication_for_plan": "The s17 Tier-N PLAN MUST choose a rebalance frequency / top-N / trade-counting convention that demonstrably clears K9 in EACH of the 5 K13 folds (e.g., higher rebalance cadence -- weekly -- or counting per-name entries/exits as trades, or a larger held-N). If the PLAN cannot show K9-per-fold, the candidate is K13/K9-blocked. This RUN_BOOK flags it; it does NOT lock the mechanic.",
+    "k13_discipline": "5 sequential OOS folds; edge must be positive in >=3 of 5 folds + aggregate-positive + K9 holds (per discipline). Each fold (~1.4y of a ~7y history) must therefore carry enough realized round-trips.",
+    "trade_count_drivers": "trades ~= rebalances/year x avg position-changes/rebalance. Monthly rebalance (~12/y) x top-N rotation on 24 names may yield only ~15-40 position-changes/y -> over a ~1.4y fold that is ~21-56, and K9 total floor is 100 / OOS >=50/y. K9-per-fold is TIGHT for a slow monthly rotation.",
+    "universe_breadth_helps_ranking_not_turnover": "24 names give cross-sectional RANKING breadth (better selection), but turnover -- hence K9-per-fold -- is driven by rebalance cadence + held-N, which the PLAN must set."
+  },
+  "labels": [
+    "S17_D1_BROAD_UNIVERSE_CROSS_SECTIONAL_MOMENTUM_AVAILABILITY_PROBE_DR9_AUDIT_RUN_BOOK",
+    "NOT_A_SEAL",
+    "FRESH_S17_PATH",
+    "PENDING_OPERATOR_FETCH_12_NAMES",
+    "12_OF_24_DR9_REUSABLE",
+    "VENDOR_TIINGO_SPLIT_ONLY",
+    "24_NAME_BROAD_LARGE_CAP_UNIVERSE",
+    "T2_CROSS_SECTIONAL_MOMENTUM_DIRECTION",
+    "GOOGL_20to1_SPLIT_CONSISTENCY_REQUIRED",
+    "MRK_ORGANON_AND_COST_SPECIAL_DIV_INFORMATIONAL",
+    "DR10_V2_BINDING",
+    "WALK_FORWARD_K13_BINDING_S17_PLUS",
+    "K9_PER_FOLD_IS_THE_LOAD_BEARING_REACHABILITY_CONCERN",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S17_D1_BROAD_UNIVERSE_CROSS_SECTIONAL_MOMENTUM_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "low_data_friction_note": "12 of 24 names are ALREADY DR9-PASSED and reusable byte-equivalent from the s16 basket (245ac0d / result_seal ec856253). Only 12 require fresh Tiingo split_only fetch + full DR9.",
+  "motivation": {
+    "k13_is_the_binding_gate": "Per framework SEAL 52a3b60, this s17 candidate must clear K13 walk-forward persistence (>=3 of 5 OOS folds positive + aggregate-positive + K9 per discipline) at the new P6.7 phase before P10. The universe must support enough cross-sectional turnover for K9-per-fold.",
+    "mechanic_deferred_to_plan": "Exact momentum spec (lookback, rebalance frequency, top-N, long-only vs long/short) is DEFERRED to the s17 Tier-N PLAN; this RUN_BOOK only establishes data availability + DR9.",
+    "why_this_universe": "Selection plan rev2 (75a22be) recommended T2 (cross-sectional momentum rotation) as the most walk-forward-K13-aligned direction (relative momentum rotates into each regime's leaders, the structural fix for the s16 absolute-trend OOS failure). Cross-sectional momentum needs BREADTH to rank/select; a 24-name large-cap basket across ~8 sectors provides it."
+  },
+  "operator_side_fetch_run_book": {
+    "executor": "operator (TIINGO_API_KEY in env only; controller never reads)",
+    "expected_output_directory": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw",
+    "expected_output_files": [
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/UNH_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/WMT_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/KO_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/META_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/AMZN_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/JNJ_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/CVX_ohlcv_1d_20190102_20251230.csv (reuse byte-equivalent OR re-fetch)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/GOOGL_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/V_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/MA_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/HD_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/PG_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/COST_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/ABBV_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/MRK_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/BAC_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/CAT_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/DIS_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/COP_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/s17_d1_broad_universe_cross_sectional_momentum_step02b_fetch_manifest.json"
+    ],
+    "fetch_boundaries_required": {
+      "no_api_key_printed_or_logged_or_saved": true,
+      "no_backtest": true,
+      "no_live_trading": true,
+      "no_oos_inspection_by_this_fetch": true,
+      "no_review_queue_mutation": true,
+      "no_signal_computation": true,
+      "no_simulator_run": true,
+      "no_strategy_lab_promotion": true,
+      "raw_csv_only_written_to_approved_directory": true,
+      "tiingo_api_key_read_from_env_only": true
+    },
+    "fetch_parameters": {
+      "adjustment_convention": "split_only",
+      "end_date_inclusive": "2025-12-30",
+      "is_window_end": "2023-12-29",
+      "is_window_start": "2019-01-02",
+      "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+      "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+      "reuse_or_refetch": "operator decision per symbol; reuse byte-equivalent (DR9 PASS carries by sha-match to ec856253) OR re-fetch into the s17 dir",
+      "start_date_inclusive": "2019-01-02",
+      "symbols_reusable_from_s16_245ac0d": [
+        "AAPL",
+        "MSFT",
+        "NVDA",
+        "JPM",
+        "XOM",
+        "UNH",
+        "WMT",
+        "KO",
+        "META",
+        "AMZN",
+        "JNJ",
+        "CVX"
+      ],
+      "symbols_to_fetch_fresh": [
+        "GOOGL",
+        "V",
+        "MA",
+        "HD",
+        "PG",
+        "COST",
+        "ABBV",
+        "MRK",
+        "BAC",
+        "CAT",
+        "DIS",
+        "COP"
+      ],
+      "vendor": "tiingo"
+    },
+    "manifest_schema": "sparta.s17.broad_universe_cross_sectional_momentum.step02b_fetch_manifest.v1 (same field structure as the s16 manifest)",
+    "post_fetch_action": "Operator confirms all 24 CSVs + manifest exist, then types `Authorize s17-d1 broad-universe cross-sectional momentum availability probe + DR9 audit RESULT SEALING only.`"
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "reuse_source_dir": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw",
+    "s16_d1_p11_terminal_commit": "99f58bd",
+    "s16_dr9_result_commit": "245ac0d",
+    "s16_dr9_result_seal_sha256": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+    "selection_plan_rev2_commit": "75a22be",
+    "walk_forward_validation_seal_commit": "52a3b60",
+    "walk_forward_validation_seal_report_seal": "4268d6f75bbc095a795510f7d8ccc50c2d8886eef36f50f769b79342002893d2"
+  },
+  "report_date_utc": "2026-05-28T23:40:22.609473Z",
+  "report_kind": "RUN_BOOK / operator-side fetch instructions + pre-authored DR9 audit framework for a 24-name broad large-cap universe for a cross-sectional momentum (rotation) candidate (T2 of selection plan rev2 75a22be). Purpose: provide the breadth a cross-sectional/relative-momentum mechanic needs to clear the walk-forward K13 gate. NOT a sealed artifact. PENDING operator-side fetch of 12 fresh names.",
+  "schema_id": "sparta.external_research_hunter.s17_d1_broad_universe_cross_sectional_momentum_availability_probe_dr9_audit_run_book.v1",
+  "scope_of_this_run_book": [
+    "24-name broad large-cap universe for a cross-sectional momentum (T2) candidate; 12 reusable DR9-passed + 12 fresh",
+    "Carry the proven Tiingo split_only vendor approach",
+    "Pre-authored DR9 audit framework (same thresholds; GOOGL 20:1 split-consistency; MRK/COST informational)",
+    "K9-per-fold + walk-forward K13 reachability logic (the load-bearing concern for low-turnover rotation)",
+    "DR10-v2 reachability (clears)",
+    "Contingency tree with a 16-name floor for ranking breadth",
+    "Mechanic + rebalance cadence DEFERRED to the s17 Tier-N PLAN"
+  ],
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "dr10_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "s16_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s17-d1 broad-universe (24-name) cross-sectional momentum availability probe + DR9 audit RUN_BOOK (NOT a SEAL; 12 DR9-reusable + 12 fresh Tiingo split_only; bound by DR10 v2 + walk-forward K13)",
+  "universe": {
+    "fresh_count": 12,
+    "fresh_fetch_required": [
+      {
+        "exchange": "NASDAQ",
+        "risk": "MODERATE -- 20:1 split 2022-07-18 (IN IS window); split-event consistency MUST verify ratio ~1.0 under split_only (large factor)",
+        "sector": "Communication Services",
+        "splits": [
+          [
+            "2022-07-18",
+            20.0
+          ]
+        ],
+        "symbol": "GOOGL"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window; high liquidity)",
+        "sector": "Financials",
+        "splits": [],
+        "symbol": "V"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Financials",
+        "splits": [],
+        "symbol": "MA"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Consumer Discretionary",
+        "splits": [],
+        "symbol": "HD"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window; div ex-dates informational under split_only)",
+        "sector": "Consumer Staples",
+        "splits": [],
+        "symbol": "PG"
+      },
+      {
+        "exchange": "NASDAQ",
+        "risk": "Low-MODERATE (no split; 2023 ~$15 special dividend -> one-day price drop under split_only, INFORMATIONAL, not a DR9 fail)",
+        "sector": "Consumer Staples",
+        "splits": [],
+        "symbol": "COST"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Health Care",
+        "splits": [],
+        "symbol": "ABBV"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low-MODERATE (no split; Organon spin-off 2021-06 -> one-day price drop under split_only, INFORMATIONAL, not a split-consistency or gap fail)",
+        "sector": "Health Care",
+        "splits": [],
+        "symbol": "MRK"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Financials",
+        "splits": [],
+        "symbol": "BAC"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Industrials",
+        "splits": [],
+        "symbol": "CAT"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Communication Services",
+        "splits": [],
+        "symbol": "DIS"
+      },
+      {
+        "exchange": "NYSE",
+        "risk": "Low (no split in window)",
+        "sector": "Energy",
+        "splits": [],
+        "symbol": "COP"
+      }
+    ],
+    "name_count": 24,
+    "reuse_count": 12,
+    "reuse_dr9_passed": [
+      {
+        "exchange": "NASDAQ",
+        "sector": "Information Technology",
+        "splits": [
+          [
+            "2020-08-31",
+            4.0
+          ]
+        ],
+        "symbol": "AAPL"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Information Technology",
+        "splits": [],
+        "symbol": "MSFT"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Information Technology",
+        "splits": [
+          [
+            "2021-07-20",
+            4.0
+          ],
+          [
+            "2024-06-10",
+            10.0
+          ]
+        ],
+        "symbol": "NVDA"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Financials",
+        "splits": [],
+        "symbol": "JPM"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Energy",
+        "splits": [],
+        "symbol": "XOM"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Health Care",
+        "splits": [],
+        "symbol": "UNH"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Consumer Staples",
+        "splits": [
+          [
+            "2024-02-26",
+            3.0
+          ]
+        ],
+        "symbol": "WMT"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Consumer Staples",
+        "splits": [],
+        "symbol": "KO"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Communication Services",
+        "splits": [],
+        "symbol": "META"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Consumer Discretionary",
+        "splits": [
+          [
+            "2022-06-06",
+            20.0
+          ]
+        ],
+        "symbol": "AMZN"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Health Care",
+        "splits": [],
+        "symbol": "JNJ"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Energy",
+        "splits": [],
+        "symbol": "CVX"
+      }
+    ],
+    "sectors_spanned": "~8 GICS (Tech, Comm Services, Consumer Disc, Consumer Staples, Financials, Health Care, Energy, Industrials)"
+  },
+  "vendor": {
+    "adjustment_convention": "split_only (Tiingo splitFactor stream; dividends/distributions NOT adjusted; adjClose/adjVolume ignored)",
+    "api_key": "TIINGO_API_KEY from env only; never printed/logged/saved",
+    "library_installed": "tiingo-0.16.1",
+    "rationale": "PROVEN across s14/s16 fetches (pure-Python requests succeeded where yfinance curl_cffi failed TLS).",
+    "vendor": "tiingo"
+  }
+}
