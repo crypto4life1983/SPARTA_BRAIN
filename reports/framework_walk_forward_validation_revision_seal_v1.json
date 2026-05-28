@@ -1,0 +1,159 @@
+{
+  "anti_overfitting_safeguards_INVIOLATE": [
+    "VALIDATION not OPTIMIZATION: locked params re-evaluated per fold; NO per-fold re-fitting (preserves no_strategy_optimization_authorized)",
+    "fold scheme (count=5, boundaries, K13 threshold) declared before any fold is evaluated and NEVER searched",
+    "no fold-anchoring to known-favorable periods; uniform scheme per asset/frequency class",
+    "K9 inviolate: walk-forward does not relax K9 (>=100; OOS >=50/y)",
+    "DR chain unchanged: DR4/DR2/DR3/DR5/DR10 v2 carry; K13 is additive, not a substitute",
+    "non-retroactive: binds s17+ only; existing candidate verdicts NOT re-opened"
+  ],
+  "audit_trail_disclaimer": "Whether s16-d1 would have failed K13 under walk-forward is INFORMATIONAL ONLY and is NOT computed or used to re-open its terminal verdict (non-retroactive).",
+  "authored_at_utc": "2026-05-28T23:25:44.463441Z",
+  "authorization_phrase": "Authorize framework walk-forward / multi-window validation discipline revision SEAL only.",
+  "binding": true,
+  "binding_for_future_seal_turns_only": true,
+  "binding_scope": "s17+ candidate candidate_record_ids only (new SEAL turns from s17 onward). Analogous to DR10 v2 binding s14+.",
+  "discipline_definition_LOCKED": {
+    "K13_walk_forward_persistence_gate_LOCKED": {
+      "fail_verdict": "OOS_NOT_ROBUST -> REJECT_FAST (terminal)",
+      "gate_id": "K13_walk_forward_persistence",
+      "pass_condition": "locked edge POSITIVE (expectancy>0 AND sharpe_proxy_per_trade>0 AND no K1/K2 fire) in >= ceil(0.6*N) OOS folds (N=5 -> >=3 of 5) AND aggregate-across-folds net>0 AND K9 reachability holds (per-fold or aggregate)",
+      "precedence": "ADDITIVE robustness gate; does NOT override or relax existing fail-closed gates (K1/K2/K4/K9/K12/DR chain)",
+      "supermajority_threshold": "ceil(0.6*N)"
+    },
+    "core_distinction_INVIOLATE": "VALIDATION of LOCKED parameters, NOT optimization. Each fold re-evaluates the SAME sealed rule (DA register byte-equivalent). There is NO per-fold parameter re-fitting / re-optimization. Preserves no_strategy_optimization_authorized. INVIOLATE.",
+    "fold_scheme_LOCKED": {
+      "fold_boundaries_searched": false,
+      "n_folds": 5,
+      "type": "fixed_pre_committed_unsearched_sequential_OOS_folds",
+      "warmup_per_fold": "each fold carries its own indicator warmup (per candidate CONFIG warmup_days); no fold-anchoring to known-favorable periods",
+      "window_mode": "rolling_or_expanding_declared_at_candidate_PLAN_per_asset_frequency_class"
+    },
+    "ladder_placement_LOCKED": "new phase P6.7 walk-forward validation, AFTER P6.5 cost-stress and BEFORE the final P10 OOS gate; a candidate must clear K13 (P6.7) before P10. P10 retained as the final hold-out.",
+    "name": "walk_forward_multi_window_validation"
+  },
+  "existing_sealed_verdicts_preserved": {
+    "s12_d1_terminal": true,
+    "s13_d1_terminal": true,
+    "s14_d1_cross_sector_terminal_FAIL_SAFETY_is": true,
+    "s15_d1_terminal_FAIL_SAFETY_is": true,
+    "s16_d1_terminal_REJECT_FAST_oos_dr4": true
+  },
+  "hard_boundaries_held_this_revision_seal_turn": {
+    "fold_scheme_pre_committed_not_searched": true,
+    "framework_revision_seal_only": true,
+    "no_broker_exchange_api": true,
+    "no_candidate_authored_or_run": true,
+    "no_code_backtest_simulator_signal": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr10_v2_modification": true,
+    "no_existing_gate_relaxation": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_retroactive_application_to_s16_s15_s14_s13_s12": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_any_candidate": true,
+    "no_strategy_lab_promotion": true,
+    "validation_not_optimization_inviolate": true
+  },
+  "is_a_candidate_artifact": false,
+  "is_a_framework_revision_seal": true,
+  "is_a_seal": true,
+  "labels": [
+    "FRAMEWORK_WALK_FORWARD_VALIDATION_REVISION_v1_SEALED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "K13_WALK_FORWARD_PERSISTENCE_GATE",
+    "VALIDATION_OF_LOCKED_PARAMS_NOT_OPTIMIZATION",
+    "FIXED_PRE_COMMITTED_5_FOLD_SCHEME",
+    "P6_7_PHASE_ADDED",
+    "BINDS_S17_PLUS_ONLY",
+    "NON_RETROACTIVE",
+    "ADDITIVE_GATE_NO_EXISTING_GATE_RELAXED",
+    "DR10_V2_CARRIED_UNCHANGED",
+    "K9_INVIOLATE_CARRIED",
+    "REC1_EQUIVALENT_BINDING_CARRIED",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "FRAMEWORK_WALK_FORWARD_VALIDATION_REVISION_v1_SEALED",
+  "negative_invariants": {
+    "any_existing_candidate_verdict_reopened": false,
+    "any_existing_gate_relaxed": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "committed_by_this_script": false,
+    "dr10_v2_modified": false,
+    "fold_scheme_searchable": false,
+    "is_a_candidate_artifact": false,
+    "k9_relaxed": false,
+    "lessons_md_touched": false,
+    "no_strategy_optimization_invariant_weakened": false,
+    "per_fold_optimization_permitted": false,
+    "rec1_demoted": false,
+    "retroactive_application_to_existing_candidates": false
+  },
+  "next_phase_authorization_scope": {
+    "commit_this_seal": "Authorize commit framework walk-forward / multi-window validation discipline revision SEAL only.",
+    "defer": "Defer / Pause.",
+    "first_s17_candidate_under_new_discipline": "Authorize next research-track selection plan after s16-d1 OOS REJECT_FAST rev2 (under walk-forward validation discipline) only."
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "framework_dr10_revision_seal_v2_report_seal": "7794bb5222ed2a2cb1cd8e1ef2f43f3d1abc6f1539d71af31dda32d832b5e907",
+    "revision_plan_commit": "e0cb0b5",
+    "revision_plan_file_sha256": "e6f7ca06b9333d62b7117957aaa1e37be79c42352b39443f5b50caa16891b3e9",
+    "s16_d1_oos_gate_commit": "3d466f5",
+    "s16_d1_p11_lifecycle_decision_commit": "99f58bd",
+    "selection_plan_after_s16_commit": "56ddd4d"
+  },
+  "phase": "FRAMEWORK_DISCIPLINE_REVISION_SEAL",
+  "report_date_utc": "2026-05-28T23:25:44.463441Z",
+  "report_kind": "Framework-level discipline revision SEAL (sealed; binding for s17+ candidate SEAL turns only). Adds the K13 walk-forward-persistence gate + fixed pre-committed multi-fold validation scheme. Analogous to the DR10 v2 revision SEAL (78cd22e). Walk-forward = VALIDATION of LOCKED parameters, NOT optimization.",
+  "report_seal_sha256": "4268d6f75bbc095a795510f7d8ccc50c2d8886eef36f50f769b79342002893d2",
+  "retroactive_effect_on_existing_sealed_candidates": "NONE. s16-d1 / s15-d1 / s14-d1 / s13-d1 / s12-d1 verdicts stand byte-equivalent; NOT re-evaluated under walk-forward. This revision binds s17+ candidate SEAL turns only.",
+  "revision_change_summary": "Adds a walk-forward / multi-window VALIDATION discipline and a new additive gate K13_walk_forward_persistence. A candidate must demonstrate its LOCKED edge persists across a fixed, pre-committed sequence of OOS folds (not just a single IS/OOS split) before it can be called READY. Motivated by s16-d1 passing P6 IS + P6.5 cost-stress yet failing a single P10 OOS gate (LESSON_S16_D1_004).",
+  "revision_id": "FRAMEWORK_WALK_FORWARD_VALIDATION_v1",
+  "schema_id": "sparta.framework.walk_forward_multi_window_validation_revision_seal.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "dr10_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "k13_walk_forward_binding_for_s17_plus": true,
+    "lifecycle_state": "FRAMEWORK_WALK_FORWARD_VALIDATION_REVISION_v1_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "this_turn_actions": [
+    "Sealed the walk-forward validation discipline + K13 gate + fixed 5-fold scheme + P6.7 placement; binding s17+.",
+    "Computed canonical report_seal_sha256 with roundtrip verification."
+  ],
+  "this_turn_does_NOT_do": [
+    "No candidate authored/run",
+    "No backtest/simulator/signal/fetch/OOS",
+    "No retroactive application",
+    "No existing-gate relaxation",
+    "No lessons.md modification",
+    "No git commit by this script"
+  ],
+  "title": "Framework discipline revision SEAL v1 — walk-forward / multi-window validation (of LOCKED parameters) + K13 walk-forward-persistence gate (binds s17+; NON-retroactive)",
+  "what_it_addresses": "Single-IS/OOS-split false positives (an edge that fits one window pair but does not persist). Raises the bar from one OOS test to multi-fold persistence (the s16 failure mode).",
+  "what_it_does_NOT_address": [
+    "It does NOT guarantee a generalizing edge exists (s16's IS already spanned the 2022 bear; walk-forward raises the bar, expected to REJECT more, not to manufacture a winner).",
+    "It does NOT change any existing gate, threshold, or candidate verdict.",
+    "It does NOT permit per-fold optimization or fold-scheme search (those would be data-snooping)."
+  ],
+  "what_it_preserves": [
+    "DR precedence chain DR7->DR1->DR9->DR10->DR6->DR4->DR2->DR3->DR5 (unchanged)",
+    "DR10 v2 AND-conjunction (78cd22e) unchanged and carried",
+    "K-gates K1/K2/K4/K6/K7/K8/K9/K10/K11/K12 unchanged; K13 ADDED",
+    "K9 inviolate (>=100; OOS >=50/y); REC1-equivalent OOS-K9 disclosure binding",
+    "C1-C8 phase-2 safety contracts; no_strategy_optimization_authorized; no_dr_redefinition_post_seal"
+  ]
+}
