@@ -1,0 +1,289 @@
+{
+  "authored_at_utc": "2026-05-28T22:45:57.324479Z",
+  "binding": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "diagnostic_only_disclosure": "This OOS result is DIAGNOSTIC-ONLY. It does NOT imply live-ready, paper-ready, Strategy-Lab-ready, or FRC-granted. The 6-gate live-block applies regardless of any verdict.",
+  "dr1_oos_rebalance": {
+    "closed_trades": 133,
+    "fires": false,
+    "min_36": 36
+  },
+  "dr4_canonical_oos_risk": {
+    "fires": true,
+    "is_net_pnl_usd": 17129.69,
+    "oos_negative_while_is_positive": true,
+    "oos_net_pnl_usd": -2837.19
+  },
+  "exit_mix": {
+    "initial_stop": 60,
+    "trailing_exit": 68,
+    "window_end": 5
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "hard_boundaries_held_this_p10_turn": {
+    "c6_carried_verbatim": true,
+    "csv_sha_verified_at_load_all_12": true,
+    "locked_params_only_no_tuning": true,
+    "no_broker_exchange_api": true,
+    "no_commit_by_this_script": true,
+    "no_data_refetch": true,
+    "no_dr_redefinition": true,
+    "no_frc_grant": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_p3_source_files": true,
+    "no_modification_of_sealed_artifacts": true,
+    "no_paper_trading_via_broker": true,
+    "no_rec1_equivalent_demotion": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s15_s14_s13_s12": true,
+    "no_strategy_lab_promotion": true,
+    "no_threshold_modification": true,
+    "oos_window_locked_not_altered": true,
+    "pure_oos_no_is_rows_touched": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "is_vs_oos_comparison": {
+    "is_expectancy_usd": 53.03,
+    "is_net_pnl_usd": 17129.69,
+    "is_sharpe_proxy_per_trade": 0.0563,
+    "oos_expectancy_usd": -21.33,
+    "oos_net_pnl_usd": -2837.19,
+    "oos_sharpe_proxy_per_trade": -0.0311
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P10_OOS_GATE_SEALED",
+    "S16_D1_EXPANDED_DONCHIAN_TREND",
+    "12_NAME_EXPANDED_CROSS_SECTOR_BASKET",
+    "P10_OOS_VERDICT_REJECT_FAST",
+    "FIRST_OOS_INSPECTION",
+    "REC1_EQUIVALENT_OOS_K9_DISCLOSURE_BINDING",
+    "DR4_CANONICAL_OOS_RISK_EVALUATED",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "NOT_MONEY_PROVEN_NOT_LIVE_READY",
+    "P11_LIFECYCLE_DECISION_NEXT",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "P10_OOS_GATE_SEALED",
+  "negative_invariants": {
+    "backtest_run": true,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_paper_ready": false,
+    "claims_strategy_lab_ready": false,
+    "committed_this_script": false,
+    "data_refetched": false,
+    "dr_redefined": false,
+    "frc_granted": false,
+    "is_rows_touched_in_oos": false,
+    "k9_relaxed": false,
+    "lessons_md_touched": false,
+    "oos_window_altered": false,
+    "p3_source_files_modified": false,
+    "parameters_optimized": false,
+    "rec1_demoted": false,
+    "s14_chain_modified": false,
+    "s15_chain_modified": false,
+    "sealed_csvs_modified": false,
+    "strategy_lab_promoted": false,
+    "thresholds_modified": false,
+    "tier_n_seal_modified": false
+  },
+  "oos_k9": {
+    "closed_trades": 133,
+    "k9_fail": false,
+    "k9_min_total": 100,
+    "k9_oos_per_year_floor": 50.0,
+    "rec1_equivalent_binding": true,
+    "trades_per_year": 66.73
+  },
+  "oos_performance_summary": {
+    "annual_turnover": 15.195,
+    "avg_loss_usd": -410.35,
+    "avg_win_usd": 739.42,
+    "cagr_pct": -1.4337,
+    "closed_trades_count": 133,
+    "expectancy_per_trade_usd": -21.33,
+    "final_equity_usd": 97162.8,
+    "max_drawdown_pct": 0.099062,
+    "net_pnl_usd": -2837.19,
+    "profit_loss_ratio": 1.8019,
+    "sharpe_annualized": -0.1592,
+    "sharpe_proxy_per_trade": -0.0311,
+    "starting_cash_usd": 100000.0,
+    "total_commission_usd": 271.59,
+    "total_slippage_usd": 305.02,
+    "trades_per_year_observed": 66.73,
+    "win_rate_pct_or_NA": 33.83
+  },
+  "oos_procedure": {
+    "indicator_warmup_only_no_entries_during_warmup": true,
+    "locked_params_only": true,
+    "no_refetch": true,
+    "no_threshold_change": true,
+    "no_tuning": true,
+    "pure_oos_no_is_rows_touched": true,
+    "warmup_bars_within_oos": 40
+  },
+  "oos_window": {
+    "altered": false,
+    "end": "2025-12-30",
+    "locked": true,
+    "start": "2024-01-02"
+  },
+  "parent_references": {
+    "csv_registry": {
+      "AAPL": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9"
+      },
+      "AMZN": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AMZN_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "d10f4e5ad48e030e769e3d6e1a2228be15d2369850151e75ef050533f63d0317"
+      },
+      "CVX": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/CVX_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "b322748f188faf30e3daa8b96d4dd4667954fe077ca39a8198df75728337b960"
+      },
+      "JNJ": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JNJ_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "d8565742778fd015d9e5f1a3659e664baf8f6542d7f06362d5fb7116787215b5"
+      },
+      "JPM": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "8aa244ab7724b292c659c81171bd8d3cf5ce5684d6c69864ee61e0be90238db7"
+      },
+      "KO": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/KO_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "0d00194723903bfa4724f7d3641499da6d165edb6bf8514a10e88233206d7d24"
+      },
+      "META": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/META_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "4cd3487376b07dd0149b12dec4154c0786ffdeaaa4ad0334f693aa8cd3dc69f5"
+      },
+      "MSFT": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "3ec6981f5bc4c37d56017a5542fd0d0d0ac6e9ecb132a4d5cc7668e0ddf112ce"
+      },
+      "NVDA": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "d974a054567921f03e66644c6ebfa18c98ae30d32da5138a60d26887c3194ee8"
+      },
+      "UNH": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/UNH_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "7b9d502e78bd2eaa8fbac08872865855e4d92ad43b1b3066881fa29f94115394"
+      },
+      "WMT": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/WMT_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "aa772f962f3afc712e9b9339b01c0b1f1fcd7cc02bf5ad276c035e1c321a8742"
+      },
+      "XOM": {
+        "path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+        "sha256": "fbbc462cbfbd11a68b0aed4d0c3fa72312afea5112cebcc24860689f33b7f77c"
+      }
+    },
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "f95e5e3",
+    "p2_phase2_plan_commit": "f826aea",
+    "p3_build_commit": "2cddb93",
+    "p4_smoke_commit": "58904e8",
+    "p6_5_cost_stress_commit": "b3a3bc5",
+    "p6_is_diagnostic_commit": "8976a47",
+    "p7_decision_memo_commit": "ecd777f",
+    "s16_dr9_result_commit": "245ac0d",
+    "tier_n_spec_seal_commit": "985c569"
+  },
+  "per_symbol": {
+    "AAPL": {
+      "closed": 8,
+      "net": 649.01
+    },
+    "AMZN": {
+      "closed": 11,
+      "net": -2048.91
+    },
+    "CVX": {
+      "closed": 11,
+      "net": -3106.15
+    },
+    "JNJ": {
+      "closed": 16,
+      "net": -2441.87
+    },
+    "JPM": {
+      "closed": 14,
+      "net": -1259.75
+    },
+    "KO": {
+      "closed": 7,
+      "net": 3897.4
+    },
+    "META": {
+      "closed": 13,
+      "net": -1239.23
+    },
+    "MSFT": {
+      "closed": 12,
+      "net": -112.57
+    },
+    "NVDA": {
+      "closed": 12,
+      "net": -1.34
+    },
+    "UNH": {
+      "closed": 13,
+      "net": 652.13
+    },
+    "WMT": {
+      "closed": 9,
+      "net": 2937.71
+    },
+    "XOM": {
+      "closed": 7,
+      "net": -763.62
+    }
+  },
+  "phase": "P10_OOS_GATE",
+  "phase_prefix": "PHASE2-S16-D1-EXPANDED-DONCHIAN-TREND",
+  "report_date_utc": "2026-05-28T22:45:57.324479Z",
+  "report_kind": "S16-D1 P10 OOS gate result (sealed; pure-OOS run on the 12 sealed CSVs over the LOCKED OOS window; WARMUP=40 OOS bars, no IS rows touched; locked s16 params; DR4 canonical OOS risk evaluated vs IS; C6 verbatim)",
+  "report_seal_sha256": "7cbcbb20b40efa2af5d79bd2166918753d9b91f5d2c377a9a0ed57675258637f",
+  "schema_id": "sparta.external_research_hunter.s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_oos_gate_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "backtest_diagnostic_only": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P10_OOS_GATE_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s16-d1 expanded-universe Donchian trend P10 OOS gate result (sealed; FIRST OOS inspection; locked window 2024-01-02..2025-12-30; REC1-equivalent binding; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE)",
+  "verdict": "REJECT_FAST",
+  "verdict_reasons": [
+    "DR4 oos_negative_while_is_positive: OOS net=$-2,837.19 (IS was +$17,129.69); sharpe_proxy=-0.0311, expectancy=$-21.33 -> REJECT_FAST"
+  ]
+}
