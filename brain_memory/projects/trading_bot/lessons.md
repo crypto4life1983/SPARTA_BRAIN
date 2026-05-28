@@ -4356,3 +4356,34 @@ into deep extraction even if the warning_labels list omits them.
   is the corroborating evidence memo. Trading remains PAUSED; live
   remains BLOCKED_AT_6_GATES; FRC never granted; advisory label
   permanent `DIAGNOSTIC_ONLY_NOT_LIVE_GRADE`.
+
+
+## 2026-05-26 - LESSON_B006_002_001 - Runner-enforced spec preconditions actually fire when calibrated correctly
+
+- **Lesson:** A sealed-spec textual precondition is only as strong as its runner-side enforcement. B006_002 added DR11 specifically to enforce the C4 leverage-cap-bound-rate precondition that B006_001's archival memo §6 Observation 3 identified as un-enforced. The B006_002 QC backtest produced `leverage_cap_bound_rate = 15.625% > 10% threshold` and DR11 fired REJECT_FAST as designed.
+- **Why:** The B006_001 run on the same strategy produced the same leverage-cap-bound rate (~15.6%) but received `REQUEST_FULL_PREREGISTRATION_REVIEW` because no rule fired. B006_002 demonstrates that wiring textual preconditions into actual fail-closed rules at the right precedence position (here, position 3) structurally pre-empts favorable verdicts when the precondition is violated.
+- **How to apply:** Every future sealed-spec precondition MUST have (a) a named DR rule, (b) a threshold constant, (c) a severity label, (d) a precedence-chain position, and (e) an emitted compact-summary field. Metric-only emission (B006_001's pattern) is not enforcement.
+
+## 2026-05-26 - LESSON_B006_002_002 - Favorable economic numbers do not change a fail-closed verdict by design
+
+- **Lesson:** The B006_002 backtest produced IS Sharpe +0.9467, OOS Sharpe +0.7197, OOS annualized return +8.43%, OOS max drawdown -25.14%, with all four cost-stress OOS Sharpes >0.5 (would have satisfied C5+ in §15). The verdict was still REJECT_FAST because DR11 fired upstream at precedence position 3.
+- **Why:** Numbers and risk-profile are orthogonal. A strategy with attractive returns AND a violated risk-profile precondition is still rejected because the strategy as sealed does NOT match the strategy actually exhibited. Treating it any other way re-opens the LESSON_B006_001_004 gap that B006_002 was built to close.
+- **How to apply:** Never treat favorable Sharpe / return / drawdown numbers as overriding a fail-closed rule fire. The framework's discipline depends on rules pre-empting verdict-favorable outcomes when their preconditions are violated - if you weaken this, the framework's risk-profile guarantees evaporate.
+
+## 2026-05-28 - LESSON_S14_D1_001 - Cross-sector diversification can improve A7/K10 without creating edge
+
+- **Lesson:** The s14-d1-cross-sector AAPL/JPM/XOM basket achieved its diversification target at P6 IS - A7 effective-independent-bets = 2.09 and K10 avg pairwise correlation = 0.4529 (AAPL-JPM 0.45, AAPL-XOM 0.32, JPM-XOM 0.59), both inside the SEAL's expected bands (A7 ~2.3-2.8, K10 0.30-0.50), with no single-symbol K6 concentration - yet the candidate still FAILED P6 IS with FAIL_SAFETY (net -$13,754.96 on $100k).
+- **Why:** Basket construction and signal edge are orthogonal failure axes. Spreading capital across low-correlation sectors reduces variance concentration but cannot manufacture positive expectancy where the underlying mechanic has none. A7/K10 in-band confirmed the basket worked as designed; it did not and cannot rescue a negative-edge entry/exit rule.
+- **How to apply:** Treat A7/K10/K6 as necessary-but-not-sufficient diagnostics. Never read "diversification thesis held" as evidence a candidate is viable, and never count a clean A7/K10 as a partial pass. Evaluate per-trade edge (K1 sharpe_proxy, K2 expectancy) independently of basket-quality metrics.
+
+## 2026-05-28 - LESSON_S14_D1_002 - RSI(3) with 2N ATR stop produced >50% win rate but negative expectancy
+
+- **Lesson:** s14-d1-cross-sector RSI(3) bi-directional mean-reversion (thresholds 15/55/85/45) with a 2N Wilder-ATR(14) hard stop produced a 54.31% win rate over 348 IS trades yet net-NEGATIVE expectancy (-$39.53/trade; sharpe_proxy/trade -0.1119), failing K1 and K2 at S1 baseline. The loss was predominantly gross (~$1.4k of the ~$13.7k loss was costs), so it was a real edge failure, not cost erosion.
+- **Why:** A hard 2N stop is structurally adversarial to the mean-reversion premise (price reverts): winners exit early when RSI crosses the 55/45 mid-band (small gains) while losers run to the full 2N stop distance (larger losses). A win rate >50% with profit/loss ratio <1 yields negative expectancy. High hit-rate masked a money-losing payoff geometry.
+- **How to apply:** For mean-reversion entries, a win rate >50% is NOT evidence of edge - always inspect expectancy and profit/loss ratio together. If the stop can be hit before the reversion completes, a high-hit-rate signal becomes a net loser.
+
+## 2026-05-28 - LESSON_S14_D1_003 - Mean-reversion candidates need exit/stop design tested from first principles, not just the entry signal
+
+- **Lesson:** The s14-d1-cross-sector SEAL locked the entry (RSI(3) thresholds) and the exit/stop (2N ATR + RSI mid-band) together; only at P6 IS did it become clear the exit/stop - not the entry - was the binding failure. Because parameters are locked post-SEAL (no in-candidate iteration), the candidate was terminal at FAIL_SAFETY with no recourse, after the full PLAN->SEAL->BUILD->P4->P6 cost.
+- **Why:** Entry signals get the design attention, but for mean-reversion the exit/stop geometry dominates expectancy. Locking an untested stop structure alongside the entry means a stop/entry mismatch can only be discovered after expensive downstream phases, with no permitted fix within the sealed candidate.
+- **How to apply:** When SEALing a future mean-reversion candidate, justify the exit/stop design from first principles BEFORE locking - does the stop distance respect the expected reversion horizon? - ideally with a cheap pre-SEAL feasibility check. A Path B follow-on candidate should vary the exit/stop structure (time-based or volatility-scaled exit, wider stop), not just re-tune entry thresholds.
