@@ -1,0 +1,508 @@
+{
+  "adjustment_convention": "split_only",
+  "all_12_symbols_dr9_pass": true,
+  "authored_at_utc": "2026-05-28T21:58:56.753306Z",
+  "authorization_phrase": "Authorize s16-d1 expanded-universe Tiingo split_only fetch + DR9 result sealing workflow only.",
+  "binding": true,
+  "candidate_universe_id": "s16-d1-expanded-cross-sector-cash-equity-12name",
+  "document_type": "AUDIT_RESULT_SEALED",
+  "dr9_thresholds": {
+    "documented_split_event_consistency_required": "PASS",
+    "gap_continuity_min": 0.95,
+    "max_gap_ratio_max": 0.3,
+    "quality_violation_count_max": 5,
+    "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+  },
+  "final_verdict": "DR9_ALL_12_PASS_EXPANDED_BASKET_READY_FOR_PLAN",
+  "fresh_fetched_symbols": [
+    "UNH",
+    "WMT",
+    "KO",
+    "META",
+    "AMZN",
+    "JNJ",
+    "CVX"
+  ],
+  "hard_boundaries_held": {
+    "fresh_split_factor_cross_checked": true,
+    "no_api_key_printed_or_logged": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_candidate_promotion": true,
+    "no_draft": true,
+    "no_git_commit_by_this_turn": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mechanic_selection": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_reused_sources": true,
+    "no_oos_inspection": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_s14_d1_revival": true,
+    "no_s15_d1_revival": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "result_sealing_only_no_tier_n_seal": true,
+    "reuse_sha_match_verified": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S16_D1_EXPANDED_CROSS_SECTOR_CASH_EQUITY_DR9_AUDIT_RESULT_SEALED",
+    "DR9_ALL_12_PASS",
+    "VENDOR_TIINGO",
+    "ADJUSTMENT_CONVENTION_SPLIT_ONLY",
+    "5_REUSED_DR9_CARRIED_7_FRESH_AUDITED",
+    "AMZN_20to1_WMT_3to1_SPLIT_CONSISTENCY_PASS",
+    "12_NAME_K9_CLEARING_TARGET_FOR_NON_MEAN_REVERSION",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state_post_audit": "S16_D1_EXPANDED_CROSS_SECTOR_CASH_EQUITY_DR9_AUDIT_SEALED_BASKET_READY_FOR_PLAN",
+  "negative_invariants": {
+    "backtest_run": false,
+    "build_executed": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "draft_authored": false,
+    "framework_dr10_v2_modified": false,
+    "lessons_md_touched": false,
+    "mechanic_selected": false,
+    "oos_inspected": false,
+    "reused_sources_modified": false,
+    "s12_d1_chain_modified": false,
+    "s13_d1_chain_modified": false,
+    "s14_chain_modified": false,
+    "s15_chain_modified": false,
+    "strategy_lab_promoted": false,
+    "tier_n_spec_plan_authored": false,
+    "tier_n_spec_sealed": false
+  },
+  "next_authorization_if_all_pass": "Authorize s16-d1 expanded-universe Tier-N spec PLAN only — bound by DR10 v2.",
+  "parent_references": {
+    "all_tech_dr9_result_seal": "1c93d4294e193b25b239fd613f4ff1e9d24a16860376ee31efd7ec2ef01eda40",
+    "cross_sector_dr9_result_seal": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+    "fetch_manifest_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/s16_d1_expanded_cross_sector_cash_equity_step02b_fetch_manifest.json",
+    "fetch_manifest_sha256_at_audit_time": "2825a762626e1faeb01ed6ec8e129edccaee675ff9bc6042b481b90eb4eb9e7f",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "run_book_commit": "4bcc396",
+    "selection_plan_after_s15_commit": "343bdac"
+  },
+  "per_symbol_audit_results": {
+    "AAPL": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": true,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "AAPL",
+      "split_consistency_checks": [
+        {
+          "ex_date": "2020-08-31",
+          "ratio_ex_over_prev": 1.033912,
+          "split_factor": 4.0,
+          "status": "PASS"
+        }
+      ],
+      "symbol": "AAPL"
+    },
+    "AMZN": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AMZN_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "d10f4e5ad48e030e769e3d6e1a2228be15d2369850151e75ef050533f63d0317",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "AMZN",
+      "split_consistency_checks": [
+        {
+          "ex_date": "2022-06-06",
+          "ratio_ex_over_prev": 1.019943,
+          "split_factor": 20.0,
+          "status": "PASS"
+        }
+      ],
+      "symbol": "AMZN"
+    },
+    "CVX": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/CVX_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "b322748f188faf30e3daa8b96d4dd4667954fe077ca39a8198df75728337b960",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "CVX",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "CVX"
+    },
+    "JNJ": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JNJ_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "d8565742778fd015d9e5f1a3659e664baf8f6542d7f06362d5fb7116787215b5",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "JNJ",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "JNJ"
+    },
+    "JPM": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "8aa244ab7724b292c659c81171bd8d3cf5ce5684d6c69864ee61e0be90238db7",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": true,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "JPM",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "JPM"
+    },
+    "KO": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/KO_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "0d00194723903bfa4724f7d3641499da6d165edb6bf8514a10e88233206d7d24",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "KO",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "KO"
+    },
+    "META": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/META_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "4cd3487376b07dd0149b12dec4154c0786ffdeaaa4ad0334f693aa8cd3dc69f5",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "META",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "META"
+    },
+    "MSFT": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "3ec6981f5bc4c37d56017a5542fd0d0d0ac6e9ecb132a4d5cc7668e0ddf112ce",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": "1c93d4294e193b25b239fd613f4ff1e9d24a16860376ee31efd7ec2ef01eda40",
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": true,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "MSFT",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "MSFT"
+    },
+    "NVDA": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "d974a054567921f03e66644c6ebfa18c98ae30d32da5138a60d26887c3194ee8",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": "1c93d4294e193b25b239fd613f4ff1e9d24a16860376ee31efd7ec2ef01eda40",
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": true,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "NVDA",
+      "split_consistency_checks": [
+        {
+          "ex_date": "2021-07-20",
+          "ratio_ex_over_prev": 0.991068,
+          "split_factor": 4.0,
+          "status": "PASS"
+        },
+        {
+          "ex_date": "2024-06-10",
+          "ratio_ex_over_prev": 1.007461,
+          "split_factor": 10.0,
+          "status": "PASS"
+        }
+      ],
+      "symbol": "NVDA"
+    },
+    "UNH": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/UNH_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "7b9d502e78bd2eaa8fbac08872865855e4d92ad43b1b3066881fa29f94115394",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "UNH",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "UNH"
+    },
+    "WMT": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/WMT_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "aa772f962f3afc712e9b9339b01c0b1f1fcd7cc02bf5ad276c035e1c321a8742",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": null,
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "WMT",
+      "split_consistency_checks": [
+        {
+          "ex_date": "2024-02-26",
+          "ratio_ex_over_prev": 1.018455,
+          "split_factor": 3.0,
+          "status": "PASS"
+        }
+      ],
+      "symbol": "WMT"
+    },
+    "XOM": {
+      "csv_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "fbbc462cbfbd11a68b0aed4d0c3fa72312afea5112cebcc24860689f33b7f77c",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_pass_carried_from_result_seal": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": true,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "sector_label": "XOM",
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "XOM"
+    }
+  },
+  "phase": "S16_D1_EXPANDED_CROSS_SECTOR_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_RESULT",
+  "report_date_utc": "2026-05-28T21:58:56.753306Z",
+  "report_seal_sha256": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+  "reused_symbols": [
+    "AAPL",
+    "JPM",
+    "XOM",
+    "MSFT",
+    "NVDA"
+  ],
+  "schema_id": "sparta.external_research_hunter.s16_d1_expanded_cross_sector_cash_equity_availability_probe_dr9_audit_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "split_event_consistency_highlights": {
+    "AAPL_2020_08_31_4to1": [
+      {
+        "ex_date": "2020-08-31",
+        "ratio_ex_over_prev": 1.033912,
+        "split_factor": 4.0,
+        "status": "PASS"
+      }
+    ],
+    "AMZN_2022_06_06_20to1": [
+      {
+        "ex_date": "2022-06-06",
+        "ratio_ex_over_prev": 1.019943,
+        "split_factor": 20.0,
+        "status": "PASS"
+      }
+    ],
+    "JNJ_kenvue_spinoff_2023_08_informational": "NON-split distribution; under split_only NOT adjusted; appears as a one-day price drop; NOT a split-consistency or gap fail (JNJ has no splits in window -> trivially PASS)",
+    "NVDA_2021_2024": [
+      {
+        "ex_date": "2021-07-20",
+        "ratio_ex_over_prev": 0.991068,
+        "split_factor": 4.0,
+        "status": "PASS"
+      },
+      {
+        "ex_date": "2024-06-10",
+        "ratio_ex_over_prev": 1.007461,
+        "split_factor": 10.0,
+        "status": "PASS"
+      }
+    ],
+    "WMT_2024_02_26_3to1": [
+      {
+        "ex_date": "2024-02-26",
+        "ratio_ex_over_prev": 1.018455,
+        "split_factor": 3.0,
+        "status": "PASS"
+      }
+    ]
+  },
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED"
+  },
+  "thresholds_immutable_per_no_dr_redefinition_post_seal": true,
+  "title": "s16-d1 expanded-universe (12-name cross-sector) cash-equity availability probe + DR9 audit RESULT (sealed; 5 reused DR9-carried + 7 fresh Tiingo split_only audited)",
+  "universe_12": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "JPM",
+    "XOM",
+    "UNH",
+    "WMT",
+    "KO",
+    "META",
+    "AMZN",
+    "JNJ",
+    "CVX"
+  ],
+  "vendor": "tiingo"
+}
