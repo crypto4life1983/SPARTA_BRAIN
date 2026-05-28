@@ -1,0 +1,97 @@
+{
+  "authored_at_utc": "2026-05-28T22:23:34.471399Z",
+  "binding": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "driver_file": {
+    "path": "external_research_hunter/s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_runner_harness/in_sample_driver.py",
+    "sha256": "2a4669bc31d5ab0c833c6d89b28ecc306ab4ba982df7631cf1f5abf05d0dffce"
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "hard_boundaries_held_this_p3_build_is_driver_turn": {
+    "c6_carried_verbatim": true,
+    "no_backtest": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_mean_reversion_reskin": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_s16_dr9_result_245ac0d": true,
+    "no_modification_of_sealed_csvs": true,
+    "no_network_call": true,
+    "no_oos_inspection": true,
+    "no_p4_smoke_execution": true,
+    "no_qc_runtime": true,
+    "no_revival_of_s15_s14_s13_s12": true,
+    "no_signal_computation": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization": true,
+    "tests_authored_not_run_at_p3_build": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "is_window": {
+    "end": "2023-12-29",
+    "start": "2019-01-02"
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P3_BUILD_IN_SAMPLE_DRIVER_REPORT_SEALED",
+    "IS_WINDOW_2019_2023",
+    "RUN_IN_SAMPLE_STUB_P6_GATED",
+    "DR9_REUSE_NO_FETCH",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "P3_BUILD_IN_SAMPLE_DRIVER_REPORT_SEALED",
+  "next_phase_requirements": {
+    "p4_authorization_phrase": "Authorize s16-d1 expanded-universe trend/breakout P4 synthetic smoke only",
+    "p4_requires_separate_authorization": true
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "f95e5e3",
+    "p1_plan_lock_report_seal_sha256": "957ca333d59a24e942a1c5f6c40375035942e2fcc53bc461c0ffbe5684d60f86",
+    "p2_phase2_plan_commit": "f826aea",
+    "p2_phase2_plan_report_seal_sha256": "3fa8634d3c5c4317ae27a498542cac7757a50029de766967d2a729cddcf73df5",
+    "s16_dr9_result_commit": "245ac0d",
+    "s16_dr9_result_seal_sha256": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+    "tier_n_spec_seal_commit": "985c569",
+    "tier_n_spec_seal_report_seal_sha256": "359aea43df85c153c8cbf2b7a84ddeaa78d6516fe43769e34b052b4f88c60df8"
+  },
+  "phase_prefix": "PHASE2-S16-D1-EXPANDED-DONCHIAN-TREND",
+  "py_compile_syntax_check": "ALL 9 .py files compiled clean (no import, no execution)",
+  "report_kind": "S16-D1 Donchian trend P3 BUILD in-sample driver report (sealed; IS 2019-01-02..2023-12-29; run_in_sample STUB P6-gated; no execution)",
+  "report_seal_sha256": "0bef46f123038228aca72598d3ed171f14a27e4736c43c40dcd9efc530273fed",
+  "run_in_sample_gate": "P6_IS_NOT_AUTHORIZED (separate authorization required)",
+  "schema_id": "sparta.external_research_hunter.s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_in_sample_driver_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P3_BUILD_REPORT_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "test_execution_status": "NOT_RUN (P4 synthetic smoke requires separate authorization)"
+}
