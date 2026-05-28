@@ -1,0 +1,242 @@
+{
+  "aapl_reuse_policy": {
+    "aapl_already_dr9_passed": true,
+    "controller_advisory": "Option A (reuse byte-equivalent) is lower-friction and preserves the established AAPL DR9 PASS; operator decides at fetch time",
+    "either_way_aapl_dr9_pass_established": true,
+    "option_a_reuse_byte_equivalent": "Copy AAPL CSV from all-tech dir to cross-sector dir; verify sha == f6625ff1...; AAPL DR9 PASS carries by sha-match",
+    "option_b_refetch_into_cross_sector_dir": "Re-fetch AAPL fresh via Tiingo split_only into cross-sector dir for fully self-contained provenance; re-run AAPL DR9"
+  },
+  "authored_at_utc": "2026-05-28T17:53:09.570553Z",
+  "authorization_phrase": "Authorize s14-d1-cross-sector cash-equity multi-name OHLCV availability probe + DR9 audit framework only.",
+  "contingency_paths": [
+    {
+      "contingency": "all_3_pass_dr9 (AAPL carried + JPM/XOM fresh PASS)",
+      "next_authorization": "Authorize s14-d1-cross-sector cash-equity Tier-N spec DRAFT only — bound by DR10 v2."
+    },
+    {
+      "contingency": "1_symbol_fails_dr9 (JPM or XOM)",
+      "next_authorization": "Authorize s14-d1-cross-sector shrunk-basket Tier-N spec PLAN only — bound by DR10 v2.",
+      "note": "Fresh candidate_record_id; substitution forbidden; shrunk to 2-name (AAPL + the passing one) which would weaken K9 OOS"
+    },
+    {
+      "contingency": "2_symbols_fail_dr9",
+      "next_authorization": "Authorize s14-d1-cross-sector universe revision to alternative cross-sector shortlist — bound by DR10 v2."
+    },
+    {
+      "contingency": "any_INCONCLUSIVE_HOLD",
+      "next_authorization": "Operator manual review; no auto-progression"
+    },
+    {
+      "contingency": "vendor_fetch_fails",
+      "next_authorization": "Operator retries Tiingo at later time; RUN_BOOK remains reference; do NOT create repeated decline memos per feedback_repeat_decline_at_unfulfilled_gate.md (brief in-chat reminder only)"
+    }
+  ],
+  "document_type": "RUN_BOOK_NOT_SEALED",
+  "dr9_audit_framework": {
+    "dividend_note": "JPM + XOM have higher dividend yields than tech. Under split_only (dividends NOT adjusted), ex-div dates show small downward jumps (<1% of price). These are NOT a DR9 fail condition under split_only convention (only split-event consistency is checked); informational only.",
+    "per_symbol_check_procedure": "Same 8-step procedure as all-tech RUN_BOOK 529bb6b §5.2: verify CSV exists + sha vs manifest; parse schema; compute gap_continuity (NYSE calendar) >= 0.95; max_gap_ratio <= 0.30; quality_violation_count <= 5; documented_split_event_consistency PASS (AAPL 4:1 already verified; JPM/XOM no splits -> trivially PASS); aggregate PASS/FAIL/INCONCLUSIVE_HOLD",
+    "split_event_notes": {
+      "AAPL": "2020-08-31 4:1 — already verified PASS in all-tech DR9 (ratio 1.034 under split_only)",
+      "JPM": "no splits in window -> documented_split_event_consistency trivially PASS",
+      "XOM": "no splits in window -> documented_split_event_consistency trivially PASS"
+    },
+    "thresholds_carried_byte_equivalent_from_all_tech_run_book_529bb6b": {
+      "documented_split_event_consistency": "PASS_IF_ALL_KNOWN_SPLITS_APPLIED_PER_SPLIT_ONLY_CONVENTION",
+      "gap_continuity_min": 0.95,
+      "max_gap_ratio_max": 0.3,
+      "quality_violation_count_max": 5,
+      "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+    },
+    "thresholds_immutable_per_no_dr_redefinition_post_seal": true
+  },
+  "explicit_exclusions_this_turn": [
+    "No vendor API call by controller (no Tiingo/yfinance/any-vendor call)",
+    "No API-key access of any kind",
+    "No network IO",
+    "No data fetch (operator-side at a future authorization)",
+    "No DR9 audit RESULTS sealed (framework pre-authored only)",
+    "No DR9 audit RUN executed",
+    "No DRAFT / SEAL / BUILD / backtest / simulator / signal computation / OOS inspection",
+    "No live trading / broker / Strategy Lab / candidate promotion",
+    "No s13-d1 / s12-d1 / parked-candidate revival",
+    "No modification of the all-tech sibling DRAFT at 214bae0",
+    "No modification of the all-tech AAPL captured data (reused read-only)",
+    "No modification of any existing sealed artifact",
+    "No lessons.md modification or staging"
+  ],
+  "hard_boundaries_held_this_run_book_turn": {
+    "dr9_audit_framework_pre_authored_only": true,
+    "no_api_key_access": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_candidate_promotion": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_claude_md_modification": true,
+    "no_data_fetch": true,
+    "no_dr9_audit_RESULTS_sealed": true,
+    "no_dr9_audit_RUN_executed": true,
+    "no_draft": true,
+    "no_gitignore_modification": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_all_tech_aapl_captured_data": true,
+    "no_modification_of_all_tech_sibling_draft_at_214bae0": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_cross_sector_plan_at_c61860d": true,
+    "no_modification_of_s14_d1_multi_instrument_chain": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_parked_candidate_revival": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_seal": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "no_vendor_api_call_by_controller": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "labels": [
+    "S14_D1_CROSS_SECTOR_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_RUN_BOOK",
+    "NOT_A_SEAL",
+    "PENDING_OPERATOR_FETCH_JPM_XOM",
+    "AAPL_REUSABLE_DR9_PASSED",
+    "VENDOR_TIINGO_PROVEN",
+    "ADJUSTMENT_CONVENTION_SPLIT_ONLY",
+    "JPM_XOM_NO_SPLITS_IN_WINDOW",
+    "CROSS_SECTOR_A7_IMPROVEMENT_TARGET",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "DR10_V2_BINDING_FOR_S14_PLUS",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S14_D1_CROSS_SECTOR_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "operator_side_fetch_run_book": {
+    "executor": "operator (TIINGO_API_KEY in env only; controller never reads)",
+    "expected_output_directory": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/",
+    "expected_output_files": [
+      "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv (reused byte-equivalent OR re-fetched)",
+      "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv (fresh)",
+      "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv (fresh)",
+      "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/s14_d1_cross_sector_cash_equity_step02b_fetch_manifest.json"
+    ],
+    "fetch_boundaries_required": {
+      "manifest_schema": "sparta.s14.cross_sector_cash_equity.step02b_fetch_manifest.v1 (same field structure as all-tech manifest)",
+      "no_api_key_printed_or_logged_or_saved": true,
+      "no_backtest": true,
+      "no_live_trading": true,
+      "no_oos_inspection_by_this_fetch": true,
+      "no_review_queue_mutation": true,
+      "no_signal_computation": true,
+      "no_simulator_run": true,
+      "no_strategy_lab_promotion": true,
+      "raw_csv_only_written_to_approved_directory": true,
+      "tiingo_api_key_read_from_env_only": true
+    },
+    "fetch_parameters": {
+      "aapl_reuse_or_refetch": "operator decision per aapl_reuse_policy",
+      "adjustment_convention": "split_only",
+      "end_date_inclusive": "2025-12-30",
+      "is_window_end": "2023-12-29",
+      "is_window_start": "2019-01-02",
+      "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+      "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+      "start_date_inclusive": "2019-01-02",
+      "symbols_to_fetch_fresh": [
+        "JPM",
+        "XOM"
+      ],
+      "vendor": "tiingo"
+    },
+    "post_fetch_action": "Operator confirms all 3 CSVs (AAPL reused/refetched + JPM + XOM fresh) + manifest exist at expected paths, then types `Authorize s14-d1-cross-sector cash-equity multi-name OHLCV availability probe + DR9 audit RESULT SEALING only.`"
+  },
+  "parent_references": {
+    "all_tech_aapl_reusable_data_sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9",
+    "all_tech_dr9_result_sealed_report_seal": "1c93d4294e193b25b239fd613f4ff1e9d24a16860376ee31efd7ec2ef01eda40",
+    "all_tech_run_book_md_sha256": "eda295ef418e66fbf956f42617acd3f1885b93fc15bbe60ee3f8d9642580f857",
+    "all_tech_run_book_model_commit": "529bb6b",
+    "candidate_record_id": "s14-d1-aapl-jpm-xom-cross-sector-cash-equity-rsi-3-bi-directional-large-cap-long-history",
+    "cross_sector_tier_n_spec_plan_commit": "c61860d",
+    "cross_sector_tier_n_spec_plan_file_sha256": "3acf6e3f26dfaf77773e1da05487b794ad6329f37a4fda767fa821b8157f12a2",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e"
+  },
+  "report_date_utc": "2026-05-28T17:53:09.570553Z",
+  "report_kind": "RUN_BOOK / operator-side fetch instructions + pre-authored DR9 audit framework for the cross-sector basket {AAPL, JPM, XOM}. NOT a sealed artifact. Status PENDING operator-side fetch of JPM + XOM (AAPL reusable from all-tech).",
+  "schema_id": "sparta.external_research_hunter.s14_d1_cross_sector_cash_equity_availability_probe_dr9_audit_run_book.v1",
+  "scope_of_this_run_book": [
+    "Carry the proven Tiingo split_only vendor approach from the all-tech basket (succeeded where yfinance curl_cffi failed TLS)",
+    "AAPL: already captured + DR9-PASSED in all-tech fetch; reusable byte-equivalent OR re-fetchable into cross-sector dir",
+    "JPM + XOM: fresh operator-side Tiingo split_only fetch required + full DR9 audit",
+    "Pre-authored DR9 audit framework (cash-equity adapted; same thresholds as all-tech RUN_BOOK 529bb6b)",
+    "Expected output paths + manifest schema for the cross-sector candidate",
+    "Contingency tree per cross-sector PLAN"
+  ],
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cash_equity_all_tech_lifecycle_state": "S14_D1_CASH_EQUITY_TIER_N_SPEC_DRAFT_SEALED (sibling; 214bae0; valid)",
+    "s14_d1_cross_sector_lifecycle_state": "S14_D1_CROSS_SECTOR_CASH_EQUITY_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+    "s14_d1_multi_instrument_lifecycle_state": "S14_D1_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH (sibling; gate-blocked at Databento)",
+    "trading_status": "PAUSED"
+  },
+  "symbols": [
+    {
+      "data_status": "ALREADY_CAPTURED_AND_DR9_PASSED in all-tech fetch",
+      "dr9_required": "ALREADY_PASSED (split_only consistency verified; re-audit at cross-sector audit turn for self-contained provenance OR carry forward the all-tech DR9 PASS by sha-match)",
+      "exchange": "NASDAQ",
+      "fetch_required": false,
+      "known_splits_in_window": [
+        [
+          "2020-08-31",
+          4.0
+        ]
+      ],
+      "name": "Apple Inc.",
+      "reusable_source_path": "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "reusable_source_sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9",
+      "risk_factors": "Low (already verified)",
+      "sector": "Information Technology",
+      "symbol": "AAPL"
+    },
+    {
+      "data_status": "NOT_YET_FETCHED",
+      "dr9_required": "FULL_DR9_AUDIT_REQUIRED after fresh fetch",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "JPMorgan Chase & Co.",
+      "risk_factors": "Low (no splits in window; high liquidity NYSE financial; split_only = raw close; higher dividend yield ~2-3% -> small ex-div jumps under split_only, <1% of price, non-distorting to RSI(3))",
+      "sector": "Financials",
+      "symbol": "JPM"
+    },
+    {
+      "data_status": "NOT_YET_FETCHED",
+      "dr9_required": "FULL_DR9_AUDIT_REQUIRED after fresh fetch",
+      "exchange": "NYSE",
+      "fetch_required": true,
+      "known_splits_in_window": [],
+      "name": "Exxon Mobil Corp.",
+      "risk_factors": "Low (no splits in window; high liquidity NYSE energy; split_only = raw close; high dividend yield ~3-5% -> small ex-div jumps under split_only, <1% of price, non-distorting to RSI(3))",
+      "sector": "Energy",
+      "symbol": "XOM"
+    }
+  ],
+  "title": "s14-d1-cross-sector cash-equity availability probe + DR9 audit RUN_BOOK (NOT a SEAL; AAPL reusable+DR9-passed; JPM+XOM fresh Tiingo split_only fetch + DR9 required)",
+  "vendor": {
+    "adjustment_convention": "split_only (Tiingo splitFactor stream; no dividend adjustment; adjClose/adjVolume ignored)",
+    "api_key": "TIINGO_API_KEY from env only; never printed/logged/saved",
+    "library_installed": "tiingo-0.16.1 (installed during all-tech fetch turn)",
+    "rationale": "Proven for the all-tech basket: Tiingo pure-Python requests transport succeeded where yfinance curl_cffi failed TLS CertificateVerifyError on this machine. Same vendor + split_only convention carried.",
+    "vendor": "tiingo"
+  }
+}
