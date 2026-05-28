@@ -1,0 +1,252 @@
+{
+  "authored_at_utc": "2026-05-28T20:19:44.993248Z",
+  "binding": true,
+  "build_scope": "runner harness package + test scaffold + synthetic fixture",
+  "candidate_record_id": "s15-d1-aapl-jpm-xom-cross-sector-cash-equity-zscore-mean-reversion-exit-to-mean",
+  "config_locked_strategy_params": {
+    "adjustment_convention": "split_only",
+    "catastrophe_stop_is_fixed_2N": false,
+    "catastrophe_stop_sigma_multiple": 3.5,
+    "data_vendor": "tiingo",
+    "entry_band_k_sigma": 2.0,
+    "exit_rule": "EXIT_TO_MEAN",
+    "lookback_L": 20,
+    "max_positions_per_name": 1,
+    "max_total_positions": 3,
+    "mechanic_family": "zscore_bollinger_mean_reversion_exit_to_mean",
+    "pyramid_method": "NONE",
+    "risk_pct_per_trade": 0.005,
+    "sizing_method": "vol_normalized",
+    "start_cash_usd": 100000,
+    "stop_method": "vol_scaled_catastrophe_sigma",
+    "time_stop_max_hold_bars": 10,
+    "verdict_min_closed_trades": 100,
+    "warmup_days": 30
+  },
+  "data_csv_registry_dr9_passed_by_reuse": {
+    "AAPL": {
+      "path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9"
+    },
+    "JPM": {
+      "path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "8aa244ab7724b292c659c81171bd8d3cf5ce5684d6c69864ee61e0be90238db7"
+    },
+    "XOM": {
+      "path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "fbbc462cbfbd11a68b0aed4d0c3fa72312afea5112cebcc24860689f33b7f77c"
+    }
+  },
+  "exit_stop_first_principles_implemented_in_build": "main.py implements EXIT-TO-MEAN (long_exit_to_mean/short_exit_to_mean) + vol-scaled catastrophe stop (compute_catastrophe_stop, 3.5*sigma, NOT 2N) + vol-normalized sizing; execution_guard enforces assert_exit_to_mean_rule + assert_catastrophe_stop_vol_scaled_not_2N. The s14-d1-cross-sector failed design (RSI-mid exit + fixed 2N stop) is structurally excluded.",
+  "files_authored": {
+    "runner_execution_guard_py": {
+      "exports": [
+        "assert_seal_inheritance (K8; anchors SEAL+P1+P2)",
+        "assert_no_forbidden_order_paths",
+        "assert_rec1_equivalent_binding_preserved",
+        "assert_locked_strategy_params (z-score DA register)",
+        "assert_exit_to_mean_rule (DA9; the binding axis)",
+        "assert_catastrophe_stop_vol_scaled_not_2N (DA10; the binding axis)",
+        "assert_boundary_alignment (C4)",
+        "assert_split_only_convention (C5)",
+        "assert_universe_locked (DA17)",
+        "assert_no_leverage_cap (K11)",
+        "full_guard_check (rollup; T15)"
+      ],
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/execution_guard.py",
+      "sha256": "2dbd9bc3652315d21c7a68bc5214f1394569611c70c990088ae398922b7c32a3"
+    },
+    "runner_init_py": {
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/__init__.py",
+      "sha256": "f1104575dec99215f7dbc419cf16f1a176fc51c569b4c2819c706be65cb35eb1"
+    },
+    "runner_main_py": {
+      "exports": [
+        "CONFIG (locked-params dict; DA1-DA20; z-score exit-to-mean)",
+        "Algo (QC-compatible; AddEquity shim; multi-name; open_position_count)",
+        "rolling_mean, rolling_std, zscore",
+        "long_entry_signal(z<=-2.0) / short_entry_signal(z>=+2.0)",
+        "long_exit_to_mean / short_exit_to_mean (EXIT-TO-MEAN)",
+        "compute_catastrophe_stop (entry -/+ 3.5*sigma; NOT 2N)",
+        "compute_position_shares_vol_normalized (vol-normalized; DA12)",
+        "time_stop_hit, portfolio_can_open, add_pyramid_unit (raises), compute_deterministic_run_id"
+      ],
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/main.py",
+      "sha256": "db174b15b8b610bb7ca0c8fdf7e0422dd1332aecca473ddd60e9bfd2245bc21a"
+    },
+    "tests_conftest_py": {
+      "env_guards": [
+        "HTTP_PROXY=invalid",
+        "HTTPS_PROXY=invalid",
+        "TIINGO_API_KEY popped"
+      ],
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/tests/conftest.py",
+      "sha256": "0b191c6796e62999d3144ec981f4a8eef2bcc58e2543a6357bf5ae8eafebc7cc"
+    },
+    "tests_fixture_synthetic_cross_sector_daily_csv": {
+      "design": "25 flat + 5 down (z<-2 long entry) + 5 up (exit-to-mean / z>+2 short) + 5 down + 50 deterministic oscillation",
+      "marker": "SYNTHETIC_PHASE2_SMOKE_FIXTURE",
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/tests/fixtures/synthetic_cross_sector_daily.csv",
+      "row_count": 90,
+      "sha256": "9de580c8d6f1943212e913e5199723190bc814964d135b27cabee6bd1e15a3a3"
+    },
+    "tests_init_py": {
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tests_test_oos_driver_invariants_py": {
+      "execution_status": "NOT_RUN_AT_P3_BUILD",
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/tests/test_oos_driver_invariants.py",
+      "sha256": "673e1cf0bf844205af58e13dbb37d8b49ffaea619f413e6ba2ccdaaea94e452b",
+      "test_count_authored": 13
+    },
+    "tests_test_smoke_t1_t15_py": {
+      "execution_status": "NOT_RUN_AT_P3_BUILD",
+      "path": "external_research_hunter/s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_harness/tests/test_smoke_t1_t15.py",
+      "sha256": "7af99c5dae126dc5961409ae69cc3b7548766df314b710a6d619f5a60b142964",
+      "test_count_authored": 21,
+      "tests": [
+        "test_T1_module_imports_clean",
+        "test_T2_runner_class_instantiable",
+        "test_T3_rolling_mean_std",
+        "test_T4_zscore",
+        "test_T5_entry_band_signals",
+        "test_T6_exit_to_mean",
+        "test_T7_catastrophe_stop_placement",
+        "test_T7b_add_pyramid_unit_raises",
+        "test_T7c_starting_cash_invariant_100000",
+        "test_T8_catastrophe_stop_wider_than_entry_band",
+        "test_T9_portfolio_cap",
+        "test_T10_vol_normalized_sizing",
+        "test_T11_skip_when_share_count_lt_one",
+        "test_T12_rth_only_filter_attested",
+        "test_T13_cost_surface",
+        "test_T14_cost_stress_matrix_S0_S1_S2_S3_S4",
+        "test_T15_validator_harness_pass_on_synthetic",
+        "test_T16_universe_locked_cross_sector",
+        "test_T17_split_only_convention",
+        "test_T18_exit_to_mean_and_catastrophe_stop_guards",
+        "test_T19_time_stop_fallback"
+      ]
+    }
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e); thresholds immutable",
+  "hard_boundaries_held_this_p3_build_runner_turn": {
+    "c6_inherited_constraints_block_carried_verbatim_into_this_build_report": true,
+    "no_adjustment_convention_switch": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_brokerage_connection": true,
+    "no_catastrophe_stop_to_fixed_2N_change": true,
+    "no_commit_by_this_turn": true,
+    "no_data_fetch": true,
+    "no_data_refetch": true,
+    "no_dr_redefinition": true,
+    "no_exit_to_mean_replacement": true,
+    "no_is_diagnostic_execution": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_all_tech_sibling_draft_214bae0": true,
+    "no_modification_of_cross_sector_dr9_result": true,
+    "no_modification_of_fetched_csvs_or_manifest": true,
+    "no_modification_of_framework_dr10_v2_78cd22e": true,
+    "no_modification_of_p1_c8d6dd5": true,
+    "no_modification_of_p2_5b36ac8": true,
+    "no_modification_of_s12_d1_chain": true,
+    "no_modification_of_s13_d1_chain": true,
+    "no_modification_of_s14_d1_cross_sector_chain": true,
+    "no_modification_of_s15_draft_9f0ce14": true,
+    "no_modification_of_tier_n_seal_597a49b": true,
+    "no_network_call": true,
+    "no_oos_inspection": true,
+    "no_p4_smoke_execution": true,
+    "no_paper_trading": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_qc_runtime": true,
+    "no_rec1_equivalent_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s14_d1_cross_sector_s13_d1_s12_d1_parked": true,
+    "no_s14_d1_cross_sector_revN_or_patch": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_invoked": true,
+    "no_strategy_optimization_or_grid_search": true,
+    "no_tiingo_api_call": true,
+    "no_tiingo_api_key_access": true,
+    "no_universe_widening_or_substitution": true,
+    "no_unrelated_tracked_file_modified": true,
+    "no_zscore_param_modification": true,
+    "tests_authored_not_run_at_p3_build": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the cross-sector basket (expected ~60-105/y basket-summed). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; central thesis): exit = EXIT-TO-MEAN (close on re-cross of SMA_L; the reversion target itself); stop = vol-scaled catastrophe brake (3.5*sigma_L; NOT a fixed 2N). This is the candidate's entire reason to exist after s14-d1-cross-sector FAIL_SAFETY (LESSON_S14_D1_002/003); a hypothesis to TEST at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%); proven-safe sizing",
+    "DA4=B (BINDING): START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT+SEAL; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family z-score/Bollinger mean-reversion exit-to-mean (NON-RSI) LOCKED at PLAN",
+    "z-score params LOCKED at SEAL: lookback L=20, entry band k=2.0, exit-to-mean, catastrophe stop 3.5*sigma, time-stop 10, vol-normalized sizing; modification post-SEAL FORBIDDEN",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50 turnover / 0.05 cost_drag immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention LOCKED (DA15); reuse same DR9-passed CSVs; switching/mixing post-SEAL FORBIDDEN",
+    "Cross-sector universe {AAPL (Tech), JPM (Financials), XOM (Energy)} LOCKED at PLAN; held constant from s14-d1-cross-sector to isolate the exit/stop variable; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 3 symbols by REUSE (sealed b13af03; result_seal a8ff9126...); data provenance locked; NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING but NOT the candidate's risk axis (already measured in-band for this universe at s14-d1-cross-sector); the risk axis is per-trade edge (K1/K2) under the new exit/stop design",
+    "s14-d1-cross-sector lifecycle terminal (FAIL_SAFETY; P7 6485ea9) preserved verbatim; this candidate is FRESH, NOT a _revN_/patch; clears T-FORBID-13/14/15",
+    "no_strategy_optimization_authorized: all parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless of any verdict; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P3_BUILD_RUNNER_REPORT_SEALED",
+    "S15_D1_CROSS_SECTOR_ZSCORE_EXIT_TO_MEAN",
+    "AAPL_JPM_XOM_CROSS_SECTOR_BASKET",
+    "EXIT_TO_MEAN_AND_VOL_SCALED_STOP_IMPLEMENTED",
+    "DR9_REUSE_NO_FETCH",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "TESTS_AUTHORED_NOT_RUN_AT_P3_BUILD",
+    "P4_SMOKE_REQUIRES_SEPARATE_AUTHORIZATION",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "P3_BUILD_RUNNER_REPORT_SEALED",
+  "next_phase_requirements": {
+    "no_phase_pre_approved_by_this_report": true,
+    "p4_authorization_phrase": "Authorize s15-d1 cross-sector cash-equity z-score exit-to-mean P4 synthetic smoke only",
+    "p4_synthetic_smoke_requires_separate_authorization": true
+  },
+  "parent_references": {
+    "all_tech_sibling_draft_commit": "214bae0",
+    "cross_sector_dr9_report_seal_sha256": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+    "cross_sector_dr9_result_commit": "b13af03",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "c8d6dd5",
+    "p1_plan_lock_report_seal_sha256": "d1355589e0c43f9a19ae575fabb87458b7e86d33184de8b33f082cf3c9d383a3",
+    "p2_phase2_plan_commit": "5b36ac8",
+    "p2_phase2_plan_report_seal_sha256": "6579f5cab302f5bf46c57184a196645755e1149941b614239cb8e9ad29488a40",
+    "s14_d1_cross_sector_p7_terminal_commit": "6485ea9",
+    "tier_n_spec_seal_commit": "597a49b",
+    "tier_n_spec_seal_report_seal_sha256": "1a89df0f07c4360cb1969f02889cd6fa973b93e81b21f0b3e27c6adc3ff0903d"
+  },
+  "phase_prefix": "PHASE2-S15-D1-CROSS-SECTOR-ZSCORE-EXIT-TO-MEAN",
+  "py_compile_syntax_check": "ALL 9 .py files compiled clean (py_compile doraise; NO import, NO execution, NO signal computation)",
+  "report_kind": "S15-D1-CROSS-SECTOR cash-equity z-score exit-to-mean P3 BUILD runner harness report (sealed; binding; runner_harness package + test scaffold + synthetic fixture; no execution; C6 carried verbatim)",
+  "report_seal_sha256": "a13fa8a59ca7bf77a076103a752286f817041b0169a5d7aab1bfe27aa6cae39f",
+  "schema_id": "sparta.external_research_hunter.s15_d1_aapl_jpm_xom_cross_sector_cash_equity_zscore_mean_reversion_exit_to_mean_runner_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P3_BUILD_REPORT_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "test_execution_status": "NOT_RUN (P4 synthetic smoke requires separate operator authorization)"
+}
