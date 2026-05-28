@@ -1,0 +1,212 @@
+{
+  "authored_at_utc": "2026-05-28T22:34:42.808392Z",
+  "binding": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "cost_stress_matrix": [
+    {
+      "annual_turnover": 16.89,
+      "closed_trades": 323,
+      "cost_drag_fraction_of_start_cash": 0.0,
+      "cost_scalar": 0.0,
+      "expectancy_per_trade_usd": 57.9,
+      "max_drawdown_pct": 0.139588,
+      "net_pnl_usd": 18702.55,
+      "sharpe_proxy_per_trade": 0.0611,
+      "slippage_scalar": 0.0,
+      "tier": "S0",
+      "total_cost_usd": 0.0
+    },
+    {
+      "annual_turnover": 16.7817,
+      "closed_trades": 323,
+      "cost_drag_fraction_of_start_cash": 0.016825,
+      "cost_scalar": 1.0,
+      "expectancy_per_trade_usd": 53.03,
+      "max_drawdown_pct": 0.140459,
+      "net_pnl_usd": 17129.66,
+      "sharpe_proxy_per_trade": 0.0563,
+      "slippage_scalar": 1.0,
+      "tier": "S1",
+      "total_cost_usd": 1682.51
+    },
+    {
+      "annual_turnover": 16.7354,
+      "closed_trades": 323,
+      "cost_drag_fraction_of_start_cash": 0.02519,
+      "cost_scalar": 1.5,
+      "expectancy_per_trade_usd": 50.98,
+      "max_drawdown_pct": 0.140688,
+      "net_pnl_usd": 16465.25,
+      "sharpe_proxy_per_trade": 0.0542,
+      "slippage_scalar": 1.5,
+      "tier": "S2",
+      "total_cost_usd": 2518.97
+    },
+    {
+      "annual_turnover": 16.6725,
+      "closed_trades": 323,
+      "cost_drag_fraction_of_start_cash": 0.033499,
+      "cost_scalar": 2.0,
+      "expectancy_per_trade_usd": 48.53,
+      "max_drawdown_pct": 0.141203,
+      "net_pnl_usd": 15673.82,
+      "sharpe_proxy_per_trade": 0.0518,
+      "slippage_scalar": 2.0,
+      "tier": "S3",
+      "total_cost_usd": 3349.94
+    },
+    {
+      "annual_turnover": 16.6849,
+      "closed_trades": 323,
+      "cost_drag_fraction_of_start_cash": 0.050253,
+      "cost_scalar": 3.0,
+      "expectancy_per_trade_usd": 47.07,
+      "max_drawdown_pct": 0.141649,
+      "net_pnl_usd": 15205.07,
+      "sharpe_proxy_per_trade": 0.0506,
+      "slippage_scalar": 3.0,
+      "tier": "S4",
+      "total_cost_usd": 5025.29
+    }
+  ],
+  "dr_k_evaluation": {
+    "DR10_v2": {
+      "and_conjunction_fires": false,
+      "cost_drag_branch_fires": false,
+      "rule": "turnover>0.50 AND S2_cost_drag>0.05 -> REJECT_FAST",
+      "s2_cost_drag": 0.02519,
+      "turnover_branch_fires": true
+    },
+    "DR2_DR4": "OOS-only; NOT evaluated at IS (deferred to P10 OOS gate)",
+    "DR3_zero_cost_only_survival": {
+      "fires": false,
+      "rule": "S0>0 AND all S1..S4<=0 -> REJECT_FAST"
+    },
+    "DR5_cost_stress_tier_flip": {
+      "fires": false,
+      "rule": "any positive->negative tier flip as cost increases"
+    },
+    "K12_DR_fires_on_cost_stress": false,
+    "K1_sharpe_proxy_lt_0_any_tier": false,
+    "K2_expectancy_le_0_any_S1_S4": false,
+    "K4_maxdd_gt_50_any_tier": false
+  },
+  "edge_survives_full_cost_stress": true,
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "hard_boundaries_held_this_p6_5_turn": {
+    "c6_carried_verbatim": true,
+    "is_window_only": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_donchian_param_modification": true,
+    "no_dr_redefinition": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_trading": true,
+    "no_modification_of_p3_source_files": true,
+    "no_modification_of_sealed_artifacts": true,
+    "no_network_call": true,
+    "no_oos_data_read": true,
+    "no_oos_inspection": true,
+    "no_p10_oos_gate": true,
+    "no_p7_decision_memo": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization_or_param_tuning": true,
+    "no_universe_widening": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P6_5_COST_STRESS_SEALED",
+    "S16_D1_EXPANDED_DONCHIAN_TREND",
+    "12_NAME_EXPANDED_CROSS_SECTOR_BASKET",
+    "P6_5_VERDICT_PASS_COST_STRESS_ELIGIBLE",
+    "DR10_V2_EVALUATED",
+    "DR3_DR5_EVALUATED_IS",
+    "DR2_DR4_DEFERRED_TO_OOS",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "REC1_EQUIVALENT_BINDING",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "P6_5_COST_STRESS_SEALED",
+  "negative_invariants": {
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_script": false,
+    "dr_redefined": false,
+    "lessons_md_touched": false,
+    "oos_inspected": false,
+    "p10_run": false,
+    "p3_source_files_modified": false,
+    "p7_authored_in_this_phase": false,
+    "parameters_optimized": false,
+    "s16_dr9_result_modified": false,
+    "sealed_csvs_modified": false,
+    "tier_n_seal_modified": false
+  },
+  "next_phase_requirements": {
+    "if_pass": "Authorize s16-d1 expanded-universe trend/breakout P7 decision memo only (integrates P6 IS + P6.5; records READY-for-OOS disposition).",
+    "if_reject_or_fail": "Author P7 terminal decision memo."
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "f95e5e3",
+    "p2_phase2_plan_commit": "f826aea",
+    "p3_build_commit": "2cddb93",
+    "p4_smoke_commit": "58904e8",
+    "p6_is_diagnostic_commit": "8976a47",
+    "p6_is_report_seal_sha256": "5b2c043e3f16f7edfa14c9e2aeefead002f945f4b2c29c721f3ac5d48b5ec55d",
+    "s16_dr9_result_commit": "245ac0d",
+    "tier_n_spec_seal_commit": "985c569"
+  },
+  "phase": "P6_5_COST_STRESS",
+  "phase_prefix": "PHASE2-S16-D1-EXPANDED-DONCHIAN-TREND",
+  "report_date_utc": "2026-05-28T22:34:42.808392Z",
+  "report_kind": "S16-D1 P6.5 cost-stress matrix (sealed; re-runs Donchian IS sim across S0-S4; evaluates DR3/DR5/DR10-v2/K1/K2/K4/K12; full DR2/DR4 deferred to OOS; C6 verbatim)",
+  "report_seal_sha256": "d8fa65e3341e02ae32b3f08c348f829185892c642f64dfd0936771cd9ebc8ddc",
+  "s0_to_s4_expectancy_degradation_pct": 18.7047,
+  "s0_to_s4_net_pnl_usd": {
+    "S0": 18702.55,
+    "S1": 17129.66,
+    "S2": 16465.25,
+    "S3": 15673.82,
+    "S4": 15205.07
+  },
+  "schema_id": "sparta.external_research_hunter.s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_p6_5_cost_stress_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "backtest_diagnostic_only": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P6_5_COST_STRESS_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s16-d1 expanded-universe Donchian trend P6.5 cost-stress result (sealed; S0-S4 on IS; DR3/DR5/DR10-v2/K12 evaluated; OOS never read)",
+  "verdict": "PASS_COST_STRESS_ELIGIBLE",
+  "verdict_reasons": [
+    "No DR2/DR3/DR4/DR5 fire at IS; DR10 v2 CLEARS (cost_drag<5%); K1/K2/K4 hold across S0-S4; edge survives full cost-stress"
+  ]
+}
