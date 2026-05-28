@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}SPARTA Trade Decision Ledger{% endblock %}
+
+{% block content %}
+<style>
+  .tl-wrap { font-family: ui-monospace, Menlo, Consolas, monospace;
+             color:#e6edf3; padding: 8px 0 32px; }
+  .tl-h1 { font-size:1.35rem; margin:0 0 4px; color:#e6edf3; }
+  .tl-sub { color:#8b949e; font-size:.84rem; margin:0 0 12px; }
+  .tl-banner { display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+               background:#0d1f1a; border:1px solid #1f5a3a; color:#3fb950;
+               border-radius:8px; padding:10px 12px; margin:10px 0 16px;
+               font-size:.8rem; font-weight:600; }
+  .tl-section { background:#0d1117; border:1px solid #30363d;
+                border-radius:8px; padding:14px 16px; margin:14px 0; }
+  .tl-section h2 { font-size:1.05rem; color:#58a6ff; margin:0 0 10px; }
+  .tl-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+             gap:10px; }
+  .tl-card { background:#161b22; border:1px solid #30363d; border-radius:6px;
+             padding:10px 12px; min-height:68px; }
+  .tl-card .lbl { display:block; color:#8b949e; font-size:.68rem;
+                  text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+  .tl-card .val { color:#e6edf3; font-size:1.1rem; font-weight:600; }
+  .tl-table-wrap { overflow:auto; }
+  table.tl-table { width:100%; border-collapse:collapse; font-size:.76rem; }
+  .tl-table th, .tl-table td { text-align:left; vertical-align:top;
+                               border-bottom:1px solid #21262d;
+                               padding:5px 8px; word-break:break-word; }
+  .tl-table th { color:#8b949e; font-weight:600; white-space:nowrap; }
+  .tl-status { display:inline-block; padding:2px 7px; border-radius:4px;
+               font-size:.68rem; text-transform:uppercase; border:1px solid #30363d;
+               background:#161b22; color:#8b949e; }
+  .tl-status-OK, .tl-status-ALLOWED, .tl-status-PAPER_ONLY { color:#3fb950;
+               background:#0d1f1a; border-color:#1f5a3a; }
+  .tl-status-MISSING, .tl-status-OBSERVATION, .tl-status-RECOMMENDED_BLOCK {
+               color:#d29922; background:#2a1f06; border-color:#6a5210; }
+  .tl-status-BLOCKED, .tl-status-ERROR, .tl-status-PARSE_ERROR {
+               color:#ff7b72; background:#3d1f1f; border-color:#6e2e2e; }
+  .tl-filters { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+                gap:10px; align-items:end; margin-bottom:10px; }
+  .tl-filter label { display:block; color:#8b949e; font-size:.68rem;
+                     text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+  .tl-filter input, .tl-filter select { width:100%; min-height:34px;
+                     border:1px solid #30363d; border-radius:6px;
+                     background:#161b22; color:#e6edf3; padding:6px 8px;
+                     font:inherit; font-size:.76rem; }
+  .tl-empty, .tl-error { padding:12px; border-radius:6px; font-size:.82rem; }
+  .tl-empty { color:#d29922; background:#161b22; border:1px dashed #d2992288; }
+  .tl-error { color:#ff7b72; background:#1f1313; border:1px solid #6e2e2e; }
+  .tl-small { color:#8b949e; font-size:.7rem; }
+  .tl-list { margin:0; padding-left:18px; }
+  .tl-list li { color:#ff7b72; font-size:.76rem; margin-bottom:3px; }
+</style>
+
+<div class="tl-wrap">
+  <h1 class="tl-h1">SPARTA Trade Decision Ledger</h1>
+  <p class="tl-sub">
+    Unified read-only view of existing candidate decisions, gate states,
+    coordinator blocks, and paper-only state. Missing values stay MISSING.
+  </p>
+
+  <div class="tl-banner" aria-label="Safety banner">
+    {{ payload.safety_banner }}
+  </div>
+
+  <section class="tl-section" aria-label="Data status">
+    <h2>
+      Data status
+      <span class="tl-status tl-status-{{ payload.status }}">{{ payload.status }}</span>
+    </h2>
+    <table class="tl-table">
+      <tbody>
+        <tr>
+          <td style="width:220px">External root</td>
+          <td><span class="tl-small">{{ payload.external_root or 'MISSING' }}</span></td>
+        </tr>
+        <tr>
+          <td>External root exists</td>
+          <td>{{ 'yes' if payload.external_root_exists else 'no' }}</td>
+        </tr>
+        <tr>
+          <td>Generated at UTC</td>
+          <td><span class="tl-small">{{ payload.generated_at }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+    {% if payload.errors %}
+      <div class="tl-error" style="margin-top:10px">
+        <strong>Fail-closed errors</strong>
+        <ul class="tl-list">
+          {% for err in payload.errors %}
+            <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="tl-section" aria-label="Summary cards">
+    <h2>Summary</h2>
+    <div class="tl-grid">
+      <div class="tl-card"><span class="lbl">Total ledger records</span><span class="val">{{ payload.summary.total_records }}</span></div>
+      <div class="tl-card"><span class="lbl">Symbols found</span><span class="val">{{ payload.summary.symbols_found }}</span></div>
+      <div class="tl-card"><span class="lbl">Blocked records</span><span class="val">{{ payload.summary.blocked_records }}</span></div>
+      <div class="tl-card"><span class="lbl">Allowed / paper / observation</span><span class="val">{{ payload.summary.allowed_paper_observation_records }}</span></div>
+      <div class="tl-card"><span class="lbl">Parse errors</span><span class="val">{{ payload.summary.parse_errors }}</span></div>
+      <div class="tl-card"><span class="lbl">Missing sources</span><span class="val">{{ payload.summary.missing_sources }}</span></div>
+    </div>
+  </section>
+
+  <section class="tl-section" aria-label="Source health">
+    <h2>Source health</h2>
+    {% if payload.source_health %}
+      <div class="tl-table-wrap">
+        <table class="tl-table">
+          <thead>
+            <tr>
+              <th>source_file</th>
+              <th>source_type</th>
+              <th>status</th>
+              <th>records</th>
+              <th>parse_errors</th>
+              <th>detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in payload.source_health %}
+              <tr>
+                <td>{{ row.source_file }}</td>
+                <td>{{ row.source_type }}</td>
+                <td><span class="tl-status tl-status-{{ row.status }}">{{ row.status }}</span></td>
+                <td>{{ row.record_count }}</td>
+                <td>{{ row.parse_errors }}</td>
+                <td>{{ row.detail or 'MISSING' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="tl-empty">MISSING: no source health rows.</div>
+    {% endif %}
+  </section>
+
+  <section class="tl-section" aria-label="Ledger filters and table">
+    <h2>Main ledger</h2>
+    <div class="tl-filters" aria-label="Client-side filters">
+      <div class="tl-filter">
+        <label for="tl-symbol">Symbol</label>
+        <input id="tl-symbol" type="search" placeholder="BTC, ETH, XRP">
+      </div>
+      <div class="tl-filter">
+        <label for="tl-final-state">Final state</label>
+        <select id="tl-final-state">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="tl-filter">
+        <label for="tl-blocked-reason">Blocked reason</label>
+        <input id="tl-blocked-reason" type="search" placeholder="duplicate, sync, risk">
+      </div>
+      <div class="tl-filter">
+        <label for="tl-source-type">Source type</label>
+        <select id="tl-source-type">
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+
+    {% if payload.records %}
+      <div class="tl-table-wrap">
+        <table class="tl-table" id="tl-ledger-table">
+          <thead>
+            <tr>
+              <th>timestamp</th>
+              <th>symbol</th>
+              <th>strategy</th>
+              <th>side</th>
+              <th>decision</th>
+              <th>final_state</th>
+              <th>blocked_reasons</th>
+              <th>evidence_state</th>
+              <th>coordinator_reason</th>
+              <th>source_file</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in payload.records %}
+              {% set blocked_text = row.blocked_reasons | join(', ') if row.blocked_reasons else 'MISSING' %}
+              <tr data-symbol="{{ row.symbol }}"
+                  data-final-state="{{ row.final_state }}"
+                  data-blocked-reasons="{{ blocked_text }}"
+                  data-source-type="{{ row.source_type }}">
+                <td>{{ row.timestamp }}</td>
+                <td>{{ row.symbol }}</td>
+                <td>{{ row.strategy }}</td>
+                <td>{{ row.side }}</td>
+                <td>{{ row.decision_allowed }}</td>
+                <td><span class="tl-status tl-status-{{ row.final_state }}">{{ row.final_state }}</span></td>
+                <td>{{ blocked_text }}</td>
+                <td>{{ row.evidence_state }}</td>
+                <td>{{ row.coordinator_reason }}</td>
+                <td><span class="tl-small">{{ row.source_file }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="tl-empty">MISSING: no ledger records from allowed sources.</div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+  const table = document.getElementById("tl-ledger-table");
+  if (!table) return;
+  const rows = Array.from(table.querySelectorAll("tbody tr"));
+  const symbolInput = document.getElementById("tl-symbol");
+  const stateSelect = document.getElementById("tl-final-state");
+  const reasonInput = document.getElementById("tl-blocked-reason");
+  const sourceSelect = document.getElementById("tl-source-type");
+
+  function fillSelect(select, attr) {
+    const values = Array.from(new Set(rows.map(r => r.dataset[attr]).filter(Boolean))).sort();
+    for (const value of values) {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = value;
+      select.appendChild(opt);
+    }
+  }
+
+  fillSelect(stateSelect, "finalState");
+  fillSelect(sourceSelect, "sourceType");
+
+  function applyFilters() {
+    const symbol = symbolInput.value.trim().toLowerCase();
+    const state = stateSelect.value;
+    const reason = reasonInput.value.trim().toLowerCase();
+    const source = sourceSelect.value;
+    for (const row of rows) {
+      const okSymbol = !symbol || row.dataset.symbol.toLowerCase().includes(symbol);
+      const okState = !state || row.dataset.finalState === state;
+      const okReason = !reason || row.dataset.blockedReasons.toLowerCase().includes(reason);
+      const okSource = !source || row.dataset.sourceType === source;
+      row.hidden = !(okSymbol && okState && okReason && okSource);
+    }
+  }
+
+  for (const el of [symbolInput, stateSelect, reasonInput, sourceSelect]) {
+    el.addEventListener("input", applyFilters);
+    el.addEventListener("change", applyFilters);
+  }
+})();
+</script>
+{% endblock %}

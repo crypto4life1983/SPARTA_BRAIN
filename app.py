@@ -140,6 +140,31 @@ async def lifespan(app: FastAPI):
         ),
         sort_order=92,
     )
+    db.upsert_manual_entry(
+        "trade_decision_ledger",
+        module_name="Trade Decision Ledger",
+        category="Trading",
+        status="READY",
+        short_description=(
+            "Read-only normalized ledger for existing candidate decisions, "
+            "gate states, coordinator blocks, and paper-only state."
+        ),
+        how_it_works=(
+            "Reads existing JSON/JSONL artifacts from the external trading "
+            "project data folder, normalizes them into ledger rows, and "
+            "renders source health plus provenance hashes. It has no trading "
+            "control surface."
+        ),
+        when_to_use=(
+            "When you need one safe view of accepted, blocked, observed, and "
+            "paper-only decision records without opening the external bot."
+        ),
+        user_action=(
+            "Open http://127.0.0.1:8765/trade-ledger in a browser. GET-only, "
+            "read-only, no forms, no bot control."
+        ),
+        sort_order=93,
+    )
 
     # One-shot migration: if the user is still on the previous-generation
     # short-form defaults (45s max / 30s target), bump them to 35s/25s.
@@ -7061,6 +7086,72 @@ async def page_journal(request: Request):
 
 
 # === END SPARTA Trade Intelligence Journal v1 block ========================
+
+
+# ===========================================================================
+# SPARTA Trade Decision Ledger v1 (read-only viewer)
+#
+# GET-only. Localhost/read-only style. No forms, no mutating buttons, no
+# broker/exchange connection, no order placement, no bot control. Reads only
+# existing external JSON/JSONL artifacts through
+# tools/trade_decision_ledger_adapter.py. If the adapter raises, render a
+# fail-closed ERROR payload.
+# ===========================================================================
+
+
+def _trade_ledger_empty_payload(status: str, *, errors: list[str]) -> dict:
+    from datetime import datetime as _dt, timezone as _tz
+    return {
+        "status": status,
+        "generated_at": _dt.now(_tz.utc).isoformat(),
+        "external_root": "",
+        "external_root_exists": False,
+        "safety_banner": (
+            "READ ONLY  no broker, no exchange, no order placement, "
+            "no bot control."
+        ),
+        "summary": {
+            "total_records": 0,
+            "symbols_found": 0,
+            "blocked_records": 0,
+            "allowed_paper_observation_records": 0,
+            "parse_errors": 0,
+            "missing_sources": 0,
+        },
+        "source_health": [],
+        "records": [],
+        "errors": list(errors),
+    }
+
+
+@app.get("/trade-ledger", response_class=HTMLResponse)
+async def page_trade_ledger(request: Request):
+    """SPARTA Trade Decision Ledger v1 — read-only normalized viewer."""
+    try:
+        from tools import trade_decision_ledger_adapter as _tdla
+        payload = _tdla.load_payload()
+        if not isinstance(payload, dict):
+            payload = _trade_ledger_empty_payload(
+                "ERROR",
+                errors=[f"adapter_returned_non_dict:{type(payload).__name__}"],
+            )
+    except Exception as exc:  # noqa: BLE001 - fail-closed render
+        payload = _trade_ledger_empty_payload(
+            "ERROR",
+            errors=[f"{type(exc).__name__}: {exc}"],
+        )
+
+    return templates.TemplateResponse(
+        "trade_ledger.html",
+        {
+            "request": request,
+            "page": "trade_ledger",
+            "payload": payload,
+        },
+    )
+
+
+# === END SPARTA Trade Decision Ledger v1 block =============================
 
 
 # ===========================================================================
