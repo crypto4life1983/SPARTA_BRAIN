@@ -1,0 +1,221 @@
+{
+  "authored_at_utc": "2026-05-28T22:15:55.051922Z",
+  "authorization_phrase": "Authorize s16-d1 expanded-universe trend/breakout P1 plan-lock only -- bound by DR10 v2.",
+  "binding": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "da_register_locked_by_reference_to_seal": {
+    "all_da1_da20_locked_byte_equivalent_at_seal": true,
+    "key_locks": {
+      "DA10_initial_catastrophe_stop_atr_multiple": 2.0,
+      "DA11_atr_period": 14,
+      "DA15_adjustment_convention": "split_only",
+      "DA16_vendor": "tiingo",
+      "DA17_universe_12name": true,
+      "DA18_portfolio_caps": "per_name 1 / total 6 / no pyramid",
+      "DA19_warmup_days": 40,
+      "DA20_signal_direction": "bi-directional",
+      "DA2_mechanic_family": "Donchian breakout trend (trailing-stop); NON-mean-reversion",
+      "DA3_per_trade_risk_pct": 0.005,
+      "DA4_start_cash_usd": 100000,
+      "DA6_N_entry": 20,
+      "DA8_N_exit_trailing": 10,
+      "DA9_exit_rule": "TRAILING_DONCHIAN_CHANNEL"
+    },
+    "p1_makes_no_da_changes": true
+  },
+  "document_type": "P1_PLAN_LOCK_SEALED",
+  "dr10_v2_binding": "carried by-reference from SEAL (framework SEAL 78cd22e); not redefined at P1",
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e); thresholds immutable",
+  "hard_boundaries_held_this_p1_turn": {
+    "c6_carried_verbatim": true,
+    "dr10_v2_carried_by_reference_not_redefined": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build_executed": true,
+    "no_candidate_promotion": true,
+    "no_commit_by_this_script": true,
+    "no_da_resolution_changed_at_p1": true,
+    "no_data_fetch": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mean_reversion_reskin": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_s16_dr9_result_245ac0d": true,
+    "no_modification_of_sealed_csvs": true,
+    "no_modification_of_tier_n_seal_985c569": true,
+    "no_oos_inspection": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s15_s14_s13_s12": true,
+    "no_s15_s14_revN_or_patch": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization": true,
+    "p1_plan_lock_only_no_p2": true
+  },
+  "inherited_constraints_block_C6_carried_verbatim": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "inherited_constraints_block_C6_count": 16,
+  "is_a_seal": true,
+  "is_a_tier_n_spec_seal": false,
+  "labels": [
+    "S16_D1_EXPANDED_DONCHIAN_TREND_P1_PLAN_LOCK_SEALED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "ANCHORS_TIER_N_SEAL_BYTE_EQUIVALENT",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "DA1_DA20_LOCKED_BY_REFERENCE",
+    "LIFECYCLE_PHASE_LADDER_LOCKED",
+    "TRAILING_DONCHIAN_EXIT_AND_2ATR_STOP_LOCKED",
+    "DR10_V2_BINDING",
+    "REC1_EQUIVALENT_BINDING",
+    "NO_PARAMETER_CHANGES_AT_P1",
+    "K8_DRIFT_CHECK_PASS",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_phase_ladder_locked": [
+    {
+      "name": "plan-lock",
+      "note": "anchors SEAL byte-equivalent; carries C6 verbatim",
+      "phase": "P1",
+      "status": "THIS_TURN"
+    },
+    {
+      "name": "phase-2 plan",
+      "note": "C1-C8 instantiation byte-equivalent; anchors SEAL + P1",
+      "phase": "P2",
+      "status": "FUTURE_SEPARATE_AUTH"
+    },
+    {
+      "name": "BUILD",
+      "note": "Donchian runner harness + IS/OOS drivers + tests; REUSES the 12 DR9-passed CSVs (245ac0d); no execution at BUILD",
+      "phase": "P3",
+      "status": "FUTURE_SEPARATE_AUTH"
+    },
+    {
+      "name": "synthetic smoke",
+      "note": "deterministic smoke + OOS invariants; sealed CSV not touched",
+      "phase": "P4",
+      "status": "FUTURE_SEPARATE_AUTH"
+    },
+    {
+      "name": "IS diagnostic",
+      "note": "IS-window run on 12 sealed CSVs 2019-01-02->2023-12-29; OOS never read; K1/K2/K4/K9 + trend edge test",
+      "phase": "P6",
+      "status": "FUTURE_SEPARATE_AUTH"
+    },
+    {
+      "name": "cost-stress matrix",
+      "note": "S0-S4 cost-stress; DR2/3/5/10 v2 evaluation",
+      "phase": "P6.5",
+      "status": "FUTURE_SEPARATE_AUTH"
+    },
+    {
+      "name": "decision memo",
+      "note": "integrate P6 IS + P6.5",
+      "phase": "P7",
+      "status": "FUTURE_SEPARATE_AUTH"
+    },
+    {
+      "name": "OOS gate",
+      "note": "OOS 2024-01-02->2025-12-30; OOS K9 inviolate; REC1-equivalent binding",
+      "phase": "P10",
+      "status": "FUTURE_SEPARATE_AUTH_REC1_BINDING"
+    }
+  ],
+  "lifecycle_state": "S16_D1_EXPANDED_DONCHIAN_TREND_P1_PLAN_LOCK_SEALED",
+  "negative_invariants": {
+    "any_da_resolution_changed_at_p1": false,
+    "backtest_run": false,
+    "build_executed": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_refetched": false,
+    "lessons_md_touched": false,
+    "mean_reversion_reskin": false,
+    "oos_inspected": false,
+    "p1_was_p2_or_build": false,
+    "parameters_optimized": false,
+    "s12_d1_chain_modified": false,
+    "s13_d1_chain_modified": false,
+    "s14_chain_modified": false,
+    "s15_chain_modified": false,
+    "s16_dr9_result_modified": false,
+    "s16_draft_modified": false,
+    "sealed_csvs_modified": false,
+    "tier_n_seal_modified": false
+  },
+  "next_phase_authorization_scope": {
+    "commit_this_p1": "Authorize commit s16-d1 expanded-universe trend/breakout P1 plan-lock only.",
+    "defer": "Defer / Pause s16-d1 at P1.",
+    "primary_forward": "Authorize s16-d1 expanded-universe trend/breakout P2 phase-2 plan only -- bound by DR10 v2."
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "s16_dr9_result_commit": "245ac0d",
+    "s16_dr9_result_seal_sha256": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+    "tier_n_spec_draft_commit": "15182cb",
+    "tier_n_spec_plan_commit": "68c2539",
+    "tier_n_spec_seal_commit": "985c569",
+    "tier_n_spec_seal_file_sha256": "68cbfb34078811e977a1c91aea30158c604c3c01f01f64fee0b66c001c845e53",
+    "tier_n_spec_seal_report_seal_sha256": "359aea43df85c153c8cbf2b7a84ddeaa78d6516fe43769e34b052b4f88c60df8"
+  },
+  "phase": "P1_PLAN_LOCK",
+  "rec1_equivalent_binding": true,
+  "rec1_equivalent_oos_k9_disclosure": "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+  "report_date_utc": "2026-05-28T22:15:55.051922Z",
+  "report_kind": "S16-D1 expanded-universe Donchian trend P1 plan-lock -- anchors the Tier-N SEAL, carries C6 verbatim, confirms DA register locked, locks the lifecycle phase-ladder. No parameter changes.",
+  "report_seal_sha256": "957ca333d59a24e942a1c5f6c40375035942e2fcc53bc461c0ffbe5684d60f86",
+  "schema_id": "sparta.s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_p1_plan_lock_sealed.v1",
+  "seal_inheritance_attestation": {
+    "anchors_tier_n_seal_byte_equivalent": true,
+    "c6_carried_verbatim_from_seal": true,
+    "c6_entry_count": 16,
+    "da_register_locked_by_reference_to_seal": true,
+    "k8_sealed_parent_drift_check": "PASS (SEAL report_seal + file sha re-read at P1; no drift)",
+    "no_parameter_changes_at_p1": true,
+    "tier_n_seal_file_sha256_at_p1": "68cbfb34078811e977a1c91aea30158c604c3c01f01f64fee0b66c001c845e53",
+    "tier_n_seal_report_seal_sha256_at_p1": "359aea43df85c153c8cbf2b7a84ddeaa78d6516fe43769e34b052b4f88c60df8"
+  },
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "S16_D1_EXPANDED_DONCHIAN_TREND_P1_PLAN_LOCK_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED"
+  },
+  "title": "s16-d1 expanded-universe Donchian trend P1 plan-lock (SEALED; anchors Tier-N SEAL byte-equivalent; C6 16 verbatim; DA1-DA20 locked by-reference; lifecycle phase-ladder locked; DR10 v2)",
+  "windows_locked": {
+    "is_window_end": "2023-12-29",
+    "is_window_start": "2019-01-02",
+    "oos_inspection_blocked_at_in_sample": true,
+    "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+    "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02"
+  }
+}
