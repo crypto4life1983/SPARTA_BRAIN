@@ -1,0 +1,363 @@
+{
+  "authored_at_utc": "2026-05-28T18:24:49.230108Z",
+  "authorization_phrase": "Authorize s14-d1-cross-sector cash-equity Tier-N spec DRAFT only — bound by DR10 v2.",
+  "binding": true,
+  "c1_c8_phase_2_safety_contracts": "inherited by-reference; cash-equity adaptations same as all-tech DRAFT (C5 splits documented+applied per split_only; C3 extended-hours NOT_APPLICABLE daily; C4 US equity RTH)",
+  "candidate_record_id": "s14-d1-aapl-jpm-xom-cross-sector-cash-equity-rsi-3-bi-directional-large-cap-long-history",
+  "cost_surface_proposed_at_draft_locked_at_seal": {
+    "commission_model": "per_share",
+    "commission_per_share_usd_proposed": 0.005,
+    "cross_sector_note": "JPM (NYSE financial) + XOM (NYSE energy) liquidity slightly different from AAPL (NASDAQ tech) but all mega-cap; per-share commission tiny fraction of notional; exact constants locked at SEAL",
+    "min_commission_per_trade_usd_proposed": 1.0,
+    "slippage_model": "half_bid_ask_spread_proxy",
+    "slippage_proxy_bps_proposed": 1.0
+  },
+  "da_register": [
+    {
+      "code": "DA1",
+      "locked_at": "PLAN",
+      "name": "candidate_record_id",
+      "resolution": "s14-d1-aapl-jpm-xom-cross-sector-cash-equity-rsi-3-bi-directional-large-cap-long-history"
+    },
+    {
+      "code": "DA2",
+      "locked_at": "PLAN",
+      "name": "mechanic_family",
+      "resolution": "F3-adjacent RSI(3) bi-directional mean-reversion"
+    },
+    {
+      "code": "DA3",
+      "locked_at": "PLAN",
+      "name": "per_trade_risk_pct",
+      "resolution": "B = 0.005 (0.5%)"
+    },
+    {
+      "code": "DA4",
+      "locked_at": "PLAN_PROPOSED_CONFIRM_AT_SEAL",
+      "name": "START_CASH_USD",
+      "resolution": "B = 100000 ($100k)"
+    },
+    {
+      "code": "DA5",
+      "locked_at": "DRAFT_PROPOSED",
+      "name": "K4_max_drawdown_magnitude_threshold",
+      "resolution": "A = 0.50 (50%)"
+    },
+    {
+      "code": "DA6",
+      "locked_at": "PLAN",
+      "name": "RSI_period",
+      "resolution": "3 (Connors)"
+    },
+    {
+      "code": "DA7",
+      "locked_at": "DRAFT_PROPOSED",
+      "name": "cost_stress_tiers",
+      "resolution": "A = five_tier_S0_S1_S2_S3_S4 (0.0/1.0/1.5/2.0/3.0)"
+    },
+    {
+      "code": "DA8",
+      "locked_at": "PLAN",
+      "name": "RSI_long_entry_threshold",
+      "resolution": "< 15"
+    },
+    {
+      "code": "DA9",
+      "locked_at": "PLAN",
+      "name": "RSI_long_exit_threshold",
+      "resolution": "> 55"
+    },
+    {
+      "code": "DA10",
+      "locked_at": "PLAN",
+      "name": "RSI_short_entry_threshold",
+      "resolution": "> 85"
+    },
+    {
+      "code": "DA11",
+      "locked_at": "PLAN",
+      "name": "RSI_short_exit_threshold",
+      "resolution": "< 45"
+    },
+    {
+      "code": "DA12",
+      "locked_at": "DRAFT_PROPOSED",
+      "name": "ATR_period",
+      "resolution": "PROPOSED 14 (equity-standard) — CONFIRM AT SEAL"
+    },
+    {
+      "code": "DA13",
+      "locked_at": "DRAFT_PROPOSED",
+      "name": "ATR_stop_multiplier_in_ATR",
+      "resolution": "2.0 (2N stop)"
+    },
+    {
+      "code": "DA14",
+      "locked_at": "DRAFT_BY_REFERENCE_TO_FRAMEWORK_SEAL_78cd22e",
+      "name": "DR10_definition",
+      "resolution": "v2 AND-conjunction (turnover>0.50 AND S2_cost_drag>0.05); thresholds byte-equivalent"
+    },
+    {
+      "code": "DA15",
+      "locked_at": "DRAFT_CONFIRMED_BY_PASSED_AUDIT",
+      "name": "DR9_data_continuity",
+      "resolution": "0.95/0.30/NOT_APPLICABLE_roll/5 + documented_split_event_consistency — ALL 3 PASSED (sealed result_seal a8ff9126...)"
+    },
+    {
+      "code": "DA16",
+      "locked_at": "DRAFT_PROPOSED",
+      "name": "warmup_days",
+      "resolution": "PROPOSED 30 (covers RSI(3)+ATR(14)) — CONFIRM AT SEAL"
+    },
+    {
+      "code": "DA17",
+      "locked_at": "DRAFT_CONFIRMED",
+      "name": "adjustment_convention",
+      "resolution": "split_only (CONFIRMED; AAPL 4:1 verified; JPM/XOM no splits)"
+    },
+    {
+      "code": "DA18",
+      "locked_at": "DRAFT_CONFIRMED",
+      "name": "data_vendor",
+      "resolution": "Tiingo (split_only via splitFactor stream)"
+    },
+    {
+      "code": "DA19",
+      "locked_at": "PLAN",
+      "name": "universe",
+      "resolution": "{AAPL (Tech), JPM (Financials), XOM (Energy)} — cross-sector for improved A7"
+    },
+    {
+      "code": "DA20",
+      "locked_at": "PLAN",
+      "name": "portfolio_position_caps",
+      "resolution": "max_positions_per_name=1, max_total_positions=3, no inter-name coordination"
+    }
+  ],
+  "da_register_count": 20,
+  "diversification_metrics_load_bearing_at_seal": {
+    "A6_concentration_index": "expected balanced (no single-name dominance vs all-tech NVDA-dominance risk)",
+    "A7_effective_independent_bets": "expected 2.3-2.8 (IMPROVED vs all-tech 1.5-2.0 — the central improvement of this candidate)",
+    "K10_avg_pairwise_correlation": "expected 0.30-0.50 (IMPROVED vs all-tech 0.70-0.85)",
+    "K6_per_symbol_dispersion": "TBD at SEAL (expected higher across sectors)",
+    "note": "Cross-sector diversification is the candidate's raison d'etre; A7/K10 improvement is the central thesis to confirm at SEAL/diagnostic"
+  },
+  "document_type": "TIER_N_SPEC_DRAFT",
+  "dr10_v2_reachability_table_draft": {
+    "dr10_v2_status": "CLEARS WITH STRONG MARGIN",
+    "expected_annual_turnover": "~30-60 (turnover branch fires alone; non-binding under AND)",
+    "expected_s2_cost_drag": "~0.3-0.6% (well under 5%)"
+  },
+  "dr9_gate_status_carried_into_draft": {
+    "aapl_reused_dr9_carried": true,
+    "data_provenance_locked": "AAPL reused byte-equivalent (sha f6625ff1...); JPM/XOM fresh Tiingo split_only; all sha-verified; DR9 sealed at b13af03",
+    "dr9_all_3_symbols_pass": true,
+    "dr9_verdict": "DR9_ALL_3_PASS_CROSS_SECTOR_BASKET_READY_FOR_DRAFT",
+    "jpm_xom_fresh_fetch_audited_pass": true,
+    "per_symbol_dr9_status": {
+      "AAPL": "PASS",
+      "JPM": "PASS",
+      "XOM": "PASS"
+    }
+  },
+  "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+  "dr_register": {
+    "DR1": "oos_rebalance_count<36 OOS-only -> INCONCLUSIVE_HOLD",
+    "DR10_v2": "turnover_cost_explosion (annual_turnover>0.50 AND S2_cost_drag>0.05) -> REJECT_FAST. AND-conjunction (78cd22e). Cash-equity cost_drag CLEARS strong margin",
+    "DR11": "NOT IN CHAIN — cash equity unlevered",
+    "DR2": "oos_metrics_degrade_materially_under_cost_stress -> REJECT_FAST (OOS-only)",
+    "DR3": "zero_cost_only_survival -> REJECT_FAST (RSI-lineage HIGHER prior; cross-sector hypothesis-fresh)",
+    "DR4": "oos_negative_while_is_positive_unexplained -> REJECT_FAST (OOS-only)",
+    "DR5": "cost_stress_turns_edge_negative tier flip -> REJECT_FAST / INCONCLUSIVE_HOLD carveout",
+    "DR6": "post_warmup_sizing_ambiguity_or_invalid -> REJECT_FAST (per-name)",
+    "DR7": "missing_oos_or_date_window_evidence -> INCONCLUSIVE_HOLD",
+    "DR8": "live_or_order_routing_path_detected -> HARD_FAIL_VOIDED",
+    "DR9": "data_continuity_integrity_check (per-name) -> INCONCLUSIVE_HOLD. STATUS: ALREADY PASSED all 3 (sealed a8ff9126...)"
+  },
+  "first_principles_burden": {
+    "vs_all_tech_sibling": "same mechanic, DIFFERENT universe (cross-sector vs all-tech); clean diversification A/B; NOT _revN_; all-tech DRAFT 214bae0 preserved byte-stable",
+    "vs_s14_d1_multi_instrument": "orthogonal asset class (cash equity vs micro-futures)",
+    "vs_s7_d1": "balanced A6/A7 directly addresses USO-dominance lesson",
+    "vs_s9": "single-name cross-sector basket vs 4-ETF basket; bi-directional vs long-only; RSI(3) vs RSI(2)"
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (commit 78cd22e); thresholds 0.50/0.05 immutable",
+  "hard_boundaries_held_this_draft_turn": {
+    "dr10_v2_carried_by_reference_not_redefined": true,
+    "dr9_gate_pass_carried_not_re_run": true,
+    "draft_only_no_tier_n_seal": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build_executed": true,
+    "no_candidate_promotion": true,
+    "no_claude_md_modification": true,
+    "no_commit_by_this_turn": true,
+    "no_data_fetch": true,
+    "no_data_refetch": true,
+    "no_dr_redefinition_post_seal": true,
+    "no_frc_grant": true,
+    "no_gitignore_modification": true,
+    "no_idea_memory_mutation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_block_relaxation": true,
+    "no_live_trading": true,
+    "no_modification_of_all_tech_sibling_draft_214bae0": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_cross_sector_dr9_result": true,
+    "no_modification_of_cross_sector_plan_at_c61860d": true,
+    "no_modification_of_fetched_csvs_or_manifest": true,
+    "no_modification_of_framework_dr10_revision_seal_v2_at_78cd22e": true,
+    "no_modification_of_s12_d1_chain": true,
+    "no_modification_of_s13_d1_chain": true,
+    "no_modification_of_s14_d1_multi_instrument_chain": true,
+    "no_oos_inspection": true,
+    "no_parked_candidate_revival": true,
+    "no_phase_2_safety_contract_template_modification": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_rsi_threshold_modification_from_plan": true,
+    "no_s12_d1_revival": true,
+    "no_s13_d1_revival": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "no_universe_widening": true
+  },
+  "is_a_seal": true,
+  "is_a_tier_n_spec_seal": false,
+  "is_oos_windows": {
+    "data_covers_full_window": true,
+    "is_window_end": "2023-12-29",
+    "is_window_start": "2019-01-02",
+    "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+    "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+    "rows_per_symbol": 1759
+  },
+  "k9_reachability_table_draft": {
+    "expected_basket_effective_at_75pct_independence": "45-79/y (cross-sector higher independence vs all-tech 60%)",
+    "expected_per_name_trades_per_year": "20-35",
+    "is_required_trades_per_year": 20.0,
+    "is_window_years": 5.0,
+    "k9_is_status": "CLEARS WITH STRONG MARGIN (225-395 over 5y; 11-20x floor)",
+    "k9_oos_risk": "LOW-MODERATE (improved vs all-tech MODERATE)",
+    "k9_oos_status": "CLEARS (90-158 over 2y; 1.8-3.2x floor) — IMPROVED vs all-tech BORDERLINE",
+    "oos_required_trades_per_year": 50.0,
+    "oos_window_years": 2.0,
+    "rec1_equivalent_disclosure": "If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability probable -> PARK. Cross-sector expected 45-79/y comfortably exceeds floor."
+  },
+  "k_gates": {
+    "K10_avg_pairwise_corr": "APPLICABLE; expected 0.30-0.50 (cross-sector; IMPROVED vs all-tech 0.70-0.85); LOAD-BEARING",
+    "K11_cap_binding_events": "NOT_APPLICABLE_NO_LEVERAGE_CAP",
+    "K12_DR_fires_on_cost_stress": "if DR2/DR3/DR4/DR5 fires across S0/S2/S3/S4 -> FAIL_SAFETY",
+    "K1_sharpe_proxy_lt_0": "FAIL_SAFETY at S1",
+    "K2_expectancy_le_0": "FAIL_SAFETY at S1",
+    "K4_maxdd_gt_50": "FAIL_SAFETY",
+    "K6_per_symbol_dispersion": "APPLICABLE; LOAD-BEARING",
+    "K7_filter_silently_introduced": "FAIL_SAFETY",
+    "K8_sealed_parent_drift": "FAIL_SAFETY",
+    "K9_closed_trades_lt_100": "INSUFFICIENT_SAMPLE; INVIOLATE"
+  },
+  "labels": [
+    "S14_D1_CROSS_SECTOR_CASH_EQUITY_TIER_N_SPEC_DRAFT_SEALED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "F3_RSI_3_BI_DIRECTIONAL_CASH_EQUITY",
+    "AAPL_JPM_XOM_CROSS_SECTOR_BASKET",
+    "ADJUSTMENT_CONVENTION_SPLIT_ONLY_CONFIRMED",
+    "VENDOR_TIINGO",
+    "CROSS_SECTOR_DR9_GATE_PASSED",
+    "DR10_V2_BINDING_CLEARS_WITH_STRONG_MARGIN",
+    "K9_OOS_RISK_LOW_MODERATE_IMPROVED_VS_ALL_TECH",
+    "A7_IMPROVED_2_3_TO_2_8_VS_ALL_TECH_1_5_TO_2_0",
+    "NOT_A_TIER_N_SEAL",
+    "DA_REGISTER_DA1_DA20",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S14_D1_CROSS_SECTOR_CASH_EQUITY_TIER_N_SPEC_DRAFT_SEALED",
+  "negative_invariants": {
+    "all_tech_sibling_draft_214bae0_modified": false,
+    "backtest_run": false,
+    "build_executed": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "cross_sector_dr9_result_modified": false,
+    "data_refetched": false,
+    "fetched_csvs_or_manifest_modified": false,
+    "framework_dr10_v2_modified": false,
+    "is_a_tier_n_spec_seal": false,
+    "lessons_md_touched": false,
+    "live_trading_attempted": false,
+    "oos_inspected": false,
+    "s12_d1_chain_modified": false,
+    "s13_d1_chain_modified": false,
+    "s14_d1_multi_instrument_chain_modified": false,
+    "strategy_lab_promoted": false,
+    "tier_n_spec_sealed_this_turn": false
+  },
+  "next_phase_authorization_scope": {
+    "advance_all_tech_sibling": "Authorize s14-d1-cash-equity Tier-N spec SEAL only — bound by DR10 v2.",
+    "commit_this_draft": "Authorize commit s14-d1-cross-sector cash-equity Tier-N spec DRAFT artifacts only.",
+    "defer": "Defer / Pause s14-d1-cross-sector cash-equity at DRAFT.",
+    "primary_forward": "Authorize s14-d1-cross-sector cash-equity Tier-N spec SEAL only — bound by DR10 v2."
+  },
+  "parent_references": {
+    "adjustment_convention": "split_only",
+    "all_tech_draft_file_sha256": "ae3a635c8f173e1b99f9d738bd9a8ce6a0aae86f0eedcacff0e215ee37b5223d",
+    "all_tech_draft_model_commit": "214bae0",
+    "cross_sector_dr9_report_seal_sha256": "a8ff91263e64529d52ac8b974ec01d8517d4bc7187df124b9938323870078a9c",
+    "cross_sector_dr9_result_commit": "b13af03",
+    "cross_sector_dr9_result_file_sha256": "a3712d58d6820433db9b98a5ae0de59c3f363132c3cbde2500583aa83bd1679c",
+    "cross_sector_dr9_verdict": "DR9_ALL_3_PASS_CROSS_SECTOR_BASKET_READY_FOR_DRAFT",
+    "fetch_manifest_path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/s14_d1_cross_sector_cash_equity_step02b_fetch_manifest.json",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "tier_n_spec_plan_commit": "c61860d",
+    "tier_n_spec_plan_file_sha256": "3acf6e3f26dfaf77773e1da05487b794ad6329f37a4fda767fa821b8157f12a2",
+    "vendor": "tiingo"
+  },
+  "phase": "TIER_N_SPEC_DRAFT",
+  "rec1_equivalent_binding": true,
+  "rec1_equivalent_oos_k9_disclosure": "OOS K9 reachable with improved margin vs all-tech (cross-sector higher signal independence). If observed effective IS rate < 25/y basket-summed -> PARK per precedent. Chain shall NOT relax K9 at OOS.",
+  "report_date_utc": "2026-05-28T18:24:49.230108Z",
+  "report_kind": "S14-D1-CROSS-SECTOR cash-equity Tier-N specification DRAFT — carries PLAN structural locks + sealed cross-sector DR9 PASS, expands DA register, confirms split_only, proposes operational params for SEAL. NOT a Tier-N SEAL.",
+  "report_seal_sha256": "ad5f046043bb137b83f6cb0a9270e848be644acd2152bb4f95f8ca05c834e764",
+  "schema_id": "sparta.external_research_hunter.s14_d1_aapl_jpm_xom_cross_sector_cash_equity_rsi_3_bi_directional_large_cap_long_history_tier_n_spec_DRAFT.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "S14_D1_CROSS_SECTOR_CASH_EQUITY_TIER_N_SPEC_DRAFT_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED"
+  },
+  "structural_locks_carried_from_plan": {
+    "inter_name_signal_coordination": "NONE",
+    "max_positions_per_name": 1,
+    "max_total_positions": 3,
+    "mechanic_family": "F3-adjacent RSI(3) bi-directional mean-reversion",
+    "per_trade_risk_pct_DA3": 0.005,
+    "pyramid": "NONE",
+    "rsi_long_entry_threshold": 15,
+    "rsi_long_exit_threshold": 55,
+    "rsi_period": 3,
+    "rsi_short_entry_threshold": 85,
+    "rsi_short_exit_threshold": 45,
+    "signal_direction": "bi-directional",
+    "start_cash_usd_DA4_proposed": 100000,
+    "universe": [
+      "AAPL",
+      "JPM",
+      "XOM"
+    ],
+    "universe_sectors": {
+      "AAPL": "Information Technology",
+      "JPM": "Financials",
+      "XOM": "Energy"
+    }
+  },
+  "title": "s14-d1-cross-sector cash-equity 3-name basket RSI(3) bi-directional Tier-N specification DRAFT (AAPL/JPM/XOM; paper-research-only; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE; bound by DR10 v2; cross-sector DR9 gate PASSED)"
+}
