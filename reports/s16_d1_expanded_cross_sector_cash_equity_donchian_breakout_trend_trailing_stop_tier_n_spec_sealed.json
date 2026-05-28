@@ -1,0 +1,438 @@
+{
+  "authored_at_utc": "2026-05-28T22:14:45.553265Z",
+  "authorization_phrase": "Authorize s16-d1 expanded-universe trend/breakout Tier-N spec SEAL only -- bound by DR10 v2.",
+  "binding": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "da_register_count": 20,
+  "da_register_locked_byte_equivalent": [
+    {
+      "code": "DA1",
+      "locked_value": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+      "name": "candidate_record_id"
+    },
+    {
+      "code": "DA2",
+      "locked_value": "F-trend: Donchian channel breakout (bi-directional) with trailing exit channel + ATR initial stop (NON-mean-reversion)",
+      "name": "mechanic_family"
+    },
+    {
+      "code": "DA3",
+      "locked_value": 0.005,
+      "name": "per_trade_risk_pct"
+    },
+    {
+      "code": "DA4",
+      "locked_value": 100000,
+      "name": "START_CASH_USD",
+      "resolved_at_seal_from": "B proposed at PLAN/DRAFT; confirmed at SEAL (DR10 v2 cost_drag <<5%)"
+    },
+    {
+      "code": "DA5",
+      "locked_value": 0.5,
+      "name": "K4_max_drawdown_magnitude_threshold"
+    },
+    {
+      "code": "DA6",
+      "locked_value": 20,
+      "name": "N_entry_donchian",
+      "resolved_at_seal_from": "first-principles standard; NOT optimized"
+    },
+    {
+      "code": "DA7",
+      "locked_value": [
+        {
+          "cost_scalar": 0.0,
+          "slippage_scalar": 0.0,
+          "tier": "S0"
+        },
+        {
+          "cost_scalar": 1.0,
+          "slippage_scalar": 1.0,
+          "tier": "S1"
+        },
+        {
+          "cost_scalar": 1.5,
+          "slippage_scalar": 1.5,
+          "tier": "S2"
+        },
+        {
+          "cost_scalar": 2.0,
+          "slippage_scalar": 2.0,
+          "tier": "S3"
+        },
+        {
+          "cost_scalar": 3.0,
+          "slippage_scalar": 3.0,
+          "tier": "S4"
+        }
+      ],
+      "name": "cost_stress_tiers"
+    },
+    {
+      "code": "DA8",
+      "locked_value": 10,
+      "name": "N_exit_donchian_trailing",
+      "resolved_at_seal_from": "first-principles; NOT optimized"
+    },
+    {
+      "code": "DA9",
+      "locked_value": "TRAILING_DONCHIAN_CHANNEL (long exits < prior 10d low; short exits > prior 10d high). [LOAD-BEARING binding axis]",
+      "name": "exit_rule"
+    },
+    {
+      "code": "DA10",
+      "locked_value": 2.0,
+      "name": "initial_catastrophe_stop_atr_multiple",
+      "resolved_at_seal_from": "2 x ATR(14) initial floor; whichever of trailing-channel / ATR-stop triggers first. NOT a tight mean-reversion stop. [LOAD-BEARING]"
+    },
+    {
+      "code": "DA11",
+      "locked_value": 14,
+      "name": "ATR_period"
+    },
+    {
+      "code": "DA12",
+      "locked_value": "vol_normalized: shares = floor((0.005*equity) / (2*ATR14))",
+      "name": "sizing_method"
+    },
+    {
+      "code": "DA13",
+      "locked_value": "v2 AND-conjunction: (annual_turnover>0.50 AND S2_cost_drag>0.05) -> REJECT_FAST",
+      "name": "DR10_definition",
+      "resolved_at_seal_from": "by-reference to framework SEAL 78cd22e; thresholds immutable"
+    },
+    {
+      "code": "DA14",
+      "locked_value": "ALL 12 PASS by REUSE of sealed CSVs at 245ac0d (result_seal ec856253); NO fresh fetch; sha-verified at BUILD",
+      "name": "DR9_data_continuity"
+    },
+    {
+      "code": "DA15",
+      "locked_value": "split_only",
+      "name": "adjustment_convention",
+      "resolved_at_seal_from": "CONFIRMED; AMZN 20:1 + WMT 3:1 + NVDA 4:1/10:1 + AAPL 4:1 applied+verified; JNJ Kenvue spin-off informational; dividends not adjusted; switching post-SEAL FORBIDDEN"
+    },
+    {
+      "code": "DA16",
+      "locked_value": "tiingo (data already fetched + DR9-sealed; no new fetch)",
+      "name": "data_vendor"
+    },
+    {
+      "code": "DA17",
+      "locked_value": [
+        "AAPL",
+        "MSFT",
+        "NVDA",
+        "JPM",
+        "XOM",
+        "UNH",
+        "WMT",
+        "KO",
+        "META",
+        "AMZN",
+        "JNJ",
+        "CVX"
+      ],
+      "name": "universe",
+      "note": "12 names ~7 GICS sectors; widening/substitution post-SEAL FORBIDDEN"
+    },
+    {
+      "code": "DA18",
+      "locked_value": "max_positions_per_name=1, max_total_positions=6, no inter-name coordination, no pyramid",
+      "name": "portfolio_position_caps"
+    },
+    {
+      "code": "DA19",
+      "locked_value": 40,
+      "name": "warmup_days"
+    },
+    {
+      "code": "DA20",
+      "locked_value": "bi-directional (long+short) per-name",
+      "name": "signal_direction"
+    }
+  ],
+  "document_type": "TIER_N_SPEC_SEALED",
+  "dr10_v2_reachability_at_seal": {
+    "expected_annual_turnover": "~5-15",
+    "expected_s2_cost_drag": "~0.3-0.8% <<5%",
+    "status": "CLEARS WITH STRONG MARGIN"
+  },
+  "dr9_gate_status": {
+    "data_provenance_locked": "reuse sealed CSVs 245ac0d; result_seal ec856253; sha-verified at BUILD",
+    "dr9_all_12_symbols_pass": true,
+    "dr9_carried_by_reuse_not_re_run": true,
+    "fresh_fetch_required": false,
+    "per_symbol_dr9_status": {
+      "AAPL": "PASS",
+      "AMZN": "PASS",
+      "CVX": "PASS",
+      "JNJ": "PASS",
+      "JPM": "PASS",
+      "KO": "PASS",
+      "META": "PASS",
+      "MSFT": "PASS",
+      "NVDA": "PASS",
+      "UNH": "PASS",
+      "WMT": "PASS",
+      "XOM": "PASS"
+    }
+  },
+  "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+  "dr_register": {
+    "DR1": "oos_rebalance_count<36 OOS-only -> INCONCLUSIVE_HOLD",
+    "DR10_v2": "turnover_cost_explosion (turnover>0.50 AND S2_cost_drag>0.05) -> REJECT_FAST. Cash-equity cost_drag CLEARS strong margin",
+    "DR11": "NOT IN CHAIN -- cash equity unlevered",
+    "DR2": "oos_metrics_degrade_under_cost_stress -> REJECT_FAST (OOS-only)",
+    "DR3": "zero_cost_only_survival -> REJECT_FAST (trend edge thesis fresh)",
+    "DR4": "oos_negative_while_is_positive_unexplained -> REJECT_FAST (OOS-only)",
+    "DR5": "cost_stress_turns_edge_negative tier flip -> REJECT_FAST/INCONCLUSIVE_HOLD",
+    "DR6": "post_warmup_sizing_ambiguity -> REJECT_FAST (per-name; vol-normalized sizing must be valid)",
+    "DR7": "missing_oos_or_date_window_evidence -> INCONCLUSIVE_HOLD",
+    "DR8": "live_or_order_routing_path -> HARD_FAIL_VOIDED",
+    "DR9": "data_continuity (per-name) -> INCONCLUSIVE_HOLD. ALREADY PASSED all 12 by reuse (ec856253)"
+  },
+  "first_principles_burden": {
+    "vs_s10_d2_donchian": "different periods+universe+scope",
+    "vs_s12_d1_donchian_futures": "different asset class (cash equity vs micro-futures), 12-name basket vs single MNQ, periods 20/10 vs 15/8, bi-directional multi-name",
+    "vs_s15_s14_cross_sector_terminal": "NON-mean-reversion FAMILY (trend breakout vs RSI/z-score MR); trailing-stop exit (vs exit-to-mean/RSI-mid); DIFFERENT 12-name universe. Clears T-FORBID-16/17/18."
+  },
+  "first_principles_exit_stop_edge_design_LOCKED": {
+    "binding_axis": true,
+    "exit_design": "TRAILING DONCHIAN channel (N_exit=10): close when price reverses through the opposite 10-day channel (let winners run / cut losers).",
+    "expected_effect_HYPOTHESIS_NOT_CLAIM": "trend profile win<50% but P/L>1 (mirror of the failed mean-reversion win>50%/P/L<1); positive expectancy IF the basket/window trends. Tested at P6 IS; never asserted.",
+    "initial_stop_design": "2 x ATR(14) vol-scaled floor; whichever of trailing-channel / ATR-stop triggers first; NOT a tight mean-reversion stop.",
+    "mechanic_geometry": "trend-following (opposite of mean-reversion)",
+    "sizing": "vol-normalized shares=floor(0.005*equity/(2*ATR14))."
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (framework SEAL 78cd22e); thresholds 0.50/0.05 immutable",
+  "hard_boundaries_held_this_seal_turn": {
+    "all_da_resolutions_locked_byte_equivalent": true,
+    "dr10_v2_carried_by_reference_not_redefined": true,
+    "dr9_gate_pass_carried_by_reuse_not_re_run": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build_executed": true,
+    "no_candidate_promotion": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mean_reversion_reskin": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_s16_dr9_result_245ac0d": true,
+    "no_modification_of_s16_draft_15182cb": true,
+    "no_modification_of_sealed_csvs": true,
+    "no_oos_inspection": true,
+    "no_profitability_claim": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s15_s14_s13_s12": true,
+    "no_s15_s14_revN_or_patch": true,
+    "no_signal_computation": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization_or_grid_search": true,
+    "seal_only_no_p1_plan_lock": true
+  },
+  "inherited_constraints_block_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "inherited_constraints_block_C6_count": 16,
+  "is_a_seal": true,
+  "is_a_tier_n_spec_seal": true,
+  "k9_reachability_at_seal": {
+    "binding_low_note": "12-name expansion exists to make this non-MR mechanic K9-OOS-reachable; the binding edge axis remains K1/K2",
+    "is_status": "CLEARS strong margin (~96-180/y basket)",
+    "oos_status": "CLEARS (~192-360 over 2y; >=50/y floor)"
+  },
+  "k_gates": {
+    "K10_avg_pairwise_corr": "APPLICABLE; expected lower than 3-name basket (12 names ~7 sectors); LOAD-BEARING",
+    "K11_cap_binding_events": "NOT_APPLICABLE_NO_LEVERAGE_CAP",
+    "K12_DR_fires_on_cost_stress": "if DR2/3/4/5 fires across S0/S2/S3/S4 -> FAIL_SAFETY",
+    "K1_sharpe_proxy_lt_0": "FAIL_SAFETY at S1 (binding edge gate)",
+    "K2_expectancy_le_0": "FAIL_SAFETY at S1",
+    "K4_maxdd_gt_50": "FAIL_SAFETY (DA5=0.50)",
+    "K6_per_symbol_dispersion": "APPLICABLE; LOAD-BEARING",
+    "K7_filter_silently_introduced": "FAIL_SAFETY",
+    "K8_sealed_parent_drift": "FAIL_SAFETY",
+    "K9_closed_trades_lt_100": "INSUFFICIENT_SAMPLE; INVIOLATE"
+  },
+  "labels": [
+    "S16_D1_EXPANDED_DONCHIAN_TREND_TIER_N_SPEC_SEALED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "F_TREND_DONCHIAN_BREAKOUT_NON_MEAN_REVERSION",
+    "12_NAME_EXPANDED_CROSS_SECTOR_BASKET",
+    "TRAILING_DONCHIAN_EXIT_LOCKED",
+    "2ATR_INITIAL_CATASTROPHE_STOP_LOCKED",
+    "FIRST_PRINCIPLES_EXIT_STOP_BINDING_AXIS_LOCKED",
+    "ADJUSTMENT_CONVENTION_SPLIT_ONLY_LOCKED",
+    "VENDOR_TIINGO",
+    "DR9_GATE_PASSED_CARRIED_BY_REUSE",
+    "DR10_V2_BINDING_CLEARS_STRONG_MARGIN",
+    "K9_CLEARS_12_NAME",
+    "DA1_DA20_LOCKED_BYTE_EQUIVALENT",
+    "C6_16_ENTRIES",
+    "FRESH_CANDIDATE_CLEARS_T_FORBID_16_17_18",
+    "REC1_EQUIVALENT_BINDING",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S16_D1_EXPANDED_DONCHIAN_TREND_TIER_N_SPEC_SEALED",
+  "locked_spec_summary": {
+    "N_entry_donchian": 20,
+    "N_exit_donchian_trailing": 10,
+    "adjustment_convention": "split_only",
+    "asset_class": "cash_equity",
+    "atr_period": 14,
+    "candidate_family": "Donchian channel breakout trend (trailing-stop); NON-mean-reversion",
+    "cost_surface": {
+      "commission_model": "per_share",
+      "commission_per_share_usd": 0.005,
+      "min_commission_per_trade_usd": 1.0,
+      "slippage_model": "half_bid_ask_spread_proxy",
+      "slippage_proxy_bps": 1.0
+    },
+    "exit_rule": "TRAILING_DONCHIAN_CHANNEL",
+    "initial_catastrophe_stop_atr_multiple": 2.0,
+    "inter_name_signal_coordination": "NONE",
+    "is_window_end": "2023-12-29",
+    "is_window_start": "2019-01-02",
+    "k4_max_drawdown_magnitude_threshold": 0.5,
+    "k9_min_closed_trades": 100,
+    "max_positions_per_name": 1,
+    "max_total_positions": 6,
+    "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+    "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+    "per_trade_risk_pct": 0.005,
+    "pyramid": "NONE",
+    "resolution": "daily (ohlcv-daily)",
+    "signal_direction": "bi-directional",
+    "sizing_method": "vol_normalized shares=floor(0.005*equity/(2*ATR14))",
+    "start_cash_usd": 100000,
+    "stop_is_tight_mean_reversion_stop": false,
+    "universe": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "JPM",
+      "XOM",
+      "UNH",
+      "WMT",
+      "KO",
+      "META",
+      "AMZN",
+      "JNJ",
+      "CVX"
+    ],
+    "vendor": "tiingo",
+    "warmup_days": 40
+  },
+  "negative_invariants": {
+    "any_da_changed_from_draft_proposal": false,
+    "backtest_run": false,
+    "build_executed": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "claims_strategy_optimized": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "data_refetched": false,
+    "lessons_md_touched": false,
+    "mean_reversion_reskin": false,
+    "oos_inspected": false,
+    "parameters_optimized": false,
+    "s12_d1_chain_modified": false,
+    "s13_d1_chain_modified": false,
+    "s14_chain_modified": false,
+    "s15_chain_modified": false,
+    "s16_dr9_result_modified": false,
+    "sealed_csvs_modified": false,
+    "tier_n_spec_was_p1_or_build": false
+  },
+  "next_phase_authorization_scope": {
+    "commit_this_seal": "Authorize commit s16-d1 expanded-universe trend/breakout Tier-N spec SEAL only.",
+    "defer": "Defer / Pause s16-d1 at SEAL.",
+    "primary_forward": "Authorize s16-d1 expanded-universe trend/breakout P1 plan-lock only -- bound by DR10 v2."
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "s14_d1_cross_sector_p7_terminal_commit": "6485ea9",
+    "s15_d1_p7_terminal_commit": "8abcd31",
+    "s16_dr9_result_commit": "245ac0d",
+    "s16_dr9_result_seal_sha256": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+    "selection_plan_after_s15_commit": "343bdac",
+    "tier_n_spec_draft_commit": "15182cb",
+    "tier_n_spec_draft_file_sha256": "69015fd4dac23823c29941808524ecff556c1becb0c6fbcf7d222000a8036a4a",
+    "tier_n_spec_draft_report_seal_sha256": "a9aded38fb3e6d4494155ce8807a8e8df2c008721ee88318712fc10cc2660b69",
+    "tier_n_spec_plan_commit": "68c2539"
+  },
+  "phase": "TIER_N_SPEC_SEAL",
+  "rec1_equivalent_binding": true,
+  "rec1_equivalent_oos_k9_disclosure": "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+  "report_date_utc": "2026-05-28T22:14:45.553265Z",
+  "report_kind": "S16-D1 expanded-universe Donchian trend Tier-N specification SEAL -- all DA1-DA20 locked byte-equivalent; canonical immutable spec; anchor for P1/P2/P3 BUILD/P4/P6/P6.5/P7 (each separate authorization)",
+  "report_seal_sha256": "359aea43df85c153c8cbf2b7a84ddeaa78d6516fe43769e34b052b4f88c60df8",
+  "runtime_invariants": [
+    "no_live_trading",
+    "no_strategy_lab_promotion",
+    "no_review_queue_mutation",
+    "no_brokerage_connection",
+    "no_external_network_at_runtime",
+    "no_production_signal",
+    "no_strategy_optimization_authorized",
+    "no_profitability_claim",
+    "no_dr_redefinition_post_seal",
+    "no_donchian_param_modification_post_seal",
+    "no_trailing_exit_replacement_post_seal",
+    "no_initial_stop_change_post_seal",
+    "no_universe_widening_post_seal",
+    "no_universe_substitution_post_seal",
+    "no_adjustment_convention_switch_post_seal",
+    "split_only_locked",
+    "no_pyramid_per_signal",
+    "cash_equity_data_reuse_byte_equivalent_no_fresh_fetch_post_seal",
+    "mechanic_family_donchian_trend_lock_at_plan",
+    "no_revision_of_s15_s14_s13_s12_terminals",
+    "dr10_v2_carried_by_reference_not_redefined",
+    "no_mean_reversion_reskin"
+  ],
+  "schema_id": "sparta.s16_d1_expanded_cross_sector_cash_equity_donchian_breakout_trend_trailing_stop_tier_n_spec_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "S16_D1_EXPANDED_DONCHIAN_TREND_TIER_N_SPEC_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED"
+  },
+  "t_forbid_clearance": {
+    "T_FORBID_16_s15_s14_revN": "CLEARED (different family + universe)",
+    "T_FORBID_17_daily_MR_tweak_on_AAPL_JPM_XOM": "CLEARED (non-MR; 12-name universe)",
+    "T_FORBID_18_reuse_terminal_mechanics": "CLEARED (Donchian trend, not RSI(3)+2N or z-score exit-to-mean)"
+  },
+  "title": "s16-d1 expanded-universe Donchian breakout trend (trailing-stop) Tier-N specification (SEALED; binding; 12-name; NON-mean-reversion; DR10 v2; DR9 PASSED by reuse; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE)"
+}
