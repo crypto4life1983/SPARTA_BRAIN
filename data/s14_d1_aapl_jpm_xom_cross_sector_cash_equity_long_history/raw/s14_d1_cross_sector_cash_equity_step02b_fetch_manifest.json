@@ -1,0 +1,88 @@
+{
+  "aapl_reuse_policy_applied": "Option A — copied byte-equivalent from all-tech dir; sha verified == f6625ff1...; AAPL DR9 PASS carried by sha-match from all-tech result_seal 1c93d4294e...",
+  "adjustment_convention": "split_only",
+  "adjustment_convention_implementation": "JPM/XOM: Tiingo raw OHLCV with split_only adjustment via splitFactor stream (both have NO splits in window -> identity adjust). AAPL: reused byte-equivalent from all-tech fetch (split_only; 2020-08-31 4:1 already applied + DR9-verified). adjClose/adjVolume ignored; divCash informational only.",
+  "anchor_to_plan_commit": "c61860d",
+  "anchor_to_run_book_commit": "4fc06ec",
+  "candidate_record_id": "s14-d1-aapl-jpm-xom-cross-sector-cash-equity-rsi-3-bi-directional-large-cap-long-history",
+  "end_date_inclusive": "2025-12-30",
+  "fetch_boundaries_held": {
+    "aapl_reused_read_only_then_copied": true,
+    "no_api_key_printed": true,
+    "no_backtest": true,
+    "no_broker_exchange_api_call": true,
+    "no_live_trading": true,
+    "no_modification_of_all_tech_aapl_source": true,
+    "no_oos_inspection_by_this_fetch": true,
+    "no_review_queue_mutation": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_promotion": true,
+    "raw_csv_only_written_to_approved_directory": true,
+    "tiingo_api_key_read_from_env_only": true
+  },
+  "fetch_run_utc": "2026-05-28T18:13:55.758406Z",
+  "is_window_end": "2023-12-29",
+  "is_window_start": "2019-01-02",
+  "no_api_key_printed": true,
+  "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+  "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+  "schema": "sparta.s14.cross_sector_cash_equity.step02b_fetch_manifest.v1",
+  "start_date_inclusive": "2019-01-02",
+  "symbols": [
+    {
+      "dr9_pass_carried_from_all_tech_result_seal": "1c93d4294e193b25b239fd613f4ff1e9d24a16860376ee31efd7ec2ef01eda40",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2020-08-31",
+          4.0
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "AAPL_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "reused_from_all_tech": true,
+      "reused_source_path": "data/s14_d1_aapl_msft_nvda_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9",
+      "size_bytes": 85372,
+      "splits_cross_check_match": true,
+      "symbol": "AAPL",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2020-08-31",
+          4.0
+        ]
+      ]
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "JPM_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "8aa244ab7724b292c659c81171bd8d3cf5ce5684d6c69864ee61e0be90238db7",
+      "size_bytes": 82874,
+      "splits_cross_check_match": true,
+      "symbol": "JPM",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "XOM_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s14_d1_aapl_jpm_xom_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "fbbc462cbfbd11a68b0aed4d0c3fa72312afea5112cebcc24860689f33b7f77c",
+      "size_bytes": 80381,
+      "splits_cross_check_match": true,
+      "symbol": "XOM",
+      "tiingo_splits_in_window_reported": []
+    }
+  ],
+  "vendor": "tiingo",
+  "vendor_library_version_at_fetch": "0.16.1"
+}
