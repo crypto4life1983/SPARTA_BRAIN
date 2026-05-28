@@ -1,0 +1,343 @@
+{
+  "authored_at_utc": "2026-05-28T19:37:32.543212Z",
+  "binding": true,
+  "candidate_archival_state": {
+    "archival_phase": "P7_DECISION_MEMO",
+    "archival_reason": "FAIL_SAFETY at P6 IS driven by K1 sharpe_proxy/trade<0 (K2 expectancy<=0 co-confirming) at S1 baseline; negative in-sample edge",
+    "archived": true,
+    "candidate_lifecycle_terminal": true,
+    "lifecycle_terminal_per_seal_clause": "fail_safety_outcomes_terminal_for_this_candidate_record_id=True",
+    "no_frc_grant_in_this_lifecycle": true,
+    "no_live_promotion_in_this_lifecycle": true,
+    "no_oos_inspection_in_this_lifecycle": true,
+    "no_p6_5_cost_stress_in_this_lifecycle": true,
+    "no_strategy_lab_in_this_lifecycle": true,
+    "rec1_equivalent_oos_k9_disclosure_remains_binding_for_future_unrelated_candidates": true
+  },
+  "candidate_lifecycle_terminal": true,
+  "candidate_record_id": "s14-d1-aapl-jpm-xom-cross-sector-cash-equity-rsi-3-bi-directional-large-cap-long-history",
+  "config_used_at_p7_authoring": {
+    "candidate_record_id": "s14-d1-aapl-jpm-xom-cross-sector-cash-equity-rsi-3-bi-directional-large-cap-long-history",
+    "p2_phase2_plan_seal": "89717a4a60ff6b704c5922683d0a46e34e59e4032a5d38eba8b1bf841f819d67",
+    "p3_is_driver_build_report_seal_sha256": "8a7e525e4b9c87a8cef3561232ba3964ba674dccc1a09ffc19d4620eeba22fb5",
+    "p3_oos_driver_build_report_seal_sha256": "a830996be15cf7822a4f4eb4bef9a798df21ba2f59d32199fee78c982774f8c8",
+    "p3_runner_build_report_seal_sha256": "6a9f8864edca77e250b212b1323f5f0ee5efbf2b6854dd8c49381d87f982562a",
+    "p4_smoke_seal_sha256": "e8bccb3507ffe5be646b2952ea93999b22aad70730dde3df9f9bae7eb1458ae3",
+    "p6_is_diagnostic_seal_sha256": "5f31fd133cd78084ed43703504c096dbbcf13a060e3f48c9eb8920697ff7d443",
+    "phase_prefix": "PHASE2-S14-D1-CROSS-SECTOR-RSI-3-BIDIR",
+    "plan_lock_seal": "fa6c2c52fb0befd5ec2345d3d74f4fd4ad4577ec4f4857193c288171692bcd00",
+    "tier_spec_seal": "862c00a5ffcc470580b6defe9c31ce89c4a43114ad418b4b6b4dfb991500569c"
+  },
+  "cross_sector_thesis_held_failure_is_the_edge": {
+    "a7_effective_independent_bets": 2.0909,
+    "a7_expected_band": "2.3-2.8",
+    "a7_in_band": true,
+    "interpretation": "The cross-sector diversification thesis HELD at the data level: A7 and K10 land inside the SEAL's expected bands and K6 shows no single-symbol concentration. The candidate failed because the RSI(3) bi-directional mechanic has a negative in-sample edge after the 2N stop, NOT because the AAPL/JPM/XOM basket construction was flawed.",
+    "k10_avg_pairwise_correlation": 0.4529,
+    "k10_expected_band": "0.30-0.50",
+    "k10_in_band": true,
+    "k10_pairwise": {
+      "AAPL_JPM": 0.4548,
+      "AAPL_XOM": 0.3162,
+      "JPM_XOM": 0.5877
+    },
+    "k6_concentration_flag": false
+  },
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e); NOT evaluated (P6.5 never reached; FAIL_SAFETY upstream at S1)",
+  "framework_reading": {
+    "lessons_eligible_for_lessons_md_in_a_separate_authorization": [
+      "LESSON_S14_D1_001 (eligible; NOT written this turn): RSI(3) bi-directional mean-reversion with a 2N ATR hard stop produced negative in-sample expectancy on a cross-sector cash-equity basket; the hard stop truncates the mean-reversion thesis, converting a >50% win rate into negative expectancy.",
+      "LESSON_S14_D1_002 (eligible; NOT written this turn): A cross-sector basket that achieves its diversification target (A7/K10 in band) does NOT rescue a mechanic with a negative per-trade edge; basket construction and signal edge are independent failure axes.",
+      "LESSON_S14_D1_003 (eligible; NOT written this turn): FAIL_SAFETY (K1/K2) at S1 baseline IS is fail-closed and upstream of the DR cost-stress chain; P6.5/P10 are moot once the S1 baseline edge is negative. Contrast s13-d1, which was REJECT_FAST of a PROFITABLE strategy by an upstream DR rule.",
+      "WARNING (eligible; NOT written this turn): These lessons would be written to brain_memory/projects/trading_bot/lessons.md only under a separate explicit operator authorization. This P7 memo deliberately does NOT touch lessons.md."
+    ]
+  },
+  "hard_boundaries_held_this_p7_turn": {
+    "c6_inherited_constraints_block_carried_verbatim_into_p7_memo": true,
+    "candidate_lifecycle_marked_terminal": true,
+    "no_adjustment_convention_switch": true,
+    "no_broker_exchange_api": true,
+    "no_candidate_promotion_to_strategy_lab": true,
+    "no_commit_by_this_turn": true,
+    "no_data_fetch": true,
+    "no_dr_redefinition_post_seal": true,
+    "no_frc_grant": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_touched": true,
+    "no_live_block_relaxation": true,
+    "no_live_trading": true,
+    "no_modification_of_all_tech_sibling_draft_214bae0": true,
+    "no_modification_of_cross_sector_dr9_result": true,
+    "no_modification_of_fetched_csvs_or_manifest": true,
+    "no_modification_of_framework_dr10_v2_78cd22e": true,
+    "no_modification_of_p1_02b77d8": true,
+    "no_modification_of_p2_27dbddc": true,
+    "no_modification_of_p3_build_30fbc6a": true,
+    "no_modification_of_p3_source_files": true,
+    "no_modification_of_p4_smoke_06bfcdb": true,
+    "no_modification_of_p6_is_7248a96": true,
+    "no_modification_of_s12_d1_chain": true,
+    "no_modification_of_s13_d1_chain": true,
+    "no_modification_of_s14_d1_multi_instrument_chain": true,
+    "no_modification_of_tier_n_seal_53cb804": true,
+    "no_network_call": true,
+    "no_oos_data_read": true,
+    "no_oos_inspection": true,
+    "no_p10_oos_gate": true,
+    "no_p6_5_cost_stress_run": true,
+    "no_paper_trading_via_broker": true,
+    "no_parameter_optimization": true,
+    "no_qc_runtime": true,
+    "no_rec1_equivalent_demotion_to_advisory": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_parked_candidates": true,
+    "no_rsi_threshold_modification": true,
+    "no_stop_multiplier_modification": true,
+    "no_strategy_lab_invoked": true,
+    "no_threshold_loosening": true,
+    "no_universe_widening_or_substitution": true,
+    "no_unrelated_tracked_file_modified": true,
+    "p6_is_fail_safety_recorded_verbatim_from_parent": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable with improved margin vs all-tech (cross-sector higher signal independence ~75% vs all-tech ~60%; expected effective rate 45-79/y vs 50/y OOS floor). If observed effective IS rate falls below 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per s10-d2/s12-d1 precedent. The chain shall NOT relax K9 at OOS.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%); standard sizing (not nano); admissible under DR10 v2 for cash equity",
+    "DA4=B (BINDING): START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin at $100k for cash equity",
+    "K9-reachability discipline applied at PLAN+DRAFT+SEAL; binding for all subsequent phases",
+    "DR10-v2-reachability discipline applied at PLAN+DRAFT+SEAL (AND-conjunction); CLEARS WITH STRONG MARGIN",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family F3-adjacent RSI(3) bi-directional mean-reversion LOCKED at PLAN",
+    "RSI thresholds 15/55/85/45 LOCKED at PLAN; modification post-SEAL FORBIDDEN",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50 turnover / 0.05 cost_drag immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention LOCKED (DA17); switching/mixing post-SEAL FORBIDDEN",
+    "Cross-sector universe {AAPL (Tech), JPM (Financials), XOM (Energy)} LOCKED at PLAN; universe widening/substitution post-SEAL FORBIDDEN",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation LOAD-BEARING (multi-name cross-sector; A7 ~2.3-2.8 / K10 ~0.30-0.50 expected; the candidate's central diversification thesis)",
+    "Cross-sector DR9 data-availability gate PASSED all 3 symbols (AAPL reused+carried; JPM/XOM fresh-fetched+audited); sealed at b13af03 report_seal a8ff9126...; data provenance locked",
+    "All-tech sibling DRAFT (214bae0) preserved byte-stable; non-mutually-exclusive sibling; this candidate is NOT a _revN_",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; OOS requires separate P10-equivalent authorization",
+    "P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless of any verdict; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "is_economics_recorded_unfavorable": {
+    "annual_turnover": 14.4539,
+    "closed_trades_count": 348,
+    "expectancy_per_trade_usd": -39.53,
+    "final_equity_usd": 86245.07,
+    "gross_pnl_usd": -13045.11,
+    "k9_satisfied_not_a_sample_problem": true,
+    "loss_is_mostly_gross_not_cost_erosion": true,
+    "max_drawdown_pct": 0.140431,
+    "net_pnl_usd": -13754.96,
+    "per_symbol_closed_trades": {
+      "AAPL": 112,
+      "JPM": 123,
+      "XOM": 113
+    },
+    "per_symbol_net_pnl_usd": {
+      "AAPL": -7348.07,
+      "JPM": -6280.02,
+      "XOM": -126.87
+    },
+    "profit_loss_ratio": 0.6545,
+    "s2_cost_drag_fraction_estimate": 0.021481,
+    "sharpe_annualized": -0.8035,
+    "sharpe_proxy_per_trade": -0.1119,
+    "starting_cash_usd": 100000.0,
+    "summary": "UNLIKE the s13-d1 P7 (which rejected a PROFITABLE strategy via a DR rule), s14-d1-cross-sector FAILS on its own economics: the strategy is net-NEGATIVE in-sample at S1 baseline. These numbers are RECORD-ONLY; not money-proven, not live-ready, not promotable.",
+    "total_costs_usd": 1432.07,
+    "trades_per_year_observed": 69.76,
+    "win_rate_gt_50_but_negative_expectancy_signature": "win-rate >50% with negative expectancy = the 2N stop-outs exceed the small RSI-exit winners (mean-reversion-with-hard-stop pattern)",
+    "win_rate_pct_or_NA": 54.31
+  },
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P7_DECISION_MEMO_SEALED",
+    "S14_D1_CROSS_SECTOR_CASH_EQUITY_RSI_3_BI_DIRECTIONAL",
+    "AAPL_JPM_XOM_CROSS_SECTOR_BASKET",
+    "NOT_LIVE_READY",
+    "VERDICT_FAIL_SAFETY",
+    "K1_SHARPE_PROXY_NEGATIVE_BINDING",
+    "K2_EXPECTANCY_NEGATIVE_CO_CONFIRMING",
+    "NEGATIVE_IN_SAMPLE_EDGE",
+    "CROSS_SECTOR_THESIS_HELD_A7_K10_IN_BAND",
+    "K9_SATISFIED_NOT_A_SAMPLE_PROBLEM",
+    "P6_5_NEVER_REACHED_FAIL_SAFETY_UPSTREAM",
+    "REC1_EQUIVALENT_OOS_K9_DISCLOSURE_BINDING",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "CANDIDATE_LIFECYCLE_TERMINAL",
+    "NO_DR_REDEFINITION_POST_SEAL",
+    "ALL_TECH_SIBLING_PRESERVED",
+    "LESSONS_MD_NOT_TOUCHED_THIS_PHASE"
+  ],
+  "lifecycle_state": "P7_DECISION_MEMO_SEALED_CANDIDATE_TERMINAL",
+  "memo_run_id": "PHASE2-S14-D1-CROSS-SECTOR-P7-094569a4d672",
+  "negative_invariants": {
+    "all_tech_sibling_draft_214bae0_modified": false,
+    "candidate_promotion_attempted": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "claims_paper_ready_for_broker_routing": false,
+    "claims_strategy_optimized": false,
+    "committed_this_turn": false,
+    "dr_redefined_post_seal_in_this_phase": false,
+    "lessons_md_touched_in_this_phase": false,
+    "oos_inspected_in_this_phase": false,
+    "p1_p2_p3_p4_p6_modified": false,
+    "parameters_optimized_in_this_phase": false,
+    "rec1_equivalent_oos_k9_risk_disclosure_demoted_to_advisory": false,
+    "rsi_thresholds_silently_modified": false,
+    "s12_d1_chain_modified": false,
+    "s13_d1_chain_modified": false,
+    "schedule_created": false,
+    "stop_multiplier_silently_modified": false,
+    "tier_n_seal_modified": false,
+    "universe_silently_modified": false
+  },
+  "non_drivers_recorded_for_audit": [
+    {
+      "fires": false,
+      "note": "|maxdd| < 50% fail-safety threshold",
+      "observed_maxdd_pct": 0.140431,
+      "rule": "K4"
+    },
+    {
+      "fires": false,
+      "note": "348 >= 100; sample ample; NOT an INSUFFICIENT_SAMPLE outcome",
+      "observed_closed_trades": 348,
+      "rule": "K9"
+    },
+    {
+      "fires": false,
+      "note": "no single-symbol >70% concentration",
+      "rule": "K6"
+    },
+    {
+      "fires": false,
+      "note": "avg pairwise corr in expected 0.30-0.50 band; diversification intact",
+      "rule": "K10"
+    },
+    {
+      "evaluated": false,
+      "outcome": "NOT_EVALUATED_P6_5_NEVER_REACHED (FAIL_SAFETY upstream at S1); turnover leg-1 would be TRUE (turnover>0.50) but leg-2 S2 cost_drag est ~2.1% < 5% so AND-conjunction would NOT have fired anyway",
+      "rule": "DR10_v2"
+    },
+    {
+      "evaluated": false,
+      "outcome": "NOT_EVALUATED (cost-stress chain deferred to P6.5, which was never authorized/reached)",
+      "rule": "DR2/DR3/DR4/DR5"
+    }
+  ],
+  "operator_decision_paths_post_p7": [
+    {
+      "default_recommended": true,
+      "description": "Honor the FAIL_SAFETY verdict as terminal. No further work on this candidate_record_id. No P6.5, no P10 OOS, no Strategy Lab, no FRC, no live. Catalog as ARCHIVED.",
+      "path_id": "A_PARK",
+      "requires_separate_authorization": false,
+      "title": "Park s14-d1-cross-sector RSI(3) bi-directional permanently for this framework"
+    },
+    {
+      "description": "Author a NEW SEAL for a candidate whose exit logic does not truncate the mean-reversion edge (e.g., time-based or wider/volatility-scaled stop, or a different mechanic family). NOT a patch on s14-d1-cross-sector.",
+      "explicit_forbiddens": [
+        "no s14-d1-cross-sector sealed-artifact mutation",
+        "no RSI threshold change within this candidate",
+        "no parameter iteration to seek positive edge under the same SEAL",
+        "no stop-multiplier change within this candidate"
+      ],
+      "path_id": "B_NEW_CANDIDATE_DIFFERENT_MECHANIC_OR_EXIT",
+      "requires_separate_authorization": true,
+      "title": "Start a fresh candidate with a different exit/stop structure or mechanic family"
+    },
+    {
+      "description": "Append LESSON_S14_D1_001/002/003 to brain_memory/projects/trading_bot/lessons.md under a separate explicit authorization. This P7 memo does NOT touch lessons.md.",
+      "path_id": "C_LESSONS_MD_UPDATE",
+      "requires_separate_authorization": true,
+      "title": "Write the eligible LESSON_S14_D1_* entries to lessons.md"
+    },
+    {
+      "description": "Keep the P7 sealed memo on file; no Path A/B/C action initiated yet.",
+      "path_id": "D_DEFER",
+      "requires_separate_authorization": false,
+      "title": "Defer / pause"
+    }
+  ],
+  "parent_references": {
+    "all_tech_sibling_draft_commit": "214bae0",
+    "cross_sector_dr9_result_commit": "b13af03",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "02b77d8",
+    "p2_phase2_plan_commit": "27dbddc",
+    "p3_build_commit": "30fbc6a",
+    "p4_smoke_commit": "06bfcdb",
+    "p6_is_diagnostic_commit": "7248a96",
+    "p6_is_diagnostic_file_sha256": "56dee8f877ddc883cdb0fdc04caab745caa2f7accf22b6271e3fa4941bb5f2ea",
+    "p6_is_diagnostic_report_seal_sha256": "5f31fd133cd78084ed43703504c096dbbcf13a060e3f48c9eb8920697ff7d443",
+    "s13_d1_p7_decision_memo_seal_sha256": "f68dd92b00fd6c08b76a445b54ddab66555f41bd4f1eca6588977f1240de8af8",
+    "tier_n_spec_commit": "53cb804"
+  },
+  "phase": "P7_DECISION_MEMO",
+  "phase_prefix": "PHASE2-S14-D1-CROSS-SECTOR-RSI-3-BIDIR",
+  "report_date_utc": "2026-05-28T19:37:32.543212Z",
+  "report_kind": "S14-D1-CROSS-SECTOR P7 decision memo: formalizes FAIL_SAFETY verdict driven by K1 (sharpe_proxy/trade<0) at P6 IS S1 baseline (K2 expectancy<=0 co-confirming), UPSTREAM of any DR cost-stress evaluation (P6.5 never reached). Cross-sector diversification thesis HELD (A7/K10 in band); failure is the mechanic edge, not the basket. C6 carried verbatim; no_dr_redefinition_post_seal honored.",
+  "report_seal_sha256": "addd83cf2cf358d0b0e95a1f860ff0ccf295b9989a1ef7af7b6d204a6d19c13e",
+  "safety_fix_attestations": {
+    "c1_live_mode_refusal_implemented": true,
+    "c2_engine_truth_run_id_used": true,
+    "c3_safety_counters_set_membership_pattern": true,
+    "c4_boundary_alignment_eod_equals_rth_close": true,
+    "c5_corporate_action_split_only_applied_AAPL_4to1": true,
+    "c6_diagnostic_output_schema_v1": true,
+    "c7_verdict_closed_enum_strict": true,
+    "c8_lifecycle_states_permanent_attributes_carried": true,
+    "rec1_equivalent_oos_k9_disclosure_carried_binding": true
+  },
+  "schema_id": "sparta.research.s14_d1_cross_sector_p7_decision_memo_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "backtest_diagnostic_only": true,
+    "candidate_lifecycle_terminal": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P7_DECISION_MEMO_SEALED_CANDIDATE_TERMINAL",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s14-d1-cross-sector cash-equity P7 decision memo (sealed; binding; candidate-lifecycle TERMINAL by FAIL_SAFETY at P6 IS)",
+  "verdict_drivers": [
+    {
+      "binding": true,
+      "fires": true,
+      "name": "sharpe_proxy_per_trade_lt_0",
+      "observed_sharpe_proxy_per_trade_s1": -0.1119,
+      "precedence_note": "K1 is the first-firing gate in the IS verdict order (safety counters -> K1 -> K2 -> K4 -> K9). Fires at S1 baseline, UPSTREAM of the DR cost-stress chain; P6.5 was never reached.",
+      "rule": "K1",
+      "threshold": "sharpe_proxy_per_trade < 0 -> FAIL_SAFETY at S1"
+    },
+    {
+      "binding_co_confirming": true,
+      "fires": true,
+      "name": "expectancy_le_0",
+      "note": "Co-confirms the negative-edge finding; K1 takes precedence as first-firing.",
+      "observed_expectancy_per_trade_usd_s1": -39.53,
+      "rule": "K2",
+      "threshold": "expectancy <= 0 -> FAIL_SAFETY at S1"
+    }
+  ],
+  "verdict_formalized": "FAIL_SAFETY",
+  "what_this_outcome_demonstrates": [
+    "RSI(3) bi-directional mean-reversion with a 2N ATR hard stop has a NEGATIVE in-sample edge on the AAPL/JPM/XOM cross-sector basket at S1 baseline costs: net -$13,754.96 on $100k, expectancy -$39.53/trade, sharpe_proxy/trade -0.1119.",
+    "The loss is predominantly GROSS (total costs ~$1.4k of the ~$13.7k loss), so it is a real edge failure, not cost erosion.",
+    "A win rate >50% (54.31%) coexisting with negative expectancy is the classic mean-reversion-with-hard-stop signature: many small RSI-exit winners are outweighed by fewer, larger 2N stop-out losers.",
+    "FAIL_SAFETY (K1/K2) is a fail-CLOSED outcome at the S1 baseline and is upstream of the DR cost-stress chain; there is no point running P6.5/P10 on a candidate already net-negative at S1.",
+    "Per SEAL fail_safety_outcomes_terminal_for_this_candidate_record_id: the candidate lifecycle is TERMINAL."
+  ],
+  "what_this_outcome_does_NOT_demonstrate": [
+    "It does NOT demonstrate the cross-sector hypothesis was wrong: A7 (2.09) and K10 (0.4529) sit inside the SEAL's expected bands; the basket diversified as intended.",
+    "It does NOT demonstrate a K9/insufficient-sample problem: 348 trades basket-summed (~70/y) clears the 100 floor with ample margin.",
+    "It does NOT demonstrate the all-tech sibling DRAFT (214bae0) is non-viable; that is a separate, non-mutually-exclusive candidate and is preserved byte-stable.",
+    "It does NOT demonstrate RSI(3) is universally non-viable; under a different exit/stop structure or mechanic family it might differ. THIS sealed spec (RSI(3) 15/55/85/45 + 2N stop) is what failed, and it is locked (no post-SEAL parameter iteration permitted within this candidate)."
+  ]
+}
