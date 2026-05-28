@@ -4405,3 +4405,21 @@ into deep extraction even if the warning_labels list omits them.
 - **Lesson:** Following s14 and s15 both terminating FAIL_SAFETY on AAPL/JPM/XOM daily mean-reversion, a third daily mean-reversion variant on the same basket would be predictable framework waste (a candidate-level T-FORBID).
 - **Why:** The cross-sector basket's data/diversification quality is strong (DR9 passed; A7/K10 in band), so the asset is reusable - but the mean-reversion edge there is exhausted. The productive next move changes one of the two exhausted dimensions: the mechanic FAMILY (e.g., trend/momentum/breakout, relative-strength rotation) or the UNIVERSE.
 - **How to apply:** Next-track selection after a two-failure basket must forbid (a) any _revN_/patch of the terminal candidates, (b) reusing the failed mechanics on the same basket, and (c) a third daily mean-reversion tweak on that basket. A non-mean-reversion mechanic on the reuse universe must still clear K9 reachability (trend on a 3-name daily basket is K9-light), so weigh K9 vs fetch-friction explicitly before committing to a fresh PLAN.
+
+## 2026-05-28 - LESSON_S16_D1_004 - IS edge + cost-stress survival is necessary but NOT sufficient; the OOS gate (DR4) is the binding generalization test
+
+- **Lesson:** s16-d1 (Donchian-20/10 breakout trend on the 12-name expanded basket) passed P6 IS with a positive edge (net +$17,129.69, expectancy +$53.03/trade, sharpe_proxy +0.0563) AND survived full P6.5 cost-stress (S0-S4 all net-positive; DR3/DR5 no-fire; DR10 v2 clears), yet FAILED the P10 OOS gate: DR4 (oos_negative_while_is_positive) fired (OOS net -$2,837.19, sharpe_proxy -0.0311, expectancy -$21.33) -> REJECT_FAST. K9 OOS was satisfied (133 trades ~67/y), so it was a genuine generalization failure, not a sample problem.
+- **Why:** In-sample performance and cost-robustness only measure whether the rule worked on the fitting window; neither measures whether the edge persists out-of-sample. DR4 is the gate that tests generalization and is the first honest place a strategy that "looked good IS" can be rejected.
+- **How to apply:** Never treat a passing P6 IS + P6.5 as evidence of a real edge or use READY/promotion language before OOS. Carry every IS+cost-stress winner through the OOS gate; expect that some will not generalize, and let DR4 decide.
+
+## 2026-05-28 - LESSON_S16_D1_005 - Trend edges are regime-dependent; weigh the IS-window regime against the OOS regime
+
+- **Lesson:** The s16 trend edge was specific to the 2019-2023 large-cap/tech uptrend. In the 2024-2025 OOS window the same Donchian rule lost money: defensive/staples names trended (KO +$3,897, WMT +$2,938) while tech/energy reversed or whipsawed (AMZN -$2,049, CVX -$3,106, JNJ -$2,442, META -$1,239, JPM -$1,260). The trend geometry (win<50% / P/L>1) was retained but the edge magnitude flipped negative.
+- **Why:** Trend-following profitability depends on sustained directional moves, which is a regime property of the window, not a fixed property of the rule. A strongly-trending IS window can inflate a trend candidate's IS edge that does not survive a choppier/rotating OOS regime.
+- **How to apply:** For trend/momentum candidates, treat the IS-window regime as a confound; prefer IS windows spanning multiple regimes, and at PLAN/SEAL weigh whether the OOS window is likely to differ in regime. A single-regime IS pass is weak evidence; the OOS gate is the real test.
+
+## 2026-05-28 - LESSON_S16_D1_006 - The phased ladder + OOS gate function as designed: they catch false positives without gate relaxation
+
+- **Lesson:** s16-d1 advanced furthest of the s14/s15/s16 line - first to pass IS, first to pass cost-stress, first to reach the OOS gate - and was then terminated honestly by DR4 at OOS. No gate was relaxed, no parameter optimized, no threshold reinterpreted to rescue it.
+- **Why:** The value of the multi-phase ladder is precisely that it lets a promising candidate earn each gate and then surfaces the failure at the right (OOS) phase, before any capital or promotion. A candidate reaching OOS-REJECT is a success of the process, not a failure of it.
+- **How to apply:** Do not shortcut the ladder for candidates that look strong in-sample; the payoff is a high-confidence OOS verdict. Record OOS-REJECT terminals as informative inputs to the next selection plan, not as wasted effort.
