@@ -1,0 +1,237 @@
+{
+  "authored_at_utc": "2026-05-28T22:48:24.048954Z",
+  "binding": true,
+  "candidate_archival_state": {
+    "archival_phase": "P11_LIFECYCLE_DECISION",
+    "archival_reason": "REJECT_FAST at P10 OOS via DR4 (oos_negative_while_is_positive); IS+cost-stress passed but the trend edge did not generalize OOS",
+    "archived": true,
+    "candidate_lifecycle_terminal": true,
+    "no_frc_grant_in_this_lifecycle": true,
+    "no_further_diagnostics": true,
+    "no_live_promotion_in_this_lifecycle": true,
+    "no_strategy_lab_in_this_lifecycle": true,
+    "rec1_equivalent_oos_k9_disclosure_remains_binding_for_future_candidates": true
+  },
+  "candidate_lifecycle_terminal": true,
+  "candidate_record_id": "s16-d1-expanded-cross-sector-cash-equity-donchian-breakout-trend-trailing-stop-large-cap-long-history",
+  "central_finding": {
+    "framework_validation": "s16 got the FURTHEST of the s14/s15/s16 line (first to pass IS, first to pass cost-stress, first to reach the OOS gate). The phased ladder + OOS gate did exactly their job: they prevented a false-positive IS result from being treated as a real edge. No gate was relaxed to rescue it.",
+    "headline": "A positive in-sample edge that survives full cost-stress is NECESSARY but NOT SUFFICIENT; the OOS gate (DR4) is the binding generalization test, and it caught a strategy that looked strong in-sample but did not generalize.",
+    "is_vs_oos_divergence": "IS net +$17,129.69 (sharpe_proxy +0.0563, win 34.67%/P-L 2.2191) -> OOS net $-2,837.19 (sharpe_proxy -0.0311, win 33.83%/P-L 1.8019). The trend geometry (win<50%/P-L>1) was RETAINED OOS, but the edge magnitude flipped negative.",
+    "regime_dependence": "The 2019-2023 IS edge was regime-specific to a strong large-cap/tech uptrend. In the 2024-2025 OOS window, defensive/staples names trended (KO +$3,897, WMT +$2,938) while tech/energy reversed or whipsawed (AMZN -$2,049, CVX -$3,106, JNJ -$2,442, META -$1,239, JPM -$1,260), netting negative."
+  },
+  "diagnostic_only_disclosure": "The strategy remains DIAGNOSTIC-ONLY and is NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, and NOT FRC-granted. Trading remains PAUSED; Live BLOCKED_AT_6_GATES; FRC NEVER_GRANTED. No promotion of any kind.",
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "framework_reading": {
+    "lessons_eligible_for_lessons_md_in_a_separate_authorization": [
+      "LESSON_S16_D1_004 (eligible; NOT written): A positive in-sample edge that survives full cost-stress (S0-S4) is necessary but NOT sufficient; DR4 (oos_negative_while_is_positive) is the binding generalization gate. s16 passed IS + cost-stress yet failed OOS -- the OOS gate is where false positives are caught.",
+      "LESSON_S16_D1_005 (eligible; NOT written): Trend-following edges are regime-dependent. The 2019-2023 large-cap uptrend edge did not carry to 2024-2025: defensive/staples (KO/WMT) trended OOS while tech/energy reversed. A trend candidate's IS window regime must be weighed against the OOS regime; in-sample trend strength is not portable.",
+      "LESSON_S16_D1_006 (eligible; NOT written): The phased ladder (PLAN->SEAL->BUILD->P4->P6->P6.5->P7->P10) plus the OOS gate functioned as designed -- s16 advanced furthest of the line precisely because it earned each gate, and the OOS gate terminated it honestly without any gate relaxation.",
+      "WARNING (eligible; NOT written): lessons would be written only under a separate explicit authorization. This P11 does NOT touch lessons.md."
+    ]
+  },
+  "full_arc_recorded": {
+    "p10_oos": {
+      "closed_trades": 133,
+      "expectancy_per_trade_usd": -21.33,
+      "k9_satisfied": true,
+      "max_drawdown_pct": 0.099062,
+      "net_pnl_usd": -2837.19,
+      "profit_loss_ratio": 1.8019,
+      "sharpe_proxy_per_trade": -0.0311,
+      "verdict": "REJECT_FAST",
+      "win_rate_pct": 33.83
+    },
+    "p6_5_cost_stress": {
+      "edge_survived_full_cost_stress": true,
+      "s0_to_s4_net_pnl_usd": {
+        "S0": 18702.55,
+        "S1": 17129.66,
+        "S2": 16465.25,
+        "S3": 15673.82,
+        "S4": 15205.07
+      },
+      "verdict": "PASS_COST_STRESS_ELIGIBLE"
+    },
+    "p6_is": {
+      "closed_trades": 323,
+      "expectancy_per_trade_usd": 53.03,
+      "net_pnl_usd": 17129.69,
+      "profit_loss_ratio": 2.2191,
+      "sharpe_proxy_per_trade": 0.0563,
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "win_rate_pct": 34.67
+    }
+  },
+  "hard_boundaries_held_this_p11_turn": {
+    "c6_carried_verbatim": true,
+    "candidate_lifecycle_marked_terminal": true,
+    "no_broker_exchange_api": true,
+    "no_data_fetch": true,
+    "no_dr_redefinition": true,
+    "no_frc_grant": true,
+    "no_further_diagnostics": true,
+    "no_k9_relaxation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_p10_oos_3d466f5": true,
+    "no_modification_of_p3_source_files": true,
+    "no_modification_of_sealed_csvs": true,
+    "no_oos_rerun": true,
+    "no_oos_window_change": true,
+    "no_paper_trading_via_broker": true,
+    "no_profitability_or_live_ready_claim": true,
+    "no_rec1_demotion": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s15_s14_s13_s12": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization": true,
+    "p10_oos_recorded_verbatim_from_parent": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "REC1-equivalent (BINDING): OOS K9 reachable on the 12-name basket (expected ~96-180/y). If observed effective IS rate < 25/y basket-summed, OOS K9 unreachability becomes structurally probable -> PARKED_SAFE_BUT_OOS_INDETERMINATE per precedent. The chain shall NOT relax K9 at OOS.",
+    "EXIT/STOP-FIRST-PRINCIPLES (BINDING; trend variant): exit = TRAILING DONCHIAN channel (N_exit=10; let winners run/cut losers) + 2xATR(14) initial catastrophe stop. Opposite geometry to the failed mean-reversion family; expected trend profile win<50% / P/L>1. Hypothesis tested at P6 IS, never assumed.",
+    "DA3=B (BINDING): per-trade risk pct = 0.005 (0.5%)",
+    "DA4=B: START_CASH_USD = 100000 ($100k); DR10 v2 cost_drag clears strong margin for cash equity",
+    "exit/stop-first-principles + K9-reachability + DR10-v2-reachability disciplines applied at PLAN+DRAFT; binding for all subsequent phases",
+    "K9_THRESHOLD_INVIOLATE: closed_trades_basket_summed >= 100; no relaxation at any phase",
+    "Mechanic family Donchian breakout trend (trailing-stop), NON-mean-reversion, LOCKED at PLAN",
+    "Donchian params N_entry=20 / N_exit=10 / ATR(14) 2N initial stop first-principles; to be JUSTIFIED (not tuned) and LOCKED at SEAL",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN",
+    "12-name expanded cross-sector universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN",
+    "DR9 data-availability gate PASSED all 12 by REUSE (sealed 245ac0d; result_seal ec856253...); NO fresh fetch; cash_equity_data_reuse_byte_equivalent",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (12 names ~7 sectors; expected higher A7 / lower K10 than 3-name basket); NOT the candidate's risk axis (per-trade trend edge K1/K2 is)",
+    "s15-d1 + s14-d1-cross-sector terminal (FAIL_SAFETY) preserved verbatim; this candidate is FRESH NON-mean-reversion; clears T-FORBID-16/17/18",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched",
+    "P6 IS PASS (if reached) does NOT imply READY at OOS; P6 PASS NEVER implies live-readiness; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent"
+  ],
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P11_LIFECYCLE_DECISION_SEALED",
+    "S16_D1_EXPANDED_DONCHIAN_TREND",
+    "12_NAME_EXPANDED_CROSS_SECTOR_BASKET",
+    "VERDICT_REJECT_FAST",
+    "DR4_OOS_NEGATIVE_WHILE_IS_POSITIVE",
+    "IS_AND_COST_STRESS_PASSED_BUT_OOS_FAILED",
+    "OOS_GENERALIZATION_FAILURE_REGIME_DEPENDENT",
+    "CANDIDATE_LIFECYCLE_TERMINAL",
+    "K9_OOS_SATISFIED_NOT_A_SAMPLE_PROBLEM",
+    "REC1_EQUIVALENT_BINDING",
+    "C6_16_ENTRIES_CARRIED_VERBATIM",
+    "REMAINS_DIAGNOSTIC_ONLY_NOT_LIVE_READY",
+    "NO_PROMOTION",
+    "LESSONS_MD_NOT_TOUCHED_THIS_PHASE"
+  ],
+  "lifecycle_state": "P11_LIFECYCLE_DECISION_SEALED_CANDIDATE_TERMINAL",
+  "memo_run_id": "PHASE2-S16-D1-P11-2fd047cb6d29",
+  "negative_invariants": {
+    "candidate_promotion_attempted": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed_positive": false,
+    "claims_paper_ready": false,
+    "committed_this_script": false,
+    "dr_redefined": false,
+    "frc_granted": false,
+    "further_diagnostics_run": false,
+    "k9_relaxed": false,
+    "lessons_md_touched": false,
+    "oos_rerun": false,
+    "p10_modified": false,
+    "p3_source_files_modified": false,
+    "parameters_optimized": false,
+    "rec1_demoted": false,
+    "s14_chain_modified": false,
+    "s15_chain_modified": false,
+    "sealed_csvs_modified": false,
+    "strategy_lab_promoted": false,
+    "tier_n_seal_modified": false
+  },
+  "operator_decision_paths_post_p11": [
+    {
+      "default_recommended": true,
+      "description": "Honor the OOS REJECT_FAST as terminal. No further diagnostics, no OOS re-run, no promotion. Catalog as ARCHIVED.",
+      "path_id": "A_PARK",
+      "requires_separate_authorization": false,
+      "title": "Park s16-d1 permanently (REJECT_FAST at OOS terminal)"
+    },
+    {
+      "description": "Author a next-track selection plan: e.g., a mechanic with regime-robustness (vol/regime overlay justified at SEAL), a different mechanic family, or an explicit IS/OOS-regime-alignment check. NOT a patch on s16-d1.",
+      "exact_phrase": "Authorize next research-track selection plan after s16-d1 OOS REJECT_FAST only.",
+      "path_id": "B_NEW_CANDIDATE",
+      "requires_separate_authorization": true,
+      "title": "Start a fresh candidate informed by the OOS-generalization finding"
+    },
+    {
+      "description": "Append LESSON_S16_D1_004/005/006 under a separate authorization. This P11 does NOT touch lessons.md.",
+      "exact_phrase": "Authorize s16-d1 P11 lessons.md update only.",
+      "path_id": "C_LESSONS_MD_UPDATE",
+      "requires_separate_authorization": true,
+      "title": "Write the eligible LESSON_S16_D1_* entries to lessons.md"
+    },
+    {
+      "description": "Keep the P11 sealed memo on file; no Path A/B/C action initiated yet.",
+      "path_id": "D_DEFER",
+      "requires_separate_authorization": false,
+      "title": "Defer / pause"
+    }
+  ],
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p10_oos_file_sha256": "bd0a371127d8403ee9c8ab6c091d33655b1149668eff4fdaf4839982d8b2677a",
+    "p10_oos_gate_commit": "3d466f5",
+    "p10_oos_report_seal_sha256": "7cbcbb20b40efa2af5d79bd2166918753d9b91f5d2c377a9a0ed57675258637f",
+    "p1_plan_lock_commit": "f95e5e3",
+    "p2_phase2_plan_commit": "f826aea",
+    "p3_build_commit": "2cddb93",
+    "p4_smoke_commit": "58904e8",
+    "p6_5_cost_stress_commit": "b3a3bc5",
+    "p6_is_diagnostic_commit": "8976a47",
+    "p7_decision_memo_commit": "ecd777f",
+    "s14_d1_cross_sector_p7_terminal_commit": "6485ea9",
+    "s15_d1_p7_terminal_commit": "8abcd31",
+    "s16_dr9_result_commit": "245ac0d",
+    "tier_n_spec_seal_commit": "985c569"
+  },
+  "phase": "P11_LIFECYCLE_DECISION",
+  "phase_prefix": "S16_D1_EXPANDED_DONCHIAN_TREND_TIER_N_SPEC_SEALED",
+  "remains_diagnostic_only": true,
+  "report_date_utc": "2026-05-28T22:48:24.048954Z",
+  "report_kind": "S16-D1 P11 lifecycle decision memo: formalizes the TERMINAL disposition. The candidate passed P6 IS (positive edge) and P6.5 (edge survived full cost-stress) but FAILED the P10 OOS gate -- DR4 oos_negative_while_is_positive fired (OOS net -$2,837.19 while IS was +$17,129.69) -> REJECT_FAST. IS+cost-stress success is necessary but NOT sufficient; DR4 (OOS generalization) is the binding gate. DIAGNOSTIC-ONLY; never live.",
+  "report_seal_sha256": "2b16844e5809eddd42e2ef473ed75a4b06c2bf876dddc186bd946c91bbf1c6f2",
+  "schema_id": "sparta.research.s16_d1_expanded_donchian_trend_p11_lifecycle_decision_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "backtest_diagnostic_only": true,
+    "candidate_lifecycle_terminal": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "P11_LIFECYCLE_DECISION_SEALED_CANDIDATE_TERMINAL",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "terminal_driver": {
+    "fires": true,
+    "is_net_pnl_usd": 17129.69,
+    "name": "oos_negative_while_is_positive_unexplained",
+    "oos_expectancy_per_trade_usd": -21.33,
+    "oos_net_pnl_usd": -2837.19,
+    "oos_sharpe_proxy_per_trade": -0.0311,
+    "precedence_note": "DR4 sits at OOS in the precedence chain; it is the canonical generalization gate. K9 OOS was SATISFIED (133 trades ~67/y), so this is a genuine edge-generalization failure, not a sample problem.",
+    "rule": "DR4"
+  },
+  "title": "s16-d1 expanded-universe Donchian trend P11 lifecycle decision memo (sealed; binding; candidate-lifecycle TERMINAL by REJECT_FAST/DR4 at P10 OOS)",
+  "verdict_formalized": "REJECT_FAST",
+  "what_this_does_NOT_demonstrate": [
+    "It does NOT demonstrate trend-following is universally non-viable; THIS sealed spec (Donchian-20/10 + 2xATR) on THIS 12-name basket over THIS OOS window failed to generalize.",
+    "It does NOT demonstrate a K9/sample problem (OOS 133 trades ~67/y; ample).",
+    "It does NOT demonstrate the IS or cost-stress analysis was wrong (they were correct; the edge simply did not persist OOS).",
+    "It does NOT condemn the 12-name universe or split_only data (DR9-passed, reused, intact)."
+  ]
+}
