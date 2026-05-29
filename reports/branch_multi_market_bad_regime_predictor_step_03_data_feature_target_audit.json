@@ -1,202 +1,225 @@
 {
-  "alignment_status": "NOT_EVALUABLE_BLOCKED (6E missing; 4 markets span different venues/sessions; series undecoded)",
   "audit_only": true,
-  "authored_at_utc": "2026-05-29T15:07:34.659517Z",
-  "base_rate_sanity": "NOT_ESTABLISHED (cannot compute discovery base-rate without assembled 2024 series; deferred; no computation performed)",
+  "authored_at_utc": "2026-05-29T16:25:09.655112Z",
   "binding": true,
   "branch": "multi_market_bad_regime_predictor",
+  "calendar_alignment": {
+    "es_not_gc_2024_weekday_breakdown": {
+      "Fri": 2,
+      "Mon": 4,
+      "Sun": 32,
+      "Tue": 3,
+      "Wed": 5
+    },
+    "gc_shortfall_diagnosis": "session-convention (GC continuous daily omits a recurring weekday set; the ES-extra dates concentrate on specific weekdays) -- NOT large contiguous data gaps",
+    "inner_join_common_2024": 266,
+    "max_contiguous_union_days_gc_lacks": 2,
+    "per_market_2024_days": {
+      "6E": 311,
+      "CL": 312,
+      "ES": 312,
+      "GC": 266
+    },
+    "pre_committed_rule": "inner-join common-4 calendar; no forward-fill",
+    "union_2024": 312
+  },
   "checks_detail": {
-    "A3.1_data_availability_coverage_2024": {
-      "detail": "TWO of four markets lack 2024 discovery data: (a) 6E (Euro FX) is ENTIRELY ABSENT (0 files, all caches); (b) ES parquet ends 2022-12 -> ES has NO 2023/2024/2025 data in the repo. Only GC and CL have 2024 -- and only inside the OOS-named cache (databento_cache_oos, 2023-01..2025-12), co-located with the sealed 2025 holdout. GC/CL are DBN (undecoded); ES is parquet ending 2022. The fixed 4-market scope (ES/GC/CL/6E) over 2024 cannot be satisfied from repo data. Daily row/session counts NOT established (series not decoded/assembled).",
-      "status": "FAIL"
+    "A3.1_data_availability_coverage": {
+      "detail": "All 4 markets now present (prior HALT gaps -- 6E absent, ES 2024 missing -- RESOLVED). Discovery 2019-01-02..2024-12-30. Rows ES 1866/GC 1589/CL 1863/6E 1798. CAVEAT: GC 2024 day-count (266) is materially lower than ES/CL/6E (312/312/311) -- see A3.3.",
+      "status": "PASS_WITH_CAVEAT"
     },
     "A3.2_point_in_time_roll_correctness": {
-      "detail": "Continuous c.0 series exist per-market but are not decoded/assembled into a unified point-in-time daily series with a documented, reconciled roll convention; roll correctness cannot be verified without the (out-of-scope) assembly step. ES (GLBX continuous) vs GC/CL (DBN c.0) roll handling not reconciled.",
-      "status": "NOT_EVALUABLE_BLOCKED"
+      "detail": "Uniform Databento continuous front-month c.0 (single roll convention across all 4); ohlcv-1d daily bars are end-of-session (point-in-time, no intraday lookahead). Integrity: OHLC violations ES 0/GC 0/CL 0/6E 0; non-monotonic ES 0/GC 0/CL 0/6E 0; dupes all 0. (low<=open/close<=high and dates strictly increasing.)",
+      "status": "PASS"
     },
-    "A3.3_cross_market_calendar_session_alignment": {
-      "detail": "Cannot align 4 markets: 6E is missing, and ES (equity-index, CME GLBX) / GC,CL (CME metals,energy) / 6E (FX) trade different sessions/holidays; a shared decision-time index + a pre-committed mismatch rule cannot be verified without all four decoded series.",
-      "status": "NOT_EVALUABLE_BLOCKED"
+    "A3.3_cross_market_calendar_alignment": {
+      "detail": "Per-market 2024 session-dates: ES 312, GC 266, CL 312, 6E 311; union 312; INNER-JOIN common-4 = 266. GC shortfall diagnosis: session-convention (GC continuous daily omits a recurring weekday set; the ES-extra dates concentrate on specific weekdays) -- NOT large contiguous data gaps. ES-not-GC 2024 dates by weekday: {'Sun': 32, 'Mon': 4, 'Wed': 5, 'Fri': 2, 'Tue': 3}. Pre-committed rule: inner-join on the common 4-market calendar (decision-time index = days ALL 4 trade); mismatches dropped, never forward-filled. CONCERN: confirm/accept GC's lower session count; 266 common 2024 dates is the usable discovery decision-date base.",
+      "status": "PASS_WITH_CONCERN"
     },
-    "A3.4_target_computability_base_rate": {
-      "detail": "The Step 02 target rule is well-DEFINED, but computability-in-principle and a non-degenerate discovery (2024) base-rate cannot be confirmed without assembled per-market daily series; and per audit guards NO returns/labels are computed here. Blocked on data assembly + 6E acquisition.",
-      "status": "NOT_EVALUABLE_BLOCKED"
+    "A3.4_target_computability": {
+      "detail": "Target is computable-in-principle on the assembled discovery series. CONSTRAINT (firewall): Forward-window labels must NOT reach into sealed 2025: labelable discovery decision dates are those with t+H <= last discovery bar (2024-12-30). The final ~H discovery dates are unlabelable without 2025 (which is sealed). With H~21, ample labelable 2024 dates remain (>=~266 common-calendar days minus the ~H tail). NO labels/returns computed in this audit.",
+      "status": "PASS_WITH_CONSTRAINT"
     },
-    "A3.5_feature_decision_time_computability": {
-      "detail": "Allowed feature families (Step 02) are decision-time-valid by design (all windows end <= t; label window strictly after t). Computability ON ACTUAL DATA is blocked pending decode/assembly + 6E.",
-      "status": "DESIGN_VALID_DATA_BLOCKED"
+    "A3.5_base_rate_sanity": {
+      "detail": "Base-rate is ESTIMABLE-in-principle (>=266 labelable common-calendar 2024 dates; binary well-defined label) but is NOT computed here -- computing it requires forward-window label realization (a return-like statistic), which is out of scope per guards. Defer to the authorized labeling step.",
+      "status": "DEFERRED_NOT_COMPUTED"
     },
-    "A3.6_no_feature_target_leakage": {
-      "detail": "Step 02 specifies strict feature/target time-separation (feature windows <= t; label window > t; no label-derived features; point-in-time rolls). No features/targets were computed, so no leakage could occur. The RULES are sound and auditable.",
+    "A3.6_feature_decision_time_computability": {
+      "detail": "Allowed feature families (Step 02) are decision-time-valid (windows end <= t); the assembled daily series now SUPPORTS computing them on discovery (data ready). No features computed in this audit.",
+      "status": "DESIGN_VALID_DATA_READY"
+    },
+    "A3.7_no_feature_target_leakage": {
+      "detail": "Feature/target time-separation rules sound (feature windows <= t; label window > t; no label-derived features); nothing computed, so no leakage could occur. Plus the forward-window cap (A3.4) prevents the label reaching into sealed 2025.",
       "status": "DESIGN_PASS"
     },
-    "A3.7_discovery_oos_firewall_enforceability": {
-      "detail": "Methodology firewall (2024 discovery vs 2025 sealed OOS) is sound IN DESIGN, but PHYSICALLY the 2024 (discovery) and 2025 (sealed) GC/CL data are CO-LOCATED in the same directory (databento_cache_oos, 2023-01..2025-12). Enforceability requires PHYSICAL separation of 2024-discovery from 2025-OOS before any data step, so 2024 cannot be read without proximity to 2025.",
-      "status": "CONCERN"
-    },
-    "A3.8_2025_oos_blocked_status": {
-      "detail": "2025 exists on disk for GC/CL (databento_cache_oos includes 2025-01..2025-12) and is presumed for ES; 6E 2025 is absent. This audit listed only directory month-names (availability) and did NOT inspect any 2025 values. 2025 remains UNUSED/SEALED (no step has touched it). CAVEAT: physical co-mingling with 2024 (see A3.7) must be resolved to keep the block robust.",
-      "status": "CONFIRMED_BLOCKED_WITH_CAVEAT"
+    "A3.8_discovery_oos_firewall_separation": {
+      "detail": "Discovery (discovery_2019_2024) and OOS (oos_2025_sealed) are PHYSICALLY DISTINCT directories; SEALED_DO_NOT_INSPECT marker present=True; discovery contains NO 2025 (all last-dates <= 2024-12-31 = True); this audit did NOT open any OOS CSV (oos_csv_opened=False) -- OOS verified by availability/hash from the acquisition manifest only.",
+      "status": "PASS"
     },
     "A3.9_scope_guard_compliance": {
-      "detail": "No model trained, no clustering, no signals, no backtest; no returns/R/PnL/Sharpe; no fetch; no 2025 value inspection (availability listing only); no tradeability/OOS-confirmation/live-readiness/profitability claims; no SPARTA_BRAIN/weekly-RS/FRC/BLOCKED_AT_6_GATES/DR-K/Strategy-Lab concepts imported (raw databento price data is not a SPARTA mechanic/gate concept; firewall vocabulary intact).",
+      "detail": "No model/cluster/signal/backtest; no returns/R/PnL/Sharpe/labels; no 2025-value inspection (availability/hash only); no tradeability/OOS-confirmation/live/profitability claims; no SPARTA_BRAIN/weekly-RS/FRC/BLOCKED_AT_6_GATES concepts; Step 01/02 reports unmodified; neutral content_sha256.",
       "status": "PASS"
     }
   },
-  "checks_passed_or_design_ok": [
-    "A3.6 leakage rules (design)",
-    "A3.9 scope/guard compliance",
-    "A3.8 2025 sealed (procedurally; not inspected)"
+  "conditions_carried": [
+    "C1 (GC coverage): accept/justify GC's lower 2024 session count (266) and use the inner-join common-4 calendar (266 2024 dates) as the decision-time index; session-convention (GC continuous daily omits a recurring weekday set; the ES-extra dates concentrate on specific weekdays) -- NOT large contiguous data gaps.",
+    "C2 (degraded days): Databento flagged 'degraded'-quality days in the warmup (several in 2019) and in the SEALED 2025 set; before labeling, apply a PRE-COMMITTED quality rule (e.g., exclude or flag degraded discovery days). Degraded != missing; bars were returned.",
+    "C3 (forward-window cap): cap labelable discovery decision dates at t+H <= last discovery bar so the target window never reaches sealed 2025.",
+    "C4 (base-rate): compute the discovery base-rate in the authorized labeling step (not here); verify non-degeneracy then.",
+    "C5 (firewall): keep oos_2025_sealed untouched until a separate pre-registered OOS gate."
   ],
   "contamination_firewall": {
     "applied": true,
-    "forbidden": [
-      "weekly_rs_rotation",
-      "FRC",
-      "BLOCKED_AT_6_GATES",
-      "DR/K-gates",
-      "Strategy_Lab"
-    ],
     "imports_no_sparta_concepts": true
   },
-  "content_sha256": "52df42868876adf02cbbd62d53236c56cdef54dae6eebc5165a3c2baec8e4a53",
-  "coverage_status": {
-    "6E": "ABSENT (0 files) -- hard blocker",
-    "CL": "DBN; same structure as GC",
-    "ES": "parquet 2012-06..2022-12 ONLY -> 2023/2024/2025 (incl 2024 discovery) ABSENT for ES in repo; format differs from GC/CL",
-    "GC": "DBN; 2013..2022 in main+is_only caches, 2023..2025 in oos cache (2024 present ONLY inside oos cache)"
+  "content_sha256": "185ef1783e1e66b418dec109d15b12ec36d759cea84266d66dd6fe55e8c1d83f",
+  "degraded_day_flags": {
+    "discovery_region": "several 2019 warmup days flagged degraded (e.g., 2019-01-15, 2019-02-22, 2019-03-13, ...); full list truncated in vendor warning",
+    "handling": "pre-committed quality rule required before labeling (C2); degraded != missing",
+    "sealed_2025_region": "a few 2025 days flagged (2025-09-17/24, 11-28) -- in the SEALED set, not inspected",
+    "source": "Databento BentoWarning during fetch"
   },
-  "data_inventory": {
+  "discovery_inventory": {
     "6E": {
-      "coverage_months": "NONE -- 6E Euro FX futures ABSENT in all caches (data/databento, _cache, _cache_is_only, _cache_oos)",
-      "daily_row_count": 0,
-      "decoded_daily_series_assembled": false,
-      "format": "n/a",
-      "present": false
+      "days_2024": 311,
+      "dupes": 0,
+      "first": "2019-01-02",
+      "last": "2024-12-30",
+      "nonmonotonic": 0,
+      "ohlc_violations": 0,
+      "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/6E_ohlcv_1d_20190102_20241231.csv",
+      "rows": 1798,
+      "sha256": "3d88c08586ef0715a1e1f2d640ecc58e0b125d268170e1b52d75e344dc6a7b8b"
     },
     "CL": {
-      "coverage_by_cache": {
-        "databento_cache": "2013-01..2022-12 (120 mo)",
-        "databento_cache_is_only": "2013-01..2022-12 (120 mo)",
-        "databento_cache_oos": "2023-01..2025-12 (36 mo)"
-      },
-      "daily_row_count": "NOT COUNTED (DBN not decoded)",
-      "decoded_daily_series_assembled": false,
-      "format": "DBN (.dbn.zst, monthly, continuous CL.c.0) -- requires decode",
-      "has_2024_discovery": true,
-      "has_2025_oos": true,
-      "present": true
+      "days_2024": 312,
+      "dupes": 0,
+      "first": "2019-01-02",
+      "last": "2024-12-30",
+      "nonmonotonic": 0,
+      "ohlc_violations": 0,
+      "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/CL_ohlcv_1d_20190102_20241231.csv",
+      "rows": 1863,
+      "sha256": "a9d5ea657ca06b2c289780e6a0d1e9d919673d8bbebc3db961a20a18dada6ae4"
     },
     "ES": {
-      "coverage_months": "2012-06..2022-12",
-      "coverage_note": "ES parquet ends 2022-12 -> 2023/2024/2025 ABSENT for ES in repo (no ES in any databento_cache). ES 2024 DISCOVERY DATA MISSING.",
-      "daily_row_count": "NOT COUNTED (parquet not decoded/assembled)",
-      "decoded_daily_series_assembled": false,
-      "dir": "data/databento/ES/raw_continuous_c0_1d",
-      "format": "parquet (ohlcv-1d, continuous ES.c.0, dataset GLBX.MDP3)",
-      "has_2023_plus": false,
-      "has_2024_discovery": false,
-      "monthly_files": 127,
-      "present": true
+      "days_2024": 312,
+      "dupes": 0,
+      "first": "2019-01-02",
+      "last": "2024-12-30",
+      "nonmonotonic": 0,
+      "ohlc_violations": 0,
+      "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/ES_ohlcv_1d_20190102_20241231.csv",
+      "rows": 1866,
+      "sha256": "3d98248541bb974ac59e6109cb854c33469608c3b9bdcf34464b8d8a9e09b3d7"
     },
     "GC": {
-      "coverage_by_cache": {
-        "databento_cache": "2013-01..2022-12 (120 mo)",
-        "databento_cache_is_only": "2013-01..2022-12 (120 mo)",
-        "databento_cache_oos": "2023-01..2025-12 (36 mo)"
-      },
-      "daily_row_count": "NOT COUNTED (DBN not decoded; would require databento decode)",
-      "decoded_daily_series_assembled": false,
-      "format": "DBN (.dbn.zst, monthly, continuous GC.c.0) -- requires decode",
-      "has_2024_discovery": true,
-      "has_2025_oos": true,
-      "present": true
+      "days_2024": 266,
+      "dupes": 0,
+      "first": "2019-01-02",
+      "last": "2024-12-30",
+      "nonmonotonic": 0,
+      "ohlc_violations": 0,
+      "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/GC_ohlcv_1d_20190102_20241231.csv",
+      "rows": 1589,
+      "sha256": "ebac946c8de6127f1fcd4ee15263a09b3a99c5bd48e2898f5e299077ec59d375"
     }
   },
   "document_type": "BRANCH_DATA_FEATURE_TARGET_AUDIT",
-  "feature_availability_status": "DESIGN_VALID (decision-time families, windows <= t) but DATA_BLOCKED (no decoded series; 6E missing)",
+  "gc_coverage_discrepancy_explicit": {
+    "GC_2024_days": 266,
+    "delta_vs_ES": 46,
+    "diagnosis": "session-convention (GC continuous daily omits a recurring weekday set; the ES-extra dates concentrate on specific weekdays) -- NOT large contiguous data gaps",
+    "others_2024_days": {
+      "6E": 311,
+      "CL": 312,
+      "ES": 312
+    },
+    "resolution": "use inner-join common-4 calendar (266 days) as the decision-time index"
+  },
   "guards_held": {
     "audit_only": true,
     "no_2025_value_inspection": true,
     "no_backtest": true,
     "no_cluster": true,
     "no_commit_by_this_audit": true,
-    "no_fetch": true,
     "no_model": true,
-    "no_returns_R_PnL_Sharpe": true,
+    "no_returns_R_PnL_Sharpe_or_labels": true,
     "no_signals": true,
     "no_sparta_contamination": true,
-    "no_tradeability_or_profitability_claims": true
+    "no_tradeability_or_profitability_claims": true,
+    "step_01_02_reports_unmodified": true
   },
   "labels": [
     "BRANCH_MULTI_MARKET_BAD_REGIME_PREDICTOR",
-    "STEP_03_DATA_FEATURE_TARGET_AUDIT",
-    "VERDICT_HALT",
-    "6E_ABSENT",
-    "ES_GC_CL_UNDECODED_UNASSEMBLED",
-    "2024_DISCOVERY_COMINGLED_WITH_2025_OOS",
-    "DESIGN_CHECKS_PASS",
-    "2025_OOS_SEALED_NOT_INSPECTED",
-    "AUDIT_ONLY_NO_DATA_NO_MODEL_NO_RETURNS_NO_CLAIMS",
+    "STEP_03_REAUDIT",
+    "VERDICT_PASS_CONDITIONAL",
+    "ALL_4_MARKETS_PRESENT",
+    "GC_2024_266_DAYS_INNER_JOIN_266",
+    "DEGRADED_DAYS_FLAGGED",
+    "FORWARD_WINDOW_CAP_TO_AVOID_2025",
+    "FIREWALL_SEPARATION_VERIFIED",
+    "2025_OOS_NOT_INSPECTED",
+    "AUDIT_ONLY_NO_MODEL_NO_RETURNS_NO_CLAIMS",
     "CONTAMINATION_FIREWALLED"
   ],
-  "leakage_firewall_checks": {
-    "discovery_2024_oos_2025_firewall": "CONCERN -- 2024 and 2025 physically co-located in databento_cache_oos; require physical separation",
-    "feature_target_time_separation_rule": "DESIGN_PASS",
-    "no_computation_occurred": true
+  "physical_separation_proof": {
+    "discovery_contains_no_2025": true,
+    "discovery_dir": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024",
+    "distinct_dirs": true,
+    "oos_csv_opened_by_this_audit": false,
+    "oos_verified_via": "acquisition manifest availability/hash only",
+    "sealed_marker_present": true,
+    "sealed_oos_dir": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed"
   },
-  "oos_2025_blocked_status": "BLOCKED/SEALED CONFIRMED procedurally (present on disk for GC/CL; 6E 2025 absent; NOT inspected by this audit -- availability listing only). Caveat: physical co-mingling with 2024 to be resolved.",
   "recommended_next_authorization": {
-    "exact_phrase": "Authorize Multi-Market Bad-Regime Predictor data acquisition + assembly + firewall-separation step (discovery 2024 + warmup only; acquire 6E; decode/assemble ES/GC/CL to unified point-in-time daily continuous; physically separate 2024-discovery from a SEALED 2025-OOS; no model/cluster/signal/backtest/returns; do not inspect 2025 values).",
-    "must_include": [
-      "ACQUIRE 6E (Euro FX futures) daily continuous-contract data for the discovery window (2024 + prior warmup) [and 2025 fetched but written to a SEALED OOS location, not inspected].",
-      "DECODE + ASSEMBLE ES (parquet) and GC/CL (DBN) into unified point-in-time daily continuous series with a documented, reconciled roll convention.",
-      "PHYSICALLY SEPARATE 2024-discovery from 2025-OOS (distinct sealed directories) to make the firewall enforceable.",
-      "Re-run THIS Step 03 audit against the assembled discovery dataset to re-verify A3.1-A3.5 + re-confirm A3.6-A3.9."
-    ],
-    "summary": "A bounded, SEPARATE data-acquisition + assembly + firewall-separation step (the branch's current steps forbid fetching, so this is its own authorization)."
+    "exact_phrase": "Authorize Multi-Market Bad-Regime Predictor Step 04 feature/target construction on DISCOVERY only — commit aba1796 data; apply the inner-join common-4 calendar (266 2024 days), a pre-committed degraded-day rule, and the t+H<=last-discovery-bar label cap; compute decision-time features (<= t) and the binary bad-regime label + discovery base-rate; NO model/cluster/signal/backtest, NO returns/R/PnL/Sharpe, NO 2025 inspection, NO tradeability/profitability claims.",
+    "summary": "Proceed to the feature/target construction (labeling) step on DISCOVERY ONLY, honoring conditions C1-C5; sealed 2025 OOS stays untouched."
   },
-  "row_session_counts": {
-    "6E_files": 0,
-    "CL_coverage_by_cache": {
-      "databento_cache": "2013-01..2022-12 (120 mo)",
-      "databento_cache_is_only": "2013-01..2022-12 (120 mo)",
-      "databento_cache_oos": "2023-01..2025-12 (36 mo)"
+  "schema_id": "branch.multi_market_bad_regime_predictor.step_03_data_feature_target_audit.v2_reaudit",
+  "sealed_oos_availability_hash_only": {
+    "6E": {
+      "range": "2025-01-01..2025-12-31",
+      "row_count": 307,
+      "sha256": "18ff41d20df7e5ed5918225179e746dae7f4b2c3c609561824e6bb7680b54536"
     },
-    "ES_coverage_months": "2012-06..2022-12",
-    "ES_monthly_files": 127,
-    "GC_coverage_by_cache": {
-      "databento_cache": "2013-01..2022-12 (120 mo)",
-      "databento_cache_is_only": "2013-01..2022-12 (120 mo)",
-      "databento_cache_oos": "2023-01..2025-12 (36 mo)"
+    "CL": {
+      "range": "2025-01-01..2025-12-31",
+      "row_count": 311,
+      "sha256": "450d902d3c735b6b29d18fcd70baa0892ff93d6fe42ea9f4d941420eab15513a"
     },
-    "note": "Daily row/session counts are NOT established: ES is parquet and GC/CL are DBN (.dbn.zst), neither decoded/assembled in this audit; 6E has zero data. Coverage reported at MONTH granularity (availability) only."
+    "ES": {
+      "range": "2025-01-01..2025-12-31",
+      "row_count": 311,
+      "sha256": "6a2b30a30f7ebe6e12599bb17d390db88e2edb742336f6d1090830011deddf1b"
+    },
+    "GC": {
+      "range": "2025-01-01..2025-12-31",
+      "row_count": 281,
+      "sha256": "90fa9291d19106b869a8af6fed7cd60d18fe710300985263ae987074df825b5d"
+    }
   },
-  "schema_id": "branch.multi_market_bad_regime_predictor.step_03_data_feature_target_audit.v1",
   "source_of_truth": {
-    "step_01_scope_anchored": true,
+    "acquisition_commit": "aba1796",
+    "acquisition_manifest_sha256": "310084ef9fda5900545257da30248cc1adf23ef4d2d005f2b5941c251df12244",
+    "discovery_dir": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw",
     "step_02_content_sha256": "26b3cd10d5d735aca0078dc8ff5a13698d050713f6edc1cfbd30998613bef6d0",
     "step_02_methodology_plan_commit": "b6c30d5"
   },
   "status": {
-    "advance_blocked_until_data_acquisition_step": true,
-    "branch_state": "STEP_03_AUDIT_COMPLETE_VERDICT_HALT"
+    "branch_state": "STEP_03_REAUDIT_PASS_CONDITIONAL_CLEARED_FOR_STEP_04_LABELING",
+    "prior_halt_resolved": true
   },
-  "step": "03_data_feature_target_audit",
-  "target_computability_status": "NOT_EVALUABLE_BLOCKED (well-defined in Step 02; not computable-confirmable without assembled series; no labels/returns computed per guards)",
-  "verdict": "HALT",
-  "verdict_reasons": [
-    "TWO of four markets lack 2024 discovery data: 6E entirely absent (0 files), AND ES parquet ends 2022-12 (no ES 2023/2024/2025 in repo) -> 4-market scope not satisfiable from repo data (A3.1 FAIL).",
-    "Only GC/CL have 2024 -- as UNDECODED DBN, and only inside the OOS-named cache (databento_cache_oos); not assembled into a unified point-in-time daily series; roll + cross-market calendar alignment unverifiable (A3.2/A3.3 blocked).",
-    "2024 discovery GC/CL co-located with sealed 2025 OOS in databento_cache_oos -> firewall needs physical separation (A3.7 concern).",
-    "Target computability/base-rate and feature computability blocked on the above (A3.4 blocked; A3.5 data-blocked)."
-  ],
+  "step": "03_data_feature_target_audit_REAUDIT",
+  "supersedes": "the prior Step 03 audit (HALT, commit 6f063a8) -- data-availability blocker now resolved",
+  "verdict": "PASS_CONDITIONAL",
+  "verdict_meaning": "PASS_CONDITIONAL = the prior data-availability HALT is RESOLVED (all 4 markets present, integrity OK, firewall separated, alignment rule defined, target computable with a documented cap); the branch is CLEARED to proceed to the feature/target labeling step on DISCOVERY ONLY, subject to the carried conditions. This is NOT a tradeability/OOS-confirmation/live/profitability claim.",
   "what_this_audit_did_not_do": [
     "train/cluster/signal/backtest",
-    "compute returns/R/PnL/Sharpe/trade metrics",
-    "fetch any data",
-    "inspect 2025 OOS values (listed month dirs only)",
+    "compute returns/R/PnL/Sharpe/labels/base-rate",
+    "open/inspect any 2025 OOS CSV values",
     "claim tradeability/OOS-confirmation/live-readiness/profitability",
-    "import SPARTA/weekly-RS/FRC/BLOCKED_AT_6_GATES/DR-K/Strategy-Lab concepts"
+    "import SPARTA/weekly-RS/FRC/BLOCKED_AT_6_GATES concepts",
+    "modify Step 01/02 reports"
   ]
 }
