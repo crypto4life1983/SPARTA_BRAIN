@@ -1,0 +1,232 @@
+{
+  "authored_at_utc": "2026-05-29T02:27:31.444026Z",
+  "authorization_phrase": "Authorize s18-d1 broad-universe weekly relative-strength rotation P10 OOS gate only — bound by DR10 v2 + walk-forward K13.",
+  "binding": true,
+  "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, NOT FRC-granted. Trading PAUSED; Live BLOCKED_AT_6_GATES; FRC NEVER_GRANTED.",
+  "document_type": "P11_LIFECYCLE_DECISION_SEALED",
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "framework_k13_binding": "walk-forward persistence (52a3b60); s18 weekly is the first candidate to clear it AND P10",
+  "full_arc_recorded": {
+    "p10_oos": {
+      "closed_trades": 117,
+      "dr4_fired": false,
+      "expectancy_usd_per_trade": 210.4281,
+      "max_drawdown_pct": 22.5951,
+      "net_pnl_usd": 39785.68,
+      "sharpe_proxy_per_trade": 0.125359,
+      "total_return_pct": 39.7857,
+      "trades_per_year": 58.7,
+      "verdict": "OOS_CONFIRMED_DIAGNOSTIC",
+      "win_rate_pct": 59.83
+    },
+    "p6_5_cost_stress": {
+      "dr_fires": [],
+      "s0_to_s4_net_usd": {
+        "S0": 88458.44,
+        "S1": 84793.57,
+        "S2": 82972.82,
+        "S3": 81159.8,
+        "S4": 77556.75
+      },
+      "verdict": "PASS_COST_STRESS_ELIGIBLE"
+    },
+    "p6_7_k13": {
+      "aggregate_net_usd": 125312.77,
+      "n_folds_positive": 3,
+      "per_fold_signs": {
+        "F1": true,
+        "F2": true,
+        "F3": false,
+        "F4": true,
+        "F5": false
+      },
+      "verdict": "K13_PASS"
+    },
+    "p6_is": {
+      "closed_trades": 229,
+      "expectancy_usd_per_trade": 370.2776,
+      "sharpe_proxy_per_trade": 0.186665,
+      "total_return_pct": 132.1841,
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "win_rate_pct": 56.33
+    }
+  },
+  "hard_boundaries_held_this_p11_turn": {
+    "c6_carried_verbatim": true,
+    "candidate_lifecycle_complete_marked": true,
+    "no_broker_exchange_api": true,
+    "no_cadence_change": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_k_k9_dr10_k13_reinterpretation": true,
+    "no_fold_scheme_change": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_p10_522df8d": true,
+    "no_oos_rerun": true,
+    "no_paper_trading_via_broker": true,
+    "no_parameter_tuning": true,
+    "no_promotion": true,
+    "no_retroactive_k13_application": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s17_s16_s15_s14_s13_s12": true,
+    "no_strategy_lab_promotion": true
+  },
+  "honest_caveats_load_bearing": [
+    "DIAGNOSTIC_ONLY and NOT live-ready: the 6-gate live-block + FRC-never-granted apply regardless of the OOS pass. P10_CONFIRMED is a research-phase status, NOT a promotion, NOT money-proven, NOT live/paper-ready.",
+    "OOS edge is THINNER than IS: expectancy +$210.43/trade OOS vs +$370.28 IS; sharpe +0.125 OOS vs +0.187 IS. The edge degraded out-of-sample (as expected for a real but modest premium).",
+    "Within-OOS fragility: K13's most-recent fold F5 (2024-09..2025-12) was NEGATIVE. The contiguous-OOS positive (+$39,786) is driven substantially by strong early-2024 (the tail of the strongly-positive K13 F4); the most recent ~15 months were weak/negative. Forward expectation should weight the recent weakness, not the headline OOS total.",
+    "K13 was a MARGINAL pass (exactly 3/5 folds positive); 2 of 5 folds (incl. the most recent) were non-positive. Persistence is real but not strong.",
+    "Single OOS window, single universe: this is one 2024-2025 hold-out on one 24-name basket. It is NOT multi-universe or multi-period replication; generalization beyond this window/universe is unproven.",
+    "Weekly is the cost-heaviest rung (turnover ~20x); the cost margin is thinner than slower cadences (S2 edge-erosion ~6%)."
+  ],
+  "inherited_constraints_block_C6_count": 15,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "K9_THRESHOLD_INVIOLATE: closed_trades >= 100 total; OOS >= 50/y; no relaxation at any phase. Pre-SEAL K9 turnover MEASURED (signal-only, no P&L, IS-only) PASSES: aggregate 229; per-fold F1/F2/F3 68/69/72 (~54-57/y); OOS projected ~100-113/2y.",
+    "K13_WALK_FORWARD_BINDING (by-reference 52a3b60): locked rule positive in >=3 of 5 fixed pre-committed UNSEARCHED OOS folds + aggregate net>0 + K9 (per-fold OR aggregate); P6.7 before P10; VALIDATION not optimization; NO per-fold refit (INVIOLATE; T-FORBID-22). Fold boundaries LOCKED byte-equivalent at DA22.",
+    "EDGE NOT INHERITED: the s17 monthly economics (+$1,130.75/trade, win 63.5%, PF 2.42) were measured at MONTHLY cadence and do NOT carry to weekly. Weekly is the WEAKEST first-principles edge basis in the monthly/fortnightly/weekly ladder; the weekly edge MUST be re-proven at P6 IS (K1 sharpe_proxy>0 AND K2 expectancy>0).",
+    "STOP-BEFORE-PROMOTION (terminal, NOT a cadence/M tune): the pre-SEAL K9 gate PASSED (so SEAL proceeded); the EDGE is the remaining open gate. If P6 IS shows the weekly edge negative/zero (K1/K2 fail), OR K13 (P6.7) shows <3/5 folds positive, OR P10 measures OOS K9 < 50/y, the candidate is terminal. A further cadence/M change is a SEPARATE fresh candidate.",
+    "RELATIVE-STRENGTH-FIRST-PRINCIPLES (BINDING): RS-rotation practitioner-family native weekly cadence; signal 126-21 (ranking metric); select top-M=8 equal-weight; exit = loss of relative rank (no trailing/ATR stop).",
+    "Params L=126 / S=21 / M=8 / R=5(weekly) first-principles JUSTIFIED (not tuned, not K9-fitted, not tuned after the pre-SEAL measurement) and LOCKED byte-equivalent at SEAL (DA6/DA8/DA10/DA11).",
+    "DA3 equal-weight 1/M sizing; DA4=B START_CASH 100000; long-only unlevered (DR11 NOT IN CHAIN).",
+    "DR10 = v2 AND-conjunction by-reference to framework SEAL 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal. Weekly is the highest-cost_drag rung in the family (~0.3-0.8% S1; ~1-2% S4) but clears <<5%; P6.5 cost-stress more load-bearing.",
+    "split_only adjustment convention CONFIRMED (DA15); reuse DR9-passed CSVs; switching post-SEAL FORBIDDEN.",
+    "24-name broad universe LOCKED at PLAN; widening/substitution post-SEAL FORBIDDEN (fresh candidate_record_id required).",
+    "DR9 data-availability gate PASSED all 24 by REUSE (sealed d86e5d1; result_seal 85667ab3); NO fresh fetch; cash_equity_data_reuse_byte_equivalent.",
+    "A7 effective_independent_bets + K10 avg_pairwise_correlation + K6 dispersion LOAD-BEARING (top-8 ~8 sectors); NOT the candidate's risk axis (the relative-momentum edge K1/K2/K13 is).",
+    "s17/s16/s15/s14/s13/s12 terminal preserved verbatim; this candidate is a FRESH SIBLING (not an s17 _revN_/patch, not a rescue of the fortnightly s18 PLAN d2f0cc7); clears T-FORBID-16..24; NOT re-evaluated under K13.",
+    "no_strategy_optimization_authorized: parameters first-principles justified at SEAL, NOT grid-searched; K13 fold scheme pre-committed + unsearched; cadence NOT tuned after the pre-SEAL K9 measurement.",
+    "P6 IS PASS and/or K13 PASS (if reached) do NOT imply READY at OOS/live; the 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent."
+  ],
+  "is_a_seal": true,
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P11_LIFECYCLE_DECISION_SEALED",
+    "S18_D1_WEEKLY_RS_ROTATION",
+    "VERDICT_OOS_CONFIRMED_DIAGNOSTIC",
+    "FIRST_LINE_MEMBER_FULL_LADDER_PASS",
+    "OOS_EDGE_THINNER_THAN_IS",
+    "K13_F5_2024_25_NEGATIVE_RECENT_WEAKNESS",
+    "SINGLE_OOS_SINGLE_UNIVERSE",
+    "NOT_LIVE_READY_NO_PROMOTION",
+    "C6_15_ENTRIES_VERBATIM",
+    "REC1_EQUIVALENT_BINDING",
+    "LESSONS_MD_NOT_TOUCHED_THIS_PHASE"
+  ],
+  "lifecycle_complete": true,
+  "lifecycle_disposition": {
+    "disposition": "CONFIRMED_DIAGNOSTIC_LIFECYCLE_COMPLETE",
+    "frc_granted": false,
+    "live_ready": false,
+    "note": "The candidate completed the full diagnostic ladder with a positive OOS. It is catalogued as the strongest diagnostic result of the s12->s18 line. It is NOT promoted; the framework provides no live-promotion authorization (FRC never granted; permanent 6-gate block). Any forward use requires separate, currently-unavailable, human-gated authorization beyond this research framework.",
+    "paper_ready": false,
+    "promoted": false,
+    "strategy_lab": false
+  },
+  "lifecycle_state": "P11_LIFECYCLE_DECISION_SEALED_OOS_CONFIRMED_DIAGNOSTIC",
+  "lifecycle_terminal_by_failure": false,
+  "memo_run_id": "PHASE2-S18-D1-WEEKLY-P11-0bd07d8a31c2",
+  "milestone": {
+    "headline": "FIRST candidate in the s12->s18 research line to clear the complete gated ladder under the walk-forward K13 discipline.",
+    "line_history": "s12/s13 (futures) terminal; s14/s15 (mean-reversion) IS-FAIL; s16 (absolute trend) OOS-REJECT (DR4); s17 (monthly cross-sectional momentum) INSUFFICIENT_SAMPLE (K9); s18 fortnightly K9-blocked at PLAN; s18 WEEKLY cleared P6 IS + P6.5 + P6.7 K13 + P10 OOS.",
+    "what_changed": "Weekly cadence on the same 24-name relative-strength signal produced both adequate sample (K9) AND an edge that persisted across folds (K13, marginally) AND a positive contiguous OOS (no DR4)."
+  },
+  "negative_invariants": {
+    "cadence_altered": false,
+    "candidate_promotion_attempted": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_paper_ready": false,
+    "claims_robust_beyond_single_oos": false,
+    "committed_this_script": false,
+    "dr_redefined": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "oos_rerun": false,
+    "p10_modified": false,
+    "parameters_tuned": false,
+    "s17_chain_modified": false,
+    "sealed_csvs_modified": false
+  },
+  "next_framework_authorization_options": [
+    {
+      "exact_phrase": "Authorize s18-d1 weekly relative-strength rotation P11 lessons.md update only.",
+      "path_id": "A_LESSONS",
+      "recommended": true,
+      "requires_separate_authorization": true,
+      "title": "Record the LESSON_S18 entries (first full-ladder pass + the cadence/sample/edge trade-off + OOS-fragility caveats)"
+    },
+    {
+      "exact_phrase": "Authorize next research-track robustness-replication selection plan after s18-d1 OOS_CONFIRMED only.",
+      "path_id": "B_ROBUSTNESS_REPLICATION",
+      "requires_separate_authorization": true,
+      "title": "Robustness replication BEFORE any promotion consideration (e.g., a different large-cap universe, or a rolling/extended OOS) -- a FRESH candidate, not a tune of s18"
+    },
+    {
+      "path_id": "C_PARK",
+      "requires_separate_authorization": false,
+      "title": "Catalogue s18-d1 weekly as the line's strongest diagnostic result and park (no promotion; framework provides no live path)"
+    },
+    {
+      "path_id": "D_DEFER",
+      "requires_separate_authorization": false,
+      "title": "Defer / pause"
+    }
+  ],
+  "no_live_promotion_authorization_exists": "By framework design there is NO authorization phrase that promotes this candidate to live/paper/Strategy-Lab; FRC is NEVER_GRANTED and the 6-gate live-block is permanent. The above options are research-phase only.",
+  "parent_references": {
+    "dr9_result_commit": "d86e5d1",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p10_oos_gate_commit": "522df8d",
+    "p10_report_seal": "2d608ebe929e42168c19ad0205dd8a1871627917689393e79ed39bc79a808c36",
+    "p1_plan_lock_commit": "466adb9",
+    "p2_phase2_plan_commit": "1d4cd48",
+    "p3_build_commit": "50171b0",
+    "p4_smoke_commit": "ad0e542",
+    "p6_5_cost_stress_commit": "1db075d",
+    "p6_7_k13_commit": "aa762f0",
+    "p6_is_commit": "3911970",
+    "p7_decision_memo_commit": "a53d093",
+    "tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "phase": "P11_LIFECYCLE_DECISION",
+  "rec1_equivalent_oos_k9_disclosure": "REC1-equivalent (BINDING): OOS K9 >=50/y. Pre-SEAL measurement projects ~100-113/2y (clears marginally) but the TRUE OOS K9 is confirmed only at P10; if measured OOS < 50/y at P10, terminal. The chain shall NOT relax K9.",
+  "remains_diagnostic_only": true,
+  "report_date_utc": "2026-05-29T02:27:31.444026Z",
+  "report_kind": "S18-D1 weekly RS rotation P11 lifecycle decision -- formalizes the disposition after a POSITIVE P10 OOS gate (no DR fired). s18 weekly is the FIRST candidate in the s12->s18 line to clear the full gated ladder (P6 IS + P6.5 cost-stress + P6.7 K13 + P10 OOS). The result is DIAGNOSTIC_ONLY and NOT live/paper/Strategy-Lab-ready; the 6-gate live-block + FRC-never-granted apply regardless.",
+  "report_seal_sha256": "7897cb1998303de4d359c2e33e8178eba4eedb4851b8dca293386fb4abb5b0d7",
+  "schema_id": "sparta.research.s18_d1_weekly_rs_p11_lifecycle_decision_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_complete": true,
+    "lifecycle_state": "P11_LIFECYCLE_DECISION_SEALED_OOS_CONFIRMED_DIAGNOSTIC",
+    "lifecycle_terminal_by_failure": false,
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "s16_d1_lifecycle_terminal": true,
+    "s17_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s18-d1 weekly RS rotation P11 lifecycle decision memo (sealed; binding; P10 OOS_CONFIRMED_DIAGNOSTIC; full-ladder pass; DIAGNOSTIC_ONLY / NOT live-ready)",
+  "verdict_formalized": "OOS_CONFIRMED_DIAGNOSTIC",
+  "what_this_does_NOT_demonstrate": [
+    "It does NOT demonstrate live/paper readiness or money-proven performance.",
+    "It does NOT demonstrate robustness beyond the single 2024-2025 OOS window on this 24-name universe.",
+    "It does NOT warrant promotion, Strategy Lab, broker connection, or FRC -- all remain blocked.",
+    "It does NOT imply the recent (late-2024/2025) edge is positive -- that sub-period was weak/negative."
+  ]
+}
