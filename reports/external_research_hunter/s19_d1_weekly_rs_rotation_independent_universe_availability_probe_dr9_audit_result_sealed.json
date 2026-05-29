@@ -1,0 +1,779 @@
+{
+  "adjustment_convention": "split_only",
+  "all_24_symbols_dr9_pass": true,
+  "authored_at_utc": "2026-05-29T02:39:41.147393Z",
+  "authorization_phrase": "Authorize s19-d1 independent-universe Tiingo split_only fetch + DR9 result sealing workflow only.",
+  "binding": true,
+  "candidate_universe_id": "s19-d1-weekly-rs-rotation-independent-universe-24name",
+  "canonical_calendar_symbol": "ORCL",
+  "document_type": "AUDIT_RESULT_SEALED",
+  "dr9_thresholds": {
+    "documented_split_event_consistency_required": "PASS",
+    "gap_continuity_min": 0.95,
+    "max_gap_ratio_max": 0.3,
+    "quality_violation_count_max": 5,
+    "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+  },
+  "final_verdict": "DR9_ALL_24_PASS_INDEPENDENT_UNIVERSE_READY_FOR_REPLICATION_PLAN",
+  "fresh_fetched_symbols": [
+    "ORCL",
+    "CSCO",
+    "ADBE",
+    "CRM",
+    "AMD",
+    "NFLX",
+    "TMUS",
+    "CMCSA",
+    "MCD",
+    "NKE",
+    "LOW",
+    "PEP",
+    "PM",
+    "MDLZ",
+    "GS",
+    "MS",
+    "WFC",
+    "AXP",
+    "LLY",
+    "ABT",
+    "TMO",
+    "SLB",
+    "EOG",
+    "HON"
+  ],
+  "hard_boundaries_held": {
+    "all_24_fresh_no_reuse": true,
+    "no_api_key_printed_or_logged": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build": true,
+    "no_candidate_promotion": true,
+    "no_draft": true,
+    "no_frc_grant": true,
+    "no_git_commit_by_this_turn": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mechanic_change": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_profitability_claim": true,
+    "no_retroactive_k13": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s17_s16_s15_s14_s13_s12": true,
+    "no_s18_modification": true,
+    "no_simulator": true,
+    "no_strategy_lab_promotion": true,
+    "replication_not_tuning": true,
+    "result_sealing_only_no_tier_n_seal": true
+  },
+  "is_a_seal": true,
+  "k9_k13_reachability_carried": "s19 runs the IDENTICAL s18 weekly mechanic; s18 MEASURED K9 aggregate (229 IS) + OOS K9 (58.7/y) + K13 (3/5); s19 K9/K13 re-measured pre-SEAL on this independent universe. DR9 establishes data availability + breadth only.",
+  "labels": [
+    "S19_D1_INDEPENDENT_UNIVERSE_DR9_AUDIT_RESULT_SEALED",
+    "DR9_ALL_24_PASS",
+    "VENDOR_TIINGO",
+    "ADJUSTMENT_CONVENTION_SPLIT_ONLY",
+    "ALL_24_FRESH_NO_REUSE",
+    "INDEPENDENT_24_NAME_ZERO_OVERLAP_WITH_S18",
+    "REPLICATION_NOT_TUNING_LOCKED_S18_MECHANIC",
+    "DR10_V2_BINDING",
+    "WALK_FORWARD_K13_BINDING",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state_post_audit": "S19_D1_INDEPENDENT_UNIVERSE_DR9_AUDIT_SEALED_BASKET_READY_FOR_REPLICATION_PLAN",
+  "names_passing": 24,
+  "negative_invariants": {
+    "backtest_run": false,
+    "build_executed": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "draft_authored": false,
+    "lessons_md_touched": false,
+    "mechanic_tuned": false,
+    "oos_inspected": false,
+    "s17_chain_modified": false,
+    "s18_chain_modified": false,
+    "strategy_lab_promoted": false,
+    "tier_n_spec_plan_authored": false,
+    "tier_n_spec_sealed": false
+  },
+  "next_authorization_if_all_pass": "Authorize s19-d1 independent-universe weekly relative-strength rotation Tier-N spec PLAN only — bound by DR10 v2 + walk-forward K13 (replication: lock the identical s18 mechanic; no tuning).",
+  "parent_references": {
+    "fetch_manifest_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/s19_d1_weekly_rs_rotation_independent_universe_step02b_fetch_manifest.json",
+    "fetch_manifest_sha256_at_audit_time": "0b5b7a222dba7badbb580d0d5baa735de1925084e9652bbf3d2c1669a6145bad",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "post_s18_robustness_replication_plan_commit": "50e5fcf",
+    "run_book_commit": "5ef4eaa",
+    "s18_p11_lifecycle_commit": "5dde0f7",
+    "s18_tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "per_symbol_audit_results": {
+    "ABT": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/ABT_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "3982be7f12fcd7fb1067ab2c446bf35c6f6985ac759932cf3bb47baaa7155bfa",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "ABT",
+      "tiingo_splits_reported": []
+    },
+    "ADBE": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/ADBE_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "8d013f7294d6d4d5e1649db3d595ccd90ca5695616802bfc6485981063c1af38",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "ADBE",
+      "tiingo_splits_reported": []
+    },
+    "AMD": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/AMD_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "3e354e930bc78f78d8ad89d8c60a2e43f01c35796d07b2899b83c2a30212e51a",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "AMD",
+      "tiingo_splits_reported": []
+    },
+    "AXP": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/AXP_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "70de5e40d15b49e4c04106d8cb96c72b2ee3b1648e7d5e3c9a16bffd942c9abe",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "AXP",
+      "tiingo_splits_reported": []
+    },
+    "CMCSA": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/CMCSA_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "10df467f0c2d92e8ee6958f8be20cbd47fc18b4d2b693c3d4b0b1d263246629c",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "CMCSA",
+      "tiingo_splits_reported": []
+    },
+    "CRM": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/CRM_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "6302b2c2055c2ab38a6166f7f8b607971cd8ced2d5bdb1794e50176a1d999f6e",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "CRM",
+      "tiingo_splits_reported": []
+    },
+    "CSCO": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/CSCO_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "1f28be4829c0905f35b0f4bb953c69cfbe09515123249a76fa61ebabe3ce833c",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "CSCO",
+      "tiingo_splits_reported": []
+    },
+    "EOG": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/EOG_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "5acea5c3adfa55ebdc6e8d10ca8ced834c2b06f654323b373271186cd9a9d696",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "EOG",
+      "tiingo_splits_reported": []
+    },
+    "GS": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/GS_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "35d6b1e8588d8d8fdd3c7c32e0a9c780c2ac400608997731c3b2df703ad6361b",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "GS",
+      "tiingo_splits_reported": []
+    },
+    "HON": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/HON_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "3e041e00a74a902ae67392ab533bb67078bcdcd4199270bced9e2d94b8e37031",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "ex_date": "2025-10-30",
+          "ratio_ex_over_prev": 0.997307,
+          "split_factor": 1.061,
+          "status": "PASS"
+        }
+      ],
+      "symbol": "HON",
+      "tiingo_splits_reported": [
+        [
+          "2025-10-30",
+          1.061
+        ]
+      ]
+    },
+    "LLY": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/LLY_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "8137023ae61d70430c3e59a0c27f90ed649ef919085f4778e353065fdc7ba01f",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "LLY",
+      "tiingo_splits_reported": []
+    },
+    "LOW": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/LOW_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "e2db1c784e0631dc9fac15a5771db938ea8a4f7321b24fac577c625c1a3a8178",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "LOW",
+      "tiingo_splits_reported": []
+    },
+    "MCD": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/MCD_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "d2f960892ae0252027f4a5e40bc266a71a1167a16a42c6ecefe490d886ffd50f",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "MCD",
+      "tiingo_splits_reported": []
+    },
+    "MDLZ": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/MDLZ_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "ba80da7b70067d8b810c135a8ebc870ab3096f0bd8aec63ad1ccff32f1dd013e",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "MDLZ",
+      "tiingo_splits_reported": []
+    },
+    "MS": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/MS_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "f63a808918fca000f6f5cd5a8d8fbbf94b0354059b42b329e79fbf3f0c3bfd1c",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "MS",
+      "tiingo_splits_reported": []
+    },
+    "NFLX": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/NFLX_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "df671942de1c7568e00e100fd213384b0656cf813890f9389e62771a39e10d56",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "ex_date": "2025-11-17",
+          "ratio_ex_over_prev": 0.991665,
+          "split_factor": 10.0,
+          "status": "PASS"
+        }
+      ],
+      "symbol": "NFLX",
+      "tiingo_splits_reported": [
+        [
+          "2025-11-17",
+          10.0
+        ]
+      ]
+    },
+    "NKE": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/NKE_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "1507b7a4990a02c9b04bb68bb90b8414d7426e07def9a0d1d2d8f781c2e606ab",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "NKE",
+      "tiingo_splits_reported": []
+    },
+    "ORCL": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/ORCL_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "145e739ab01bfa830f9ba46d56bc7248c47acb637da3a9976031d0d9190b8eda",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "ORCL",
+      "tiingo_splits_reported": []
+    },
+    "PEP": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/PEP_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "037cc3d106a903bf6779702a3e09f5f18081404f587013be621a817f46a578d8",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "PEP",
+      "tiingo_splits_reported": []
+    },
+    "PM": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/PM_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "fbfe0e20e4852bca8ef5296f81a3eddb8649dab78ee5a94dd9b8dfa438ad6aec",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "PM",
+      "tiingo_splits_reported": []
+    },
+    "SLB": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/SLB_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "c0a027cce5fbe16fdf1b484502cba7d6b96a0e0dad99eb3c328ce9aae9ee75fe",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "SLB",
+      "tiingo_splits_reported": []
+    },
+    "TMO": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/TMO_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "df92465bbf7467c5f48791f1f05897bd233472d4a841215ff29b676d6e7c0f6a",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "TMO",
+      "tiingo_splits_reported": []
+    },
+    "TMUS": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/TMUS_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "220f5f0c6b177c17911297ff1e95a809359dbf92631708f4c4cecbfbfafc5413",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "TMUS",
+      "tiingo_splits_reported": []
+    },
+    "WFC": {
+      "csv_path": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/WFC_ohlcv_1d_20190102_20251230.csv",
+      "csv_sha256": "633a1d2c8cd10f9121d1008d07bfda8adf9d9f211acf566b4552ec630f297147",
+      "documented_split_event_consistency": "PASS",
+      "dr9_failure_branches_if_any": [],
+      "dr9_per_instrument_status": "PASS",
+      "first_date": "2019-01-02",
+      "gap_continuity": 1.0,
+      "last_date": "2025-12-30",
+      "max_gap_days": 0,
+      "max_gap_ratio": 0.0,
+      "quality_violation_count": 0,
+      "quality_violations_if_any": [],
+      "reused": false,
+      "roll_event_count": "NOT_APPLICABLE_CASH_EQUITY",
+      "row_count": 1759,
+      "split_consistency_checks": [
+        {
+          "note": "no splits in window",
+          "status": "PASS_NO_SPLITS_IN_WINDOW"
+        }
+      ],
+      "symbol": "WFC",
+      "tiingo_splits_reported": []
+    }
+  },
+  "phase": "S19_D1_INDEPENDENT_UNIVERSE_AVAILABILITY_PROBE_DR9_AUDIT_RESULT",
+  "replication_not_tuning": "REPLICATION of the OOS_CONFIRMED s18 weekly mechanic on an INDEPENDENT universe; the s19 Tier-N PLAN locks the IDENTICAL s18 params (126-21/R=5/top-8/long-only/relative-rank exit); NO tuning. s18 frozen/untouched.",
+  "report_date_utc": "2026-05-29T02:39:41.147393Z",
+  "report_seal_sha256": "0c8e21f240c8b8017a500d78cee6b0b48280a229a2a21bdea2be69ddb6cd5b3d",
+  "reused_symbols": [],
+  "schema_id": "sparta.external_research_hunter.s19_d1_weekly_rs_rotation_independent_universe_availability_probe_dr9_audit_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s17_d1_lifecycle_terminal": true,
+    "s18_d1_weekly_oos_confirmed_diagnostic_not_live": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "thresholds_immutable_per_no_dr_redefinition_post_seal": true,
+  "title": "s19-d1 weekly RS rotation INDEPENDENT-universe (24-name) availability probe + DR9 audit RESULT (sealed; all 24 fresh Tiingo split_only; replication of OOS_CONFIRMED s18 mechanic)",
+  "universe_24": [
+    "ORCL",
+    "CSCO",
+    "ADBE",
+    "CRM",
+    "AMD",
+    "NFLX",
+    "TMUS",
+    "CMCSA",
+    "MCD",
+    "NKE",
+    "LOW",
+    "PEP",
+    "PM",
+    "MDLZ",
+    "GS",
+    "MS",
+    "WFC",
+    "AXP",
+    "LLY",
+    "ABT",
+    "TMO",
+    "SLB",
+    "EOG",
+    "HON"
+  ],
+  "universe_floor": 16,
+  "vendor": "tiingo"
+}
