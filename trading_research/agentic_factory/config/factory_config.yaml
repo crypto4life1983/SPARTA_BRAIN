@@ -1,0 +1,49 @@
+# SPARTA Agentic Backtest Factory - config (safe placeholders only)
+#
+# SAFETY: paths below are LOCAL and OFFLINE only. No secrets, no live folders,
+# no credentials, no network endpoints. Input data must be a CSV you place
+# manually into data_offline\.
+
+# ---- Data (offline CSV only) ----
+data:
+  # Relative to the agentic_factory root. Local NQ 1-minute intraday CSV.
+  offline_csv: "data_offline/nq_c0_ohlcv_1m_2023-12-25_2023-12-29.csv"
+  # Columns in this file: ts_event, open, high, low, close, volume, symbol
+  timestamp_column: "ts_event"
+  # Instrument represented in the file.
+  symbol: "NQ"
+
+# ---- Strategy target (NQ ORB only for now) ----
+# TIMEZONE: this CSV's ts_event is UTC (tz-aware, +00:00). Session times below
+# are therefore expressed in UTC. RTH 09:30-16:00 ET == 14:30-21:00 UTC.
+strategy:
+  name: "nq_orb"
+  # Opening range built from the first N minutes of the regular session.
+  opening_range_minutes: 15
+  session_start: "14:30"   # 09:30 ET expressed in UTC
+  session_end: "21:00"     # 16:00 ET expressed in UTC
+  # Risk model
+  stop_mode: "opposite_range"   # stop at the other side of the opening range
+  target_r_multiple: 2.0        # take profit at 2R
+  one_trade_per_day: true
+
+# ---- Decision thresholds (continue / park / kill) ----
+decision:
+  min_trades: 30
+  continue:
+    min_profit_factor: 1.30
+    min_win_rate: 0.40
+    max_drawdown_pct: 25.0
+  park:
+    min_profit_factor: 1.00
+  # Anything below 'park' thresholds -> kill
+
+# ---- Proposer (deterministic, offline) ----
+proposer:
+  seed: 23
+  search_opening_range_minutes: [5, 10, 15, 30]
+  search_target_r_multiple: [1.5, 2.0, 3.0]
+
+# ---- Reports ----
+reports:
+  output_dir: "reports"

@@ -1,0 +1,14 @@
+# Python cache
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Local offline data — never commit market CSVs (keep docs + placeholder)
+data_offline/*.csv
+
+# Generated run outputs — keep folder + intentional memos
+reports/nq_orb_run_*.json
+reports/nq_orb_run_*.md
+
+# Local-only narrative smoke summaries
+reports/smoke_run_summary_*.md
