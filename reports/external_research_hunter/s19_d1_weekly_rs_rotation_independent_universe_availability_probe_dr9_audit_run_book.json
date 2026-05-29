@@ -1,0 +1,389 @@
+{
+  "all_24_fresh_fetch_no_reuse": true,
+  "authored_at_utc": "2026-05-29T02:37:21.252832Z",
+  "authorization_phrase": "Authorize s19-d1 weekly relative-strength rotation availability probe + DR9 audit framework only.",
+  "contingency_tree": [
+    {
+      "contingency": "all_24_pass_dr9",
+      "next_authorization": "Authorize s19-d1 independent-universe weekly relative-strength rotation Tier-N spec PLAN only — bound by DR10 v2 + walk-forward K13 (replication: LOCK the identical s18 mechanic; no tuning)."
+    },
+    {
+      "contingency": "1-8_symbols_fail_dr9",
+      "next_authorization": "Authorize s19-d1 shrunk independent-universe DR9 RESULT SEALING only (drop failing names; basket must retain >= 16 names for cross-sectional ranking breadth)",
+      "note": "no silent substitution; a replacement name needs its own fetch+DR9"
+    },
+    {
+      "contingency": "9+_symbols_fail_dr9 (basket would drop below 16)",
+      "next_authorization": "Authorize s19-d1 independent-universe revision to an alternative large-cap shortlist (RUN_BOOK rev only)"
+    },
+    {
+      "contingency": "any_split_consistency_fail",
+      "next_authorization": "Operator manual review / re-fetch that symbol; mark INCONCLUSIVE_HOLD; do NOT auto-progress"
+    },
+    {
+      "contingency": "vendor_fetch_fails",
+      "next_authorization": "Operator retries Tiingo later; RUN_BOOK remains reference; one concise blocker report only"
+    }
+  ],
+  "document_type": "RUN_BOOK_NOT_SEALED",
+  "dr10_v2_reachability": {
+    "expected_status": "CLEARS -- weekly turnover is high (~20x, turnover branch fires alone) but cash-equity cost_drag stays well under 5% for liquid large-caps (s18 measured ~0.95%/y capital-basis); the AND-conjunction is not triggered.",
+    "rule": "v2 AND-conjunction (78cd22e): REJECT_FAST only if (annual_turnover>0.50 AND S2_cost_drag>0.05)"
+  },
+  "dr9_audit_framework": {
+    "per_symbol_check_procedure": "Per symbol: verify CSV exists + sha vs manifest; parse date,open,high,low,close,volume; gap_continuity vs NYSE/NASDAQ calendar >=0.95; max_gap_ratio <=0.30 (calendar gaps; price jumps not gaps); quality_violation_count <=5 (dups/non-monotonic/OHLC-order/neg-vol); documented_split_event_consistency (each Tiingo-reported splitFactor ratio ~1.0 under split_only across its ex-date); roll NOT_APPLICABLE; aggregate PASS/FAIL/INCONCLUSIVE_HOLD.",
+    "split_corporate_action_checks": {
+      "dividend_ex_dates": "higher-yield names (PM/MO-type) show small ex-div jumps (<1% of price) under split_only -> informational, not a DR9 fail (dividends not adjusted).",
+      "no_forward_splits_KNOWN_in_window_for_the_24": "To the author's knowledge none of the 24 had a FORWARD stock split in 2019-2025; the fetch's split-consistency audit VERIFIES the actual Tiingo splitFactor stream per symbol (no pre-assertion of zero).",
+      "spinoff_factor_precedent": "If Tiingo encodes any spin-off/special situation as a fractional splitFactor (as it did for MRK's Organon 1.048 in s17), the split_only pipeline APPLIES it and the audit verifies return-continuity (ratio within the DR9 band). Such an event is documented + verified, not a fail.",
+      "splits_cross_check_match": "the fetch records, per symbol, Tiingo-reported splitFactor events vs the known set (empty); any mismatch is surfaced (splits_cross_check_match=False) and resolved by the split-consistency ratio audit."
+    },
+    "thresholds_carried_byte_equivalent_from_s16_s17_run_books": {
+      "documented_split_event_consistency": "PASS_IF_ALL_KNOWN_SPLITS_APPLIED_PER_SPLIT_ONLY_CONVENTION",
+      "gap_continuity_min": 0.95,
+      "max_gap_ratio_max": 0.3,
+      "quality_violation_count_max": 5,
+      "roll_event_count_max": "NOT_APPLICABLE_CASH_EQUITY"
+    },
+    "thresholds_immutable_per_no_dr_redefinition_post_seal": true
+  },
+  "explicit_exclusions_this_turn": [
+    "No vendor API call by controller",
+    "No API-key access",
+    "No network IO",
+    "No data fetch (operator-side at a future authorization)",
+    "No DR9 RESULTS sealed (framework pre-authored only)",
+    "No DR9 RUN executed",
+    "No mechanic change (REPLICATION of locked s18 mechanic; no tuning)",
+    "No DRAFT/SEAL/BUILD/backtest/simulator/signal/OOS",
+    "No live/broker/Strategy Lab/FRC/candidate promotion",
+    "No s18 _revN_/patch/tune; no s18 modification",
+    "No revival of s17/s16/s15/s14/s13/s12",
+    "No retroactive K13",
+    "No modification of any sealed artifact",
+    "No lessons.md modification or staging",
+    "No canonical seal (RUN_BOOK, not a seal)"
+  ],
+  "framework_binding": "DR10 v2 AND-conjunction (78cd22e) + walk-forward K13 persistence (52a3b60) -- both bind this s19 replication candidate",
+  "fresh_s19_path": true,
+  "hard_boundaries_held_this_run_book_turn": {
+    "no_api_key_access": true,
+    "no_backtest": true,
+    "no_build": true,
+    "no_canonical_seal_sha256_computed": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr9_audit_RESULTS_sealed": true,
+    "no_dr9_audit_RUN_executed": true,
+    "no_draft": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_mechanic_tuning_replication_only": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_network_io": true,
+    "no_oos_inspection": true,
+    "no_profitability_claim": true,
+    "no_retroactive_k13_application": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s18_s17_s16_s15_s14_s13_s12": true,
+    "no_s18_revN_or_modification": true,
+    "no_seal": true,
+    "no_strategy_lab_promotion": true,
+    "no_vendor_api_call_by_controller": true,
+    "this_document_is_not_a_seal": true
+  },
+  "is_a_seal": false,
+  "k13_fold_scheme_inherited": {
+    "boundaries": "identical bar-index DA22 scheme as s18 (warmup 0-159; F1 160-478; F2 479-797; F3 798-1116; F4 1117-1435; F5 1436-1758) assuming the standard 1759-bar 2019-01-02..2025-12-30 calendar; re-derived, NOT searched",
+    "n_folds": 5,
+    "note": "to be locked byte-equivalent at the s19 SEAL",
+    "warmup_bars": 160,
+    "window_mode": "rolling"
+  },
+  "k9_k13_reachability_logic": {
+    "basis": "The s18 weekly mechanic (R=5, top-8, 126-21) MEASURED 229 IS closed trades and 117 OOS trades (58.7/y) on a 24-name basket -> K9 aggregate CLEARS, OOS K9 >=50/y CLEARS, K13 per-fold cleared (3/5). Because s19 runs the IDENTICAL locked mechanic on a same-size (24-name) independent basket, K9/K13 reachability is EXPECTED to hold similarly.",
+    "confirmation": "K9/K13 reachability is RE-MEASURED on the s19 universe at the s19 pre-SEAL turnover measurement (signal-only, no P&L), mirroring s18; the RUN_BOOK only establishes data availability + DR9.",
+    "k13_per_fold_requirement": "the 5 fixed pre-committed UNSEARCHED folds (identical bar-index DA22 scheme; same 2019-2025 calendar) must support enough round-trips per fold (s18 measured ~54-72/fold).",
+    "k9_aggregate_requirement": "IS closed_trades >= 100 (expected ~200-250 at weekly top-8 on 24 names).",
+    "oos_k9_requirement": "OOS >=50/y (>=100 over the 2y OOS); s18 measured ~58.7/y."
+  },
+  "labels": [
+    "S19_D1_WEEKLY_RS_ROTATION_INDEPENDENT_UNIVERSE_AVAILABILITY_PROBE_DR9_AUDIT_RUN_BOOK",
+    "NOT_A_SEAL",
+    "FRESH_S19_REPLICATION_PATH",
+    "INDEPENDENT_24_NAME_UNIVERSE_ZERO_OVERLAP_WITH_S18",
+    "ALL_24_FRESH_FETCH_NO_REUSE",
+    "VENDOR_TIINGO_SPLIT_ONLY",
+    "REPLICATION_NOT_TUNING_LOCKED_S18_MECHANIC",
+    "DR10_V2_BINDING",
+    "WALK_FORWARD_K13_BINDING",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "PENDING_OPERATOR_FETCH_24_NAMES",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S19_D1_WEEKLY_RS_ROTATION_INDEPENDENT_UNIVERSE_AVAILABILITY_PROBE_DR9_AUDIT_PENDING_OPERATOR_FETCH",
+  "operator_side_fetch_run_book": {
+    "executor": "operator (TIINGO_API_KEY in env only; controller never reads/prints)",
+    "expected_output_directory": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw",
+    "expected_output_files": [
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/ORCL_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/CSCO_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/ADBE_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/CRM_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/AMD_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/NFLX_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/TMUS_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/CMCSA_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/MCD_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/NKE_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/LOW_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/PEP_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/PM_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/MDLZ_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/GS_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/MS_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/WFC_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/AXP_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/LLY_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/ABT_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/TMO_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/SLB_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/EOG_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/HON_ohlcv_1d_20190102_20251230.csv (fresh Tiingo split_only)",
+      "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/s19_d1_weekly_rs_rotation_independent_universe_step02b_fetch_manifest.json"
+    ],
+    "fetch_boundaries_required": {
+      "no_api_key_printed_or_logged_or_saved": true,
+      "no_backtest": true,
+      "no_live_trading": true,
+      "no_oos_inspection_by_this_fetch": true,
+      "no_review_queue_mutation": true,
+      "no_signal_computation": true,
+      "no_simulator_run": true,
+      "no_strategy_lab_promotion": true,
+      "raw_csv_only_written_to_approved_directory": true,
+      "tiingo_api_key_read_from_env_only": true
+    },
+    "fetch_parameters": {
+      "adjustment_convention": "split_only",
+      "end_date_inclusive": "2025-12-30",
+      "is_window_end": "2023-12-29",
+      "is_window_start": "2019-01-02",
+      "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+      "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+      "reuse_or_refetch": "ALL 24 are FRESH (no reuse) -- this is an independent universe; none exist in any prior DR9-passed dir",
+      "start_date_inclusive": "2019-01-02",
+      "symbols_to_fetch_fresh": [
+        "ORCL",
+        "CSCO",
+        "ADBE",
+        "CRM",
+        "AMD",
+        "NFLX",
+        "TMUS",
+        "CMCSA",
+        "MCD",
+        "NKE",
+        "LOW",
+        "PEP",
+        "PM",
+        "MDLZ",
+        "GS",
+        "MS",
+        "WFC",
+        "AXP",
+        "LLY",
+        "ABT",
+        "TMO",
+        "SLB",
+        "EOG",
+        "HON"
+      ],
+      "vendor": "tiingo"
+    },
+    "manifest_schema": "sparta.s19.weekly_rs_rotation_independent_universe.step02b_fetch_manifest.v1 (same field structure as the s16/s17 manifests)",
+    "post_fetch_action": "Operator confirms all 24 CSVs + manifest exist, then types `Authorize s19-d1 independent-universe Tiingo split_only fetch + DR9 result sealing workflow only.`"
+  },
+  "parent_references": {
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "post_s18_robustness_replication_plan_commit": "50e5fcf",
+    "s18_dr9_data_universe_commit": "d86e5d1",
+    "s18_p10_oos_commit": "522df8d",
+    "s18_p11_lifecycle_commit": "5dde0f7",
+    "s18_tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "replication_not_tuning": {
+    "purpose": "Answer the binding post-s18 question (LESSON_S18_D1_003/004): is the s18 edge a generalizing premium or a single-universe artifact? Independent data is the only clean test.",
+    "statement": "This is a REPLICATION of the s18 weekly mechanic on an INDEPENDENT universe -- NOT a tune, _revN_, or patch of s18. The s19 candidate (if it proceeds past DR9) will run the IDENTICAL LOCKED s18 parameters byte-equivalent: 126-21 relative-strength signal, weekly rebalance R=5, top-8 equal-weight, long-only, relative-rank exit, $100k, split_only. The ONLY change vs s18 is the UNIVERSE (24 independent large-caps). No parameter is altered, searched, or tuned. The s18 candidate (7e6aa36 SEAL / OOS_CONFIRMED P11 5dde0f7) is frozen and untouched.",
+    "what_a_pass_would_and_would_not_mean": "A positive s19 IS+K13+OOS would be CORROBORATING evidence of generalization (still DIAGNOSTIC_ONLY, still no live path). A negative/weak s19 would indicate the s18 result was universe-specific. Either way: no promotion, no FRC, no live (6-gate block permanent)."
+  },
+  "report_date_utc": "2026-05-29T02:37:21.252832Z",
+  "report_kind": "RUN_BOOK / operator-side fetch instructions + pre-authored DR9 audit framework for an INDEPENDENT 24-name large-cap universe (zero overlap with the s17/s18 basket) to REPLICATE the OOS_CONFIRMED s18 weekly relative-strength rotation mechanic on genuinely new data (R1 of the post-s18 robustness-replication plan 50e5fcf). Purpose: test universe-generalization of the s18 edge. NOT a sealed artifact; PENDING operator-side fetch of all 24 fresh names.",
+  "schema_id": "sparta.external_research_hunter.s19_d1_weekly_rs_rotation_independent_universe_availability_probe_dr9_audit_run_book.v1",
+  "scope_of_this_run_book": [
+    "24-name INDEPENDENT large-cap universe (zero overlap with s18) for replicating the s18 weekly RS mechanic; all 24 fresh",
+    "Carry the proven Tiingo split_only vendor approach",
+    "Pre-authored DR9 audit framework (same thresholds; split-consistency incl. spin-off-factor precedent)",
+    "K9 aggregate + K13 per-fold + OOS K9 reachability expectations (mechanic-driven, demonstrated by s18; re-measured pre-SEAL)",
+    "DR10 v2 reachability (clears)",
+    "Contingency tree with a 16-name floor for ranking breadth",
+    "REPLICATION-not-tuning: locked s18 mechanic; only the universe changes"
+  ],
+  "status_fields": {
+    "diagnostic_only_not_live_grade": true,
+    "dr10_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "s16_d1_lifecycle_terminal": true,
+    "s17_d1_lifecycle_terminal": true,
+    "s18_d1_weekly_oos_confirmed_diagnostic_not_live": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "this_document_is_not_a_seal": true,
+  "title": "s19-d1 weekly relative-strength rotation INDEPENDENT-universe (24-name) availability probe + DR9 audit RUN_BOOK (NOT a SEAL; all 24 fresh Tiingo split_only; replication of the OOS_CONFIRMED s18 weekly mechanic; bound by DR10 v2 + walk-forward K13)",
+  "universe": {
+    "breadth_rationale": "24 independent large-caps across ~8 sectors give the cross-sectional RANKING breadth the relative-strength mechanic needs, matching the s18 basket size so the top-8 weekly rotation is directly comparable.",
+    "fresh_fetch_required_count": 24,
+    "independence": "ZERO overlap with the s17/s18 24-name basket {AAPL,MSFT,NVDA,JPM,XOM,UNH,WMT,KO,META,AMZN,JNJ,CVX,GOOGL,V,MA,HD,PG,COST,ABBV,MRK,BAC,CAT,DIS,COP} -- verified disjoint",
+    "name_count": 24,
+    "reuse_count": 0,
+    "sectors_spanned": "~8 GICS (Info Tech, Comm Services, Consumer Disc, Consumer Staples, Financials, Health Care, Energy, Industrials) -- matched to s18 for a like-for-like breadth replication",
+    "symbols": [
+      {
+        "exchange": "NYSE",
+        "sector": "Information Technology",
+        "symbol": "ORCL"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Information Technology",
+        "symbol": "CSCO"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Information Technology",
+        "symbol": "ADBE"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Information Technology",
+        "symbol": "CRM"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Information Technology",
+        "symbol": "AMD"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Communication Services",
+        "symbol": "NFLX"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Communication Services",
+        "symbol": "TMUS"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Communication Services",
+        "symbol": "CMCSA"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Consumer Discretionary",
+        "symbol": "MCD"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Consumer Discretionary",
+        "symbol": "NKE"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Consumer Discretionary",
+        "symbol": "LOW"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Consumer Staples",
+        "symbol": "PEP"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Consumer Staples",
+        "symbol": "PM"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Consumer Staples",
+        "symbol": "MDLZ"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Financials",
+        "symbol": "GS"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Financials",
+        "symbol": "MS"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Financials",
+        "symbol": "WFC"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Financials",
+        "symbol": "AXP"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Health Care",
+        "symbol": "LLY"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Health Care",
+        "symbol": "ABT"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Health Care",
+        "symbol": "TMO"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Energy",
+        "symbol": "SLB"
+      },
+      {
+        "exchange": "NYSE",
+        "sector": "Energy",
+        "symbol": "EOG"
+      },
+      {
+        "exchange": "NASDAQ",
+        "sector": "Industrials",
+        "symbol": "HON"
+      }
+    ]
+  },
+  "vendor": {
+    "adjustment_convention": "split_only (Tiingo splitFactor stream; dividends/distributions NOT adjusted; adjClose/adjVolume ignored)",
+    "api_key": "TIINGO_API_KEY from env only; never printed/logged/saved",
+    "library_installed": "tiingo-0.16.1",
+    "rationale": "PROVEN across s14/s16/s17 fetches (pure-Python requests succeeded where yfinance curl_cffi failed TLS); same convention as the s18 universe for a like-for-like replication.",
+    "vendor": "tiingo"
+  }
+}
