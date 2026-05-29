@@ -39,3 +39,8 @@ reports/journal_snapshot_*.md
 
 # JS deps (if ever introduced)
 node_modules/
+
+# Local secrets + local-only config / manual inputs (never commit)
+local_secrets/
+config/
+manual_inputs/
