@@ -1,0 +1,132 @@
+{
+  "aggregate_closed_trades": 343,
+  "aggregate_net_pnl_usd": 125312.77,
+  "aggregate_net_positive": true,
+  "anchors": {
+    "dr9_result_commit": "d86e5d1",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "466adb9",
+    "p2_phase2_plan_commit": "1d4cd48",
+    "p3_build_commit": "50171b0",
+    "p4_smoke_commit": "ad0e542",
+    "p6_5_cost_stress_commit": "1db075d",
+    "p6_is_commit": "3911970",
+    "tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T02:19:15.696610Z",
+  "authorization_phrase": "s18-d1 weekly RS rotation continuation bundle: P6.7 K13 walk-forward (if P6.5 passes).",
+  "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "cost_tier_used": "S1",
+  "document_type": "P6_7_K13_WALK_FORWARD_RESULT_SEALED",
+  "fold_calendar_note": "By the sealed DA22 design the folds span the full 2019-2025 history (F4/F5 fall in the 2024-2025 calendar). This is the authorized P6.7 walk-forward phase, DISTINCT from the separate P10 final-hold-out gate, which is NOT run this bundle.",
+  "fold_scheme": "5 fixed pre-committed UNSEARCHED DA22 folds; locked at SEAL; re-evaluated with the SAME locked params (no per-fold refit, no search, no cadence tuning)",
+  "hard_boundaries_held": {
+    "imports_committed_p3_primitives_unmodified": true,
+    "locked_fold_scheme_unsearched": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_k_reinterpretation": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_optimization": true,
+    "no_p10_final_oos_gate": true,
+    "no_per_fold_refit": true,
+    "no_retroactive_k13": true,
+    "no_revival": true,
+    "same_locked_params_each_fold": true
+  },
+  "is_a_seal": true,
+  "k13_criteria": ">=3/5 folds positive (expectancy>0 AND sharpe_proxy/trade>0) AND aggregate net>0 AND K9 (per-fold OR aggregate)",
+  "k13_pass": true,
+  "k9_basis": "aggregate across folds (>=100); per-fold also reported",
+  "k9_ok": true,
+  "labels": [
+    "S18_D1_WEEKLY_RS_P6_7_K13_WALK_FORWARD_SEALED",
+    "K13_PASS",
+    "5_FIXED_UNSEARCHED_FOLDS",
+    "NO_PER_FOLD_REFIT",
+    "P10_GATE_NOT_RUN",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S18_D1_WEEKLY_RS_ROTATION_P6_7_K13_K13_PASS_SEALED",
+  "n_folds_positive": 3,
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr_redefined": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "p10_oos_gate_run": false,
+    "p3_source_modified": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false
+  },
+  "per_fold_results": {
+    "F1": {
+      "closed_trades": 68,
+      "expectancy": 195.30155681337556,
+      "net_pnl": 42939.26572856918,
+      "positive": true,
+      "rebalances": 64,
+      "sharpe": 0.18356727020821434,
+      "window": "2019-08-21..2020-11-23"
+    },
+    "F2": {
+      "closed_trades": 67,
+      "expectancy": 234.5756018480784,
+      "net_pnl": 19230.063762431673,
+      "positive": true,
+      "rebalances": 64,
+      "sharpe": 0.2233933953982444,
+      "window": "2020-11-24..2022-03-02"
+    },
+    "F3": {
+      "closed_trades": 71,
+      "expectancy": -2.696892312299074,
+      "net_pnl": 12462.720358888299,
+      "positive": false,
+      "rebalances": 64,
+      "sharpe": -0.002481063028620837,
+      "window": "2022-03-03..2023-06-08"
+    },
+    "F4": {
+      "closed_trades": 68,
+      "expectancy": 447.93035157815274,
+      "net_pnl": 41151.94029636597,
+      "positive": true,
+      "rebalances": 64,
+      "sharpe": 0.27199603205584005,
+      "window": "2023-06-09..2024-09-16"
+    },
+    "F5": {
+      "closed_trades": 69,
+      "expectancy": -33.89168436291191,
+      "net_pnl": 9528.776642201541,
+      "positive": false,
+      "rebalances": 64,
+      "sharpe": -0.03187999023741905,
+      "window": "2024-09-17..2025-12-30"
+    }
+  },
+  "phase": "P6_7_K13_WALK_FORWARD",
+  "report_date_utc": "2026-05-29T02:19:15.696610Z",
+  "report_seal_sha256": "309d7f3244a74ebe78da7f2073551965e3c2ce34136ed4776e589cdc9fcded06",
+  "schema_id": "sparta.s18_d1_weekly_rs_p6_7_k13_walk_forward_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "supermajority_required": 3,
+  "title": "s18-d1 weekly RS rotation P6.7 K13 walk-forward validation result (sealed; K13_PASS)",
+  "verdict": "K13_PASS"
+}
