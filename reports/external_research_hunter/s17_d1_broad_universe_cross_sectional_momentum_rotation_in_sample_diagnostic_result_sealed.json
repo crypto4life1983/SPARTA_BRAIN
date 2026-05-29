@@ -1,0 +1,136 @@
+{
+  "anchors": {
+    "dr9_result_commit": "d86e5d1",
+    "dr9_result_seal": "85667ab3238a27b2f020c3644e4b7e2643b64be48d2a3f21cd75123b9b7677e3",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "4484ab6",
+    "p2_phase2_plan_commit": "894da78",
+    "p3_build_commit": "affbcb0",
+    "p4_smoke_commit_pending_same_bundle": true,
+    "tier_n_spec_seal_commit": "767d86b",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T01:03:14.170416Z",
+  "authorization_phrase": "Authorize s17-d1 broad-universe cross-sectional momentum P6 IS diagnostic only.",
+  "candidate_record_id": "s17-d1-broad-universe-cross-sectional-momentum-rotation-24name-large-cap-long-history",
+  "csv_sha_verified_all_24": true,
+  "document_type": "P6_IS_DIAGNOSTIC_RESULT_SEALED",
+  "gates": {
+    "K1_sharpe_proxy_lt_0": {
+      "fail": false,
+      "value": 0.285318
+    },
+    "K2_expectancy_le_0": {
+      "fail": false,
+      "value": 1130.7539
+    },
+    "K4_maxdd_gt_50pct": {
+      "fail": false,
+      "value": 31.3989
+    },
+    "K9_closed_trades_lt_100": {
+      "floor": 100,
+      "insufficient": true,
+      "value": 85
+    }
+  },
+  "hard_boundaries_held": {
+    "base_cost_tier_S1": true,
+    "imports_committed_p3_primitives_unmodified": true,
+    "is_window_only": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_optimization": true,
+    "no_per_fold_refit": true,
+    "no_retroactive_k13": true,
+    "no_revival": true,
+    "oos_rows_hard_excluded": true
+  },
+  "is_a_seal": true,
+  "is_window": {
+    "bars": 1258,
+    "end": "2023-12-29",
+    "start": "2019-01-02"
+  },
+  "k9_note": "closed_trades counts completed rotations (a name leaving top-M = one closed trade per DA12). Open positions at IS end are marked-to-market for equity but NOT counted as closed trades. K9 floor 100 total.",
+  "labels": [
+    "S17_D1_XMOM_P6_IS_DIAGNOSTIC_SEALED",
+    "INSUFFICIENT_SAMPLE",
+    "IS_WINDOW_ONLY_OOS_ISOLATED",
+    "K9_PRIMARY_KILL_RISK",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S17_D1_BROAD_UNIVERSE_CROSS_SECTIONAL_MOMENTUM_P6_IS_INSUFFICIENT_SAMPLE_SEALED",
+  "locked_params_used": {
+    "L": 126,
+    "M": 6,
+    "R": 21,
+    "S": 21,
+    "direction": "long-only",
+    "exit": "ROTATION_RELATIVE_RANK",
+    "sizing": "equal_weight_1/M",
+    "warmup": 160
+  },
+  "metrics": {
+    "avg_loss_usd": -2186.22,
+    "avg_win_usd": 3034.94,
+    "closed_trades": 85,
+    "cost_tier_used": "S1 (commission 0.005/sh min $1, slippage 1bp, scalar 1.0)",
+    "expectancy_usd_per_trade": 1130.7539,
+    "final_equity_usd": 245789.47,
+    "max_drawdown_pct": 31.3989,
+    "net_pnl_closed_usd": 96114.08,
+    "open_positions_at_is_end": [
+      "NVDA",
+      "META",
+      "AMZN",
+      "MSFT",
+      "COST",
+      "CAT"
+    ],
+    "pl_ratio": 1.388216,
+    "profit_factor": 2.418182,
+    "rebalance_count": 53,
+    "sharpe_proxy_per_trade": 0.285318,
+    "start_cash_usd": 100000.0,
+    "total_return_pct": 145.7895,
+    "trades_per_year": 17.04,
+    "win_rate": 0.6353
+  },
+  "negative_invariants": {
+    "claims_live_ready": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "oos_inspected": false,
+    "oos_rows_in_signal_logic": false,
+    "p3_source_modified": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false
+  },
+  "oos_isolation": "OOS rows (>= 2024-01-02) hard-excluded at load; never entered signal logic. final bar in run = 2023-12-29",
+  "phase": "P6_IS_DIAGNOSTIC",
+  "rec1_equivalent_oos_k9_disclosure": "OOS K9 (>=50/y) is AT RISK for a monthly top-6 rotation (~24-72 over 2y). If observed effective OOS trade count < 50/y, OOS K9 is unreachable -> the candidate is K9-BLOCKED (terminal), NOT rescued by cadence change. The chain shall NOT relax K9 at OOS.",
+  "report_date_utc": "2026-05-29T01:03:14.170416Z",
+  "report_seal_sha256": "7abe7a3f1c20df3cffff884157e2d9a8881e283da389146a400e29a43acc22c6",
+  "schema_id": "sparta.s17_d1_broad_universe_xmom_in_sample_diagnostic_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s17-d1 broad-universe cross-sectional momentum P6 IS diagnostic result (sealed; INSUFFICIENT_SAMPLE)",
+  "trade_accounting": "Per-name holding-period net cashflow (sells - buys incl. S1 commission+slippage) realized as trade pnl on full exit; honors DA3 reweighting + DA12 exit-on-leave. expectancy=mean(trade_pnl); sharpe_proxy/trade=mean/pstdev.",
+  "verdict": "INSUFFICIENT_SAMPLE"
+}
