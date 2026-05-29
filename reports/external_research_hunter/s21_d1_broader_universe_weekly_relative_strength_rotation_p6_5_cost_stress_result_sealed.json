@@ -1,0 +1,117 @@
+{
+  "anchors": {
+    "framework_dr10_v2_commit": "78cd22e",
+    "p3_build_commit": "90aedca",
+    "p6_is_commit": "eaba5f0",
+    "tier_n_spec_seal_commit": "ae11479",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T05:02:33.935782Z",
+  "authorization_phrase": "Authorize s21-d1 broader-universe weekly relative-strength rotation full diagnostic continuation bundle (Step 6: P6.5 cost-stress).",
+  "candidate_record_id": "s21-d1-broader-universe-weekly-relative-strength-rotation-48name-fresh-large-cap-long-history",
+  "cost_tiers_S0_S4": {
+    "S0": {
+      "closed_trades": 310,
+      "cost_scalar": 0.0,
+      "net_pnl_usd": 103823.51,
+      "slippage_scalar": 0.0,
+      "total_cost_usd": 0.0
+    },
+    "S1": {
+      "closed_trades": 310,
+      "cost_scalar": 1.0,
+      "net_pnl_usd": 98879.58,
+      "slippage_scalar": 1.0,
+      "total_cost_usd": 3283.41
+    },
+    "S2": {
+      "closed_trades": 310,
+      "cost_scalar": 1.5,
+      "net_pnl_usd": 96427.23,
+      "slippage_scalar": 1.5,
+      "total_cost_usd": 4910.56
+    },
+    "S3": {
+      "closed_trades": 310,
+      "cost_scalar": 2.0,
+      "net_pnl_usd": 93987.85,
+      "slippage_scalar": 2.0,
+      "total_cost_usd": 6528.09
+    },
+    "S4": {
+      "closed_trades": 310,
+      "cost_scalar": 3.0,
+      "net_pnl_usd": 89147.61,
+      "slippage_scalar": 3.0,
+      "total_cost_usd": 9734.62
+    }
+  },
+  "document_type": "P6_5_COST_STRESS_RESULT_SEALED",
+  "dr10_v2_evaluation": {
+    "annual_turnover": 22.4893,
+    "cost_drag_branch_true": false,
+    "definition": "(annual_turnover>0.50 AND S2_cost_drag>0.05) -> REJECT_FAST (by-ref 78cd22e)",
+    "fires": false,
+    "s2_cost_drag_pct_per_year": 0.9844,
+    "turnover_branch_true": true
+  },
+  "dr_evaluation": {
+    "DR10_v2": false,
+    "DR3_sign_flip_max_stress": false,
+    "DR5_negative_tier": false,
+    "all_tiers_positive": true,
+    "fires": false
+  },
+  "driver": "none_no_dr_fired",
+  "hard_boundaries_held": {
+    "imports_committed_p3_primitives_unmodified": true,
+    "is_window_only": true,
+    "locked_p6_5_procedure_only": true,
+    "no_commit_by_this_script": true,
+    "no_dr10_reinterpretation": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_or_broker": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_parameter_tuning": true,
+    "no_promotion": true,
+    "oos_not_touched": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S21_D1_FRESH_UNIVERSE_WEEKLY_RS_P6_5_SEALED",
+    "PASS_COST_STRESS_ELIGIBLE",
+    "DRIVER_NONE_NO_DR_FIRED",
+    "DR10_V2_EVALUATED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S21_D1_BROADER_UNIVERSE_WEEKLY_RS_ROTATION_P6_5_PASS_COST_STRESS_ELIGIBLE_SEALED",
+  "negative_invariants": {
+    "cadence_altered": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr_redefined": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18_s19_s20": false,
+    "oos_touched": false,
+    "p3_source_modified": false,
+    "parameters_tuned": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false,
+    "s20_chain_modified": false
+  },
+  "phase": "P6_5_COST_STRESS",
+  "report_date_utc": "2026-05-29T05:02:33.935782Z",
+  "report_seal_sha256": "830a530843a103912929a2fd68cb725624eaa87e620c852e786bfdad6c2f4233",
+  "schema_id": "sparta.s21_d1_fresh_weekly_rs_p6_5_cost_stress_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s21-d1 fresh-universe weekly RS rotation P6.5 cost-stress result (sealed; PASS_COST_STRESS_ELIGIBLE; DR10 v2 evaluated)",
+  "verdict": "PASS_COST_STRESS_ELIGIBLE"
+}
