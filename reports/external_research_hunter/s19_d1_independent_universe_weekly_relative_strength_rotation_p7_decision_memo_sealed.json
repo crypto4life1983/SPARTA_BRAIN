@@ -1,0 +1,140 @@
+{
+  "also_labeled": "READY_FOR_FINAL_OOS",
+  "anchors": {
+    "dr9_result_commit": "574fa9e",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "ea6e8d1",
+    "p2_phase2_plan_commit": "f7fe042",
+    "p3_build_commit": "3d5f753",
+    "p4_smoke_commit": "b057c52",
+    "p6_5_cost_stress_commit": "bd94e2a",
+    "p6_7_k13_commit": "9cf7682",
+    "p6_7_report_seal": "f1d4c6e17290044c04daf9433e912e7e2edbe24312fe2fc2af2074a27fa8f1aa",
+    "p6_is_commit": "2e1e7d9",
+    "p6_is_report_seal": "6ee2f41798a5b73b946375f62393cd3d9ea676b8ee9519fbbcb53abcba4c1c71",
+    "s18_seal_frozen_commit": "7e6aa36",
+    "tier_n_spec_seal_commit": "a3aed99",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T03:17:25.085095Z",
+  "authorization_phrase": "s19-d1 full diagnostic continuation bundle: P7 decision memo (K13 passed -> READY_FOR_P10).",
+  "binding": true,
+  "candidate_lifecycle_terminal": false,
+  "candidate_record_id": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live/paper/Strategy-Lab-ready; NOT FRC-granted. READY_FOR_P10 is a research-phase status only.",
+  "document_type": "P7_DECISION_MEMO_SEALED",
+  "hard_boundaries_held": {
+    "no_broker_exchange_api": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_k_k9_dr10_k13_reinterpretation": true,
+    "no_fold_scheme_search": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_optimization": true,
+    "no_per_fold_refit": true,
+    "no_retroactive_k13_application": true,
+    "no_review_queue_mutation": true,
+    "no_revival": true,
+    "no_s18_modification": true,
+    "no_strategy_lab_promotion": true,
+    "p7_memo_only": true
+  },
+  "honest_notes_for_p10": [
+    "s19 edges are THINNER per-trade than s18 (IS exp +$262.64 vs +$370.28; K13 fold sharpe ~0.05-0.15 vs s18 0.18-0.27) -- a real but modest premium.",
+    "K13 was 5/5 here vs s18 3/5; the independent universe is MORE persistent (incl. a positive recent F5), but persistence != large edge.",
+    "PRECEDENT: a positive IS+cost+K13 does NOT guarantee P10; s16 passed IS+cost then failed P10 (DR4). P10 (independent 2024-2025) is the binding generalization test.",
+    "DIAGNOSTIC_ONLY regardless of P10; 6-gate live-block + FRC-never-granted apply."
+  ],
+  "integrated_arc": {
+    "p6_5_cost_stress": {
+      "dr_fires": [],
+      "s0_to_s4_net_usd": {
+        "S0": 62799.7,
+        "S1": 59356.65,
+        "S2": 57646.34,
+        "S3": 55943.43,
+        "S4": 52559.66
+      },
+      "verdict": "PASS_COST_STRESS_ELIGIBLE"
+    },
+    "p6_7_k13": {
+      "aggregate_net_usd": 89539.03,
+      "n_folds_positive": 5,
+      "per_fold_signs": {
+        "F1": true,
+        "F2": true,
+        "F3": true,
+        "F4": true,
+        "F5": true
+      },
+      "verdict": "K13_PASS"
+    },
+    "p6_is": {
+      "closed_trades": 226,
+      "expectancy_usd_per_trade": 262.64,
+      "sharpe_proxy_per_trade": 0.113516,
+      "total_return_pct": 65.8295,
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "win_rate_pct": 54.42
+    }
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S19_D1_INDEPENDENT_WEEKLY_RS_P7_DECISION_MEMO_SEALED",
+    "READY_FOR_P10",
+    "NON_TERMINAL",
+    "REPLICATION_CORROBORATES_S18_SO_FAR",
+    "K13_PASS_5_OF_5",
+    "EDGE_THINNER_THAN_S18",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_ROTATION_P7_READY_FOR_P10_SEALED",
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "candidate_lifecycle_terminal": false,
+    "claims_edge_generalizes": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr4_relaxed": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18": false,
+    "p10_oos_gate_run": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "promotion_attempted": false,
+    "s18_chain_modified": false
+  },
+  "p10_runs_next_this_bundle": true,
+  "phase": "P7_DECISION_MEMO",
+  "replication_status_so_far": {
+    "interim_read": "the s18 edge generalizes to the independent universe through IS + cost-stress + K13; P10 OOS is the final test",
+    "p6_5": "PASS_COST_STRESS_ELIGIBLE",
+    "p6_7_k13": "K13_PASS 5/5 (STRONGER persistence than s18 3/5; incl. positive recent F5 that was negative in s18)",
+    "p6_is": "POSITIVE (corroborates s18; weaker per-trade)"
+  },
+  "report_date_utc": "2026-05-29T03:17:25.085095Z",
+  "report_kind": "S19-D1 P7 decision memo -- integrates P6 IS + P6.5 + P6.7 K13 on the INDEPENDENT universe; records READY_FOR_P10. REPLICATION of s18: so far the s18 edge GENERALIZES to independent data (P6 IS positive; P6.5 survives; K13 5/5). NOT terminal; NOT live-ready; P10 OOS gate runs next.",
+  "report_seal_sha256": "a9b07a2706dea290563f9e1f56311859c690f27873bcdd8724a8cdbaa0b43d2f",
+  "schema_id": "sparta.research.s19_d1_independent_weekly_rs_p7_decision_memo_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "candidate_lifecycle_terminal": false,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s19-d1 independent-universe weekly RS rotation P7 decision memo (sealed; NON-terminal; READY_FOR_P10; REPLICATION corroborates s18 IS+cost+K13)",
+  "verdict": "READY_FOR_P10"
+}
