@@ -1,0 +1,96 @@
+{
+  "anchors": {
+    "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+    "dr9_result_commit": "d86e5d1",
+    "dr9_result_seal": "85667ab3238a27b2f020c3644e4b7e2643b64be48d2a3f21cd75123b9b7677e3",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "466adb9",
+    "p2_phase2_plan_commit": "1d4cd48",
+    "tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T02:11:14.380996Z",
+  "authorization_phrase": "Authorize s18-d1 broad-universe weekly relative-strength rotation P3 BUILD only — bound by DR10 v2 + walk-forward K13.",
+  "build_component": "runner",
+  "build_reuses_sealed_csvs": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/<24 names> (DR9-PASSED; d86e5d1); read at P6/P6.5/P6.7 only",
+  "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "component_description": "Weekly RS primitives (trailing_return 126-21, cross_sectional_rank, select_top_8, equal_weight_targets 1/8, is_rebalance_bar R=5, rotation_exits/entries, cost) + CONFIG byte-equivalent to SEAL DA1-DA22 (weekly R=5, top-8) + Algo stub (live refusal). full_guard_check overall_pass=True. NO execution.",
+  "document_type": "P3_BUILD_REPORT_SEALED",
+  "files_built": {
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/__init__.py": "592240e73f843d0d61c9d81352527d53ac6210e3c6bd8e59ec19138861434aae",
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/execution_guard.py": "6ea20a759c917d005fdad4d43737d7b04e505bda09cd3dbaa4161a4f94913a34",
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/main.py": "ace47a8ae8de8c152bbf09348073edd677b0d6e69763a0d6817d8395b2b9bd4d",
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/tests/conftest.py": "63c5eaeb6ecaf1828da233bbae90b54b7f61446e93a2b82adb8ae1ec4e135ac1",
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/tests/fixtures/synthetic_weekly_universe_daily.csv": "8bef773dcd962676d79310d9a3e021e942bea9b424b95b2b483ff9eb20bf65dc",
+    "external_research_hunter/s18_d1_broad_universe_weekly_relative_strength_rotation_runner_harness/tests/test_smoke.py": "1ade517d0f0c67b95be9a39cf35252cf9d211f7408b317f55cd230203cecf446"
+  },
+  "hard_boundaries_held": {
+    "build_only_no_execution": true,
+    "no_backtest": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_per_fold_refit": true,
+    "no_real_csv_read": true,
+    "no_retroactive_k13_application": true,
+    "no_revival": true,
+    "no_signal_computation_on_real_data": true,
+    "no_strategy_optimization": true,
+    "py_compile_only_no_pytest": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S18_D1_WEEKLY_RS_P3_BUILD_REPORT_SEALED",
+    "COMPONENT_RUNNER",
+    "NO_EXECUTION_AT_BUILD",
+    "PY_COMPILE_PASS",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S18_D1_WEEKLY_RS_ROTATION_P3_BUILD_SEALED",
+  "negative_invariants": {
+    "backtest_run": false,
+    "cadence_tuned": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "live_or_broker_path": false,
+    "oos_inspected": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "real_csv_read": false,
+    "signal_computed_on_real_data": false,
+    "simulator_run": false,
+    "strategy_lab_promoted": false,
+    "tests_run": false
+  },
+  "next_phase_authorization_scope": {
+    "primary_forward": "Authorize s18-d1 broad-universe weekly relative-strength rotation P4 synthetic smoke only."
+  },
+  "phase": "P3_BUILD",
+  "py_compile_status": "PASS (all harness source compiled; doraise=True)",
+  "report_date_utc": "2026-05-29T02:11:14.380996Z",
+  "report_seal_sha256": "ec51c287c3e09d5870722d92b9cb576452cbb10f44791658209eb1bce5021a53",
+  "schema_id": "sparta.s18_d1_weekly_rs_runner_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "structural_guard_check": {
+    "full_guard_check_overall_pass": true,
+    "k13_fold_scheme_valid": true,
+    "note": "CONFIG attestation only; no data, no signals, no backtest"
+  },
+  "title": "s18-d1 weekly RS rotation P3 BUILD report: runner harness (main.py) + execution_guard + synthetic fixture (sealed; NO execution)"
+}
