@@ -1,0 +1,54 @@
+{
+  "amends": "Step 02 methodology (b6c30d5) target definition",
+  "authored_at_utc": "2026-05-29T16:47:26.589919Z",
+  "binding": true,
+  "branch": "multi_market_bad_regime_predictor",
+  "content_sha256": "72572a47eb60a11ff7d1393db0fc93ee544d4910a1282aa861346de6ccd9c9ff",
+  "document_type": "BRANCH_TARGET_RULE_AMENDMENT",
+  "grounded_in": "Step 04 result (commit 1573893): the original target made CL degenerate.",
+  "guards": {
+    "definitional_plus_discovery_rebuild_only": true,
+    "no_2025_inspection": true,
+    "no_backtest": true,
+    "no_cluster": true,
+    "no_model": true,
+    "no_signals": true,
+    "no_sparta_contamination": true,
+    "no_strategy_returns_R_PnL_Sharpe": true,
+    "no_tuning_to_2024": true
+  },
+  "labels": [
+    "BRANCH_MULTI_MARKET_BAD_REGIME_PREDICTOR",
+    "STEP_02_TARGET_RULE_AMENDMENT",
+    "VOL_SCALED_REGIME_RELATIVE",
+    "FIXES_CL_DEGENERACY",
+    "PRE_COMMITTED_NO_2024_TUNING",
+    "CONTAMINATION_FIREWALLED"
+  ],
+  "no_tuning_to_2024_attestation": "K is fixed from 2019-2023 BEFORE computing any 2024 label; 2024 base-rates are MEASURED ONCE and reported as-is; the method (vol-scaling) was selected on the degeneracy MECHANISM (absolute-level inflation), not on 2024 outcomes; no iteration on 2024 results.",
+  "options_compared_conceptually": {
+    "A_absolute_quantile_ORIGINAL": "per-market absolute fwd-maxDD threshold = 2019-2023 q80. REJECTED: a fixed absolute level set by an extreme historical regime (2020 oil) is not regime-appropriate for a calmer period -> degeneracy (CL 0%).",
+    "B_rolling_recent_window_threshold": "per-market threshold = q80 of COMPLETED fwd-maxDD labels over a trailing window (point-in-time, label-completed <= t). Adapts to recent vol; valid. Slightly heavier machinery (trailing label distribution).",
+    "C_volatility_scaled_regime_relative_SELECTED": "standardize the forward drawdown by decision-time vol, then threshold a SINGLE pooled K. bad=1 iff z(t) = fwd_maxDD(t,H) / (trailing_21d_realized_vol(t) * sqrt(H)) >= K, with K = the 80th percentile of z over 2019-2023 POOLED across all 4 markets (estimated on pre-2024 data ONLY). SELECTED: regime- and market-relative by construction (a drawdown 'bad' relative to prevailing vol), comparable across markets, single pre-committed K, directly removes the absolute-level inflation that caused CL degeneracy."
+  },
+  "problem_statement": "Original target: bad=1 iff forward 21-bar max-drawdown >= per-market ABSOLUTE threshold = each market's 2019-2023 q80 of forward-maxDD. CL's 2019-2023 q80 = 0.152 (inflated by the extreme 2020-2022 oil period); the calmer 2024 never reaches it -> CL 2024 base-rate = 0.0 (DEGENERATE), blocking CL per-market modeling/evaluation.",
+  "schema_id": "branch.multi_market_bad_regime_predictor.step_02_target_rule_amendment.v1",
+  "selected_rule": {
+    "K_definition": "K = pooled 80th-percentile of z over ALL 2019-2023 decision dates across all 4 markets (label-window completed within discovery); estimated on PRE-2024 data ONLY; a SINGLE K shared by all markets.",
+    "decision_time_scale": "sigma_H(t) = trailing_21d_realized_vol(t) * sqrt(21)  [uses only data <= t]",
+    "forward_statistic": "fwd_maxDD(t,H) = running peak-to-trough max drawdown of the underlying close over (t, t+H] common-calendar bars (MARKET-STATE statistic; NOT a strategy return)",
+    "horizon_H_common_bars": 21,
+    "label": "bad_regime=1 iff z(t) >= K",
+    "leakage": "numerator uses the forward label window (allowed for a target); denominator sigma_H(t) uses only data <= t; K from 2019-2023 only -> no 2024/2025 information enters the threshold.",
+    "name": "volatility_scaled_regime_relative_bad_regime",
+    "standardized_statistic": "z(t) = fwd_maxDD(t,H) / sigma_H(t)"
+  },
+  "step": "02_target_rule_amendment",
+  "unchanged_from_step_02": [
+    "inner-join common-4 calendar",
+    "t+H<=last-discovery-bar label cap (no reach into sealed 2025)",
+    "decision-time feature families (<= t)",
+    "degraded-day exclusion rule",
+    "discovery-only fitting; 2025 sealed"
+  ]
+}
