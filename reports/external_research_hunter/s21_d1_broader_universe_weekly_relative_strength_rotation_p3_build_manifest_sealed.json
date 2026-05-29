@@ -1,0 +1,72 @@
+{
+  "anchors": {
+    "dr9_commit": "d76c999",
+    "p1_p2_commit": "01afcbd",
+    "p1_plan_lock": "369a4fce800c9d3525bd65a50e717fe065224fca27e4a0ac9f553b3cba16af3b",
+    "p2_phase2_plan": "f55d898d5d292a3647c98ba640a30cdb5612d59fe8b328ae585c0ffc9df8186e",
+    "seal_commit": "ae11479",
+    "tier_n_spec_seal": "0057308a4b8d6b9aa4f7126537fca43389336579871960330e4045d60444244f",
+    "walk_forward_k13_seal": "4268d6f75bbc095a795510f7d8ccc50c2d8886eef36f50f769b79342002893d2"
+  },
+  "authored_at_utc": "2026-05-29T04:56:02.757835Z",
+  "candidate_record_id": "s21-d1-broader-universe-weekly-relative-strength-rotation-48name-fresh-large-cap-long-history",
+  "document_type": "P3_BUILD_MANIFEST_SEALED",
+  "file_count": 10,
+  "file_sha256_manifest": {
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\execution_guard.py": "cc9f48eca520f3dd90194ec88cee7fee153772171a8d4de63b0e5fd84461918b",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\in_sample_driver.py": "ec6fb2f6160d4eee3a7efa2ea1db09d7e1669e175291d46e00adf3b5e2c99929",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\main.py": "fbfc3dddf16ba246d5d60e0221d3f697e21a17469c471a1e4cfa11e1c48d7a69",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\out_of_sample_driver.py": "51c994cc3f303f47e1e3e6664ea4867e1247266349bf0ba6101adb41b5c6a33e",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\tests\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\tests\\conftest.py": "1459c72111708d6f2ed753767f67835f19aa2333592e75c96bfa9dd2a1c1bbcf",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\tests\\fixtures\\synthetic_fresh_universe_daily.csv": "8bef773dcd962676d79310d9a3e021e942bea9b424b95b2b483ff9eb20bf65dc",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\tests\\test_smoke.py": "5b16ca2a701438b44da366129bf5ecb5ac82bf55f267c86214fe29cf690e5965",
+    "external_research_hunter\\s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness\\walk_forward_driver.py": "d035522dd8bad9a59f8878aa4079b14f33c7750f6ab92df7eee6a45f70b2ac30"
+  },
+  "hard_boundaries_held": {
+    "build_only": true,
+    "fresh_candidate_not_revN": true,
+    "m8_unchanged": true,
+    "mechanic_byte_identical_to_s18_s19_s20": true,
+    "no_commit_by_this_script": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification": true,
+    "no_live_or_broker": true,
+    "no_modification_of_sealed_artifacts": true,
+    "no_promotion": true
+  },
+  "harness_package": "external_research_hunter/s21_d1_broader_universe_weekly_relative_strength_rotation_runner_harness",
+  "is_a_seal": true,
+  "labels": [
+    "S21_D1_P3_BUILD_MANIFEST",
+    "PY_COMPILE_PASS",
+    "NO_EXECUTION",
+    "FRESH_48_NAME",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE"
+  ],
+  "no_execution_attestation": {
+    "import_self_check_config_only": true,
+    "no_backtest": true,
+    "no_data_fetch": true,
+    "no_pnl": true,
+    "no_real_csv_read": true,
+    "no_signal_on_real_data": true,
+    "no_test_run_at_build": true,
+    "py_compile_only": true
+  },
+  "phase": "P3_BUILD",
+  "py_compile_result": "PASS (7 modules)",
+  "report_date_utc": "2026-05-29T04:56:02.757835Z",
+  "report_seal_sha256": "dbb8f041ce7e1281c432ebc2ca16ed234163374f30dcf6c7724030ea55bd9503",
+  "schema_id": "sparta.s21_d1_fresh_weekly_rs_p3_build_manifest_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s21-d1 fresh-universe weekly RS rotation P3 BUILD manifest (sealed)",
+  "universe_count": 48
+}
