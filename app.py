@@ -165,6 +165,36 @@ async def lifespan(app: FastAPI):
         ),
         sort_order=93,
     )
+    # Weekly RS s21 broker-free paper status card (read-only). Mirrors the
+    # /command read-only pattern: GET-only, localhost-only, no buttons, no
+    # cycle trigger, no fetch, no broker. DIAGNOSTIC_ONLY; FRC NEVER_GRANTED.
+    db.upsert_manual_entry(
+        "weekly_rs_s21_paper",
+        module_name="Weekly RS s21 Paper Status",
+        category="Trading",
+        status="READY",
+        short_description=(
+            "Read-only status card for the broker-free weekly RS s21 paper "
+            "process. No cycle run, no fetch, no broker, no execution."
+        ),
+        how_it_works=(
+            "Reads the harness manifest plus the newest runs/dry_cycle_NNN/ "
+            "outputs (orders, killswitch_status.json) and shows paper status, "
+            "last cycle/anchor, next expected anchor, equity, holdings, "
+            "verdict, kill-switch, and whether the next cycle is READY or "
+            "STALE. A separate dry-run Telegram notifier reuses the same "
+            "read-only aggregator."
+        ),
+        when_to_use=(
+            "When you want a one-glance, read-only view of the weekly RS s21 "
+            "paper test without running a cycle or opening the harness."
+        ),
+        user_action=(
+            "Open http://127.0.0.1:8765/paper in a browser. GET-only, "
+            "localhost-only, no buttons, no execution."
+        ),
+        sort_order=91,
+    )
 
     # One-shot migration: if the user is still on the previous-generation
     # short-form defaults (45s max / 30s target), bump them to 35s/25s.
@@ -6994,6 +7024,36 @@ async def page_command(request: Request):
 
 
 # === END SPARTA Trading Command Center v1 block ============================
+
+
+# ===========================================================================
+# Weekly RS s21 broker-free paper status card (read-only viewer)
+#
+# Mirrors the /command pattern: GET-only, localhost-only, no forms, no inputs,
+# no mutating buttons, no broker/API/order/scheduler/cycle/live affordances.
+# Reads the harness status aggregator strictly read-only. Fail-closed: if the
+# aggregator raises, render the page anyway with an error banner.
+# DIAGNOSTIC_ONLY -- FRC NEVER_GRANTED -- Live BLOCKED_AT_6_GATES.
+# ===========================================================================
+
+@app.get("/paper", response_class=HTMLResponse)
+def page_weekly_rs_paper(request: Request):
+    error = None
+    paper = None
+    try:
+        from paper_trading.weekly_rs_s21_forward_paper_harness import status as _paper_status
+        paper = _paper_status.paper_status()
+    except Exception as exc:  # noqa: BLE001 — fail-closed render, never fabricate
+        error = f"{type(exc).__name__}: {exc}"
+    return templates.TemplateResponse(
+        "weekly_rs_s21_paper.html",
+        {
+            "request": request,
+            "page": "paper",
+            "paper": paper,
+            "error": error,
+        },
+    )
 
 
 # ===========================================================================

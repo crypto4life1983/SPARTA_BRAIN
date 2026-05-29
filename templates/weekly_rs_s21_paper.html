@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Weekly RS s21 — Paper Status (read-only){% endblock %}
+
+{% block content %}
+<style>
+  .ps-wrap { font-family: ui-monospace, Menlo, Consolas, monospace;
+             color:#e6edf3; padding: 8px 0 32px; }
+  .ps-h1 { font-size: 1.35rem; margin: 0 0 4px; color:#e6edf3; }
+  .ps-sub { color:#8b949e; font-size:.85rem; margin: 0 0 12px; }
+  .ps-banner { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0 18px; font-size:.78rem; }
+  .ps-banner .pill { background:#3d1f1f; border:1px solid #6e2e2e; padding:5px 10px;
+                     border-radius:6px; color:#ff7b72; font-weight:600; }
+  .ps-card { background:#0d1117; border:1px solid #30363d; border-radius:8px;
+             padding:14px 16px; margin: 14px 0; }
+  table.ps-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+  table.ps-table th, table.ps-table td { text-align:left; padding:6px 10px;
+            border-bottom:1px solid #21262d; vertical-align:top; word-break:break-word; }
+  table.ps-table th { color:#8b949e; font-weight:600; width:14rem; }
+  .ps-READY      { color:#3fb950; font-weight:bold; }
+  .ps-STALE      { color:#d29922; font-weight:bold; }
+  .ps-CONTINUE   { color:#3fb950; }
+  .ps-WARN       { color:#d29922; font-weight:bold; }
+  .ps-HALT       { color:#ff7b72; font-weight:bold; }
+  .ps-GREEN      { color:#3fb950; }
+  .ps-REVIEW     { color:#d29922; font-weight:bold; }
+  .ps-TRIGGERED  { color:#ff7b72; font-weight:bold; }
+  .ps-UNKNOWN    { color:#8b949e; }
+  .ps-empty { color:#d29922; padding: 16px; background:#161b22;
+              border:1px dashed #d2992288; border-radius:6px; font-size:.85rem; }
+  .ps-foot { color:#8b949e; font-size:.72rem; margin-top: 22px;
+             padding-top: 10px; border-top:1px solid #21262d; }
+</style>
+
+<div class="ps-wrap">
+  <h1 class="ps-h1">Weekly RS s21 &mdash; Paper Status</h1>
+  <p class="ps-sub">
+    Read-only view of the broker-free weekly RS s21 paper process.
+    GET-only. Localhost-only. No cycle run, no fetch, no broker, no execution.
+  </p>
+
+  {% if paper %}
+    <div class="ps-banner" aria-label="Governance invariants">
+      {% for b in paper.governance_banner %}<span class="pill">{{ b }}</span>{% endfor %}
+    </div>
+  {% endif %}
+
+  {% if error %}
+    <div class="ps-empty">ERROR: {{ error }}<br>Nothing fabricated. The aggregator failed to read status.</div>
+  {% elif not paper %}
+    <div class="ps-empty">MISSING: no paper status available.</div>
+  {% else %}
+    <section class="ps-card">
+      <table class="ps-table" aria-label="Weekly RS s21 paper status">
+        <tbody>
+          <tr><th>Paper state</th><td>{{ paper.paper_state }}</td></tr>
+          <tr><th>Trading / Live / FRC</th>
+              <td>{{ paper.trading_status }} &middot; {{ paper.live_status }} &middot; {{ paper.frc_status }}</td></tr>
+          <tr><th>Last cycle #</th><td>{{ paper.last_cycle_number if paper.last_cycle_number is not none else '—' }}</td></tr>
+          <tr><th>Last anchor date</th><td>{{ paper.last_anchor_date or '—' }}</td></tr>
+          <tr><th>Next expected anchor</th><td>{{ paper.next_expected_anchor or '—' }} <span style="color:#8b949e">(indicator; re-checked at cycle time)</span></td></tr>
+          <tr><th>Latest paper equity</th><td>{{ paper.latest_equity_usd if paper.latest_equity_usd is not none else '—' }}</td></tr>
+          <tr><th>Current holdings (&le;8)</th><td>{{ paper.current_holdings | join(', ') if paper.current_holdings else '—' }}</td></tr>
+          <tr><th>Last cycle verdict</th><td class="ps-{{ paper.last_cycle_verdict }}">{{ paper.last_cycle_verdict }}</td></tr>
+          <tr><th>Kill-switch status</th>
+              <td class="ps-{{ paper.killswitch_status }}">{{ paper.killswitch_status }}
+                  {% if paper.killswitch_reasons %}&mdash; {{ paper.killswitch_reasons | join(', ') }}{% endif %}
+                  {% if paper.killswitch_halt %}<strong>(HALT)</strong>{% endif %}</td></tr>
+          <tr><th>Active data source</th>
+              <td>{{ paper.data_source.key }} &middot; last {{ paper.data_source.last_date }}
+                  {% if paper.data_source.read_only %}&middot; read-only{% endif %}</td></tr>
+          <tr><th>Next cycle</th>
+              <td class="ps-{{ paper.next_cycle }}">{{ paper.next_cycle }}
+                  <span style="color:#8b949e">&mdash; {{ paper.next_cycle_reason }}</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="ps-sub">
+      Generated {{ paper.generated_at_utc }} &middot; READY only indicates a cycle is <em>authorizable</em>;
+      running it is a separate explicit authorization. This card never starts a cycle.
+    </p>
+  {% endif %}
+
+  <div class="ps-foot">
+    Read-only &middot; localhost &middot; broker-free paper diagnostic &middot;
+    no broker, no live trading, no fetch, no FRC, no Strategy Lab.
+  </div>
+</div>
+{% endblock %}
