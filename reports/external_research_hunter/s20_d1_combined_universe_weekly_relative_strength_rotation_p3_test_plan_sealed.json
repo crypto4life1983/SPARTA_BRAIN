@@ -10,7 +10,7 @@
     "tier_n_spec_seal": "e6f801085bb14fc8f16f819fe5f085105772dadf816613b568f7c8163c4fc924",
     "walk_forward_k13_seal": "4268d6f75bbc095a795510f7d8ccc50c2d8886eef36f50f769b79342002893d2"
   },
-  "authored_at_utc": "2026-05-29T03:53:48.066992Z",
+  "authored_at_utc": "2026-05-29T03:56:32.440683Z",
   "candidate_record_id": "s20-d1-combined-universe-weekly-relative-strength-rotation-48name-large-cap-long-history",
   "document_type": "P3_TEST_PLAN_SEALED",
   "hard_boundaries_held": {
@@ -43,8 +43,8 @@
   },
   "phase": "P3_BUILD",
   "pytest_invocation": "pinned --rootdir/--confcutdir to harness tests dir + -p no:cacheprovider",
-  "report_date_utc": "2026-05-29T03:53:48.066992Z",
-  "report_seal_sha256": "95ef3db84e83e825535e3e5f6dddec1be7b642c4b0526d4294b8509cc84001b2",
+  "report_date_utc": "2026-05-29T03:56:32.440683Z",
+  "report_seal_sha256": "96bc244812bb3fcd80efb852392fd2cd5789182486a98b4715b5c5dce30799c7",
   "schema_id": "sparta.s20_d1_combined_weekly_rs_p3_test_plan_sealed.v1",
   "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
   "status_fields": {
