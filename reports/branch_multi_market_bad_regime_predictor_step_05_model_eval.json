@@ -1,0 +1,226 @@
+{
+  "audit_only_discovery": true,
+  "authored_at_utc": "2026-05-29T17:06:10.924190Z",
+  "baselines": {
+    "base_rate": 0.1551,
+    "per_market_base_rates": {
+      "6E": 0.2163,
+      "CL": 0.1837,
+      "ES": 0.1469,
+      "GC": 0.0735
+    },
+    "random_auc": 0.5
+  },
+  "branch": "multi_market_bad_regime_predictor",
+  "candidate_models": {
+    "B0_base_rate_baseline": {
+      "auc": 0.5,
+      "note": "reference; AUC 0.5 by construction",
+      "type": "constant predicted prob = base-rate"
+    },
+    "M1_logistic_regression": {
+      "deterministic": true,
+      "features": [
+        "ret_21",
+        "ret_63",
+        "vol_21",
+        "vol_63",
+        "range_21",
+        "dist_high_252",
+        "xmkt_corr_21",
+        "xmkt_disp_21"
+      ],
+      "pooled_across_markets": true,
+      "type": "deterministic logistic regression (pure numpy GD; lr=0.1, iters=3000, l2=1e-3, zero-init; per-fold train standardization)"
+    },
+    "rule_table_univariate_diagnostic": {
+      "note": "DIAGNOSTIC only (in-sample, not the CV result); indicates which decision-time features carry signal",
+      "per_feature": {
+        "dist_high_252": {
+          "in_sample_auc_best_direction": 0.5496
+        },
+        "range_21": {
+          "in_sample_auc_best_direction": 0.6072
+        },
+        "ret_21": {
+          "in_sample_auc_best_direction": 0.5532
+        },
+        "ret_63": {
+          "in_sample_auc_best_direction": 0.5659
+        },
+        "vol_21": {
+          "in_sample_auc_best_direction": 0.6426
+        },
+        "vol_63": {
+          "in_sample_auc_best_direction": 0.6142
+        },
+        "xmkt_corr_21": {
+          "in_sample_auc_best_direction": 0.5311
+        },
+        "xmkt_disp_21": {
+          "in_sample_auc_best_direction": 0.5531
+        }
+      },
+      "type": "single-feature ranking (in-sample AUC per feature, best direction)"
+    }
+  },
+  "content_sha256": "7376761230394cab409f0eaaa25f39a474a3ad9fcd3d245d16ba425cec27a982",
+  "cv_design": {
+    "embargo_bars": 21,
+    "k": 5,
+    "pooled_markets_per_fold": true,
+    "purge": "train excludes test dates and any date within H of the test block (both sides) -> prevents forward-label-window overlap leakage",
+    "scheme": "purged + embargoed blocked time-series K-fold by decision-date",
+    "standardization": "train-fold only"
+  },
+  "dataset": {
+    "markets": [
+      "ES",
+      "GC",
+      "CL",
+      "6E"
+    ],
+    "pooled_base_rate": 0.1551,
+    "rows": 980,
+    "unique_2024_dates": 245
+  },
+  "document_type": "BRANCH_MODEL_EVAL",
+  "excluded_features": {
+    "dow": "calendar; excluded from primary model (kept available)",
+    "month": "calendar; excluded from primary model (kept available)",
+    "z_vol_scaled_fwd_maxdd": "LABEL-DERIVED (forward window) -> excluded to prevent target leakage"
+  },
+  "guards_held": {
+    "discovery_only": true,
+    "leaky_z_feature_excluded": true,
+    "no_2025_inspection": true,
+    "no_backtest": true,
+    "no_commit_by_this_script": true,
+    "no_live_readiness_claim": true,
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_sparta_contamination": true,
+    "no_strategy_returns_R_PnL_Sharpe": true,
+    "no_tradeability_claim": true,
+    "no_trading_signals": true,
+    "within_2024_cv_only": true
+  },
+  "honest_limitations": [
+    "DISCOVERY IN-SAMPLE ONLY: cross-validation is within a SINGLE year (2024) -> evaluates within-2024 generalization across dates, NOT across regimes/years; 2025 OOS untouched.",
+    "Small sample: 245 2024 decision dates x 4 markets = 980 rows; label base-rates 7-22% (class imbalance); CV folds are small.",
+    "Label autocorrelation: overlapping forward windows make adjacent dates' labels correlated; purge+embargo (H=21) mitigates but does not eliminate finite-sample optimism.",
+    "Pooled model treats markets jointly; per-market metrics have fewer rows/positives -> noisier.",
+    "Metrics are CLASSIFICATION diagnostics ONLY (AUC/precision/recall/calibration/lift). They are NOT returns, PnL, Sharpe, or any tradeability/profitability measure; no strategy was constructed or backtested.",
+    "Univariate AUCs are IN-SAMPLE diagnostics (feature screening), not the cross-validated result.",
+    "A single deterministic linear model + simple features; no model selection/tuning performed (would need its own pre-registered protocol)."
+  ],
+  "key_findings": [
+    "NEGATIVE RESULT (substantive): the simple pooled linear model shows NO out-of-fold predictive edge within 2024 -- pooled OOF AUC 0.4711 is at/below the 0.5 random baseline; precision-lift vs base-rate 1.018 (~1.0 = none).",
+    "Per-market OOF AUCs are HIGHLY DISPERSED (ES 0.705 / GC 0.198 / CL 0.456 / 6E 0.382), several below 0.5 (inverted). With ~245 rows/market and few positives this dispersion is consistent with small-sample noise, NOT a stable per-market edge.",
+    "Univariate IN-SAMPLE feature AUCs are mildly above 0.5 for volatility/range features (vol_21 0.643, vol_63 0.614, range_21 0.607) but this in-sample signal does NOT survive the leakage-safe pooled OOF cross-validation -- a textbook in-sample-vs-OOF gap.",
+    "Implication for the sealed 2025 OOS: there is NO discovery-stage edge to confirm, so the sealed 2025 OOS should NOT be unsealed/spent on this model. Doing so now would waste the one-shot OOS on a model with no demonstrated discovery signal."
+  ],
+  "labels": [
+    "BRANCH_MULTI_MARKET_BAD_REGIME_PREDICTOR",
+    "STEP_05_DISCOVERY_MODEL_EVAL",
+    "PURGED_EMBARGOED_CV",
+    "CLASSIFICATION_METRICS_ONLY",
+    "DISCOVERY_IN_SAMPLE_ONLY",
+    "NO_2025_NO_BACKTEST_NO_RETURNS_NO_CLAIMS",
+    "CONTAMINATION_FIREWALLED",
+    "VERDICT_PASS"
+  ],
+  "metrics_OOF": {
+    "brier_score": 0.16943,
+    "calibration_bins": [
+      {
+        "bin": 1,
+        "mean_pred": 0.0035,
+        "n": 196,
+        "obs_freq": 0.2245
+      },
+      {
+        "bin": 2,
+        "mean_pred": 0.022,
+        "n": 196,
+        "obs_freq": 0.0969
+      },
+      {
+        "bin": 3,
+        "mean_pred": 0.0867,
+        "n": 196,
+        "obs_freq": 0.1684
+      },
+      {
+        "bin": 4,
+        "mean_pred": 0.2276,
+        "n": 196,
+        "obs_freq": 0.1224
+      },
+      {
+        "bin": 5,
+        "mean_pred": 0.4858,
+        "n": 196,
+        "obs_freq": 0.1633
+      }
+    ],
+    "coverage": 1.0,
+    "per_market": {
+      "6E": {
+        "auc": 0.3819,
+        "base_rate": 0.2163,
+        "lift_vs_baserate": 1.221,
+        "n": 245,
+        "precision_at_baserate_thr": 0.2642,
+        "recall": 0.2642
+      },
+      "CL": {
+        "auc": 0.4562,
+        "base_rate": 0.1837,
+        "lift_vs_baserate": 1.21,
+        "n": 245,
+        "precision_at_baserate_thr": 0.2222,
+        "recall": 0.2222
+      },
+      "ES": {
+        "auc": 0.7053,
+        "base_rate": 0.1469,
+        "lift_vs_baserate": 0.567,
+        "n": 245,
+        "precision_at_baserate_thr": 0.0833,
+        "recall": 0.0833
+      },
+      "GC": {
+        "auc": 0.1977,
+        "base_rate": 0.0735,
+        "lift_vs_baserate": null,
+        "n": 245,
+        "precision_at_baserate_thr": 0.0,
+        "recall": 0.0
+      }
+    },
+    "pooled_auc": 0.4711,
+    "pooled_confusion_at_threshold": {
+      "f1": 0.15789473684210525,
+      "fn": 128,
+      "fp": 128,
+      "precision": 0.15789473684210525,
+      "recall": 0.15789473684210525,
+      "tn": 700,
+      "tp": 24
+    },
+    "pooled_precision_lift_vs_baserate": 1.018,
+    "threshold_rule": "predicted-positive if OOF score >= (1-base_rate) quantile (predicted-positive rate ~ base-rate)",
+    "threshold_value": 0.346508
+  },
+  "recommended_next_authorization": "Operator's choice between two in-protocol paths (the sealed 2025 OOS stays SEALED in BOTH): (A) CATALOG-AND-PARK -- 'Authorize Multi-Market Bad-Regime Predictor catalog + park as DISCOVERY-NEGATIVE only' -- record that a simple pooled linear model found no leakage-safe within-2024 OOF edge; close the modeling line; commit Step 05 + catalog memo; OR (B) ONE pre-registered alternative-model attempt -- 'Authorize Multi-Market Bad-Regime Predictor Step 05b pre-registered alternative-model discovery-only CV evaluation only' -- a SINGLE fixed, pre-declared protocol (e.g. per-market logistic + one shallow nonlinear baseline) under the SAME purged/embargoed within-discovery CV, with a pre-committed discovery AUC/lift threshold that MUST be met before any future 2025-OOS authorization, NO threshold tuning, NO 2025 inspection, NO backtest/returns/signals. Default recommendation: (A), given the negative result; commit Step 05 outputs first under a separate commit authorization either way.",
+  "schema_id": "branch.multi_market_bad_regime_predictor.step_05_model_eval.v1",
+  "source": {
+    "step_02_amendment_commit": "5c2bea7",
+    "step_04_table_commit": "9164bd7",
+    "table_path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/feature_target/feature_target_table_discovery_2024.csv"
+  },
+  "step": "05_discovery_model_eval",
+  "verdict": "PASS",
+  "verdict_meaning": "PASS = the discovery-only, leakage-safe (purged/embargoed) within-2024 cross-validated classification evaluation was VALIDLY CONDUCTED and metrics computed honestly. PASS is NOT a statement that the predictor is good/tradeable/profitable/OOS-confirmed; it certifies the evaluation methodology + reporting, not an edge. The substantive finding here is NEGATIVE (no OOF edge)."
+}
