@@ -1,0 +1,140 @@
+{
+  "anchors": {
+    "dr9_result_commit": "d86e5d1",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "466adb9",
+    "p2_phase2_plan_commit": "1d4cd48",
+    "p3_build_commit": "50171b0",
+    "p4_smoke_commit": "ad0e542",
+    "p6_5_cost_stress_commit": "1db075d",
+    "p6_7_k13_commit": "aa762f0",
+    "p6_is_commit": "3911970",
+    "p7_decision_memo_commit": "a53d093",
+    "tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T02:24:53.378468Z",
+  "authorization_phrase": "Authorize s18-d1 broad-universe weekly relative-strength rotation P10 OOS gate only — bound by DR10 v2 + walk-forward K13.",
+  "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "document_type": "P10_OOS_GATE_RESULT_SEALED",
+  "dr_evaluation": {
+    "DR10_v2_turnover_cost": false,
+    "DR1_oos_rebalance_count_lt_36": false,
+    "DR4_oos_negative_while_is_positive": false,
+    "DR6_sizing_ambiguity": false,
+    "DR9_data_continuity": "PASS (reuse d86e5d1)",
+    "K9_oos_floor": "50/y (>=100 over 2y)",
+    "K9_oos_insufficient": false,
+    "K9_oos_rate_per_year": 58.7,
+    "K9_oos_total": 117
+  },
+  "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+  "hard_boundaries_held": {
+    "imports_committed_p3_primitives_unmodified": true,
+    "locked_p10_procedure_only": true,
+    "no_cadence_change": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_reinterpretation": true,
+    "no_fold_scheme_change": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_or_broker": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_parameter_tuning": true,
+    "no_strategy_lab_promotion": true
+  },
+  "is_a_seal": true,
+  "is_reference_for_dr4": {
+    "is_expectancy_usd_per_trade": 370.2776,
+    "is_net_pnl_usd": 84793.57,
+    "is_positive": true,
+    "source_commit": "3911970"
+  },
+  "k13_context": "P6.7 K13 PASSED marginally (3/5); the most recent K13 fold F5 (2024-09..2025-12) was NEGATIVE -- it foreshadowed this OOS result.",
+  "labels": [
+    "S18_D1_WEEKLY_RS_P10_OOS_GATE_SEALED",
+    "OOS_CONFIRMED_DIAGNOSTIC",
+    "DRIVER_NONE_NO_DR_FIRED",
+    "OOS_2024_2025_HOLD_OUT",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S18_D1_WEEKLY_RS_ROTATION_P10_OOS_CONFIRMED_DIAGNOSTIC_SEALED",
+  "locked_params_used": {
+    "L": 126,
+    "M": 8,
+    "R": 5,
+    "S": 21,
+    "cadence": "weekly",
+    "direction": "long-only",
+    "exit": "ROTATION_RELATIVE_RANK",
+    "sizing": "equal_weight_1/M",
+    "warmup": 160
+  },
+  "metrics": {
+    "closed_trades": 117,
+    "cost_tier_used": "S1",
+    "expectancy_usd_per_trade": 210.4281,
+    "final_equity_usd": 139785.68,
+    "max_drawdown_pct": 22.5951,
+    "net_pnl_usd": 39785.68,
+    "oos_rebalances": 100,
+    "open_positions_at_oos_end": [
+      "NVDA",
+      "CAT",
+      "GOOGL",
+      "BAC",
+      "AAPL",
+      "JNJ",
+      "ABBV",
+      "MRK"
+    ],
+    "profit_factor": 1.540518,
+    "sharpe_proxy_per_trade": 0.125359,
+    "start_cash_usd": 100000.0,
+    "total_return_pct": 39.7857,
+    "trades_per_year": 58.7,
+    "win_rate": 0.5983
+  },
+  "negative_invariants": {
+    "cadence_altered": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr_redefined": false,
+    "k13_fold_scheme_altered": false,
+    "lessons_md_touched": false,
+    "oos_window_altered": false,
+    "p3_source_modified": false,
+    "parameters_tuned": false,
+    "sealed_csvs_modified": false
+  },
+  "oos_window": {
+    "bars": 501,
+    "end": "2025-12-30",
+    "idx": [
+      1258,
+      1758
+    ],
+    "start": "2024-01-02"
+  },
+  "phase": "P10_OOS_GATE",
+  "report_date_utc": "2026-05-29T02:24:53.378468Z",
+  "report_seal_sha256": "2d608ebe929e42168c19ad0205dd8a1871627917689393e79ed39bc79a808c36",
+  "schema_id": "sparta.s18_d1_weekly_rs_p10_oos_gate_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "terminal_driver": "none_no_dr_fired",
+  "title": "s18-d1 weekly RS rotation P10 OOS gate result (sealed; OOS_CONFIRMED_DIAGNOSTIC)",
+  "verdict": "OOS_CONFIRMED_DIAGNOSTIC",
+  "warmup_note": "signal warmup uses prior (pre-OOS) bars for the 126-21 lookback only; trades execute ONLY within the OOS window; fresh $100k at first OOS rebalance"
+}
