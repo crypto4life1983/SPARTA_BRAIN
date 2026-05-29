@@ -1,0 +1,153 @@
+{
+  "authored_at_utc": "2026-05-29T05:13:40.581520Z",
+  "authorization_phrase": "Catalogue the weekly RS line as clean-generalization-confirmed DIAGNOSTIC_ONLY and park.",
+  "binding": true,
+  "candidate_final_states": {
+    "s18_d1_broad_universe_24name": {
+      "anchors": {
+        "p11_commit": "5dde0f7",
+        "seal_commit": "7e6aa36"
+      },
+      "caveat": "thin OOS edge and a NEGATIVE most-recent fold (F5); K13 3/5 (marginal supermajority); recent-fold weakness",
+      "oos": "117 trades (58.7/y), net +$39,786, expectancy +$210/trade, sharpe +0.125",
+      "verdict": "OOS_CONFIRMED_DIAGNOSTIC (with caveat)"
+    },
+    "s19_d1_independent_universe_24name": {
+      "anchors": {
+        "dr9_commit": "574fa9e",
+        "p11_commit": "81563fd",
+        "seal_commit": "a3aed99"
+      },
+      "finding": "edge GENERALIZED to an independent 24-name universe (positive IS + cost + 5/5 K13 + a positive OOS even stronger per-trade) BUT the candidate was K9-terminal: 87 OOS trades (43.6/y) < the >=50/y floor",
+      "oos": "87 trades (43.6/y), net +$44,050, expectancy +$336/trade, sharpe +0.238 -- positive but sample-terminal",
+      "verdict": "INSUFFICIENT_SAMPLE / K9-terminal at OOS (edge generalized)"
+    },
+    "s20_d1_combined_universe_48name": {
+      "anchors": {
+        "dr9_commits": "d86e5d1 + 574fa9e",
+        "p11_commit": "7ef6488",
+        "seal_commit": "e9ec72f"
+      },
+      "finding": "broadening the ranking pool to the 48-name s18+s19 UNION at fixed M=8 STRUCTURALLY SOLVED the s19 OOS-K9 blocker WITHOUT tuning (OOS 43.6/y -> 67.2/y); full ladder passed. SELECTION CAVEAT: the union included the known-OOS-good s18 basket -> a sample-size demonstration, NOT clean generalization",
+      "oos": "134 trades (67.2/y), net +$60,004, expectancy +$353/trade, sharpe +0.214",
+      "verdict": "OOS_CONFIRMED_DIAGNOSTIC (sample-size solved; selection caveat)"
+    },
+    "s21_d1_fresh_universe_48name": {
+      "anchors": {
+        "dr9_commit": "d76c999",
+        "p11_commit": "7e12e56",
+        "seal_commit": "ae11479"
+      },
+      "finding": "ran the identical mechanic on a FRESH 48-name universe with ZERO overlap vs s17/s18/s19 (0/48 names ever backtested under this mechanic) -> NO selection bias -> the s18/s20 weekly RS edge GENERALIZES cleanly to a genuinely fresh universe. RESOLVES the s20 selection caveat. Largest OOS-K9 margin of the line",
+      "oos": "171 trades (85.8/y), net +$48,475, expectancy +$170.96/trade (MODEST), sharpe +0.144, PF 1.51, +48.47%",
+      "verdict": "OOS_CONFIRMED_DIAGNOSTIC (CLEAN -- resolves the selection caveat)"
+    }
+  },
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, NOT FRC-granted. Trading PAUSED; Live BLOCKED_AT_6_GATES; FRC NEVER_GRANTED. OOS_CONFIRMED_DIAGNOSTIC (incl. the clean s21 result) is a research-phase label, NOT a promotion.",
+  "document_type": "RESEARCH_LINE_CATALOG_SEALED",
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "framework_k13_binding": "walk-forward persistence (52a3b60)",
+  "hard_boundaries_held": {
+    "catalog_summary_memo_only": true,
+    "no_backtest": true,
+    "no_broker_or_live": true,
+    "no_build": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_draft": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification": true,
+    "no_modification_of_any_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_revival": true,
+    "no_seal_of_candidate": true,
+    "no_strategy_lab_promotion": true
+  },
+  "is_a_candidate_phase": false,
+  "is_a_seal": true,
+  "labels": [
+    "WEEKLY_RS_ROTATION_LINE_CATALOG_SEALED",
+    "S18_S21",
+    "CLEAN_GENERALIZATION_CONFIRMED",
+    "STRONGEST_COMPLETED_DIAGNOSTIC_EDGE",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "PARKED",
+    "NOT_LIVE_OR_PAPER_READY",
+    "FRC_NEVER_GRANTED",
+    "NO_SEALED_ARTIFACT_MODIFIED",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lessons_index_read_only": [
+    "LESSON_S18_D1_001..004",
+    "LESSON_S19_D1_001..003",
+    "LESSON_S20_D1_001..003",
+    "LESSON_S21_D1_001..003"
+  ],
+  "lifecycle_state": "WEEKLY_RS_ROTATION_LINE_S18_S21_CLEAN_GENERALIZATION_CONFIRMED_DIAGNOSTIC_ONLY_PARKED",
+  "line_identity": {
+    "candidates": "s18, s19, s20, s21 -- ALL ran the IDENTICAL byte-locked mechanic; ONLY the universe differed; none was a tune/revN of another; M=8 never changed",
+    "framework_binding": "DR10 v2 AND-conjunction (78cd22e) + walk-forward K13 (52a3b60)",
+    "mechanic_unified_byte_locked": "cross-sectional relative-strength rotation, WEEKLY: 126-21 skip-month signal; rank universe; hold top-M=8 equal-weight (1/M); long-only; relative-rank rotation exit (no trailing/ATR stop); $100k; split_only; tiingo; warmup 160; IS 2019-01-02..2023-12-29; OOS 2024-01-02..2025-12-30; K13 = 5 pre-committed UNSEARCHED DA22 folds"
+  },
+  "line_level_conclusion": {
+    "headline": "The weekly RS rotation line is the STRONGEST COMPLETED DIAGNOSTIC EDGE in the research program: the only line to reach OOS_CONFIRMED, and now CLEAN-GENERALIZATION-CONFIRMED -- the edge OOS-confirms on a fresh never-tested universe (s21), not merely on baskets containing known winners.",
+    "honest_strength_statement": "STRONGEST COMPLETED DIAGNOSTIC EDGE -- but a diagnostic edge, modest in magnitude, and permanently DIAGNOSTIC_ONLY. 'Strongest diagnostic' is NOT 'live-ready' and NOT 'money-proven'.",
+    "what_is_NOT_established": [
+      "NOT a large edge: the clean fresh-universe per-trade edge is MODEST (+$171/trade); generalization != magnitude.",
+      "NOT live/paper-grade: every result is DIAGNOSTIC_ONLY; the 6-gate live-block and FRC-never-granted apply regardless of how strong the diagnostic is.",
+      "NO live path exists by framework design -- there is no authorization that promotes any candidate to live/paper/Strategy-Lab."
+    ],
+    "what_is_established": [
+      "The cross-sectional relative-strength weekly rotation premium is REAL and PORTABLE: positive across multiple universes through IS + cost-stress + walk-forward K13 + OOS.",
+      "Its recurring blocker (OOS sample / K9) is SOLVABLE by universe breadth at fixed held-N, WITHOUT tuning (s20 proved it; s21 showed it holds on fresh names).",
+      "The clean fresh-universe test (s21) removes selection bias and confirms genuine generalization."
+    ]
+  },
+  "negative_invariants": {
+    "any_sealed_artifact_modified": false,
+    "backtest_run": false,
+    "broker_connected": false,
+    "build_executed": false,
+    "candidate_phase_authored": false,
+    "claims_large_edge": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "draft_authored": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "oos_inspected": false,
+    "promotion_attempted": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false,
+    "s20_chain_modified": false,
+    "s21_chain_modified": false,
+    "strategy_lab_promoted": false,
+    "tier_n_sealed": false
+  },
+  "park_decision": {
+    "line_closed_as_diagnostic": true,
+    "no_frc_grant": true,
+    "no_further_phases": true,
+    "no_promotion": true,
+    "no_revival_required": "candidates remain individually frozen/sealed; this catalog does not modify them",
+    "parked": true,
+    "reactivation_note": "Any future work on this mechanic would be a NEW candidate with its own RUN_BOOK/PLAN; this catalog does not authorize it.",
+    "reason": "Clean generalization is now confirmed (s21); the line's central research question -- does the weekly RS edge generalize? -- is answered YES (real, portable, modest, DIAGNOSTIC_ONLY). Further same-mechanic candidates would add marginal diagnostic confidence only; there is no live path regardless."
+  },
+  "report_date_utc": "2026-05-29T05:13:40.581520Z",
+  "report_seal_sha256": "b61f32eeb8784c0b15a7e65dc3b28ab824829acfd2452d41d6a3e5151fd8c845",
+  "schema_id": "sparta.weekly_rs_rotation_line_catalog_s18_s21_diagnostic_only_parked_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true,
+    "weekly_rs_line_state": "CLEAN_GENERALIZATION_CONFIRMED_DIAGNOSTIC_ONLY_PARKED"
+  },
+  "title": "Weekly relative-strength rotation research line (s18->s21) CATALOG -- clean-generalization-CONFIRMED, strongest completed diagnostic edge, DIAGNOSTIC_ONLY, PARKED (NOT live/paper-ready; FRC NEVER_GRANTED)"
+}
