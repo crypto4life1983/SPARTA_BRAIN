@@ -1,0 +1,144 @@
+{
+  "anchors": {
+    "dr9_result_commit": "d86e5d1",
+    "dr9_result_seal": "85667ab3238a27b2f020c3644e4b7e2643b64be48d2a3f21cd75123b9b7677e3",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "466adb9",
+    "p2_phase2_plan_commit": "1d4cd48",
+    "p3_build_commit": "50171b0",
+    "p4_smoke_commit": "ad0e542",
+    "tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T02:13:49.792046Z",
+  "authorization_phrase": "Authorize s18-d1 broad-universe weekly relative-strength rotation P6 IS diagnostic only.",
+  "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "csv_sha_verified_all_24": true,
+  "document_type": "P6_IS_DIAGNOSTIC_RESULT_SEALED",
+  "edge_reproof_note": "Weekly edge was NOT inherited from monthly s17; this P6 IS is the edge re-proof (K1/K2).",
+  "gates": {
+    "K1_sharpe_proxy_lt_0": {
+      "fail": false,
+      "value": 0.186665
+    },
+    "K2_expectancy_le_0": {
+      "fail": false,
+      "value": 370.2776
+    },
+    "K4_maxdd_gt_50pct": {
+      "fail": false,
+      "value": 32.1907
+    },
+    "K9_closed_trades_lt_100": {
+      "floor": 100,
+      "insufficient": false,
+      "value": 229
+    }
+  },
+  "hard_boundaries_held": {
+    "base_cost_tier_S1": true,
+    "imports_committed_p3_primitives_unmodified": true,
+    "is_window_only": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_optimization": true,
+    "no_per_fold_refit": true,
+    "no_retroactive_k13": true,
+    "no_revival": true,
+    "oos_rows_hard_excluded": true
+  },
+  "is_a_seal": true,
+  "is_window": {
+    "bars": 1258,
+    "end": "2023-12-29",
+    "start": "2019-01-02"
+  },
+  "k9_note": "K9 closed_trades counts completed rotations (DA12). K9 already measured-PASS at the pre-SEAL gate (229); this IS run confirms K9 and TESTS the weekly EDGE (K1/K2). Open positions at IS end marked-to-market, not counted.",
+  "labels": [
+    "S18_D1_WEEKLY_RS_P6_IS_DIAGNOSTIC_SEALED",
+    "READY_FOR_LONGER_BACKTEST",
+    "IS_WINDOW_ONLY_OOS_ISOLATED",
+    "WEEKLY_EDGE_REPROOF",
+    "K9_ALREADY_MEASURED_PASS",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S18_D1_WEEKLY_RS_ROTATION_P6_IS_READY_FOR_LONGER_BACKTEST_SEALED",
+  "locked_params_used": {
+    "L": 126,
+    "M": 8,
+    "R": 5,
+    "S": 21,
+    "cadence": "weekly",
+    "direction": "long-only",
+    "exit": "ROTATION_RELATIVE_RANK",
+    "sizing": "equal_weight_1/M",
+    "warmup": 160
+  },
+  "metrics": {
+    "avg_loss_usd": -901.17,
+    "avg_win_usd": 1355.9,
+    "closed_trades": 229,
+    "cost_tier_used": "S1 (0.005/sh min $1, slippage 1bp)",
+    "expectancy_usd_per_trade": 370.2776,
+    "final_equity_usd": 232184.12,
+    "max_drawdown_pct": 32.1907,
+    "net_pnl_closed_usd": 84793.57,
+    "open_positions_at_is_end": [
+      "NVDA",
+      "META",
+      "AMZN",
+      "CAT",
+      "COST",
+      "MSFT",
+      "UNH",
+      "V"
+    ],
+    "pl_ratio": 1.504591,
+    "profit_factor": 1.940923,
+    "rebalance_count": 220,
+    "sharpe_proxy_per_trade": 0.186665,
+    "start_cash_usd": 100000.0,
+    "total_return_pct": 132.1841,
+    "trades_per_year": 45.91,
+    "win_rate": 0.5633
+  },
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "claims_live_ready": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "edge_inherited_from_s17_monthly": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "oos_inspected": false,
+    "oos_rows_in_signal_logic": false,
+    "p3_source_modified": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false
+  },
+  "oos_isolation": "OOS rows (>= 2024-01-02) hard-excluded at load; never entered signal logic; final bar = 2023-12-29",
+  "phase": "P6_IS_DIAGNOSTIC",
+  "rec1_equivalent_oos_k9_disclosure": "OOS K9 >=50/y. Pre-SEAL turnover measurement projects ~100-113/2y (clears marginally) but the TRUE OOS K9 is confirmed only at P10; if measured OOS < 50/y at P10, terminal. The chain shall NOT relax K9.",
+  "report_date_utc": "2026-05-29T02:13:49.792046Z",
+  "report_seal_sha256": "42c8c0f4070eece800bb13386b2e05332644736d4f7118ca8b2fd27302316161",
+  "schema_id": "sparta.s18_d1_weekly_rs_in_sample_diagnostic_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s18-d1 weekly RS rotation P6 IS diagnostic result (sealed; READY_FOR_LONGER_BACKTEST)",
+  "trade_accounting": "per-name holding-period net cashflow (sells-buys incl S1 cost) realized on full exit; expectancy=mean; sharpe_proxy/trade=mean/pstdev",
+  "verdict": "READY_FOR_LONGER_BACKTEST"
+}
