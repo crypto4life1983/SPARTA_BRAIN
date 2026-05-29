@@ -1,0 +1,59 @@
+{
+  "all_synthetic_no_real_csv": true,
+  "anchors": {
+    "p1_p2_commit": "5593de3",
+    "p1_plan_lock": "48a6d3ee923c4ed2f37ca1578e87048e4f35568b40dae60ef35a2d287dd70d34",
+    "p2_phase2_plan": "63eb162afbe842da0e420af726e1998af8cb8bcdabdc273a33d2fa7b812712f3",
+    "s18_dr9_commit": "d86e5d1",
+    "s19_dr9_commit": "574fa9e",
+    "seal_commit": "e9ec72f",
+    "tier_n_spec_seal": "e6f801085bb14fc8f16f819fe5f085105772dadf816613b568f7c8163c4fc924",
+    "walk_forward_k13_seal": "4268d6f75bbc095a795510f7d8ccc50c2d8886eef36f50f769b79342002893d2"
+  },
+  "authored_at_utc": "2026-05-29T03:53:48.066992Z",
+  "candidate_record_id": "s20-d1-combined-universe-weekly-relative-strength-rotation-48name-large-cap-long-history",
+  "document_type": "P3_TEST_PLAN_SEALED",
+  "hard_boundaries_held": {
+    "build_only": true,
+    "fresh_candidate_not_s18_or_s19_revN": true,
+    "m8_unchanged": true,
+    "mechanic_byte_identical_to_s18_s19": true,
+    "no_commit_by_this_script": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification": true,
+    "no_live_or_broker": true,
+    "no_modification_of_sealed_artifacts": true,
+    "no_promotion": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S20_D1_P3_TEST_PLAN",
+    "T1_T25_SYNTHETIC",
+    "NO_REAL_CSV",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE"
+  ],
+  "no_execution_attestation": {
+    "no_backtest": true,
+    "no_data_fetch": true,
+    "no_pnl": true,
+    "no_real_csv_read": true,
+    "no_signal_computation_on_real_data": true,
+    "no_test_run_at_build": true,
+    "py_compile_only": true
+  },
+  "phase": "P3_BUILD",
+  "pytest_invocation": "pinned --rootdir/--confcutdir to harness tests dir + -p no:cacheprovider",
+  "report_date_utc": "2026-05-29T03:53:48.066992Z",
+  "report_seal_sha256": "95ef3db84e83e825535e3e5f6dddec1be7b642c4b0526d4294b8509cc84001b2",
+  "schema_id": "sparta.s20_d1_combined_weekly_rs_p3_test_plan_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "test_count": 25,
+  "tests": "T1 imports; T2 instantiate(48-name id); T3 trailing_return; T4 rank; T5 top-8; T6 equal-weight 1/8; T7 weekly cadence; T8 rotation exits/entries; T9 cost prims; T10 pyramid/short forbidden; T11 locked params; T12 universe 48 locked; T13 split_only; T14 cost tiers; T15 full_guard_check pass; T16 cadence guard; T17 long-only/equal-weight; T18 K13 folds locked; T19 K13 verdict; T20 driver stubs refuse; T21 OOS isolation; T22 synthetic rotation invariants; T23 fixture parses; T24 combined-universe markers; T25 calendar-alignment guard",
+  "title": "s20-d1 combined-universe weekly RS rotation P3 synthetic test plan (sealed; run at P4)"
+}

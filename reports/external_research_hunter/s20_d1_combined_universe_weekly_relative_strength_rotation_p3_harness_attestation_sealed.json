@@ -1,0 +1,82 @@
+{
+  "anchors": {
+    "p1_p2_commit": "5593de3",
+    "p1_plan_lock": "48a6d3ee923c4ed2f37ca1578e87048e4f35568b40dae60ef35a2d287dd70d34",
+    "p2_phase2_plan": "63eb162afbe842da0e420af726e1998af8cb8bcdabdc273a33d2fa7b812712f3",
+    "s18_dr9_commit": "d86e5d1",
+    "s19_dr9_commit": "574fa9e",
+    "seal_commit": "e9ec72f",
+    "tier_n_spec_seal": "e6f801085bb14fc8f16f819fe5f085105772dadf816613b568f7c8163c4fc924",
+    "walk_forward_k13_seal": "4268d6f75bbc095a795510f7d8ccc50c2d8886eef36f50f769b79342002893d2"
+  },
+  "authored_at_utc": "2026-05-29T03:53:48.066992Z",
+  "calendar_alignment_precondition": "assert_calendar_aligned_48 enforces equal-length + identical date vectors across all 48 (asserted on real data at P6; BUILD HALT on mismatch, not silent reindex)",
+  "candidate_record_id": "s20-d1-combined-universe-weekly-relative-strength-rotation-48name-large-cap-long-history",
+  "config_byte_equivalent_to_seal_da": "ALL strategy DA byte-identical to s18/s19 (L126/S21/M8/R5/relative-rank/equal-weight/long-only/warmup160/split_only/tiingo); only universe(48 union)+provenance differ",
+  "document_type": "P3_HARNESS_ATTESTATION_SEALED",
+  "driver_stubs_refuse": [
+    "P6_IS_NOT_AUTHORIZED",
+    "P10_OOS_NOT_AUTHORIZED",
+    "P6_7_K13_NOT_AUTHORIZED"
+  ],
+  "guards_present": [
+    "assert_seal_inheritance",
+    "assert_no_forbidden_order_paths",
+    "assert_rec1_equivalent_binding_preserved",
+    "assert_locked_strategy_params",
+    "assert_rotation_exit",
+    "assert_equal_weight_sizing",
+    "assert_long_only",
+    "assert_momentum_params_locked",
+    "assert_weekly_cadence",
+    "assert_k13_fold_scheme_locked",
+    "assert_no_per_fold_refit",
+    "assert_boundary_alignment",
+    "assert_split_only_convention",
+    "assert_universe_locked",
+    "assert_no_leverage_cap",
+    "assert_calendar_aligned_48",
+    "full_guard_check"
+  ],
+  "hard_boundaries_held": {
+    "build_only": true,
+    "fresh_candidate_not_s18_or_s19_revN": true,
+    "m8_unchanged": true,
+    "mechanic_byte_identical_to_s18_s19": true,
+    "no_commit_by_this_script": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification": true,
+    "no_live_or_broker": true,
+    "no_modification_of_sealed_artifacts": true,
+    "no_promotion": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S20_D1_P3_HARNESS_ATTESTATION",
+    "CONFIG_BYTE_EQUIVALENT_TO_SEAL",
+    "CALENDAR_ALIGN_48_GUARD",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE"
+  ],
+  "live_refusal": "Algo.Initialize raises LIVE_PATH_DETECTED in LiveMode",
+  "no_execution_attestation": {
+    "no_backtest": true,
+    "no_data_fetch": true,
+    "no_pnl": true,
+    "no_real_csv_read": true,
+    "no_signal_computation_on_real_data": true,
+    "no_test_run_at_build": true,
+    "py_compile_only": true
+  },
+  "phase": "P3_BUILD",
+  "report_date_utc": "2026-05-29T03:53:48.066992Z",
+  "report_seal_sha256": "2acc7a5cfa26642bb9a2a40b3cf7b3bf377fb3238dba2e7769bea31f764fe3cf",
+  "schema_id": "sparta.s20_d1_combined_weekly_rs_p3_harness_attestation_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED"
+  },
+  "title": "s20-d1 combined-universe weekly RS rotation P3 harness attestation (sealed)"
+}
