@@ -1,0 +1,147 @@
+{
+  "anchors": {
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_p2_commit": "5593de3",
+    "p3_build_commit": "7255f9c",
+    "p4_smoke_commit": "d4d5629",
+    "s18_dr9_commit": "d86e5d1",
+    "s19_dr9_commit": "574fa9e",
+    "tier_n_spec_seal_commit": "e9ec72f",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T03:59:40.977009Z",
+  "authorization_phrase": "Authorize s20-d1 combined-universe weekly relative-strength rotation DRAFT-to-diagnostic bundle (Step 6: P6 IS diagnostic).",
+  "candidate_record_id": "s20-d1-combined-universe-weekly-relative-strength-rotation-48name-large-cap-long-history",
+  "comparison_to_parents": {
+    "note": "K9 sample (284) far exceeds parents (229/226); per-trade edge diluted by broader breadth as expected",
+    "s18_is_expectancy": 370.28,
+    "s19_is_expectancy": 262.64,
+    "s20_is_closed": 284,
+    "s20_is_expectancy": 272.3
+  },
+  "document_type": "P6_IS_DIAGNOSTIC_RESULT_SEALED",
+  "edge_reproven_not_inherited": {
+    "k1_sharpe_proxy_positive": true,
+    "k2_expectancy_positive": true,
+    "note": "edge computed from scratch on the 48-name union; NOT inherited from s18/s19"
+  },
+  "gate_driver": "none_no_gate_fired",
+  "hard_boundaries_held": {
+    "cost_tier_s1": true,
+    "fresh_candidate_not_s18_or_s19_revN": true,
+    "imports_committed_p3_primitives_unmodified": true,
+    "is_window_only": true,
+    "locked_p6_is_procedure_only": true,
+    "no_cadence_change": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_or_broker": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_parameter_tuning": true,
+    "no_strategy_lab_promotion": true,
+    "oos_not_touched": true
+  },
+  "is_a_seal": true,
+  "is_window": {
+    "bars": 1258,
+    "end": "2023-12-29",
+    "idx": [
+      0,
+      1257
+    ],
+    "start": "2019-01-02"
+  },
+  "k_gates": {
+    "DR1_rebalance_lt_36": false,
+    "K1_sharpe_proxy_lt_0": false,
+    "K2_expectancy_le_0": false,
+    "K4_maxdd_gt_50": false,
+    "K9_closed_lt_100": false
+  },
+  "labels": [
+    "S20_D1_COMBINED_UNIVERSE_WEEKLY_RS_P6_IS_SEALED",
+    "READY_FOR_LONGER_BACKTEST",
+    "DRIVER_NONE_NO_GATE_FIRED",
+    "EDGE_REPROVEN_ON_48_NAME_UNION",
+    "SELECTION_CAVEAT_BINDING",
+    "K9_IS_284_CLEARS",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S20_D1_COMBINED_UNIVERSE_WEEKLY_RS_ROTATION_P6_IS_READY_FOR_LONGER_BACKTEST_SEALED",
+  "locked_params_used": {
+    "L": 126,
+    "M": 8,
+    "R": 5,
+    "S": 21,
+    "cadence": "weekly",
+    "cost_tier": "S1",
+    "direction": "long-only",
+    "exit": "ROTATION_RELATIVE_RANK",
+    "sizing": "equal_weight_1/M",
+    "warmup": 160
+  },
+  "metrics": {
+    "closed_trades": 284,
+    "cost_tier_used": "S1",
+    "expectancy_usd_per_trade": 272.3014,
+    "final_equity_usd": 215347.3,
+    "is_rebalances": 220,
+    "max_drawdown_pct": 30.6395,
+    "net_pnl_usd": 115347.3,
+    "open_positions_at_is_end": [
+      "NVDA",
+      "META",
+      "ADBE",
+      "LLY",
+      "AMZN",
+      "NFLX",
+      "SLB",
+      "COST"
+    ],
+    "profit_factor": 1.507756,
+    "sharpe_proxy_per_trade": 0.129009,
+    "start_cash_usd": 100000.0,
+    "total_return_pct": 115.3473,
+    "trades_per_year": 56.93,
+    "win_rate": 0.5317
+  },
+  "negative_invariants": {
+    "cadence_altered": false,
+    "claims_live_ready": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "edge_inherited": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18_s19": false,
+    "oos_rows_touched": false,
+    "p3_source_modified": false,
+    "parameters_tuned": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false
+  },
+  "oos_isolation": {
+    "note": "IS loop stops at idx 1257; OOS rows (idx>=1258) never entered signal/P&L",
+    "oos_rows_idx_ge": 1258,
+    "oos_rows_touched": false
+  },
+  "phase": "P6_IS_DIAGNOSTIC",
+  "report_date_utc": "2026-05-29T03:59:40.977009Z",
+  "report_seal_sha256": "5c24bb4b813c6832624388bd9690190b50f4dca302a15a0577667fc71b97817f",
+  "schema_id": "sparta.s20_d1_combined_weekly_rs_p6_is_diagnostic_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "selection_caveat_binding": "The union includes the known-OOS-good s18 basket -> this positive IS edge is WEAK fresh-generalization evidence; s20's value is the SAMPLE-SIZE/OOS-K9 question (binding at P10).",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s20-d1 combined-universe weekly RS rotation P6 IS diagnostic result (sealed; READY_FOR_LONGER_BACKTEST; edge re-proven on the 48-name union; selection caveat binding)",
+  "verdict": "READY_FOR_LONGER_BACKTEST"
+}
