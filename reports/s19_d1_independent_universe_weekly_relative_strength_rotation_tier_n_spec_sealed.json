@@ -1,0 +1,617 @@
+{
+  "authored_at_utc": "2026-05-29T02:54:43.036671Z",
+  "authorization_phrase": "Authorize s19-d1 independent-universe weekly relative-strength rotation Tier-N spec SEAL only — bound by DR10 v2 + walk-forward K13.",
+  "binding": true,
+  "candidate_record_id": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "da_register_count": 22,
+  "da_register_locked_byte_equivalent": [
+    {
+      "code": "DA1",
+      "locked_value": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+      "name": "candidate_record_id"
+    },
+    {
+      "code": "DA2",
+      "locked_value": "F-xmom: cross-sectional relative-strength rotation, long-only, WEEKLY (IDENTICAL to s18)",
+      "name": "mechanic_family"
+    },
+    {
+      "code": "DA3",
+      "locked_value": "equal_weight 1/M per held name; long-only unlevered",
+      "name": "position_sizing"
+    },
+    {
+      "code": "DA4",
+      "locked_value": 100000,
+      "name": "START_CASH_USD",
+      "resolved_at_seal_from": "B; identical to s18"
+    },
+    {
+      "code": "DA5",
+      "locked_value": 0.5,
+      "name": "K4_max_drawdown_magnitude_threshold"
+    },
+    {
+      "code": "DA6",
+      "locked_value": 126,
+      "name": "momentum_lookback_L",
+      "resolved_at_seal_from": "identical to s18; NOT tuned"
+    },
+    {
+      "code": "DA7",
+      "locked_value": [
+        {
+          "cost_scalar": 0.0,
+          "slippage_scalar": 0.0,
+          "tier": "S0"
+        },
+        {
+          "cost_scalar": 1.0,
+          "slippage_scalar": 1.0,
+          "tier": "S1"
+        },
+        {
+          "cost_scalar": 1.5,
+          "slippage_scalar": 1.5,
+          "tier": "S2"
+        },
+        {
+          "cost_scalar": 2.0,
+          "slippage_scalar": 2.0,
+          "tier": "S3"
+        },
+        {
+          "cost_scalar": 3.0,
+          "slippage_scalar": 3.0,
+          "tier": "S4"
+        }
+      ],
+      "name": "cost_stress_tiers"
+    },
+    {
+      "code": "DA8",
+      "locked_value": 21,
+      "name": "momentum_skip_S"
+    },
+    {
+      "code": "DA9",
+      "locked_value": "each WEEKLY rebalance rank 24 by (L-S)=126-21 trailing total return; SELECT top-M",
+      "name": "ranking_selection_rule"
+    },
+    {
+      "code": "DA10",
+      "locked_value": 8,
+      "name": "top_M_held"
+    },
+    {
+      "code": "DA11",
+      "locked_value": 5,
+      "name": "rebalance_cadence_R",
+      "resolved_at_seal_from": "weekly; identical to s18; NOT tuned"
+    },
+    {
+      "code": "DA12",
+      "locked_value": "ROTATION_RELATIVE_RANK (exit when leaves top-M; no trailing/ATR stop)",
+      "name": "exit_rule"
+    },
+    {
+      "code": "DA13",
+      "locked_value": "v2 AND-conjunction (annual_turnover>0.50 AND S2_cost_drag>0.05) -> REJECT_FAST",
+      "name": "DR10_definition",
+      "resolved_at_seal_from": "by-ref 78cd22e"
+    },
+    {
+      "code": "DA14",
+      "locked_value": "ALL 24 (independent) PASS by sealed DR9 result 574fa9e (result_seal 0c8e21f2); sha-verified at BUILD",
+      "name": "DR9_data_continuity"
+    },
+    {
+      "code": "DA15",
+      "locked_value": "split_only",
+      "name": "adjustment_convention",
+      "resolved_at_seal_from": "CONFIRMED; NFLX 10:1 (2025-11-17) + HON 1.061 spin-off (2025-10-30) applied+verified; dividends not adjusted; switching post-SEAL FORBIDDEN"
+    },
+    {
+      "code": "DA16",
+      "locked_value": "tiingo (s19 independent universe; DR9-sealed 574fa9e; no new fetch)",
+      "name": "data_vendor"
+    },
+    {
+      "code": "DA17",
+      "locked_value": [
+        "ORCL",
+        "CSCO",
+        "ADBE",
+        "CRM",
+        "AMD",
+        "NFLX",
+        "TMUS",
+        "CMCSA",
+        "MCD",
+        "NKE",
+        "LOW",
+        "PEP",
+        "PM",
+        "MDLZ",
+        "GS",
+        "MS",
+        "WFC",
+        "AXP",
+        "LLY",
+        "ABT",
+        "TMO",
+        "SLB",
+        "EOG",
+        "HON"
+      ],
+      "name": "universe",
+      "note": "24 INDEPENDENT names ~8 GICS; zero overlap with s18; widening/substitution post-SEAL FORBIDDEN"
+    },
+    {
+      "code": "DA18",
+      "locked_value": "hold top-M=8 equal-weight; long-only; no shorting; no leverage; no pyramid; cross-sectional ranking only",
+      "name": "portfolio_position_caps"
+    },
+    {
+      "code": "DA19",
+      "locked_value": 160,
+      "name": "warmup_days"
+    },
+    {
+      "code": "DA20",
+      "locked_value": "long-only",
+      "name": "signal_direction"
+    },
+    {
+      "code": "DA21",
+      "locked_value": "P6.7: N=5 fixed pre-committed UNSEARCHED OOS folds; PASS >=3/5 + aggregate net>0 + K9 (per-fold OR aggregate); else OOS_NOT_ROBUST -> REJECT_FAST; VALIDATION not optimization; no per-fold refit",
+      "name": "K13_walk_forward_persistence",
+      "resolved_at_seal_from": "by-ref 52a3b60"
+    },
+    {
+      "code": "DA22",
+      "locked_value": {
+        "boundaries_searched": false,
+        "folds": [
+          {
+            "bars": 319,
+            "date_end": "2020-11-23",
+            "date_start": "2019-08-21",
+            "fold": "F1",
+            "idx_end": 478,
+            "idx_start": 160
+          },
+          {
+            "bars": 319,
+            "date_end": "2022-03-02",
+            "date_start": "2020-11-24",
+            "fold": "F2",
+            "idx_end": 797,
+            "idx_start": 479
+          },
+          {
+            "bars": 319,
+            "date_end": "2023-06-08",
+            "date_start": "2022-03-03",
+            "fold": "F3",
+            "idx_end": 1116,
+            "idx_start": 798
+          },
+          {
+            "bars": 319,
+            "date_end": "2024-09-16",
+            "date_start": "2023-06-09",
+            "fold": "F4",
+            "idx_end": 1435,
+            "idx_start": 1117
+          },
+          {
+            "bars": 323,
+            "date_end": "2025-12-30",
+            "date_start": "2024-09-17",
+            "fold": "F5",
+            "idx_end": 1758,
+            "idx_start": 1436
+          }
+        ],
+        "n_folds": 5,
+        "per_fold_refit": false,
+        "supermajority_threshold": "ceil(0.6*5)=3 of 5",
+        "warmup_bars": 160,
+        "window_mode": "rolling"
+      },
+      "name": "K13_fold_scheme",
+      "resolved_at_seal_from": "identical bar-index boundaries to s18 on the s19 1759-bar calendar; locked byte-equivalent; NEVER searched"
+    }
+  ],
+  "document_type": "TIER_N_SPEC_SEALED",
+  "dr10_v2_reachability_at_seal": {
+    "expected_annual_turnover": "~20x (weekly)",
+    "expected_s2_cost_drag": "<<5% (s18 ~0.95%/y)",
+    "status": "CLEARS"
+  },
+  "dr9_gate_status": {
+    "data_provenance_locked": "sealed DR9 result 574fa9e; result_seal 0c8e21f2; sha-verified at BUILD",
+    "dr9_all_24_symbols_pass": true,
+    "dr9_independent_universe": true,
+    "fresh_fetch_required": false,
+    "per_symbol_dr9_status": {
+      "ABT": "PASS",
+      "ADBE": "PASS",
+      "AMD": "PASS",
+      "AXP": "PASS",
+      "CMCSA": "PASS",
+      "CRM": "PASS",
+      "CSCO": "PASS",
+      "EOG": "PASS",
+      "GS": "PASS",
+      "HON": "PASS",
+      "LLY": "PASS",
+      "LOW": "PASS",
+      "MCD": "PASS",
+      "MDLZ": "PASS",
+      "MS": "PASS",
+      "NFLX": "PASS",
+      "NKE": "PASS",
+      "ORCL": "PASS",
+      "PEP": "PASS",
+      "PM": "PASS",
+      "SLB": "PASS",
+      "TMO": "PASS",
+      "TMUS": "PASS",
+      "WFC": "PASS"
+    }
+  },
+  "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e); thresholds immutable",
+  "framework_k13_binding": "walk-forward persistence (52a3b60); binds s17+",
+  "hard_boundaries_held_this_seal_turn": {
+    "all_da_resolutions_locked_byte_equivalent": true,
+    "dr10_v2_carried_by_reference_not_redefined": true,
+    "k13_carried_by_reference_not_redefined": true,
+    "k13_fold_boundaries_locked_byte_equivalent": true,
+    "mechanic_byte_identical_to_s18": true,
+    "no_backtest": true,
+    "no_broker_exchange_api": true,
+    "no_build_executed": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_frc_grant": true,
+    "no_k9_k13_dr10_reinterpretation": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_modification_of_s19_draft_6990ac4": true,
+    "no_oos_inspection": true,
+    "no_p_and_l": true,
+    "no_per_fold_refit": true,
+    "no_profitability_claim": true,
+    "no_retroactive_k13": true,
+    "no_review_queue_mutation": true,
+    "no_revival": true,
+    "no_s18_revN_or_modification": true,
+    "no_strategy_lab_promotion": true,
+    "no_strategy_optimization": true,
+    "preseal_k9_carried_from_draft_unchanged": true,
+    "replication_not_tuning": true,
+    "seal_only_no_p1_plan_lock": true
+  },
+  "inherited_constraints_block_C6": [
+    "K9_THRESHOLD_INVIOLATE: closed_trades>=100 total; OOS>=50/y; no relaxation. Pre-SEAL K9 turnover MEASURED (signal-only, no P&L, s19 IS-only) PASSES: aggregate 226; per-fold F1/F2/F3 54/79/71; OOS projected ~90-117/2y.",
+    "K13_WALK_FORWARD_BINDING (by-ref 52a3b60): >=3/5 fixed pre-committed UNSEARCHED OOS folds positive + aggregate net>0 + K9; P6.7 before P10; VALIDATION not optimization; NO per-fold refit (INVIOLATE; T-FORBID-22). Folds LOCKED at DA22.",
+    "REPLICATION OF s18 (NOT a tune/_revN_): mechanic byte-identical to the OOS_CONFIRMED s18 weekly spec (7e6aa36); ONLY the universe changes (24 independent names). s18 frozen/untouched. The edge is NOT inherited.",
+    "EDGE NOT INHERITED: s18 OOS edge was thin + recently-weak (F5 negative). The s19 edge MUST be re-proven from scratch at s19 P6 IS (K1 sharpe>0 AND K2 expectancy>0). A null/negative s19 = s18 was universe-specific (accepted, informative).",
+    "STOP-BEFORE-PROMOTION (terminal, NOT a tune): pre-SEAL K9 PASSED; the EDGE is the open gate. If s19 P6 IS edge negative/zero, OR K13 <3/5, OR P10 OOS K9 <50/y -> terminal. A param/cadence change = NOT a replication (a different fresh candidate).",
+    "RELATIVE-STRENGTH-FIRST-PRINCIPLES (BINDING): RS-rotation native weekly cadence; 126-21 ranking signal; top-8 equal-weight; relative-rank exit (no trailing/ATR stop). Identical to s18.",
+    "Params L=126 / S=21 / M=8 / R=5(weekly) LOCKED byte-equivalent (identical to s18; NOT tuned, NOT searched).",
+    "DA3 equal-weight 1/M; DA4=B START_CASH 100000; long-only unlevered (DR11 NOT IN CHAIN).",
+    "DR10 = v2 AND-conjunction by-ref 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal; cost_drag <<5% (s18 ~0.95%/y).",
+    "split_only CONFIRMED (DA15); reuse s19 DR9-passed CSVs (574fa9e); switching post-SEAL FORBIDDEN; NFLX 10:1 + HON 1.061 spin-off applied+verified.",
+    "24-name INDEPENDENT universe LOCKED; widening/substitution post-SEAL FORBIDDEN (fresh candidate_record_id required).",
+    "DR9 data-availability gate PASSED all 24 (independent) by sealed result 574fa9e (0c8e21f2); cash_equity_data_reuse_byte_equivalent.",
+    "A7 + K10 + K6 LOAD-BEARING (top-8 ~8 sectors); NOT the risk axis (the relative-momentum edge K1/K2/K13 is).",
+    "s18/s17/s16/s15/s14/s13/s12 terminal-or-frozen preserved verbatim; s19 is a FRESH replication sibling; clears T-FORBID-16..24; NOT re-evaluated under K13.",
+    "no_strategy_optimization_authorized: replication of locked s18 params, NOT grid-searched/tuned; K13 fold scheme pre-committed + unsearched; no cadence-tuning.",
+    "P6 IS PASS and/or K13 PASS (if reached) do NOT imply READY at OOS/live; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent."
+  ],
+  "inherited_constraints_block_C6_count": 16,
+  "is_a_seal": true,
+  "is_a_tier_n_spec_seal": true,
+  "k13_fold_scheme_locked_byte_equivalent": {
+    "boundaries_searched": false,
+    "folds": [
+      {
+        "bars": 319,
+        "date_end": "2020-11-23",
+        "date_start": "2019-08-21",
+        "fold": "F1",
+        "idx_end": 478,
+        "idx_start": 160
+      },
+      {
+        "bars": 319,
+        "date_end": "2022-03-02",
+        "date_start": "2020-11-24",
+        "fold": "F2",
+        "idx_end": 797,
+        "idx_start": 479
+      },
+      {
+        "bars": 319,
+        "date_end": "2023-06-08",
+        "date_start": "2022-03-03",
+        "fold": "F3",
+        "idx_end": 1116,
+        "idx_start": 798
+      },
+      {
+        "bars": 319,
+        "date_end": "2024-09-16",
+        "date_start": "2023-06-09",
+        "fold": "F4",
+        "idx_end": 1435,
+        "idx_start": 1117
+      },
+      {
+        "bars": 323,
+        "date_end": "2025-12-30",
+        "date_start": "2024-09-17",
+        "fold": "F5",
+        "idx_end": 1758,
+        "idx_start": 1436
+      }
+    ],
+    "n_folds": 5,
+    "per_fold_refit": false,
+    "supermajority_threshold": "ceil(0.6*5)=3 of 5",
+    "warmup_bars": 160,
+    "window_mode": "rolling"
+  },
+  "k9_reachability_at_seal": {
+    "basis": "MEASURED pre-SEAL (s19, signal-only, no P&L)",
+    "binding_note": "K9 PASSES; the binding axis is the per-trade/per-fold EDGE (K1/K2/K13), UNTESTED on s19.",
+    "is_aggregate": "226 (CLEARS >=100)",
+    "oos_projected": "~90-117/2y (CLEARS marginally; OOS not read)",
+    "per_fold_measured": "F1=54(~43/y)/F2=79(~62/y)/F3=71(~56/y)",
+    "replicates_s18": "s18 measured 229 IS/117 OOS -> K9 reachability REPLICATES on the independent universe"
+  },
+  "k_gates": {
+    "K10_avg_pairwise_corr": "APPLICABLE; LOAD-BEARING",
+    "K11_cap_binding_events": "NOT_APPLICABLE_NO_LEVERAGE_CAP",
+    "K12_DR_fires_on_cost_stress": "if DR2/3/4/5 fires -> FAIL_SAFETY",
+    "K13_walk_forward_persistence": "ADDED (by-ref 52a3b60); >=3/5 + aggregate + K9; at P6.7 before P10; folds LOCKED at DA22",
+    "K1_sharpe_proxy_lt_0": "FAIL_SAFETY (binding edge gate; s19 edge UNPROVEN -> P6 IS)",
+    "K2_expectancy_le_0": "FAIL_SAFETY",
+    "K4_maxdd_gt_50": "FAIL_SAFETY (DA5=0.50)",
+    "K6_per_symbol_dispersion": "APPLICABLE; LOAD-BEARING",
+    "K7_filter_silently_introduced": "FAIL_SAFETY",
+    "K8_sealed_parent_drift": "FAIL_SAFETY",
+    "K9_closed_trades_lt_100": "INSUFFICIENT_SAMPLE; INVIOLATE -- pre-SEAL MEASURED PASS (226)"
+  },
+  "labels": [
+    "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_TIER_N_SPEC_SEALED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "REPLICATION_OF_S18_IDENTICAL_MECHANIC",
+    "INDEPENDENT_24_NAME_UNIVERSE",
+    "WEEKLY_R5_TOP8_LOCKED",
+    "126_21_SIGNAL_LOCKED",
+    "PRESEAL_K9_MEASURED_PASS_226",
+    "K13_FOLDS_LOCKED_DA22",
+    "EDGE_UNTESTED_REPROVE_AT_P6_IS",
+    "VENDOR_TIINGO",
+    "DR9_PASSED_INDEPENDENT",
+    "DR10_V2_BINDING",
+    "WALK_FORWARD_K13_BINDING",
+    "DA1_DA22_LOCKED_BYTE_EQUIVALENT",
+    "C6_16_ENTRIES",
+    "FRESH_REPLICATION_SIBLING_CLEARS_T_FORBID_16_24",
+    "REC1_EQUIVALENT_BINDING",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_ROTATION_TIER_N_SPEC_SEALED",
+  "locked_spec_summary": {
+    "adjustment_convention": "split_only",
+    "asset_class": "cash_equity",
+    "candidate_family": "cross-sectional relative-strength rotation; long-only; WEEKLY; REPLICATION of s18",
+    "cost_surface": {
+      "commission_model": "per_share",
+      "commission_per_share_usd": 0.005,
+      "min_commission_per_trade_usd": 1.0,
+      "slippage_model": "half_bid_ask_spread_proxy",
+      "slippage_proxy_bps": 1.0
+    },
+    "exit_rule": "ROTATION_relative_rank",
+    "is_window_end": "2023-12-29",
+    "is_window_start": "2019-01-02",
+    "k13_n_folds": 5,
+    "k13_placement": "P6.7 (before P10)",
+    "k13_supermajority": "3 of 5",
+    "k4_max_drawdown_magnitude_threshold": 0.5,
+    "k9_min_closed_trades": 100,
+    "k9_oos_min_per_year": 50,
+    "leverage": "NONE",
+    "momentum_lookback_L": 126,
+    "momentum_skip_S": 21,
+    "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+    "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+    "pyramid": "NONE",
+    "rebalance_cadence_R_days": 5,
+    "resolution": "daily",
+    "signal_direction": "long_only",
+    "start_cash_usd": 100000,
+    "top_M_held": 8,
+    "universe": [
+      "ORCL",
+      "CSCO",
+      "ADBE",
+      "CRM",
+      "AMD",
+      "NFLX",
+      "TMUS",
+      "CMCSA",
+      "MCD",
+      "NKE",
+      "LOW",
+      "PEP",
+      "PM",
+      "MDLZ",
+      "GS",
+      "MS",
+      "WFC",
+      "AXP",
+      "LLY",
+      "ABT",
+      "TMO",
+      "SLB",
+      "EOG",
+      "HON"
+    ],
+    "universe_count": 24,
+    "vendor": "tiingo",
+    "warmup_days": 160,
+    "weighting": "equal_weight_1/M"
+  },
+  "negative_invariants": {
+    "any_da_changed_from_draft_proposal": false,
+    "backtest_run": false,
+    "build_executed": false,
+    "cadence_tuned": false,
+    "claims_edge_proven": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "edge_inherited_from_s18": false,
+    "fold_scheme_searched": false,
+    "k13_applied_retroactively": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18": false,
+    "oos_returns_inspected": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "s18_chain_modified": false,
+    "tier_n_spec_was_p1_or_build": false
+  },
+  "parent_references": {
+    "data_dir": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "post_s18_robustness_replication_plan_commit": "50e5fcf",
+    "s18_p11_lifecycle_commit": "5dde0f7",
+    "s18_tier_n_spec_seal_commit": "7e6aa36",
+    "s19_dr9_result_commit": "574fa9e",
+    "s19_dr9_result_seal_sha256": "0c8e21f240c8b8017a500d78cee6b0b48280a229a2a21bdea2be69ddb6cd5b3d",
+    "s19_run_book_commit": "5ef4eaa",
+    "s19_tier_n_spec_plan_commit": "6981339",
+    "tier_n_spec_draft_commit": "6990ac4",
+    "tier_n_spec_draft_file_sha256": "393c445ff5408846ce5983ca4ab9069f29384b7972d02f0d71087b539026a2e4",
+    "tier_n_spec_draft_report_seal_sha256": "8231f11105614ace32874519eb5501dd0ebc67a9e61ddb12c2ebbfc44b016a8e",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "phase": "TIER_N_SPEC_SEAL",
+  "preseal_k9_gate_verdict": "PASS (measured at DRAFT 6990ac4; aggregate 226 clears; per-fold 54/79/71; OOS projected ~90-117/2y). T-FORBID-24 satisfied -> SEAL legitimate. EDGE remains the open gate (s19 P6 IS).",
+  "preseal_k9_turnover_measurement_carried": {
+    "F4_full_projected": 57,
+    "F4_is_part_measured": 22,
+    "F5_projected_oos_not_read": 58,
+    "closed_trades_measured_IS": 226,
+    "comparison_to_s18": "s18 weekly measured 229 IS / 117 OOS / per-fold 68-72; s19 independent universe measures 226 IS / ~90-117 OOS / per-fold 54-79 -> K9 reachability REPLICATES on the independent universe (F1 ~43/y marginal alone; aggregate + F2/F3 clear).",
+    "exits_per_rebalance": 1.027,
+    "full_is_span_rate_per_year_conservative": 45.3,
+    "is_bars": 1258,
+    "method": "signal-only rotation count (126-21 rank -> top-8 -> count names leaving top-8 as closed trades); NO cash/equity/returns/P&L; IS window 2019-01-02..2023-12-29 ONLY; OOS rows hard-excluded; reused committed s18 parameterized primitives unmodified",
+    "oos_k9_projection_over_2y_from_per_fold_rate": "~90-117 -> CLEARS >=100 (marginally); aggregate IS 226 CLEARS strongly",
+    "oos_rows_read": false,
+    "p_and_l_computed": false,
+    "per_fold_measured_fully_in_IS": {
+      "F1": 54,
+      "F2": 79,
+      "F3": 71
+    },
+    "per_fold_rate_per_year": {
+      "F1": 42.7,
+      "F2": 62.4,
+      "F3": 56.1
+    },
+    "rebalances": 220
+  },
+  "rec1_equivalent_binding": true,
+  "rec1_equivalent_oos_k9_disclosure": "REC1-equivalent (BINDING): OOS K9 >=50/y. Pre-SEAL projects ~90-117/2y (clears marginally); TRUE OOS K9 confirmed only at P10; if measured OOS <50/y at P10, terminal. The chain shall NOT relax K9.",
+  "replication_of_s18": {
+    "is_replication": true,
+    "is_tune_or_revN": false,
+    "s18_p11_commit": "5dde0f7",
+    "s18_seal_commit": "7e6aa36",
+    "statement": "Identical locked s18 mechanic; ONLY the universe differs; s18 frozen; edge NOT inherited."
+  },
+  "report_date_utc": "2026-05-29T02:54:43.036671Z",
+  "report_kind": "S19-D1 independent-universe weekly RS rotation Tier-N spec SEAL -- all DA1-DA22 locked byte-equivalent (incl. K13 fold boundaries); carries the MEASURED pre-SEAL K9 (PASS); REPLICATION of the s18 mechanic on an independent universe; canonical immutable spec; anchor for P1/P2/P3 BUILD/P4/P6/P6.5/P6.7(K13)/P7/P10/P11. The EDGE is untested and re-proven at s19 P6 IS.",
+  "report_seal_sha256": "648793b40995f9fb2678ed1cff874299f8a28dd14063a68464a84ee3cf2de76b",
+  "runtime_invariants": [
+    "no_live_trading",
+    "no_strategy_lab_promotion",
+    "no_review_queue_mutation",
+    "no_brokerage_connection",
+    "no_external_network_at_runtime",
+    "no_production_signal",
+    "no_strategy_optimization_authorized",
+    "no_profitability_claim",
+    "no_dr_redefinition_post_seal",
+    "no_momentum_param_modification_post_seal (L=126/S=21/M=8/R=5 locked identical to s18)",
+    "no_rebalance_cadence_change_post_seal",
+    "no_cadence_tuning",
+    "no_top_M_change_post_seal",
+    "no_long_short_conversion_post_seal",
+    "no_sizing_method_change_post_seal",
+    "no_universe_widening_post_seal",
+    "no_universe_substitution_post_seal",
+    "no_adjustment_convention_switch_post_seal",
+    "split_only_locked",
+    "no_k13_fold_scheme_search_post_seal",
+    "no_per_fold_refit",
+    "cash_equity_data_reuse_byte_equivalent_no_fresh_fetch_post_seal",
+    "mechanic_family_weekly_relative_strength_rotation_REPLICATION_of_s18",
+    "no_s18_revN_tune_or_modification",
+    "no_revision_of_terminals",
+    "no_retroactive_k13_application",
+    "dr10_v2_carried_by_reference_not_redefined",
+    "k13_carried_by_reference_not_redefined",
+    "edge_not_inherited_must_reprove_at_p6_is"
+  ],
+  "schema_id": "sparta.s19_d1_independent_universe_weekly_relative_strength_rotation_tier_n_spec_sealed.v1",
+  "seal_inheritance_attestation": {
+    "anchors_draft_byte_equivalent": true,
+    "c6_entry_count": 16,
+    "da_register_locked_by_reference_to_draft": true,
+    "k8_sealed_parent_drift_check": "PASS (DRAFT re-read at SEAL; recomputed canonical seal == stored report_seal; no drift)",
+    "mechanic_byte_identical_to_s18": true,
+    "no_da_changes_from_draft": true,
+    "preseal_k9_carried_unchanged": true,
+    "tier_n_draft_file_sha256_at_seal": "393c445ff5408846ce5983ca4ab9069f29384b7972d02f0d71087b539026a2e4",
+    "tier_n_draft_report_seal_sha256_at_seal": "8231f11105614ace32874519eb5501dd0ebc67a9e61ddb12c2ebbfc44b016a8e"
+  },
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_ROTATION_TIER_N_SPEC_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s18_d1_weekly_oos_confirmed_diagnostic_not_live": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "t_forbid_clearance": {
+    "T_FORBID_16_17_18_mean_reversion": "CLEARED",
+    "T_FORBID_19_20_21_s16_trend": "CLEARED",
+    "T_FORBID_22_per_fold_refit_or_fold_scheme_search": "CLEARED",
+    "T_FORBID_23_s18_revN_or_tune": "CLEARED (REPLICATION on a fresh universe; identical locked mechanic; s18 frozen; no param change/search)",
+    "T_FORBID_24_seal_without_preseal_K9": "CLEARED (pre-SEAL K9 MEASURED signal-only no P&L; PASS)"
+  },
+  "title": "s19-d1 independent-universe weekly relative-strength rotation Tier-N specification (SEALED; binding; REPLICATION of OOS_CONFIRMED s18 mechanic; identical params; independent 24-name universe; pre-SEAL K9 MEASURED-PASS; edge untested; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE)"
+}
