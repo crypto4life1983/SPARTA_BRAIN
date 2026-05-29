@@ -1,0 +1,474 @@
+{
+  "adjustment_convention": "split_only",
+  "adjustment_convention_implementation": "Fresh names: Tiingo raw OHLCV x cumulative(1/splitFactor) for splits strictly after each date; volume / cumulative factor; adjClose/adjVolume ignored; dividends/distributions NOT adjusted. Reused names: byte-equivalent from s16 DR9-passed dir (245ac0d); DR9 PASS carried by sha-match to sealed result ec856253.",
+  "anchor_to_run_book_commit": "c5dac8a",
+  "candidate_universe_id": "s17-d1-broad-universe-cross-sectional-momentum-24name",
+  "end_date_inclusive": "2025-12-30",
+  "fetch_boundaries_held": {
+    "no_api_key_printed": true,
+    "no_backtest": true,
+    "no_broker_exchange_api_call": true,
+    "no_live_trading": true,
+    "no_modification_of_reused_sources": true,
+    "no_oos_inspection_by_this_fetch": true,
+    "no_review_queue_mutation": true,
+    "no_signal_computation": true,
+    "no_simulator_run": true,
+    "no_strategy_lab_promotion": true,
+    "raw_csv_only_written_to_approved_directory": true,
+    "tiingo_api_key_read_from_env_only": true
+  },
+  "fetch_run_utc": "2026-05-28T23:53:27.362880Z",
+  "is_window_end": "2023-12-29",
+  "is_window_start": "2019-01-02",
+  "no_api_key_printed": true,
+  "oos_window_end_LOCKED_NOT_INSPECTED": "2025-12-30",
+  "oos_window_start_LOCKED_NOT_INSPECTED": "2024-01-02",
+  "reuse_policy": "12 names (AAPL/MSFT/NVDA/JPM/XOM/UNH/WMT/KO/META/AMZN/JNJ/CVX) copied byte-equivalent from data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw (245ac0d); each sha-verified against the sealed s16 DR9 result ec856253 (DR9 PASS carries).",
+  "schema": "sparta.s17.broad_universe_cross_sectional_momentum.step02b_fetch_manifest.v1",
+  "start_date_inclusive": "2019-01-02",
+  "symbols": [
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2020-08-31",
+          4.0
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "AAPL_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AAPL_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "f6625ff1a6f8026369344bd50ca82bffcba716f1f3be9cdcfb5b905e35f893a9",
+      "size_bytes": 85372,
+      "splits_cross_check_match": true,
+      "symbol": "AAPL",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2020-08-31",
+          4.0
+        ]
+      ]
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "MSFT_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/MSFT_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "3ec6981f5bc4c37d56017a5542fd0d0d0ac6e9ecb132a4d5cc7668e0ddf112ce",
+      "size_bytes": 84161,
+      "splits_cross_check_match": true,
+      "symbol": "MSFT",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2021-07-20",
+          4.0
+        ],
+        [
+          "2024-06-10",
+          10.0
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "NVDA_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/NVDA_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "d974a054567921f03e66644c6ebfa18c98ae30d32da5138a60d26887c3194ee8",
+      "size_bytes": 87448,
+      "splits_cross_check_match": true,
+      "symbol": "NVDA",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2021-07-20",
+          4.0
+        ],
+        [
+          "2024-06-10",
+          10.0
+        ]
+      ]
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "JPM_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JPM_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "8aa244ab7724b292c659c81171bd8d3cf5ce5684d6c69864ee61e0be90238db7",
+      "size_bytes": 82874,
+      "splits_cross_check_match": true,
+      "symbol": "JPM",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "XOM_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/XOM_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "fbbc462cbfbd11a68b0aed4d0c3fa72312afea5112cebcc24860689f33b7f77c",
+      "size_bytes": 80381,
+      "splits_cross_check_match": true,
+      "symbol": "XOM",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "UNH_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/UNH_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/UNH_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "7b9d502e78bd2eaa8fbac08872865855e4d92ad43b1b3066881fa29f94115394",
+      "size_bytes": 82258,
+      "splits_cross_check_match": true,
+      "symbol": "UNH",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2024-02-26",
+          3.0
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "WMT_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/WMT_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/WMT_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "aa772f962f3afc712e9b9339b01c0b1f1fcd7cc02bf5ad276c035e1c321a8742",
+      "size_bytes": 91742,
+      "splits_cross_check_match": true,
+      "symbol": "WMT",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2024-02-26",
+          3.0
+        ]
+      ]
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "KO_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/KO_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/KO_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "0d00194723903bfa4724f7d3641499da6d165edb6bf8514a10e88233206d7d24",
+      "size_bytes": 77077,
+      "splits_cross_check_match": true,
+      "symbol": "KO",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "META_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/META_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/META_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "4cd3487376b07dd0149b12dec4154c0786ffdeaaa4ad0334f693aa8cd3dc69f5",
+      "size_bytes": 84045,
+      "splits_cross_check_match": true,
+      "symbol": "META",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2022-06-06",
+          20.0
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "AMZN_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/AMZN_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/AMZN_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "d10f4e5ad48e030e769e3d6e1a2228be15d2369850151e75ef050533f63d0317",
+      "size_bytes": 87338,
+      "splits_cross_check_match": true,
+      "symbol": "AMZN",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2022-06-06",
+          20.0
+        ]
+      ]
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "JNJ_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/JNJ_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/JNJ_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "d8565742778fd015d9e5f1a3659e664baf8f6542d7f06362d5fb7116787215b5",
+      "size_bytes": 82458,
+      "splits_cross_check_match": true,
+      "symbol": "JNJ",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "dr9_pass_carried_from_result_seal": "ec856253a28f7d538704b2610da8d1c3b13823335d741c356dd41259488b12e9",
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "CVX_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/CVX_ohlcv_1d_20190102_20251230.csv",
+      "reused": true,
+      "reused_source_label": "s16_245ac0d",
+      "reused_source_path": "data/s16_d1_expanded_cross_sector_cash_equity_long_history/raw/CVX_ohlcv_1d_20190102_20251230.csv",
+      "row_count": 1759,
+      "sha256": "b322748f188faf30e3daa8b96d4dd4667954fe077ca39a8198df75728337b960",
+      "size_bytes": 81835,
+      "splits_cross_check_match": true,
+      "symbol": "CVX",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2022-07-18",
+          20.0
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "GOOGL_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/GOOGL_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "eb65064a12597161e0bfb32303ecc479549f9cee2b276b790b1bddf1012732fe",
+      "size_bytes": 86985,
+      "splits_cross_check_match": true,
+      "symbol": "GOOGL",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2022-07-18",
+          20.0
+        ]
+      ]
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "V_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/V_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "9b496414f796f8558422d2a2130ec31cab73aa9088e785133bbc5db2ea407cd3",
+      "size_bytes": 82420,
+      "splits_cross_check_match": true,
+      "symbol": "V",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "MA_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/MA_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "9dbea25a40ac7399d873a8b8f7246bb1a24f1ce39abaf0f58cb90227a70ba4ee",
+      "size_bytes": 82142,
+      "splits_cross_check_match": true,
+      "symbol": "MA",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "HD_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/HD_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "43d8ac33ad9e5c9159cae8be97a398aa920a4ef862420f852186ac8990faa759",
+      "size_bytes": 82524,
+      "splits_cross_check_match": true,
+      "symbol": "HD",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "PG_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/PG_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "2416ef9443ab9340b7576aa0e1c5a4f5a7dc01162e9d2ae2df7ef1e8c5c77754",
+      "size_bytes": 82461,
+      "splits_cross_check_match": true,
+      "symbol": "PG",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "COST_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/COST_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "b2e502e51d6b3bc666c3279584cdea81895499da3c10ed2adf66d21c74daa131",
+      "size_bytes": 82593,
+      "splits_cross_check_match": true,
+      "symbol": "COST",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "ABBV_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/ABBV_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "73e2f33b5359cc18d6e4da46d004d32423001b8d56b925bc61cb947af5189af6",
+      "size_bytes": 80681,
+      "splits_cross_check_match": true,
+      "symbol": "ABBV",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [
+        [
+          "2021-06-03",
+          1.048
+        ]
+      ],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "MRK_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/MRK_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "3ee12b393c7a4a8288c4677c51b28cd1510ce00ba1c1216e5c523e75ed4e21ae",
+      "size_bytes": 88090,
+      "splits_cross_check_match": true,
+      "symbol": "MRK",
+      "tiingo_splits_in_window_reported": [
+        [
+          "2021-06-03",
+          1.048
+        ]
+      ]
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "BAC_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/BAC_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "96f5b27f136b2489283a5f62dd0c734790829aa210c535eefbfac515c640ec65",
+      "size_bytes": 77419,
+      "splits_cross_check_match": true,
+      "symbol": "BAC",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "CAT_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/CAT_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "55a0db01e31ddb478883612203fb8de3f35c34f465d5632d1b08e018bfc30079",
+      "size_bytes": 82300,
+      "splits_cross_check_match": true,
+      "symbol": "CAT",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "DIS_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/DIS_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "5a5340c7894ce8cab03be48e84e4ae37dd846c3e8b2395bfaa749df7a2758b80",
+      "size_bytes": 81594,
+      "splits_cross_check_match": true,
+      "symbol": "DIS",
+      "tiingo_splits_in_window_reported": []
+    },
+    {
+      "first_timestamp": "2019-01-02",
+      "known_splits_reference": [],
+      "last_timestamp": "2025-12-30",
+      "output_filename": "COP_ohlcv_1d_20190102_20251230.csv",
+      "output_path": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/COP_ohlcv_1d_20190102_20251230.csv",
+      "reused": false,
+      "row_count": 1759,
+      "sha256": "bb9f792be977202963c11a1aed5762f68852d1e94da2247c41bb089c57fcd4b9",
+      "size_bytes": 78242,
+      "splits_cross_check_match": true,
+      "symbol": "COP",
+      "tiingo_splits_in_window_reported": []
+    }
+  ],
+  "vendor": "tiingo",
+  "vendor_library_version_at_fetch": "0.16.1"
+}
