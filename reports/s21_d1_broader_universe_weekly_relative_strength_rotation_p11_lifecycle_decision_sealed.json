@@ -1,0 +1,235 @@
+{
+  "authored_at_utc": "2026-05-29T05:08:14.530500Z",
+  "binding": true,
+  "candidate_archival_state": {
+    "archival_phase": "P11_LIFECYCLE_DECISION",
+    "archival_reason": "OOS_CONFIRMED_DIAGNOSTIC (full ladder passed on a clean fresh universe; resolves the s20 selection caveat)",
+    "archived": true,
+    "candidate_lifecycle_terminal": false,
+    "lifecycle_complete": true,
+    "no_frc_grant_in_this_lifecycle": true,
+    "no_live_path_exists": true,
+    "no_promotion": true
+  },
+  "candidate_record_id": "s21-d1-broader-universe-weekly-relative-strength-rotation-48name-fresh-large-cap-long-history",
+  "central_finding": {
+    "clean_vs_s20": "s20 OOS_CONFIRMED on the s18+s19 UNION (which included the known-OOS-good s18 basket -> sample-size demo, weak generalization evidence). s21 is the clean version: fresh names, no selection bias -> genuine independent generalization.",
+    "edge_strength_honest": "Per-trade OOS edge +$170.96 is LOWER than s20's +$353 and s19's +$336 (the fresh basket's edge is more modest) but solidly positive and survives IS + cost-stress + 5/5 K13 + OOS. A real, portable, but modest premium.",
+    "headline": "s21 PASSES the full ladder (OOS_CONFIRMED_DIAGNOSTIC) on a FRESH 48-name universe with ZERO overlap vs s17/s18/s19 -- the CLEAN generalization test. 0/48 names were ever backtested under this mechanic, so there is NO selection bias: the s18/s20 weekly RS edge GENERALIZES to a genuinely fresh universe. This RESOLVES the s20 selection caveat.",
+    "oos_economics": "OOS net +$48,474.92, expectancy +$170.96/trade, sharpe +0.144, win 58.48%, PF 1.51, maxDD 19.30%, +48.47%; 171 closed (85.8/y, clears K9 with the largest margin of the line); DR1/K9/DR4 all clear."
+  },
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, NOT FRC-granted. Trading PAUSED; Live BLOCKED_AT_6_GATES; FRC NEVER_GRANTED. OOS_CONFIRMED_DIAGNOSTIC is a research-phase label, NOT a promotion.",
+  "document_type": "P11_LIFECYCLE_DECISION_SEALED",
+  "does_s21_cleanly_generalize_the_s18_s20_edge": "YES. s21 is the clean independent generalization test (fresh 48-name universe, 0/48 ever backtested, identical byte-locked mechanic) and it OOS_CONFIRMED (171/85.8y, +$48,475, exp +$171/trade, 5/5 K13). This resolves the s20 selection caveat: the s18/s20 weekly RS edge generalizes on genuinely unseen names, not just baskets containing known winners. The edge is real and portable (though modest per-trade). Still DIAGNOSTIC_ONLY.",
+  "framework_dr10_binding": "v2 AND-conjunction (78cd22e)",
+  "framework_k13_binding": "walk-forward persistence (52a3b60)",
+  "frc_status": "NEVER_GRANTED",
+  "full_arc_recorded": {
+    "p10_oos": {
+      "closed_trades": 171,
+      "commit": "f6ec708",
+      "expectancy_usd_per_trade": 170.9645,
+      "net_pnl_usd": 48474.92,
+      "sharpe_proxy_per_trade": 0.144079,
+      "trades_per_year": 85.79,
+      "verdict": "OOS_CONFIRMED_DIAGNOSTIC"
+    },
+    "p6_5_cost_stress": {
+      "commit": "91d9747",
+      "dr10_v2_fires": false,
+      "s0_to_s4_net_usd": {
+        "S0": 103823.51,
+        "S1": 98879.58,
+        "S2": 96427.23,
+        "S3": 93987.85,
+        "S4": 89147.61
+      },
+      "s2_cost_drag_pct_per_year": 0.9844,
+      "verdict": "PASS_COST_STRESS_ELIGIBLE"
+    },
+    "p6_7_k13": {
+      "aggregate_net_usd": 114696.23,
+      "commit": "e8e511b",
+      "n_folds_positive": 5,
+      "verdict": "K13_PASS"
+    },
+    "p6_is": {
+      "closed_trades": 310,
+      "commit": "eaba5f0",
+      "expectancy_usd_per_trade": 277.9263,
+      "sharpe_proxy_per_trade": 0.152738,
+      "total_return_pct": 98.8796,
+      "verdict": "READY_FOR_LONGER_BACKTEST"
+    },
+    "p7": {
+      "commit": "02cb006",
+      "verdict": "READY_FOR_P10"
+    }
+  },
+  "hard_boundaries_held_this_p11_turn": {
+    "c6_carried_verbatim": true,
+    "candidate_lifecycle_complete_marked": true,
+    "no_broker_exchange_api": true,
+    "no_cadence_change": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_k_k9_dr10_k13_reinterpretation": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_p10_rerun": true,
+    "no_paper_trading_via_broker": true,
+    "no_parameter_tuning": true,
+    "no_promotion": true,
+    "no_retroactive_k13_application": true,
+    "no_review_queue_mutation": true,
+    "no_revival": true,
+    "no_s18_s19_s20_modification": true,
+    "no_strategy_lab_promotion": true,
+    "oos_confirmed_diagnostic_not_promotion": true
+  },
+  "inherited_constraints_block_C6_count": 16,
+  "inherited_constraints_block_VERBATIM_FROM_SEAL_C6": [
+    "K9_THRESHOLD_INVIOLATE: closed_trades>=100 total; OOS>=50/y; no relaxation. Pre-SEAL K9 turnover MEASURED (signal-only, no P&L, fresh 48-name universe) PASSES: IS aggregate 310; OOS 171 (85.8/y) CLEARS the floor; per-fold F1-F5 97/87/83/100/112 (agg 479).",
+    "K13_WALK_FORWARD_BINDING (by-ref 52a3b60): >=3/5 fixed pre-committed UNSEARCHED OOS folds positive + aggregate net>0 + K9; P6.7 before P10; VALIDATION not optimization; NO per-fold refit (INVIOLATE; T-FORBID-22). Folds LOCKED at DA22.",
+    "FRESH s21 CANDIDATE (NOT a tune/_revN_ of s18/s19/s20): mechanic byte-identical to the s18/s19/s20 weekly spec; the ONLY change is the universe (fresh 48-name, zero overlap with s17/s18/s19). s18 (7e6aa36) / s19 (a3aed99) / s20 (e9ec72f) frozen/untouched. M=8 unchanged.",
+    "EDGE NOT INHERITED: the fresh-basket edge MUST be re-proven from scratch at s21 P6 IS (K1 sharpe>0 AND K2 expectancy>0), P6.7 K13, and P10 OOS. A null/negative result = accepted, informative (the weekly RS edge is partly universe-specific).",
+    "CLEAN-GENERALIZATION (BINDING; resolves the s20 selection caveat): the s21 basket has 0/48 names ever backtested under this mechanic -> a positive s21 IS/OOS is GENUINE independent generalization evidence (no selection bias, unlike s20's union which included the known-OOS-good s18 basket). Honest residual: names pre-committed in the RUN_BOOK (dd69414) by liquidity/sector-spread/listing-history, NEVER by performance; no look-ahead.",
+    "PURPOSE = CLEAN GENERALIZATION: the breadth-solves-OOS-K9 mechanism was proven in s20 (LESSON_S20_D1_001) and pre-SEAL MEASURED to GENERALIZE here (OOS 171/85.8y on fresh names, even higher than s20's 67.2/y). The open binding question is whether the EDGE (P&L) survives on fresh names -- tested at P6 IS / P6.7 / P10.",
+    "RELATIVE-STRENGTH-FIRST-PRINCIPLES (BINDING): weekly cadence; 126-21 ranking signal; top-8 equal-weight; relative-rank exit (no trailing/ATR stop). Identical to s18/s19/s20.",
+    "Params L=126 / S=21 / M=8 / R=5(weekly) LOCKED byte-equivalent (identical to s18/s19/s20; NOT tuned, NOT searched). M held at 8 -> breadth from universe size alone.",
+    "DA3 equal-weight 1/M; DA4=B START_CASH 100000; long-only unlevered (DR11 NOT IN CHAIN).",
+    "DR10 = v2 AND-conjunction by-ref 78cd22e; thresholds 0.50/0.05 immutable; no_dr_redefinition_post_seal. Cost_drag projected ~1-3% (s20 measured 1.03% at this breadth); turnover branch true; DR10-v2 binding at P6.5; expected clear with narrower-but-adequate margin.",
+    "split_only CONFIRMED (DA15); reuse the DR9-passed FRESH CSVs (d76c999); switching post-SEAL FORBIDDEN; AVGO 10:1 (2024-07-15) + all Tiingo splitFactors applied+verified; dividends not adjusted.",
+    "FRESH 48-name universe LOCKED (zero overlap with s17/s18/s19); widening/substitution post-SEAL FORBIDDEN (fresh candidate_record_id required).",
+    "DR9 data-availability gate PASSED all 48 by sealed result d76c999 (result_seal 9835c0d2a21f40eb); calendar-aligned 1759 bars; cash_equity_data_reuse_byte_equivalent; sha-verified all 48 at the DRAFT measurement.",
+    "A7 + K10 + K6 LOAD-BEARING (top-8 of 48 -> broad sector spread); NOT the risk axis (the relative-momentum edge K1/K2/K13 is).",
+    "no_strategy_optimization_authorized: byte-locked s18/s19/s20 params, NOT grid-searched/tuned; K13 fold scheme pre-committed + unsearched; no cadence-tuning; no held-N change; no universe performance-selection.",
+    "P6 IS PASS and/or K13 PASS (if reached) do NOT imply READY at OOS/live; 6-gate live-block applies regardless; DIAGNOSTIC_ONLY_NOT_LIVE_GRADE permanent."
+  ],
+  "is_a_seal": true,
+  "is_live_ready": false,
+  "is_paper_ready": false,
+  "is_strategy_lab_ready": false,
+  "labels": [
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "P11_LIFECYCLE_DECISION_SEALED",
+    "S21_D1_FRESH_UNIVERSE_WEEKLY_RS",
+    "VERDICT_OOS_CONFIRMED_DIAGNOSTIC",
+    "CLEAN_GENERALIZATION_CONFIRMED",
+    "RESOLVES_S20_SELECTION_CAVEAT",
+    "EDGE_REAL_PORTABLE_MODEST",
+    "C6_16_ENTRIES_VERBATIM",
+    "NOT_LIVE_READY_NO_PROMOTION_FRC_NEVER_GRANTED",
+    "LESSONS_MD_NOT_TOUCHED_THIS_PHASE"
+  ],
+  "lifecycle_complete": true,
+  "lifecycle_state": "S21_D1_BROADER_UNIVERSE_WEEKLY_RS_ROTATION_P11_OOS_CONFIRMED_DIAGNOSTIC_SEALED",
+  "lifecycle_terminal_by_failure": false,
+  "negative_invariants": {
+    "cadence_altered": false,
+    "candidate_promotion_attempted": false,
+    "claims_large_edge": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "committed_this_script": false,
+    "dr_redefined": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18_s19_s20": false,
+    "oos_rerun": false,
+    "p10_modified": false,
+    "parameters_tuned": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false,
+    "s20_chain_modified": false,
+    "top_M_changed": false
+  },
+  "next_framework_authorization_options": [
+    {
+      "exact_phrase": "Authorize s21-d1 P11 lessons.md update only.",
+      "path_id": "A_LESSONS",
+      "recommended": true,
+      "requires_separate_authorization": true,
+      "title": "Record the LESSON_S21 entries (clean generalization confirmed; edge real/portable/modest; breadth-K9 mechanism holds on fresh names)"
+    },
+    {
+      "path_id": "B_PARK",
+      "requires_separate_authorization": false,
+      "title": "Catalogue the weekly RS line as a clean-generalization-confirmed DIAGNOSTIC_ONLY family and park (no live path exists by design)"
+    },
+    {
+      "path_id": "C_DEFER",
+      "requires_separate_authorization": false,
+      "title": "Defer / pause the trading-bot track"
+    }
+  ],
+  "no_live_promotion_authorization_exists": "By framework design there is NO phrase that promotes any candidate to live/paper/Strategy-Lab; FRC NEVER_GRANTED; 6-gate block permanent -- OOS_CONFIRMED_DIAGNOSTIC included.",
+  "parent_references": {
+    "dr9_commit": "d76c999",
+    "draft_commit": "c4c1016",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p10_oos_gate_commit": "f6ec708",
+    "p10_report_seal": "003ae25285f1ed38c1610d47928cda35a2e329c27b158d65f287e16c935dcffe",
+    "p1_p2_commit": "01afcbd",
+    "p3_build_commit": "90aedca",
+    "p4_smoke_commit": "d3c8fc2",
+    "p6_5_cost_stress_commit": "91d9747",
+    "p6_7_k13_commit": "e8e511b",
+    "p6_is_commit": "eaba5f0",
+    "p7_commit": "02cb006",
+    "s18_p11_commit": "5dde0f7",
+    "s18_seal_commit": "7e6aa36",
+    "s19_p11_commit": "81563fd",
+    "s19_seal_commit": "a3aed99",
+    "s20_p11_commit": "7ef6488",
+    "s20_seal_commit": "e9ec72f",
+    "tier_n_spec_seal_commit": "ae11479",
+    "tier_n_spec_seal_report_seal": "0057308a4b8d6b9aa4f7126537fca43389336579871960330e4045d60444244f",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "phase": "P11_LIFECYCLE_DECISION",
+  "rec1_equivalent_oos_k9_disclosure": "REC1-equivalent (BINDING): OOS K9 >=50/y. Pre-SEAL OOS turnover MEASURED 171 (85.8/y) clears; TRUE OOS K9 (with P&L) confirmed only at P10; the chain shall NOT relax K9.",
+  "remains_diagnostic_only": true,
+  "report_date_utc": "2026-05-29T05:08:14.530500Z",
+  "report_seal_sha256": "9aa1e14712a644b87847bee302ecf561f715414bf73941afe915a685c02dad50",
+  "schema_id": "sparta.s21_d1_fresh_weekly_rs_p11_lifecycle_decision_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_complete": true,
+    "lifecycle_state": "S21_D1_BROADER_UNIVERSE_WEEKLY_RS_ROTATION_P11_OOS_CONFIRMED_DIAGNOSTIC_SEALED",
+    "lifecycle_terminal_by_failure": false,
+    "live_status": "BLOCKED_AT_6_GATES",
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s18_d1_weekly_oos_confirmed_diagnostic_not_live": true,
+    "s19_d1_independent_k9_terminal_frozen": true,
+    "s20_d1_combined_oos_confirmed_diagnostic_not_live": true,
+    "s21_d1_fresh_oos_confirmed_diagnostic_clean_not_live": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s21-d1 fresh-universe weekly RS rotation P11 lifecycle decision (sealed; binding; OOS_CONFIRMED_DIAGNOSTIC; the s18/s20 weekly RS edge CLEANLY GENERALIZES to a fresh never-tested universe; resolves the s20 selection caveat; DIAGNOSTIC_ONLY)",
+  "verdict_formalized": "OOS_CONFIRMED_DIAGNOSTIC",
+  "weekly_rs_line_summary": {
+    "net_read": "The weekly RS cross-sectional momentum edge is REAL, PORTABLE, and GENERALIZES cleanly to fresh names; its recurring OOS-sample blocker is solvable by breadth WITHOUT tuning. The edge is modest per-trade and DIAGNOSTIC_ONLY -- there is NO live path by framework design.",
+    "s18_24name": "OOS_CONFIRMED_DIAGNOSTIC (117/58.7y; recent-fold weak)",
+    "s19_independent_24name": "edge generalized but INSUFFICIENT_SAMPLE/K9 at OOS (87/43.6y)",
+    "s20_combined_48name": "OOS_CONFIRMED_DIAGNOSTIC (134/67.2y; breadth solves K9; selection-biased -> sample-size demo)",
+    "s21_fresh_48name": "OOS_CONFIRMED_DIAGNOSTIC (171/85.8y; CLEAN -- fresh never-tested universe; no selection bias)"
+  },
+  "what_s21_demonstrates": [
+    "The weekly RS edge (126-21 / R=5 / top-8 / relative-rank exit) is a GENERALIZING cross-sectional premium: it OOS-confirms on a fresh 48-name universe never seen by the mechanic, not just on baskets containing known winners.",
+    "The breadth-solves-OOS-K9 mechanism (LESSON_S20_D1_001) holds on fresh names: 48-name pool at M=8 -> OOS 85.8/y, clearing K9 with the largest margin yet.",
+    "Across the line: s18 OOS_CONFIRMED (24-name, recent-fold weak); s19 edge-generalized-but-K9-terminal (independent 24-name); s20 OOS_CONFIRMED (combined 48, breadth solves K9 but selection-biased); s21 OOS_CONFIRMED CLEAN (fresh 48, no selection bias). The edge is real and portable."
+  ],
+  "what_s21_does_NOT_demonstrate": [
+    "It does NOT demonstrate live/paper readiness or money-proven performance.",
+    "It does NOT warrant promotion/Strategy-Lab/broker/FRC -- all remain permanently blocked.",
+    "It does NOT prove a LARGE edge -- the fresh-universe per-trade edge (+$171) is modest; generalization != magnitude.",
+    "It does NOT license tuning M/cadence/universe -- M=8 held fixed; the universe was pre-committed."
+  ]
+}
