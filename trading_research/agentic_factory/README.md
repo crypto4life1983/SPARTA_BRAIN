@@ -8,6 +8,13 @@ AI proposes strategy  ->  local offline backtest  ->  metrics  ->  report  ->  d
 
 First and only strategy target: **NQ ORB** (Nasdaq Opening Range Breakout).
 
+**Data Quality Scanner (S23-D2):** `engine/data_quality.py` checks every CSV
+before any backtest result is trusted. It reports rows, timestamp span,
+required columns, duplicate timestamps, invalid OHLC rows, timezone awareness,
+distinct dates, bar interval, RTH session coverage, eligible sessions, and
+thin/holiday warnings — then grades the dataset (plumbing / smoke / serious
+research / profitability) with a single honest verdict. Offline, stdlib-only.
+
 This module is **inert**. It produces reports. It never trades, never connects, never
 touches anything outside its own folder.
 

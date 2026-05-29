@@ -12,3 +12,6 @@ reports/nq_orb_run_*.md
 
 # Local-only narrative smoke summaries
 reports/smoke_run_summary_*.md
+
+# Local-only generated data-quality scan reports
+reports/data_quality_*.md

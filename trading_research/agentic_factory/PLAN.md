@@ -83,6 +83,23 @@ No engine, loop, proposer, backtester, metrics, decision, or test files created.
 
 ---
 
+## S23-D2 addendum — Data Quality Scanner (built)
+
+`engine\data_quality.py` + `tests\test_data_quality.py` added. The scanner
+inspects any local CSV *before* a backtest result is trusted and reports row
+count, first/last timestamp, required columns, duplicate timestamps, invalid
+OHLC rows, timezone awareness, distinct dates, estimated bar interval, RTH
+session coverage (14:30-21:00 UTC), eligible RTH sessions, and thin/holiday
+warnings. It then classifies the dataset on a readiness ladder:
+plumbing_test / smoke_test / serious_research / profitability_conclusion, with
+a single verdict (`UNUSABLE` / `NEEDS_MORE_DATA` /
+`RESEARCH_OK_NOT_PROFITABILITY_GRADE` / `PROFITABILITY_GRADE`). Offline,
+stdlib-only, no optimization, no trading. The current Christmas-week NQ CSV
+scores **NEEDS_MORE_DATA** (4 eligible sessions, Dec 25 closed) — good for
+plumbing/smoke only.
+
+---
+
 ## Why this does not interfere with the existing trading bot
 
 - Disjoint, brand-new folder; touches none of `paper_trading/`, `strategy_lab/`,
