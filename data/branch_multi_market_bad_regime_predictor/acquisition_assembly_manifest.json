@@ -1,0 +1,148 @@
+{
+  "acquisition_decision": "Existing local GC/CL DBN cache is ohlcv-1m (1-minute, intraday) -- NOT the daily target schema. For a uniform point-in-time daily continuous dataset across all 4 markets with a SINGLE roll convention, all four were fetched fresh as ohlcv-1d continuous c.0 from Databento (entitlement confirmed). The local 1-min cache was left untouched.",
+  "authored_at_utc": "2026-05-29T15:21:48.446570Z",
+  "calendar_alignment_discovery": {
+    "common_2024_days_all_markets": 266,
+    "common_full_discovery_days": 1564,
+    "per_market": {
+      "6E": {
+        "days_2024": 311,
+        "total_days": 1798
+      },
+      "CL": {
+        "days_2024": 312,
+        "total_days": 1863
+      },
+      "ES": {
+        "days_2024": 312,
+        "total_days": 1866
+      },
+      "GC": {
+        "days_2024": 266,
+        "total_days": 1589
+      }
+    },
+    "pre_committed_alignment_rule": "inner-join on the COMMON trading calendar across all 4 markets (a decision-time index defined only on days all 4 markets trade); mismatches dropped, never forward-filled (no silent fill).",
+    "union_2024_days": 312
+  },
+  "dataset": "GLBX.MDP3",
+  "discovery": {
+    "dir": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw",
+    "symbols": {
+      "6E": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2019-01-02",
+        "last_date": "2024-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/6E_ohlcv_1d_20190102_20241231.csv",
+        "row_count": 1798,
+        "sha256": "3d88c08586ef0715a1e1f2d640ecc58e0b125d268170e1b52d75e344dc6a7b8b",
+        "symbol": "6E"
+      },
+      "CL": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2019-01-02",
+        "last_date": "2024-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/CL_ohlcv_1d_20190102_20241231.csv",
+        "row_count": 1863,
+        "sha256": "a9d5ea657ca06b2c289780e6a0d1e9d919673d8bbebc3db961a20a18dada6ae4",
+        "symbol": "CL"
+      },
+      "ES": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2019-01-02",
+        "last_date": "2024-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/ES_ohlcv_1d_20190102_20241231.csv",
+        "row_count": 1866,
+        "sha256": "3d98248541bb974ac59e6109cb854c33469608c3b9bdcf34464b8d8a9e09b3d7",
+        "symbol": "ES"
+      },
+      "GC": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2019-01-02",
+        "last_date": "2024-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw/GC_ohlcv_1d_20190102_20241231.csv",
+        "row_count": 1589,
+        "sha256": "ebac946c8de6127f1fcd4ee15263a09b3a99c5bd48e2898f5e299077ec59d375",
+        "symbol": "GC"
+      }
+    },
+    "window": "2019-01-02..2024-12-31"
+  },
+  "firewall_separation_proof": {
+    "discovery_contains_no_2025": true,
+    "discovery_dir": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw",
+    "distinct_top_level_dirs": true,
+    "oos_contains_only_2025": true,
+    "sealed_marker": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/SEALED_DO_NOT_INSPECT.txt",
+    "sealed_oos_dir": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/raw"
+  },
+  "grounded_in_step_03_audit": true,
+  "guards_held": {
+    "api_key_never_printed": true,
+    "no_2025_value_inspection": true,
+    "no_backtest": true,
+    "no_cluster": true,
+    "no_model": true,
+    "no_returns_R_PnL_Sharpe": true,
+    "no_signals": true,
+    "no_sparta_contamination": true,
+    "no_tradeability_or_profitability_claims": true
+  },
+  "manifest_content_sha256": "ba8618517cfdd78e3c9109fd1d197b37f2453ac1f73302b491492a32eee5c5d5",
+  "markets": [
+    "ES",
+    "GC",
+    "CL",
+    "6E"
+  ],
+  "roll_convention": "Databento continuous front-month c.0 (single uniform roll across all 4 markets); ohlcv-1d daily bars are end-of-session (point-in-time, no intraday lookahead).",
+  "schema": "branch.multi_market_bad_regime_predictor.acquisition_assembly_manifest.v1",
+  "schema_fetched": "ohlcv-1d",
+  "sealed_oos": {
+    "dir": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/raw",
+    "symbols": {
+      "6E": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2025-01-01",
+        "last_date": "2025-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/raw/6E_ohlcv_1d_20250101_20251231.csv",
+        "row_count": 307,
+        "sha256": "18ff41d20df7e5ed5918225179e746dae7f4b2c3c609561824e6bb7680b54536",
+        "symbol": "6E"
+      },
+      "CL": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2025-01-01",
+        "last_date": "2025-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/raw/CL_ohlcv_1d_20250101_20251231.csv",
+        "row_count": 311,
+        "sha256": "450d902d3c735b6b29d18fcd70baa0892ff93d6fe42ea9f4d941420eab15513a",
+        "symbol": "CL"
+      },
+      "ES": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2025-01-01",
+        "last_date": "2025-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/raw/ES_ohlcv_1d_20250101_20251231.csv",
+        "row_count": 311,
+        "sha256": "6a2b30a30f7ebe6e12599bb17d390db88e2edb742336f6d1090830011deddf1b",
+        "symbol": "ES"
+      },
+      "GC": {
+        "dupe_session_rows_collapsed": 0,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-30",
+        "path": "data/branch_multi_market_bad_regime_predictor/oos_2025_sealed/raw/GC_ohlcv_1d_20250101_20251231.csv",
+        "row_count": 281,
+        "sha256": "90fa9291d19106b869a8af6fed7cd60d18fe710300985263ae987074df825b5d",
+        "symbol": "GC"
+      }
+    },
+    "values_inspected": false,
+    "window": "2025-01-01..2025-12-31"
+  },
+  "step_02_commit": "b6c30d5",
+  "step_03_commit": "6f063a8",
+  "stype_in": "continuous",
+  "vendor": "databento"
+}
