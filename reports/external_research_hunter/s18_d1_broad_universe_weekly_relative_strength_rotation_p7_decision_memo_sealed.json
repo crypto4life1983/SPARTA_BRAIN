@@ -1,0 +1,192 @@
+{
+  "also_labeled": "READY_FOR_FINAL_OOS",
+  "anchors": {
+    "dr9_result_commit": "d86e5d1",
+    "framework_dr10_revision_seal_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "466adb9",
+    "p2_phase2_plan_commit": "1d4cd48",
+    "p3_build_commit": "50171b0",
+    "p4_smoke_commit": "ad0e542",
+    "p6_5_cost_stress_commit": "1db075d",
+    "p6_5_report_seal": "28a4aa25b1634e44ef7c8e4b91084ff68c7a36190cfec65e4c91809403c12061",
+    "p6_7_k13_commit": "aa762f0",
+    "p6_7_report_seal": "309d7f3244a74ebe78da7f2073551965e3c2ce34136ed4776e589cdc9fcded06",
+    "p6_is_commit": "3911970",
+    "p6_is_report_seal": "42c8c0f4070eece800bb13386b2e05332644736d4f7118ca8b2fd27302316161",
+    "tier_n_spec_seal_commit": "7e6aa36",
+    "walk_forward_validation_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T02:21:05.129233Z",
+  "authorization_phrase": "s18-d1 weekly RS rotation continuation bundle: P7 decision memo (K13 passed -> READY_FOR_P10).",
+  "binding": true,
+  "candidate_lifecycle_terminal": false,
+  "candidate_record_id": "s18-d1-broad-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, NOT FRC-granted. READY_FOR_P10 is a research-phase status only. Trading PAUSED; Live BLOCKED_AT_6_GATES; FRC NEVER_GRANTED.",
+  "document_type": "P7_DECISION_MEMO_SEALED",
+  "hard_boundaries_held": {
+    "no_broker_exchange_api": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_k_k9_dr10_k13_reinterpretation": true,
+    "no_fold_scheme_search": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_optimization": true,
+    "no_p10_final_oos_gate": true,
+    "no_per_fold_refit": true,
+    "no_retroactive_k13_application": true,
+    "no_review_queue_mutation": true,
+    "no_revival_of_s17_s16_s15_s14_s13_s12": true,
+    "no_strategy_lab_promotion": true,
+    "p7_memo_only_no_p10": true
+  },
+  "honest_yellow_flags_for_p10": [
+    "K13 was a MARGINAL pass: exactly 3/5 folds positive (the supermajority floor). F3 (2022-03..2023-06) and F5 (2024-09..2025-12) were non-positive.",
+    "The most recent fold F5 (2024-09..2025-12) was NEGATIVE (expectancy -$33.89/trade, sharpe -0.032). P10 tests the contiguous 2024-2025 OOS window via DR4 (oos_negative_while_is_positive); F5 being negative is a direct yellow flag that P10 may REJECT_FAST.",
+    "PRECEDENT: s16-d1 passed P6 IS + P6.5 cost-stress yet FAILED P10 OOS (DR4) -- READY_FOR_P10 does NOT imply P10 will pass; the OOS gate is the binding generalization test.",
+    "Weekly is the cost-heaviest rung (annual turnover ~20x); P6.5 cleared on the capital-drag convention but the edge-erosion view of S2 cost_drag was 6.2% -- cost sensitivity at OOS is non-trivial.",
+    "The weekly per-trade edge is thinner than s17 monthly (expectancy +$370 vs +$1,131; sharpe +0.187 vs +0.285); it cleared K9 by trading a smaller edge over more trades."
+  ],
+  "integrated_arc": {
+    "p6_5_cost_stress": {
+      "annual_turnover_S1": 20.158,
+      "cost_drag_S2_capital_annual_pct": 0.9499,
+      "dr_fires": [],
+      "s0_to_s4_net_usd": {
+        "S0": 88458.44,
+        "S1": 84793.57,
+        "S2": 82972.82,
+        "S3": 81159.8,
+        "S4": 77556.75
+      },
+      "verdict": "PASS_COST_STRESS_ELIGIBLE"
+    },
+    "p6_7_k13": {
+      "aggregate_closed_trades": 343,
+      "aggregate_net_usd": 125312.77,
+      "n_folds_positive": 3,
+      "per_fold": {
+        "F1": {
+          "expectancy": 195.30155681337556,
+          "net_pnl": 42939.26572856918,
+          "positive": true,
+          "window": "2019-08-21..2020-11-23"
+        },
+        "F2": {
+          "expectancy": 234.5756018480784,
+          "net_pnl": 19230.063762431673,
+          "positive": true,
+          "window": "2020-11-24..2022-03-02"
+        },
+        "F3": {
+          "expectancy": -2.696892312299074,
+          "net_pnl": 12462.720358888299,
+          "positive": false,
+          "window": "2022-03-03..2023-06-08"
+        },
+        "F4": {
+          "expectancy": 447.93035157815274,
+          "net_pnl": 41151.94029636597,
+          "positive": true,
+          "window": "2023-06-09..2024-09-16"
+        },
+        "F5": {
+          "expectancy": -33.89168436291191,
+          "net_pnl": 9528.776642201541,
+          "positive": false,
+          "window": "2024-09-17..2025-12-30"
+        }
+      },
+      "supermajority_required": 3,
+      "verdict": "K13_PASS"
+    },
+    "p6_is": {
+      "closed_trades": 229,
+      "expectancy_usd_per_trade": 370.2776,
+      "k1_k2_k4_pass": true,
+      "k9_clears": true,
+      "max_drawdown_pct": 32.1907,
+      "profit_factor": 1.940923,
+      "sharpe_proxy_per_trade": 0.186665,
+      "total_return_pct": 132.1841,
+      "trades_per_year": 45.91,
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "win_rate_pct": 56.33
+    }
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S18_D1_WEEKLY_RS_P7_DECISION_MEMO_SEALED",
+    "READY_FOR_P10",
+    "READY_FOR_FINAL_OOS",
+    "NON_TERMINAL",
+    "FIRST_LINE_MEMBER_TO_CLEAR_IS_COSTSTRESS_K13",
+    "K13_PASS_MARGINAL_3_OF_5",
+    "F5_2024_25_FOLD_NEGATIVE_YELLOW_FLAG",
+    "P10_GATE_NOT_RUN",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "NO_PROMOTION",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S18_D1_WEEKLY_RS_ROTATION_P7_READY_FOR_P10_SEALED",
+  "milestone": "FIRST candidate in the s12->s18 research line to reach the P10 OOS gate under the walk-forward K13 discipline (s14/s15 IS-failed; s16 OOS-failed; s17 K9-failed; s18 fortnightly K9-blocked at PLAN). s18 weekly cleared the edge (P6), cost-stress (P6.5), and walk-forward persistence (P6.7 K13).",
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "candidate_lifecycle_terminal": false,
+    "claims_edge_generalizes": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr4_relaxed": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "p10_oos_gate_run": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "promotion_attempted": false,
+    "sealed_csvs_modified": false
+  },
+  "next_phase_authorization_scope": {
+    "defer": "Defer / Pause s18-d1 weekly at P7 (READY_FOR_P10).",
+    "primary_forward_P10": "Authorize s18-d1 broad-universe weekly relative-strength rotation P10 OOS gate only — bound by DR10 v2 + walk-forward K13."
+  },
+  "p10_not_run_this_bundle": true,
+  "phase": "P7_DECISION_MEMO",
+  "rec1_equivalent_oos_k9_disclosure": "OOS K9 >=50/y. Pre-SEAL turnover measurement projects ~100-113/2y (clears marginally) but the TRUE OOS K9 is confirmed only at P10; if measured OOS < 50/y at P10, terminal. The chain shall NOT relax K9.",
+  "report_date_utc": "2026-05-29T02:21:05.129233Z",
+  "report_kind": "S18-D1 weekly RS rotation P7 decision memo -- integrates P6 IS + P6.5 cost-stress + P6.7 K13 walk-forward; records READY_FOR_P10. The FIRST candidate in the s12->s18 line to clear P6 IS (positive edge) + P6.5 (cost-survival) + P6.7 K13 (multi-fold persistence). NOT terminal; NOT live-ready; P10 OOS gate NOT run this bundle.",
+  "report_seal_sha256": "279b8fc221109f95b39a2e93bf8a6976e1b9de5e7fdd447a3f09fe4941f5474a",
+  "schema_id": "sparta.research.s18_d1_weekly_rs_p7_decision_memo_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "candidate_lifecycle_terminal": false,
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "lifecycle_state": "S18_D1_WEEKLY_RS_ROTATION_P7_READY_FOR_P10_SEALED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_dr_redefinition_post_seal": true,
+    "no_strategy_optimization_authorized": true,
+    "rec1_equivalent_oos_k9_disclosure_binding": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "s12_d1_lifecycle_terminal": true,
+    "s13_d1_lifecycle_terminal": true,
+    "s14_d1_cross_sector_lifecycle_terminal": true,
+    "s15_d1_lifecycle_terminal": true,
+    "s16_d1_lifecycle_terminal": true,
+    "s17_d1_lifecycle_terminal": true,
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s18-d1 weekly RS rotation P7 decision memo (sealed; NON-terminal; READY_FOR_P10 / READY_FOR_FINAL_OOS; first line-member to clear IS+cost-stress+K13)",
+  "verdict": "READY_FOR_P10",
+  "what_this_does_NOT_demonstrate": [
+    "It does NOT demonstrate the weekly edge generalizes OOS -- that is exactly what P10 tests (and F5 warns it may not).",
+    "It does NOT imply any promotion, live/paper readiness, or money-proven claim.",
+    "It does NOT relax DR4 or any OOS gate; P10 stands as the binding generalization test."
+  ]
+}
