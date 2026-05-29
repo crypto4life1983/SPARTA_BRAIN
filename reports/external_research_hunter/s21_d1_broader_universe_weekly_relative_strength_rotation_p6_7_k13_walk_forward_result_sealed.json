@@ -1,0 +1,150 @@
+{
+  "aggregate_closed_trades": 479,
+  "aggregate_net_pnl_usd": 114696.23,
+  "anchors": {
+    "framework_dr10_v2_commit": "78cd22e",
+    "p3_build_commit": "90aedca",
+    "p6_5_commit": "91d9747",
+    "p6_is_commit": "eaba5f0",
+    "tier_n_spec_seal_commit": "ae11479",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T05:04:12.806189Z",
+  "authorization_phrase": "Authorize s21-d1 broader-universe weekly relative-strength rotation full diagnostic continuation bundle (Step 7: P6.7 K13 walk-forward).",
+  "candidate_record_id": "s21-d1-broader-universe-weekly-relative-strength-rotation-48name-fresh-large-cap-long-history",
+  "comparison_to_prior": {
+    "note": "K13 validation on the FRESH universe; clean generalization (no selection bias)",
+    "s18_k13": "3/5",
+    "s19_k13": "5/5",
+    "s20_k13": "5/5",
+    "s21_k13": "5/5"
+  },
+  "document_type": "P6_7_K13_WALK_FORWARD_RESULT_SEALED",
+  "fold_scheme": "5 pre-committed UNSEARCHED DA22 folds (warmup 0-159; F1 160-478..F5 1436-1758); identical to s18/s19/s20; per_fold_refit=False; boundaries_searched=False",
+  "hard_boundaries_held": {
+    "imports_committed_p3_primitives_unmodified": true,
+    "locked_p6_7_procedure_only": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_or_broker": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_parameter_tuning": true,
+    "no_per_fold_refit": true,
+    "no_promotion": true
+  },
+  "is_a_seal": true,
+  "k13_pass": true,
+  "k9_ok": true,
+  "labels": [
+    "S21_D1_FRESH_UNIVERSE_WEEKLY_RS_P6_7_K13_SEALED",
+    "K13_PASS",
+    "FOLDS_5_OF_5_POSITIVE",
+    "VALIDATION_NOT_OPTIMIZATION",
+    "NO_PER_FOLD_REFIT",
+    "CLEAN_GENERALIZATION",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S21_D1_BROADER_UNIVERSE_WEEKLY_RS_ROTATION_P6_7_K13_PASS_SEALED",
+  "n_folds_positive": 5,
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "k13_applied_retroactively": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18_s19_s20": false,
+    "p3_source_modified": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false,
+    "s20_chain_modified": false
+  },
+  "no_cadence_tuning": true,
+  "no_fold_search": true,
+  "no_per_fold_refit": true,
+  "per_fold_results": {
+    "F1": {
+      "closed_trades": 97,
+      "date_end": "2020-11-23",
+      "date_start": "2019-08-21",
+      "idx": [
+        160,
+        478
+      ],
+      "net_pnl_usd": 26346.03,
+      "positive": true,
+      "rebalances": 64
+    },
+    "F2": {
+      "closed_trades": 87,
+      "date_end": "2022-03-02",
+      "date_start": "2020-11-24",
+      "idx": [
+        479,
+        797
+      ],
+      "net_pnl_usd": 3238.0,
+      "positive": true,
+      "rebalances": 64
+    },
+    "F3": {
+      "closed_trades": 83,
+      "date_end": "2023-06-08",
+      "date_start": "2022-03-03",
+      "idx": [
+        798,
+        1116
+      ],
+      "net_pnl_usd": 25660.64,
+      "positive": true,
+      "rebalances": 64
+    },
+    "F4": {
+      "closed_trades": 100,
+      "date_end": "2024-09-16",
+      "date_start": "2023-06-09",
+      "idx": [
+        1117,
+        1435
+      ],
+      "net_pnl_usd": 24766.95,
+      "positive": true,
+      "rebalances": 64
+    },
+    "F5": {
+      "closed_trades": 112,
+      "date_end": "2025-12-30",
+      "date_start": "2024-09-17",
+      "idx": [
+        1436,
+        1758
+      ],
+      "net_pnl_usd": 34684.61,
+      "positive": true,
+      "rebalances": 64
+    }
+  },
+  "phase": "P6_7_K13_WALK_FORWARD",
+  "report_date_utc": "2026-05-29T05:04:12.806189Z",
+  "report_seal_sha256": "a3e19973c7bb884605271a79c3df88eb35c24fa8d10a1a1e81af5ed83ddf43d3",
+  "schema_id": "sparta.s21_d1_fresh_weekly_rs_p6_7_k13_walk_forward_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "supermajority_required": 3,
+  "title": "s21-d1 fresh-universe weekly RS rotation P6.7 K13 walk-forward result (sealed; K13_PASS; 5/5 folds positive; validation-not-optimization)",
+  "validation_not_optimization": true,
+  "verdict": "K13_PASS"
+}
