@@ -1,0 +1,115 @@
+{
+  "all_pass": true,
+  "anchors": {
+    "dr9_result_commit": "d86e5d1",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "4484ab6",
+    "p2_phase2_plan_commit": "894da78",
+    "p3_build_commit": "affbcb0",
+    "tier_n_spec_seal_commit": "767d86b",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T01:00:42.352338Z",
+  "authorization_phrase": "Authorize s17-d1 broad-universe cross-sectional momentum P4 synthetic smoke only.",
+  "candidate_record_id": "s17-d1-broad-universe-cross-sectional-momentum-rotation-24name-large-cap-long-history",
+  "document_type": "P4_SYNTHETIC_SMOKE_RESULT_SEALED",
+  "hard_boundaries_held": {
+    "no_backtest": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_per_fold_refit": true,
+    "no_real_csv_read": true,
+    "no_retroactive_k13": true,
+    "no_revival": true,
+    "no_signal_on_real_data": true,
+    "no_strategy_optimization": true,
+    "synthetic_tests_only": true
+  },
+  "is_a_seal": true,
+  "k13_invariants_verified": [
+    "K13 fold scheme exact DA22 boundaries (F1 160-478..F5 1436-1758), contiguous, unsearched",
+    "k13_verdict gate (>=3/5 + aggregate>0 + K9)",
+    "no per-fold refit",
+    "run_walk_forward STUB raises P6_7_K13_NOT_AUTHORIZED"
+  ],
+  "labels": [
+    "S17_D1_XMOM_P4_SYNTHETIC_SMOKE_SEALED",
+    "P4_SYNTHETIC_SMOKE_PASS",
+    "SYNTHETIC_ONLY_NO_REAL_DATA",
+    "K13_AND_OOS_INVARIANTS_VERIFIED",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S17_D1_BROAD_UNIVERSE_CROSS_SECTIONAL_MOMENTUM_P4_SYNTHETIC_SMOKE_SEALED",
+  "negative_invariants": {
+    "backtest_run": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "live_or_broker_path": false,
+    "oos_inspected": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "real_csv_read": false,
+    "signal_computed_on_real_data": false
+  },
+  "next_phase_authorization_scope": {
+    "primary_forward": "Authorize s17-d1 broad-universe cross-sectional momentum P6 IS diagnostic only."
+  },
+  "oos_invariants_verified": [
+    "run_out_of_sample STUB raises P10_OOS_NOT_AUTHORIZED",
+    "OOS isolation (no IS-window constants in OOS module scope)"
+  ],
+  "phase": "P4_SYNTHETIC_SMOKE",
+  "report_date_utc": "2026-05-29T01:00:42.352338Z",
+  "report_seal_sha256": "e39e140c231b3052a856aaafd2cc9b80db1d5766ed6babc192dc8d8a4178de6c",
+  "schema_id": "sparta.s17_d1_broad_universe_xmom_p4_synthetic_smoke_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "test_node_ids": [
+    "test_T1_modules_import_clean",
+    "test_T2_runner_class_instantiable",
+    "test_T3_trailing_return_126_21",
+    "test_T4_cross_sectional_rank_desc_with_tiebreak",
+    "test_T5_select_top_m",
+    "test_T6_equal_weight_targets_1_over_M",
+    "test_T7_is_rebalance_bar",
+    "test_T8_rotation_exits_and_entries",
+    "test_T9_cost_primitives",
+    "test_T10_pyramid_and_short_forbidden",
+    "test_T11_config_locked_params",
+    "test_T12_universe_24name_locked",
+    "test_T13_split_only_convention",
+    "test_T14_cost_stress_matrix",
+    "test_T15_validator_harness_pass",
+    "test_T16_rotation_exit_guard",
+    "test_T17_long_only_and_equal_weight_guards",
+    "test_T18_K13_fold_scheme_locked_invariant",
+    "test_T19_K13_verdict_gate",
+    "test_T20_driver_stubs_refuse_execution",
+    "test_T21_oos_isolation_no_is_window_in_oos_signal_scope",
+    "test_T22_end_to_end_synthetic_rotation_invariants",
+    "test_T23_synthetic_fixture_parses_if_present"
+  ],
+  "test_summary": {
+    "failed": 0,
+    "passed": 23,
+    "returncode": 0,
+    "total": 23
+  },
+  "title": "s17-d1 broad-universe cross-sectional momentum P4 synthetic smoke result (sealed; P4_SYNTHETIC_SMOKE_PASS)",
+  "verdict": "P4_SYNTHETIC_SMOKE_PASS",
+  "what_ran": "synthetic fixture + invariant tests only (momentum primitives, cross-sectional rank/select/rotation, equal-weight, cost primitives, guard pass/drift, K13 fold-scheme-locked + verdict gate, driver stubs refuse execution, OOS isolation, end-to-end synthetic rotation invariants). NO real-CSV read, NO signal computation on real data, NO backtest."
+}
