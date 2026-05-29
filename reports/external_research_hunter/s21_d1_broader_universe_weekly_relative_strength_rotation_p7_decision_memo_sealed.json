@@ -1,0 +1,121 @@
+{
+  "anchors": {
+    "dr9_commit": "d76c999",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p3_build_commit": "90aedca",
+    "p6_5_cost_stress_commit": "91d9747",
+    "p6_7_k13_commit": "e8e511b",
+    "p6_is_commit": "eaba5f0",
+    "tier_n_spec_seal_commit": "ae11479",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T05:05:05.320297Z",
+  "authorization_phrase": "Authorize s21-d1 broader-universe weekly relative-strength rotation full diagnostic continuation bundle (Step 8: P7 decision memo, K13 passed -> READY_FOR_P10).",
+  "binding": true,
+  "candidate_lifecycle_terminal": false,
+  "candidate_record_id": "s21-d1-broader-universe-weekly-relative-strength-rotation-48name-fresh-large-cap-long-history",
+  "clean_generalization_no_selection_bias": true,
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live/paper/Strategy-Lab-ready; NOT FRC-granted. READY_FOR_P10 is a research-phase status only.",
+  "document_type": "P7_DECISION_MEMO_SEALED",
+  "hard_boundaries_held": {
+    "no_broker_exchange_api": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_trading": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_optimization": true,
+    "no_promotion": true,
+    "no_review_queue_mutation": true,
+    "no_strategy_lab_promotion": true,
+    "p7_memo_only": true
+  },
+  "honest_notes_for_p10": [
+    "The fresh-universe edge is POSITIVE and broad across IS (+$277.93/trade, 310 trades) + cost-stress (S0-S4 all positive, DR10 v2 no-fire at 0.98%/y) + K13 (5/5 positive, aggregate +$114696.23).",
+    "CLEAN GENERALIZATION: 0/48 names ever backtested under this mechanic -> a positive P10 OOS would be GENUINE independent generalization evidence, resolving the s20 selection caveat. This is the load-bearing test the whole weekly-RS line has been building toward.",
+    "PRECEDENT: a positive IS+cost+K13 does NOT guarantee P10 (s16 failed P10 DR4; s19 K9-terminal at OOS). P10 (fresh 2024-2025) is the binding gate; the pre-SEAL signal-only OOS turnover (171/85.8y) clears K9 but the EDGE sign is tested only here.",
+    "DIAGNOSTIC_ONLY regardless of P10; 6-gate live-block + FRC-never-granted apply."
+  ],
+  "integrated_arc": {
+    "p6_5_cost_stress": {
+      "dr10_v2_fires": false,
+      "s0_to_s4_net_usd": {
+        "S0": 103823.51,
+        "S1": 98879.58,
+        "S2": 96427.23,
+        "S3": 93987.85,
+        "S4": 89147.61
+      },
+      "s2_cost_drag_pct_per_year": 0.9844,
+      "verdict": "PASS_COST_STRESS_ELIGIBLE"
+    },
+    "p6_7_k13": {
+      "aggregate_net_usd": 114696.23,
+      "n_folds_positive": 5,
+      "per_fold_signs": {
+        "F1": true,
+        "F2": true,
+        "F3": true,
+        "F4": true,
+        "F5": true
+      },
+      "verdict": "K13_PASS"
+    },
+    "p6_is": {
+      "closed_trades": 310,
+      "expectancy_usd_per_trade": 277.9263,
+      "sharpe_proxy_per_trade": 0.152738,
+      "total_return_pct": 98.8796,
+      "verdict": "READY_FOR_LONGER_BACKTEST",
+      "win_rate_pct": 57.42
+    }
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S21_D1_FRESH_UNIVERSE_WEEKLY_RS_P7_DECISION_MEMO_SEALED",
+    "READY_FOR_P10",
+    "NON_TERMINAL",
+    "IS_COST_K13_ALL_PASS",
+    "CLEAN_GENERALIZATION_NO_SELECTION_BIAS",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S21_D1_BROADER_UNIVERSE_WEEKLY_RS_ROTATION_P7_READY_FOR_P10_SEALED",
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "candidate_lifecycle_terminal": false,
+    "claims_generalization_proven": false,
+    "claims_live_ready": false,
+    "claims_oos_confirmed": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18_s19_s20": false,
+    "p10_oos_gate_run": false,
+    "parameters_optimized": false,
+    "promotion_attempted": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false,
+    "s20_chain_modified": false
+  },
+  "p10_runs_next_this_bundle": true,
+  "phase": "P7_DECISION_MEMO",
+  "report_date_utc": "2026-05-29T05:05:05.320297Z",
+  "report_kind": "S21-D1 P7 decision memo -- integrates P6 IS + P6.5 + P6.7 K13 on the FRESH universe; READY_FOR_P10. NOT terminal; NOT live-ready; P10 OOS runs next.",
+  "report_seal_sha256": "04ee5e86acbdfd3d3018bb13b2b3969778038bba2c46ec16b5ebab9c845a8b57",
+  "schema_id": "sparta.s21_d1_fresh_weekly_rs_p7_decision_memo_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "candidate_lifecycle_terminal": false,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s21-d1 fresh-universe weekly RS rotation P7 decision memo (sealed; NON-terminal; READY_FOR_P10; IS+cost+K13 all pass on the FRESH universe; CLEAN generalization)",
+  "verdict": "READY_FOR_P10"
+}
