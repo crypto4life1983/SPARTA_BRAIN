@@ -1,0 +1,270 @@
+"""P4 synthetic smoke battery for s17-d1 cross-sectional momentum runner. Authored at P3 BUILD; run at P4.
+
+Synthetic data + invariant checks only. NO real CSV reads, NO signal computation on real data.
+"""
+
+import csv
+
+import pytest
+
+
+def test_T1_modules_import_clean(runner_harness_module):
+    assert all(runner_harness_module[k] is not None for k in
+               ("main", "execution_guard", "in_sample_driver", "out_of_sample_driver", "walk_forward_driver"))
+
+
+def test_T2_runner_class_instantiable(runner_harness_module):
+    main = runner_harness_module["main"]
+    algo = main.Algo(); algo.Initialize()
+    assert algo.config["candidate_record_id"] == "s17-d1-broad-universe-cross-sectional-momentum-rotation-24name-large-cap-long-history"
+    assert algo._stale_fill_warning_count == 0 and algo.all_safety_warnings_zero() is True and algo.held_count() == 0
+
+
+def test_T3_trailing_return_126_21(runner_harness_module):
+    main = runner_harness_module["main"]
+    # closes[i] = i+1 (strictly increasing); at i=200, j=179 (=180), k=53 (=54) -> 180/54 - 1
+    closes = [float(i + 1) for i in range(260)]
+    sig = main.trailing_return(closes, 200, lookback=126, skip=21)
+    assert sig == pytest.approx(180.0 / 54.0 - 1.0)
+    # insufficient history -> None
+    assert main.trailing_return(closes, 100, lookback=126, skip=21) is None  # 100-21-126 < 0
+    assert main.trailing_return(closes, 146, lookback=126, skip=21) is None  # 146-147 = -1 < 0
+    assert main.trailing_return(closes, 147, lookback=126, skip=21) is not None  # boundary OK
+
+
+def test_T4_cross_sectional_rank_desc_with_tiebreak(runner_harness_module):
+    main = runner_harness_module["main"]
+    sigs = {"AAA": 0.10, "BBB": 0.30, "CCC": 0.20, "DDD": None, "EEE": 0.20}
+    ranked = main.cross_sectional_rank(sigs)
+    # desc by signal; tie 0.20 -> CCC before EEE (alpha); None excluded
+    assert ranked == ["BBB", "CCC", "EEE", "AAA"]
+
+
+def test_T5_select_top_m(runner_harness_module):
+    main = runner_harness_module["main"]
+    assert main.select_top_m(["B", "C", "E", "A"], 2) == ["B", "C"]
+    assert main.select_top_m(["B", "C"], 6) == ["B", "C"]
+    assert main.select_top_m(["B", "C"], 0) == []
+
+
+def test_T6_equal_weight_targets_1_over_M(runner_harness_module):
+    main = runner_harness_module["main"]
+    t = main.equal_weight_targets(["B", "C", "E"], 120000.0, 6)
+    # 1/M = 1/6 of equity each (NOT 1/len) -> cash held when fewer than M qualify
+    assert all(v == pytest.approx(20000.0) for v in t.values())
+    assert set(t) == {"B", "C", "E"}
+    t6 = main.equal_weight_targets(["A", "B", "C", "D", "E", "F"], 120000.0, 6)
+    assert sum(t6.values()) == pytest.approx(120000.0)  # fully invested at M holdings
+
+
+def test_T7_is_rebalance_bar(runner_harness_module):
+    main = runner_harness_module["main"]
+    assert main.is_rebalance_bar(160, 160, 21) is True
+    assert main.is_rebalance_bar(181, 160, 21) is True
+    assert main.is_rebalance_bar(170, 160, 21) is False
+    assert main.is_rebalance_bar(159, 160, 21) is False  # before warmup
+    with pytest.raises(ValueError):
+        main.is_rebalance_bar(160, 160, 0)
+
+
+def test_T8_rotation_exits_and_entries(runner_harness_module):
+    main = runner_harness_module["main"]
+    prev = ["A", "B", "C", "D", "E", "F"]
+    new = ["A", "B", "C", "D", "E", "G"]  # F leaves, G enters
+    assert main.rotation_exits(prev, new) == ["F"]
+    assert main.rotation_entries(prev, new) == ["G"]
+    assert main.rotation_exits(prev, prev) == []  # no churn -> no closed trades
+
+
+def test_T9_cost_primitives(runner_harness_module):
+    main = runner_harness_module["main"]
+    # commission: max(min_per_trade, n*per_share); 10 sh * 0.005 = 0.05 -> min 1.0
+    assert main.commission_cost(10, per_share=0.005, min_per_trade=1.0, scalar=1.0) == pytest.approx(1.0)
+    assert main.commission_cost(1000, per_share=0.005, min_per_trade=1.0, scalar=1.0) == pytest.approx(5.0)
+    assert main.commission_cost(0) == 0.0
+    assert main.commission_cost(1000, per_share=0.005, min_per_trade=1.0, scalar=0.0) == 0.0  # S0
+    # slippage: n*price*bps/1e4
+    assert main.slippage_cost(100, 50.0, bps=1.0, scalar=1.0) == pytest.approx(0.5)
+    assert main.slippage_cost(100, 50.0, bps=1.0, scalar=2.0) == pytest.approx(1.0)
+    assert main.slippage_cost(0, 50.0) == 0.0
+
+
+def test_T10_pyramid_and_short_forbidden(runner_harness_module):
+    main = runner_harness_module["main"]
+    with pytest.raises(RuntimeError, match="PYRAMID_FORBIDDEN"):
+        main.add_pyramid_unit()
+    with pytest.raises(RuntimeError, match="SHORTING_FORBIDDEN"):
+        main.open_short_position()
+
+
+def test_T11_config_locked_params(runner_harness_module):
+    c = runner_harness_module["main"].CONFIG
+    assert c["momentum_lookback_L"] == 126 and c["momentum_skip_S"] == 21
+    assert c["top_m_held"] == 6 and c["rebalance_cadence_R_days"] == 21
+    assert c["exit_rule"] == "ROTATION_RELATIVE_RANK" and c["exit_is_trailing_or_atr_stop"] is False
+    assert c["sizing_method"] == "equal_weight" and c["signal_direction"] == "long-only"
+    assert c["start_cash_usd"] == 100_000 and c["warmup_days"] == 160
+    assert c["verdict_min_closed_trades"] == 100 and c["verdict_oos_min_closed_trades_per_year"] == 50
+
+
+def test_T12_universe_24name_locked(runner_harness_module):
+    main = runner_harness_module["main"]; guard = runner_harness_module["execution_guard"]
+    assert len(main.CONFIG["universe"]) == 24
+    guard.assert_universe_locked(main.CONFIG)
+    bad = dict(main.CONFIG); bad["universe"] = main.CONFIG["universe"][:12]
+    with pytest.raises(Exception, match="UNIVERSE_DRIFT"):
+        guard.assert_universe_locked(bad)
+
+
+def test_T13_split_only_convention(runner_harness_module):
+    main = runner_harness_module["main"]; guard = runner_harness_module["execution_guard"]
+    assert main.CONFIG["adjustment_convention"] == "split_only" and main.CONFIG["dividends_adjusted"] is False
+    guard.assert_split_only_convention(main.CONFIG)
+    bad = dict(main.CONFIG); bad["adjustment_convention"] = "split_and_dividend"
+    with pytest.raises(Exception, match="C5_ADJUSTMENT_CONVENTION_NOT_SPLIT_ONLY"):
+        guard.assert_split_only_convention(bad)
+
+
+def test_T14_cost_stress_matrix(runner_harness_module):
+    tiers = runner_harness_module["main"].CONFIG["cost_stress_tiers"]
+    assert [t["tier"] for t in tiers] == ["S0", "S1", "S2", "S3", "S4"]
+    assert [t["cost_scalar"] for t in tiers] == [0.0, 1.0, 1.5, 2.0, 3.0]
+
+
+def test_T15_validator_harness_pass(runner_harness_module):
+    main = runner_harness_module["main"]; guard = runner_harness_module["execution_guard"]
+    algo = main.Algo(); algo.Initialize()
+    result = guard.full_guard_check(algo.config, safety_counters={"stale_fill_warning_count": algo._stale_fill_warning_count})
+    assert result["overall_pass"] is True, f"errors: {result['errors']}"
+    for k in ("assert_seal_inheritance", "assert_no_forbidden_order_paths", "assert_rec1_equivalent_binding_preserved",
+              "assert_locked_strategy_params", "assert_rotation_exit", "assert_equal_weight_sizing", "assert_long_only",
+              "assert_momentum_params_locked", "assert_k13_fold_scheme_locked", "assert_no_per_fold_refit",
+              "assert_boundary_alignment", "assert_split_only_convention", "assert_universe_locked",
+              "assert_no_leverage_cap", "safety_counters_all_zero"):
+        assert result["checks"].get(k) is True, f"check {k} failed: {result['errors']}"
+
+
+def test_T16_rotation_exit_guard(runner_harness_module):
+    main = runner_harness_module["main"]; guard = runner_harness_module["execution_guard"]
+    guard.assert_rotation_exit(main.CONFIG)
+    bad = dict(main.CONFIG); bad["exit_rule"] = "TRAILING_DONCHIAN_CHANNEL"
+    with pytest.raises(Exception, match="EXIT_RULE_DRIFT"):
+        guard.assert_rotation_exit(bad)
+    bad2 = dict(main.CONFIG); bad2["exit_is_trailing_or_atr_stop"] = True
+    with pytest.raises(Exception, match="EXIT_DESIGN_DRIFT"):
+        guard.assert_rotation_exit(bad2)
+
+
+def test_T17_long_only_and_equal_weight_guards(runner_harness_module):
+    main = runner_harness_module["main"]; guard = runner_harness_module["execution_guard"]
+    guard.assert_long_only(main.CONFIG)
+    guard.assert_equal_weight_sizing(main.CONFIG)
+    bad = dict(main.CONFIG); bad["shorting_enabled"] = True
+    with pytest.raises(Exception, match="SHORTING_ENABLED_MUST_BE_FALSE"):
+        guard.assert_long_only(bad)
+
+
+def test_T18_K13_fold_scheme_locked_invariant(runner_harness_module):
+    """K13 invariant: 5 fixed pre-committed UNSEARCHED contiguous folds; exact DA22 boundaries; no per-fold refit."""
+    main = runner_harness_module["main"]; guard = runner_harness_module["execution_guard"]
+    wf = runner_harness_module["walk_forward_driver"]
+    assert wf.validate_fold_scheme() is True
+    guard.assert_k13_fold_scheme_locked(main.CONFIG)
+    guard.assert_no_per_fold_refit(main.CONFIG)
+    # exact boundaries
+    got = [(f["fold"], f["idx_start"], f["idx_end"]) for f in wf.K13_FOLDS]
+    assert got == [("F1", 160, 478), ("F2", 479, 797), ("F3", 798, 1116), ("F4", 1117, 1435), ("F5", 1436, 1758)]
+    # contiguous + cover warmup..1758
+    assert wf.K13_FOLDS[0]["idx_start"] == 160 and wf.K13_FOLDS[-1]["idx_end"] == 1758
+    # tampering detected
+    bad = dict(main.CONFIG)
+    bad_scheme = {k: v for k, v in main.CONFIG["k13_fold_scheme"].items()}
+    bad_scheme["folds"] = [dict(f) for f in bad_scheme["folds"]]
+    bad_scheme["folds"][0]["idx_end"] = 500  # anchor a fold -> search/drift
+    bad["k13_fold_scheme"] = bad_scheme
+    with pytest.raises(Exception, match="K13_FOLD_BOUNDARY_DRIFT|K13_FOLDS_NOT_CONTIGUOUS"):
+        guard.assert_k13_fold_scheme_locked(bad)
+
+
+def test_T19_K13_verdict_gate(runner_harness_module):
+    wf = runner_harness_module["walk_forward_driver"]
+    # >=3/5 positive + aggregate>0 + k9 -> PASS
+    v = wf.k13_verdict([True, True, True, False, False], aggregate_net=1000.0, k9_ok=True)
+    assert v["k13_pass"] is True and v["verdict"] == "K13_PASS" and v["n_folds_positive"] == 3
+    # only 2/5 positive -> OOS_NOT_ROBUST
+    v2 = wf.k13_verdict([True, True, False, False, False], aggregate_net=1000.0, k9_ok=True)
+    assert v2["k13_pass"] is False and v2["verdict"] == "OOS_NOT_ROBUST"
+    # aggregate negative -> fail even if >=3 folds positive
+    v3 = wf.k13_verdict([True, True, True, True, False], aggregate_net=-50.0, k9_ok=True)
+    assert v3["k13_pass"] is False
+    # k9 not ok -> fail
+    v4 = wf.k13_verdict([True, True, True, True, True], aggregate_net=1000.0, k9_ok=False)
+    assert v4["k13_pass"] is False
+
+
+def test_T20_driver_stubs_refuse_execution(runner_harness_module):
+    isd = runner_harness_module["in_sample_driver"]
+    oosd = runner_harness_module["out_of_sample_driver"]
+    wf = runner_harness_module["walk_forward_driver"]
+    with pytest.raises(RuntimeError, match="P6_IS_NOT_AUTHORIZED"):
+        isd.run_in_sample()
+    with pytest.raises(RuntimeError, match="P10_OOS_NOT_AUTHORIZED"):
+        oosd.run_out_of_sample()
+    with pytest.raises(RuntimeError, match="P6_7_K13_NOT_AUTHORIZED"):
+        wf.run_walk_forward()
+
+
+def test_T21_oos_isolation_no_is_window_in_oos_signal_scope(runner_harness_module):
+    """OOS driver must not bind IS-window date constants in its own module namespace."""
+    oosd = runner_harness_module["out_of_sample_driver"]
+    assert not hasattr(oosd, "IN_SAMPLE_START")
+    assert not hasattr(oosd, "IN_SAMPLE_END")
+    assert oosd.OOS_START.isoformat() == "2024-01-02" and oosd.OOS_END.isoformat() == "2025-12-30"
+
+
+def test_T22_end_to_end_synthetic_rotation_invariants(runner_harness_module, synthetic_prices):
+    """Mini synthetic rotation: never hold > M; closed trades counted only on rotation exit; equal-weight targets.
+
+    Synthetic monotone-rate symbols => rank stable => after the first rebalance there is NO churn,
+    so closed_trades should be 0 across stable rebalances (exercises the low-turnover counting that
+    drives the K9 concern). NOT real data.
+    """
+    main = runner_harness_module["main"]
+    syms = list(synthetic_prices.keys())  # A..F, 6 symbols
+    n = len(synthetic_prices[syms[0]])
+    warmup, R, M, equity = 160, 21, 4, 100000.0
+    holdings = []
+    closed_trades = 0
+    max_held = 0
+    for i in range(n):
+        if not main.is_rebalance_bar(i, warmup, R):
+            continue
+        sigs = {s: main.trailing_return(synthetic_prices[s], i, 126, 21) for s in syms}
+        ranked = main.cross_sectional_rank(sigs)
+        selected = main.select_top_m(ranked, M)
+        exits = main.rotation_exits(holdings, selected)
+        closed_trades += len(exits)
+        targets = main.equal_weight_targets(selected, equity, M)
+        holdings = selected
+        max_held = max(max_held, len(holdings))
+        assert len(holdings) <= M
+        assert all(v == pytest.approx(equity / M) for v in targets.values())
+    # monotone rates => top-4 stable (A,B,C,D) after first selection => no churn => 0 closed trades
+    assert max_held == M
+    assert closed_trades == 0
+
+
+def test_T23_synthetic_fixture_parses_if_present(runner_harness_module, synthetic_csv_path):
+    """If the synthetic fixture CSV exists, it parses and ranking runs on it (synthetic, not real)."""
+    if not synthetic_csv_path.exists():
+        pytest.skip("synthetic fixture not present")
+    main = runner_harness_module["main"]
+    by_sym = {}
+    with open(synthetic_csv_path, "r", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            by_sym.setdefault(row["symbol"], []).append(float(row["close"]))
+    assert len(by_sym) >= 2
+    i = min(len(v) for v in by_sym.values()) - 1
+    sigs = {s: main.trailing_return(v, i, 126, 21) for s, v in by_sym.items()}
+    ranked = main.cross_sectional_rank(sigs)
+    assert isinstance(ranked, list)

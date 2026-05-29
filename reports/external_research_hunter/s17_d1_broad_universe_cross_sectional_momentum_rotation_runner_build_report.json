@@ -1,0 +1,99 @@
+{
+  "anchors": {
+    "candidate_record_id": "s17-d1-broad-universe-cross-sectional-momentum-rotation-24name-large-cap-long-history",
+    "dr9_result_commit": "d86e5d1",
+    "dr9_result_seal": "85667ab3238a27b2f020c3644e4b7e2643b64be48d2a3f21cd75123b9b7677e3",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "4484ab6",
+    "p1_plan_lock_report_seal": "e848b7c4efe900f029ebc51222c7b15bb6652a21a7f306cc38327f21303888ae",
+    "p2_phase2_plan_commit": "894da78",
+    "p2_phase2_plan_report_seal": "4b92816c9d1825924c87554e13534e2fc74b59fbcb73569078cd3edb1bc85115",
+    "tier_n_spec_seal_commit": "767d86b",
+    "tier_n_spec_seal_report_seal": "ff4b237436cf116b5ab3f1f28cfbd966a99d21020589bec4a1892004fc16b5dc",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T00:58:38.818131Z",
+  "authorization_phrase": "Authorize s17-d1 broad-universe cross-sectional momentum P3 BUILD only — bound by DR10 v2 + walk-forward K13.",
+  "build_component": "runner",
+  "build_reuses_sealed_csvs": "data/s17_d1_broad_universe_cross_sectional_momentum_long_history/raw/<24 names> (DR9-PASSED; sealed d86e5d1); read at P6/P6.5/P6.7 only, NOT at BUILD",
+  "candidate_record_id": "s17-d1-broad-universe-cross-sectional-momentum-rotation-24name-large-cap-long-history",
+  "component_description": "Cross-sectional momentum primitives (trailing_return 126-21, cross_sectional_rank, select_top_m, equal_weight_targets, is_rebalance_bar, rotation_exits/entries, commission_cost, slippage_cost) + CONFIG byte-equivalent to SEAL DA1-DA22 + Algo stub (live refusal). full_guard_check overall_pass=True. NO execution.",
+  "document_type": "P3_BUILD_REPORT_SEALED",
+  "files_built": {
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/__init__.py": "ce0dd14e7285fe24cd22a5c1fe680f60225edc1dacfd9cfd8e475dba88c0ddd1",
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/execution_guard.py": "31a4d57222d8c5f9e4e7148eccf7d90cb3cfc4d3cca4f1a104ac2f85cb401467",
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/main.py": "5b6a06c118768a8e036e318e9d3e5f8ba6b8ebee0f2bb15b692362f402414964",
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/tests/conftest.py": "ce365d6314503fbb128859a91028440a1f150ea33e317db8caa93ecae4fcc84f",
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/tests/fixtures/synthetic_broad_universe_daily.csv": "5e03ba03e391be5350e282d804fd57b1fb3e9dd73d9c6ca827388481ac8cdb4d",
+    "external_research_hunter/s17_d1_broad_universe_cross_sectional_momentum_rotation_runner_harness/tests/test_smoke.py": "c4f9f54df77ed198d98093bd92fe382db7fa98c832b055787f1a11619b2b1769"
+  },
+  "hard_boundaries_held": {
+    "build_only_no_execution": true,
+    "no_backtest": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_per_fold_refit": true,
+    "no_real_csv_read": true,
+    "no_retroactive_k13_application": true,
+    "no_revival_of_s16_s15_s14_s13_s12": true,
+    "no_signal_computation_on_real_data": true,
+    "no_strategy_optimization": true,
+    "py_compile_only_no_pytest": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S17_D1_XMOM_P3_BUILD_REPORT_SEALED",
+    "COMPONENT_RUNNER",
+    "NO_EXECUTION_AT_BUILD",
+    "PY_COMPILE_PASS",
+    "BUILD",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S17_D1_BROAD_UNIVERSE_CROSS_SECTIONAL_MOMENTUM_P3_BUILD_SEALED",
+  "negative_invariants": {
+    "backtest_run": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "live_or_broker_path": false,
+    "oos_inspected": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "real_csv_read": false,
+    "signal_computed_on_real_data": false,
+    "simulator_run": false,
+    "strategy_lab_promoted": false,
+    "tests_run": false
+  },
+  "next_phase_authorization_scope": {
+    "primary_forward": "Authorize s17-d1 broad-universe cross-sectional momentum P4 synthetic smoke only."
+  },
+  "phase": "P3_BUILD",
+  "py_compile_status": "PASS (all harness source compiled; doraise=True)",
+  "report_date_utc": "2026-05-29T00:58:38.818131Z",
+  "report_seal_sha256": "57fc17563df47a4bf7cfad5c1ffebc35010de8291e3a8693d2f029cd11c9b95f",
+  "schema_id": "sparta.s17_d1_broad_universe_xmom_runner_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "no_strategy_optimization_authorized": true,
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "structural_guard_check": {
+    "full_guard_check_overall_pass": true,
+    "k13_fold_scheme_valid": true,
+    "note": "CONFIG attestation only; no data, no signals, no backtest"
+  },
+  "title": "s17-d1 broad-universe cross-sectional momentum P3 BUILD report: runner harness (main.py) + execution_guard + synthetic fixture (sealed; NO execution)"
+}
