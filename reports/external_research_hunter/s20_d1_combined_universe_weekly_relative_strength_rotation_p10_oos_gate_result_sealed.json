@@ -1,0 +1,158 @@
+{
+  "anchors": {
+    "framework_dr10_v2_commit": "78cd22e",
+    "p3_build_commit": "7255f9c",
+    "p6_5_commit": "8138301",
+    "p6_7_k13_commit": "1574a67",
+    "p6_is_commit": "ab7b232",
+    "p7_commit": "009d90a",
+    "s18_dr9_commit": "d86e5d1",
+    "s19_dr9_commit": "574fa9e",
+    "tier_n_spec_seal_commit": "e9ec72f",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T04:12:25.966708Z",
+  "authorization_phrase": "Authorize s20-d1 combined-universe weekly relative-strength rotation DRAFT-to-diagnostic bundle (Step 9: P10 OOS gate).",
+  "candidate_record_id": "s20-d1-combined-universe-weekly-relative-strength-rotation-48name-large-cap-long-history",
+  "comparison": {
+    "s18_oos": "117 trades/58.7y, net +$39,786, OOS_CONFIRMED",
+    "s19_oos": "87 trades/43.6y, net +$44,050, INSUFFICIENT_SAMPLE/K9",
+    "s20_oos": "134 trades/67.2y, net $60,003.60, OOS_CONFIRMED_DIAGNOSTIC"
+  },
+  "document_type": "P10_OOS_GATE_RESULT_SEALED",
+  "dr_evaluation": {
+    "DR1_oos_rebalance_count_lt_36": false,
+    "DR4_oos_negative_while_is_positive": false,
+    "DR9_data_continuity": "PASS (d86e5d1 + 574fa9e)",
+    "K9_oos_floor": "50/y (>=100 over 2y)",
+    "K9_oos_insufficient": false,
+    "K9_oos_rate_per_year": 67.23,
+    "K9_oos_total": 134
+  },
+  "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+  "hard_boundaries_held": {
+    "imports_committed_p3_primitives_unmodified": true,
+    "locked_p10_procedure_only": true,
+    "no_cadence_change": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_reinterpretation": true,
+    "no_fold_scheme_change": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_live_or_broker": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_window_change": true,
+    "no_parameter_tuning": true,
+    "no_rerun_or_retry": true,
+    "no_strategy_lab_promotion": true
+  },
+  "is_a_seal": true,
+  "is_reference_for_dr4": {
+    "is_expectancy_usd_per_trade": 272.3,
+    "is_net_pnl_usd": 115347.3,
+    "is_positive": true,
+    "source_commit": "ab7b232"
+  },
+  "labels": [
+    "S20_D1_COMBINED_UNIVERSE_WEEKLY_RS_P10_OOS_GATE_SEALED",
+    "OOS_CONFIRMED_DIAGNOSTIC",
+    "DRIVER_NONE_NO_DR_FIRED",
+    "OOS_2024_2025_HOLD_OUT",
+    "SAMPLE_SIZE_VERDICT_VS_S19_K9_BLOCKER",
+    "SELECTION_CAVEAT_BINDING",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S20_D1_COMBINED_UNIVERSE_WEEKLY_RS_ROTATION_P10_OOS_CONFIRMED_DIAGNOSTIC_SEALED",
+  "locked_params_used": {
+    "L": 126,
+    "M": 8,
+    "R": 5,
+    "S": 21,
+    "cadence": "weekly",
+    "cost_tier": "S1",
+    "direction": "long-only",
+    "exit": "ROTATION_RELATIVE_RANK",
+    "sizing": "equal_weight_1/M",
+    "warmup": 160
+  },
+  "metrics": {
+    "closed_trades": 134,
+    "cost_tier_used": "S1",
+    "expectancy_usd_per_trade": 353.1933,
+    "final_equity_usd": 160003.6,
+    "max_drawdown_pct": 20.9322,
+    "net_pnl_usd": 60003.6,
+    "oos_rebalances": 100,
+    "open_positions_at_oos_end": [
+      "NVDA",
+      "AMD",
+      "GOOGL",
+      "CAT",
+      "TMO",
+      "LLY",
+      "JNJ",
+      "AAPL"
+    ],
+    "profit_factor": 2.05623,
+    "sharpe_proxy_per_trade": 0.214428,
+    "start_cash_usd": 100000.0,
+    "total_return_pct": 60.0036,
+    "trades_per_year": 67.23,
+    "win_rate": 0.5522
+  },
+  "negative_invariants": {
+    "cadence_altered": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr_redefined": false,
+    "k13_fold_scheme_altered": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18_s19": false,
+    "oos_window_altered": false,
+    "p3_source_modified": false,
+    "parameters_tuned": false,
+    "rerun_or_retried": false,
+    "s18_chain_modified": false,
+    "s19_chain_modified": false
+  },
+  "oos_k9_measured_with_pnl": {
+    "clears": true,
+    "closed_trades": 134,
+    "floor_per_year": 50,
+    "floor_total_2y": 100,
+    "per_year": 67.23,
+    "vs_signal_only_preseal": "pre-SEAL signal-only measured 134/67.2y; P10 with P&L measured 134/67.2y"
+  },
+  "oos_window": {
+    "bars": 501,
+    "end": "2025-12-30",
+    "idx": [
+      1258,
+      1758
+    ],
+    "start": "2024-01-02"
+  },
+  "phase": "P10_OOS_GATE",
+  "report_date_utc": "2026-05-29T04:12:25.966708Z",
+  "report_seal_sha256": "529b224dc42b628df0778303763a52c313261f01de26a31a90895b99cfaab88f",
+  "schema_id": "sparta.s20_d1_combined_weekly_rs_p10_oos_gate_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "selection_caveat_binding": "The union includes the known-OOS-CONFIRMED s18 basket -> a positive P10 OOS is WEAK fresh-generalization evidence. The load-bearing s20 result is the OOS-K9 sample outcome (does breadth solve the s19 blocker WITH P&L), NOT a clean generalization claim.",
+  "solves_s19_oos_k9_blocker": true,
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "terminal_driver": "none_no_dr_fired",
+  "title": "s20-d1 combined-universe weekly RS rotation P10 OOS gate result (sealed; OOS_CONFIRMED_DIAGNOSTIC; sample-size verdict vs s19 OOS-K9 blocker; selection caveat binding)",
+  "verdict": "OOS_CONFIRMED_DIAGNOSTIC",
+  "warmup_note": "signal warmup uses prior (pre-OOS) bars for the 126-21 lookback only; trades execute ONLY within the OOS window; fresh $100k at first OOS rebalance"
+}
