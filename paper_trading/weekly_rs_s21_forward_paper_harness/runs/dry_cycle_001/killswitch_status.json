@@ -1,0 +1,18 @@
+{
+  "metrics": {
+    "annualized_cost_drag": 0.0,
+    "current_drawdown": 0.00018675603217154275,
+    "data_integrity_ok": true,
+    "manual_stop": false,
+    "mean_shortfall_bps": 0.0,
+    "mechanic_drift": false,
+    "trailing_expectancy": null
+  },
+  "note": "annualized_cost_drag/shortfall N/A on week 1",
+  "result": {
+    "halt": false,
+    "reasons": [],
+    "status": "GREEN"
+  },
+  "week": 1
+}
