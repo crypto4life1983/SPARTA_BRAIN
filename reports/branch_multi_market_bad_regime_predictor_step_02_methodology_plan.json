@@ -1,0 +1,146 @@
+{
+  "allowed_decision_time_features": {
+    "candidate_feature_families_conceptual": [
+      "trailing price-derived state of market m up to t (e.g., trailing realized volatility, trailing range/ATR-like dispersion, momentum/trend descriptors) -- all windows END at or before t",
+      "cross-market state up to t (e.g., trailing co-movement/correlation among ES/GC/CL/6E, relative dispersion) computed only from <= t data",
+      "term-structure / roll-state descriptors available at t (if continuous-contract construction exposes them) -- point-in-time",
+      "calendar / seasonality features knowable at t (day-of-week, month, pre-announced event-window flags from a point-in-time calendar)"
+    ],
+    "feature_windows_must_end_before_label_window": "Every feature window must close at or before t; the label window opens strictly after t. No overlap.",
+    "principle": "A feature is allowed ONLY if it is fully computable from information available at or before the decision time t (point-in-time correct). All features are indexed at t and use data with timestamp <= t."
+  },
+  "anchors": {
+    "step_01_scope_content_sha256": "b5ffe4daa72260992cf453922e4d053a0dd388e9ae156908360a28e78c9ea009"
+  },
+  "authored_at_utc": "2026-05-29T14:53:15.944871Z",
+  "binding": true,
+  "branch": "multi_market_bad_regime_predictor",
+  "contamination_firewall": {
+    "contamination_firewall": true,
+    "forbidden_imports": [
+      "weekly_rs_rotation",
+      "FRC",
+      "BLOCKED_AT_6_GATES",
+      "DR10/DR-chain",
+      "K9/K13/K-gates",
+      "Strategy_Lab",
+      "s12..s21 candidate universes/mechanics"
+    ],
+    "rule": "This branch is self-contained. It does NOT import, reference, or inherit SPARTA_BRAIN weekly relative-strength rotation, FRC, BLOCKED_AT_6_GATES, the DR/K gate framework, Strategy-Lab promotion, or any other cross-project mechanic/universe/gate vocabulary. Its lifecycle, gates, and terminology are its own."
+  },
+  "content_sha256": "26b3cd10d5d735aca0078dc8ff5a13698d050713f6edc1cfbd30998613bef6d0",
+  "data_requirements": {
+    "coverage_required": {
+      "discovery": "full 2024 + sufficient PRIOR history so the longest feature lookback is fully warmed at the first 2024 decision date",
+      "oos": "full 2025 (SEALED; availability may be audited but values not inspected for labeling/fitting)"
+    },
+    "fields_required": [
+      "date/timestamp",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "open_interest (if available)",
+      "roll/contract metadata"
+    ],
+    "frequency": "daily (pre-committed; intraday out of scope unless a later step re-scopes)",
+    "instrument_type": "futures continuous-contract series (construction/roll convention to be FIXED and documented; e.g., volume/OI-based roll, ratio- vs difference-adjustment) -- point-in-time correct",
+    "markets": [
+      "ES",
+      "GC",
+      "CL",
+      "6E"
+    ],
+    "no_fetch_in_this_branch_step": "Steps 01-03 do NOT fetch ES/GC/CL/6E data; data requirements are a SPEC for a later separately-authorized acquisition step.",
+    "point_in_time": "all series must be reconstructable as-of any t without future information; revisions/rolls applied point-in-time"
+  },
+  "discovery_2024_vs_oos_2025_constraints": {
+    "discovery_2024": "ALL design happens here: target threshold/horizon selection, feature definition, any future model fitting, inspection, and validation-internal splits (e.g., within-2024 cross-validation).",
+    "firewall_enforcement": "discovery/OOS separation is a hard gate audited at Step 03 (enforceability) and re-checked before any OOS step.",
+    "oos_2025_sealed": "2025 is a write-once holdout. It is NOT inspected, fitted, thresholded, or used for any decision until a SEPARATE pre-registered OOS-evaluation gate is authorized. No 2025-derived statistic may leak into discovery.",
+    "pre_registration": "Before touching 2025, the target rule, horizon H, feature set, and evaluation metrics must be FROZEN/committed; OOS is then a single evaluation, not an iterative tuning set."
+  },
+  "document_type": "BRANCH_METHODOLOGY_PLAN",
+  "exact_step_03_audit_requirements": {
+    "must_not": [
+      "train/cluster/signal/backtest",
+      "compute returns/R/PnL/Sharpe",
+      "fetch or inspect 2025 labels",
+      "claim tradeability/OOS-confirmation/live-readiness/profitability"
+    ],
+    "must_verify": [
+      "A3.1 DATA AVAILABILITY/COVERAGE: for ES/GC/CL/6E, the SPEC'd fields exist at daily frequency over the discovery period (2024 + prior warmup); and that 2025 exists as a holdout (availability only -- NOT inspected for labels).",
+      "A3.2 POINT-IN-TIME / ROLL CORRECTNESS: continuous-contract construction + any adjustments are point-in-time, with the roll convention documented and free of look-ahead.",
+      "A3.3 CALENDAR ALIGNMENT: the 4 markets' trading calendars are reconciled (shared decision-time index defined; mismatches handled by a pre-committed rule, not silent fill).",
+      "A3.4 TARGET COMPUTABILITY/DEFINEDNESS: the label rule is unambiguous; horizon H fits within available history at every discovery decision date; the discovery base-rate is estimable and non-degenerate -- WITHOUT computing returns/PnL (label feasibility only).",
+      "A3.5 FEATURE DECISION-TIME VALIDITY: each allowed feature family is confirmed computable from <= t data only; windows end before the label window; no forbidden/leaky feature is present.",
+      "A3.6 LEAKAGE FIREWALL: feature/target time-separation and the discovery/OOS (2024/2025) firewall are enforceable and documented.",
+      "A3.7 SCOPE/GUARD COMPLIANCE: confirm NO model trained, NO clustering, NO signals, NO backtest, NO returns/R/PnL/Sharpe, NO tradeability/OOS/live/profitability claims, and NO SPARTA cross-project contamination."
+    ],
+    "output": "exactly two files: reports/branch_multi_market_bad_regime_predictor_step_03_data_feature_target_audit.json and .md, grounded in THIS Step 02 document (cite its commit + content_sha256). Commit only if separately authorized.",
+    "purpose": "Step 03 is an AUDIT that data, features, and target are sound and the methodology is enforceable -- with NO model/cluster/signal/backtest/returns and NO data inspection beyond integrity/availability needed for the audit."
+  },
+  "forbidden_features_and_leakage_rules": [
+    "NO future data: no value with timestamp > t may enter any feature.",
+    "NO target leakage: features must not be derived from, or be a deterministic function of, the label window (t, t+H] or the label itself.",
+    "NO contemporaneous-bar leakage: if the decision is made on bar t's close, features must not use any same-bar information unavailable at that close, nor any t+1.. information.",
+    "NO look-ahead in construction: continuous-contract rolls, revisions, or any data only knowable later must be applied point-in-time (no fully-revised/back-adjusted series that bakes in future rolls in a way unavailable at t).",
+    "NO OOS peeking: 2025 data must not inform any feature/target/threshold/model decision during discovery.",
+    "NO survivorship / selection on outcome: thresholds, horizons, and feature sets are pre-committed on discovery, not chosen by their OOS effect.",
+    "NO cross-project contamination: no SPARTA weekly-RS/FRC/gate-derived features or labels."
+  ],
+  "guards": {
+    "definitional_only": true,
+    "is_a_prediction_research_project_not_a_trading_system": true,
+    "no_backtest": true,
+    "no_clustering": true,
+    "no_data_fetch": true,
+    "no_live_readiness_claim": true,
+    "no_model_training": true,
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_returns_R_PnL_Sharpe": true,
+    "no_signal_creation": true,
+    "no_tradeability_claim": true
+  },
+  "labels": [
+    "BRANCH_MULTI_MARKET_BAD_REGIME_PREDICTOR",
+    "STEP_02_METHODOLOGY_PLAN",
+    "DEFINITIONAL_ONLY",
+    "PREDICTION_NOT_TRADING",
+    "TARGET_DEFINED",
+    "DISCOVERY_2024_OOS_2025_SEALED",
+    "VALIDATION_GATES_OWN",
+    "STEP_03_REQUIREMENTS_SPECIFIED",
+    "CONTAMINATION_FIREWALLED",
+    "NO_DATA_NO_MODEL_NO_RETURNS_NO_CLAIMS"
+  ],
+  "objective": "For each market m in {ES, GC, CL, 6E} and each decision time t, produce a calibrated estimate (and binary label) of whether m will be in a 'bad regime' over the forward horizon H, using ONLY information available at or before t. Goal = predictive quality (classification), explicitly NOT trading signals or P&L.",
+  "schema_id": "branch.multi_market_bad_regime_predictor.step_02_methodology_plan.v1",
+  "status": {
+    "branch_state": "METHODOLOGY_DEFINED_READY_FOR_STEP_03_AUDIT",
+    "no_claims": true,
+    "no_data": true,
+    "no_model": true
+  },
+  "step": "02_methodology_plan",
+  "supersedes_missing_reference": "Replaces the previously-cited but non-existent Step 02 commit 2a85b96; THIS committed document is the new source of truth for Step 03.",
+  "target_definition": {
+    "computation_status": "NOT COMPUTED in Steps 01-03. No returns/R/PnL/Sharpe are computed. Step 03 audits only that the label is well-defined, unambiguous, and COMPUTABLE-IN-PRINCIPLE from the specified data (horizon fits available history; base-rate estimable on discovery only). Actual label realization is deferred to a later separately-authorized step.",
+    "framing_note": "The adverse-condition is a property of the MARKET STATE (a labeling statistic), not the return of any strategy. This branch predicts regimes; it does not trade them.",
+    "horizon_H": "a single, pre-committed forward horizon (e.g., a fixed number of trading days), fixed before any labeling; H is a design constant, not searched per result.",
+    "label_rule_conceptual": "y_{m,t} = 1 ('bad regime') iff the realized forward window (t, t+H] of market m satisfies a PRE-COMMITTED adverse-condition rule; else 0. The adverse-condition rule is a labeling function over realized market-state statistics (e.g., elevated realized volatility and/or a large sustained adverse price excursion over the window), with thresholds PRE-COMMITTED and estimated ONLY on discovery (2024) data.",
+    "label_uses_future_window_BY_DESIGN": "The TARGET is allowed to use the forward window (t, t+H] -- that is what makes it a supervised label. The FEATURES must not (see leakage rules). The label timestamp is anchored at t; the realization window is strictly after t.",
+    "type": "binary classification label per (market, decision-time t)"
+  },
+  "validation_gates_branch_own": {
+    "G1_data_integrity_point_in_time": "data is complete, calendar-consistent across the 4 markets, and point-in-time correct (no future leakage via rolls/revisions).",
+    "G2_no_leakage_feature_target_separation": "every feature window ends <= t; the label window is strictly after t; no feature is a function of the label window.",
+    "G3_target_well_defined_and_base_rate_sane": "the label rule is unambiguous, computable-in-principle, and its discovery base-rate is neither degenerate (≈0% or ≈100%) nor undefined.",
+    "G4_discovery_only_fitting": "all thresholds/feature/model choices are made on 2024 only; documented and frozen before OOS.",
+    "G5_oos_sealed_until_preregistered": "2025 untouched until a separate pre-registered evaluation; no peeking.",
+    "G6_honest_reporting_classification_only": "results are reported as CLASSIFICATION quality (e.g., AUC, precision/recall, calibration, base-rate-relative lift) -- NEVER returns/PnL/Sharpe/tradeability/profitability. No live-readiness or OOS-confirmation language.",
+    "note": "These are THIS branch's gates; they deliberately do NOT reuse SPARTA DR/K/FRC/6-gate constructs."
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "authored_at_utc": "2026-05-29T14:53:15.944871Z",
+  "binding": true,
+  "branch": "multi_market_bad_regime_predictor",
+  "contamination_firewall": {
+    "contamination_firewall": true,
+    "forbidden_imports": [
+      "weekly_rs_rotation",
+      "FRC",
+      "BLOCKED_AT_6_GATES",
+      "DR10/DR-chain",
+      "K9/K13/K-gates",
+      "Strategy_Lab",
+      "s12..s21 candidate universes/mechanics"
+    ],
+    "rule": "This branch is self-contained. It does NOT import, reference, or inherit SPARTA_BRAIN weekly relative-strength rotation, FRC, BLOCKED_AT_6_GATES, the DR/K gate framework, Strategy-Lab promotion, or any other cross-project mechanic/universe/gate vocabulary. Its lifecycle, gates, and terminology are its own."
+  },
+  "content_sha256": "b5ffe4daa72260992cf453922e4d053a0dd388e9ae156908360a28e78c9ea009",
+  "deliverable_chain": [
+    "Step 01 (this) -- scope.",
+    "Step 02 -- methodology plan (objective, target, allowed/forbidden features, data requirements, discovery/OOS constraints, validation gates, exact Step 03 requirements).",
+    "Step 03 -- DATA/FEATURE/TARGET AUDIT (audit-only; no model/cluster/signal/backtest/returns/fetch beyond what the audit requires; grounded in committed Step 02).",
+    "Later steps -- separately authorized; not pre-approved here."
+  ],
+  "document_type": "BRANCH_SCOPE",
+  "guards": {
+    "definitional_only": true,
+    "is_a_prediction_research_project_not_a_trading_system": true,
+    "no_backtest": true,
+    "no_clustering": true,
+    "no_data_fetch": true,
+    "no_live_readiness_claim": true,
+    "no_model_training": true,
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_returns_R_PnL_Sharpe": true,
+    "no_signal_creation": true,
+    "no_tradeability_claim": true
+  },
+  "labels": [
+    "BRANCH_MULTI_MARKET_BAD_REGIME_PREDICTOR",
+    "STEP_01_SCOPE",
+    "DEFINITIONAL_ONLY",
+    "PREDICTION_NOT_TRADING",
+    "CONTAMINATION_FIREWALLED",
+    "NO_DATA_NO_MODEL_NO_CLAIMS"
+  ],
+  "markets_in_scope": {
+    "6E": "Euro FX (currency)",
+    "CL": "WTI Crude Oil (energy)",
+    "ES": "E-mini S&P 500 (equity index)",
+    "GC": "Gold (metals)"
+  },
+  "objective_one_line": "Define the scope of a research project to PREDICT, at decision time, whether the near-future environment of each of four futures markets (ES, GC, CL, 6E) is a 'bad regime' (to be precisely defined in Step 02) -- a supervised classification/forecasting problem, NOT a trading system.",
+  "rationale_for_universe": "Four liquid, structurally-distinct futures markets across asset classes (equity / metal / energy / FX) so that 'bad regime' prediction can be studied both per-market and cross-market without single-asset idiosyncrasy dominating. Universe is FIXED for this branch.",
+  "schema_id": "branch.multi_market_bad_regime_predictor.step_01_scope.v1",
+  "status": {
+    "branch_state": "DEFINITIONAL_SCOPE_SET",
+    "no_claims": true,
+    "no_data": true,
+    "no_model": true
+  },
+  "step": "01_scope",
+  "temporal_scope": {
+    "discovery_period": "2024 (in-sample; all design/fitting/inspection)",
+    "oos_holdout": "2025 (strictly sealed; untouched until a separate pre-registered evaluation gate)"
+  },
+  "what_this_is": "A multi-market, decision-time predictive-classification study: given only information available at time t, estimate the probability/label that market m enters a 'bad regime' over a forward horizon H. The deliverable is predictive understanding + honestly-measured classification quality -- never orders, signals, or P&L.",
+  "what_this_is_NOT": [
+    "NOT a trading strategy, signal generator, or execution system.",
+    "NOT a returns/PnL/Sharpe study -- evaluation is classification quality only (e.g., AUC/precision/recall/calibration), computed in later authorized steps.",
+    "NOT a claim of tradeability, OOS confirmation, live readiness, or profitability at any stage of this branch."
+  ]
+}
