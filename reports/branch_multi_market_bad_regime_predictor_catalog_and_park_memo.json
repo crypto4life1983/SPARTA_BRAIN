@@ -1,0 +1,112 @@
+{
+  "authored_at_utc": "2026-05-29T17:09:43.284951Z",
+  "branch": "multi_market_bad_regime_predictor",
+  "content_sha256": "ea0d0379e9b9e028eab45b4d8580a00060ebc458a0e9bdf55fdd7d4211d4defd",
+  "document_type": "BRANCH_CATALOG_AND_PARK_MEMO",
+  "guards_held": {
+    "no_2025_inspection": true,
+    "no_backtest": true,
+    "no_cluster": true,
+    "no_commit_by_this_script": true,
+    "no_live_readiness_claim": true,
+    "no_new_model": true,
+    "no_oos_confirmation_claim": true,
+    "no_profitability_claim": true,
+    "no_returns_R_PnL_Sharpe": true,
+    "no_signals": true,
+    "no_sparta_contamination": true,
+    "no_tradeability_claim": true,
+    "read_only_memo": true
+  },
+  "honest_scope_of_finding": "This is a within-a-single-year (2024) discovery-stage finding using one simple deterministic linear model on 8 decision-time features. It is NOT a claim that bad regimes are unpredictable in general, nor a claim about any other model class, feature set, horizon, or market. It is a specific NEGATIVE result for THIS model on THIS discovery slice. No backtest, no signals, no returns/R/PnL/Sharpe, no trading system was ever built.",
+  "labels": [
+    "BRANCH_MULTI_MARKET_BAD_REGIME_PREDICTOR",
+    "CATALOG_AND_PARK",
+    "DISCOVERY_NEGATIVE",
+    "NO_OOF_EDGE",
+    "SEALED_2025_OOS_NEVER_INSPECTED",
+    "CONTAMINATION_FIREWALLED",
+    "READ_ONLY_MEMO"
+  ],
+  "lifecycle_ledger": [
+    {
+      "commit": "b6c30d5",
+      "content_sha256": "b5ffe4daa7226099",
+      "note": "Prediction/classification research scope for bad regimes in ES/GC/CL/6E; explicitly NOT a trading system; contamination-firewalled (no SPARTA vocabulary).",
+      "outcome": "DEFINED",
+      "step": "01 scope"
+    },
+    {
+      "commit": "b6c30d5",
+      "content_sha256": "26b3cd10d5d735ac",
+      "note": "Source-of-truth methodology: discovery 2019-2024 + sealed 2025 OOS; common-4 inner-join calendar; purged/embargoed time-series CV; classification metrics only.",
+      "outcome": "DEFINED",
+      "step": "02 methodology plan"
+    },
+    {
+      "commit": "5c2bea7",
+      "content_sha256": "72572a47eb60a11f",
+      "note": "Vol-scaled regime-relative target z(t)=fwd_maxDD/(trailing_21d_vol*sqrt(H)) >= K, K = pooled 2019-2023 z-q80 (n=5152, K=1.5575). Fixed CL degeneracy WITHOUT tuning to 2024.",
+      "outcome": "PASS",
+      "step": "02 target-rule amendment"
+    },
+    {
+      "commit": "b1411c7",
+      "content_sha256": "185ef1783e1e66b4",
+      "note": "Assembled discovery dataset audited; GC Sunday-session coverage discrepancy diagnosed benign (max contiguous gap 2); inner-join common-4 calendar + physical 2024/2025 separation confirmed.",
+      "outcome": "PASS_CONDITIONAL",
+      "step": "03 data/feature/target re-audit"
+    },
+    {
+      "commit": "aba1796",
+      "content_sha256_manifest": "ba8618517cfdd78e",
+      "note": "All 4 markets fetched uniform ohlcv-1d continuous c.0; discovery (2019-2024) physically separate from sealed 2025 OOS (SEALED_DO_NOT_INSPECT marker); values not inspected.",
+      "outcome": "PASS",
+      "step": "acquisition/assembly"
+    },
+    {
+      "commit": "9164bd7",
+      "content_sha256_manifest": "ded859a998b9ff39",
+      "note": "980 rows (245 labelable 2024 common-4 dates x 4 markets); 8 decision-time (<=t) features + leaky z (flagged exclude); base-rates ES 14.7%/GC 7.3%/CL 18.4%/6E 21.6%; pooled 15.5%; all 4 non-degenerate.",
+      "outcome": "PASS",
+      "step": "04 feature/target rebuild (amended target)",
+      "table_sha256": "9fd31f0e3adae3c9"
+    },
+    {
+      "commit": "026d2c5",
+      "content_sha256": "7376761230394cab",
+      "note": "Deterministic pooled logistic regression on the 8 decision-time features (leaky z excluded); purged + embargoed (H=21) blocked CV (K=5), OOF coverage 100%. Pooled OOF AUC 0.471 (<=0.5), precision-lift ~1.02 (none); per-market AUC dispersed (ES 0.71/GC 0.20/CL 0.46/6E 0.38) = small-sample noise; in-sample volatility-feature signal did not survive OOF.",
+      "outcome": "PASS_METHODOLOGY / NEGATIVE_RESULT",
+      "step": "05 model fit + within-2024 CV evaluation"
+    }
+  ],
+  "one_line": "The Multi-Market Bad-Regime Predictor branch is PARKED as DISCOVERY-NEGATIVE: the data pipeline and vol-scaled target rebuild passed, but the simple pooled decision-time classification model showed NO leakage-safe within-2024 out-of-fold edge (pooled OOF AUC 0.471; no useful precision lift). The sealed 2025 OOS was never inspected and stays sealed.",
+  "park_decision": "Close the modeling line for this branch. Retain all artifacts read-only. Do NOT proceed to 2025 OOS. Any future revival requires a NEW pre-registered protocol (fixed model class, fixed features, pre-committed discovery AUC/lift threshold that must be met BEFORE any 2025-OOS authorization; no threshold tuning).",
+  "recommended_next_authorization": "No further action required to park. If/when desired, either: (i) leave parked (no authorization needed); or (ii) 'Authorize Multi-Market Bad-Regime Predictor Step 05b pre-registered alternative-model discovery-only CV evaluation only' -- a SINGLE fixed pre-declared protocol under the same purged/embargoed within-discovery CV with a pre-committed edge threshold gating any future 2025-OOS use; no tuning, no 2025 inspection, no backtest/returns/signals. Commit of THIS memo requires a separate explicit authorization.",
+  "schema_id": "branch.multi_market_bad_regime_predictor.catalog_park_memo.v1",
+  "sealed_oos_status": {
+    "rationale": "No discovery-stage edge exists to confirm, so the one-shot 2025 OOS was not unsealed/spent; it remains available for a future pre-registered evaluation only if a discovery edge is first demonstrated under a pre-committed threshold.",
+    "state": "SEALED / NEVER INSPECTED",
+    "window": "2025-01-01..2025-12-31"
+  },
+  "source_of_truth": {
+    "step_02_amendment_commit": "5c2bea7",
+    "step_04_table_commit": "9164bd7",
+    "step_05_content_sha256": "7376761230394cab409f0eaaa25f39a474a3ad9fcd3d245d16ba425cec27a982",
+    "step_05_model_eval_commit": "026d2c5"
+  },
+  "status": "PARKED_DISCOVERY_NEGATIVE",
+  "what_did_not_work": [
+    "Pooled out-of-fold AUC 0.471 -- at/below the 0.5 random baseline; no out-of-fold predictive edge from the simple pooled linear model within 2024.",
+    "Precision-lift vs base-rate ~1.02 -- effectively no lift over the unconditional bad-regime base-rate (pooled 15.5%).",
+    "Per-market OOF AUCs highly dispersed (ES 0.71 / GC 0.20 / CL 0.46 / 6E 0.38), several inverted -- consistent with small-sample noise (~245 rows/market, 7-22% base-rates), not a stable per-market edge.",
+    "Mild IN-SAMPLE volatility/range-feature signal (vol_21 0.64, vol_63 0.61, range_21 0.61) did NOT survive the leakage-safe pooled OOF cross-validation (textbook in-sample-vs-OOF gap)."
+  ],
+  "what_passed": [
+    "Scope + methodology defined and contamination-firewalled (no SPARTA / weekly-RS / FRC / BLOCKED_AT_6_GATES concepts imported).",
+    "Data acquisition/assembly: uniform ohlcv-1d continuous c.0 for ES/GC/CL/6E; discovery 2019-2024 physically separated from sealed 2025 OOS; SHA + calendar + roll documented.",
+    "Target-rule amendment: vol-scaled regime-relative threshold (K from pooled 2019-2023 z-q80, NOT tuned to 2024) resolved CL degeneracy; all 4 markets non-degenerate.",
+    "Step 04 feature/target table rebuilt (980 rows; 8 decision-time features; leaky z identified and excluded from modeling).",
+    "Step 05 evaluation conducted leakage-safe: purged + embargoed (H=21) blocked within-2024 time-series CV, K=5, train-fold-only standardization, OOF coverage 100%, both classes present."
+  ]
+}
