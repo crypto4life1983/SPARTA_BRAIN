@@ -1,0 +1,131 @@
+{
+  "anchors": {
+    "dr9_result_commit": "574fa9e",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "ea6e8d1",
+    "p2_phase2_plan_commit": "f7fe042",
+    "p3_build_commit": "3d5f753",
+    "p4_smoke_commit": "b057c52",
+    "p6_is_commit": "2e1e7d9",
+    "s18_seal_frozen_commit": "7e6aa36",
+    "tier_n_spec_seal_commit": "a3aed99",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T03:14:00.125544Z",
+  "authorization_phrase": "s19-d1 full diagnostic continuation bundle: P6.5 cost-stress (IS only).",
+  "candidate_record_id": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "cost_tiers_S0_S4": {
+    "S0": {
+      "closed_trades": 226,
+      "expectancy_usd_per_trade": 277.8748,
+      "net_pnl_usd": 62799.7,
+      "sharpe_proxy_per_trade": 0.118576,
+      "total_costs_usd": 0.0
+    },
+    "S1": {
+      "closed_trades": 226,
+      "expectancy_usd_per_trade": 262.64,
+      "net_pnl_usd": 59356.65,
+      "sharpe_proxy_per_trade": 0.113516,
+      "total_costs_usd": 2957.05
+    },
+    "S2": {
+      "closed_trades": 226,
+      "expectancy_usd_per_trade": 255.0723,
+      "net_pnl_usd": 57646.34,
+      "sharpe_proxy_per_trade": 0.110954,
+      "total_costs_usd": 4424.99
+    },
+    "S3": {
+      "closed_trades": 226,
+      "expectancy_usd_per_trade": 247.5373,
+      "net_pnl_usd": 55943.43,
+      "sharpe_proxy_per_trade": 0.108371,
+      "total_costs_usd": 5885.97
+    },
+    "S4": {
+      "closed_trades": 226,
+      "expectancy_usd_per_trade": 232.5649,
+      "net_pnl_usd": 52559.66,
+      "sharpe_proxy_per_trade": 0.10314,
+      "total_costs_usd": 8787.13
+    }
+  },
+  "document_type": "P6_5_COST_STRESS_RESULT_SEALED",
+  "dr10_v2_inputs": {
+    "annual_turnover_S1": 17.275,
+    "cost_drag_S2_edge_erosion_pct": 8.206,
+    "cost_drag_S2_on_capital_annual_pct": 0.8871,
+    "dr10_v2_cost_drag_basis": "S2 total transaction costs / START_CASH annualized (capital-drag convention; not reinterpreted)",
+    "dr10_v2_rule": "(annual_turnover>0.50 AND S2_cost_drag>0.05) -> REJECT_FAST"
+  },
+  "dr_evaluation": {
+    "DR10v2_turnover_cost_explosion": false,
+    "DR3_zero_cost_only_survival": false,
+    "DR5_cost_stress_turns_edge_negative": false,
+    "fires": []
+  },
+  "edge_survived_full_cost_stress": true,
+  "hard_boundaries_held": {
+    "imports_committed_p3_primitives_unmodified": true,
+    "is_window_only": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_dr_reinterpretation": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_optimization": true,
+    "no_per_fold_refit": true,
+    "no_retroactive_k13": true,
+    "no_revival": true,
+    "no_s18_modification": true,
+    "oos_rows_hard_excluded": true
+  },
+  "is_a_seal": true,
+  "is_window": {
+    "bars": 1258,
+    "end": "2023-12-29",
+    "start": "2019-01-02"
+  },
+  "labels": [
+    "S19_D1_INDEPENDENT_WEEKLY_RS_P6_5_COST_STRESS_SEALED",
+    "PASS_COST_STRESS_ELIGIBLE",
+    "IS_WINDOW_ONLY_OOS_ISOLATED",
+    "REPLICATION_OF_S18",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_ROTATION_P6_5_PASS_COST_STRESS_ELIGIBLE_SEALED",
+  "negative_invariants": {
+    "cadence_tuned": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "dr_redefined": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "mechanic_changed_from_s18": false,
+    "oos_inspected": false,
+    "p3_source_modified": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "s18_chain_modified": false
+  },
+  "phase": "P6_5_COST_STRESS",
+  "report_date_utc": "2026-05-29T03:14:00.125544Z",
+  "report_seal_sha256": "be7e4d4c6a5945213802b4609fd893801dd79b85550a5ad0aaed2e6ce19b2a63",
+  "schema_id": "sparta.s19_d1_independent_weekly_rs_p6_5_cost_stress_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "title": "s19-d1 independent-universe weekly RS rotation P6.5 cost-stress result (sealed; PASS_COST_STRESS_ELIGIBLE)",
+  "verdict": "PASS_COST_STRESS_ELIGIBLE"
+}
