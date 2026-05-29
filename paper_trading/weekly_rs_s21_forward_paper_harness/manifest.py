@@ -2,6 +2,25 @@
 
 LOCKED_UNIVERSE_48 = ["AVGO", "QCOM", "TXN", "INTC", "MU", "AMAT", "IBM", "INTU", "NOW", "ADI", "VZ", "T", "CHTR", "EA", "SBUX", "TGT", "BKNG", "MAR", "GM", "TJX", "ROST", "MO", "CL", "KMB", "GIS", "STZ", "PFE", "BMY", "AMGN", "GILD", "CVS", "CI", "ISRG", "SYK", "C", "USB", "SCHW", "BLK", "SPGI", "CB", "BA", "ITW", "UPS", "RTX", "LMT", "DE", "PSX", "VLO"]
 
+# Configurable LOCAL data sources (read-only). The harness NEVER fetches; the operator supplies these split_only CSVs.
+# Each entry: dir (relative to repo root) + filename_suffix appended to the symbol. The sealed_baseline is READ-ONLY and
+# MUST NOT be overwritten. The forward cycle defaults to the refreshed source.
+DATA_SOURCES = {
+    "sealed_baseline_20251230": {
+        "dir": "data/s21_d1_weekly_rs_rotation_fresh_universe_long_history/raw",
+        "filename_suffix": "_ohlcv_1d_20190102_20251230.csv",
+        "last_date": "2025-12-30", "read_only": True,
+        "note": "sealed DR9 set (commit d76c999); ends 2025-12-30; immutable baseline; NEVER overwrite",
+    },
+    "refreshed_20260528": {
+        "dir": "data/s21_weekly_rs_paper_refresh/raw",
+        "filename_suffix": "_ohlcv_1d_20190102_20260528.csv",
+        "last_date": "2026-05-28", "read_only": False,
+        "note": "refreshed full-history split_only set through 2026-05-28 (RUN_BOOK 115f4f2); BKNG 25:1 2026-04-06 documented; overlap reproduces sealed 47/48 (BKNG re-scaled)",
+    },
+}
+DEFAULT_DATA_SOURCE = "refreshed_20260528"
+
 MANIFEST = {
     "harness_id": "weekly_rs_s21_forward_paper_harness",
     "purpose": "broker-free SIMULATED forward paper test of the s21 weekly RS diagnostic edge (no broker, no live, no FRC)",
