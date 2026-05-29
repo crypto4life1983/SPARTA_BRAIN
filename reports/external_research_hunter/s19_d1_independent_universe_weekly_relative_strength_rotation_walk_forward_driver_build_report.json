@@ -1,0 +1,96 @@
+{
+  "anchors": {
+    "candidate_record_id": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+    "dr9_result_commit": "574fa9e",
+    "dr9_result_seal": "0c8e21f240c8b8017a500d78cee6b0b48280a229a2a21bdea2be69ddb6cd5b3d",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "ea6e8d1",
+    "p2_phase2_plan_commit": "f7fe042",
+    "s18_seal_frozen_commit": "7e6aa36",
+    "tier_n_spec_seal_commit": "a3aed99",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T03:10:04.656681Z",
+  "authorization_phrase": "Authorize s19-d1 independent-universe weekly relative-strength rotation P3 BUILD only — bound by DR10 v2 + walk-forward K13.",
+  "build_component": "walk_forward_driver",
+  "build_reuses_sealed_csvs": "data/s19_d1_weekly_rs_rotation_independent_universe_long_history/raw/<24 names> (DR9-PASSED; 574fa9e); read at P6/P6.5/P6.7 only",
+  "candidate_record_id": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "component_description": "5 fixed pre-committed UNSEARCHED DA22 folds (F1 160-478..F5 1436-1758); validate_fold_scheme; k13_verdict (>=3/5 + aggregate>0 + K9); run_walk_forward STUB raises P6_7_K13_NOT_AUTHORIZED; no per-fold refit. NO execution.",
+  "document_type": "P3_BUILD_REPORT_SEALED",
+  "files_built": {
+    "external_research_hunter/s19_d1_independent_universe_weekly_relative_strength_rotation_runner_harness/walk_forward_driver.py": "6f4f944ec9456e8a374486a87ec584543c145650bc1d720f1ce716748332ae67"
+  },
+  "hard_boundaries_held": {
+    "build_only_no_execution": true,
+    "no_backtest": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_per_fold_refit": true,
+    "no_real_csv_read": true,
+    "no_retroactive_k13_application": true,
+    "no_revival": true,
+    "no_s18_modification": true,
+    "no_signal_computation_on_real_data": true,
+    "no_strategy_optimization": true,
+    "py_compile_only_no_pytest": true,
+    "replication_not_tuning": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S19_D1_INDEPENDENT_WEEKLY_RS_P3_BUILD_REPORT_SEALED",
+    "COMPONENT_WALK_FORWARD_DRIVER",
+    "NO_EXECUTION_AT_BUILD",
+    "PY_COMPILE_PASS",
+    "REPLICATION_OF_S18",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_ROTATION_P3_BUILD_SEALED",
+  "negative_invariants": {
+    "backtest_run": false,
+    "cadence_tuned": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "live_or_broker_path": false,
+    "mechanic_changed_from_s18": false,
+    "oos_inspected": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "real_csv_read": false,
+    "signal_computed_on_real_data": false,
+    "simulator_run": false,
+    "strategy_lab_promoted": false,
+    "tests_run": false
+  },
+  "next_phase_authorization_scope": {
+    "primary_forward": "Authorize s19-d1 independent-universe weekly relative-strength rotation P4 synthetic smoke only."
+  },
+  "phase": "P3_BUILD",
+  "py_compile_status": "PASS (all harness source compiled; doraise=True)",
+  "replication_of_s18": true,
+  "report_date_utc": "2026-05-29T03:10:04.656681Z",
+  "report_seal_sha256": "43bce44713c9211d04d26cb0c34f07125abd0cd03e3a2cb6433fa2272ceacfa9",
+  "schema_id": "sparta.s19_d1_independent_weekly_rs_walk_forward_driver_build_report.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "structural_guard_check": {
+    "full_guard_check_overall_pass": true,
+    "k13_fold_scheme_valid": true,
+    "note": "CONFIG attestation only; no data, no signals, no backtest"
+  },
+  "title": "s19-d1 independent-universe weekly RS rotation P3 BUILD report: walk_forward_driver.py (5 DA22 folds + K13 verdict + run_walk_forward STUB) (sealed; NO execution)"
+}
