@@ -9,8 +9,12 @@ aggregator and never reaches into harness mechanic code.
 SAFETY MODEL (none may be weakened):
 - DRY-RUN BY DEFAULT. A real send requires BOTH dry_run=False AND enable_send=True AND a configured
   secret, routed through the single existing transport boundary (tools/brain_telegram_notify).
-- Token + chat_id are read ONLY from local_secrets/ or the environment. They are NEVER printed, logged,
-  returned to callers, or placed in a message body. local_secrets/ stays gitignored.
+- Secret resolution chain (first hit wins): (1) environment vars (SPARTA_TELEGRAM_TOKEN+CHAT_ID, or
+  TELEGRAM_TOKEN+CHAT_ID), (2) the paper-specific gitignored local_secrets/weekly_rs_paper_telegram.json,
+  (3) the existing SPARTA Telegram config loaded via tools/brain_telegram_notify.load_telegram_config()
+  (which itself reads env + data/telegram_config.json + config/telegram_config.json + the external
+  obsidian-trade-logger live_config.json). Tokens are NEVER printed, logged, returned to callers, or
+  placed in a message body. local_secrets/ stays gitignored.
 - Every message carries the DIAGNOSTIC_ONLY footer and is scrubbed: a Telegram-bot-token-shaped string
   in any message BLOCKS the send (SecretLeakBlocked).
 - This module NEVER runs a cycle, fetches/refreshes data, or connects a broker.
@@ -44,22 +48,40 @@ class SecretLeakBlocked(RuntimeError):
 # ---- secrets (token NEVER returned/printed) ----------------------------- #
 
 def _resolve_secret():
-    """Internal only. Returns (token, chat_id, source) from env or local_secrets/. Callers MUST NOT
-    log/return the token; it is handed directly to the transport on a real send."""
+    """Internal only. Returns (token, chat_id, source_label) by trying, in order: env vars, the paper
+    local_secrets file, then the existing SPARTA Telegram config (via the existing transport loader).
+    Callers MUST NOT log/return the token; it is handed directly to the transport on a real send.
+    source_label is a coarse category only -- it never embeds a path that could include a token."""
     env = _os.environ
     token = env.get("SPARTA_TELEGRAM_TOKEN") or env.get("TELEGRAM_TOKEN")
     chat_id = env.get("SPARTA_TELEGRAM_CHAT_ID") or env.get("TELEGRAM_CHAT_ID")
-    source = "environment" if (token and chat_id) else None
-    if not (token and chat_id) and LOCAL_SECRET_PATH.exists():
+    if token and chat_id:
+        return token, chat_id, "environment"
+    if LOCAL_SECRET_PATH.exists():
         try:
             data = _json.loads(LOCAL_SECRET_PATH.read_text(encoding="utf-8"))
-            token = token or data.get("token") or data.get("bot_token")
-            chat_id = chat_id or data.get("chat_id")
-            if token and chat_id:
-                source = "local_secrets"
+            t = data.get("token") or data.get("bot_token")
+            c = data.get("chat_id")
+            if t and c:
+                return t, c, "local_secrets"
         except Exception:
             pass
-    return token, chat_id, source
+    # Fallback: existing SPARTA Telegram config via the existing transport's loader (lazy import).
+    try:
+        spec = _ilu.spec_from_file_location(
+            "_brain_telegram_notify_resolver", str(REPO_ROOT / "tools" / "brain_telegram_notify.py"))
+        mod = _ilu.module_from_spec(spec); spec.loader.exec_module(mod)
+        cfg = mod.load_telegram_config()
+        t = cfg.get("token"); c = cfg.get("chat_id"); src = cfg.get("source") or ""
+        if t and c:
+            if src == "environment":
+                return t, c, "environment"
+            if "live_config.json" in str(src):
+                return t, c, "sparta_existing:external_live_config"
+            return t, c, "sparta_existing:local_config"
+    except Exception:
+        pass
+    return None, None, None
 
 
 def secret_status():
