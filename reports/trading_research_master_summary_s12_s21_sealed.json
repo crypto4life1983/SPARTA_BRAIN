@@ -1,0 +1,199 @@
+{
+  "anchors_read_only": {
+    "framework_dr10_v2": "78cd22e",
+    "s12_p11": "s12_d1_p11_lifecycle_memo_sealed",
+    "s13_p7": "s13_d1_p7_decision_memo_sealed",
+    "s13_reconciliation": "master_reconciliation_memo_after_s13_d1_terminal_sealed",
+    "s14_p7": "s14_d1_cross_sector_p7_decision_memo_sealed",
+    "s15_p7": "s15_d1_cross_sector_p7_decision_memo_sealed",
+    "s16_p11": "s16_d1_expanded_donchian_trend_p11_lifecycle_decision_sealed",
+    "s17_p7_p11": "s17_d1_broad_universe_xmom_p7_p11_terminal_decision_memo_sealed",
+    "s18_p11": "5dde0f7",
+    "s18_seal": "7e6aa36",
+    "s19_p11": "81563fd",
+    "s19_seal": "a3aed99",
+    "s20_p11": "7ef6488",
+    "s20_seal": "e9ec72f",
+    "s21_p11": "7e12e56",
+    "s21_seal": "ae11479",
+    "walk_forward_k13": "52a3b60",
+    "weekly_rs_line_catalog_commit": "b4ee876"
+  },
+  "authored_at_utc": "2026-05-29T05:46:24.159282Z",
+  "authorization_phrase": "Authorize weekly RS trading research master summary memo only.",
+  "best_candidates": {
+    "first_oos_confirmed": "s18 (broad 24-name) -- the first candidate in the whole program to clear the full ladder (with a recent-fold caveat).",
+    "informative_failure": "s19 (independent 24-name) -- showed the EDGE generalizes even when the CANDIDATE is sample-terminal; separated 'edge generalizes' from 'candidate certifiable'.",
+    "sample_size_breakthrough": "s20 (combined 48-name) -- proved breadth solves the OOS-K9 blocker WITHOUT tuning (M=8 fixed).",
+    "strongest_overall": "s21 (fresh 48-name) -- the cleanest result: full-ladder OOS_CONFIRMED on a never-tested universe, no selection bias; establishes the weekly RS edge as genuinely generalizing."
+  },
+  "binding": true,
+  "candidate_ladder_final_states": {
+    "s12_mnq_donchian_15_8_breakout_futures": {
+      "anchor": "s12_d1_p11_lifecycle_memo_sealed",
+      "driver": "C8 weak-performance / insufficient-sample: IS ~10.37 trades/y -> implied ~21 OOS trades << K9 100 floor; maxDD 37.62% (above 30% concern)",
+      "final": "PARKED (P11)",
+      "mechanic": "single-instrument MNQ.c.0 Donchian 15/8 breakout (futures)",
+      "result": "too few trades to certify; no edge established"
+    },
+    "s13_mnq_rsi2_bidirectional_futures": {
+      "anchor": "s13_d1_p7_decision_memo_sealed + master_reconciliation_memo_after_s13_d1_terminal_sealed",
+      "driver": "DR10 REJECT_FAST at P6.5 (turnover x cost-drag)",
+      "final": "TERMINAL",
+      "mechanic": "MNQ.c.0 RSI(2) bi-directional mean-reversion (futures)",
+      "result": "cost-stress rejected; high-turnover mean-reversion did not survive realistic costs"
+    },
+    "s14_cross_sector_cash_equity": {
+      "anchor": "s14_d1_cross_sector_p7_decision_memo_sealed",
+      "driver": "FAIL_SAFETY at P6 IS (K1 sharpe<0 / K2 expectancy<=0)",
+      "final": "TERMINAL",
+      "mechanic": "cross-sector cash-equity candidate",
+      "result": "negative in-sample edge; rejected immediately"
+    },
+    "s15_cross_sector_zscore_exit_to_mean": {
+      "anchor": "s15_d1_cross_sector_p7_decision_memo_sealed",
+      "driver": "FAIL_SAFETY at P6 IS (K1/K2)",
+      "final": "TERMINAL",
+      "mechanic": "cross-sector z-score exit-to-mean (mean-reversion)",
+      "result": "negative in-sample edge; rejected immediately"
+    },
+    "s16_expanded_donchian_trend": {
+      "anchor": "s16_d1_expanded_donchian_trend_p11_lifecycle_decision_sealed",
+      "driver": "DR4 REJECT_FAST at P10 OOS (oos-negative-while-is-positive)",
+      "final": "TERMINAL",
+      "mechanic": "expanded-universe Donchian trend",
+      "result": "IS +$17,130 but OOS NEGATIVE (exp -$21.33/trade, OOS net ~ -$28k) -> classic IS-fit that failed out-of-sample"
+    },
+    "s17_broad_universe_xmom_monthly": {
+      "anchor": "reports/external_research_hunter/s17_d1_broad_universe_xmom_p7_p11_terminal_decision_memo_sealed",
+      "driver": "INSUFFICIENT_SAMPLE/K9 at P6 IS (85 closed < 100 floor)",
+      "final": "TERMINAL",
+      "mechanic": "broad-universe cross-sectional momentum, MONTHLY rebalance",
+      "result": "positive-looking but sample-terminal; monthly cadence too few trades. MOTIVATED the cadence pivot to weekly (s18)"
+    },
+    "s18_broad_24_weekly_rs": {
+      "anchor": "s18 SEAL 7e6aa36 / P11 5dde0f7",
+      "driver": "full ladder passed; caveat: K13 3/5 + NEGATIVE recent fold F5",
+      "final": "OOS_CONFIRMED_DIAGNOSTIC (with caveat)",
+      "mechanic": "WEEKLY relative-strength rotation 126-21/top-8 (24-name broad)",
+      "result": "FIRST full-ladder OOS_CONFIRMED. OOS 117 trades (58.7/y), +$39,786, +$210/trade, sharpe +0.125; recent-fold weakness"
+    },
+    "s19_independent_24_weekly_rs": {
+      "anchor": "s19 SEAL a3aed99 / P11 81563fd",
+      "driver": "INSUFFICIENT_SAMPLE/K9 at P10 OOS (87 trades / 43.6/y < 50/y floor)",
+      "final": "TERMINAL (edge generalized but sample-short)",
+      "mechanic": "IDENTICAL weekly RS on an independent 24-name universe",
+      "result": "edge GENERALIZED (OOS +$44,050, +$336/trade -- stronger per-trade than s18; 5/5 K13) BUT the candidate was K9-terminal: turnover fell below the OOS sample floor"
+    },
+    "s20_combined_48_weekly_rs": {
+      "anchor": "s20 SEAL e9ec72f / P11 7ef6488",
+      "driver": "full ladder passed; selection caveat: union includes the known-OOS-good s18 basket",
+      "final": "OOS_CONFIRMED_DIAGNOSTIC (sample-size solved; selection caveat)",
+      "mechanic": "IDENTICAL weekly RS on the 48-name s18+s19 UNION (M=8 unchanged)",
+      "result": "broadening the pool to 48 at fixed M=8 STRUCTURALLY SOLVED the s19 OOS-K9 blocker WITHOUT tuning (43.6/y -> 67.2/y). OOS 134 trades, +$60,004, +$353/trade, sharpe +0.214, 5/5 K13. But selection-biased -> a sample-size demonstration, not clean generalization"
+    },
+    "s21_fresh_48_weekly_rs": {
+      "anchor": "s21 SEAL ae11479 / P11 7e12e56 / DR9 d76c999",
+      "driver": "full ladder passed on genuinely unseen names; no selection bias",
+      "final": "OOS_CONFIRMED_DIAGNOSTIC (CLEAN -- resolves the selection caveat)",
+      "mechanic": "IDENTICAL weekly RS on a FRESH 48-name universe, ZERO overlap (0/48 ever backtested)",
+      "result": "the s18/s20 edge GENERALIZES cleanly. OOS 171 trades (85.8/y -- largest K9 margin of the line), +$48,475, +$170.96/trade (MODEST), sharpe +0.144, PF 1.51, +48.47%, 5/5 K13. RESOLVES the s20 selection caveat"
+    }
+  },
+  "diagnostic_only_disclosure": "DIAGNOSTIC-ONLY; NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, NOT FRC-granted. Trading PAUSED; Live BLOCKED_AT_6_GATES; FRC NEVER_GRANTED. No live path exists by framework design.",
+  "document_type": "TRADING_RESEARCH_MASTER_SUMMARY_SEALED",
+  "failure_taxonomy_s12_s17": {
+    "cost_DR10": "s13 -- high-turnover mean-reversion rejected under realistic cost-stress",
+    "negative_edge_FAIL_SAFETY": "s14, s15 -- negative in-sample sharpe/expectancy (esp. mean-reversion variants)",
+    "oos_generalization_DR4": "s16 -- positive IS but negative OOS (in-sample fit that broke out-of-sample)",
+    "sample_floor_K9": "s12 (parked, ~21 implied OOS), s17 (85 IS < 100) -- too few trades to certify",
+    "takeaway": "Across s12-s17 the framework REJECTED every candidate on a spread of distinct gates -- the gates are doing their job (no false promotions). Only the weekly cross-sectional relative-strength rotation family (s18+) ever cleared the full ladder."
+  },
+  "framework": {
+    "dr10_binding": "v2 AND-conjunction (78cd22e)",
+    "dr_precedence_chain": "DR7 -> DR1 -> DR9 -> DR10 -> DR6 -> DR4 -> DR2 -> DR3 -> DR5",
+    "k13_binding": "walk-forward persistence (52a3b60); binds s17+",
+    "key_gates": "K1 sharpe<0 / K2 expectancy<=0 = FAIL_SAFETY; K4 maxdd>50% = FAIL_SAFETY; K9 closed>=100 total + OOS>=50/y = INVIOLATE sample floor; DR4 oos-negative-while-is-positive = REJECT_FAST; DR10 v2 (turnover>0.50 AND cost_drag>0.05) = REJECT_FAST; K13 >=3/5 folds + aggregate + K9; FRC (live promotion) NEVER_GRANTED by design"
+  },
+  "hard_boundaries_held": {
+    "no_backtest": true,
+    "no_broker_or_live": true,
+    "no_build": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_draft": true,
+    "no_frc_grant": true,
+    "no_lessons_md_modification": true,
+    "no_modification_of_any_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_seal_of_candidate": true,
+    "no_strategy_lab_promotion": true,
+    "read_only_synthesis": true,
+    "summary_memo_only": true
+  },
+  "is_a_candidate_phase": false,
+  "is_a_seal": true,
+  "labels": [
+    "TRADING_RESEARCH_MASTER_SUMMARY_SEALED",
+    "S12_S21",
+    "WEEKLY_RS_STRONGEST_COMPLETED_DIAGNOSTIC",
+    "CLEAN_GENERALIZATION_CONFIRMED",
+    "EARLIER_CANDIDATES_ALL_TERMINAL",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "FRC_NEVER_GRANTED",
+    "PARKED",
+    "NO_SEALED_ARTIFACT_MODIFIED",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "TRADING_RESEARCH_MASTER_SUMMARY_S12_S21_SEALED",
+  "negative_invariants": {
+    "any_sealed_artifact_modified": false,
+    "backtest_run": false,
+    "broker_connected": false,
+    "build_executed": false,
+    "candidate_phase_authored": false,
+    "claims_live_ready": false,
+    "claims_money_proven": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "draft_authored": false,
+    "frc_granted": false,
+    "lessons_md_touched": false,
+    "oos_inspected": false,
+    "promotion_attempted": false,
+    "secrets_accessed_or_printed": false,
+    "strategy_lab_promoted": false,
+    "tier_n_sealed": false
+  },
+  "paper_backtest_results_diagnostic_only": {
+    "disclaimer": "ALL figures are PAPER backtest P&L on a $100k notional CSV simulator (split_only daily bars, proxy costs). NONE is real money, live execution, or money-proven. They are DIAGNOSTIC research metrics only.",
+    "honest_magnitude_note": "The clean fresh-universe per-trade edge (s21, +$171) is MODEST and LOWER than the selection-biased s20 (+$353). Generalization is confirmed; magnitude is moderate. Earlier candidates (s12-s17) produced NO certifiable edge.",
+    "oos_pnl_by_confirmed_candidate": {
+      "s18": "+$39,786 (+$210/trade, 117 trades)",
+      "s19_terminal": "+$44,050 (+$336/trade, 87 trades -- K9-terminal)",
+      "s20": "+$60,004 (+$353/trade, 134 trades)",
+      "s21_clean": "+$48,475 (+$171/trade, 171 trades)"
+    }
+  },
+  "program_conclusion": "The weekly relative-strength rotation line (s18->s21) is the STRONGEST COMPLETED DIAGNOSTIC EDGE in the trading research program and the ONLY line to reach OOS_CONFIRMED -- now clean-generalization-confirmed on a fresh universe (s21). The cross-sectional RS premium is REAL, PORTABLE, and MODEST; its OOS-sample blocker is solvable by breadth without tuning. It remains PERMANENTLY DIAGNOSTIC_ONLY: NOT live-ready, NOT paper-ready, NOT Strategy-Lab-ready, FRC NEVER_GRANTED. Strongest diagnostic != live-ready.",
+  "report_date_utc": "2026-05-29T05:46:24.159282Z",
+  "report_seal_sha256": "175d4cd3cffe2b1b9cf6d93df8008013c53a32a2d9253c09ba76f56aabcdbba4",
+  "schema_id": "sparta.trading_research_master_summary_s12_s21_sealed.v1",
+  "scope_and_method": "Read-only synthesis of the sealed per-candidate lifecycle/terminal/park memos for s12..s21 (committed). This memo modifies NO sealed artifact, runs NO code/backtest/fetch, and promotes NOTHING. All results are PAPER backtests (CSV simulator, $100k notional, split_only daily data, proxy commission 0.005/share min $1 + 1bp slippage) under the DR/K gate framework -- NOT real money, NOT live executions.",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "weekly_rs_line_state": "CLEAN_GENERALIZATION_CONFIRMED_DIAGNOSTIC_ONLY_PARKED"
+  },
+  "title": "Trading research MASTER SUMMARY s12->s21 -- full candidate ladder, final status, best candidates, paper-backtest results, failure reasons, and why the weekly RS line is parked DIAGNOSTIC_ONLY (NOT live/paper-ready; FRC NEVER_GRANTED)",
+  "why_weekly_rs_is_parked_diagnostic_only_not_live_ready": [
+    "PERMANENT 6-GATE LIVE-BLOCK + FRC NEVER_GRANTED: by framework design there is NO authorization phrase that promotes any candidate to live/paper/Strategy-Lab. OOS_CONFIRMED_DIAGNOSTIC (incl. the clean s21) is a research label, NOT a promotion.",
+    "PAPER, NOT MONEY-PROVEN: every result is a CSV-simulator backtest on split_only daily bars with proxy costs -- no broker fills, no slippage realism beyond a 1bp proxy, no live capital, no execution risk, no borrow/financing, no capacity analysis.",
+    "MODEST EDGE: the clean generalization edge is real but small per-trade (+$171); generalization != live-grade profitability.",
+    "SCOPE: this is a research/diagnostic program; promotion to capital would require gates and infrastructure that do not exist here and were never authorized.",
+    "PARKED: the central research question (does the weekly RS edge generalize?) is answered YES (real, portable, modest, DIAGNOSTIC_ONLY) -- further same-mechanic candidates add marginal diagnostic confidence only, and there is no live path regardless. Line catalog: weekly_rs_rotation_line_catalog_s18_s21_diagnostic_only_parked_sealed (b4ee876)."
+  ]
+}
