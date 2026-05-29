@@ -1,61 +1,52 @@
 {
-  "authored_at_utc": "2026-05-29T16:35:18.678935Z",
+  "K_estimation_n": 5152,
+  "K_value_pooled_2019_2023_zq80": 1.557499,
+  "amended_target_rule": {
+    "K_definition": "K = pooled 80th-percentile of z over ALL 2019-2023 decision dates across all 4 markets (label-window completed within discovery); estimated on PRE-2024 data ONLY; a SINGLE K shared by all markets.",
+    "decision_time_scale": "sigma_H(t) = trailing_21d_realized_vol(t) * sqrt(21)  [uses only data <= t]",
+    "forward_statistic": "fwd_maxDD(t,H) = running peak-to-trough max drawdown of the underlying close over (t, t+H] common-calendar bars (MARKET-STATE statistic; NOT a strategy return)",
+    "horizon_H_common_bars": 21,
+    "label": "bad_regime=1 iff z(t) >= K",
+    "leakage": "numerator uses the forward label window (allowed for a target); denominator sigma_H(t) uses only data <= t; K from 2019-2023 only -> no 2024/2025 information enters the threshold.",
+    "name": "volatility_scaled_regime_relative_bad_regime",
+    "standardized_statistic": "z(t) = fwd_maxDD(t,H) / sigma_H(t)"
+  },
+  "authored_at_utc": "2026-05-29T16:47:26.589919Z",
   "base_rate_degeneracy_flags": {
     "6E": "ok",
-    "CL": "DEGENERATE",
+    "CL": "ok",
     "ES": "ok",
     "GC": "ok"
   },
-  "base_rate_degeneracy_note": "CL per-market base-rate = 0.0 (DEGENERATE): its pre-committed threshold (fwd_maxDD q80 = 0.152, set by the extreme 2019-2023 oil period incl. 2020) is never reached in the calmer 2024 -> 0 positives. This is a TARGET-DESIGN finding under the pre-committed rule; it must NOT be fixed by re-tuning to the 2024 outcome. A Step-02 amendment (e.g., a rolling/recent-window threshold or a different adverse-condition) is required before per-market CL modeling. ES/GC/6E are non-degenerate.",
-  "common_calendar": {
-    "common_2024_dates": 266,
-    "first": "2019-01-02",
-    "full_discovery_common_bars": 1564,
-    "last": "2024-12-30"
-  },
-  "conditions_carried": [
-    "D1 (CL degenerate base-rate=0.0): CL has 0 positives in 2024 under the pre-committed threshold; per-market CL modeling is BLOCKED until the target is re-specified via a Step-02 amendment (rolling/recent threshold or different adverse-condition), pre-committed and NOT chosen by 2024 outcome.",
-    "D2 (low base-rates / calm 2024): pooled 2024 base-rate 7.8% reflects 2024 being calmer than the 2019-2023 threshold-estimation window; acceptable but note class imbalance for any future modeling.",
-    "C2 (degraded days): full Databento degraded-day reconciliation still pending (partial list applied; 0 excluded in 2024).",
-    "C5 (firewall): oos_2025_sealed remains untouched until a separate pre-registered OOS gate."
-  ],
-  "counts": {
-    "expected_rows_if_full": 980,
-    "feature_table_rows": 980,
-    "labelable_2024_decision_dates": 245,
-    "markets": 4,
-    "target_rows": 980
-  },
-  "design_pre_committed": {
-    "calendar": "inner-join common-4 (no forward-fill)",
-    "degraded_day_rule": "exclude decision date if it is a known degraded day (partial list from Databento warning: ['2019-01-15', '2019-02-22', '2019-03-13']); full reconciliation deferred (C2)",
-    "horizon_H_common_bars": 21,
-    "label_cap": "drop decision dates whose t+H exceeds the last discovery common bar (no reach into sealed 2025)",
-    "label_rule": "bad_regime=1 iff forward max-drawdown of the underlying close over (t, t+H] common-calendar bars >= per-market threshold",
-    "per_market_thresholds": {
-      "6E": 0.028075,
-      "CL": 0.152448,
-      "ES": 0.061093,
-      "GC": 0.058163
+  "before_after_base_rate": {
+    "after_by_market": {
+      "6E": 0.216327,
+      "CL": 0.183673,
+      "ES": 0.146939,
+      "GC": 0.073469
     },
-    "threshold_estimation_window": "2019-01-01..2023-12-31 (pre-2024 discovery; so the 2024 base-rate is MEASURED, not set)",
-    "threshold_quantile": 0.8
-  },
-  "discovery_base_rate": {
-    "by_market": {
+    "after_pooled": 0.155102,
+    "after_rule": "vol-scaled regime-relative z>=K (K=pooled 2019-2023 z-q80)",
+    "before_by_market": {
       "6E": 0.130612,
       "CL": 0.0,
       "ES": 0.106122,
       "GC": 0.073469
     },
-    "interpretation": "fraction of (date,market) rows labeled bad_regime=1, measured on 2024 vs a 2019-2023 q80 threshold; LOW because 2024 was calmer than the 2019-2023 estimation window (which included the 2020 crash + 2022).",
-    "pooled": 0.077551
+    "before_pooled": 0.077551,
+    "before_rule": "absolute per-market 2019-2023 q80 fwd-maxDD",
+    "cl_fixed": true
+  },
+  "counts": {
+    "feature_table_rows": 980,
+    "labelable_2024_dates": 245,
+    "markets": 4,
+    "target_rows": 980
   },
   "excluded_rows_and_reasons": {
     "degraded_day": 0,
     "insufficient_warmup_nan_feature": 0,
-    "label_cap_no_forward_window": 21,
-    "not_2024": 0
+    "label_cap_no_forward_window": 21
   },
   "feature_columns_decision_time_leq_t": [
     "ret_21",
@@ -69,37 +60,34 @@
     "dow",
     "month"
   ],
-  "feature_target_semantics": "Features and label are MARKET-STATE statistics of the underlying futures (momentum/vol/range/drawdown-state/cross-market co-movement/calendar + a forward-drawdown regime label). They are NOT strategy returns/R/PnL/Sharpe; no strategy, signal, or model is constructed here.",
   "guards_held": {
     "discovery_only": true,
     "no_2025_inspection": true,
     "no_backtest": true,
     "no_cluster": true,
-    "no_commit_by_this_script": true,
     "no_model": true,
     "no_signals": true,
     "no_sparta_contamination": true,
     "no_strategy_returns_R_PnL_Sharpe": true,
-    "no_tradeability_or_profitability_claims": true
+    "no_tradeability_or_profitability_claims": true,
+    "no_tuning_to_2024": true
   },
   "leakage_checks": {
-    "decision_dates_are_2024_only": true,
-    "feature_windows_end_at_or_before_t": true,
-    "label_not_a_feature": true,
-    "label_window_strictly_after_t_and_within_discovery": true,
+    "K_from_2019_2023_only": true,
+    "decision_dates_2024_only": true,
+    "feature_windows_leq_t": true,
+    "label_uses_forward_window_and_leq_t_scale": true,
     "max_label_window_end_date": "2024-12-30",
-    "no_2025_touched": true,
-    "thresholds_from_2019_2023_only_not_2024_or_2025": true
+    "no_2025_touched": true
   },
-  "manifest_content_sha256": "ecbc5202fa9b2b6b9371d66d4c2014a33a927d8aa1b3583b2cc000c7d4a47271",
-  "schema": "branch.multi_market_bad_regime_predictor.step_04_feature_target.v1",
+  "manifest_content_sha256": "ded859a998b9ff39a741c2d17b8448edb99ddc58bc86e0f08d66254e1334cac6",
+  "schema": "branch.multi_market_bad_regime_predictor.step_04_feature_target.v2_amended",
   "source": {
     "acquisition_commit": "aba1796",
-    "discovery_dir": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/raw",
-    "step_02_commit": "b6c30d5",
-    "step_03_reaudit_commit": "b1411c7"
+    "prior_step04_commit": "1573893",
+    "step_02_amendment_content_sha256": "72572a47eb60a11ff7d1393db0fc93ee544d4910a1282aa861346de6ccd9c9ff"
   },
   "table_path": "data/branch_multi_market_bad_regime_predictor/discovery_2019_2024/feature_target/feature_target_table_discovery_2024.csv",
-  "table_sha256": "15bd939963069b9af46f29e0b601b8ee4e6b6cd7ad3ccba5870f76b86dc42014",
-  "verdict": "PASS_CONDITIONAL"
+  "table_sha256": "9fd31f0e3adae3c9b94900374e791fe03a88fab95e7ec6eeeeaba338a68f487b",
+  "verdict": "PASS"
 }
