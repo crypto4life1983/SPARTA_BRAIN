@@ -1,0 +1,85 @@
+{
+  "all_pass": true,
+  "anchors": {
+    "dr9_result_commit": "574fa9e",
+    "framework_dr10_v2_commit": "78cd22e",
+    "p1_plan_lock_commit": "ea6e8d1",
+    "p2_phase2_plan_commit": "f7fe042",
+    "p3_build_commit": "3d5f753",
+    "s18_seal_frozen_commit": "7e6aa36",
+    "tier_n_spec_seal_commit": "a3aed99",
+    "walk_forward_k13_seal_commit": "52a3b60"
+  },
+  "authored_at_utc": "2026-05-29T03:11:06.614844Z",
+  "authorization_phrase": "Authorize s19-d1 independent-universe weekly relative-strength rotation P4 synthetic smoke only.",
+  "candidate_record_id": "s19-d1-independent-universe-weekly-relative-strength-rotation-24name-large-cap-long-history",
+  "document_type": "P4_SYNTHETIC_SMOKE_RESULT_SEALED",
+  "hard_boundaries_held": {
+    "no_backtest": true,
+    "no_cadence_tuning": true,
+    "no_commit_by_this_script": true,
+    "no_data_fetch": true,
+    "no_fold_scheme_search": true,
+    "no_lessons_md_modification_or_staging": true,
+    "no_modification_of_any_existing_sealed_artifact": true,
+    "no_oos_inspection": true,
+    "no_per_fold_refit": true,
+    "no_real_csv_read": true,
+    "no_retroactive_k13": true,
+    "no_revival": true,
+    "no_s18_modification": true,
+    "no_signal_on_real_data": true,
+    "no_strategy_optimization": true,
+    "synthetic_tests_only": true
+  },
+  "is_a_seal": true,
+  "labels": [
+    "S19_D1_INDEPENDENT_WEEKLY_RS_P4_SYNTHETIC_SMOKE_SEALED",
+    "P4_SYNTHETIC_SMOKE_PASS",
+    "SYNTHETIC_ONLY_NO_REAL_DATA",
+    "REPLICATION_OF_S18",
+    "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "LESSONS_MD_NOT_TOUCHED"
+  ],
+  "lifecycle_state": "S19_D1_INDEPENDENT_UNIVERSE_WEEKLY_RS_ROTATION_P4_P4_SYNTHETIC_SMOKE_PASS_SEALED",
+  "negative_invariants": {
+    "backtest_run": false,
+    "cadence_tuned": false,
+    "committed_this_turn": false,
+    "data_fetched": false,
+    "fold_scheme_searched": false,
+    "lessons_md_touched": false,
+    "live_or_broker_path": false,
+    "mechanic_changed_from_s18": false,
+    "oos_inspected": false,
+    "parameters_optimized": false,
+    "per_fold_refit": false,
+    "real_csv_read": false,
+    "signal_computed_on_real_data": false
+  },
+  "next_phase_authorization_scope": {
+    "primary_forward": "Authorize s19-d1 independent-universe weekly relative-strength rotation P6 IS diagnostic only."
+  },
+  "phase": "P4_SYNTHETIC_SMOKE",
+  "replication_of_s18": true,
+  "report_date_utc": "2026-05-29T03:11:06.614844Z",
+  "report_seal_sha256": "fc82ea69138ad2000e1820bd7302e738d517989553d92e4f329c1f2f00342aa6",
+  "schema_id": "sparta.s19_d1_independent_weekly_rs_p4_synthetic_smoke_result_sealed.v1",
+  "seal_method": "LESSON_HUNTER_004 canonical roundtrip",
+  "status_fields": {
+    "framework_dr10_revision_v2_binding_for_s14_plus": true,
+    "frc_status": "NEVER_GRANTED",
+    "live_status": "BLOCKED_AT_6_GATES",
+    "research_label": "DIAGNOSTIC_ONLY_NOT_LIVE_GRADE",
+    "trading_status": "PAUSED",
+    "walk_forward_k13_binding_for_s17_plus": true
+  },
+  "test_summary": {
+    "failed": 0,
+    "passed": 24,
+    "returncode": 0
+  },
+  "title": "s19-d1 independent-universe weekly RS rotation P4 synthetic smoke result (sealed; P4_SYNTHETIC_SMOKE_PASS)",
+  "verdict": "P4_SYNTHETIC_SMOKE_PASS",
+  "what_ran": "synthetic fixture + invariant tests only (weekly RS primitives, rank/select-top8/equal-weight/rotation, cost, guard pass/drift, weekly-cadence guard, K13 fold-scheme-locked + verdict gate, driver stubs refuse execution, OOS isolation, end-to-end synthetic weekly rotation invariants, replication-of-s18 markers). NO real-CSV read, NO signal computation on real data, NO backtest."
+}
