@@ -1,0 +1,121 @@
+{
+  "step": "Crypto-D3",
+  "title": "Crypto data-source + data-QA provisioning (selection/QA only -- no fetch, no strategy, no backtest)",
+  "created": "2026-05-30",
+  "kind": "data_source_and_qa_provisioning",
+  "spec_only": false,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "strategy_test": false,
+  "paper_or_live": false,
+  "head_at_memo": "2849279752b9218fbc138fb3c2ca1069471e547b",
+  "reconciliation_note": "Both report.md (automation-written, active) and this report.json land on the conservative verdict DATA_NOT_READY_FETCH_AUTH_REQUIRED. An intermediate draft briefly proposed DATA_READY after the acquisition manifest confirmed a Binance SPOT lineage; that was corrected because the manifest documents 1h klines in a separate location (SPARTA_RESEARCH_LAB) and does NOT pin provenance for these exact 1d files. Crypto-D1 sec5 / Crypto-D2 sec6 require NAMED, PINNED provenance per dataset -- inference is not sufficient.",
+  "binding_context": {
+    "crypto_d1_commit": "c8a59fe",
+    "crypto_d2_commit": "a035ab0",
+    "both_ancestors_of_head": true,
+    "crypto_d1_rules_applied": "spot-first; BTC/ETH/SOL (XRP deferred); daily UTC 00:00 boundary; one quote currency documented; perps BLOCKED until funding sourced+frozen; NAMED/PINNED provenance per dataset (sec5); IS 2020-2023 / OOS 2024-2025 proposed, 2026 blocked; same validation ladder as futures.",
+    "crypto_d2_rules_applied": "spot OHLCV first; BTC/ETH/SOL; daily first; one consistent series per symbol, no cross-exchange stitching; SOL needs a justified per-symbol window (history starts mid-2020); BTC/ETH/SOL calendar alignment; 24/7 no expected weekend gaps; named pinned provenance per dataset (sec6)."
+  },
+  "2_local_search": {
+    "method": "Read-only Glob/Grep over the local repo. No network, no fetch.",
+    "crypto_data_found": true,
+    "candidate_dataset": {
+      "location": "data/frozen_regime_inputs/ (top-level repo data dir; NOT in trading_research/agentic_factory; gitignored)",
+      "files_current": [
+        "btcusdt_1d_2020-01-01_2026-05-29.csv",
+        "ethusdt_1d_2020-01-01_2026-05-29.csv",
+        "solusdt_1d_2020-08-11_2026-05-29.csv"
+      ],
+      "schema": "timestamp,open,high,low,close,volume",
+      "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+      "timeframe": "1d (daily)",
+      "quote_currency": "USDT (consistent across all three; documented in filename only)",
+      "spot_or_perp": "UNDETERMINED for these exact files -- filename 'usdt' and the manifest hint at spot, but nothing PINS it for these specific 1d CSVs.",
+      "source_exchange": "UNPINNED for these exact files -- Binance-style USDT pair inferred; no provenance record in the daily files' own location.",
+      "lineage": "Regime-intelligence drop-zone consumed by sparta_regime_intelligence.csv_loader; same data family as Crypto-D2 inventory item #3 (regime HMM mid-vol study, HISTORICAL_ONLY). Per Crypto-D1/D2 the STRATEGY results of that lane carry no edge; the raw QA'd OHLCV may be reused as DATA only if provenance is pinned and it is re-QA'd.",
+      "excluded": "_SAMPLE_SYNTHETIC_btcusdt_1d.csv (synthetic placeholder -- never usable for an edge claim). Many *.csv.superseded.<timestamp> daily-refresh backups present (background automation)."
+    },
+    "acquisition_manifest_examined": {
+      "path": "reports/crypto_regime_data_acquisition_manifest.json (repo-root reports/, ~137k tokens)",
+      "schema": "sparta.crypto_regime_data_acquisition_manifest.v2",
+      "arc_id": "CRYPTO-REGIME-MR",
+      "generated_at": "2026-05-17T17:28:04+00:00",
+      "source": "data.binance.vision (Binance public market data)",
+      "instrument_path_prefix": "https://data.binance.vision/data/spot/monthly/klines/{BTCUSDT,ETHUSDT,SOLUSDT}/1h/... -- the data/spot/ prefix indicates SPOT for THAT acquisition.",
+      "tls": "curl/Schannel FULL chain verification ON; no --insecure / verify=False / cert bypass.",
+      "integrity": "status ACQUIRED; total_files_good 279; total_checksum_mismatch 0; all three symbols present.",
+      "why_it_does_not_close_the_gap": "Manifest interval is 1h and its raw_root is C:\\SPARTA_RESEARCH_LAB\\crypto_regime_momentum_meanrev\\data\\raw -- a SEPARATE timeframe and location from the 1d CSVs in SPARTA_BRAIN\\data\\frozen_regime_inputs being provisioned here. The manifest never references the daily files or a documented roll-up step. It is SUGGESTIVE of a Binance-spot lineage, NOT a pinned 1:1 provenance record for these exact daily files."
+    },
+    "other_crypto_artifacts_found": {
+      "location": "external_repos_static/funding_rate_arbitrage_.../historicalDataJSON/{Binance,Synthetix}/",
+      "content": "Perp FUNDING-RATE arbitrage historical JSON for BTC/ETH/SOL/BNB/ARB/DOGE/etc.",
+      "status": "OUT OF SCOPE -- perp/funding data; perps are BLOCKED (Crypto-D1 sec4/sec9) until funding sourced+frozen. Not a spot OHLCV candidate."
+    }
+  },
+  "3_data_qa": {
+    "note": "Read-only structural QA (stdlib only). No strategy, no backtest, no indicator/return computation beyond integrity checks.",
+    "per_symbol": {
+      "BTCUSDT": {"rows": 2341, "range": ["2020-01-01", "2026-05-29"], "calendar_days": 2341, "unique_dates": 2341, "missing_daily_bars": 0, "duplicate_dates": 0, "invalid_ohlc": 0, "zero_volume_bars": 0},
+      "ETHUSDT": {"rows": 2341, "range": ["2020-01-01", "2026-05-29"], "calendar_days": 2341, "unique_dates": 2341, "missing_daily_bars": 0, "duplicate_dates": 0, "invalid_ohlc": 0, "zero_volume_bars": 0},
+      "SOLUSDT": {"rows": 2118, "range": ["2020-08-11", "2026-05-29"], "calendar_days": 2118, "unique_dates": 2118, "missing_daily_bars": 0, "duplicate_dates": 0, "invalid_ohlc": 0, "zero_volume_bars": 0}
+    },
+    "calendar_alignment": {
+      "btc_eq_eth_exact": true,
+      "sol_subset_of_btc": true,
+      "sol_dates_not_in_btc": 0,
+      "common_btc_eth_sol_days": 2118,
+      "common_range": ["2020-08-11", "2026-05-29"]
+    },
+    "is_oos_feasibility_crypto_d1_sec10": {
+      "IS_2020_2023_days": {"BTCUSDT": 1461, "ETHUSDT": 1461, "SOLUSDT": 1238},
+      "OOS_2024_2025_days": {"BTCUSDT": 731, "ETHUSDT": 731, "SOLUSDT": 731},
+      "year_2026_days": {"BTCUSDT": 149, "ETHUSDT": 149, "SOLUSDT": 149},
+      "note": "IS and OOS windows fully populated for all three symbols. SOL IS shorter (1238 vs 1461) because its history starts 2020-08-11 -- a justified per-symbol window, NOT fabricated/stitched pre-listing history. 2026 (149 days) is BLOCKED unless explicitly authorized."
+    },
+    "structural_qa_verdict": "CLEAN -- 24/7 complete (every calendar day present), no duplicates, no invalid OHLC, no zero-volume bars, all three symbols calendar-aligned, one consistent series per symbol (no cross-exchange stitching), single consistent USDT quote. NOTE: a structural QA pass certifies STRUCTURE only -- it does NOT certify provenance or spot-vs-perp."
+  },
+  "4_provisioning_decision": {
+    "structural_quality": "PASS (clean).",
+    "blocking_gap": "PROVENANCE NOT PINNED for these exact daily files. Crypto-D1 sec5 / Crypto-D2 sec6 require a named exchange, a spot-vs-perp determination, and a documented retrieval method PER DATASET. The daily files' own location documents none; the only related manifest is 1h in a separate repo and does not pin these 1d files.",
+    "spot_vs_perp_is_a_hard_gate": "UNDETERMINED for the provisioned files. If they were perp, the dataset is BLOCKED (perps need sourced+frozen funding). A frozen Crypto-D4 spec cannot be built on data whose instrument type is uncertified.",
+    "quote_currency": "USDT consistent across all three (good), but the USDT-vs-USD-vs-USDC reconciliation rule is undocumented (known QA hazard, Crypto-D1 sec11 / Crypto-D2 sec6).",
+    "paths_to_readiness": [
+      "(A) Pin provenance retroactively for the existing files: named exchange + EXPLICIT SPOT confirmation + retrieval method/date + quote rule (e.g., formally tie the daily series to the verified Binance-spot manifest and document the roll-up). No fetch. If done with confidence, data becomes ready.",
+      "(B) Crypto-D3b: a separately authorized, provenance-documented spot OHLCV re-provision for BTC/ETH/SOL. This IS a fetch and needs its own explicit authorization; this memo fetches nothing."
+    ]
+  },
+  "5_verdict": "DATA_NOT_READY_FETCH_AUTH_REQUIRED",
+  "5_verdict_nuance": "NOT a 'no data' situation and NOT a QA failure. Clean BTC/ETH/SOL daily USDT candles exist locally and PASS every structural QA check with feasible IS/OOS windows. They are NOT READY only because provenance is unpinned for these exact files -- spot-vs-perp is undetermined (a hard gate, since perps are blocked) and no source exchange / retrieval method is documented in the daily files' own location. A Binance-SPOT acquisition manifest exists and strongly SUGGESTS spot lineage, but it is 1h klines in a separate location and does not pin these 1d files. Readiness requires either (A) pinning provenance incl. explicit SPOT confirmation, or (B) a separately authorized provenance-documented re-provision (Crypto-D3b). Crypto-D4 (spec) must NOT start until the provenance gap closes.",
+  "6_tests": {
+    "scoped_command": "python -m pytest tests -q --rootdir=. --confcutdir=. -p no:cacheprovider (run from trading_research/agentic_factory)",
+    "note": "No engine/test/spec/data files were created or modified by Crypto-D3 -- only the report pair. Full-repo pytest remains blocked by the unrelated corrupt-named hydra directory at the repo root (collection-time WinError 2) -- pre-existing, NOT touched, NOT fixed. The pre-existing test_config_wiring session_start 09:30/14:30 flap (background automation) is unrelated and not touched."
+  },
+  "7_next_step": {
+    "recommended": "Close the provenance gap via path (A) pin provenance for the existing data/frozen_regime_inputs BTC/ETH/SOL USDT daily CSVs (named exchange + SPOT confirmation + retrieval method + quote rule), OR path (B) authorize Crypto-D3b (a documented spot OHLCV re-provision). Only then author Crypto-D4 with 2026 sealed and SOL on a justified per-symbol window.",
+    "do_not_start_crypto_d4": true,
+    "crypto_d3b_not_authorized": "Any fetch is a separate, separately-authorized step. This memo fetches nothing."
+  },
+  "guardrails": {
+    "no_data_fetch": true,
+    "no_code": true,
+    "no_backtest": true,
+    "no_optimization": true,
+    "no_parameter_sweeps": true,
+    "no_old_crypto_strategy_rerun": true,
+    "no_strategy_test": true,
+    "no_broker_or_exchange_api_execution": true,
+    "no_paper_or_live": true,
+    "crypto_kept_separate_from_futures": true,
+    "do_not_touch_s30_s26_s27_s28_s29_donchian": true,
+    "jarvis_templates_base_hydra_untouched": true,
+    "no_staging": true,
+    "no_commit": true,
+    "did_not_start_crypto_d4": true
+  },
+  "trading_recommendation": "NONE. Data-source + QA provisioning only. Local BTC/ETH/SOL daily USDT candles (data/frozen_regime_inputs) are structurally CLEAN with feasible IS/OOS windows, but provenance is UNPINNED for these exact files (spot-vs-perp undetermined; a Binance-spot manifest exists but is 1h in a separate location and does not pin these 1d files), so verdict is DATA_NOT_READY_FETCH_AUTH_REQUIRED. No crypto strategy is validated, paper-ready, or live-ready. Perps remain BLOCKED. Crypto remains a separate research lane; S30 and the futures branches (Donchian, S26-S29) remain PARKED and untouched. Nothing fetched, staged, or committed."
+}
