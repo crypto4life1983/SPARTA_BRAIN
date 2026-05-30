@@ -1,0 +1,46 @@
+{
+  "step": "S23-D18",
+  "type": "CLOSEOUT MEMO (human-readable record; NOT a new backtest)",
+  "created_date": "2026-05-29",
+  "branch": "Frozen Donchian NQ-only daily baseline discovery branch",
+  "frozen_params": {"entry_channel": 55, "exit_channel": 20, "atr_period": 20, "stop_n_multiple": 2.0, "max_units_per_market": 1, "accounting": "R-only"},
+  "s23_chain_summary": {
+    "D13": "Transcoded local Databento-native NQ 2014-2022 into module-local daily CSVs (IS data prep).",
+    "D14": "Ran the frozen daily Donchian baseline over the full 2013-2022 IS window (continuous stream).",
+    "D15": "Pre-registered the OOS validation protocol and COMMITTED it (18349fa) BEFORE any OOS data was seen.",
+    "D16": "Transcoded sealed 2023-2025 OOS data into daily CSVs; all years structural-QA PASS.",
+    "D17": "Ran the frozen Donchian engine exactly ONCE over 2023-2025 and judged strictly against D15."
+  },
+  "is_result_2013_2022": {
+    "trades": 66, "total_r": 10.5421, "profit_factor": 1.31, "win_rate": 0.424,
+    "expectancy_r": 0.16, "max_drawdown_r": 6.34, "positive_years": 5, "negative_years": 5
+  },
+  "oos_result_2023_2025": {
+    "trades": 16, "total_r": 11.37, "profit_factor": 2.41, "win_rate": 0.438,
+    "expectancy_r": 0.71, "max_drawdown_r": 3.00, "positive_years": 3, "negative_years": 0,
+    "best_trade_r": 5.72, "worst_trade_r": -1.0, "best_trade_share_of_net": 0.503
+  },
+  "d15_protocol_commit": "18349fa7091523fd55df467276076307510b4e69",
+  "final_s23_verdict": "WATCH",
+  "verdict_reason": "Every economic gate is green (expectancy > 0, PF > 1.05, max DD within 1.5x IS, >= 1 positive year, no >80% single-trade dominance, no data defect), and no FAIL trigger fires. But the committed protocol's WATCH trigger 'OOS trade count too small for confidence' is live at n=16, which holds the verdict at WATCH under the FAIL->WATCH->PASS precedence.",
+  "what_watch_means": [
+    "Do not trade live.",
+    "Do not paper-promote yet.",
+    "Do not optimize against OOS.",
+    "Do not add filters using 2023-2025 data."
+  ],
+  "correct_next_steps": [
+    "S24 entry-rule significance on the frozen signals (signal_significance, currently parked).",
+    "Trade-order Monte Carlo.",
+    "Drawdown sequence-risk Monte Carlo.",
+    "Wider evidence base / multi-market test (fresh future OOS, not re-using 2023-2025).",
+    "Regime breakdown."
+  ],
+  "anti_overfit_warning": "Promising but still fragile: low OOS trade count (n=16) and a trend-follower profile whose net result leans on a few large winners (best trade = 50.3% of OOS net). Do not over-read three strong OOS years.",
+  "final_line": "S23 is complete as a frozen Donchian baseline discovery branch. It produced a WATCH candidate, NOT a deployable strategy.",
+  "commits_of_record": {
+    "d15_protocol": "18349fa7091523fd55df467276076307510b4e69",
+    "d14_is_ignore": "4deb36b61c13b4c102fb28bfe864de2f564ca452",
+    "d16_d17_ignore": "81c4a643ff401201eaaf42973157cff4218bf7bb"
+  }
+}
