@@ -1,0 +1,205 @@
+{
+  "step": "Factory-D1 (a.k.a. S29-D0)",
+  "title": "Reusable Validation Runner -- PLAN ONLY (no code, no backtest, no strategy search)",
+  "created": "2026-05-30",
+  "kind": "planning_spec_only",
+  "plan_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "runner_implemented": false,
+  "provenance": {
+    "memory_commit": "18797fb",
+    "head_at_plan_context": "4e21cc4",
+    "head_note": "HEAD 4e21cc4 is a JARVIS-only background-automation commit (app.py, docs/jarvis_system_map.json, templates/jarvis.html, tests/test_jarvis_route.py); it touched NO agentic_factory file and 18797fb remains its ancestor.",
+    "context_reports_read": [
+      "reports/s25_d1_donchian_trade_order_monte_carlo/report.md",
+      "reports/s26_d18_trend_sr_ema_rsi_decision_gate/report.md",
+      "reports/s27_d4_mean_reversion_bull_is_baseline/report.md",
+      "reports/s28_d4_breakout_retest_is_baseline/report.md"
+    ],
+    "parked_branch_commits_referenced": {
+      "s26_d18_head": "066c16c",
+      "s27_d1": "dc53087468ab955c85dacb70241c8b3387593883",
+      "s27_d2": "4a678ce935850164aec00e32f45390ee456d1fad",
+      "s27_d3": "d016127c77cd46116f632064de850c1fa8f0b103",
+      "s28_d4": "1ef71fe5fe7e7db08adabec0625ec7a915898b35"
+    }
+  },
+  "1_executive_summary": [
+    "The validation ladder was built and run MANUALLY, prompt-by-prompt, across four strategy branches.",
+    "It correctly PARKED all four: Donchian (reference baseline only), S26 (PARK_CANDIDATE), S27 (IS_FAIL), S28 (IS_FAIL).",
+    "The highest-value next improvement is automation/repeatability of that ladder -- NOT immediately testing another strategy.",
+    "This step designs a reusable validation runner so any future frozen strategy can be put through the same controlled, anti-overfit ladder with consistent reports and identical git/data guardrails."
+  ],
+  "2_problem_being_solved": {
+    "summary": "Manual prompt-by-prompt validation is slow and error-prone.",
+    "pain_points": [
+      "Repeated report patterns hand-authored each step (provenance, data QA, metrics tables, verdict).",
+      "Repeated git guardrails restated each commit (explicit pathspec, verify-before/after).",
+      "Repeated IS/OOS separation logic re-implemented per branch.",
+      "Risk of accidental OOS peeking (the 2023-2025 seal is enforced only by hand-written asserts).",
+      "Risk of mixed commits due to background JARVIS index races.",
+      "Hard to compare candidates consistently when each report is bespoke."
+    ]
+  },
+  "3_design_goal": "A reusable validation runner that takes a FROZEN strategy engine + frozen spec + a branch ID/commit, and generates the SAME decision-record ladder (one module at a time, each gated) in a controlled, reproducible, anti-overfit way -- producing uniform report.json/report.md per module.",
+  "4_non_goals": [
+    "NOT a strategy optimizer.",
+    "NOT an agent that mutates strategies until profitable.",
+    "NOT a paper-trading system.",
+    "NOT a live-trading system.",
+    "NOT broker-connected; no network, no data fetch.",
+    "NOT allowed to change strategy parameters.",
+    "NOT allowed to touch OOS data until the OOS protocol is committed.",
+    "NOT allowed to auto-promote a candidate.",
+    "NOT allowed to pick the best variant or hide failed branches."
+  ],
+  "5_validation_ladder_modules": {
+    "A_spec_check": {
+      "purpose": "Verify the frozen spec exists, parameters are locked, and branch ID + selected-hypothesis commit hash are recorded.",
+      "inputs": ["frozen spec report.json/md", "engine module path", "branch ID", "spec commit hash"],
+      "outputs": ["spec_check decision record"],
+      "blocks": ["any later module if spec missing or params not frozen"]
+    },
+    "B_is_baseline": {
+      "purpose": "Run IS only; enforce the IS data window; hard-block OOS files; produce the IS decision record.",
+      "inputs": ["IS CSV list", "frozen engine", "IS window"],
+      "outputs": ["IS metrics + verdict IS_CONTINUE/IS_WATCH/IS_FAIL"],
+      "hard_rules": ["OOS files refused", "no parameter input accepted"]
+    },
+    "C_oos_protocol": {
+      "purpose": "Create the pass/watch/fail protocol BEFORE any OOS run; require the protocol be committed before OOS is permitted.",
+      "outputs": ["pre-registered OOS thresholds decision record"],
+      "gate": "oos_run is refused unless a committed protocol hash is supplied"
+    },
+    "D_oos_run": {
+      "purpose": "Run OOS exactly ONCE; compare strictly to the committed protocol; no re-runs with changed rules.",
+      "inputs": ["OOS CSV list", "protocol commit hash"],
+      "outputs": ["OOS metrics vs protocol verdict"],
+      "hard_rules": ["one-shot", "protocol hash must match a committed protocol"]
+    },
+    "E_entry_significance": {
+      "purpose": "Real entries vs same-count random-in-regime entries; optional real entries vs raw-signal baseline.",
+      "outputs": ["EDGE_LIKELY / INCONCLUSIVE / NOT_SUPPORTED at fixed horizons"]
+    },
+    "F_sequence_risk": {
+      "purpose": "Trade-order Monte Carlo + bootstrap + top-winner dependence (the S25 lesson).",
+      "outputs": ["prob(total R<=0)", "DD tail percentiles", "top-3 removal sign", "best-trade share of net"]
+    },
+    "G_regime_breakdown": {
+      "purpose": "Volatility/trend/year regime breakdown + concentration analysis (single-year / single-regime dominance).",
+      "outputs": ["per-regime R", "per-year R", "concentration flags"]
+    },
+    "H_multimarket": {
+      "purpose": "NQ primary, ES independent confirmation, micros (MNQ/MES) proxy-only; no false robustness claims.",
+      "hard_rules": ["micros are descriptive only, never independent", "max verdict by design = PARTIAL_SUPPORT when independence is by-ticker not by-underlying"]
+    },
+    "I_walk_forward": {
+      "purpose": "Rolling 3-year and 5-year windows; identify common weak windows (e.g. the 2014-2016 chop).",
+      "outputs": ["per-window R", "fraction of positive windows", "shared weak-window flags"]
+    },
+    "J_friction_stress": {
+      "purpose": "Low/moderate/high/severe per-trade R-cost; compute break-even friction.",
+      "outputs": ["R at each friction level (IS and OOS)", "break-even R-cost"]
+    },
+    "K_readiness_gate": {
+      "purpose": "Map cumulative evidence to a readiness tier.",
+      "tiers": ["BLOCKED", "RESEARCH_CANDIDATE", "VALIDATION_CANDIDATE", "PAPER_REVIEW_CANDIDATE", "PAPER_READY", "LIVE_READY"]
+    },
+    "L_final_decision": {
+      "purpose": "Final branch disposition.",
+      "verdicts": ["CONTINUE", "PARK", "FAIL", "REDESIGN_REQUIRED"]
+    }
+  },
+  "6_data_safety_rules": [
+    "Hard-block OOS files during any IS module (refuse the run, do not silently drop).",
+    "Hard-block 2026 data unless explicitly authorized.",
+    "No network fetch anywhere inside the validation runner.",
+    "Data inventory must be explicit (every input file path recorded).",
+    "The exact input file list and data window must be recorded in EVERY module report."
+  ],
+  "7_git_safety_rules": [
+    "Explicit pathspec commits only.",
+    "Never plain `git commit` when JARVIS may stage files.",
+    "Never `git add .`.",
+    "Never `git add trading_research/agentic_factory/`.",
+    "Report the exact staged set (`git diff --cached --name-only`) BEFORE commit.",
+    "Report `git show --stat HEAD` AFTER commit.",
+    "Raw artifacts (e.g. _run.json/_run.py) are NOT committed unless explicitly approved.",
+    "When HEAD advances externally, confirm the prior approved commit is still an ancestor and the external commit touched no agentic_factory file before proceeding; never touch/unstage JARVIS files."
+  ],
+  "8_report_structure_standard": [
+    "branch ID",
+    "module ID",
+    "source commits",
+    "input files",
+    "data window",
+    "frozen params",
+    "metrics",
+    "verdict",
+    "caveats",
+    "next allowed step",
+    "forbidden actions"
+  ],
+  "9_runner_architecture_proposal": {
+    "note": "PLAN ONLY -- suggested files; NONE are created in this step.",
+    "proposed_future_files": [
+      "engine/validation_runner.py",
+      "engine/validation_reports.py",
+      "engine/validation_gates.py",
+      "tests/test_validation_runner.py",
+      "docs/validation_ladder.md"
+    ]
+  },
+  "10_cli_proposal": {
+    "note": "Proposed commands ONLY -- not implemented.",
+    "examples": [
+      "python -m engine.validation_runner --branch S29 --module is_baseline --strategy engine/s29_x.py --market NQ --window IS",
+      "python -m engine.validation_runner --branch S29 --module oos_run --protocol-commit <hash>"
+    ]
+  },
+  "11_overfitting_guardrails": [
+    "The runner must NOT choose the best variant.",
+    "The runner must NOT mutate parameters.",
+    "The runner must NOT rerun OOS with changed rules.",
+    "The runner must NOT hide failed branches.",
+    "The runner must NOT combine OOS with IS to justify promotion.",
+    "The runner must NOT promote based on a single metric."
+  ],
+  "12_lessons_from_parked_branches": {
+    "donchian": "Profit can HIDE a weak entry and sequence fragility. S24 found ENTRY_EDGE_NOT_SUPPORTED; S25 found prob(total R<=0)=20.9%, net flips negative removing top-3, best trade 50-65% of net, realized DD only at the 11th percentile of shuffles (path luck). A profitable equity curve is not an edge.",
+    "s26": "OOS PASS is NOT enough. NQ+ES OOS both passed and were friction-robust, but the thin ~0.06R IS edge was FRICTION_SENSITIVE, entry significance was INCONCLUSIVE, regime was INCONCLUSIVE (profitable vol regime inconsistent across markets), the record lived entirely in the post-2016 trend, and OOS was single-year-dominated (NQ 2024 61.7%, ES 2025 72.8%). Result: PARK_CANDIDATE.",
+    "s27_s28": "IS_FAIL must STOP before OOS. Both failed IS net-negative with the anti-Donchian top-3 gate failing (net already negative; removing winners makes it worse). Burning the one-shot OOS on an IS-failed branch wastes the clean look and invites curve-fitting.",
+    "why_ladder_valuable": "The ladder SAVES the OOS seal and prevents emotional continuation -- it converts 'this looks promising' into mechanical pass/watch/fail against pre-registered floors."
+  },
+  "13_proposed_implementation_sequence": {
+    "Factory-D2": "validation report schema + report writer ONLY",
+    "Factory-D3": "IS runner harness for one EXISTING (frozen, parked) engine",
+    "Factory-D4": "OOS protocol/run enforcement (one-shot + protocol-commit gate)",
+    "Factory-D5": "entry significance integration",
+    "Factory-D6": "sequence-risk integration",
+    "Factory-D7": "regime / walk-forward / friction modules",
+    "Factory-D8": "final decision dashboard/report",
+    "note": "No paper/live module until much later, and only under separate explicit authorization."
+  },
+  "14_final_recommendation": {
+    "recommendation": "BUILD_FACTORY_D2_NEXT",
+    "rationale": "Repeatability should come before more strategy search. Four branches already proved the ladder works; encoding the report schema + writer first (Factory-D2) is the smallest, lowest-risk increment that removes the most manual error (bespoke reports, restated guardrails) and makes every later module consistent. Returning to S29 idea-sourcing now would re-incur the manual cost on every step.",
+    "alternative": "S29-D1 deeper idea-sourcing memo (no code) -- valid if the operator prefers to keep searching; but recommended to defer until the runner exists."
+  },
+  "15_final_line": "Factory-D1 is a plan-only step. No strategy test, optimization, paper trading, live trading, or runner implementation is authorized.",
+  "guardrails": {
+    "plan_only": true, "no_code": true, "no_backtest": true, "no_is_oos_run": true,
+    "no_optimization": true, "no_parameter_sweeps": true, "no_data_fetch": true,
+    "no_paper_or_live": true, "no_broker_or_api": true, "no_strategy_search": true,
+    "no_runner_implementation": true, "no_raw_artifact_cleanup": true,
+    "donchian_s26_s27_s28_read_only": true, "jarvis_templates_hydra_untouched": true,
+    "no_staging": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. Plan-only design step. Donchian, S26, S27, S28 remain PARKED; no new strategy started; the runner is not built."
+}
