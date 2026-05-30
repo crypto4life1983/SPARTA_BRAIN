@@ -1,7 +1,7 @@
 # JARVIS Docs Index / Command Center Manual
 
 - **Generated:** 2026-05-30
-- **Audited through commit:** `da1f1ee` (Step 13)
+- **Audited through commit:** `c94da5c` (Step 17)
 - **Live page:** http://127.0.0.1:8765/jarvis
 - **Status API:** http://127.0.0.1:8765/api/jarvis/status
 
@@ -51,6 +51,10 @@ and operator docs) into one screen.
 | `78a50cc` | Step 11 read-only hardening audit memo |
 | `9a97848` | Step 12 system map api_key reconciliation |
 | `da1f1ee` | Step 13 refresh mission board and prompt library |
+| `efa8298` | Step 14 docs index / command center manual |
+| `8eea703` | Step 15 read-only cache freshness panel |
+| `34b09a5` | Step 16 live regression smoke memo |
+| `c94da5c` | Step 17 panel consistency audit memo |
 
 ---
 
@@ -76,6 +80,10 @@ and operator docs) into one screen.
 | `docs/jarvis_step_11_hardening_audit/report.md` | Step 11 hardening audit memo (human-readable). Conclusion: JARVIS_HARDENING_PASS. |
 | `docs/jarvis_docs_index/report.json` | This docs index (machine-readable). |
 | `docs/jarvis_docs_index/report.md` | This docs index / command center manual (human-readable). |
+| `docs/jarvis_step_16_live_regression_smoke/report.json` | Step 16 live regression smoke memo (machine-readable). |
+| `docs/jarvis_step_16_live_regression_smoke/report.md` | Step 16 live regression smoke memo (human-readable). Conclusion: JARVIS_LIVE_REGRESSION_PASS. |
+| `docs/jarvis_step_17_panel_consistency_audit/report.json` | Step 17 panel consistency audit memo (machine-readable). |
+| `docs/jarvis_step_17_panel_consistency_audit/report.md` | Step 17 panel consistency audit memo (human-readable). Conclusion: CONSISTENT. |
 
 ---
 
@@ -105,8 +113,8 @@ by the dashboard.
 
 ## 7. Current API sections
 
-`/api/jarvis/status` returns these 21 sections (plus the meta keys `online` and
-`read_only`):
+`/api/jarvis/status` returns these 22 sections (plus the meta keys `online` and
+`read_only`, for 24 top-level keys total):
 
 - `commander_snapshot`
 - `system_core`
@@ -129,6 +137,13 @@ by the dashboard.
 - `prompt_library`
 - `file_hygiene_report`
 - `system_map`
+- `cache_freshness`
+
+The `cache_freshness` section (added Step 15) renders in the UI panel with id
+`pCacheFreshness`. It reports whether the known `storage/jarvis/*.json` caches
+are fresh, stale, missing, or invalid by reading only their metadata
+(existence, modified time, `generated_at`) — it never runs the generator
+scripts and never refreshes a cache.
 
 Every section is wrapped fail-closed by `_jarvis_safe`, so one failing section
 never crashes the endpoint (it still returns 200 with an error dict for that
@@ -156,6 +171,8 @@ section).
 - `/money-spartan` may report a non-required **404** in the route smoke report.
 - A corrupted `hydra ` directory can break bare pytest collection, so always use
   the scoped JARVIS pytest command (`--rootdir=tests`).
+- This docs index is now refreshed through **Step 17** (commit `c94da5c`): it
+  lists the `cache_freshness` section and the Step 16 / 17 memos.
 
 ---
 
@@ -176,11 +193,21 @@ pytest tests/test_jarvis_route.py --rootdir=tests -q
 
 ## 11. Recommended next steps
 
-- **JARVIS-LIVE-REGRESSION-SMOKE** — confirm `/jarvis` and `/api/jarvis/status`
-  return 200 after the latest commits; verify key panels render.
-- **JARVIS-CACHE-FRESHNESS** — surface the age of each cached report
-  (`generated_at` vs now) with a display-only staleness threshold.
-- **JARVIS-PANEL-CONSISTENCY** — cross-reference system map panels, documented
-  `api_key` values, live status keys, and rendered UI panel ids.
+**Completed since the last index revision:**
+
+- **JARVIS-CACHE-FRESHNESS** — shipped Step 15 (commit `8eea703`).
+- **JARVIS-LIVE-REGRESSION-SMOKE** — memo Step 16 (commit `34b09a5`); conclusion
+  JARVIS_LIVE_REGRESSION_PASS.
+- **JARVIS-PANEL-CONSISTENCY** — memo Step 17 (commit `c94da5c`); conclusion
+  CONSISTENT.
+
+**Recommended next:**
+
 - **JARVIS-UI-POLISH** — cosmetic layout, spacing, and label improvements only;
   no new buttons, forms, POST routes, or capabilities.
+- **JARVIS-CACHE-FRESHNESS-AGE-BADGES** — optional display-only age badges on
+  each cache row (no new controls).
+- **JARVIS-DOCS-AUTO-CHECK-MEMO** — a read-only memo that re-verifies the docs
+  index against the live API and tracked docs.
+- **JARVIS-LIVE-REGRESSION-SMOKE (recurring)** — re-run the live regression
+  memo after future JARVIS commits.

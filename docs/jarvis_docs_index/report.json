@@ -1,7 +1,7 @@
 {
   "title": "JARVIS Docs Index / Command Center Manual",
-  "generated_at": "2026-05-30T00:00:00",
-  "audited_through_commit": "da1f1ee",
+  "generated_at": "2026-05-30T04:00:00",
+  "audited_through_commit": "c94da5c",
   "live_url": "http://127.0.0.1:8765/jarvis",
   "api_url": "http://127.0.0.1:8765/api/jarvis/status",
   "overview": {
@@ -37,7 +37,11 @@
     {"hash": "4e21cc4", "purpose": "Step 10 read-only system map panel"},
     {"hash": "78a50cc", "purpose": "Step 11 read-only hardening audit memo"},
     {"hash": "9a97848", "purpose": "Step 12 system map api_key reconciliation"},
-    {"hash": "da1f1ee", "purpose": "Step 13 refresh mission board and prompt library"}
+    {"hash": "da1f1ee", "purpose": "Step 13 refresh mission board and prompt library"},
+    {"hash": "efa8298", "purpose": "Step 14 docs index / command center manual"},
+    {"hash": "8eea703", "purpose": "Step 15 read-only cache freshness panel"},
+    {"hash": "34b09a5", "purpose": "Step 16 live regression smoke memo"},
+    {"hash": "c94da5c", "purpose": "Step 17 panel consistency audit memo"}
   ],
   "main_code_files": [
     {"path": "app.py", "purpose": "FastAPI app. Holds the _jarvis_* read-only helpers, the GET /api/jarvis/status aggregate endpoint, and the GET /jarvis page route."},
@@ -52,7 +56,11 @@
     {"path": "docs/jarvis_step_11_hardening_audit/report.json", "purpose": "Step 11 hardening audit memo (machine-readable)."},
     {"path": "docs/jarvis_step_11_hardening_audit/report.md", "purpose": "Step 11 hardening audit memo (human-readable). Conclusion: JARVIS_HARDENING_PASS."},
     {"path": "docs/jarvis_docs_index/report.json", "purpose": "This docs index (machine-readable)."},
-    {"path": "docs/jarvis_docs_index/report.md", "purpose": "This docs index / command center manual (human-readable)."}
+    {"path": "docs/jarvis_docs_index/report.md", "purpose": "This docs index / command center manual (human-readable)."},
+    {"path": "docs/jarvis_step_16_live_regression_smoke/report.json", "purpose": "Step 16 live regression smoke memo (machine-readable)."},
+    {"path": "docs/jarvis_step_16_live_regression_smoke/report.md", "purpose": "Step 16 live regression smoke memo (human-readable). Conclusion: JARVIS_LIVE_REGRESSION_PASS."},
+    {"path": "docs/jarvis_step_17_panel_consistency_audit/report.json", "purpose": "Step 17 panel consistency audit memo (machine-readable)."},
+    {"path": "docs/jarvis_step_17_panel_consistency_audit/report.md", "purpose": "Step 17 panel consistency audit memo (human-readable). Conclusion: CONSISTENT."}
   ],
   "manual_only_scripts": [
     {"path": "tools/jarvis_health_report.py", "writes": "storage/jarvis/health_report.json", "purpose": "Offline compile/test health report. Manual only; never run from the web."},
@@ -85,8 +93,10 @@
     "route_smoke_report",
     "prompt_library",
     "file_hygiene_report",
-    "system_map"
+    "system_map",
+    "cache_freshness"
   ],
+  "api_section_count": 22,
   "api_meta_keys": ["online", "read_only"],
   "safety_rules": [
     "No browser execution.",
@@ -101,7 +111,8 @@
   "known_warnings": [
     "commander_snapshot may show yellow due to the large untracked-file backlog and a dirty working tree (conservative by design, not an error).",
     "/money-spartan may report a non-required 404 in the route smoke report.",
-    "A corrupted 'hydra ' directory can break bare pytest collection, so always use the scoped JARVIS pytest command (--rootdir=tests)."
+    "A corrupted 'hydra ' directory can break bare pytest collection, so always use the scoped JARVIS pytest command (--rootdir=tests).",
+    "This docs index is now refreshed through Step 17 (commit c94da5c); it lists the cache_freshness section and the Step 16/17 memos."
   ],
   "how_to_validate": [
     "python -m py_compile app.py",
@@ -113,10 +124,15 @@
     "python tools/jarvis_file_hygiene_report.py",
     "pytest tests/test_jarvis_route.py --rootdir=tests -q"
   ],
+  "completed_since_last_index": [
+    "JARVIS-CACHE-FRESHNESS (shipped Step 15, commit 8eea703)",
+    "JARVIS-LIVE-REGRESSION-SMOKE (memo Step 16, commit 34b09a5; conclusion JARVIS_LIVE_REGRESSION_PASS)",
+    "JARVIS-PANEL-CONSISTENCY (memo Step 17, commit c94da5c; conclusion CONSISTENT)"
+  ],
   "recommended_next_steps": [
-    "JARVIS-LIVE-REGRESSION-SMOKE",
-    "JARVIS-CACHE-FRESHNESS",
-    "JARVIS-PANEL-CONSISTENCY",
-    "JARVIS-UI-POLISH"
+    "JARVIS-UI-POLISH",
+    "JARVIS-CACHE-FRESHNESS-AGE-BADGES",
+    "JARVIS-DOCS-AUTO-CHECK-MEMO",
+    "JARVIS-LIVE-REGRESSION-SMOKE (recurring)"
   ]
 }
