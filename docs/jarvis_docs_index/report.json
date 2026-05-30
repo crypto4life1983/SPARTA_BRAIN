@@ -1,0 +1,122 @@
+{
+  "title": "JARVIS Docs Index / Command Center Manual",
+  "generated_at": "2026-05-30T00:00:00",
+  "audited_through_commit": "da1f1ee",
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "overview": {
+    "purpose": "A cinematic, read-only command center that aggregates the state of the SPARTA_BRAIN system (server, AI brains, trading research, content/money/moving engines, git, safety posture, cached reports, and operator docs) into one dashboard.",
+    "read_only_posture": true,
+    "allowed": [
+      "Read and display aggregated status from /api/jarvis/status (GET only).",
+      "Display cached reports written offline by manual tools.",
+      "Display tracked documentation JSON (mission board, prompt library, system map).",
+      "Poll the status endpoint on a timer for a live read-only view."
+    ],
+    "not_allowed": [
+      "Execute commands or scripts from the browser.",
+      "Clean, stage, delete, move, or write any file from the web.",
+      "Run tests or probes from the web route.",
+      "Execute any prompt or mission text.",
+      "Control a broker, place paper/live trades, or expose any order path.",
+      "Upload, deploy, push, or fire automation.",
+      "Dump secrets or environment values."
+    ]
+  },
+  "commit_timeline": [
+    {"hash": "7c9cad2", "purpose": "Add SPARTA JARVIS command center (base)"},
+    {"hash": "6632b9b", "purpose": "Add JARVIS command center release note"},
+    {"hash": "38cf4fa", "purpose": "Step 02 operator intelligence panel"},
+    {"hash": "5ae2f84", "purpose": "Step 03 cached health report panel"},
+    {"hash": "0f4523c", "purpose": "Step 04 read-only mission board panel"},
+    {"hash": "f4ba60d", "purpose": "Step 05 trading detail panel"},
+    {"hash": "df14112", "purpose": "Step 06 cached route smoke panel"},
+    {"hash": "49f3f4e", "purpose": "Step 07 read-only prompt library panel"},
+    {"hash": "bdcca5a", "purpose": "Step 08 read-only file hygiene panel"},
+    {"hash": "0640d25", "purpose": "Step 09 commander's snapshot summary"},
+    {"hash": "4e21cc4", "purpose": "Step 10 read-only system map panel"},
+    {"hash": "78a50cc", "purpose": "Step 11 read-only hardening audit memo"},
+    {"hash": "9a97848", "purpose": "Step 12 system map api_key reconciliation"},
+    {"hash": "da1f1ee", "purpose": "Step 13 refresh mission board and prompt library"}
+  ],
+  "main_code_files": [
+    {"path": "app.py", "purpose": "FastAPI app. Holds the _jarvis_* read-only helpers, the GET /api/jarvis/status aggregate endpoint, and the GET /jarvis page route."},
+    {"path": "templates/jarvis.html", "purpose": "Cinematic read-only dashboard template. Single GET fetch to /api/jarvis/status; no buttons, forms, onclick, or POST."},
+    {"path": "tests/test_jarvis_route.py", "purpose": "JARVIS route + reader test suite (98 tests). Run scoped with --rootdir=tests."}
+  ],
+  "tracked_data_doc_files": [
+    {"path": "docs/JARVIS_COMMAND_CENTER_RELEASE_NOTE.md", "purpose": "Original release note for the command center."},
+    {"path": "docs/jarvis_mission_board.json", "purpose": "Display-only operator mission board (14 missions)."},
+    {"path": "docs/jarvis_prompt_library.json", "purpose": "Display-only operator prompt library (10 read-only prompts)."},
+    {"path": "docs/jarvis_system_map.json", "purpose": "Display-only wiring map: 21 panels (each with api_key), 3 scripts, tracked/ignored file lists."},
+    {"path": "docs/jarvis_step_11_hardening_audit/report.json", "purpose": "Step 11 hardening audit memo (machine-readable)."},
+    {"path": "docs/jarvis_step_11_hardening_audit/report.md", "purpose": "Step 11 hardening audit memo (human-readable). Conclusion: JARVIS_HARDENING_PASS."},
+    {"path": "docs/jarvis_docs_index/report.json", "purpose": "This docs index (machine-readable)."},
+    {"path": "docs/jarvis_docs_index/report.md", "purpose": "This docs index / command center manual (human-readable)."}
+  ],
+  "manual_only_scripts": [
+    {"path": "tools/jarvis_health_report.py", "writes": "storage/jarvis/health_report.json", "purpose": "Offline compile/test health report. Manual only; never run from the web."},
+    {"path": "tools/jarvis_route_smoke_report.py", "writes": "storage/jarvis/route_smoke_report.json", "purpose": "Offline GET-only route smoke report. Manual only; never run from the web."},
+    {"path": "tools/jarvis_file_hygiene_report.py", "writes": "storage/jarvis/file_hygiene_report.json", "purpose": "Offline git/untracked hygiene summary. Manual only; never run from the web."}
+  ],
+  "ignored_runtime_cache_files": [
+    "storage/jarvis/health_report.json",
+    "storage/jarvis/route_smoke_report.json",
+    "storage/jarvis/file_hygiene_report.json"
+  ],
+  "api_sections": [
+    "commander_snapshot",
+    "system_core",
+    "ai_brains",
+    "trading_bridge",
+    "content_engine",
+    "money_engine",
+    "moving_company",
+    "daily_mission",
+    "safety_gates",
+    "git",
+    "safety",
+    "project",
+    "brain_memory",
+    "recommended_next_actions",
+    "health_report",
+    "mission_board",
+    "trading_detail",
+    "route_smoke_report",
+    "prompt_library",
+    "file_hygiene_report",
+    "system_map"
+  ],
+  "api_meta_keys": ["online", "read_only"],
+  "safety_rules": [
+    "No browser execution.",
+    "No broker control.",
+    "No paper or live trading controls.",
+    "No file cleanup, stage, or delete controls.",
+    "No POST routes or actions.",
+    "No secrets or environment dumps.",
+    "Cached-report scripts are manual only.",
+    "The web route reads only; every section is fail-closed via _jarvis_safe."
+  ],
+  "known_warnings": [
+    "commander_snapshot may show yellow due to the large untracked-file backlog and a dirty working tree (conservative by design, not an error).",
+    "/money-spartan may report a non-required 404 in the route smoke report.",
+    "A corrupted 'hydra ' directory can break bare pytest collection, so always use the scoped JARVIS pytest command (--rootdir=tests)."
+  ],
+  "how_to_validate": [
+    "python -m py_compile app.py",
+    "python -m py_compile tools/jarvis_health_report.py",
+    "python -m py_compile tools/jarvis_route_smoke_report.py",
+    "python -m py_compile tools/jarvis_file_hygiene_report.py",
+    "python tools/jarvis_health_report.py",
+    "python tools/jarvis_route_smoke_report.py",
+    "python tools/jarvis_file_hygiene_report.py",
+    "pytest tests/test_jarvis_route.py --rootdir=tests -q"
+  ],
+  "recommended_next_steps": [
+    "JARVIS-LIVE-REGRESSION-SMOKE",
+    "JARVIS-CACHE-FRESHNESS",
+    "JARVIS-PANEL-CONSISTENCY",
+    "JARVIS-UI-POLISH"
+  ]
+}
