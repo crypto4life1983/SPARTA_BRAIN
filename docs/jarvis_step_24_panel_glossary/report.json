@@ -1,0 +1,161 @@
+{
+  "title": "JARVIS Step 24 — Panel Glossary",
+  "generated_at": "2026-05-30T07:00:00",
+  "type": "documentation_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "purpose": "A plain-language glossary of every visible JARVIS section and key panel: what each means, what healthy / warning / critical readings look like, and what the operator should do. Documentation only — adds no capability, control, or API change.",
+  "relation_to_steps_20_23": "Step 20 polished the UI; Step 21 proved it live and safe; Step 22 gave the operator runbook; Step 23 set the known-limits and safe roadmap. Step 24 is the reference glossary operators read alongside the runbook.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc"
+  },
+  "jarvis_identity": [
+    "Read-only observer — it mirrors aggregated state and never mutates anything.",
+    "No execution authority — no commands, scripts, prompts, or missions are run from the page.",
+    "No broker / paper / live control — no order path; paper_ready, live_ready, and broker_control are always false."
+  ],
+  "panel_id_alias_map": {
+    "note": "The Step 24 spec named four panels with shorthand that are not literal template ids. They are documented here mapped to the real committed ids so nothing is ambiguous.",
+    "aliases": [
+      {"spec_name": "pCommander", "actual_id": "pSnapshot", "reads": "commander_snapshot"},
+      {"spec_name": "pResearch", "actual_id": "pTradingDetail", "reads": "trading_detail"},
+      {"spec_name": "pStatus", "actual_id": "pCore", "reads": "system_core"},
+      {"spec_name": "pDocs", "actual_id": "pMissions + pPromptLib + pSystemMap", "reads": "mission_board + prompt_library + system_map", "note": "The 'Documentation & Maps' section, not a single panel."}
+    ],
+    "real_key_panel_ids": ["pSnapshot", "pCore", "pBrains", "pTrading", "pHealth", "pRouteSmoke", "pHygiene", "pMissions", "pPromptLib", "pSystemMap", "pTradingDetail", "pCacheFreshness"]
+  },
+  "section_glossary": [
+    {"section": "Command Overview", "meaning": "The single-glance verdict for the whole system.", "contains": ["pSnapshot"]},
+    {"section": "Core Systems", "meaning": "The foundational infrastructure: server, AI brains, git repository, project artifacts, brain memory.", "contains": ["pCore", "pBrains", "pGit", "pProject", "pBrainMem"]},
+    {"section": "Operations", "meaning": "Read-only engine status plus the daily plan.", "contains": ["pTrading", "pContent", "pMoney", "pMoving", "pMission", "pNext"]},
+    {"section": "Safety & Reliability", "meaning": "Safety gates, operator posture, and the cached health / route / cache-freshness / hygiene reports.", "contains": ["pSafety", "pOpSafety", "pHealth", "pRouteSmoke", "pCacheFreshness", "pHygiene"]},
+    {"section": "Research Visibility", "meaning": "Read-only trading research detail — no broker, paper, or live.", "contains": ["pTradingDetail"]},
+    {"section": "Documentation & Maps", "meaning": "Tracked, display-only mission board, prompt library, and system wiring map.", "contains": ["pMissions", "pPromptLib", "pSystemMap"]}
+  ],
+  "panel_glossary": [
+    {
+      "id": "pSnapshot", "alias": "pCommander", "title": "Commander's Snapshot", "reads": "commander_snapshot",
+      "means": "The derived top-level verdict: overall state plus safety, health, route, trading posture, cache, counts, and warnings.",
+      "healthy": "overall_state = green (clean posture, all required checks pass).",
+      "warning": "overall_state = yellow — most often a dirty/untracked working tree. Needs attention, not approval.",
+      "critical": "overall_state = red, or trading posture not research_only.",
+      "operator_action": "Read the warnings line. Yellow: note it and continue observing. Red: stop and investigate the failing signal."
+    },
+    {
+      "id": "pCore", "alias": "pStatus", "title": "System Core", "reads": "system_core",
+      "means": "Server running state, brain state, server time, and library counts.",
+      "healthy": "Server running; brain online; sensible counts.",
+      "warning": "Brain state not online, or counts missing.",
+      "critical": "Server not running / section error.",
+      "operator_action": "If the server isn't running, restart it offline and re-check. Do not add a UI control."
+    },
+    {
+      "id": "pBrains", "title": "AI Brains", "reads": "ai_brains",
+      "means": "Per-brain state (Claude / Codex / Gemini / Ollama).",
+      "healthy": "Expected brains present and online.",
+      "warning": "A brain idle / waiting / placeholder (informational).",
+      "critical": "Brain error / not connected when it is expected.",
+      "operator_action": "Warn states are usually informational; investigate offline only if a required brain is down."
+    },
+    {
+      "id": "pTrading", "title": "Trading Bridge", "reads": "trading_bridge",
+      "means": "READ-ONLY / LOCKED trading posture, sealed lifecycle count, and per-lifecycle verdicts.",
+      "healthy": "Posture READ-ONLY / LOCKED; lifecycle count as expected.",
+      "warning": "Lifecycle count 0 / waiting.",
+      "critical": "Posture shows anything other than read-only / locked.",
+      "operator_action": "Critical posture change is a safety regression — stop and investigate. There is no order path here by design."
+    },
+    {
+      "id": "pHealth", "title": "Health Report", "reads": "health_report",
+      "means": "CACHED offline compile/test health (py_compile, pytest).",
+      "healthy": "Overall pass; py_compile and pytest pass.",
+      "warning": "No cached report (manual tool not run) — not a live failure.",
+      "critical": "Overall fail / a check failed.",
+      "operator_action": "If failing, read the stderr tail and fix offline; regenerate the cached report with the manual tool. Never run the tool from the web."
+    },
+    {
+      "id": "pRouteSmoke", "title": "Route Smoke", "reads": "route_smoke_report",
+      "means": "CACHED GET-only route check with per-route status codes.",
+      "healthy": "Overall pass; required routes 200.",
+      "warning": "No cached report, or a non-required 404 (e.g. /money-spartan).",
+      "critical": "A required route fails.",
+      "operator_action": "Required-route failures: investigate the route offline. Non-required 404s are expected noise."
+    },
+    {
+      "id": "pCacheFreshness", "title": "Cache Freshness", "reads": "cache_freshness",
+      "means": "DISPLAY-ONLY cache metadata: per-cache age vs threshold, gitignored status, timestamps. Reads metadata only; never refreshes.",
+      "healthy": "Overall fresh; each cache within its threshold.",
+      "warning": "stale or missing — a manual cached report is old or not generated (not a live failure).",
+      "critical": "invalid / unavailable (corrupt or unreadable cache file).",
+      "operator_action": "Stale/missing: regenerate the cached report offline with the manual tool. Invalid: inspect the file offline."
+    },
+    {
+      "id": "pHygiene", "title": "File Hygiene", "reads": "file_hygiene_report",
+      "means": "CACHED git/untracked summary: untracked, tracked-modified, staged counts; top untracked dirs; cached reports stay gitignored.",
+      "healthy": "Staged count 0; cached reports gitignored.",
+      "warning": "Non-zero staged count, or a large untracked backlog.",
+      "critical": "A cached report shown as NOT ignored, or git read unavailable.",
+      "operator_action": "Investigate a non-zero staged count before commit work; ensure cached reports remain gitignored."
+    },
+    {
+      "id": "pMissions", "alias": "pDocs", "title": "Mission Board", "reads": "mission_board",
+      "means": "DISPLAY-ONLY tracked operator missions with status/priority. 'Safe next prompt' text is display only.",
+      "healthy": "Board renders with mission cards.",
+      "warning": "NO MISSION BOARD (file missing) or blocked missions present.",
+      "critical": "Section unavailable / error.",
+      "operator_action": "Missions are informational. Nothing on this panel executes; never add a run/execute control."
+    },
+    {
+      "id": "pPromptLib", "alias": "pDocs", "title": "Prompt Library", "reads": "prompt_library",
+      "means": "DISPLAY-ONLY tracked prompts with category / risk / allowed flags. Prompt text is shown, never run.",
+      "healthy": "Library renders with prompt cards.",
+      "warning": "NO PROMPT LIBRARY (file missing).",
+      "critical": "Section unavailable / error.",
+      "operator_action": "Read prompts as reference only. There is no copy-and-run affordance, and there must never be one."
+    },
+    {
+      "id": "pSystemMap", "alias": "pDocs", "title": "System Map", "reads": "system_map",
+      "means": "DISPLAY-ONLY wiring map: panels, manual-only scripts, tracked/ignored files, and posture flags.",
+      "healthy": "Posture flags: read-only TRUE, browser execution DISABLED, broker control DISABLED, file mutation from web DISABLED.",
+      "warning": "Version/counts missing.",
+      "critical": "Any posture flag flips to the unsafe value (e.g. browser execution ENABLED).",
+      "operator_action": "An unsafe posture flag is a serious regression — stop and investigate."
+    },
+    {
+      "id": "pTradingDetail", "alias": "pResearch", "title": "Trading Research Detail", "reads": "trading_detail",
+      "means": "READ-ONLY research detail: candidate status, posture flags, S26 research state, latest report cards.",
+      "healthy": "read_only TRUE; paper_ready / live_ready / broker_control all FALSE.",
+      "warning": "A research report missing / waiting.",
+      "critical": "paper_ready, live_ready, or broker_control reported TRUE.",
+      "operator_action": "Any TRUE on paper/live/broker is a CRITICAL safety regression — stop and investigate immediately."
+    }
+  ],
+  "field_glossary": [
+    {"field": "online", "means": "The aggregator responded and the page received its payload (dashboard liveness). Not a claim that all subsystems are green.", "must_be": "true"},
+    {"field": "read_only", "means": "The whole JARVIS surface is observe-only: no execution, no refresh control, no broker/paper/live path, no web file mutation.", "must_be": "true (always)"},
+    {"field": "overall_state", "means": "Commander's Snapshot verdict.", "values": "green = healthy, yellow = attention needed (often dirty tree), red = stop and investigate."},
+    {"field": "cache_freshness", "means": "Display-only freshness of the gitignored cached reports (fresh / stale / missing / invalid).", "must_be": "ideally fresh; stale/missing is non-blocking."},
+    {"field": "commander_snapshot", "means": "The derived top-level summary object that powers pSnapshot.", "must_be": "present."},
+    {"field": "system_map", "means": "The display-only wiring map object that powers pSystemMap, including posture flags.", "must_be": "present with safe posture flags."},
+    {"field": "trading_detail", "means": "The read-only research detail object that powers pTradingDetail.", "must_be": "present, read_only true."},
+    {"field": "paper_ready", "means": "Whether a paper-trading path is armed.", "must_be": "false (always)."},
+    {"field": "live_ready", "means": "Whether a live-trading path is armed.", "must_be": "false (always)."},
+    {"field": "broker_control", "means": "Whether JARVIS holds any broker control / order path.", "must_be": "false (always)."}
+  ],
+  "safety_interpretation_rules": {
+    "green": "Observation healthy.",
+    "yellow": "Attention needed.",
+    "red": "Stop and investigate.",
+    "critical_note": "None of these colours authorize trading or execution."
+  },
+  "never_confuse_with_permission": "A green dashboard is an observation that the system looks healthy. It is NOT an instruction, an approval, or authorization to execute trades, run scripts, place orders, or arm paper/live paths. JARVIS grants no permissions — it only shows state. Authorization for any action comes from an explicit human decision through the proper, separately-gated channel, never from a colour on this page.",
+  "recommended_next_safe_step": "JARVIS-STATUS-INTERPRETATION-TABLE-MEMO (Step 25) — a docs-only reference table of every section's possible states and exactly how to read each, complementing this glossary; alternatively JARVIS-REPORT-ARCHIVE-INDEX-MEMO indexing all committed JARVIS step reports.",
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_step_24_panel_glossary/report.json", "result": "JSON_OK"}
+  ],
+  "conclusion": "Documentation-only panel glossary created. No code, UI, tool, test, API, or trading surface was changed."
+}
