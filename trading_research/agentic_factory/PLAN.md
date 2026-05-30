@@ -107,6 +107,28 @@ profitability-grade; it correctly scores `RESEARCH_OK_NOT_PROFITABILITY_GRADE`.
 
 ---
 
+## S23-D9 addendum — Daily Donchian baseline engine (built)
+
+New module `engine/donchian_daily.py`: an offline, stdlib-only daily Donchian
+System-1 no-pyramid baseline for the NQ-only slice (see
+`strategies/donchian_nq_daily/strategy_spec.md`). Fixed inputs — 55-day entry
+channel, 20-day exit channel, Wilder ATR(20), 2N hard stop, `max_units = 1`. No
+optimization, no parameter search, no data fetch. Output is the same
+`{r_multiples, trades}` shape the metrics layer consumes.
+
+Accounting is the **simplified 2N-stop R baseline** (1R = initial 2N stop
+distance) — NO dollar sizing, point value, cost, or roll — and is explicitly
+**NOT a reproduction of the sealed S10-D2 dollar result**. Lookahead-safe:
+channels and N use prior bars only; management starts the bar after entry; the
+hard stop is checked before the channel exit within a bar.
+
+Tests: `tests/test_donchian_daily.py` (no-lookahead channels, long entry, short
+entry, opposite-channel exit, hard-stop priority, no-pyramid one-position-max,
+empty/too-short -> no trades, deterministic output, accounting-honesty note).
+No real 2013 backtest has been run yet — that is a separate later step (S23-D10).
+
+---
+
 ## Why this does not interfere with the existing trading bot
 
 - Disjoint, brand-new folder; touches none of `paper_trading/`, `strategy_lab/`,

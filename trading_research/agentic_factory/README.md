@@ -15,6 +15,13 @@ distinct dates, bar interval, RTH session coverage, eligible sessions, and
 thin/holiday warnings — then grades the dataset (plumbing / smoke / serious
 research / profitability) with a single honest verdict. Offline, stdlib-only.
 
+**Daily Donchian baseline (S23-D9):** `engine/donchian_daily.py` adds an
+offline, stdlib-only daily Donchian System-1 no-pyramid baseline for the
+NQ-only slice (55-day entry / 20-day exit channels, Wilder ATR(20), 2N hard
+stop, one position max). It uses a simplified 2N-stop R accounting model and is
+**not** a dollar reproduction of the sealed S10-D2 result. See
+`strategies/donchian_nq_daily/strategy_spec.md`.
+
 This module is **inert**. It produces reports. It never trades, never connects, never
 touches anything outside its own folder.
 
