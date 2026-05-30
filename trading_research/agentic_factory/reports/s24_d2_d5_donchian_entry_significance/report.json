@@ -1,0 +1,285 @@
+{
+  "step": "S24-D2..D5",
+  "title": "Donchian entry-rule significance vs same-count random entries (IS 2013-2022, OOS 2023-2025)",
+  "run_date": "2026-05-29",
+  "s24_d1_module_commit": "0394236081db934de5baf9941fccc94e6091dba4",
+  "s23_watch_context": {
+    "is_2013_2022": {
+      "trades": 66,
+      "total_r": 10.5421,
+      "pf": 1.31,
+      "expectancy_r": 0.16,
+      "max_dd_r": 6.34
+    },
+    "oos_2023_2025": {
+      "trades": 16,
+      "total_r": 11.37,
+      "pf": 2.41,
+      "expectancy_r": 0.71,
+      "max_dd_r": 3.0
+    },
+    "s23_final_verdict": "WATCH (not deployable)"
+  },
+  "signal_extraction_method": {
+    "engine": "engine/donchian_daily.py (UNCHANGED; helpers imported read-only)",
+    "raw_long_signal_rule": "For bar i with i>=max(entry_channel=55, atr_period+1=21): a LONG breakout signal when bars[i].high > prior 55-day high (channel over bars[i-55:i], EXCLUDING current bar), with a valid prior-55 channel and Wilder ATR(20) at i-1 > 0. This matches the engine's exact LONG entry trigger condition, WITHOUT the in-position filter / exit / stop / sizing.",
+    "primary_test": "Raw long entry rule via engine/signal_significance.summarize_significance (the module's intended use: raw entry signal vs same-count random darts; long forward-return convention).",
+    "descriptive_robustness_test": "Direction-aware check on the ACTUAL realized entries (both long and short) using a directional forward return (long:(c1-c0)/c0; short:(c0-c1)/c0) against a random baseline with the SAME long/short mix. Labeled descriptive-only; not the module's long-only path.",
+    "correction": "Earlier S23 notes implied long-only (true only for the 2013-only D10 slice). Over the full continuous streams the frozen engine is BIDIRECTIONAL: realized IS = 45 long / 21 short; realized OOS = 9 long / 7 short."
+  },
+  "files_used": {
+    "IS": [
+      "data_offline/nq_c0_ohlcv_1d_2013.csv",
+      "data_offline/nq_c0_ohlcv_1d_2014.csv",
+      "data_offline/nq_c0_ohlcv_1d_2015.csv",
+      "data_offline/nq_c0_ohlcv_1d_2016.csv",
+      "data_offline/nq_c0_ohlcv_1d_2017.csv",
+      "data_offline/nq_c0_ohlcv_1d_2018.csv",
+      "data_offline/nq_c0_ohlcv_1d_2019.csv",
+      "data_offline/nq_c0_ohlcv_1d_2020.csv",
+      "data_offline/nq_c0_ohlcv_1d_2021.csv",
+      "data_offline/nq_c0_ohlcv_1d_2022.csv"
+    ],
+    "OOS": [
+      "data_offline/nq_c0_ohlcv_1d_2023.csv",
+      "data_offline/nq_c0_ohlcv_1d_2024.csv",
+      "data_offline/nq_c0_ohlcv_1d_2025.csv"
+    ]
+  },
+  "signal_counts": {
+    "IS": {
+      "bars": 3079,
+      "raw_long_signals": 567,
+      "raw_short_signals": 97,
+      "realized_trades": 66,
+      "realized_dirs": {
+        "long": 45,
+        "short": 21
+      },
+      "first_signal_date": "2013-04-10",
+      "last_signal_date": "2022-12-13"
+    },
+    "OOS": {
+      "bars": 934,
+      "raw_long_signals": 164,
+      "raw_short_signals": 23,
+      "realized_trades": 16,
+      "realized_dirs": {
+        "long": 9,
+        "short": 7
+      },
+      "first_signal_date": "2023-03-22",
+      "last_signal_date": "2025-10-30"
+    }
+  },
+  "signal_vs_trade_count_explanation": "Raw long signals (IS 567 / OOS 164) vastly exceed realized trades (IS 66 / OOS 16) for three reasons: (1) IN-POSITION FILTERING - simulate() ignores any new breakout while a position is open, so only breakouts that fire while FLAT become trades (only 45 of 567 IS raw long triggers became long entries); (2) the realized set also contains SHORT entries (21 IS / 7 OOS) which are not in the long-signal set; (3) warmup (first 55 bars / ATR seed) removes early bars. Net: realized_trades = (flat-state long breakouts) + (flat-state short breakouts).",
+  "is_significance_by_horizon_raw_long": {
+    "5": {
+      "usable_real_count": 567,
+      "real_mean": 0.00117,
+      "baseline_mean": 0.002568,
+      "baseline_std": 0.000941,
+      "percentile": 7.54,
+      "p_value": 0.92462,
+      "verdict": "NO_EDGE"
+    },
+    "10": {
+      "usable_real_count": 567,
+      "real_mean": 0.001643,
+      "baseline_mean": 0.005159,
+      "baseline_std": 0.001288,
+      "percentile": 0.44,
+      "p_value": 0.9956,
+      "verdict": "NO_EDGE"
+    },
+    "20": {
+      "usable_real_count": 566,
+      "real_mean": 0.00316,
+      "baseline_mean": 0.010466,
+      "baseline_std": 0.001775,
+      "percentile": 0.0,
+      "p_value": 1.0,
+      "verdict": "NO_EDGE"
+    },
+    "40": {
+      "usable_real_count": 565,
+      "real_mean": 0.008395,
+      "baseline_mean": 0.021165,
+      "baseline_std": 0.002407,
+      "percentile": 0.0,
+      "p_value": 1.0,
+      "verdict": "NO_EDGE"
+    }
+  },
+  "oos_significance_by_horizon_raw_long": {
+    "5": {
+      "usable_real_count": 164,
+      "real_mean": 0.001351,
+      "baseline_mean": 0.004904,
+      "baseline_std": 0.001763,
+      "percentile": 2.36,
+      "p_value": 0.9764,
+      "verdict": "NO_EDGE"
+    },
+    "10": {
+      "usable_real_count": 164,
+      "real_mean": 0.003919,
+      "baseline_mean": 0.009628,
+      "baseline_std": 0.002317,
+      "percentile": 0.64,
+      "p_value": 0.9936,
+      "verdict": "NO_EDGE"
+    },
+    "20": {
+      "usable_real_count": 164,
+      "real_mean": 0.01037,
+      "baseline_mean": 0.018805,
+      "baseline_std": 0.003173,
+      "percentile": 0.52,
+      "p_value": 0.9948,
+      "verdict": "NO_EDGE"
+    },
+    "40": {
+      "usable_real_count": 164,
+      "real_mean": 0.026013,
+      "baseline_mean": 0.036338,
+      "baseline_std": 0.004294,
+      "percentile": 0.96,
+      "p_value": 0.9904,
+      "verdict": "NO_EDGE"
+    }
+  },
+  "is_significance_by_horizon_realized_directional_descriptive": {
+    "5": {
+      "usable_real_count": 66,
+      "real_mean_dir": -0.00184,
+      "baseline_mean_dir": 0.000944,
+      "percentile": 17.88,
+      "p_value": 0.82124,
+      "verdict": "NO_EDGE",
+      "mix": {
+        "long": 45,
+        "short": 21
+      }
+    },
+    "10": {
+      "usable_real_count": 66,
+      "real_mean_dir": 0.001777,
+      "baseline_mean_dir": 0.001838,
+      "percentile": 48.58,
+      "p_value": 0.5143,
+      "verdict": "NO_EDGE",
+      "mix": {
+        "long": 45,
+        "short": 21
+      }
+    },
+    "20": {
+      "usable_real_count": 65,
+      "real_mean_dir": 0.004949,
+      "baseline_mean_dir": 0.003931,
+      "percentile": 56.82,
+      "p_value": 0.43191,
+      "verdict": "INCONCLUSIVE",
+      "mix": {
+        "long": 45,
+        "short": 21
+      }
+    },
+    "40": {
+      "usable_real_count": 64,
+      "real_mean_dir": -4.4e-05,
+      "baseline_mean_dir": 0.007627,
+      "percentile": 16.76,
+      "p_value": 0.83243,
+      "verdict": "NO_EDGE",
+      "mix": {
+        "long": 45,
+        "short": 21
+      }
+    }
+  },
+  "oos_significance_by_horizon_realized_directional_descriptive": {
+    "5": {
+      "usable_real_count": 16,
+      "real_mean_dir": -0.00165,
+      "baseline_mean_dir": 0.00048,
+      "percentile": 36.44,
+      "p_value": 0.63567,
+      "verdict": "NO_EDGE",
+      "mix": {
+        "long": 9,
+        "short": 7
+      }
+    },
+    "10": {
+      "usable_real_count": 16,
+      "real_mean_dir": -0.008195,
+      "baseline_mean_dir": 0.001305,
+      "percentile": 12.02,
+      "p_value": 0.87982,
+      "verdict": "NO_EDGE",
+      "mix": {
+        "long": 9,
+        "short": 7
+      }
+    },
+    "20": {
+      "usable_real_count": 16,
+      "real_mean_dir": -0.011003,
+      "baseline_mean_dir": 0.002091,
+      "percentile": 12.62,
+      "p_value": 0.87383,
+      "verdict": "NO_EDGE",
+      "mix": {
+        "long": 9,
+        "short": 7
+      }
+    },
+    "40": {
+      "usable_real_count": 15,
+      "real_mean_dir": 0.016232,
+      "baseline_mean_dir": 0.00432,
+      "percentile": 77.22,
+      "p_value": 0.22795,
+      "verdict": "INCONCLUSIVE",
+      "mix": {
+        "long": 9,
+        "short": 7
+      }
+    }
+  },
+  "random_baseline_config": {
+    "n_iter": 5000,
+    "is_seed": 2403,
+    "oos_seed": 2404,
+    "same_count": true,
+    "no_lookahead": true,
+    "horizon_window_required": true
+  },
+  "final_s24_verdict": "ENTRY_EDGE_NOT_SUPPORTED",
+  "verdict_rationale": [
+    "PRIMARY (raw long entry rule, module): NO_EDGE at ALL four pre-fixed horizons (5/10/20/40) in BOTH IS and OOS. Real mean forward return sits BELOW the random-entry baseline every time (IS percentiles 7.5/0.4/0.0/0.0, p 0.92-1.0; OOS percentiles 2.4/0.6/0.5/1.0, p 0.98-0.99).",
+    "DESCRIPTIVE (realized bidirectional entries, direction-aware): NO_EDGE or INCONCLUSIVE at every horizon in BOTH IS and OOS - never EDGE_LIKELY. Real directional returns are at or below the direction-matched random baseline.",
+    "Real entries are NOT better than random at forward-return prediction; in fact they are typically worse (a breakout enters AFTER an extended move, so the immediate forward window carries mean-reversion drag).",
+    "Because the result is consistent across IS and OOS and across all four horizons, this is NOT_SUPPORTED rather than INCONCLUSIVE."
+  ],
+  "what_this_means_for_the_donchian_candidate": [
+    "ENTRY_EDGE_NOT_SUPPORTED: the entry timing does NOT carry predictive edge. S23's positive R most likely came from EXIT / PATH / position-management (fast 2N stops cutting losers, 20-day channel letting winners run) and a few fat-tailed winners - and partly luck given the low trade count.",
+    "The candidate should be PARKED or REFRAMED. Do NOT optimize the entry, do NOT add entry filters, do NOT promote to paper/live.",
+    "If pursued later, reframe as an EXIT/trend-capture study (the edge hypothesis moves to position management, not entry), validated as a fresh branch with its own future OOS."
+  ],
+  "guards": {
+    "no_trading_recommendation": true,
+    "no_paper_or_live_promotion": true,
+    "no_optimization": true,
+    "no_parameter_changes": true,
+    "engine_unchanged": true
+  },
+  "caveats": [
+    "Forward-return significance tests the entry's PREDICTIVE timing, not the full strategy P&L (which includes exits/stops/sizing). NOT_SUPPORTED here does not 'disprove' S23's R; it explains that the R is not attributable to entry edge.",
+    "The module's primary path is long-only forward returns; the bidirectional realized-entry test is a hand-rolled descriptive supplement using the same horizons/seeds.",
+    "OOS realized n=16 is small; the descriptive OOS directional result is low-power, but it agrees with the decisive raw-rule result.",
+    "IS and OOS kept SEPARATE for the core judgement; no IS+OOS pooling was used to manufacture significance."
+  ]
+}
