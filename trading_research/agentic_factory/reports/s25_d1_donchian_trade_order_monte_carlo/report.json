@@ -1,0 +1,303 @@
+{
+  "step": "S25-D1",
+  "title": "Trade-order Monte Carlo and drawdown sequence-risk validation for the frozen Donchian WATCH candidate",
+  "created_date": "2026-05-29",
+  "type": "SEQUENCE-RISK VALIDATION (descriptive resampling on frozen realized R-lists; NOT a new backtest, NOT optimization)",
+  "frozen_params": {
+    "entry_channel": 55,
+    "exit_channel": 20,
+    "atr_period": 20,
+    "stop_n_multiple": 2.0,
+    "max_units_per_market": 1,
+    "accounting": "R-only"
+  },
+  "s23_context": {
+    "final_s23_verdict": "WATCH",
+    "note": "Full Donchian system was positive IS and OOS but only WATCH (OOS n=16 too small for confidence). Not deployable."
+  },
+  "s24_context": {
+    "verdict": "ENTRY_EDGE_NOT_SUPPORTED",
+    "note": "Raw entry rule shows no predictive edge vs random darts. Therefore S25 cannot upgrade this candidate to deployable or paper status; S25 only characterizes fragility/luck of the realized trade sequence."
+  },
+  "trade_sources": {
+    "IS": "reports/s23_d14_2013_2022_donchian_is_baseline/_run.json (trades[].r_multiple), git-ignored local run output",
+    "OOS": "reports/s23_d17_2023_2025_donchian_oos_result/_run.json (trades[].r_multiple), git-ignored local run output",
+    "COMBINED": "IS + OOS concatenated chronologically; descriptive only, NOT an OOS proof",
+    "engine_rerun": false,
+    "engine_rerun_note": "Exact frozen R-lists were already present in the local _run.json files; the engine was NOT rerun."
+  },
+  "rlist_verification": {
+    "IS": {
+      "count": 66,
+      "total_r": 10.5421
+    },
+    "OOS": {
+      "count": 16,
+      "total_r": 11.3738
+    },
+    "COMBINED": {
+      "count": 82,
+      "total_r": 21.916
+    }
+  },
+  "monte_carlo": {
+    "IS_2013_2022": {
+      "realized": {
+        "count": 66,
+        "total_r": 10.5421,
+        "expectancy_r": 0.1597,
+        "win_rate": 0.4242,
+        "profit_factor": 1.3098,
+        "max_dd_r": 6.3431,
+        "longest_losing_streak": 5,
+        "best_trade_r": 6.8455,
+        "worst_trade_r": -1.0,
+        "worst_3_window_r": -2.5631,
+        "worst_5_window_r": -4.0973,
+        "worst_10_window_r": -5.8839
+      },
+      "trade_order_shuffle_mc": {
+        "seed": 2501,
+        "n_iter": 10000,
+        "note": "total R is invariant under shuffle; this isolates path risk",
+        "realized_max_dd_r": 6.3431,
+        "max_dd_dist_r": {
+          "median": 8.7824,
+          "p05": 5.7891,
+          "p25": 7.305,
+          "p75": 10.651,
+          "p95": 14.0186,
+          "p99": 16.9559,
+          "max": 22.4511
+        },
+        "realized_dd_percentile_vs_shuffle": 11.13,
+        "longest_losing_streak_dist": {
+          "median": 6.0,
+          "p95": 10.0,
+          "max": 20,
+          "realized": 5
+        },
+        "worst_10_window_dist_r": {
+          "median": -6.4731,
+          "p05": -8.9112,
+          "p95": -4.0869,
+          "min": -10.0,
+          "realized": -5.8839
+        }
+      },
+      "bootstrap_resample_mc": {
+        "seed": 2501,
+        "n_iter": 10000,
+        "prob_total_r_le_0": 0.2094,
+        "median_total_r": 10.1721,
+        "mean_total_r": 10.7236,
+        "p05_total_r": -10.1654,
+        "p95_total_r": 32.9358,
+        "median_max_dd_r": 9.0,
+        "p95_max_dd_r": 18.1545,
+        "prob_max_dd_gt_is_maxdd": 0.8143,
+        "is_maxdd_ref_r": 6.34,
+        "prob_max_dd_gt_1p5x_is_maxdd": 0.4427,
+        "one_and_half_x_is_maxdd_r": 9.51
+      },
+      "single_winner_dependence": {
+        "total_r": 10.5421,
+        "best_trade_r": 6.8455,
+        "best_trade_share_of_net": 0.6493,
+        "top1_share_of_net": 0.6493,
+        "top3_share_of_net": 1.3628,
+        "total_r_without_best": 3.6967,
+        "total_r_without_top3": -3.8244,
+        "still_positive_without_best": true,
+        "still_positive_without_top3": false
+      },
+      "loss_cluster_pain": {
+        "longest_losing_streak": 5,
+        "worst_3_window_r": -2.5631,
+        "worst_5_window_r": -4.0973,
+        "worst_10_window_r": -5.8839,
+        "realized_max_dd_r": 6.3431
+      }
+    },
+    "OOS_2023_2025": {
+      "realized": {
+        "count": 16,
+        "total_r": 11.3738,
+        "expectancy_r": 0.7109,
+        "win_rate": 0.4375,
+        "profit_factor": 2.4127,
+        "max_dd_r": 3.0,
+        "longest_losing_streak": 3,
+        "best_trade_r": 5.7176,
+        "worst_trade_r": -1.0,
+        "worst_3_window_r": -3.0,
+        "worst_5_window_r": 0.2386,
+        "worst_10_window_r": 3.3432
+      },
+      "trade_order_shuffle_mc": {
+        "seed": 2502,
+        "n_iter": 10000,
+        "note": "total R is invariant under shuffle; this isolates path risk",
+        "realized_max_dd_r": 3.0,
+        "max_dd_dist_r": {
+          "median": 3.0512,
+          "p05": 2.0,
+          "p25": 3.0,
+          "p75": 4.0512,
+          "p95": 5.9814,
+          "p99": 7.0,
+          "max": 8.0512
+        },
+        "realized_dd_percentile_vs_shuffle": 30.02,
+        "longest_losing_streak_dist": {
+          "median": 4.0,
+          "p95": 6.0,
+          "max": 9,
+          "realized": 3
+        },
+        "worst_10_window_dist_r": {
+          "median": 2.5517,
+          "p05": -3.1962,
+          "p95": 8.0335,
+          "min": -7.0326,
+          "realized": 3.3432
+        }
+      },
+      "bootstrap_resample_mc": {
+        "seed": 2502,
+        "n_iter": 10000,
+        "prob_total_r_le_0": 0.0842,
+        "median_total_r": 11.0831,
+        "mean_total_r": 11.5365,
+        "p05_total_r": -1.983,
+        "p95_total_r": 26.707,
+        "median_max_dd_r": 3.1024,
+        "p95_max_dd_r": 7.0512,
+        "prob_max_dd_gt_is_maxdd": 0.0825,
+        "is_maxdd_ref_r": 6.34,
+        "prob_max_dd_gt_1p5x_is_maxdd": 0.0099,
+        "one_and_half_x_is_maxdd_r": 9.51
+      },
+      "single_winner_dependence": {
+        "total_r": 11.3738,
+        "best_trade_r": 5.7176,
+        "best_trade_share_of_net": 0.5027,
+        "top1_share_of_net": 0.5027,
+        "top3_share_of_net": 1.1695,
+        "total_r_without_best": 5.6562,
+        "total_r_without_top3": -1.9281,
+        "still_positive_without_best": true,
+        "still_positive_without_top3": false
+      },
+      "loss_cluster_pain": {
+        "longest_losing_streak": 3,
+        "worst_3_window_r": -3.0,
+        "worst_5_window_r": 0.2386,
+        "worst_10_window_r": 3.3432,
+        "realized_max_dd_r": 3.0
+      }
+    },
+    "COMBINED_2013_2025_descriptive": {
+      "realized": {
+        "count": 82,
+        "total_r": 21.916,
+        "expectancy_r": 0.2673,
+        "win_rate": 0.4268,
+        "profit_factor": 1.5209,
+        "max_dd_r": 6.3431,
+        "longest_losing_streak": 5,
+        "best_trade_r": 6.8455,
+        "worst_trade_r": -1.0,
+        "worst_3_window_r": -3.0,
+        "worst_5_window_r": -4.0973,
+        "worst_10_window_r": -5.8839
+      },
+      "trade_order_shuffle_mc": {
+        "seed": 2503,
+        "n_iter": 10000,
+        "note": "total R is invariant under shuffle; this isolates path risk",
+        "realized_max_dd_r": 6.3431,
+        "max_dd_dist_r": {
+          "median": 8.7845,
+          "p05": 5.889,
+          "p25": 7.3048,
+          "p75": 10.6935,
+          "p95": 14.1836,
+          "p99": 16.6319,
+          "max": 23.853
+        },
+        "realized_dd_percentile_vs_shuffle": 10.81,
+        "longest_losing_streak_dist": {
+          "median": 7.0,
+          "p95": 10.0,
+          "max": 19,
+          "realized": 5
+        },
+        "worst_10_window_dist_r": {
+          "median": -6.5938,
+          "p05": -9.0512,
+          "p95": -4.1159,
+          "min": -10.0,
+          "realized": -5.8839
+        }
+      },
+      "bootstrap_resample_mc": {
+        "seed": 2503,
+        "n_iter": 10000,
+        "prob_total_r_le_0": 0.0797,
+        "median_total_r": 21.4763,
+        "mean_total_r": 22.0638,
+        "p05_total_r": -3.3576,
+        "p95_total_r": 49.2729,
+        "median_max_dd_r": 8.9128,
+        "p95_max_dd_r": 17.4538,
+        "prob_max_dd_gt_is_maxdd": 0.8211,
+        "is_maxdd_ref_r": 6.34,
+        "prob_max_dd_gt_1p5x_is_maxdd": 0.4313,
+        "one_and_half_x_is_maxdd_r": 9.51
+      },
+      "single_winner_dependence": {
+        "total_r": 21.916,
+        "best_trade_r": 6.8455,
+        "best_trade_share_of_net": 0.3124,
+        "top1_share_of_net": 0.3124,
+        "top3_share_of_net": 0.818,
+        "total_r_without_best": 15.0705,
+        "total_r_without_top3": 3.9886,
+        "still_positive_without_best": true,
+        "still_positive_without_top3": true
+      },
+      "loss_cluster_pain": {
+        "longest_losing_streak": 5,
+        "worst_3_window_r": -3.0,
+        "worst_5_window_r": -4.0973,
+        "worst_10_window_r": -5.8839,
+        "realized_max_dd_r": 6.3431
+      }
+    }
+  },
+  "verdict": "SEQUENCE_RISK_FRAGILE",
+  "verdict_flags": [
+    "IS bootstrap prob(total R<=0) >= 20%",
+    "IS turns non-positive when top 3 trades removed",
+    "OOS best trade is >= 50% of net (single-winner dependence)"
+  ],
+  "small_sample_caution": {
+    "oos_n": 16,
+    "too_small_for_confidence": true,
+    "note": "OOS n=16 is below any threshold for statistical confidence; even a clean sequence-risk profile cannot upgrade this candidate."
+  },
+  "conservative_interpretation": [
+    "OOS n=16 is too small; do not overstate any green OOS resampling result.",
+    "Single-winner dependence is the dominant fragility driver for OOS (one trade ~50% of net).",
+    "Bootstrap probability of <=0 total R quantifies expectancy fragility under the same trade distribution.",
+    "Shuffle drawdown tail (p95/p99) shows how much worse the path could have been at the same total R."
+  ],
+  "final_recommendation": [
+    "Do NOT optimize Donchian based on these results.",
+    "Do NOT trade or paper-promote.",
+    "S24 already established the entry edge is not supported; S25 cannot change that.",
+    "Treat Donchian 55/20/20/2.0 as a parked reference baseline.",
+    "Move research effort toward a stronger entry hypothesis with its own pre-registered OOS."
+  ]
+}
