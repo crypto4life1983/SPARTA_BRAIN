@@ -1,0 +1,116 @@
+{
+  "step": "S26-D3",
+  "title": "Trend + S/R + EMA/RSI long-only IS baseline (2013-2022 only)",
+  "created_date": "2026-05-29",
+  "type": "IS BASELINE MEASUREMENT (single frozen run on IS data only; NOT optimization, NOT OOS).",
+  "spec_commit_s26_d1": "af643aef58c63dd3bd904b4fb44406f4a2a55c3e",
+  "engine_commit_s26_d2": "1b1174e37c377b6331fa480a96115f286fb6a246",
+  "input_files_is": [
+    "data_offline/nq_c0_ohlcv_1d_2013.csv",
+    "data_offline/nq_c0_ohlcv_1d_2014.csv",
+    "data_offline/nq_c0_ohlcv_1d_2015.csv",
+    "data_offline/nq_c0_ohlcv_1d_2016.csv",
+    "data_offline/nq_c0_ohlcv_1d_2017.csv",
+    "data_offline/nq_c0_ohlcv_1d_2018.csv",
+    "data_offline/nq_c0_ohlcv_1d_2019.csv",
+    "data_offline/nq_c0_ohlcv_1d_2020.csv",
+    "data_offline/nq_c0_ohlcv_1d_2021.csv",
+    "data_offline/nq_c0_ohlcv_1d_2022.csv"
+  ],
+  "oos_files_excluded": [
+    "data_offline/nq_c0_ohlcv_1d_2023.csv",
+    "data_offline/nq_c0_ohlcv_1d_2024.csv",
+    "data_offline/nq_c0_ohlcv_1d_2025.csv"
+  ],
+  "oos_files_used": false,
+  "frozen_params": {
+    "ema_fast": 20,
+    "ema_mid": 50,
+    "ema_slow": 200,
+    "rsi_period": 14,
+    "atr_period": 20,
+    "support_window": 20,
+    "support_atr_mult": 1.5,
+    "rsi_band": [
+      40.0,
+      55.0
+    ],
+    "stop_n_multiple": 2.0,
+    "target_r_multiple": 2.0,
+    "direction": "long-only",
+    "accounting": "R-only"
+  },
+  "data_qa": {
+    "total_bars": 3079,
+    "date_range": [
+      "2013-01-02",
+      "2022-12-30"
+    ],
+    "duplicate_dates": [],
+    "duplicate_date_count": 0,
+    "invalid_ohlc_rows": 0,
+    "per_year_rows": {
+      "2013": 289,
+      "2014": 302,
+      "2015": 312,
+      "2016": 310,
+      "2017": 309,
+      "2018": 312,
+      "2019": 312,
+      "2020": 312,
+      "2021": 311,
+      "2022": 310
+    },
+    "per_year_sum_equals_total": true
+  },
+  "metrics": {
+    "trade_count": 117,
+    "total_r": 7.6536,
+    "profit_factor": 1.2016,
+    "win_rate": 0.3932,
+    "expectancy_r": 0.0654,
+    "max_drawdown_r": 10.5943,
+    "best_trade_r": 2.0,
+    "worst_trade_r": -1.0,
+    "average_r": 0.0654,
+    "median_r": -0.1726,
+    "year_by_year_r": {
+      "2013": 3.2897,
+      "2014": -1.2545,
+      "2015": -2.7328,
+      "2016": -4.447,
+      "2017": 4.2862,
+      "2018": 0.3501,
+      "2019": 1.784,
+      "2020": 4.8232,
+      "2021": 2.543,
+      "2022": -0.9883
+    },
+    "positive_years": 6,
+    "negative_years": 4,
+    "exit_reason_counts": {
+      "ema50_trend_break": 75,
+      "target": 20,
+      "stop": 22
+    },
+    "best_trade_share_of_net": 0.2613,
+    "total_r_without_top3": 1.6536,
+    "positive_without_top3": true
+  },
+  "is_prescreen_vs_s26_d1": {
+    "is_trades_target_ge_40": true,
+    "pf_target_ge_1p20": true,
+    "expectancy_gt_0": true,
+    "positive_without_top3": true,
+    "majority_years_positive": true
+  },
+  "year_by_year_attribution": "R attributed to the trade's EXIT (realization) year.",
+  "verdict": "IS_CONTINUE",
+  "conservative_interpretation": [
+    "IS_CONTINUE does NOT mean OOS will pass; it only means the IS baseline justifies pre-registering an OOS protocol.",
+    "IS_WATCH means continue only if the evidence genuinely justifies the protocol step; otherwise reconsider.",
+    "IS_FAIL means park or revise as a NEW branch with a fresh protocol - do NOT tune this one.",
+    "This is in-sample only; in-sample numbers are the EASY case and must not be over-read."
+  ],
+  "next_step_recommendation": "Pre-register the S26-D4 sealed OOS protocol BEFORE viewing 2023-2025."
+}
