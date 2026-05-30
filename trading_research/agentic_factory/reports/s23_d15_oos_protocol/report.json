@@ -1,0 +1,112 @@
+{
+  "run_metadata": {
+    "step": "S23-D15",
+    "title": "Pre-registered sealed OOS validation protocol for the frozen 55/20/20/2.0 daily NQ Donchian baseline",
+    "created_date": "2026-05-29",
+    "status": "PRE-REGISTERED PROTOCOL — frozen before any 2023-2025 OOS data is unsealed, transcoded, or run",
+    "frozen_strategy_code_commit": "f94dfe1aae198a40f4e6e9b8a43f258354502e9d",
+    "engine": "engine/donchian_daily.py (unchanged at HEAD f94dfe1)",
+    "this_step_does_not": [
+      "transcode 2023-2025",
+      "run any OOS backtest",
+      "change parameters",
+      "optimize anything",
+      "touch parked S24 files"
+    ]
+  },
+  "section_1_frozen_strategy": {
+    "market": "NQ continuous daily bars (NQ.c.0, UTC-calendar daily, same construction as S23-D8/D13)",
+    "entry_channel": 55,
+    "exit_channel": 20,
+    "atr_period": 20,
+    "stop_n_multiple": 2.0,
+    "max_units_per_market": 1,
+    "pyramiding": false,
+    "accounting": "R-only (1R = initial 2N stop distance); no dollar/point-value/cost/roll",
+    "engine_behavior": "Identical to S23-D14: continuous time-sorted bar stream, single simulate() call, channels/ATR/open positions carry across boundaries; lookahead-safe (prior bars only; management starts bar after entry; hard stop checked before channel exit). No code change permitted."
+  },
+  "section_2_frozen_is_reference": {
+    "window": "2013-2022",
+    "bars": 3079,
+    "trade_count": 66,
+    "total_r": 10.5421,
+    "profit_factor": 1.31,
+    "win_rate": 0.424,
+    "expectancy_r": 0.16,
+    "max_drawdown_r": 6.34,
+    "best_trade_r": 6.85,
+    "worst_trade_r": -1.0,
+    "positive_years": 5,
+    "negative_years": 5,
+    "source": "reports/s23_d14_2013_2022_donchian_is_baseline/report.json (frozen reference, not to be re-run for this protocol)"
+  },
+  "section_3_oos_window": {
+    "window": "2023-2025 only",
+    "treatment": "SEALED / UNSEEN until this protocol is committed",
+    "parameter_changes_after_viewing_oos": false,
+    "run_policy": "Run ONCE only, after this protocol is committed. No re-runs, no parameter edits, no subperiod cherry-picking.",
+    "prerequisite": "Separate explicit approval required to transcode 2023-2025 from local Databento-native source (mirroring S23-D13 method) before the single OOS run."
+  },
+  "section_4_minimum_evaluation_metrics": [
+    "OOS trade count",
+    "OOS total R",
+    "OOS expectancy R/trade",
+    "OOS profit factor",
+    "OOS win rate",
+    "OOS max drawdown R",
+    "OOS best trade R",
+    "OOS worst trade R",
+    "OOS year-by-year R (2023, 2024, 2025)",
+    "OOS positive years count",
+    "comparison: OOS expectancy vs IS expectancy (+0.16R)",
+    "comparison: OOS max drawdown vs IS max drawdown (6.34R)"
+  ],
+  "section_5_decision_rules": {
+    "PASS": {
+      "all_must_hold": [
+        "OOS expectancy > 0",
+        "OOS profit factor > 1.05",
+        "OOS max drawdown <= 1.5 x IS max DD (<= 9.51R), UNLESS total R remains positive and the excess drawdown is explained by sequence risk",
+        "at least one positive OOS year",
+        "no single trade accounts for more than 80% of OOS net profit",
+        "no data-QA defect invalidates the result"
+      ]
+    },
+    "WATCH": {
+      "any_triggers": [
+        "expectancy near flat, between -0.05R and +0.05R",
+        "profit factor between 0.95 and 1.05",
+        "OOS trade count too small for confidence",
+        "positive result depends mostly on one trade",
+        "one year strongly dominates the result"
+      ]
+    },
+    "FAIL": {
+      "any_triggers": [
+        "expectancy < -0.05R",
+        "profit factor < 0.95",
+        "max drawdown materially exceeds IS max DD without recovery",
+        "all OOS years negative",
+        "structural data issue appears"
+      ]
+    },
+    "precedence": "Evaluate FAIL triggers first, then WATCH, then PASS. If any FAIL trigger fires, classification is FAIL regardless of other metrics. PASS requires ALL PASS conditions AND no FAIL/WATCH trigger."
+  },
+  "section_6_interpretation_rules": {
+    "PASS": "Does NOT mean live trading. Means proceed only to the validation layer: trade-order Monte Carlo, drawdown sequence-risk analysis, entry significance, regime breakdown.",
+    "WATCH": "Do not optimize immediately. First inspect data quality and trade distribution.",
+    "FAIL": "Park the frozen Donchian baseline or move to a new hypothesis. Do NOT tune against OOS."
+  },
+  "section_7_anti_overfit_rules": [
+    "No changing parameters after OOS.",
+    "No cherry-picking OOS subperiods.",
+    "No adding filters after seeing OOS unless it becomes a NEW, separately-labeled branch with fresh FUTURE OOS.",
+    "No paper or live promotion from this step."
+  ],
+  "git_handling": {
+    "report_folder": "reports/s23_d15_oos_protocol/",
+    "currently_git_ignored": null,
+    "note": "Determined at runtime via git check-ignore; see report.md / final response. If ignored and the repo style is to track protocol docs, exact files proposed before any staging.",
+    "no_staging_or_commit_in_this_step": true
+  }
+}
