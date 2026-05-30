@@ -1,0 +1,64 @@
+{
+  "title": "JARVIS Step 16 — Live Regression Smoke Memo",
+  "generated_at": "2026-05-30T00:00:00",
+  "audited_commit": "8eea703",
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "type": "validation_memo_only",
+  "read_only": true,
+  "conclusion": "JARVIS_LIVE_REGRESSION_PASS",
+  "commands": [
+    {"cmd": "python -m py_compile app.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_health_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_route_smoke_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_file_hygiene_report.py", "result": "PASS"},
+    {"cmd": "python tools/jarvis_health_report.py", "result": "exit 0"},
+    {"cmd": "python tools/jarvis_route_smoke_report.py", "result": "exit 0"},
+    {"cmd": "python tools/jarvis_file_hygiene_report.py", "result": "exit 0"},
+    {"cmd": "pytest tests/test_jarvis_route.py --rootdir=tests -q", "result": "108 passed"}
+  ],
+  "live_url_checks": [
+    {"url": "http://127.0.0.1:8765/jarvis", "method": "GET", "status": 200},
+    {"url": "http://127.0.0.1:8765/api/jarvis/status", "method": "GET", "status": 200}
+  ],
+  "api_checklist": [
+    {"key": "online", "expected": "true", "actual": "true", "ok": true},
+    {"key": "read_only", "expected": "true", "actual": "true", "ok": true},
+    {"key": "commander_snapshot", "expected": "present", "actual": "present (overall_state=yellow)", "ok": true},
+    {"key": "health_report", "expected": "ready/pass", "actual": "state=ready, overall=pass", "ok": true},
+    {"key": "route_smoke_report", "expected": "ready/pass", "actual": "state=ready, overall=pass", "ok": true},
+    {"key": "file_hygiene_report", "expected": "ready", "actual": "state=ready", "ok": true},
+    {"key": "cache_freshness", "expected": "ready/fresh", "actual": "state=ready, overall=fresh", "ok": true},
+    {"key": "mission_board", "expected": "ready", "actual": "state=ready", "ok": true},
+    {"key": "prompt_library", "expected": "ready", "actual": "state=ready", "ok": true},
+    {"key": "system_map", "expected": "ready", "actual": "state=ready", "ok": true},
+    {"key": "trading_detail.read_only", "expected": "true", "actual": "true", "ok": true},
+    {"key": "trading_detail.paper_ready", "expected": "false", "actual": "false", "ok": true},
+    {"key": "trading_detail.live_ready", "expected": "false", "actual": "false", "ok": true},
+    {"key": "trading_detail.broker_control", "expected": "false", "actual": "false", "ok": true}
+  ],
+  "ui_panel_checklist": [
+    {"panel": "Commander's Snapshot", "id": "pSnapshot", "present": true},
+    {"panel": "Health Report", "id": "pHealth", "present": true},
+    {"panel": "Route Smoke", "id": "pRouteSmoke", "present": true},
+    {"panel": "File Hygiene", "id": "pHygiene", "present": true},
+    {"panel": "Cache Freshness", "id": "pCacheFreshness", "present": true},
+    {"panel": "Mission Board", "id": "pMissions", "present": true},
+    {"panel": "Prompt Library", "id": "pPromptLib", "present": true},
+    {"panel": "System Map", "id": "pSystemMap", "present": true},
+    {"panel": "Trading Research Detail", "id": "pTradingDetail", "present": true}
+  ],
+  "safety_scan": {
+    "button": false,
+    "form": false,
+    "onclick": false,
+    "method_post": false,
+    "refresh_endpoint": false,
+    "finding": "No execution, refresh, form, or POST affordance present in the served /jarvis HTML."
+  },
+  "known_non_blocking_warnings": [
+    "Large untracked backlog may keep commander_snapshot yellow (conservative by design, not an error).",
+    "/money-spartan may report a non-required 404 in the route smoke report.",
+    "A corrupted 'hydra ' directory can break bare pytest collection, so the scoped JARVIS pytest command (--rootdir=tests) is used."
+  ]
+}
