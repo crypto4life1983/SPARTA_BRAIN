@@ -1857,12 +1857,13 @@ def test_jarvis_step_34_voice_control_is_non_functional_span():
 
 
 def test_jarvis_step_34_no_microphone_or_audio_apis():
-    # Step 35 intentionally adds browser SpeechRecognition (input-fill only), so
-    # that token is now allowed. The dangerous capture/synthesis/recorder APIs
-    # must still be absent: no raw mic capture, no recorder, no audio graph, no
-    # text-to-speech (TTS is deferred to Step 36).
+    # Step 35 intentionally adds browser SpeechRecognition (input-fill only) and
+    # Step 36 intentionally adds browser SpeechSynthesis (read returned answers
+    # aloud), so those tokens are now allowed. The dangerous raw-capture and
+    # recorder APIs must still be absent: no raw mic capture, no recorder, no
+    # audio graph, no media devices.
     low = _jarvis_template_text().lower()
-    for tok in ("getusermedia", "speechsynthesis", "mediarecorder",
+    for tok in ("getusermedia", "mediarecorder",
                 "audiocontext", "navigator.mediadevices"):
         assert tok not in low, f"voice preview must not use audio API: {tok}"
 
@@ -1914,7 +1915,7 @@ def _jarvis_wirevoice_body():
     posts {question}) is defined earlier and is excluded by this slice."""
     html = _jarvis_template_text()
     start = html.index("function wireVoice(){")
-    end = html.index("tick(); setInterval(tick", start)
+    end = html.index("\n  function wireSpeak(){", start)
     return html[start:end]
 
 
@@ -1943,10 +1944,11 @@ def test_jarvis_step_35_uses_browser_speech_recognition_only():
 
 def test_jarvis_step_35_no_forbidden_audio_or_tts_apis():
     low = _jarvis_template_text().lower()
-    # No raw mic capture, no recorder, no audio graph, no text-to-speech (TTS is
-    # deferred to Step 36), no external STT, no media devices.
+    # Step 36 intentionally adds browser SpeechSynthesis (read returned answers
+    # aloud), so that token is now allowed. The dangerous raw-capture/recorder
+    # APIs and external STT must still be absent.
     for tok in ("getusermedia", "mediarecorder", "audiocontext",
-                "speechsynthesis", "navigator.mediadevices"):
+                "navigator.mediadevices"):
         assert tok not in low, f"Step 35 must not use audio/TTS API: {tok}"
 
 
@@ -2044,3 +2046,153 @@ def test_jarvis_step_35_spoken_safe_phrase_is_answered():
     assert d["refused"] is False
     assert d["safety_class"].startswith("SAFE_")
     assert isinstance(d["answer"], str) and d["answer"]
+
+
+# --- Step 36: optional browser TTS reads the returned answer ALOUD ----------
+# Off by default, click-gated. It reads only the last rendered answer (or
+# refusal text), never the question or any command/action/execute field, never
+# auto-speaks, makes no network call, and stores nothing. STT and the
+# {question}-only ask flow are unchanged.
+
+
+def _jarvis_wirespeak_body():
+    """Isolate the wireSpeak() function body so we can prove the read-aloud
+    handler never fetches, never reads the question/input, and only speaks
+    the captured answer text."""
+    html = _jarvis_template_text()
+    start = html.index("function wireSpeak(){")
+    end = html.index("tick(); setInterval(tick", start)
+    return html[start:end]
+
+
+def _jarvis_renderask_body():
+    """Isolate renderAsk() so we can prove it never auto-speaks and captures the
+    read-aloud text only from the answer / refusal explanation."""
+    html = _jarvis_template_text()
+    start = html.index("function renderAsk(")
+    end = html.index("function wireAsk(", start)
+    return html[start:end]
+
+
+def test_jarvis_step_36_page_renders_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+
+
+def test_jarvis_step_36_tts_labels_appear():
+    low = _jarvis_template_text().lower()
+    assert "voice output" in low
+    assert "read answer aloud" in low  # rendered as the READ ANSWER ALOUD tag
+    assert "off by default" in low
+    assert "reads returned answers only" in low
+
+
+def test_jarvis_step_36_uses_browser_speech_synthesis_only():
+    body = _jarvis_template_text()
+    assert "window.speechSynthesis" in body
+    assert "SpeechSynthesisUtterance" in body
+
+
+def test_jarvis_step_36_no_external_tts_or_fetch_in_speak():
+    speak = _jarvis_wirespeak_body()
+    low = speak.lower()
+    for tok in ("fetch(", "xmlhttprequest", "/api/", "http://", "https://"):
+        assert tok not in low, f"read-aloud handler must make no network call: {tok}"
+
+
+def test_jarvis_step_36_no_recorder_or_capture_apis():
+    low = _jarvis_template_text().lower()
+    for tok in ("getusermedia", "mediarecorder", "audiocontext",
+                "navigator.mediadevices"):
+        assert tok not in low, f"Step 36 must not use capture/recorder API: {tok}"
+
+
+def test_jarvis_step_36_no_browser_storage_tokens():
+    low = _jarvis_template_text().lower()
+    for tok in ("localstorage", "sessionstorage", "indexeddb", "document.cookie"):
+        assert tok not in low, f"voice output must not persist: {tok}"
+
+
+def test_jarvis_step_36_no_auto_speak_on_response():
+    # The ask response renderer must never speak on its own. The only speak()
+    # call lives behind the explicit Read-last-answer control.
+    render = _jarvis_renderask_body()
+    low = render.lower()
+    for tok in (".speak(", "synth.speak", "speechsynthesisutterance"):
+        assert tok not in low, f"ask response must not auto-speak: {tok}"
+
+
+def test_jarvis_step_36_read_aloud_requires_explicit_control():
+    body = _jarvis_template_text()
+    assert 'id="jvSpeakAnswerBtn"' in body
+    speak = _jarvis_wirespeak_body()
+    # The single synth.speak call is bound only to an explicit click/key control.
+    assert "synth.speak(u)" in speak
+    assert "addEventListener('click', speak)" in speak
+
+
+def test_jarvis_step_36_tts_reads_answer_not_question():
+    speak = _jarvis_wirespeak_body()
+    # Read-aloud sources the captured answer text only — never the input/question.
+    assert "jvLastAnswerText" in speak
+    for bad in ("input.value", "jvAskInput", "d.command", "d.action", "d.execute"):
+        assert bad not in speak, f"read-aloud must not read: {bad}"
+
+
+def test_jarvis_step_36_speak_text_is_answer_or_refusal_only():
+    render = _jarvis_renderask_body()
+    # The read-aloud text is captured ONLY from the model answer or the refusal
+    # explanation — never the question or any command/action/execute field.
+    assert "jvLastAnswerText = String(d.answer)" in render
+    assert "String(d.refusal_reason)" in render
+    for bad in ("input.value", "d.command", "d.action", "d.execute"):
+        assert "jvLastAnswerText = " + bad not in render
+        assert "jvLastAnswerText=" + bad not in render
+
+
+def test_jarvis_step_36_stt_still_fills_input_only():
+    voice = _jarvis_wirevoice_body()
+    assert "input.value = transcript" in voice
+    low = voice.lower()
+    for tok in ("fetch(", "askjarvis", ".submit(", "/api/jarvis/ask"):
+        assert tok not in low, f"STT must remain input-fill only: {tok}"
+
+
+def test_jarvis_step_36_ask_payload_remains_question_only():
+    html = _jarvis_template_text()
+    assert "JSON.stringify({question: q})" in html
+    low = html.lower()
+    for bad in ("stringify({command", "stringify({action", "stringify({execute",
+                "stringify({transcript", "stringify({audio", "stringify({answer"):
+        assert bad not in low, f"ask payload must stay question-only, found: {bad}"
+
+
+def test_jarvis_step_36_no_refresh_or_real_control():
+    html = _jarvis_template_text()
+    assert "/api/jarvis/refresh" not in html
+    low = html.lower()
+    for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
+        assert tok not in low, f"Step 36 must add no real control: {tok}"
+
+
+def test_jarvis_step_36_persistent_warning_present():
+    assert "JARVIS answers only. No execution. No trading control." in _jarvis_template_text()
+
+
+def test_jarvis_step_36_graceful_when_unavailable():
+    speak = _jarvis_wirespeak_body()
+    assert "Voice output unavailable in this browser." in speak
+
+
+def test_jarvis_step_36_status_shape_unchanged():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert d["online"] is True
+    assert d["read_only"] is True
+    for forbidden_key in ("conversation", "ask", "chat", "answer", "voice",
+                          "audio", "transcript", "tts", "speech"):
+        assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"

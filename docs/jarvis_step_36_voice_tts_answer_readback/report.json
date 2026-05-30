@@ -1,0 +1,91 @@
+{
+  "title": "JARVIS Step 36 — Optional Browser TTS Answer Readback",
+  "generated_at": "2026-05-30T18:00:00",
+  "type": "ui_tts_wiring_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Add optional browser text-to-speech so JARVIS can read the returned answer aloud after a successful read-only ask response. TTS is off by default, manually controlled (click-gated), and never auto-speaks. It reads only the last rendered answer (or refusal explanation), never the question or any command/action/execute field, makes no network call, and stores nothing.",
+  "relation_to_steps_20_35": "Step 30 the answer-only POST /api/jarvis/ask; Step 31 the read-only ask UI; Step 33 the docs-only voice-layer safety plan; Step 34 the disabled voice preview; Step 35 browser speech-to-text that fills the input only. Step 36 implements the final voice roadmap item from Step 33: optional browser SpeechSynthesis that reads returned answers aloud, off by default, with no backend, no storage, and no auto-speak.",
+  "files_changed": [
+    "templates/jarvis.html — added an optional Voice output block inside the existing #jvVoicePreview area: a non-interactive <span role=button id=jvSpeakAnswerBtn>Read last answer</span> plus a status line. Added a module-level jvLastAnswerText, set inside renderAsk ONLY from the model answer (d.answer) or refusal explanation (d.refusal_reason) — reset on every response. Added wireSpeak(): it uses window.speechSynthesis + SpeechSynthesisUtterance, is off by default, speaks only on explicit click/Enter/Space, and shows 'Voice output unavailable in this browser.' when unsupported. No auto-speak, no fetch, no storage. STT and the {question}-only ask flow are unchanged.",
+    "tests/test_jarvis_route.py — reconciled two prior tests (Step 34/35 audio scans) that forbade speechSynthesis, since Step 36 intentionally adds browser TTS (kept getUserMedia/MediaRecorder/AudioContext/mediaDevices forbidden); added a Step 36 section (16 tests).",
+    "docs/jarvis_step_36_voice_tts_answer_readback/report.md and report.json — this memo."
+  ],
+  "prior_tests_reconciled": [
+    "test_jarvis_step_34_no_microphone_or_audio_apis — dropped 'speechsynthesis' from the forbidden list (Step 36 adds browser TTS); still forbids getUserMedia/MediaRecorder/AudioContext/navigator.mediaDevices.",
+    "test_jarvis_step_35_no_forbidden_audio_or_tts_apis — dropped 'speechsynthesis' from the forbidden list (Step 36 adds browser TTS); still forbids getUserMedia/MediaRecorder/AudioContext/navigator.mediaDevices."
+  ],
+  "explicitly_not_done": [
+    "No app.py change.",
+    "No jarvis_conversation_safety.py change.",
+    "No backend endpoint added.",
+    "No server-side TTS.",
+    "No getUserMedia / MediaRecorder / AudioContext / navigator.mediaDevices.",
+    "No external TTS API; no fetch/XHR from the read-aloud handler.",
+    "No audio recording or storage; no transcript storage.",
+    "No localStorage / sessionStorage / IndexedDB / cookies.",
+    "No auto-submit.",
+    "No auto-speak: the response renderer never speaks; speech is click-gated only.",
+    "Read-aloud never speaks the question or any command/action/execute field; for a refusal it speaks only the refusal explanation.",
+    "No change to STT: voice still fills the input only and does not auto-submit.",
+    "No refresh / execution / broker / paper / live control.",
+    "No change to the /api/jarvis/ask payload — still {question} only.",
+    "No change to /api/jarvis/status shape.",
+    "Nothing staged or committed."
+  ],
+  "tts_answer_readback_summary": {
+    "location": "Inside the existing #jvVoicePreview block in the 'Talk to JARVIS' panel, below the speech-to-text row.",
+    "labels": ["Voice output", "Read answer aloud (READ ANSWER ALOUD tag)", "Off by default", "Reads returned answers only"],
+    "control": "<span class=jv-voice-ctl is-disabled id=jvSpeakAnswerBtn role=button tabindex=0 aria-disabled=true>Read last answer</span> — disabled until an answer exists; wired only with addEventListener (click + Enter/Space); never a real button/form/submit.",
+    "mechanism": "window.speechSynthesis + new SpeechSynthesisUtterance(text); lang=en-US, rate=1. synth.cancel() before each utterance.",
+    "source_text": "jvLastAnswerText, set in renderAsk ONLY from String(d.answer), else (refused) String(d.refusal_reason). Reset to '' on every response; never the question; never command/action/execute fields.",
+    "off_by_default": "The control starts disabled and never speaks until the operator clicks it after an answer renders. The ask response renderer makes no speak call.",
+    "graceful_degradation": "If window.speechSynthesis or SpeechSynthesisUtterance is unavailable, the control disables and shows 'Voice output unavailable in this browser.'",
+    "stt_unchanged": "wireVoice() still fills #jvAskInput only and does not auto-submit or fetch.",
+    "ask_flow": "Unchanged: #jvAskInput + 'Ask read-only' still POST only {question}; the classifier decides.",
+    "persistent_warning": "'JARVIS answers only. No execution. No trading control.' retained."
+  },
+  "voice_safety_scan": {
+    "window_speech_synthesis_present": true,
+    "speech_synthesis_utterance_present": true,
+    "getusermedia_mediarecorder_audiocontext_mediadevices": 0,
+    "external_tts_or_fetch_in_speak_handler": 0,
+    "browser_storage_tokens": 0,
+    "renderask_auto_speak_calls": 0,
+    "synth_speak_calls_total": 1,
+    "speak_reads_question_or_input": 0,
+    "ask_payload_question_only": true,
+    "real_button_form_onclick_post_submit": 0,
+    "refresh_occurrences": 0,
+    "persistent_warning_present": true
+  },
+  "tests": {
+    "new_step_36_tests": [
+      "test_jarvis_step_36_page_renders_ok",
+      "test_jarvis_step_36_tts_labels_appear",
+      "test_jarvis_step_36_uses_browser_speech_synthesis_only",
+      "test_jarvis_step_36_no_external_tts_or_fetch_in_speak",
+      "test_jarvis_step_36_no_recorder_or_capture_apis",
+      "test_jarvis_step_36_no_browser_storage_tokens",
+      "test_jarvis_step_36_no_auto_speak_on_response",
+      "test_jarvis_step_36_read_aloud_requires_explicit_control",
+      "test_jarvis_step_36_tts_reads_answer_not_question",
+      "test_jarvis_step_36_speak_text_is_answer_or_refusal_only",
+      "test_jarvis_step_36_stt_still_fills_input_only",
+      "test_jarvis_step_36_ask_payload_remains_question_only",
+      "test_jarvis_step_36_no_refresh_or_real_control",
+      "test_jarvis_step_36_persistent_warning_present",
+      "test_jarvis_step_36_graceful_when_unavailable",
+      "test_jarvis_step_36_status_shape_unchanged"
+    ]
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "239 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_36_voice_tts_answer_readback/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "Step 37 (JARVIS-VOICE-LIVE-SMOKE, separate approval): a live end-to-end voice smoke — speak -> transcript fills input -> click Ask read-only -> answer/refusal -> optional click Read last answer. Validation/report-only; spoken safe + forbidden questions behave identically to typed, with no storage, no refresh, no execution, and no auto-speak.",
+  "conclusion": "JARVIS can now optionally read a returned answer aloud, but only when the operator clicks the off-by-default 'Read last answer' control. It uses the browser SpeechSynthesis API exclusively, reads only the last answer (or refusal explanation), never the question or any command, never auto-speaks, makes no network call, and stores nothing. STT still fills the input only; the {question}-only payload, the persistent warning, and the /api/jarvis/status shape are unchanged. app.py and jarvis_conversation_safety.py are untouched. Nothing staged or committed."
+}

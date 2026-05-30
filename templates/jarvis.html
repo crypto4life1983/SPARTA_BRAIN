@@ -408,6 +408,26 @@
                 aria-label="Speak to fill the question box">Speak to fill</span>
           <span class="jv-detail" id="jvVoiceStatus" aria-live="polite">Idle.</span>
         </div>
+
+        <!-- Step 36: optional Voice output. Reads the LAST returned answer (or
+             refusal text) aloud, only when the operator clicks. Off by default,
+             never auto-speaks, never reads the question or any command field,
+             and stores nothing. Uses the browser SpeechSynthesis API only. The
+             control is a non-interactive span (role=button), not a real
+             control. -->
+        <div class="jv-voice-head" style="margin-top:10px">
+          Voice output <span class="jv-tag t-display">READ ANSWER ALOUD</span>
+        </div>
+        <div class="jv-detail">
+          Off by default &middot; Reads returned answers only &middot;
+          Never reads your question or any command. The read-only text flow above is unchanged.
+        </div>
+        <div class="jv-voice-row">
+          <span class="jv-voice-ctl is-disabled" id="jvSpeakAnswerBtn" role="button"
+                tabindex="0" aria-disabled="true"
+                aria-label="Read the last returned answer aloud">Read last answer</span>
+          <span class="jv-detail" id="jvSpeakStatus" aria-live="polite">Off. Ask a read-only question first.</span>
+        </div>
       </div>
     </div>
 
@@ -426,6 +446,11 @@
 (function(){
   var root = document.querySelector('.jarvis-root');
   if(!root) return;
+
+  // Step 36: holds ONLY the last rendered answer / refusal text, for optional
+  // click-gated read-aloud. Never the question, never a command/action/execute
+  // field. Reset on every ask; not persisted anywhere.
+  var jvLastAnswerText = '';
 
   function led(state){
     var ok = ['online','ready','installed','connected','armed','locked','compliance_first'];
@@ -1036,6 +1061,11 @@
   // the answer-only ask endpoint. No execution, refresh, mutation, broker,
   // paper, or live control. No chat persistence, no client storage, no writes.
   function renderAsk(out, d){
+    // Step 36: reset read-aloud text on every response, so a stale answer is
+    // never spoken. Disable the speak control until a fresh answer exists.
+    jvLastAnswerText = '';
+    var speakBtn = document.getElementById('jvSpeakAnswerBtn');
+    if(speakBtn){ speakBtn.classList.add('is-disabled'); speakBtn.setAttribute('aria-disabled', 'true'); }
     if(!d || typeof d !== 'object'){
       out.innerHTML = '<div class="jv-detail" style="color:var(--jv-bad)">No answer.</div>';
       return;
@@ -1055,6 +1085,15 @@
         src.map(function(s){ return esc(String(s)); }).join(', ')+'</div>';
     }
     out.innerHTML = html;
+    // Step 36: capture ONLY the answer (or refusal text) for optional read-aloud.
+    // For a refusal we speak the refusal explanation, never a command. Never the
+    // question, never any command/action/execute field.
+    if(d.answer){ jvLastAnswerText = String(d.answer); }
+    else if(refused && d.refusal_reason){ jvLastAnswerText = String(d.refusal_reason); }
+    if(speakBtn && jvLastAnswerText.trim()){
+      speakBtn.classList.remove('is-disabled');
+      speakBtn.setAttribute('aria-disabled', 'false');
+    }
   }
 
   function wireAsk(){
@@ -1158,10 +1197,49 @@
     });
   }
 
+  // Step 36: optional read-aloud of the LAST returned answer (or refusal text).
+  // Off by default and click-gated — it never auto-speaks, never reads the
+  // question or any command/action/execute field, makes no network call, and
+  // stores nothing. Uses the browser SpeechSynthesis API only.
+  function wireSpeak(){
+    var btn = document.getElementById('jvSpeakAnswerBtn');
+    var status = document.getElementById('jvSpeakStatus');
+    if(!btn || !status) return;
+    function setStatus(msg){ status.textContent = msg; }
+
+    var synth = window.speechSynthesis;
+    if(!synth || typeof window.SpeechSynthesisUtterance === 'undefined'){
+      btn.classList.add('is-disabled');
+      btn.setAttribute('aria-disabled', 'true');
+      setStatus('Voice output unavailable in this browser.');
+      return;
+    }
+
+    function speak(){
+      var text = (jvLastAnswerText || '').trim();
+      if(!text){
+        setStatus('No answer yet — ask a read-only question first.');
+        return;
+      }
+      try { synth.cancel(); } catch(e){ /* nothing queued */ }
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 1;
+      synth.speak(u);
+      setStatus('Reading the last answer aloud…');
+    }
+
+    btn.addEventListener('click', speak);
+    btn.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); speak(); }
+    });
+  }
+
   tick(); setInterval(tick, 1000);
   load(); setInterval(load, 15000);
   wireAsk();
   wireVoice();
+  wireSpeak();
 })();
 </script>
 {% endblock %}
