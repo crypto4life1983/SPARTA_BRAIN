@@ -790,14 +790,20 @@
   ],
   "recommendation": {
     "verdict": "SELECT_FAMILY_FOR_CRYPTO_D9_SPEC",
-    "selected_family": "daily_crash_candle (1-day drop reversion), decoupled from the CODR-1 close>SMA200 uptrend gate",
+    "basis": "power_only (signal density / statistical power); NOT an edge claim",
+    "selected_family": "daily crash-candle / 1-day-drop reversion",
     "primary_threshold": "ret_1d<=-5% (BTC 81 events, 4-year spread, max_year_share 0.43)",
-    "secondary_threshold": "ret_1d<=-7% (BTC 33 events, still POWER_OK)",
-    "rationale": "Only the raw daily-crash family clears BTC>=30 IS events AND is regime-diverse (present in the 2022 bear). The D8 audit isolates the CODR-1 root cause: it was the combination of -7% AND close>SMA200 that produced exactly 9 BTC events (max_year_share 0.78, zero 2022). Removing the uptrend gate restores >=30 BTC events with cross-regime distribution, giving a Crypto-D9 spec a fighting chance at the >=30-trade and not-one-year-concentrated gates. Trend-continuation and vol-compression were rejected for top-winner dependence / parameter-freedom; cross-asset and calendar for too-low power / friction domination (consistent with Crypto-D7).",
+    "secondary_threshold": "ret_1d<=-7% (BTC 33 events, still >=30 and regime-diverse)",
+    "what_d8_proves": "Only signal density / statistical power: this family fires often enough, across enough regimes, on the primary symbol BTC to be worth a future spec attempt.",
+    "what_d8_does_not_prove": "Edge. No PnL was computed. This selection is a NECESSARY condition to proceed, never a SUFFICIENT one.",
+    "rationale": "The raw daily crash-candle is the only family that clears BTC>=30 IS events AND is not one-year-concentrated (>=30 at -5%=81 and -7%=33, present in all four IS years including the 2022 bear, max_year_share<=0.43). Trend-continuation and vol-compression were rejected for top-winner dependence / parameter-freedom; cross-asset and calendar for too-low power / friction domination (consistent with Crypto-D7).",
+    "central_risk": "Any confirmation filter may push BTC below power. CODR-1 is the proof: adding the close>SMA200 uptrend confirmation to the -7% drop starved BTC to exactly 9 events (max_year_share 0.78, zero 2022), which is why CODR-1 failed IS. The selected family is power-OK only in its UNFILTERED form, and the unfiltered form is a 'catch a falling knife' with no edge claim. Crypto-D9 must resolve this tension.",
+    "crypto_d9_conditions": "If authorized later, Crypto-D9 is ONLY a strict frozen-spec attempt (single pre-registered spec, new id, fresh ladder, no parameter freedom) with hard non-negotiable gates: (1) BTC PRIMARY must carry its own positive, friction-survivable edge (BTC>=30 IS trades; cannot be rescued by ETH/SOL pooling); (2) friction survival at base AND +50% stress; (3) top-3-winner-removal stays positive; (4) multi-asset corroboration >=2/3 of BTC/ETH/SOL.",
+    "failure_discipline": "If Crypto-D9 (and any later Crypto-D10 OOS, if ever reached) fails IS, OOS 2024-2025 and 2026 remain SEALED and the family is PARKED. No tweak-and-retry.",
+    "fallback": "If Crypto-D9 cannot define a daily spec that keeps BTC>=30 IS events WITHOUT degenerating into an unfiltered falling knife (i.e. every edge-giving confirmation drops BTC below power, as CODR-1 demonstrated), the recommendation automatically becomes NEEDS_4H_DATA_PROTOCOL: scope an offline, immutable, SHA256-pinned BTC/ETH/SOL 4H spot snapshot (governed like the daily D3b freeze) to lift event density BEFORE any confirmed-mechanism spec is frozen. The sub-30 variants here (-10% crash BTC 12; 3d<=-15% BTC 14; mean-reversion-in-uptrend -7% BTC 9) already sit in that NEEDS_4H zone.",
     "caveats": [
-      "This is a COUNTING result only. It says the family CAN fire >=30 times on BTC across regimes; it says NOTHING about whether those events carry a positive, friction-survivable, top-3-robust edge. That is for a future separately-authorized Crypto-D9 IS baseline.",
-      "-10% daily crash (BTC 12) and 3d<=-15% (BTC 14) remain sub-30 -> NEEDS_4H_DATA if a deeper-flush variant is ever wanted.",
-      "No spec is frozen here. Crypto-D9 must write its own pre-registered spec with a fresh ladder and a new id."
+      "This is a COUNTING result only. No spec is frozen here, no edge is claimed, no parameters are chosen.",
+      "Crypto-D9 must write its own pre-registered spec with a fresh ladder and a new id."
     ]
   },
   "forbidden_actions": [

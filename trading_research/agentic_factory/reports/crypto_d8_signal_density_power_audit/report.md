@@ -139,26 +139,59 @@ freedom / C top-winner dependence).
 
 ## 7. Recommended next step
 
-### **SELECT_FAMILY_FOR_CRYPTO_D9_SPEC**
+### **SELECT_FAMILY_FOR_CRYPTO_D9_SPEC** — conservative, power-only selection
 
-- **Selected family:** **daily crash-candle (1-day-drop reversion), decoupled from the
-  CODR-1 `close>SMA200` uptrend gate.**
+- **Selected family:** **daily crash-candle / 1-day-drop reversion.**
 - **Primary threshold:** `ret_1d ≤ −5%` (BTC **81** events, 4-year spread, maxYr 0.43).
-- **Secondary threshold:** `ret_1d ≤ −7%` (BTC **33**, still POWER_OK).
-- **Why:** Only the raw daily-crash family clears BTC ≥30 IS events **and** is
-  regime-diverse (fires in the 2022 bear). D8 isolates CODR-1's root cause — the
-  **combination** of −7% **and** the uptrend gate produced exactly 9 BTC events
-  (maxYr 0.78, zero 2022). Removing the uptrend gate restores ≥30 cross-regime BTC events,
-  giving a future spec a fighting chance at the ≥30-trade and not-one-year-concentrated
-  gates. Trend-continuation and vol-compression are rejected for top-winner dependence /
-  parameter-freedom; cross-asset and calendar for too-low power / friction domination
-  (consistent with Crypto-D7).
-- **Caveats:** This is a **counting** result only. It proves the family **can** fire ≥30×
-  on BTC across regimes; it says **nothing** about whether those events carry a positive,
-  friction-survivable, top-3-robust **edge** — that is a future, separately-authorized
-  **Crypto-D9 IS baseline**. The −10% crash (BTC 12) and 3d ≤−15% (BTC 14) variants remain
-  sub-30 → NEEDS_4H_DATA if a deeper-flush variant is ever wanted. **No spec is frozen
-  here**; Crypto-D9 must write its own pre-registered spec with a fresh ladder and a new id.
+- **Secondary threshold:** `ret_1d ≤ −7%` (BTC **33**, still ≥30 and regime-diverse).
+
+**What this selection does and does NOT mean — read before acting:**
+
+- **D8 proves only signal density / statistical power.** It establishes that this
+  family fires often enough, across enough regimes, on the **primary symbol (BTC)** to be
+  *worth* a future spec attempt.
+- **D8 does NOT prove edge.** It says **nothing** about whether those events carry a
+  positive, friction-survivable, top-3-robust return. No PnL was computed. Selection here
+  is a *necessary* condition for proceeding, **never a sufficient** one.
+- **The raw daily crash-candle has enough BTC events** — ≥30 on BTC at both −5% (81) and
+  −7% (33), distributed across all four IS years including the 2022 bear (maxYr ≤ 0.43).
+  This is the *only* family that is simultaneously ≥30 on BTC **and** not one-year-
+  concentrated. Trend-continuation / vol-compression are rejected for top-winner
+  dependence / parameter-freedom; cross-asset and calendar for too-low power / friction
+  domination (consistent with Crypto-D7).
+- **Any confirmation filter may push BTC below power.** The instant a confirmation is
+  added to give the mechanism a defensible edge, BTC events can collapse below the ≥30
+  gate. **CODR-1 is the proof:** adding the `close>SMA200` uptrend confirmation to the
+  −7% drop starved BTC to **9 events** (maxYr 0.78, zero 2022) — which is exactly why
+  CODR-1 failed IS. So the selected family is power-OK **only in its unfiltered form**, and
+  its unfiltered form is a "catch a falling knife" with no edge claim. This tension is the
+  central risk Crypto-D9 must resolve.
+
+**Therefore, if Crypto-D9 is authorized later, it is only a strict frozen-spec attempt** —
+not a green light, not an edge claim. Crypto-D9 must:
+
+- write a **single pre-registered, frozen spec** (new id, fresh ladder, no parameter
+  freedom), and
+- include **hard, non-negotiable gates** for:
+  1. **BTC primary** must carry its own positive, friction-survivable edge (BTC ≥30 IS
+     trades; primary cannot be rescued by ETH/SOL pooling — the D6 lesson),
+  2. **friction** survival at base **and** +50% stress,
+  3. **top-3-winner-removal** stays positive (the universal killer gate),
+  4. **multi-asset corroboration** (≥2/3 of BTC/ETH/SOL).
+- **If Crypto-D9 (and any Crypto-D10 OOS, if ever reached) fails IS, OOS remains SEALED
+  and the family is PARKED** — same ladder discipline that parked CODR-1 and the futures
+  branches. No tweak-and-retry.
+
+**Fallback condition (explicit):** if Crypto-D9 **cannot** define a daily spec that keeps
+**BTC ≥30 IS events without degenerating into an unfiltered falling knife** — i.e. every
+edge-giving confirmation drops BTC below power, as CODR-1 demonstrated — then the
+recommendation **automatically becomes `NEEDS_4H_DATA_PROTOCOL`**: scope an offline,
+immutable, SHA256-pinned BTC/ETH/SOL **4H** spot snapshot (governed exactly like the daily
+D3b freeze) to lift event density **before** any confirmed-mechanism spec is frozen. The
+sub-30 variants here (−10% crash BTC 12; 3d ≤−15% BTC 14; mean-reversion-in-uptrend −7%
+BTC 9) already sit in that NEEDS_4H zone.
+
+**No spec is frozen in this memo. No edge is claimed. No parameters are chosen.**
 
 ## 8. Forbidden actions (this lane)
 
@@ -176,9 +209,13 @@ validated, backtested, paper-ready, live-ready, or authorized for execution.”*
 ---
 
 **Trading recommendation:** NONE — read-only counting audit only. CODR-1 v1 stays
-**PARKED after IS_FAIL**. Recommendation is **SELECT_FAMILY_FOR_CRYPTO_D9_SPEC** (daily
-crash-reversion, −5% primary / −7% secondary, decoupled from the uptrend gate), but **no
-spec is frozen** and **no edge is claimed** — that requires a separately-authorized
-Crypto-D9 IS baseline. Frozen BTC/ETH/SOL spot data stays valid; perps remain blocked; OOS
-2024–2025 and 2026 stay sealed; crypto stays a separate research lane; **S30 stays PARKED
-and the futures branches are untouched.**
+**PARKED after IS_FAIL**. Recommendation is **SELECT_FAMILY_FOR_CRYPTO_D9_SPEC** on a
+**power-only** basis (daily crash-candle / 1-day-drop reversion, −5% primary / −7%
+secondary). **D8 proves signal density, not edge.** No spec is frozen, no parameters are
+chosen, no edge is claimed. If later authorized, **Crypto-D9 is only a strict frozen-spec
+attempt** with hard gates for BTC-primary, friction (base + stress), top-3-winner removal,
+and multi-asset corroboration; **if D9/D10 fails IS, OOS stays SEALED and the family is
+PARKED.** **Fallback:** if D9 cannot keep BTC ≥30 IS events without becoming an unfiltered
+falling knife, the recommendation becomes **NEEDS_4H_DATA_PROTOCOL**. Frozen BTC/ETH/SOL
+spot data stays valid; perps remain blocked; OOS 2024–2025 and 2026 stay sealed; crypto
+stays a separate research lane; **S30 stays PARKED and the futures branches are untouched.**
