@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "updated_at": "2026-05-30T00:00:00",
+  "updated_at": "2026-05-30T02:00:00",
   "prompts": [
     {
-      "id": "JARVIS-SMOKE-VERIFY",
-      "title": "Verify live JARVIS dashboard",
+      "id": "JARVIS-LIVE-REGRESSION-SMOKE",
+      "title": "Live regression smoke after latest commits",
       "category": "jarvis",
       "risk": "read_only",
-      "prompt": "Run a read-only smoke validation of /jarvis and /api/jarvis/status. Confirm HTTP 200 and that every panel renders. Do not modify files or commit anything.",
+      "prompt": "Confirm /jarvis and /api/jarvis/status return 200 after the latest JARVIS commits, that commander_snapshot and system_map are present and ready, and that the new api_key fields display. Report findings as text. Do not modify files or commit anything.",
       "allowed": true,
       "notes": "Manual operator prompt only. Display-only in JARVIS."
     },
@@ -34,7 +34,7 @@
       "title": "Review mission board",
       "category": "jarvis",
       "risk": "read_only",
-      "prompt": "Read docs/jarvis_mission_board.json and summarize open missions by status and priority. Do not execute any mission and do not edit the file.",
+      "prompt": "Read docs/jarvis_mission_board.json and summarize missions by status and priority. Do not execute any mission and do not edit the file.",
       "allowed": true,
       "notes": "Display-only review of the tracked mission board."
     },
@@ -48,15 +48,6 @@
       "notes": "Inspection only. No staging or commits."
     },
     {
-      "id": "JARVIS-NEXT-PANEL-PLAN",
-      "title": "Draft next JARVIS read-only panel plan",
-      "category": "planning",
-      "risk": "read_only",
-      "prompt": "Draft a plan for the next read-only JARVIS panel that follows the cached-file / fail-closed reader pattern. Output the plan as text only; write no code and commit nothing.",
-      "allowed": true,
-      "notes": "Planning prompt. Produces text, not changes."
-    },
-    {
       "id": "JARVIS-AUDIT-EXEC-CONTROLS",
       "title": "Audit JARVIS for execution controls",
       "category": "safety",
@@ -66,13 +57,40 @@
       "notes": "Read-only safety audit of the console surface."
     },
     {
-      "id": "JARVIS-UNTRACKED-REVIEW",
-      "title": "Review untracked files without deleting/staging",
-      "category": "git",
+      "id": "JARVIS-DOCS-INDEX",
+      "title": "Draft a JARVIS docs index",
+      "category": "planning",
       "risk": "read_only",
-      "prompt": "List untracked files and briefly describe what they appear to be. Do not stage, delete, move, or commit any of them. Reading and describing only.",
+      "prompt": "Draft a plain-text index of JARVIS artifacts: tracked data files (mission board, prompt library, system map), cached report locations, the three offline tools, and the audit memo. One line per item. Output text only; write no code and commit nothing.",
       "allowed": true,
-      "notes": "Inspection only. Never deletes or stages."
+      "notes": "Documentation aid. Produces text, not changes."
+    },
+    {
+      "id": "JARVIS-PANEL-CONSISTENCY",
+      "title": "Panel consistency audit",
+      "category": "safety",
+      "risk": "read_only",
+      "prompt": "Cross-reference the system map panels, their documented api_key values, the live /api/jarvis/status keys, and the rendered UI panel ids. Report any mismatches as text. Make no changes and commit nothing.",
+      "allowed": true,
+      "notes": "Read-only consistency audit. Reporting only."
+    },
+    {
+      "id": "JARVIS-CACHE-FRESHNESS",
+      "title": "Cache freshness audit",
+      "category": "planning",
+      "risk": "read_only",
+      "prompt": "Inspect the generated_at timestamps in the cached JARVIS reports and describe how stale each one is relative to now. Propose a display-only freshness threshold. Output text only; add no execution controls.",
+      "allowed": true,
+      "notes": "Read-only freshness review. Produces text, not changes."
+    },
+    {
+      "id": "JARVIS-UI-POLISH",
+      "title": "UI polish plan",
+      "category": "planning",
+      "risk": "read_only",
+      "prompt": "Propose cosmetic layout, spacing, and label improvements for the JARVIS console. No new buttons, forms, POST routes, or capabilities. Output the plan as text only; write no code and commit nothing.",
+      "allowed": true,
+      "notes": "Cosmetic planning prompt. No new capability or execution affordance."
     }
   ]
 }

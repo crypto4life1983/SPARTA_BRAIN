@@ -1,66 +1,146 @@
 {
   "version": 1,
-  "updated_at": "2026-05-30T01:30:00",
+  "updated_at": "2026-05-30T02:00:00",
   "missions": [
+    {
+      "id": "JARVIS-TRADING-DETAIL",
+      "title": "Read-only trading research detail panel",
+      "status": "completed",
+      "priority": "medium",
+      "area": "trading_bot",
+      "safe_next_prompt": "Review the read-only trading research detail panel. Trading execution stays LOCKED; there is no order path.",
+      "blocked": false,
+      "notes": "Shipped (Step 05). Read-only viewer only. No broker, no orders."
+    },
+    {
+      "id": "JARVIS-ROUTE-SMOKE",
+      "title": "Cached route smoke panel",
+      "status": "completed",
+      "priority": "medium",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Review the cached GET-only route smoke panel. The web route only reads the cached report; it runs no probes itself.",
+      "blocked": false,
+      "notes": "Shipped (Step 06). Offline GET-only probe; web reads cache."
+    },
+    {
+      "id": "JARVIS-PROMPT-LIBRARY",
+      "title": "Read-only prompt library panel",
+      "status": "completed",
+      "priority": "low",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Review the read-only prompt library panel. Every prompt is display-only text and is never executed by the web app.",
+      "blocked": false,
+      "notes": "Shipped (Step 07). Display-only library from a tracked JSON file."
+    },
+    {
+      "id": "JARVIS-FILE-HYGIENE",
+      "title": "Read-only file hygiene panel",
+      "status": "completed",
+      "priority": "low",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Review the read-only file hygiene panel. It reflects an offline git status summary; it never deletes, stages, or moves anything.",
+      "blocked": false,
+      "notes": "Shipped (Step 08). Offline summary; web reads cache only."
+    },
+    {
+      "id": "JARVIS-SYSTEM-MAP",
+      "title": "Read-only system map panel",
+      "status": "completed",
+      "priority": "medium",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Review the read-only system map panel. Script paths are documentation strings and are never executed from the web.",
+      "blocked": false,
+      "notes": "Shipped (Step 10). Display-only wiring map from a tracked JSON file."
+    },
+    {
+      "id": "JARVIS-HARDENING-AUDIT",
+      "title": "Read-only hardening audit memo",
+      "status": "completed",
+      "priority": "medium",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Read docs/jarvis_step_11_hardening_audit/report.md and summarize the read-only posture findings. Make no changes.",
+      "blocked": false,
+      "notes": "Shipped (Step 11). Conclusion: JARVIS_HARDENING_PASS."
+    },
+    {
+      "id": "JARVIS-APIKEY-RECONCILE",
+      "title": "System map api_key reconciliation",
+      "status": "completed",
+      "priority": "low",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Review that every system map panel documents an api_key matching the /api/jarvis/status response key. Display-only.",
+      "blocked": false,
+      "notes": "Shipped (Step 12). Reader fails closed on missing or duplicate api_key."
+    },
+    {
+      "id": "JARVIS-HEALTH-REPORT",
+      "title": "Refresh cached health report manually",
+      "status": "pending",
+      "priority": "high",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Run python tools/jarvis_health_report.py from the repo root and confirm storage/jarvis/health_report.json shows overall pass. Do not modify app code.",
+      "blocked": false,
+      "notes": "Recurring offline cached-report refresh. Read by the Health Report panel."
+    },
     {
       "id": "JARVIS-LOCAL-SMOKE",
       "title": "Open /jarvis locally and verify panels",
       "status": "pending",
       "priority": "high",
       "area": "sparta_brain",
-      "safe_next_prompt": "Run the local server, open /jarvis, and report whether all panels render correctly. Do not modify files.",
+      "safe_next_prompt": "Open /jarvis locally and report whether all panels render correctly. Do not modify files.",
       "blocked": false,
-      "notes": "Manual operator validation only."
+      "notes": "Recurring manual operator validation only."
     },
     {
-      "id": "JARVIS-HEALTH-REPORT",
-      "title": "Generate cached health report manually",
+      "id": "JARVIS-LIVE-REGRESSION-SMOKE",
+      "title": "Verify live dashboard after Steps 10-12",
       "status": "pending",
       "priority": "high",
       "area": "sparta_brain",
-      "safe_next_prompt": "Run python tools/jarvis_health_report.py from the repo root and confirm storage/jarvis/health_report.json shows overall pass. Do not modify app code.",
+      "safe_next_prompt": "Confirm /jarvis and /api/jarvis/status return 200 after the latest commits, that commander_snapshot and system_map are present and ready, and that the new api_key fields display. Report only; change nothing.",
       "blocked": false,
-      "notes": "Refreshes the read-only Health Report panel. Offline only."
+      "notes": "Read-only live regression check after the latest JARVIS commits."
     },
     {
-      "id": "JARVIS-ROUTE-SMOKE",
-      "title": "Add cached route smoke report later",
+      "id": "JARVIS-DOCS-INDEX",
+      "title": "Create a simple docs index for JARVIS artifacts",
       "status": "backlog",
       "priority": "medium",
       "area": "sparta_brain",
-      "safe_next_prompt": "Design a read-only cached route smoke report that records HTTP status for key GET routes, written offline and only read by /api/jarvis/status. Do not add execution controls.",
+      "safe_next_prompt": "Draft a plain-text index that lists the JARVIS tracked data files, cached report locations, tools, and audit memos with a one-line description each. Output text only; write no code.",
       "blocked": false,
-      "notes": "Future additive, read-only step. Not started."
+      "notes": "Documentation aid. Display/text only; no new capability."
     },
     {
-      "id": "JARVIS-TRADING-DETAIL",
-      "title": "Add read-only trading bridge detail panel later",
+      "id": "JARVIS-PANEL-CONSISTENCY",
+      "title": "Compare system map panels to API keys and UI panels",
       "status": "backlog",
       "priority": "medium",
-      "area": "trading_bot",
-      "safe_next_prompt": "Extend the JARVIS trading bridge panel with additional read-only sealed-lifecycle detail. Keep trading execution LOCKED and add no order path.",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Cross-reference the system map panels, their documented api_key values, the live /api/jarvis/status keys, and the rendered UI panel ids. Report any mismatches as text. Make no changes.",
       "blocked": false,
-      "notes": "Read-only viewer enhancement only. No broker, no orders."
+      "notes": "Read-only consistency audit. Reporting only."
     },
     {
-      "id": "JARVIS-PROMPT-LIBRARY",
-      "title": "Add read-only Claude/Codex prompt library later",
+      "id": "JARVIS-CACHE-FRESHNESS",
+      "title": "Show cached report age and freshness rules later",
       "status": "backlog",
       "priority": "low",
       "area": "sparta_brain",
-      "safe_next_prompt": "Add a read-only panel that displays a curated set of safe operator prompts from a tracked JSON file. Display text only, no execution.",
+      "safe_next_prompt": "Design a read-only way to surface the age of each cached JARVIS report (generated_at vs now) and a staleness threshold, displayed text only. Do not add execution controls.",
       "blocked": false,
-      "notes": "Display-only library. No prompt is ever executed by the web app."
+      "notes": "Future additive read-only display idea. Not started."
     },
     {
-      "id": "JARVIS-FILE-HYGIENE",
-      "title": "Review untracked-file hygiene later",
+      "id": "JARVIS-UI-POLISH",
+      "title": "Improve JARVIS layout and labels only",
       "status": "backlog",
       "priority": "low",
       "area": "sparta_brain",
-      "safe_next_prompt": "Review the large set of untracked files under data/, tools/, and docs/ and propose a .gitignore / cleanup plan. Report only; do not delete or stage anything without approval.",
+      "safe_next_prompt": "Propose layout, spacing, and label improvements for the JARVIS console. Cosmetic only: no new buttons, forms, POST routes, or capabilities. Report the plan as text.",
       "blocked": false,
-      "notes": "Hygiene review. No deletion without explicit approval."
+      "notes": "Cosmetic polish only. No new capability or execution affordance."
     }
   ]
 }
