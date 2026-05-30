@@ -1,0 +1,104 @@
+{
+  "step": "S26-D18",
+  "title": "Trend / SR / EMA / RSI candidate decision-gate memo (committed-evidence review only)",
+  "memo_only": true,
+  "validation_only": true,
+  "optimization": false,
+  "parameter_changes": false,
+  "strategy_change": false,
+  "new_filters": false,
+  "new_backtest": false,
+  "created": "2026-05-30",
+  "head_commit": "066c16c87b80fda493e3c312a312a3ae0c9b5d30",
+  "head_commit_short": "066c16c",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "basis": "Built ONLY from committed S26 reports (D2-D17) and S26 git history. No new analysis, no backtest, no market test, no data fetch. The untracked _friction_raw.json (D17) is mentioned only as an existing generated artifact; the memo rests on committed report.json/report.md.",
+  "s26_current_status": {
+    "level": "RESEARCH_CANDIDATE",
+    "paper_ready": false,
+    "live_ready": false,
+    "deployable": false
+  },
+  "s26_commit_chain": {
+    "af643ae": "D2 pre-register strategy spec",
+    "1bb70f9": "D3 IS baseline (IS_CONTINUE marginal)",
+    "a5d90c6": "D4 pre-register OOS protocol",
+    "30f2190": "D5 OOS PASS",
+    "cc73d6a": "D6 entry significance (ENTRY_EDGE_INCONCLUSIVE)",
+    "8a613e8": "D7 sequence-risk (SEQUENCE_RISK_INCONCLUSIVE)",
+    "6605654": "D8 regime breakdown (CONCENTRATED_SUPPORT)",
+    "a9cbfaa": "D9 multi-market robustness (DATA_LIMITED_INCONCLUSIVE)",
+    "483aee4": "D10 multi-market data protocol (PROTOCOL_REGISTERED)",
+    "fb4fecd": "D11 data provisioning (DATA_PROVISIONED)",
+    "cfe841d": "D12 multi-market partial support (PARTIAL_SUPPORT_WITH_CAUTION)",
+    "91b6931": "D13 closeout memo",
+    "ff6b779": "D14 risk/readiness gate design",
+    "51486b3": "D15 regime breakdown (REGIME_RISK_INCONCLUSIVE)",
+    "ca0077f": "D16 walk-forward stability (WALK_FORWARD_INCONCLUSIVE)",
+    "066c16c": "D17 friction stress (FRICTION_SENSITIVE)"
+  },
+  "evidence_summary": {
+    "what_s26_tested": "Whether a long-only daily 'Trend (close>EMA200 & EMA50>EMA200) + Support/Resistance pullback (low <= 20d low + 1.5*ATR20) + EMA/RSI confirmation' entry, with a 2N stop and +2R target, has a real, robust, tradeable edge on index futures (NQ reference, ES independent), surviving OOS, regime, walk-forward and friction stress.",
+    "strongest_positive_evidence": [
+      "OOS PASS on BOTH primaries: NQ OOS +7.999R/PF1.7694/32 trades (D5), ES OOS +11.4584R/PF2.2352/27 trades (D12) -- the independent market agrees in net direction.",
+      "OOS is friction-robust: both NQ and ES OOS stay POSITIVE through SEVERE friction (C=0.20R/trade) -- NQ OOS +1.599R, ES OOS +6.058R (D17).",
+      "Walk-forward broadly positive post-2016: NQ 8/11 and ES 7/11 rolling-3yr windows positive, both 6/9 rolling-5yr positive (D16).",
+      "No hard blocker (D14) fired across D15/D16/D17 -- each step permitted the next."
+    ],
+    "strongest_negative_evidence": [
+      "Thin IS edge: NQ IS PF 1.2016 / expectancy +0.0654R; ES IS PF 1.2003 / expectancy +0.0614R (D3/D12).",
+      "Entry significance never demonstrated: ENTRY_EDGE_INCONCLUSIVE -- no horizon reached EDGE_LIKELY on IS (D6).",
+      "Regime risk inconclusive: the profitable volatility regime is INCONSISTENT across markets (NQ profit in mid-vol, high-vol negative; ES profit in high-vol, low-vol negative) (D15).",
+      "Whole positive record is the single post-2016 trending regime; a shared 2014-2016 multi-year collapse on both markets (ES 3yr -16.49R/PF0.26, NQ 3yr -8.43R/PF0.51) with NO NQ/ES diversification (D16).",
+      "OOS profit single-year-dominated on both: NQ 2024 = 61.7% of OOS net, ES 2025 = 72.8% (D12/D15)."
+    ],
+    "friction_conclusion_d17": "FRICTION_SENSITIVE. OOS robust to severe friction on both primaries, but the thin full-history IS edge (break-even only ~0.06R/trade) turns NEGATIVE at high friction (C=0.10R): NQ IS -4.05R, ES IS -4.83R. The binding weakness is the thin IS edge.",
+    "robustness_oos_limitations": [
+      "OOS samples are small (NQ 32, ES 27 trades) and single-year-dominated.",
+      "OOS strength sits entirely in the post-2016 trending era; the strategy has NOT survived a multi-year choppy regime (lost on both markets 2014-2016).",
+      "IS max DD exceeds or rivals IS net (NQ IS DD 10.59R vs net 7.65R; ES IS DD 16.73R vs net 7.67R) and inflates further under friction."
+    ],
+    "market_data_coverage_limitations": [
+      "Only ONE genuinely independent market beyond NQ: ES. MNQ/MES are same-underlying micro proxies (partial history from 2019), descriptive only, cannot raise the verdict above PARTIAL_SUPPORT.",
+      "No data outside 2013-2025; micros begin 2019 so they cannot speak to the 2014-2016 weak regime.",
+      "Max attainable multi-market verdict by design = PARTIAL_SUPPORT (independence is by underlying, not ticker)."
+    ]
+  },
+  "decision": "PARK_CANDIDATE",
+  "decision_rationale": {
+    "summary": "Park S26 as a documented RESEARCH_CANDIDATE. The strategy is not broken -- no D14 hard blocker fired, OOS is positive and friction-robust on both primaries, and the independent market (ES) agrees with NQ. But the validation ladder D3-D17 has repeatedly returned INCONCLUSIVE / SENSITIVE rather than a strengthening signal, and the cumulative picture is a THIN edge that lives entirely in the post-2016 trending regime, lacks demonstrated entry significance, is friction-sensitive on IS, and whose OOS profit is single-year-dominated. There is no productive next validation step on the CURRENT committed evidence and CURRENT data that would resolve these without new independent markets, longer/other-regime history, or a conceptual change -- re-running the same families of tests would only re-confirm INCONCLUSIVE.",
+    "why_not_continue_research": "CONTINUE_RESEARCH would imply a clear, evidence-justified next test that could move the verdict. The remaining open questions (entry significance, regime breadth, choppy-regime survival, OOS single-year dominance) cannot be resolved by more analysis of the SAME data -- they need new independent markets or other-regime history (a data-fetch step, separately authorized) or a conceptual change. Spending more compute on the same four markets/same window would be busywork that re-confirms the existing INCONCLUSIVE results.",
+    "why_not_redesign_required": "REDESIGN_REQUIRED overstates the failure. No hard blocker fired; the edge is real-but-thin and directionally consistent across the independent market and OOS, and it is friction-robust where it matters most (OOS). The branch is not disproven -- it is unproven at the bar required for promotion -- so parking (reversible) is more honest than declaring a forced redesign.",
+    "promotion_bar_not_met": "Does NOT clear PAPER_REVIEW_CANDIDATE (D14 Section 4): the 'no top-year/top-trade dominance' gate FAILS (OOS single-year-dominated on both markets), the edge is thin with IS friction-fragility, and regime/walk-forward both returned INCONCLUSIVE rather than ACCEPTABLE/STABLE."
+  },
+  "unpark_conditions": [
+    "A genuinely INDEPENDENT market beyond ES (different underlying, e.g. YM/Dow or RTY/Russell) independently confirms a positive, friction-survivable edge -- raising multi-market support above PARTIAL.",
+    "Demonstrated ENTRY edge: entry significance reaches EDGE_LIKELY (not merely inconclusive) on out-of-sample-style testing, distinguishing the entry from the trend filter alone.",
+    "OOS profit NOT single-year-dominated: positive contribution spread across multiple years/markets, not one year carrying 60-73% of net.",
+    "Evidence of survival (or controlled loss) through a multi-year CHOPPY/non-trending regime comparable to 2014-2016, so the edge is not solely a post-2016 trending artifact.",
+    "Friction headroom: a realistic per-trade cost model (in R) shows the FULL-history edge -- not just OOS -- staying positive under conservative friction."
+  ],
+  "continue_research_next_steps_if_chosen": "N/A -- decision is PARK_CANDIDATE.",
+  "redesign_requirements_if_chosen": "N/A -- decision is PARK_CANDIDATE.",
+  "guardrails": {
+    "paper_trading_authorized": false,
+    "live_trading_authorized": false,
+    "optimization_authorized": false,
+    "deployment_authorized": false,
+    "broker_or_api_actions_authorized": false,
+    "data_fetch_authorized": false,
+    "note": "This memo authorizes NOTHING. Parking is a documentation state, not a trade action. Any future unpark requires a separate, explicitly-authorized step; any new data fetch (e.g. a new independent market) requires separate authorization."
+  },
+  "hashes": {
+    "current_head": "066c16c87b80fda493e3c312a312a3ae0c9b5d30",
+    "d17_friction_commit": "066c16c",
+    "d16_walk_forward_commit": "ca0077f",
+    "d15_regime_commit": "51486b3",
+    "d14_gate_design_commit": "ff6b779",
+    "d13_closeout_commit": "91b6931",
+    "d12_multimarket_commit": "cfe841d",
+    "d5_oos_pass_commit": "30f2190",
+    "d3_is_baseline_commit": "1bb70f9"
+  },
+  "trading_recommendation": "NONE. No deployment, no paper, no live. S26 is PARKED as a RESEARCH_CANDIDATE with documented unpark conditions."
+}
