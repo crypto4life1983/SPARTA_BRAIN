@@ -1,0 +1,208 @@
+{
+  "step": "S26-D7",
+  "title": "Monte Carlo / sequence-risk for frozen Trend + S/R + EMA/RSI trade results (IS, OOS, combined descriptive)",
+  "created_date": "2026-05-29",
+  "type": "Sequence-risk / fragility stress of ALREADY-RECORDED S26 trade results. NOT a new strategy test, NOT optimization, NOT a parameter change.",
+  "s26_context": {
+    "d1_spec_commit": "af643aef58c63dd3bd904b4fb44406f4a2a55c3e",
+    "d2_engine_commit": "1b1174e37c377b6331fa480a96115f286fb6a246",
+    "d3_is_baseline_commit": "1bb70f9c3961cf4435d7953a69e06989f11a5dbb (IS_CONTINUE, marginal)",
+    "d4_oos_protocol_commit": "a5d90c63aa11f5c275fec4cae993ba6ab4ccb85f",
+    "d5_oos_pass_commit": "30f2190b8ced3cb08c3758d7da7215a9c36feb68 (OOS PASS)",
+    "d6_entry_significance_commit": "cc73d6a580c6ef49bbc77fb6fcbe68a1065868b9 (ENTRY_EDGE_INCONCLUSIVE)"
+  },
+  "trade_sources": {
+    "method": "R-list REGENERATION via the frozen S26-D2 engine, run once per window on the same IS/OOS files. Not a new test, not optimization. Counts/totals asserted against committed D3/D5 reports.",
+    "is_files": [
+      "data_offline/nq_c0_ohlcv_1d_2013.csv",
+      "data_offline/nq_c0_ohlcv_1d_2014.csv",
+      "data_offline/nq_c0_ohlcv_1d_2015.csv",
+      "data_offline/nq_c0_ohlcv_1d_2016.csv",
+      "data_offline/nq_c0_ohlcv_1d_2017.csv",
+      "data_offline/nq_c0_ohlcv_1d_2018.csv",
+      "data_offline/nq_c0_ohlcv_1d_2019.csv",
+      "data_offline/nq_c0_ohlcv_1d_2020.csv",
+      "data_offline/nq_c0_ohlcv_1d_2021.csv",
+      "data_offline/nq_c0_ohlcv_1d_2022.csv"
+    ],
+    "oos_files": [
+      "data_offline/nq_c0_ohlcv_1d_2023.csv",
+      "data_offline/nq_c0_ohlcv_1d_2024.csv",
+      "data_offline/nq_c0_ohlcv_1d_2025.csv"
+    ],
+    "combined": "IS (2013-2022) then OOS (2023-2025), descriptive only - NOT additional OOS proof."
+  },
+  "r_list_summary": {
+    "IS_2013_2022": {
+      "count": 117,
+      "total_r": 7.6536
+    },
+    "OOS_2023_2025": {
+      "count": 32,
+      "total_r": 7.999
+    },
+    "COMBINED_2013_2025_descriptive": {
+      "count": 149,
+      "total_r": 15.6526
+    }
+  },
+  "trade_order_shuffle_mc": {
+    "IS_2013_2022": {
+      "realized_max_dd": 10.5943,
+      "realized_longest_losing_streak": 6,
+      "shuffled_median_max_dd": 7.9879,
+      "shuffled_p75_max_dd": 9.7022,
+      "shuffled_p90_max_dd": 11.5679,
+      "shuffled_p95_max_dd": 12.6463,
+      "shuffled_p99_max_dd": 15.0067,
+      "realized_max_dd_percentile": 83.67,
+      "prob_shuffled_mdd_ge_realized": 0.1633,
+      "shuffled_median_longest_losing_streak": 8,
+      "shuffled_p95_longest_losing_streak": 12,
+      "worst_5_window": -3.9537,
+      "worst_10_window": -4.9863,
+      "n_iter": 10000,
+      "seed": 2671
+    },
+    "OOS_2023_2025": {
+      "realized_max_dd": 2.1827,
+      "realized_longest_losing_streak": 4,
+      "shuffled_median_max_dd": 3.5366,
+      "shuffled_p75_max_dd": 4.3465,
+      "shuffled_p90_max_dd": 5.2123,
+      "shuffled_p95_max_dd": 5.7786,
+      "shuffled_p99_max_dd": 6.8776,
+      "realized_max_dd_percentile": 5.21,
+      "prob_shuffled_mdd_ge_realized": 0.9479,
+      "shuffled_median_longest_losing_streak": 4,
+      "shuffled_p95_longest_losing_streak": 6,
+      "worst_5_window": -2.0643,
+      "worst_10_window": -1.476,
+      "n_iter": 10000,
+      "seed": 2672
+    },
+    "COMBINED_2013_2025_descriptive": {
+      "realized_max_dd": 10.5943,
+      "realized_longest_losing_streak": 6,
+      "shuffled_median_max_dd": 8.0319,
+      "shuffled_p75_max_dd": 9.684,
+      "shuffled_p90_max_dd": 11.5263,
+      "shuffled_p95_max_dd": 12.8311,
+      "shuffled_p99_max_dd": 15.4947,
+      "realized_max_dd_percentile": 84.0,
+      "prob_shuffled_mdd_ge_realized": 0.16,
+      "shuffled_median_longest_losing_streak": 8,
+      "shuffled_p95_longest_losing_streak": 12,
+      "worst_5_window": -3.9537,
+      "worst_10_window": -4.9863,
+      "n_iter": 10000,
+      "seed": 2673
+    }
+  },
+  "bootstrap_resample_mc": {
+    "IS_2013_2022": {
+      "prob_total_r_le_0": 0.2389,
+      "median_total_r": 7.4197,
+      "p05_total_r": -9.7706,
+      "p95_total_r": 25.0847,
+      "median_max_dd": 8.2624,
+      "p95_max_dd": 16.7574,
+      "prob_max_dd_gt_is_realized": 0.2772,
+      "prob_max_dd_gt_1p5x_is_realized": 0.0624,
+      "n_iter": 10000,
+      "seed": 3171
+    },
+    "OOS_2023_2025": {
+      "prob_total_r_le_0": 0.1025,
+      "median_total_r": 7.9231,
+      "p05_total_r": -2.3159,
+      "p95_total_r": 18.6012,
+      "median_max_dd": 3.5933,
+      "p95_max_dd": 7.4198,
+      "prob_max_dd_gt_is_realized": 0.0052,
+      "prob_max_dd_gt_1p5x_is_realized": 0.0,
+      "n_iter": 10000,
+      "seed": 3172
+    },
+    "COMBINED_2013_2025_descriptive": {
+      "prob_total_r_le_0": 0.102,
+      "median_total_r": 15.3216,
+      "p05_total_r": -4.4899,
+      "p95_total_r": 36.2968,
+      "median_max_dd": 8.2682,
+      "p95_max_dd": 15.8477,
+      "prob_max_dd_gt_is_realized": 0.2648,
+      "prob_max_dd_gt_1p5x_is_realized": 0.0492,
+      "n_iter": 10000,
+      "seed": 3173
+    }
+  },
+  "winner_dependence": {
+    "IS_2013_2022": {
+      "total_r": 7.6536,
+      "best_trade": 2.0,
+      "best_trade_share_of_net": 0.2613,
+      "top3_share_of_net": 0.7839,
+      "total_without_best": 5.6536,
+      "total_without_top3": 1.6536,
+      "positive_without_best": true,
+      "positive_without_top3": true
+    },
+    "OOS_2023_2025": {
+      "total_r": 7.999,
+      "best_trade": 2.0,
+      "best_trade_share_of_net": 0.25,
+      "top3_share_of_net": 0.7501,
+      "total_without_best": 5.999,
+      "total_without_top3": 1.999,
+      "positive_without_best": true,
+      "positive_without_top3": true
+    },
+    "COMBINED_2013_2025_descriptive": {
+      "total_r": 15.6526,
+      "best_trade": 2.0,
+      "best_trade_share_of_net": 0.1278,
+      "top3_share_of_net": 0.3833,
+      "total_without_best": 13.6526,
+      "total_without_top3": 9.6526,
+      "positive_without_best": true,
+      "positive_without_top3": true
+    }
+  },
+  "loss_cluster_pain": {
+    "IS_2013_2022": {
+      "longest_losing_streak": 6,
+      "worst_3_window": -2.5165,
+      "worst_5_window": -3.9537,
+      "worst_10_window": -4.9863,
+      "realized_max_dd": 10.5943
+    },
+    "OOS_2023_2025": {
+      "longest_losing_streak": 4,
+      "worst_3_window": -1.9684,
+      "worst_5_window": -2.0643,
+      "worst_10_window": -1.476,
+      "realized_max_dd": 2.1827
+    },
+    "COMBINED_2013_2025_descriptive": {
+      "longest_losing_streak": 6,
+      "worst_3_window": -2.5165,
+      "worst_5_window": -3.9537,
+      "worst_10_window": -4.9863,
+      "realized_max_dd": 10.5943
+    }
+  },
+  "fragile_flags_is": [],
+  "fragile_flags_oos": [],
+  "oos_small_sample": true,
+  "verdict": "SEQUENCE_RISK_INCONCLUSIVE",
+  "conservative_interpretation": [
+    "OOS sample is small (32 trades); sequence-risk metrics on it are noisy and must not be over-read.",
+    "OOS PASS (D5) does not erase bootstrap fragility; a high P(total R<=0) would temper the PASS.",
+    "Low winner-dependence + acceptable bootstrap risk supports continuing validation, not deployment.",
+    "This is a fragility test of recorded results, not a trading or paper/live recommendation."
+  ],
+  "recommendation": "If ACCEPTABLE: continue to S26-D8 regime breakdown. If INCONCLUSIVE: continue cautiously or widen evidence (e.g. more OOS as it accrues). If FRAGILE: do not promote; consider parking or a new branch.",
+  "no_trading_recommendation": true,
+  "no_paper_or_live_promotion": true
+}
