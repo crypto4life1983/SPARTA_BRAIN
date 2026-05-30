@@ -1,0 +1,170 @@
+{
+  "step": "Crypto-D7",
+  "title": "Crypto-D7 -- CODR-1 closeout + next-hypothesis selection memo (memo only)",
+  "created": "2026-05-30",
+  "kind": "closeout_and_idea_selection_memo",
+  "memo_only": true,
+  "network": false,
+  "data_fetch": false,
+  "exchange_api": false,
+  "broker": false,
+  "paper_or_live": false,
+  "backtest": false,
+  "strategy_test": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_change": false,
+  "oos_used": false,
+  "rows_2024_2025_2026_used": false,
+  "modified_crypto_data_file": false,
+  "staged": false,
+  "committed": false,
+  "0_preflight": {
+    "head_at_memo": "27b06206c779c0980badd17e41771a67f51ddcb4",
+    "head_short": "27b0620",
+    "head_is_d6_or_descendant": true,
+    "factory_tree_clean": true,
+    "nothing_staged": true,
+    "active_crypto_strategy": "NONE (CODR-1 v1 PARKED after IS_FAIL)",
+    "s30_untouched": true,
+    "jarvis_templates_base_hydra_untouched": true
+  },
+  "1_codr1_chain_summary": {
+    "crypto_d4_spec": {"commit": "5552356", "what": "Froze CODR-1 v1 (Crypto Oversold-Dip Reversion in Uptrend): long-only spot; close_t>SMA200 AND ret_t<=-7% -> enter open_{t+1}; one position/symbol, no pyramiding; -10% close stop (precedence) else time stop at close of 5th held bar; no profit target. Pre-registered, no parameter freedom."},
+    "crypto_d5_engine_tests": {"commit": "4614190", "what": "Implemented the frozen engine (engine/crypto_codr1.py, stdlib-only, offline, GROSS returns, friction as separate layer) + tests. No run."},
+    "crypto_d6_is_baseline": {"commit": "27b0620", "what": "Ran CODR-1 IS-only on frozen BTC/ETH/SOL spot daily (BTC/ETH 2020-2023, SOL partial 2020-08-11..2023). SMA200 warmed inside IS; 0 rows from 2024/2025/2026 used. Verdict IS_FAIL."}
+  },
+  "2_codr1_final_verdict": {
+    "status": "PARKED after IS_FAIL",
+    "oos_run": false,
+    "crypto_d7_oos_authorized": false,
+    "note": "Per the factory ladder, IS_FAIL stops the branch BEFORE any OOS pre-registration. The D2 future-sequence had labeled D7 'OOS protocol pre-registration', but CODR-1 never earned OOS, so D7 is repurposed as a closeout + idea-selection memo. OOS 2024-2025 and 2026 remain SEALED and untouched."
+  },
+  "3_main_failure_reasons": {
+    "btc_primary_hard_fail": "BTC (the designated primary) lost money after costs: 9 trades, net@0.30% total -4.93% (avg -0.55%/trade), gross PF 0.911, net PF 0.81. A strategy whose primary symbol is unprofitable cannot advance.",
+    "btc_trade_count_too_low": "BTC produced only 9 IS trades vs the >=30/symbol gate -- far too thin for any statistical claim; ETH (27) was also below 30.",
+    "net_pf_below_threshold": "Net profit factor after the pre-registered 0.30% round-trip friction was below 1.3 on BTC (0.81), ETH (1.21) and the combined pool (1.28); only SOL cleared 1.3 (1.45).",
+    "top3_gate_failed_under_stress": "The HARD top-3-winner-removal gate failed on all three symbols at net@0.30% (BTC -25.12%, ETH -35.05%, SOL -2.86% ex-top-3). The combined pool passed at net@0.30% (+6.74%) but FAILED under +50% friction stress (net@0.45% ex-top-3 = -2.71%).",
+    "edge_concentrated_in_2020_2021_bull": "The close>SMA200 trend filter suppresses entries in the 2022 bear; combined trades collapse to 2 (2022) and 5 (2023). Net P&L is overwhelmingly 2020-2021. The strategy is effectively a bull-only dip-buyer -- exactly the regime fragility the ladder is built to catch.",
+    "combined_pass_was_pooling_dependent": "The only gates the combined pool cleared (top-3 at base friction) were cleared by pooling 66 trades across three coins, which dilutes any single coin's winner concentration. It does not represent per-symbol robust evidence and cannot rescue a primary-symbol failure."
+  },
+  "4_what_this_teaches": {
+    "simple_oversold_dip_not_enough": "A single -7% down-day inside an uptrend is too weak/too rare a causal signal on daily spot: it neither fires often enough (BTC 9 trades) nor produces an edge robust to friction and winner-removal.",
+    "btc_primary_must_carry_evidence": "Multi-asset corroboration is a SECONDARY check, not a substitute. If BTC (the deepest, most-liquid market and designated primary) cannot carry its own positive, friction-surviving, winner-robust evidence, the hypothesis fails regardless of ETH/SOL.",
+    "pooling_cannot_hide_weak_symbol_level_evidence": "Pooling improves apparent trade count and dilutes winner concentration, but it masks per-symbol fragility. Future gates must be read per-symbol first, pooled second.",
+    "top_winner_gate_remains_crucial": "The top-3-winner-removal gate -- the gate that parked every futures branch -- once again exposed concentration that headline returns hid. It stays a hard, non-negotiable gate.",
+    "crypto_needs_more_signals_or_a_different_mechanism": "Daily spot BTC simply does not generate enough discrete shock events to power a thin event-driven strategy to >=30 trades with a friction-robust edge. The next hypothesis must EITHER fire materially more often (higher signal density / more frequent timeframe) OR rest on a stronger, more specific causal mechanism than 'a one-day dip in an uptrend.'"
+  },
+  "5_data_readiness_remains_useful": {
+    "frozen_spot_data_still_valid": "The immutable, SHA256-pinned, 2026-sealed BTC/ETH/SOL spot daily USDT snapshot (Crypto-D3b 5b3d94c, ratified D3c fe5594f; BTC d87742b8, ETH 4a4d7b08, SOL bd8b28f1) remains QA-CLEAN and ready to back the NEXT separately-authorized crypto hypothesis. CODR-1's failure is a strategy failure, not a data failure.",
+    "perps_blocked": "Perps remain BLOCKED until funding-rate data is sourced and funding rules are frozen (Crypto-D1 4/9; D2 item #4 funding work is know-how, not authorization).",
+    "advisable_before_next_edge_claim": "Quote reconciliation (USDT vs USD/USDC) and an independent second-source cross-check (e.g. Kraken/Coinbase) remain advisable before any future edge claim, per D3b."
+  },
+  "6_next_hypothesis_options": [
+    {
+      "id": "A",
+      "name": "Crypto volatility compression -> expansion breakout",
+      "prior_factory_view": "D4 candidate #3, REJECTED as first pick (2-param entry adds parameter freedom).",
+      "why_it_may_work": "Low-volatility coils preceding range expansion are a documented behaviour; could fire in both bull and bear, unlike CODR-1's bull-only filter.",
+      "why_it_may_fail": "A compression->expansion entry needs at least a lookback window AND a threshold -> parameter freedom that fights the no-sweep discipline; expansion captures can be fat-tailed -> top-winner risk.",
+      "expected_trade_count": "moderate-low",
+      "top_winner_risk": "moderate-high (breakout winners can be large)",
+      "friction_sensitivity": "moderate",
+      "btc_eth_sol_testability": "OK (daily spot sufficient)",
+      "needs_new_data": false,
+      "too_close_to_codr1_or_rejected": "Novel vs CODR-1, but its parameter-freedom problem is exactly why D4 rejected it first."
+    },
+    {
+      "id": "B",
+      "name": "Cross-asset momentum leadership (BTC leads ETH/SOL)",
+      "prior_factory_view": "D4 candidate #4, REJECTED (weak paradox -- corroboration baked into the signal).",
+      "why_it_may_work": "BTC moves often lead alt moves; a lead-lag signal could be a genuine structural effect.",
+      "why_it_may_fail": "Baking BTC->alt corroboration INTO the entry undercuts the independent multi-asset robustness gate (the signal and the corroboration are the same thing). Also leaves BTC itself without a primary entry -- the opposite of the D6 lesson that BTC must carry evidence.",
+      "expected_trade_count": "moderate",
+      "top_winner_risk": "moderate",
+      "friction_sensitivity": "moderate",
+      "btc_eth_sol_testability": "weak paradox -- corroboration and signal collapse together",
+      "needs_new_data": false,
+      "too_close_to_codr1_or_rejected": "Directly conflicts with the D6 lesson; rejected reasoning still holds."
+    },
+    {
+      "id": "C",
+      "name": "Trend continuation after high-volume breakout (with explicit top-winner safeguards)",
+      "prior_factory_view": "D4 candidate #1 (trend/Donchian) family + old ema_pullback (D2 item #2), which is the S26/S27 trend-continuation family ALREADY PARKED in futures.",
+      "why_it_may_work": "Volume-confirmed breakouts can ride strong crypto trends; the volume filter is a stronger causal hook than a bare price breakout.",
+      "why_it_may_fail": "Trend continuation is the canonical top-winner-dependent structure -- a few fat-tail winners carry the net. 'Safeguards' (capped horizon / winner trimming) blunt the very upside the strategy relies on. This is the exact failure mode (top-winner concentration) that parked every futures branch.",
+      "expected_trade_count": "low",
+      "top_winner_risk": "HIGH (the universal killer)",
+      "friction_sensitivity": "moderate",
+      "btc_eth_sol_testability": "OK",
+      "needs_new_data": false,
+      "too_close_to_codr1_or_rejected": "Too close to the already-PARKED trend-continuation family; structurally most likely to fail the top-3 gate."
+    },
+    {
+      "id": "D",
+      "name": "Mean reversion after an EXTREME multi-day liquidation candle, with stricter BTC confirmation",
+      "prior_factory_view": "A refined cousin of CODR-1 -- a STRONGER causal trigger (a forced-liquidation cascade, not a single -7% day) and an explicit BTC-carry requirement responding to the D6 lesson.",
+      "why_it_may_work": "Forced-liquidation flushes are a more specific, higher-conviction overreaction than a routine dip; requiring BTC to confirm forces the primary symbol to carry evidence directly (fixes a D6 root cause).",
+      "why_it_may_fail": "Extreme liquidation events are RARER than -7% days. CODR-1 already starved BTC at 9 trades; a stricter/rarer trigger would likely produce even FEWER BTC trades and fail the >=30 gate harder. The trade-count math is the central risk.",
+      "expected_trade_count": "LOW to very low (the binding risk)",
+      "top_winner_risk": "lower (fixed-horizon reversion caps winners, like CODR-1)",
+      "friction_sensitivity": "moderate-high (testable)",
+      "btc_eth_sol_testability": "good, and BTC-carry is built in",
+      "needs_new_data": "no for daily spot; BUT may need intraday/4H or a liquidation/volume proxy to get enough events -- which IS new data",
+      "too_close_to_codr1_or_rejected": "Adjacent to CODR-1 but mechanistically distinct; the open question is whether it can ever clear the trade-count gate on daily BTC."
+    },
+    {
+      "id": "E",
+      "name": "Calendar / weekend / day-of-week seasonality (daily spot)",
+      "prior_factory_view": "D4 candidate #5, REJECTED as first pick (likely friction-dominated FAIL).",
+      "why_it_may_work": "High signal density (fires on a fixed schedule) -> easily clears the >=30-trade gate; trivial, no parameter freedom.",
+      "why_it_may_fail": "Per-trade edge is tiny, so the ~0.30% round-trip friction almost certainly dominates -> friction-dominated FAIL, and 24/7 crypto has weakened any classic weekend effect over 2020-2025.",
+      "expected_trade_count": "HIGH",
+      "top_winner_risk": "LOW",
+      "friction_sensitivity": "VERY HIGH (the likely killer)",
+      "btc_eth_sol_testability": "OK",
+      "needs_new_data": false,
+      "too_close_to_codr1_or_rejected": "Novel vs CODR-1, but its friction-domination problem is why D4 rejected it."
+    },
+    {
+      "id": "F",
+      "name": "Regime / no-trade overlay only",
+      "prior_factory_view": "D4 candidate #6 EXCLUDED (an overlay is not a strategy) + old regime-HMM study (D2 item #3: holdout never closed, SOL cross-coin transfer FAILED).",
+      "why_it_may_work": "A robust regime filter could improve a FUTURE entry strategy (e.g. avoid the 2022 bear that hurt CODR-1).",
+      "why_it_may_fail": "An overlay has no entry of its own -- it cannot be validated as a standalone strategy through the ladder. The old HMM evidence is historical-only and unproven (holdout open, SOL transfer failed).",
+      "expected_trade_count": "N/A (no standalone entry)",
+      "top_winner_risk": "N/A",
+      "friction_sensitivity": "N/A",
+      "btc_eth_sol_testability": "N/A as a standalone strategy",
+      "needs_new_data": false,
+      "too_close_to_codr1_or_rejected": "Same exclusion as D4/S30-D1: an overlay is not a strategy; only usable as a future add-on to a validated entry."
+    }
+  ],
+  "7_recommendation": {
+    "verdict": "NO_STRATEGY_SELECTED_NEED_MORE_RESEARCH",
+    "rationale": "Every option carries a known structural defect that the factory has already reasoned through: A (parameter freedom), B (conflicts with the BTC-must-carry lesson), C (top-winner-dependent trend family, already parked), E (friction-dominated), F (an overlay is not a strategy). The only option aligned with the D6 lessons -- D (liquidation-cascade reversion with BTC confirmation) -- is throttled by the SAME binding constraint that just failed CODR-1: insufficient discrete signal events on daily BTC to reach the >=30-trade gate. Selecting another thin daily-spot event strategy now would most likely reproduce CODR-1's BTC trade-count failure.",
+    "what_crypto_d8_should_be": "A READ-ONLY signal-density / statistical-power audit (memo only -- counting candidate events, NOT backtesting) on the frozen IS data: for each surviving family (especially D, and as a sanity floor E), count how many candidate entry events it would generate on BTC/ETH/SOL in 2020-2023 IS, and determine whether daily spot can EVER produce >=30 BTC events with a friction-survivable per-event edge. If daily spot is structurally too sparse for event-driven mechanisms, D8 should also scope whether a more frequent timeframe (4H spot -- deferred in D2) or a second data source is the real prerequisite. Only after that audit should a Crypto-D9 spec freeze a single hypothesis.",
+    "conditional_runner_up": "If a single hypothesis MUST be picked, option D (extreme-liquidation reversion with stricter BTC confirmation) is the least-bad single pick because it both strengthens the causal mechanism and forces BTC to carry evidence -- but it should NOT be frozen until the D8 signal-density audit confirms it can clear the BTC trade-count gate. Do not freeze a spec in this memo.",
+    "no_full_spec_written": true
+  },
+  "8_forbidden_actions": [
+    "no_oos",
+    "no_strategy_testing",
+    "no_backtest",
+    "no_exchange_api_execution",
+    "no_broker",
+    "no_paper_or_live",
+    "no_perps_until_funding_rules_frozen",
+    "no_parameter_tweaking_of_codr1",
+    "no_data_fetch",
+    "no_network",
+    "no_optimization",
+    "no_modification_of_frozen_data",
+    "do_not_touch_s30_or_futures",
+    "jarvis_templates_base_hydra_untouched",
+    "no_staging",
+    "no_commit"
+  ],
+  "9_final_line": "Crypto-D7 is a closeout and idea-selection memo only; no crypto strategy is validated, paper-ready, live-ready, or authorized for execution.",
+  "trading_recommendation": "NONE. Closeout + idea-selection memo only. CODR-1 v1 is PARKED after IS_FAIL (no OOS run, no D7 OOS authorized). No next hypothesis is frozen: recommendation is NO_STRATEGY_SELECTED_NEED_MORE_RESEARCH, with Crypto-D8 proposed as a read-only signal-density/power audit. Frozen BTC/ETH/SOL spot data stays valid for future research; perps remain blocked; OOS 2024-2025 and 2026 stay sealed; crypto stays a separate research lane; S30 stays PARKED after IS_FAIL and the futures branches are untouched."
+}
