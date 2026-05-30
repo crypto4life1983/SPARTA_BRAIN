@@ -1,0 +1,124 @@
+{
+  "title": "JARVIS Step 19 — UI Polish Plan Memo",
+  "generated_at": "2026-05-30T05:00:00",
+  "audited_commit": "496b0b8",
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "type": "plan_memo_only",
+  "read_only": true,
+  "conclusion": "PROCEED_TO_UI_POLISH",
+  "conclusion_detail": "The committed JARVIS console is functionally complete and read-only. The recommended Step 20 is a CSS/layout/label-only polish pass that improves grouping, label consistency, warning hierarchy, and Commander's Snapshot readability without changing the API shape, data flow, panel set, or capabilities. No execution, refresh, broker, trade, or file-mutation affordance may be added.",
+  "files_inspected": [
+    "templates/jarvis.html",
+    "docs/jarvis_system_map.json",
+    "docs/jarvis_docs_index/report.md",
+    "docs/jarvis_step_17_panel_consistency_audit/report.md",
+    "tests/test_jarvis_route.py"
+  ],
+  "current_ui_inventory": {
+    "layout": "Single <section class=\"jarvis-root\"> with a sticky header (.jv-head: title + live clock + READ-ONLY badge), a .jv-core orb/ring, then one .jv-grid that holds all panels, then a .jv-foot disclaimer.",
+    "grid_behavior": "grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)). Standard panels occupy one column; panels with .jv-wide span the full row (grid-column: 1 / -1). Reflows responsively from multi-column desktop to single-column mobile.",
+    "panel_count": 22,
+    "wide_panels": ["pSnapshot", "pHygiene", "pMissions", "pPromptLib", "pSystemMap", "pTradingDetail"],
+    "panels_dom_order": [
+      {"id": "pSnapshot", "title": "Commander's Snapshot", "wide": true, "tag": null, "note": "uses jv-snap green/yellow/red verdict styling"},
+      {"id": "pCore", "title": "System Core", "wide": false, "tag": null},
+      {"id": "pBrains", "title": "AI Brains", "wide": false, "tag": null},
+      {"id": "pTrading", "title": "Trading Bridge", "wide": false, "tag": "READ-ONLY"},
+      {"id": "pContent", "title": "Content Engine", "wide": false, "tag": null},
+      {"id": "pMoney", "title": "Money Engine", "wide": false, "tag": null},
+      {"id": "pMoving", "title": "Moving Company", "wide": false, "tag": null},
+      {"id": "pMission", "title": "Daily Mission", "wide": false, "tag": null},
+      {"id": "pSafety", "title": "Safety Gates", "wide": false, "tag": null, "note": "has static fallback gates rendered even before JS runs"},
+      {"id": "pGit", "title": "Git State", "wide": false, "tag": null},
+      {"id": "pOpSafety", "title": "Operator Safety", "wide": false, "tag": null},
+      {"id": "pProject", "title": "Project Files", "wide": false, "tag": null},
+      {"id": "pBrainMem", "title": "Brain Memory", "wide": false, "tag": null},
+      {"id": "pNext", "title": "Recommended Next Actions", "wide": false, "tag": null},
+      {"id": "pHealth", "title": "Health Report", "wide": false, "tag": null},
+      {"id": "pRouteSmoke", "title": "Route Smoke", "wide": false, "tag": "CACHED"},
+      {"id": "pHygiene", "title": "File Hygiene", "wide": true, "tag": "CACHED"},
+      {"id": "pMissions", "title": "Mission Board", "wide": true, "tag": null},
+      {"id": "pPromptLib", "title": "Prompt Library", "wide": true, "tag": "DISPLAY ONLY"},
+      {"id": "pSystemMap", "title": "System Map", "wide": true, "tag": "DISPLAY ONLY"},
+      {"id": "pTradingDetail", "title": "Trading Research Detail", "wide": true, "tag": null},
+      {"id": "pCacheFreshness", "title": "Cache Freshness", "wide": false, "tag": "DISPLAY ONLY"}
+    ],
+    "implicit_groups": {
+      "command": ["pSnapshot"],
+      "system": ["pCore", "pBrains", "pGit", "pProject", "pBrainMem"],
+      "engines": ["pTrading", "pContent", "pMoney", "pMoving"],
+      "mission_and_next": ["pMission", "pNext"],
+      "safety": ["pSafety", "pOpSafety"],
+      "cached_reports": ["pHealth", "pRouteSmoke", "pHygiene", "pCacheFreshness"],
+      "operator_docs": ["pMissions", "pPromptLib", "pSystemMap"],
+      "research": ["pTradingDetail"]
+    }
+  },
+  "safe_polish_opportunities": [
+    {"id": "P1-visual-grouping", "summary": "Introduce lightweight, display-only section dividers/labels (e.g. Command / System / Engines / Safety / Cached Reports / Operator Docs / Research) so related panels read as groups instead of an undifferentiated grid. Pure markup + CSS, no data change.", "risk": "low"},
+    {"id": "P2-tag-legend-consistency", "summary": "Unify the panel tags (READ-ONLY / CACHED / DISPLAY ONLY) into a consistent, color-coded chip vocabulary plus a one-line legend, so the read-only/cached/display semantics are obvious at a glance. Label/CSS only.", "risk": "low"},
+    {"id": "P3-compact-status-badges", "summary": "Tighten the per-row LED + value badges (consistent width, monospace value, aligned label column) to reduce ragged left edges and make state scanning faster.", "risk": "low"},
+    {"id": "P4-warning-hierarchy", "summary": "Give warnings a clearer visual rank (e.g. a subtle warn-tinted block with an icon) and de-emphasize informational/conservative-by-design notes (commander yellow, money-spartan 404) so genuine issues stand out.", "risk": "low"},
+    {"id": "P5-snapshot-readability", "summary": "Make Commander's Snapshot easier to read: larger verdict chip, a compact one-line summary row, and the contributing signals (safety/health/route/cache/git) as aligned mini-badges rather than a text list.", "risk": "low"},
+    {"id": "P6-reduce-wall-of-text", "summary": "In the wide panels (File Hygiene, System Map, Trading Research Detail), cap long lists with a display-only truncation/'+N more' style and tighter line spacing, so dense JSON-backed content is skimmable. No data is dropped from the API; truncation is presentation-only.", "risk": "low"},
+    {"id": "P7-spacing-and-mobile", "summary": "Refine desktop/mobile spacing: consistent panel padding, gap rhythm, and a min panel width tuned so single-column mobile and multi-column desktop both breathe. Lower the narrow Cache Freshness panel's visual orphaning at the end of the wide-panel run by adjusting placement/width via CSS only.", "risk": "low"},
+    {"id": "P8-reduced-motion", "summary": "Audit and, if needed, extend the existing @media (prefers-reduced-motion: reduce) coverage so all new polish animations (if any) are also disabled for that preference.", "risk": "low"}
+  ],
+  "explicit_non_goals": [
+    "No <button>, <form>, onclick, or any interactive control.",
+    "No POST routes, no method=\"post\", no refresh endpoint or refresh button.",
+    "No script execution from the browser.",
+    "No broker control, no paper/live trade controls, no order path.",
+    "No file cleanup / stage / delete / move / write controls.",
+    "No secrets or environment dumps.",
+    "No new capability of any kind — polish is visual only."
+  ],
+  "proposed_step_20_scope": {
+    "allowed": [
+      "Edit templates/jarvis.html CSS (the inline <style> scoped under .jarvis-root) for grouping, spacing, badges, warning hierarchy, and snapshot layout.",
+      "Edit templates/jarvis.html markup to add display-only group headers/labels and to restructure existing rendered content for readability.",
+      "Adjust the existing render JS only to reshape already-fetched data into clearer DOM (e.g. grouping, truncation display) — still a single GET fetch to /api/jarvis/status, no new requests."
+    ],
+    "not_allowed": [
+      "No change to the /api/jarvis/status response shape or keys.",
+      "No new scripts, no changes to tools/jarvis_*.py.",
+      "No new route or change to route behavior (GET-only, read-only preserved).",
+      "No change to data flow: still one GET fetch polled on a timer."
+    ],
+    "api_shape_change": "none_expected"
+  },
+  "risk_controls": {
+    "tests_to_rerun": [
+      "python -m json.tool docs/jarvis_step_19_ui_polish_plan/report.json",
+      "python -m py_compile app.py",
+      "python -m py_compile tools/jarvis_health_report.py",
+      "python -m py_compile tools/jarvis_route_smoke_report.py",
+      "python -m py_compile tools/jarvis_file_hygiene_report.py",
+      "pytest tests/test_jarvis_route.py --rootdir=tests -q  (expect 108 passed)"
+    ],
+    "served_html_scan": [
+      "Confirm served /jarvis HTML contains no <button>.",
+      "Confirm no <form>.",
+      "Confirm no onclick.",
+      "Confirm no method=\"post\".",
+      "Confirm no /api/jarvis/refresh or any refresh endpoint reference."
+    ],
+    "endpoint_guarantee": "No new endpoint; /jarvis stays GET-only HTML and /api/jarvis/status stays GET-only JSON, every section fail-closed via _jarvis_safe.",
+    "regression_followup": "After Step 20 ships, re-run the live regression smoke memo (JARVIS-LIVE-REGRESSION-SMOKE recurring) to confirm all panels still render and no execution affordance was introduced."
+  },
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_step_19_ui_polish_plan/report.json", "result": "JSON_OK"},
+    {"cmd": "python -m py_compile app.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_health_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_route_smoke_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_file_hygiene_report.py", "result": "PASS"},
+    {"cmd": "pytest tests/test_jarvis_route.py --rootdir=tests -q", "result": "108 passed"}
+  ],
+  "non_blocking_warnings": [
+    "Large untracked backlog keeps commander_snapshot yellow (conservative by design, not an error).",
+    "/money-spartan may report a non-required 404 in the route smoke report.",
+    "A corrupted 'hydra ' directory can break bare pytest collection, so the scoped pytest command (--rootdir=tests) is used."
+  ],
+  "recommended_decision": "PROCEED_TO_UI_POLISH"
+}
