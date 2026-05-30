@@ -1,0 +1,105 @@
+{
+  "title": "JARVIS Step 22 — Operator Guide / Runbook",
+  "generated_at": "2026-05-30T06:00:00",
+  "type": "documentation_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_20_purpose": "Safe UI-only polish pass (templates/jarvis.html only): section dividers, posture legend, colour-coded tags, prominent Commander's Snapshot, regrouped Cache Freshness, roomier spacing. API shape unchanged.",
+    "step_21_commit": "4f55aae",
+    "step_21_purpose": "Post-polish live smoke memo: confirmed the polished UI is live, all key panels render, API shape unchanged at 24 top-level keys, no execution/refresh controls. Conclusion JARVIS_POST_POLISH_SMOKE_PASS."
+  },
+  "purpose": "An operator-facing guide/runbook for the JARVIS Command Center: what the page shows, how to read each panel and section, the read-only safety posture, and what operators should and should not do. Documentation only — it adds no capability, control, or API change.",
+  "relation_to_steps_20_21": "Step 20 polished the UI; Step 21 proved the polished UI is live and safe. Step 22 documents how to operate and interpret that polished, validated surface. No code, UI, or API is touched.",
+  "what_is_jarvis_page": {
+    "route": "GET /jarvis",
+    "description": "A cinematic, read-only dashboard (single HTML page) that renders the aggregated SPARTA_BRAIN state. It performs one GET fetch to /api/jarvis/status and re-polls on a 15s timer. It has no buttons, forms, onclick handlers, POST actions, or refresh endpoint. The browser surface never mutates anything."
+  },
+  "what_is_status_api": {
+    "route": "GET /api/jarvis/status",
+    "description": "A GET-only JSON aggregate with 24 top-level keys: 22 read-only sections plus the two meta keys online and read_only. Every section is wrapped fail-closed by _jarvis_safe, so one failing section returns an error dict for that section but still yields HTTP 200. The endpoint reads state; it never executes scripts, runs probes, refreshes caches, or controls a broker."
+  },
+  "field_meaning": {
+    "read_only": "true means the JARVIS surface is in its guaranteed observe-only posture: no execution, no refresh control, no broker/paper/live path, no file mutation from the web. read_only must always be true.",
+    "online": "true means the JARVIS aggregator responded and the page received its status payload. It is a liveness signal for the dashboard itself, not a claim that every downstream subsystem is green.",
+    "commander_snapshot_overall_state_yellow": "yellow is the conservative-by-design verdict, most commonly driven by the large untracked-file backlog and a dirty working tree. It means 'needs attention / not fully green' — it is NOT an error and NOT an approval to act. Green requires a clean posture; the required safety checks (safety locked, health pass, route smoke pass, caches fresh) can all be green while overall stays yellow purely due to the dirty/untracked working tree.",
+    "trading_detail": {
+      "read_only": "true — the trading surface is observe-only.",
+      "paper_ready": "false — no paper-trading path is wired or armed.",
+      "live_ready": "false — no live-trading path is wired or armed.",
+      "broker_control": "false — JARVIS holds no broker control and exposes no order path. Research is candidate/visibility only."
+    }
+  },
+  "ui_sections": [
+    {"section": "Command Overview", "contains": ["pSnapshot"], "purpose": "Single-glance verdict: the Commander's Snapshot with the overall green/yellow/red state and contributing signals."},
+    {"section": "Core Systems", "contains": ["pCore", "pBrains", "pGit", "pProject", "pBrainMem"], "purpose": "Server, AI brains, git repository state, project artifacts, and brain-memory tree."},
+    {"section": "Operations", "contains": ["pTrading", "pContent", "pMoney", "pMoving", "pMission", "pNext"], "purpose": "Read-only engine status (trading bridge, content, money, moving) plus the daily mission and recommended next actions."},
+    {"section": "Safety & Reliability", "contains": ["pSafety", "pOpSafety", "pHealth", "pRouteSmoke", "pCacheFreshness", "pHygiene"], "purpose": "Safety gates, operator posture flags, and the cached health / route smoke / cache freshness / file hygiene reports."},
+    {"section": "Research Visibility", "contains": ["pTradingDetail"], "purpose": "Read-only trading research detail — no broker, no paper, no live."},
+    {"section": "Documentation & Maps", "contains": ["pMissions", "pPromptLib", "pSystemMap"], "purpose": "Tracked, display-only mission board, prompt library, and system wiring map."}
+  ],
+  "key_panels": [
+    {"id": "pSnapshot", "title": "Commander's Snapshot", "reads": "commander_snapshot", "interpretation": "Top-level verdict (green/yellow/red) plus safety, health, route smoke, trading posture, cache, mission/prompt counts, staged/untracked counts, and warnings. Yellow = needs attention, not approval."},
+    {"id": "pCore", "title": "System Core", "reads": "system_core", "interpretation": "Server running state, brain state, server time, and library counts."},
+    {"id": "pBrains", "title": "AI Brains", "reads": "ai_brains", "interpretation": "Per-brain state (Claude/Codex/Gemini/Ollama). Warn/idle states are informational."},
+    {"id": "pTrading", "title": "Trading Bridge", "reads": "trading_bridge", "interpretation": "READ-ONLY / LOCKED posture, sealed lifecycle count, and per-lifecycle verdicts. No order path."},
+    {"id": "pHealth", "title": "Health Report", "reads": "health_report", "interpretation": "CACHED offline compile/test health. Overall pass/fail plus py_compile and pytest results. 'No cached report' means the manual tool has not been run."},
+    {"id": "pRouteSmoke", "title": "Route Smoke", "reads": "route_smoke_report", "interpretation": "CACHED GET-only route check. Overall pass/fail and per-route status codes. /money-spartan may show a non-required 404."},
+    {"id": "pHygiene", "title": "File Hygiene", "reads": "file_hygiene_report", "interpretation": "CACHED git/untracked summary: untracked count, tracked-modified, staged count, top untracked dirs, and that cached reports stay gitignored. A non-zero staged count is worth a glance."},
+    {"id": "pMissions", "title": "Mission Board", "reads": "mission_board", "interpretation": "DISPLAY-ONLY tracked operator missions with status/priority. 'Safe next prompt' text is display only — nothing executes it."},
+    {"id": "pPromptLib", "title": "Prompt Library", "reads": "prompt_library", "interpretation": "DISPLAY-ONLY tracked prompts with category/risk/allowed flags. Prompt text is shown, never run, and there is no copy-and-run affordance."},
+    {"id": "pSystemMap", "title": "System Map", "reads": "system_map", "interpretation": "DISPLAY-ONLY wiring map: panels (id/api_key/kind), manual-only scripts, tracked data files, ignored runtime files, and posture flags (read-only true, browser execution disabled, broker control disabled, file mutation from web disabled)."},
+    {"id": "pTradingDetail", "title": "Trading Research Detail", "reads": "trading_detail", "interpretation": "READ-ONLY research detail: candidate status, read_only/paper_ready/live_ready/broker_control flags, S26 research state, and latest report cards. No broker/paper/live."},
+    {"id": "pCacheFreshness", "title": "Cache Freshness", "reads": "cache_freshness", "interpretation": "DISPLAY-ONLY cache metadata: overall fresh/stale/missing, per-cache age vs threshold, gitignored status, generated_at/modified_at. Reads metadata only; never runs the generator scripts and never refreshes a cache. Now grouped with Health Report and Route Smoke under Safety & Reliability."}
+  ],
+  "additional_panels_outside_the_twelve": [
+    {"id": "pContent", "title": "Content Engine", "reads": "content_engine"},
+    {"id": "pMoney", "title": "Money Engine", "reads": "money_engine"},
+    {"id": "pMoving", "title": "Moving Company", "reads": "moving_company"},
+    {"id": "pMission", "title": "Daily Mission", "reads": "daily_mission"},
+    {"id": "pSafety", "title": "Safety Gates", "reads": "safety_gates"},
+    {"id": "pGit", "title": "Git State", "reads": "git"},
+    {"id": "pOpSafety", "title": "Operator Safety", "reads": "safety"},
+    {"id": "pProject", "title": "Project Files", "reads": "project"},
+    {"id": "pBrainMem", "title": "Brain Memory", "reads": "brain_memory"},
+    {"id": "pNext", "title": "Recommended Next Actions", "reads": "recommended_next_actions"}
+  ],
+  "safety_rules": [
+    "JARVIS observes only — it is a read-only mirror of state.",
+    "JARVIS does not execute commands, scripts, prompts, or missions.",
+    "JARVIS does not refresh anything through UI controls; there is no refresh button or endpoint. Data updates only via the page's own GET poll.",
+    "JARVIS does not control broker, paper, or live trading, and exposes no order path.",
+    "Operators must treat yellow as 'needs attention / not fully green', NOT as approval to act.",
+    "Cached-report scripts (health / route smoke / file hygiene) are manual-only and are never run from the web."
+  ],
+  "operator_daily_checklist": [
+    "Open http://127.0.0.1:8765/jarvis and confirm the page loads (status orb ONLINE, not SIGNAL LOST).",
+    "Confirm Commander's Snapshot renders; note overall state (green/yellow/red) and read any warnings.",
+    "Confirm Safety Gates show Trading execution LOCKED, YouTube upload APPROVAL_REQUIRED, Live automation BLOCKED.",
+    "Confirm Operator Safety flags are all locked/true (read-only, no execution control, no broker control, no secret display, no force git).",
+    "Confirm Trading Research Detail shows read_only TRUE and paper_ready / live_ready / broker_control all FALSE.",
+    "Glance at Cache Freshness: overall fresh; if stale/missing, that only means a manual cached report is old or not generated — not a live failure.",
+    "Glance at File Hygiene staged count; a non-zero staged count is worth investigating before any commit work.",
+    "Optionally confirm GET /api/jarvis/status returns 200 with online=true, read_only=true, and 24 top-level keys."
+  ],
+  "failure_interpretation": [
+    {"symptom": "A panel is missing or stuck on its loading text", "meaning": "The page did not receive that section, or that section returned an error dict (fail-closed). The endpoint still returns 200. Reload the page; if it persists, inspect /api/jarvis/status for that section's error field.", "action": "Investigate the named section offline. Do not add any control to 'fix' it from the UI."},
+    {"symptom": "GET /jarvis or /api/jarvis/status returns non-200", "meaning": "The server is down or the route is broken.", "action": "Restart the server process offline (manual), then re-check. Do not expose a restart/refresh control in the UI."},
+    {"symptom": "online = false", "meaning": "The aggregator did not report itself online; the dashboard liveness signal failed.", "action": "Treat as degraded; investigate the server/aggregator offline."},
+    {"symptom": "read_only = false", "meaning": "CRITICAL — the read-only guarantee is broken. This must never happen for the JARVIS surface.", "action": "Stop. Treat as a serious safety regression, investigate immediately, and do not trust the surface until read_only is true again."},
+    {"symptom": "broker_control = true", "meaning": "CRITICAL — a broker control path is reported present. JARVIS must never hold broker control.", "action": "Stop. Treat as a serious safety regression; halt and investigate before any further use."},
+    {"symptom": "paper_ready or live_ready unexpectedly true", "meaning": "CRITICAL — a paper or live trading path is reported armed/ready. Both must stay false on the JARVIS surface.", "action": "Stop. Treat as a serious safety regression; halt and investigate before any further use."}
+  ],
+  "recommended_next_safe_improvements": [
+    "JARVIS-CACHE-FRESHNESS-AGE-BADGES — optional display-only age badges per cache row (no new controls).",
+    "JARVIS-DOCS-AUTO-CHECK-MEMO — a read-only memo that re-verifies the docs index against the live API and tracked docs.",
+    "JARVIS-LIVE-REGRESSION-SMOKE (recurring) — re-run the live regression / post-polish smoke memo after future JARVIS commits.",
+    "JARVIS-OPERATOR-GUIDE-LINK — optionally surface a display-only link/footnote pointing operators to this runbook (no behavior)."
+  ],
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_step_22_operator_guide/report.json", "result": "JSON_OK"}
+  ],
+  "conclusion": "Documentation-only operator guide created. No code, UI, tool, test, API, or trading surface was changed."
+}
