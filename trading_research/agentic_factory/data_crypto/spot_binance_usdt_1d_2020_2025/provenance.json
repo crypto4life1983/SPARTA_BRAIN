@@ -1,0 +1,107 @@
+{
+  "snapshot_id": "spot_binance_usdt_1d_2020_2025",
+  "step": "Crypto-D3b",
+  "title": "Factory-internal immutable crypto data freeze (BTC/ETH/SOL spot daily 2020-2025)",
+  "created_utc": "2026-05-30T17:54:00Z",
+  "no_fetch": true,
+  "network": false,
+  "no_exchange_execution": true,
+  "broker": false,
+  "paper_or_live": false,
+  "derived_from_local_only": true,
+  "source_modified": false,
+  "source": {
+    "vendor": "Binance public market data",
+    "endpoint_family": "https://api.binance.com/api/v3/klines",
+    "market_type": "spot",
+    "quote_currency": "USDT",
+    "interval": "1d",
+    "interval_origin": "daily-native (not aggregated from 1h)",
+    "timezone": "UTC",
+    "utc_day_boundary": "open_time -> UTC date %Y-%m-%d; Binance 1d klines anchored 00:00 UTC",
+    "retrieval_scripts": [
+      "tools/fetch_binance_crypto_daily_frozen.py",
+      "tools/regime_shadow_fresh_data_update.py"
+    ],
+    "provenance_basis": "Crypto-D3a provenance pin (commit ce62a71): 9/10 source-provenance fields PINNED; only unmet item was dataset immutability, which THIS freeze closes.",
+    "spot_vs_perp_basis": "spot endpoint api/v3/klines (perp would be fapi.binance.com); producer docstring 'public spot daily klines'; URL guard forbids account/order/trade/signed/userdata"
+  },
+  "seal": {
+    "seal_max_date": "2025-12-31",
+    "is_window": "2020-2023",
+    "oos_window": "2024-2025",
+    "2026_excluded": true,
+    "2026_excluded_reason": "Crypto-D1 sec10 blocks 2026 unless separately authorized"
+  },
+  "symbols": {
+    "BTCUSDT": {
+      "source_path": "data/frozen_regime_inputs/btcusdt_1d_2020-01-01_2026-05-29.csv",
+      "source_size_bytes": 132101,
+      "source_mtime_utc": "2026-05-30T00:15:04Z",
+      "output_filename": "BTCUSDT_1d_2020_2025.csv",
+      "output_sha256": "d87742b8e4c90eeadb3312561e8f63314c3139e6740c06e151b206ee06622941",
+      "source_rows": 2341,
+      "kept_rows": 2192,
+      "excluded_2026_rows": 149,
+      "date_start": "2020-01-01",
+      "date_end": "2025-12-31",
+      "qa": {
+        "duplicate_timestamps": 0,
+        "invalid_ohlc": 0,
+        "zero_or_negative_volume": 0,
+        "missing_calendar_days": 0,
+        "header_ok": true
+      }
+    },
+    "ETHUSDT": {
+      "source_path": "data/frozen_regime_inputs/ethusdt_1d_2020-01-01_2026-05-29.csv",
+      "source_size_bytes": 125579,
+      "source_mtime_utc": "2026-05-30T00:15:04Z",
+      "output_filename": "ETHUSDT_1d_2020_2025.csv",
+      "output_sha256": "4a4d7b082b5c6c086c71d4dbc933e9d45f67b1632c9130a7df48d0daeb0180e7",
+      "source_rows": 2341,
+      "kept_rows": 2192,
+      "excluded_2026_rows": 149,
+      "date_start": "2020-01-01",
+      "date_end": "2025-12-31",
+      "qa": {
+        "duplicate_timestamps": 0,
+        "invalid_ohlc": 0,
+        "zero_or_negative_volume": 0,
+        "missing_calendar_days": 0,
+        "header_ok": true
+      }
+    },
+    "SOLUSDT": {
+      "source_path": "data/frozen_regime_inputs/solusdt_1d_2020-08-11_2026-05-29.csv",
+      "source_size_bytes": 114188,
+      "source_mtime_utc": "2026-05-30T00:15:04Z",
+      "output_filename": "SOLUSDT_1d_2020_2025.csv",
+      "output_sha256": "bd8b28f1fd7c6d5187bc3f60e609e22aa28c57d57477472e4b845059c07c5f32",
+      "source_rows": 2118,
+      "kept_rows": 1969,
+      "excluded_2026_rows": 149,
+      "date_start": "2020-08-11",
+      "date_end": "2025-12-31",
+      "qa": {
+        "duplicate_timestamps": 0,
+        "invalid_ohlc": 0,
+        "zero_or_negative_volume": 0,
+        "missing_calendar_days": 0,
+        "header_ok": true
+      }
+    }
+  },
+  "schema": ["timestamp", "open", "high", "low", "close", "volume"],
+  "sol_window_note": "SOL starts 2020-08-11 (exchange listing); tri-symbol joint tests align to common 2020-08-11+ index or pre-registered per-symbol windows.",
+  "quote_rule": "USDT, documented; reconcile vs USD/USDC before any edge claim (no silent mixing).",
+  "perps_status": "BLOCKED until funding sourced + frozen.",
+  "immutability": "This snapshot is content-hash (SHA256) pinned and intended immutable. Re-freeze must produce identical hashes or be a new snapshot_id.",
+  "forbidden": [
+    "no_strategy_test", "no_backtest", "no_optimization", "no_parameter_sweep",
+    "no_exchange_api_execution", "no_broker", "no_paper_or_live", "no_network",
+    "no_data_fetch", "no_perps_until_funding_rules_frozen",
+    "no_mixing_crypto_with_futures_validation_claims",
+    "do_not_touch_s30_or_futures_branches", "no_modification_of_source_csv"
+  ]
+}
