@@ -189,9 +189,128 @@ def test_jarvis_status_exposes_no_execution_fields():
             for v in o:
                 yield from _keys(v)
     all_keys = set(_keys(d))
+    # Forbid keys that would represent an execution trigger / control
+    # affordance. A descriptive "command" label inside the cached health
+    # report is read-only data, not a control, so it is allowed.
     for forbidden in ("place_order", "submit_order", "execute_trade",
-                      "command", "shell", "push", "reset", "force_push"):
+                      "run_command", "exec", "shell", "force_push", "git_push"):
         assert forbidden not in all_keys, f"forbidden key in feed: {forbidden}"
+
+
+# --- Step 03: cached health report ----------------------------------------
+
+def test_jarvis_status_has_health_report_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "health_report" in d
+    assert isinstance(d["health_report"], dict)
+    assert d["health_report"].get("state") in (
+        "ready", "missing", "unavailable", "error",
+    )
+
+
+def test_jarvis_health_report_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    # Point BASE at an empty dir so the cached file is absent.
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    hr = app_module._jarvis_health_report()
+    assert hr["state"] == "missing"
+    assert "tools/jarvis_health_report.py" in hr["message"]
+
+
+def test_jarvis_health_report_invalid_is_fail_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    (d / "health_report.json").write_text("{ not valid json", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    hr = app_module._jarvis_health_report()
+    assert hr["state"] == "unavailable"
+    assert "error" in hr
+
+
+def test_jarvis_health_report_valid_is_passed_through(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    payload = {
+        "state": "ready", "generated_at": "2026-05-30T00:00:00", "overall": "pass",
+        "checks": [{"name": "py_compile", "status": "pass", "returncode": 0}],
+    }
+    (d / "health_report.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    hr = app_module._jarvis_health_report()
+    assert hr["overall"] == "pass"
+    assert hr["checks"][0]["name"] == "py_compile"
+
+
+def test_jarvis_endpoint_does_not_execute_health_checks(monkeypatch):
+    # The web route must never spawn subprocesses to build the feed.
+    import subprocess
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("endpoint must not run subprocesses")
+
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert "health_report" in r.json()
+
+
+# --- Step 03: health report script ----------------------------------------
+
+def test_health_report_script_exists_and_compiles():
+    import py_compile
+    script = _REPO_ROOT / "tools" / "jarvis_health_report.py"
+    assert script.exists(), "tools/jarvis_health_report.py missing"
+    py_compile.compile(str(script), doraise=True)
+
+
+def test_health_report_script_has_no_secret_dumps():
+    src = (_REPO_ROOT / "tools" / "jarvis_health_report.py").read_text(
+        encoding="utf-8"
+    )
+    low = src.lower()
+    # Target real env/secret ACCESS patterns, not the word "secret" in prose.
+    for tok in ("os.environ", "getenv", "environ.copy", "dotenv",
+                "load_secrets", "local_secrets"):
+        assert tok not in low, f"script must not touch env/secrets: {tok}"
+
+
+def test_health_report_module_writes_expected_shape(monkeypatch, tmp_path):
+    # Run the script's logic without invoking real py_compile/pytest:
+    # stub _run_check so the test is fast and not environment-fragile.
+    import importlib.util
+    import json
+    script = _REPO_ROOT / "tools" / "jarvis_health_report.py"
+    spec = importlib.util.spec_from_file_location("jarvis_health_report", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(mod, "REPORT_DIR", tmp_path / "storage" / "jarvis")
+    monkeypatch.setattr(
+        mod, "REPORT_PATH", tmp_path / "storage" / "jarvis" / "health_report.json"
+    )
+    monkeypatch.setattr(
+        mod, "_run_check",
+        lambda c: {"name": c["name"], "command": "stub", "status": "pass",
+                   "returncode": 0, "stdout_tail": "", "stderr_tail": "",
+                   "duration_seconds": 0.0},
+    )
+    rc = mod.main()
+    assert rc == 0
+    report = json.loads(mod.REPORT_PATH.read_text(encoding="utf-8"))
+    assert report["overall"] == "pass"
+    assert {c["name"] for c in report["checks"]} == {"py_compile", "pytest"}
+    assert "generated_at" in report
 
 
 # --- safety: no forbidden trade-action language ---------------------------

@@ -7668,6 +7668,27 @@ def _jarvis_brain_memory() -> dict:
     }
 
 
+def _jarvis_health_report() -> dict:
+    """READ-ONLY. Loads the cached health report written offline by
+    tools/jarvis_health_report.py. The web route NEVER runs the checks
+    itself — it only reflects whatever the last manual run produced."""
+    path = BASE / "storage" / "jarvis" / "health_report.json"
+    if not path.exists():
+        return {
+            "state": "missing",
+            "message": "Run tools/jarvis_health_report.py to generate a cached report.",
+        }
+    try:
+        import json as _json
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+        return {"state": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(data, dict):
+        return {"state": "unavailable", "error": "report is not a JSON object"}
+    data.setdefault("state", "ready")
+    return data
+
+
 _JARVIS_NEXT_ACTIONS = [
     "Review the latest sealed lifecycles in the Trading Bridge (read-only).",
     "Open /guide to confirm the JARVIS module manual entry is accurate.",
@@ -7701,6 +7722,7 @@ def api_jarvis_status():
     operator_safety = _jarvis_safe(_jarvis_operator_safety)
     project = _jarvis_safe(_jarvis_project_files)
     brain_memory = _jarvis_safe(_jarvis_brain_memory)
+    health_report = _jarvis_safe(_jarvis_health_report)
     return {
         "online": True,
         "read_only": True,
@@ -7716,6 +7738,7 @@ def api_jarvis_status():
         "safety": operator_safety,
         "project": project,
         "brain_memory": brain_memory,
+        "health_report": health_report,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
 

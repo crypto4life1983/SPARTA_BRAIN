@@ -199,6 +199,11 @@
       <div class="jv-loading">Computing&hellip;</div>
     </div>
 
+    <div class="jv-panel" id="pHealth">
+      <h2><span class="ic">&#x2695;</span>Health Report</h2>
+      <div class="jv-loading">Reading cached report&hellip;</div>
+    </div>
+
   </div>
 
   <p class="jv-foot">
@@ -402,6 +407,40 @@
       return '<li>'+esc(a)+'</li>';
     }).join('') + '</ul></div>';
     setPanel('pNext', naUl);
+
+    // Health Report (cached, read-only — never executed from this page)
+    var hr = d.health_report || {};
+    if(hr.state === 'missing'){
+      setPanel('pHealth',
+        row('Status', 'waiting', 'NO CACHED REPORT') +
+        '<div class="jv-detail">'+esc(hr.message || 'Run tools/jarvis_health_report.py to generate a cached report.')+'</div>');
+    } else if(hr.state === 'unavailable' || hr.state === 'error'){
+      setPanel('pHealth',
+        row('Status', 'bad', 'UNAVAILABLE', hr.error || hr.detail));
+    } else {
+      var overall = (hr.overall || '').toLowerCase();
+      var hHtml = row('Overall', overall === 'pass' ? 'online' : 'bad',
+                      (hr.overall || 'UNKNOWN').toUpperCase()) +
+        row('Generated at', '', esc(hr.generated_at || '—'));
+      var byName = {};
+      (hr.checks || []).forEach(function(c){ byName[c.name] = c; });
+      ['py_compile','pytest'].forEach(function(nm){
+        var c = byName[nm];
+        if(c){
+          var st = c.status === 'pass' ? 'online' : 'bad';
+          hHtml += row(nm, st, (c.status||'').toUpperCase() +
+            (c.returncode != null ? ' (rc '+esc(c.returncode)+')' : ''));
+          if(c.status !== 'pass'){
+            var tail = (c.stderr_tail || c.stdout_tail || '').slice(-600);
+            if(tail){
+              hHtml += '<div class="jv-detail" style="white-space:pre-wrap;opacity:.8">'+
+                esc(tail)+'</div>';
+            }
+          }
+        }
+      });
+      setPanel('pHealth', hHtml);
+    }
   }
 
   function tick(){
