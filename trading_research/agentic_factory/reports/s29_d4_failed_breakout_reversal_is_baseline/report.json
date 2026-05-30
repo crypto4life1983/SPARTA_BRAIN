@@ -1,0 +1,158 @@
+{
+  "branch_id": "S29",
+  "caveats": [
+    "IS_CONTINUE does NOT mean OOS will pass; it only licenses pre-registering the S29-D5 OOS protocol before any 2023-2025 data is seen.",
+    "IS_WATCH means continue only if the evidence justifies committing the OOS protocol; otherwise park.",
+    "IS_FAIL means PARK or redesign as a NEW branch -- never tune S29 in place.",
+    "EMA200 needs ~200 warmup bars, so roughly the first IS year produces no eligible entries; this is inherent to the frozen 200-EMA regime guard.",
+    "Daily bars hide the intraday path; the same-bar stop-first assumption is conservative and may mis-state true fills.",
+    "Single IS pass on NQ only; ES independent confirmation is a later step."
+  ],
+  "created_utc": "2026-05-30T18:29:24.386135+00:00",
+  "data_window": {
+    "date_range": [
+      "2013-01-02",
+      "2022-12-30"
+    ],
+    "duplicate_dates_count": 0,
+    "in_sample_years": [
+      2013,
+      2022
+    ],
+    "invalid_ohlc_count": 0,
+    "is_years_list": [
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022
+    ],
+    "oos_2023_2025": "SEALED -- not loaded, not used",
+    "oos_files_excluded": [
+      "data_offline/nq_c0_ohlcv_1d_2023.csv",
+      "data_offline/nq_c0_ohlcv_1d_2024.csv",
+      "data_offline/nq_c0_ohlcv_1d_2025.csv"
+    ],
+    "per_year_row_counts": {
+      "2013": 289,
+      "2014": 302,
+      "2015": 312,
+      "2016": 310,
+      "2017": 309,
+      "2018": 312,
+      "2019": 312,
+      "2020": 312,
+      "2021": 311,
+      "2022": 310
+    },
+    "qa_verdict": "CLEAN -- no duplicate dates, no invalid OHLC rows.",
+    "total_bars": 3079
+  },
+  "forbidden_actions": [
+    "no_oos_peek",
+    "no_optimization",
+    "no_parameter_sweeps",
+    "no_data_fetch",
+    "no_paper_or_live",
+    "no_execution_or_api"
+  ],
+  "frozen_parameters": {
+    "accounting": "R-only; 1R = entry_open - (signal_low - 0.25*ATR20(signal)) level stop; no dollar sizing / point value / cost / roll; long-only false-downside-break v1; +1.5R target; 10-bar time stop; one position at a time",
+    "atr_period": 20,
+    "direction": "long_only_false_downside_break",
+    "ema_fast": 50,
+    "ema_slow": 200,
+    "lookback_n": 20,
+    "regime_guard": "block long only when close<EMA200 AND EMA50<EMA200 (Option B)",
+    "same_bar": "stop_first",
+    "stop_atr_buffer": 0.25,
+    "target_r_multiple": 1.5,
+    "time_stop_bars": 10
+  },
+  "input_files": [
+    "data_offline/nq_c0_ohlcv_1d_2013.csv",
+    "data_offline/nq_c0_ohlcv_1d_2014.csv",
+    "data_offline/nq_c0_ohlcv_1d_2015.csv",
+    "data_offline/nq_c0_ohlcv_1d_2016.csv",
+    "data_offline/nq_c0_ohlcv_1d_2017.csv",
+    "data_offline/nq_c0_ohlcv_1d_2018.csv",
+    "data_offline/nq_c0_ohlcv_1d_2019.csv",
+    "data_offline/nq_c0_ohlcv_1d_2020.csv",
+    "data_offline/nq_c0_ohlcv_1d_2021.csv",
+    "data_offline/nq_c0_ohlcv_1d_2022.csv"
+  ],
+  "metrics": {
+    "anti_donchian_top3_gate_passes": false,
+    "avg_r": 0.0327265061237048,
+    "best_r": 1.5000000000000129,
+    "best_trade_r": 1.5000000000000129,
+    "best_trade_share_of_net": 0.7275302691807378,
+    "exit_reason_counts": {
+      "stop": 33,
+      "target": 21,
+      "time_stop": 9
+    },
+    "expectancy_r": 0.0327265061237048,
+    "max_drawdown_r": 5.236068864257421,
+    "median_r": -1.0,
+    "net_r_ex_top3": -2.43823011420662,
+    "positive_years": 4,
+    "prescreen_gates": {
+      "dd_le_net": false,
+      "dd_value": 5.236068864257421,
+      "expectancy_gt_0": true,
+      "expectancy_value": 0.0327265061237048,
+      "is_trade_count_ge_40": true,
+      "is_trade_count_value": 63,
+      "net_r_ex_top3_value": -2.43823011420662,
+      "net_r_value": 2.061769885793402,
+      "pf_ge_1_30": false,
+      "pf_value": 1.0622540562719787,
+      "positive_years_ge_6": false,
+      "positive_years_value": 4,
+      "top3_removal_positive": false
+    },
+    "profit_factor": 1.0622540562719787,
+    "top3_r": 4.500000000000022,
+    "total_r": 2.061769885793402,
+    "trade_count": 63,
+    "win_rate": 0.4444444444444444,
+    "worst_r": -1.0,
+    "worst_trade_r": -1.0,
+    "year_by_year_r": {
+      "2013": 0.0,
+      "2014": -3.0291092793352297,
+      "2015": 8.310758085351747,
+      "2016": -2.1908474634001793,
+      "2017": 1.2613478541632295,
+      "2018": -0.6842484812454459,
+      "2019": 0.4999999999999942,
+      "2020": -2.5000000000000044,
+      "2021": 2.39386917025929,
+      "2022": -2.0
+    }
+  },
+  "module_id": "S29-D4",
+  "next_allowed_step": "oos_protocol_preregistration (S29-D5) -- NOT authorized yet",
+  "notes": [
+    "S29-D4 IS baseline measurement only; no OOS, no optimization, no parameter change, no paper/live.",
+    "Frozen engine: engine/s29_failed_breakout_reversal.py @ fba5ff9d815b2d1d6f26833bb282f804afdc78b2",
+    "Frozen spec: reports/s29_d2_failed_breakout_reversal_strategy_spec @ c96850fe2c38b2bf88c30bd44731f2a323ca7bc4",
+    "Idea selection: reports/s29_d1_new_strategy_idea_sourcing @ 139bb60bb920da143bb42ee38b123130616b5b95",
+    "RECOMMENDATION: STOP and PARK S29 (or redesign as a new branch). Do NOT run OOS, do not tune the frozen parameters.",
+    "Donchian, S26, S27, S28 remain PARKED; no paper/live system exists or is authorized."
+  ],
+  "source_commits": {
+    "s29_d1": "139bb60bb920da143bb42ee38b123130616b5b95",
+    "s29_d2": "c96850fe2c38b2bf88c30bd44731f2a323ca7bc4",
+    "s29_d3": "fba5ff9d815b2d1d6f26833bb282f804afdc78b2"
+  },
+  "status": "COMPLETE",
+  "title": "S29-D4 -- Failed-Breakout / False-Break Reversal IS baseline (NQ 2013-2022, IS only)",
+  "verdict": "IS_FAIL"
+}
