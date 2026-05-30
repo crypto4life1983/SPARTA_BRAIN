@@ -1,0 +1,112 @@
+{
+  "title": "JARVIS Step 28 — Conversation Safety Classifier (tests-first, local, no route)",
+  "generated_at": "2026-05-30T09:00:00",
+  "type": "code_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "purpose": "Implement a small, local, deterministic classifier that categorizes future JARVIS conversation questions as safe or forbidden BEFORE any /api/jarvis/ask endpoint exists. Preparation only: no backend route is wired, no POST endpoint is added, and app.py is not modified. The classifier executes nothing — it only inspects the text of a string.",
+  "relation_to_steps_20_27": "Step 20 polished the UI; Step 21 proved it live and safe; Step 22 gave the operator runbook; Step 23 set known limits and the safe roadmap; Step 24 added the panel glossary; Step 25 designed the read-only conversation layer plan; Step 26 shipped the display-only conversation shell (UI-only); Step 27 designed the answer-only backend safety envelope. Step 28 implements the first option from the Step 27 recommendation — JARVIS-ASK-CLASSIFIER-MODULE: a pure, dependency-free safety classifier with full unit tests and NO endpoint.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc",
+    "step_24_commit": "9523da8",
+    "step_25_commit": "6b88d9b",
+    "step_26_commit": "f2268f3",
+    "step_27_commit": "e961481"
+  },
+  "files_changed": [
+    "jarvis_conversation_safety.py — new pure classifier module (stdlib `re` only).",
+    "tests/test_jarvis_conversation_safety.py — new test suite for the classifier and safety gates.",
+    "docs/jarvis_step_28_conversation_safety_classifier/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No /api/jarvis/ask endpoint added.",
+    "No POST endpoint added.",
+    "No route wired; the classifier is not imported by app.py.",
+    "No change to app.py.",
+    "No change to templates/jarvis.html.",
+    "No change to /api/jarvis/status shape.",
+    "No change to read_only=true behavior.",
+    "No subprocess, file write, network, broker, or trading import."
+  ],
+  "classifier": {
+    "module": "jarvis_conversation_safety.py",
+    "public_function": "classify_jarvis_question(question) -> dict",
+    "returns": {
+      "safety_class": "one of SAFETY_LABELS",
+      "refused": "bool — False only for the three SAFE_* labels; True for forbidden and UNSUPPORTED",
+      "reason": "short read-only explanation string",
+      "normalized_question": "the input stripped and whitespace-collapsed (original case)"
+    },
+    "labels": [
+      "SAFE_INFO", "SAFE_EXPLAIN", "SAFE_NEXT_REVIEW_STEP",
+      "FORBIDDEN_EXECUTION", "FORBIDDEN_TRADING", "FORBIDDEN_MUTATION",
+      "UNSUPPORTED"
+    ],
+    "ordering": "Forbidden patterns are checked first (TRADING -> EXECUTION -> MUTATION); only if none match are safe patterns checked (NEXT_REVIEW_STEP -> EXPLAIN -> INFO). Anything unrecognised is UNSUPPORTED.",
+    "fail_closed": [
+      "Empty or whitespace-only input -> UNSUPPORTED, refused.",
+      "Non-string input -> UNSUPPORTED, refused.",
+      "Ambiguous / command-like / unrecognised input -> UNSUPPORTED, refused.",
+      "A question mixing a safe phrase and a forbidden phrase -> the forbidden class wins (refused)."
+    ],
+    "note_on_commit": "Per this step's spec, stage/commit phrasing is classified as FORBIDDEN_EXECUTION (the Step 27 prose example grouped commit under mutation; the Step 28 module follows the Step 28 spec, which lists 'stage commit' under execution). Either way the result is a forbidden, refused classification.",
+    "purity": "The module imports only the stdlib `re`. It runs no commands, performs no I/O, opens no network connection, and imports no broker/trading/subprocess module. The only forbidden-action vocabulary present is blocked keyword text used to refuse, never to act."
+  },
+  "examples": {
+    "safe": [
+      {"q": "Why is commander yellow?", "label": "SAFE_INFO"},
+      {"q": "What needs attention?", "label": "SAFE_INFO"},
+      {"q": "What is the trading posture?", "label": "SAFE_INFO"},
+      {"q": "What JARVIS docs exist?", "label": "SAFE_INFO"},
+      {"q": "What does read_only mean?", "label": "SAFE_EXPLAIN"},
+      {"q": "Explain pTrading", "label": "SAFE_EXPLAIN"},
+      {"q": "Explain cache_freshness", "label": "SAFE_EXPLAIN"},
+      {"q": "What is the safest next review step?", "label": "SAFE_NEXT_REVIEW_STEP"}
+    ],
+    "forbidden": [
+      {"q": "Run the route-smoke script", "label": "FORBIDDEN_EXECUTION"},
+      {"q": "Trigger a refresh of the caches", "label": "FORBIDDEN_EXECUTION"},
+      {"q": "Stage and commit the changes", "label": "FORBIDDEN_EXECUTION"},
+      {"q": "Buy NQ", "label": "FORBIDDEN_TRADING"},
+      {"q": "Enable live trading", "label": "FORBIDDEN_TRADING"},
+      {"q": "Connect to my broker", "label": "FORBIDDEN_TRADING"},
+      {"q": "Approve and promote the S26 strategy", "label": "FORBIDDEN_TRADING"},
+      {"q": "Edit app.py", "label": "FORBIDDEN_MUTATION"},
+      {"q": "Save a chat log", "label": "FORBIDDEN_MUTATION"}
+    ],
+    "fail_closed": [
+      {"q": "", "label": "UNSUPPORTED"},
+      {"q": "make me a sandwich", "label": "UNSUPPORTED"},
+      {"q": "explain the trading posture then place a trade", "label": "FORBIDDEN_TRADING"}
+    ]
+  },
+  "tests_added": [
+    "test_classifier_returns_required_keys — exact return keys and types.",
+    "test_label_vocabulary_is_complete — label tuples are as specified.",
+    "test_safe_questions_are_allowed — all eight spec safe examples map to the right SAFE_* label, refused=False.",
+    "test_all_safe_labels_are_reachable — each SAFE_* label is produced.",
+    "test_forbidden_execution_is_refused — run/execute/refresh/stage/commit/terminal refused.",
+    "test_forbidden_trading_is_refused — place trade/buy/sell/long/short/enable live|paper/connect broker/approve strategy refused.",
+    "test_forbidden_mutation_is_refused — modify file/write to disk/edit app.py/update template/save chat log/delete refused.",
+    "test_empty_is_unsupported_refused — empty/whitespace -> UNSUPPORTED refused.",
+    "test_non_string_is_unsupported_refused — None/int/list/dict -> UNSUPPORTED refused.",
+    "test_ambiguous_is_unsupported_refused — unrecognised input -> UNSUPPORTED refused.",
+    "test_forbidden_overrides_safe — mixed safe+forbidden questions resolve to the forbidden class.",
+    "test_normalized_question_is_whitespace_collapsed — normalization is whitespace-only.",
+    "test_classifier_module_imports_nothing_dangerous — no subprocess/os/socket/requests/urllib/open()/broker/order refs in code.",
+    "test_step_28_adds_no_ask_endpoint — app.py has no /api/jarvis/ask.",
+    "test_jarvis_status_shape_unchanged_after_step_28 — online/read_only true, no conversation/ask/chat/answer key.",
+    "test_jarvis_template_still_has_no_controls — template has no button/form/onclick/submit/post/ask/refresh."
+  ],
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py --rootdir=tests -q", "result": "167 passed"},
+    {"cmd": "python -m json.tool docs/jarvis_step_28_conversation_safety_classifier/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "JARVIS-ASK-ENDPOINT-TESTS-FIRST (Step 29, separate approval) — author the §10 endpoint safety tests from Step 27 against a not-yet-existing /api/jarvis/ask to pin the contract before any handler is written. Only after the classifier (this step) and the endpoint test contract are green should a later, separately-approved step wire a strictly answer-only, non-mutating handler that consumes this classifier. No broker/paper/live/refresh/execution capability is introduced at any point without explicit, separate authorization.",
+  "conclusion": "A pure, local, deterministic JARVIS conversation safety classifier was added with full unit tests and Step 28 docs. No endpoint, route, POST, app.py change, template change, status-shape change, or execution/trading/mutation capability was introduced. The classifier only describes the intent of input text and fails closed; forbidden classifications always override safe ones."
+}
