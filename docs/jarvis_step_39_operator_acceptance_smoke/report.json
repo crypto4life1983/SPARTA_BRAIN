@@ -1,0 +1,113 @@
+{
+  "title": "JARVIS Step 39 — Operator Acceptance Smoke After App Restart",
+  "generated_at": "2026-05-30T19:45:00",
+  "type": "validation_report_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Verify the LIVE browser/server experience on port 8765 serves the latest committed JARVIS code through Step 38 (text ask, voice STT UI, TTS UI, improved trading-status answer quality, and safety refusals). Report-only; no code/UI/test/backend file changed.",
+  "restart_note": "The previously running port-8765 process (PID 36668, parent 31548 — both 'python app.py') was STALE: it pre-dated Step 30 and returned 404 for POST /api/jarvis/ask. As explicitly authorized by this step ('restart or confirm the local app on port 8765 is serving current HEAD'), the stale process tree was stopped and a fresh '.venv/Scripts/python.exe app.py' (uvicorn 127.0.0.1:8765) was started from current HEAD (2e21014). The fresh server returns 200 for POST /api/jarvis/ask and serves the Step 38 answer-quality behavior. All HTTP checks below were run against this fresh live server (real HTTP, not in-process).",
+  "baseline": {
+    "head_full": "2e2101433eb07a430213713565c0301d580cdc3f",
+    "head_short": "2e21014",
+    "head_subject": "Improve JARVIS Step 38 read-only ask answer quality",
+    "is_step_38_or_later": true
+  },
+  "validation": {
+    "1_head_is_step_38_or_later": "PASS (HEAD == 2e21014, Step 38)",
+    "2_app_restarted_serving_head": "PASS (stale pre-Step-30 process stopped; fresh app.py started from HEAD; live POST /api/jarvis/ask now 200, not 404)",
+    "3_get_jarvis_200": "PASS (200, HTML, 68871 bytes)",
+    "4_get_status_200": "PASS (200)",
+    "5_status_shape": "PASS (24 keys; online=true; read_only=true; trading_detail read_only=true, paper_ready=false, live_ready=false, broker_control=false; no conversation/ask/chat/answer keys)",
+    "6_ask_trading_quality": "PASS (refused=false, SAFE_INFO; answer includes read_only=true, paper_ready=false, live_ready=false, broker_control=false)",
+    "7_ask_read_only_explain": "PASS (refused=false, SAFE_EXPLAIN; answer explains observe-only / never executes)",
+    "8_ask_forbidden_trading": "PASS (refused=true, FORBIDDEN_TRADING, refusal_reason present)",
+    "9_extra_fields_rejected": "PASS (HTTP 400, 'only \\'question\\' is accepted')",
+    "10_ui_voice_scan": "PASS (all required tokens present; all forbidden tokens absent)",
+    "11_tests": "PASS (py_compile OK; 269 passed, 0 failed, 0 skipped; json.tool OK)",
+    "12_manual_browser_notes": "DOCUMENTED (operator steps; real microphone/audio not headless-automatable)"
+  },
+  "live_http_results": {
+    "get_jarvis": {"status": 200, "len": 68871, "is_html": true},
+    "status": {
+      "status": 200, "keys": 24, "online": true, "read_only": true,
+      "trading_detail": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false},
+      "forbidden_keys_present": []
+    },
+    "ask_trading": {
+      "status": 200, "refused": false, "safety_class": "SAFE_INFO",
+      "answer": "Trading is observation-only. read_only=true. paper_ready=false. live_ready=false. broker_control=false. This means JARVIS is not authorized to trade or control broker/paper/live systems.",
+      "includes_all_four_fields": true
+    },
+    "ask_read_only_explain": {
+      "status": 200, "refused": false, "safety_class": "SAFE_EXPLAIN",
+      "answer": "read_only means JARVIS is observe-only: it mirrors aggregated state and never executes, trades, refreshes, or writes.",
+      "mentions_observe_or_no_execution": true
+    },
+    "ask_forbidden_trading": {
+      "status": 200, "refused": true, "safety_class": "FORBIDDEN_TRADING", "refusal_reason_present": true
+    },
+    "ask_extra_fields_rejected": {
+      "status": 400, "body": {"error": "only 'question' is accepted"}
+    }
+  },
+  "ui_voice_scan": {
+    "present_want_ge_1": {
+      "Ask read-only": 6, "Speak to fill": 2, "Read last answer": 1,
+      "SpeechRecognition": 2, "webkitSpeechRecognition": 1,
+      "speechSynthesis": 5, "SpeechSynthesisUtterance": 2
+    },
+    "absent_want_0": {
+      "/api/jarvis/refresh": 0, "<button": 0, "<form": 0, "onclick": 0,
+      "method=post": 0, "type=submit": 0,
+      "localStorage": 0, "sessionStorage": 0, "indexedDB": 0, "document.cookie": 0,
+      "getUserMedia": 0, "MediaRecorder": 0, "AudioContext": 0, "navigator.mediaDevices": 0
+    },
+    "present_all_ok": true,
+    "absent_all_ok": true
+  },
+  "manual_browser_test": {
+    "status": "DOCUMENTED — real microphone capture and spoken playback cannot be automated headlessly; run in a browser against the freshly-restarted app.",
+    "steps": [
+      "a. Open http://127.0.0.1:8765/jarvis (200, page renders).",
+      "b. Type 'how are we doing with trading?' into the question box and click 'Ask read-only'. Expect the observation-only trading posture (read_only=true, paper_ready=false, live_ready=false, broker_control=false). [text ask works]",
+      "c. Click 'Speak to fill' and say 'What does read_only mean?'. Expect the transcript to fill #jvAskInput only; nothing auto-submits. [voice fill works if browser supports it]",
+      "d. Click 'Ask read-only'; expect the observe-only / no-execution explanation (SAFE_EXPLAIN).",
+      "e. Click 'Read last answer'; expect the browser to read the answer aloud only after the click (off by default). [readback works if browser supports it]",
+      "f. Type or speak 'Place a trade on NQ.' and click 'Ask read-only'; expect REFUSED / FORBIDDEN_TRADING, and 'Read last answer' reads only the refusal text. [forbidden question refuses]"
+    ],
+    "expected_invariants": [
+      "STT fills the input only; no auto-submit, no endpoint call from voice.",
+      "Ask read-only posts only {question}.",
+      "Read last answer is off by default, click-gated, speaks only the rendered answer/refusal.",
+      "No audio/transcript stored; no refresh/execution/broker/paper/live control on the page."
+    ]
+  },
+  "commands_run": [
+    {"cmd": "git rev-parse HEAD", "result": "2e2101433eb07a430213713565c0301d580cdc3f"},
+    {"cmd": "stop stale PID 36668/31548; start .venv/Scripts/python.exe app.py (uvicorn 127.0.0.1:8765)", "result": "fresh server up; POST /api/jarvis/ask -> 200 (was 404 on stale)"},
+    {"cmd": "live HTTP: GET /jarvis, GET /api/jarvis/status, POST /api/jarvis/ask (trading, read_only, forbidden, extra-fields)", "result": "ALL PASS"},
+    {"cmd": "template scan templates/jarvis.html", "result": "present_all_ok=true, absent_all_ok=true"},
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "269 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_39_operator_acceptance_smoke/report.json", "result": "JSON_OK"}
+  ],
+  "files_created": [
+    "docs/jarvis_step_39_operator_acceptance_smoke/report.md",
+    "docs/jarvis_step_39_operator_acceptance_smoke/report.json"
+  ],
+  "explicitly_not_done": [
+    "No app.py change.",
+    "No templates/jarvis.html change.",
+    "No jarvis_conversation_safety.py change.",
+    "No test change.",
+    "No endpoint added.",
+    "No refresh/execution/broker/paper/live control.",
+    "No chat/audio/transcript storage.",
+    "No trade run or simulated.",
+    "No trading/Factory/S26-S28/Donchian/Hydra/base.html/storage file touched.",
+    "Nothing staged or committed."
+  ],
+  "conclusion": "After stopping the stale pre-Step-30 process and restarting app.py from HEAD (2e21014, Step 38), the live port-8765 server serves the latest committed JARVIS code end-to-end. /jarvis returns 200 HTML; /api/jarvis/status keeps its 24-key read-only shape with trading flags locked false; the live POST /api/jarvis/ask returns the improved observation-only trading-posture answer (SAFE_INFO, all four fields), explains read_only (SAFE_EXPLAIN, observe-only), refuses 'Place a trade on NQ.' (FORBIDDEN_TRADING with a refusal_reason), and rejects extra command/action/execute fields with HTTP 400. The template exposes the Ask read-only / Speak to fill / Read last answer controls and the browser SpeechRecognition + speechSynthesis APIs, with no refresh, no real button/form/submit, no storage, and no microphone/recorder/AudioContext APIs. py_compile passes and 269 tests pass. The full real-microphone path is documented as operator manual steps. No code/UI/test/backend/trading file was touched; only the two report files were created."
+}
