@@ -1,0 +1,174 @@
+{
+  "step": "S26-D6",
+  "title": "Entry-rule significance for frozen Trend + S/R + EMA/RSI signals (IS + OOS)",
+  "created_date": "2026-05-29",
+  "type": "Entry-signal significance vs same-count random entries. NOT a new backtest, NOT optimization, NOT a strategy change.",
+  "spec_commit_s26_d1": "af643aef58c63dd3bd904b4fb44406f4a2a55c3e",
+  "engine_commit_s26_d2": "1b1174e37c377b6331fa480a96115f286fb6a246",
+  "is_baseline_commit_s26_d3": "1bb70f9c3961cf4435d7953a69e06989f11a5dbb",
+  "oos_protocol_commit_s26_d4": "a5d90c63aa11f5c275fec4cae993ba6ab4ccb85f",
+  "oos_pass_commit_s26_d5": "30f2190b8ced3cb08c3758d7da7215a9c36feb68",
+  "input_files_is": [
+    "data_offline/nq_c0_ohlcv_1d_2013.csv",
+    "data_offline/nq_c0_ohlcv_1d_2014.csv",
+    "data_offline/nq_c0_ohlcv_1d_2015.csv",
+    "data_offline/nq_c0_ohlcv_1d_2016.csv",
+    "data_offline/nq_c0_ohlcv_1d_2017.csv",
+    "data_offline/nq_c0_ohlcv_1d_2018.csv",
+    "data_offline/nq_c0_ohlcv_1d_2019.csv",
+    "data_offline/nq_c0_ohlcv_1d_2020.csv",
+    "data_offline/nq_c0_ohlcv_1d_2021.csv",
+    "data_offline/nq_c0_ohlcv_1d_2022.csv"
+  ],
+  "input_files_oos": [
+    "data_offline/nq_c0_ohlcv_1d_2023.csv",
+    "data_offline/nq_c0_ohlcv_1d_2024.csv",
+    "data_offline/nq_c0_ohlcv_1d_2025.csv"
+  ],
+  "signal_extraction_method": {
+    "signal_logic": "exact frozen S26 long_signal_indices (close>EMA200 AND EMA50>EMA200; low<=20d_rolling_low(excl current)+1.5*ATR20; 40<=RSI14<=55; RSI14[i]>RSI14[i-1] OR close>EMA20)",
+    "forward_return_anchor": "ENTRY/FILL bar = signal_index+1, measured close[i+1]->close[i+1+horizon]",
+    "rationale": "engine fills at open[i+1]; module is close-based; anchoring at the fill bar's close is the most engine-consistent + conservative choice and is lookahead-safe.",
+    "limitation": "close[i+1] is a proxy for the actual open[i+1] fill price.",
+    "random_baseline": "same-count random entries drawn from indices with a full forward window; close-to-close; without replacement; seeded."
+  },
+  "horizons": [
+    5,
+    10,
+    20,
+    40
+  ],
+  "n_iter": 5000,
+  "seeds": {
+    "IS": 2606,
+    "OOS": 2607
+  },
+  "is_raw_signal_count": 195,
+  "is_entry_count": 195,
+  "oos_raw_signal_count": 50,
+  "oos_entry_count": 50,
+  "is_significance_by_horizon": {
+    "5": {
+      "horizon": 5,
+      "usable_real_count": 195,
+      "real_mean": 0.0031098377508285207,
+      "baseline_mean": 0.002565146704722272,
+      "baseline_std": 0.0017459625842824093,
+      "percentile": 62.68,
+      "p_value": 0.3733253349330134,
+      "module_verdict": "INCONCLUSIVE",
+      "n_iter": 5000,
+      "seed": 2606
+    },
+    "10": {
+      "horizon": 10,
+      "usable_real_count": 195,
+      "real_mean": 0.006591951203287432,
+      "baseline_mean": 0.005131507913857869,
+      "baseline_std": 0.0023821588201561297,
+      "percentile": 72.74,
+      "p_value": 0.27274545090981805,
+      "module_verdict": "INCONCLUSIVE",
+      "n_iter": 5000,
+      "seed": 2606
+    },
+    "20": {
+      "horizon": 20,
+      "usable_real_count": 195,
+      "real_mean": 0.01283823875582432,
+      "baseline_mean": 0.010385457747781164,
+      "baseline_std": 0.003204504879174259,
+      "percentile": 78.36,
+      "p_value": 0.21655668866226754,
+      "module_verdict": "INCONCLUSIVE",
+      "n_iter": 5000,
+      "seed": 2606
+    },
+    "40": {
+      "horizon": 40,
+      "usable_real_count": 195,
+      "real_mean": 0.020556552220471584,
+      "baseline_mean": 0.021047260267706994,
+      "baseline_std": 0.004355981559536984,
+      "percentile": 45.76,
+      "p_value": 0.5424915016996601,
+      "module_verdict": "NO_EDGE",
+      "n_iter": 5000,
+      "seed": 2606
+    }
+  },
+  "oos_significance_by_horizon": {
+    "5": {
+      "horizon": 5,
+      "usable_real_count": 50,
+      "real_mean": 0.008063086438026357,
+      "baseline_mean": 0.004902286747977349,
+      "baseline_std": 0.003364012559937462,
+      "percentile": 83.04,
+      "p_value": 0.16976604679064186,
+      "module_verdict": "INCONCLUSIVE",
+      "n_iter": 5000,
+      "seed": 2607
+    },
+    "10": {
+      "horizon": 10,
+      "usable_real_count": 48,
+      "real_mean": 0.01937073486961541,
+      "baseline_mean": 0.009713215998289148,
+      "baseline_std": 0.004595248132906565,
+      "percentile": 98.34,
+      "p_value": 0.016796640671865627,
+      "module_verdict": "EDGE_LIKELY",
+      "n_iter": 5000,
+      "seed": 2607
+    },
+    "20": {
+      "horizon": 20,
+      "usable_real_count": 47,
+      "real_mean": 0.02222022787953502,
+      "baseline_mean": 0.018801565694919867,
+      "baseline_std": 0.006332402014966131,
+      "percentile": 70.1,
+      "p_value": 0.2991401719656069,
+      "module_verdict": "INCONCLUSIVE",
+      "n_iter": 5000,
+      "seed": 2607
+    },
+    "40": {
+      "horizon": 40,
+      "usable_real_count": 41,
+      "real_mean": 0.04185864781125592,
+      "baseline_mean": 0.03623908675554151,
+      "baseline_std": 0.009052938294739335,
+      "percentile": 72.6,
+      "p_value": 0.2741451709658068,
+      "module_verdict": "INCONCLUSIVE",
+      "n_iter": 5000,
+      "seed": 2607
+    }
+  },
+  "is_edge_likely_horizons": [],
+  "is_no_edge_horizons": [
+    "40"
+  ],
+  "is_inconclusive_horizons": [
+    "5",
+    "10",
+    "20"
+  ],
+  "oos_edge_likely_horizons": [
+    "10"
+  ],
+  "oos_no_edge_horizons": [],
+  "oos_inconclusive_horizons": [
+    "5",
+    "20",
+    "40"
+  ],
+  "verdict": "ENTRY_EDGE_INCONCLUSIVE",
+  "interpretation": [
+    "SUPPORTED does NOT mean live/paper trading; it authorizes S26-D7 Monte Carlo / sequence-risk.",
+    "INCONCLUSIVE means continue cautiously only if the OOS PASS and risk tests justify it.",
+    "NOT_SUPPORTED means full-strategy profit may come from exit/management/regime luck; do not promote."
+  ]
+}
