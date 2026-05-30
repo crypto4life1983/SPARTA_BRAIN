@@ -2,6 +2,7 @@
 
 import os
 import sys
+from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -19,6 +20,17 @@ def _write(tmp_path, name, body):
 
 def _bar(ts, o=100.0, h=101.0, lo=99.0, c=100.5):
     return f"{ts},{o},{h},{lo},{c},10,NQ\n"
+
+
+def _sessions_body(dates):
+    """Two bars per date: one opening-range bar (14:30) + one post bar (14:45),
+    enough to count each date as an eligible RTH session."""
+    parts = [_HEADER]
+    for d in dates:
+        ds = d.isoformat()
+        parts.append(_bar(f"{ds} 14:30:00+00:00"))
+        parts.append(_bar(f"{ds} 14:45:00+00:00"))
+    return "".join(parts)
 
 
 def test_valid_csv_basic_fields(tmp_path):
@@ -65,6 +77,39 @@ def test_bad_ohlc_row_detection(tmp_path):
     rep = data_quality.scan_csv(path)
 
     assert rep["invalid_ohlc_rows"] == 2
+
+
+def test_one_year_many_sessions_not_profitability(tmp_path):
+    # 210 consecutive days, all within 2013 -> >200 eligible sessions but a
+    # single calendar year. Must be serious research, NOT profitability-grade.
+    dates = [date(2013, 1, 1) + timedelta(days=i) for i in range(210)]
+    assert len({d.year for d in dates}) == 1
+    path = _write(tmp_path, "one_year.csv", _sessions_body(dates))
+    rep = data_quality.scan_csv(path)
+
+    assert rep["eligible_rth_sessions"] >= 200
+    assert rep["distinct_years"] == 1
+    assert rep["distinct_months"] < 18
+    assert rep["readiness"]["serious_research"] is True
+    assert rep["readiness"]["profitability_conclusion"] is False
+    assert rep["verdict"] == data_quality.RESEARCH_OK_NOT_PROFITABILITY
+
+
+def test_multi_year_many_sessions_can_be_profitability(tmp_path):
+    # 110 days in 2013 + 110 days in 2014 -> >200 eligible sessions across two
+    # calendar years. Regime spread is satisfied -> profitability-grade allowed.
+    dates = (
+        [date(2013, 1, 1) + timedelta(days=i) for i in range(110)]
+        + [date(2014, 1, 1) + timedelta(days=i) for i in range(110)]
+    )
+    path = _write(tmp_path, "multi_year.csv", _sessions_body(dates))
+    rep = data_quality.scan_csv(path)
+
+    assert rep["eligible_rth_sessions"] >= 200
+    assert rep["distinct_years"] >= 2
+    assert rep["readiness"]["serious_research"] is True
+    assert rep["readiness"]["profitability_conclusion"] is True
+    assert rep["verdict"] == data_quality.PROFITABILITY_GRADE
 
 
 def test_too_small_dataset_needs_more_data(tmp_path):

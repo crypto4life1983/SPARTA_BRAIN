@@ -21,8 +21,13 @@ REQUIRED_OHLC = ["open", "high", "low", "close"]
 # Grade gates. Deliberately strict: a handful of holiday-thin sessions must not
 # be allowed to masquerade as research-grade evidence.
 SERIOUS_RESEARCH_MIN_SESSIONS = 60
-SERIOUS_RESEARCH_MIN_DISTINCT_DATES = 60
 PROFITABILITY_MIN_SESSIONS = 200
+# A profitability read needs regime spread, not just session count: a single
+# rich year (200+ sessions) is still one volatility regime and must not pass.
+# Require multiple calendar years OR many distinct months on top of the
+# session-count bar.
+PROFITABILITY_MIN_DISTINCT_YEARS = 2
+PROFITABILITY_MIN_DISTINCT_MONTHS = 18
 
 # Verdict labels.
 UNUSABLE = "UNUSABLE"
@@ -92,6 +97,8 @@ def scan_csv(
         "invalid_ohlc_rows": 0,
         "timezone_aware": False,
         "distinct_dates": 0,
+        "distinct_years": 0,
+        "distinct_months": 0,
         "estimated_bar_interval_minutes": None,
         "session_coverage_pct_avg": 0.0,
         "eligible_rth_sessions": 0,
@@ -184,9 +191,11 @@ def scan_csv(
     counts = Counter(timestamps)
     report["duplicate_timestamps"] = sum(n - 1 for n in counts.values() if n > 1)
 
-    # Distinct calendar dates.
+    # Distinct calendar dates and regime spread (years / months).
     distinct_dates = sorted({t.date() for t in timestamps})
     report["distinct_dates"] = len(distinct_dates)
+    report["distinct_years"] = len({d.year for d in distinct_dates})
+    report["distinct_months"] = len({(d.year, d.month) for d in distinct_dates})
 
     # Estimated bar interval: most common gap between consecutive unique stamps.
     uniq = sorted(counts.keys())
@@ -244,14 +253,26 @@ def scan_csv(
     )
 
     # Readiness ladder.
+    no_major_errors = bool(invalid_ohlc == 0 and report["duplicate_timestamps"] == 0)
     plumbing = bool(report["row_count"] > 0 and eligible >= 1)
     smoke = bool(plumbing and report["timezone_aware"] and eligible >= 1)
     serious = bool(
         eligible >= SERIOUS_RESEARCH_MIN_SESSIONS
-        and report["distinct_dates"] >= SERIOUS_RESEARCH_MIN_DISTINCT_DATES
-        and invalid_ohlc == 0
+        and report["required_columns_present"]
+        and no_major_errors
     )
-    profit = bool(serious and eligible >= PROFITABILITY_MIN_SESSIONS)
+    # Profitability needs regime spread on top of a high session count: a single
+    # rich year is still one regime and must not be called profitability-grade.
+    regime_spread = bool(
+        report["distinct_years"] >= PROFITABILITY_MIN_DISTINCT_YEARS
+        or report["distinct_months"] >= PROFITABILITY_MIN_DISTINCT_MONTHS
+    )
+    profit = bool(
+        serious
+        and eligible >= PROFITABILITY_MIN_SESSIONS
+        and regime_spread
+        and no_major_errors
+    )
 
     report["readiness"] = {
         "plumbing_test": plumbing,
@@ -290,6 +311,8 @@ def render_markdown(report: Dict[str, Any]) -> str:
         f"- invalid_ohlc_rows: {r['invalid_ohlc_rows']}",
         f"- timezone_aware: {r['timezone_aware']}",
         f"- distinct_dates: {r['distinct_dates']}",
+        f"- distinct_years: {r['distinct_years']}",
+        f"- distinct_months: {r['distinct_months']}",
         f"- estimated_bar_interval_minutes: {r['estimated_bar_interval_minutes']}",
         f"- session_window_utc: {r['session_window_utc']}",
         f"- session_coverage_pct_avg: {r['session_coverage_pct_avg']}",

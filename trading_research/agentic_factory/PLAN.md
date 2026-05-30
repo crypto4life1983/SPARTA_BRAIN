@@ -98,6 +98,13 @@ stdlib-only, no optimization, no trading. The current Christmas-week NQ CSV
 scores **NEEDS_MORE_DATA** (4 eligible sessions, Dec 25 closed) — good for
 plumbing/smoke only.
 
+**S23-D5 fix:** the profitability gate now requires *regime spread*, not just
+session count. `profitability_conclusion` is True only when a dataset clears
+200 eligible sessions AND spans >= 2 calendar years OR >= 18 distinct months
+(plus zero invalid-OHLC and zero duplicate timestamps). This stops a single
+rich year (e.g. the full-2013 NQ CSV, 234 sessions) from being mislabeled
+profitability-grade; it correctly scores `RESEARCH_OK_NOT_PROFITABILITY_GRADE`.
+
 ---
 
 ## Why this does not interfere with the existing trading bot
