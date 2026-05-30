@@ -313,6 +313,105 @@ def test_health_report_module_writes_expected_shape(monkeypatch, tmp_path):
     assert "generated_at" in report
 
 
+# --- Step 04: read-only mission board -------------------------------------
+
+def test_jarvis_status_has_mission_board_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "mission_board" in d
+    assert isinstance(d["mission_board"], dict)
+    assert d["mission_board"].get("state") in (
+        "ready", "missing", "unavailable", "error",
+    )
+
+
+def test_jarvis_mission_board_seed_file_is_valid_and_ready():
+    import app as app_module
+    mb = app_module._jarvis_mission_board()
+    assert mb["state"] == "ready", mb
+    assert mb.get("version") == 1
+    assert isinstance(mb.get("missions"), list) and len(mb["missions"]) >= 4
+    for m in mb["missions"]:
+        for key in ("id", "title", "status", "priority", "area"):
+            assert key in m, f"mission missing {key}"
+    counts = mb.get("counts") or {}
+    assert counts.get("total") == len(mb["missions"])
+
+
+def test_jarvis_mission_board_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    mb = app_module._jarvis_mission_board()
+    assert mb["state"] == "missing"
+    assert "jarvis_mission_board.json" in mb["message"]
+
+
+def test_jarvis_mission_board_invalid_json_is_fail_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    (d / "jarvis_mission_board.json").write_text("{ broken", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    mb = app_module._jarvis_mission_board()
+    assert mb["state"] == "unavailable"
+    assert "error" in mb
+
+
+def test_jarvis_mission_board_bad_shape_is_fail_closed(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    # missions present but a mission lacks required fields
+    payload = {"version": 1, "missions": [{"id": "X", "title": "no fields"}]}
+    (d / "jarvis_mission_board.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    mb = app_module._jarvis_mission_board()
+    assert mb["state"] == "unavailable"
+
+
+def test_jarvis_mission_board_does_not_execute_prompts(monkeypatch):
+    # Reading the board must never spawn a subprocess / run a prompt.
+    import subprocess
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("mission board must not execute anything")
+
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    mb = client.get("/api/jarvis/status").json()["mission_board"]
+    assert mb["state"] == "ready"
+
+
+def test_jarvis_mission_board_prompt_is_text_only():
+    import app as app_module
+    mb = app_module._jarvis_mission_board()
+    for m in mb["missions"]:
+        # safe_next_prompt, if present, is a plain string — never a callable
+        # descriptor, command list, or execution affordance.
+        p = m.get("safe_next_prompt", "")
+        assert isinstance(p, str)
+        # mission dicts expose no execution/control fields
+        for forbidden in ("command", "cmd", "exec", "run", "shell", "action"):
+            assert forbidden not in m, f"mission exposes control field: {forbidden}"
+
+
+def test_jarvis_mission_board_seed_file_is_tracked_safe():
+    # The seed file lives under docs/ (tracked) and is pure data — no code.
+    src = (_REPO_ROOT / "docs" / "jarvis_mission_board.json").read_text(
+        encoding="utf-8"
+    )
+    import json
+    data = json.loads(src)
+    assert data["version"] == 1
+    assert isinstance(data["missions"], list)
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

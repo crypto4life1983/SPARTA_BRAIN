@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "updated_at": "2026-05-30T01:30:00",
+  "missions": [
+    {
+      "id": "JARVIS-LOCAL-SMOKE",
+      "title": "Open /jarvis locally and verify panels",
+      "status": "pending",
+      "priority": "high",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Run the local server, open /jarvis, and report whether all panels render correctly. Do not modify files.",
+      "blocked": false,
+      "notes": "Manual operator validation only."
+    },
+    {
+      "id": "JARVIS-HEALTH-REPORT",
+      "title": "Generate cached health report manually",
+      "status": "pending",
+      "priority": "high",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Run python tools/jarvis_health_report.py from the repo root and confirm storage/jarvis/health_report.json shows overall pass. Do not modify app code.",
+      "blocked": false,
+      "notes": "Refreshes the read-only Health Report panel. Offline only."
+    },
+    {
+      "id": "JARVIS-ROUTE-SMOKE",
+      "title": "Add cached route smoke report later",
+      "status": "backlog",
+      "priority": "medium",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Design a read-only cached route smoke report that records HTTP status for key GET routes, written offline and only read by /api/jarvis/status. Do not add execution controls.",
+      "blocked": false,
+      "notes": "Future additive, read-only step. Not started."
+    },
+    {
+      "id": "JARVIS-TRADING-DETAIL",
+      "title": "Add read-only trading bridge detail panel later",
+      "status": "backlog",
+      "priority": "medium",
+      "area": "trading_bot",
+      "safe_next_prompt": "Extend the JARVIS trading bridge panel with additional read-only sealed-lifecycle detail. Keep trading execution LOCKED and add no order path.",
+      "blocked": false,
+      "notes": "Read-only viewer enhancement only. No broker, no orders."
+    },
+    {
+      "id": "JARVIS-PROMPT-LIBRARY",
+      "title": "Add read-only Claude/Codex prompt library later",
+      "status": "backlog",
+      "priority": "low",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Add a read-only panel that displays a curated set of safe operator prompts from a tracked JSON file. Display text only, no execution.",
+      "blocked": false,
+      "notes": "Display-only library. No prompt is ever executed by the web app."
+    },
+    {
+      "id": "JARVIS-FILE-HYGIENE",
+      "title": "Review untracked-file hygiene later",
+      "status": "backlog",
+      "priority": "low",
+      "area": "sparta_brain",
+      "safe_next_prompt": "Review the large set of untracked files under data/, tools/, and docs/ and propose a .gitignore / cleanup plan. Report only; do not delete or stage anything without approval.",
+      "blocked": false,
+      "notes": "Hygiene review. No deletion without explicit approval."
+    }
+  ]
+}

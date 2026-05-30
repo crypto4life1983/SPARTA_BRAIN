@@ -105,6 +105,25 @@
     .jv-foot{margin-top:18px;font-size:11px;color:var(--jv-dim);
       letter-spacing:.06em;position:relative;z-index:2;text-align:center;}
     .jv-loading{color:var(--jv-dim);font-size:12px;}
+    .jv-wide{grid-column:1/-1;}
+    .jv-counts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;}
+    .jv-chip{font-size:11px;letter-spacing:.06em;padding:3px 9px;border-radius:999px;
+      border:1px solid var(--jv-edge);color:#cfe9ff;background:rgba(63,224,255,.06);}
+    .jv-mcard{border:1px solid rgba(63,224,255,.16);border-radius:10px;
+      padding:11px 13px;margin:9px 0;background:rgba(10,30,54,.4);}
+    .jv-mcard .top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+    .jv-mcard .ttl{font-size:13px;color:#eaf6ff;font-weight:600;}
+    .jv-mcard .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+    .jv-tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+      padding:2px 7px;border-radius:6px;border:1px solid var(--jv-edge);color:#bfe3ff;}
+    .jv-tag.p-high{border-color:var(--jv-bad);color:#ffd2d6;}
+    .jv-tag.p-medium{border-color:var(--jv-warn);color:#ffe8c2;}
+    .jv-tag.blocked{border-color:var(--jv-bad);color:#ffd2d6;}
+    .jv-prompt{margin-top:8px;font-size:12px;color:#bcd6ea;white-space:pre-wrap;
+      background:rgba(0,0,0,.22);border:1px dashed rgba(63,224,255,.18);
+      border-radius:8px;padding:8px 10px;}
+    .jv-prompt .plabel{display:block;font-size:9px;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--jv-dim);margin-bottom:4px;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -202,6 +221,11 @@
     <div class="jv-panel" id="pHealth">
       <h2><span class="ic">&#x2695;</span>Health Report</h2>
       <div class="jv-loading">Reading cached report&hellip;</div>
+    </div>
+
+    <div class="jv-panel jv-wide" id="pMissions">
+      <h2><span class="ic">&#x2691;</span>Mission Board</h2>
+      <div class="jv-loading">Reading mission board&hellip;</div>
     </div>
 
   </div>
@@ -440,6 +464,54 @@
         }
       });
       setPanel('pHealth', hHtml);
+    }
+
+    // Mission Board (read-only — JARVIS never executes a mission)
+    var mb = d.mission_board || {};
+    if(mb.state === 'missing'){
+      setPanel('pMissions',
+        row('Status', 'waiting', 'NO MISSION BOARD') +
+        '<div class="jv-detail">'+esc(mb.message || 'docs/jarvis_mission_board.json not found')+'</div>');
+    } else if(mb.state === 'unavailable' || mb.state === 'error'){
+      setPanel('pMissions', row('Status', 'bad', 'UNAVAILABLE', mb.error || mb.detail));
+    } else {
+      var c = mb.counts || {};
+      var chips = '';
+      chips += '<span class="jv-chip">Total: '+esc(c.total != null ? c.total : 0)+'</span>';
+      if(c.blocked){ chips += '<span class="jv-chip">Blocked: '+esc(c.blocked)+'</span>'; }
+      var bs = c.by_status || {};
+      Object.keys(bs).forEach(function(k){
+        chips += '<span class="jv-chip">'+esc(k)+': '+esc(bs[k])+'</span>';
+      });
+      var bp = c.by_priority || {};
+      Object.keys(bp).forEach(function(k){
+        chips += '<span class="jv-chip">'+esc(k)+' pri: '+esc(bp[k])+'</span>';
+      });
+      var mbHtml = '<div class="jv-counts">'+chips+'</div>';
+      if(mb.updated_at){
+        mbHtml += '<div class="jv-detail" style="margin-bottom:8px">Updated: '+esc(mb.updated_at)+'</div>';
+      }
+      (mb.missions || []).forEach(function(m){
+        var pri = String(m.priority || '').toLowerCase();
+        var card = '<div class="jv-mcard"><div class="top">'+
+          '<span class="ttl">'+esc(m.title || '')+'</span>'+
+          '<span class="jv-tag">'+esc(m.status || '')+'</span></div>'+
+          '<div class="meta">'+
+          '<span class="jv-tag">'+esc(m.id || '')+'</span>'+
+          '<span class="jv-tag p-'+esc(pri)+'">'+esc(m.priority || '')+'</span>'+
+          '<span class="jv-tag">'+esc(m.area || '')+'</span>'+
+          (m.blocked ? '<span class="jv-tag blocked">BLOCKED</span>' : '')+
+          '</div>';
+        if(m.notes){ card += '<div class="jv-detail" style="margin-top:6px">'+esc(m.notes)+'</div>'; }
+        if(m.safe_next_prompt){
+          // Display-only text. No button, no handler, nothing executes it.
+          card += '<div class="jv-prompt"><span class="plabel">Safe next prompt (display only)</span>'+
+            esc(m.safe_next_prompt)+'</div>';
+        }
+        card += '</div>';
+        mbHtml += card;
+      });
+      setPanel('pMissions', mbHtml);
     }
   }
 

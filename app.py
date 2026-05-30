@@ -7689,6 +7689,62 @@ def _jarvis_health_report() -> dict:
     return data
 
 
+def _jarvis_mission_board() -> dict:
+    """READ-ONLY. Loads the operator mission board from a tracked JSON file
+    and returns it for display. JARVIS never executes a mission, never runs
+    safe_next_prompt, and never writes this file — it only reflects it."""
+    path = BASE / "docs" / "jarvis_mission_board.json"
+    if not path.exists():
+        return {"state": "missing",
+                "message": "docs/jarvis_mission_board.json not found"}
+    try:
+        import json as _json
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+        return {"state": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(data, dict):
+        return {"state": "unavailable", "error": "mission board is not a JSON object"}
+    if "version" not in data:
+        return {"state": "unavailable", "error": "missing 'version'"}
+    missions = data.get("missions")
+    if not isinstance(missions, list):
+        return {"state": "unavailable", "error": "'missions' is not a list"}
+    required = ("id", "title", "status", "priority", "area")
+    clean = []
+    for m in missions:
+        if not isinstance(m, dict) or any(k not in m for k in required):
+            return {"state": "unavailable",
+                    "error": "a mission is missing required fields"}
+        # Re-emit only known, display-only fields — never anything executable.
+        clean.append({
+            "id": m.get("id"),
+            "title": m.get("title"),
+            "status": m.get("status"),
+            "priority": m.get("priority"),
+            "area": m.get("area"),
+            "blocked": bool(m.get("blocked", False)),
+            "notes": m.get("notes", ""),
+            "safe_next_prompt": m.get("safe_next_prompt", ""),
+        })
+    by_status: dict = {}
+    by_priority: dict = {}
+    for m in clean:
+        by_status[m["status"]] = by_status.get(m["status"], 0) + 1
+        by_priority[m["priority"]] = by_priority.get(m["priority"], 0) + 1
+    return {
+        "state": "ready",
+        "version": data.get("version"),
+        "updated_at": data.get("updated_at"),
+        "missions": clean,
+        "counts": {
+            "total": len(clean),
+            "by_status": by_status,
+            "by_priority": by_priority,
+            "blocked": sum(1 for m in clean if m["blocked"]),
+        },
+    }
+
+
 _JARVIS_NEXT_ACTIONS = [
     "Review the latest sealed lifecycles in the Trading Bridge (read-only).",
     "Open /guide to confirm the JARVIS module manual entry is accurate.",
@@ -7723,6 +7779,7 @@ def api_jarvis_status():
     project = _jarvis_safe(_jarvis_project_files)
     brain_memory = _jarvis_safe(_jarvis_brain_memory)
     health_report = _jarvis_safe(_jarvis_health_report)
+    mission_board = _jarvis_safe(_jarvis_mission_board)
     return {
         "online": True,
         "read_only": True,
@@ -7739,6 +7796,7 @@ def api_jarvis_status():
         "project": project,
         "brain_memory": brain_memory,
         "health_report": health_report,
+        "mission_board": mission_board,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
 
