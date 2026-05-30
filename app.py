@@ -7960,6 +7960,126 @@ def _jarvis_prompt_library() -> dict:
     }
 
 
+def _jarvis_commander_snapshot(operator_safety, safety_gates, health,
+                               route_smoke, mission_board, prompt_library,
+                               file_hygiene, trading_detail, git) -> dict:
+    """Derive a conservative top-level snapshot from data ALREADY collected by
+    the other read-only helpers. This function runs NOTHING — no subprocess,
+    no git, no route probe, no test, no file scan. It only reads the dicts it
+    is handed and synthesizes a green/yellow/red verdict. When unsure it is
+    deliberately conservative and returns yellow rather than green."""
+    def _g(d, *keys, default=None):
+        cur = d
+        for k in keys:
+            if not isinstance(cur, dict):
+                return default
+            cur = cur.get(k)
+        return cur if cur is not None else default
+
+    # --- safety posture (all must hold to be 'locked') ---
+    os_locked = isinstance(operator_safety, dict) and operator_safety.get("state") == "locked"
+    sg_locked = isinstance(safety_gates, dict) and safety_gates.get("state") == "locked"
+    read_only = bool(_g(operator_safety, "read_only", default=False))
+    no_broker = bool(_g(operator_safety, "no_broker_control", default=False))
+    no_exec = bool(_g(operator_safety, "no_execution_control", default=False))
+    safety_locked = bool(os_locked and sg_locked and read_only and no_broker and no_exec)
+    safety_status = "locked" if safety_locked else "unknown"
+
+    # --- trading posture (from the read-only trading detail summary) ---
+    broker_control = bool(_g(trading_detail, "broker_control", default=False))
+    paper_ready = bool(_g(trading_detail, "paper_ready", default=False))
+    live_ready = bool(_g(trading_detail, "live_ready", default=False))
+    execution_risk = bool(broker_control or paper_ready or live_ready)
+    trading_posture = "research_only" if not execution_risk else "EXECUTION_RISK"
+
+    # --- cached report statuses: collapse to pass/fail/<state> ---
+    def _report_status(d):
+        st = _g(d, "state", default="missing")
+        if st == "ready":
+            ov = str(_g(d, "overall", default="")).lower()
+            return ov if ov in ("pass", "fail") else "ready"
+        return st  # missing / unavailable / error
+    health_status = _report_status(health)
+    route_smoke_status = _report_status(route_smoke)
+
+    mission_count = _g(mission_board, "counts", "total", default=0) or 0
+    prompt_count = _g(prompt_library, "counts", "total", default=0) or 0
+    fh_state = _g(file_hygiene, "state", default="missing")
+    untracked_count = _g(file_hygiene, "total_untracked_count", default=None)
+    staged_count = _g(file_hygiene, "staged_count", default=None)
+    git_dirty = bool(_g(git, "dirty", default=False))
+
+    warnings: list = []
+    red = False
+    yellow = False
+
+    # RED: any safety contract broken, execution capability present, or a
+    # required (health / route smoke) check explicitly FAILS.
+    if not safety_locked:
+        red = True
+        warnings.append("Safety posture is not fully LOCKED.")
+    if execution_risk:
+        red = True
+        warnings.append("Trading detail reports execution capability (broker/paper/live).")
+    if health_status == "fail":
+        red = True
+        warnings.append("Health report overall = FAIL.")
+    if route_smoke_status == "fail":
+        red = True
+        warnings.append("Route smoke overall = FAIL.")
+
+    # YELLOW: cached reports missing/unavailable, staged files, a large
+    # untracked backlog, or a dirty working tree.
+    if health_status in ("missing", "unavailable", "error", "ready"):
+        yellow = True
+        warnings.append(f"Health report not confirmed pass ({health_status}).")
+    if route_smoke_status in ("missing", "unavailable", "error", "ready"):
+        yellow = True
+        warnings.append(f"Route smoke not confirmed pass ({route_smoke_status}).")
+    if fh_state in ("missing", "unavailable", "error"):
+        yellow = True
+        warnings.append(f"File hygiene report {fh_state}.")
+    if isinstance(staged_count, int) and staged_count > 0:
+        yellow = True
+        warnings.append(f"{staged_count} file(s) staged — review before commit.")
+    if isinstance(untracked_count, int) and untracked_count > 1000:
+        yellow = True
+        warnings.append(f"Large untracked backlog ({untracked_count} files).")
+    if git_dirty:
+        yellow = True
+        warnings.append("Git working tree is dirty.")
+
+    no_staged = (staged_count == 0)
+    if red:
+        overall_state = "red"
+    elif (safety_locked and health_status == "pass"
+          and route_smoke_status == "pass" and no_staged and not yellow):
+        overall_state = "green"
+    else:
+        # Conservative default: anything not provably all-green is yellow.
+        overall_state = "yellow"
+
+    headline = {
+        "green": "All clear — read-only console nominal, safety locked, reports pass.",
+        "yellow": "Caution — review warnings; some reports unconfirmed or tree not clean.",
+        "red": "Alert — a safety contract or a required report check failed.",
+    }[overall_state]
+
+    return {
+        "overall_state": overall_state,
+        "headline": headline,
+        "safety_status": safety_status,
+        "health_status": health_status,
+        "route_smoke_status": route_smoke_status,
+        "trading_posture": trading_posture,
+        "mission_count": mission_count,
+        "prompt_count": prompt_count,
+        "staged_count": staged_count,
+        "untracked_count": untracked_count,
+        "warnings": warnings[:8],
+    }
+
+
 _JARVIS_NEXT_ACTIONS = [
     "Review the latest sealed lifecycles in the Trading Bridge (read-only).",
     "Open /guide to confirm the JARVIS module manual entry is accurate.",
@@ -7999,9 +8119,14 @@ def api_jarvis_status():
     mission_board = _jarvis_safe(_jarvis_mission_board)
     prompt_library = _jarvis_safe(_jarvis_prompt_library)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
+    # Derived ONLY from the dicts already collected above — no new commands.
+    commander_snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
+        operator_safety, safety, health_report, route_smoke, mission_board,
+        prompt_library, file_hygiene, trading_detail, git))
     return {
         "online": True,
         "read_only": True,
+        "commander_snapshot": commander_snapshot,
         "system_core": system,
         "ai_brains": ai,
         "trading_bridge": trading,

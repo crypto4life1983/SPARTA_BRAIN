@@ -993,6 +993,169 @@ def test_file_hygiene_report_exposes_no_mutation_fields():
         assert forbidden not in keys, f"forbidden mutation key: {forbidden}"
 
 
+# --- Step 09: commander's snapshot (derived, read-only) -------------------
+
+def _green_snapshot_inputs():
+    return dict(
+        operator_safety={"state": "locked", "read_only": True,
+                         "no_broker_control": True, "no_execution_control": True},
+        safety_gates={"state": "locked"},
+        health={"state": "ready", "overall": "pass"},
+        route_smoke={"state": "ready", "overall": "pass"},
+        mission_board={"counts": {"total": 4}},
+        prompt_library={"counts": {"total": 8}},
+        file_hygiene={"state": "ready", "total_untracked_count": 12, "staged_count": 0},
+        trading_detail={"broker_control": False, "paper_ready": False,
+                        "live_ready": False},
+        git={"dirty": False},
+    )
+
+
+def test_jarvis_status_has_commander_snapshot_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "commander_snapshot" in d
+    cs = d["commander_snapshot"]
+    assert isinstance(cs, dict)
+    for key in ("overall_state", "headline", "safety_status", "health_status",
+                "route_smoke_status", "trading_posture", "mission_count",
+                "prompt_count", "staged_count", "untracked_count", "warnings"):
+        assert key in cs, f"snapshot missing {key}"
+    assert cs["overall_state"] in ("green", "yellow", "red")
+
+
+def test_commander_snapshot_green_only_when_all_clear():
+    import app as app_module
+    cs = app_module._jarvis_commander_snapshot(**_green_snapshot_inputs())
+    assert cs["overall_state"] == "green", cs
+    assert cs["safety_status"] == "locked"
+    assert cs["health_status"] == "pass"
+    assert cs["route_smoke_status"] == "pass"
+    assert cs["trading_posture"] == "research_only"
+    assert cs["mission_count"] == 4
+    assert cs["prompt_count"] == 8
+
+
+def test_commander_snapshot_red_when_safety_unsafe():
+    import app as app_module
+    args = _green_snapshot_inputs()
+    args["operator_safety"] = {"state": "locked", "read_only": True,
+                               "no_broker_control": False,
+                               "no_execution_control": True}
+    cs = app_module._jarvis_commander_snapshot(**args)
+    assert cs["overall_state"] == "red", cs
+    assert cs["safety_status"] == "unknown"
+
+
+def test_commander_snapshot_red_when_execution_capability_present():
+    import app as app_module
+    args = _green_snapshot_inputs()
+    args["trading_detail"] = {"broker_control": False, "paper_ready": True,
+                              "live_ready": False}
+    cs = app_module._jarvis_commander_snapshot(**args)
+    assert cs["overall_state"] == "red", cs
+    assert cs["trading_posture"] == "EXECUTION_RISK"
+
+
+def test_commander_snapshot_red_when_required_report_fails():
+    import app as app_module
+    args = _green_snapshot_inputs()
+    args["route_smoke"] = {"state": "ready", "overall": "fail"}
+    cs = app_module._jarvis_commander_snapshot(**args)
+    assert cs["overall_state"] == "red", cs
+    assert cs["route_smoke_status"] == "fail"
+
+
+def test_commander_snapshot_yellow_when_report_missing():
+    import app as app_module
+    args = _green_snapshot_inputs()
+    args["health"] = {"state": "missing"}
+    cs = app_module._jarvis_commander_snapshot(**args)
+    assert cs["overall_state"] == "yellow", cs
+    assert cs["health_status"] == "missing"
+
+
+def test_commander_snapshot_yellow_when_files_staged():
+    import app as app_module
+    args = _green_snapshot_inputs()
+    args["file_hygiene"] = {"state": "ready", "total_untracked_count": 5,
+                            "staged_count": 2}
+    cs = app_module._jarvis_commander_snapshot(**args)
+    assert cs["overall_state"] == "yellow", cs
+    assert cs["staged_count"] == 2
+    assert any("staged" in w.lower() for w in cs["warnings"])
+
+
+def test_commander_snapshot_yellow_when_tree_dirty_or_huge_backlog():
+    import app as app_module
+    args = _green_snapshot_inputs()
+    args["git"] = {"dirty": True}
+    args["file_hygiene"] = {"state": "ready", "total_untracked_count": 4371,
+                            "staged_count": 0}
+    cs = app_module._jarvis_commander_snapshot(**args)
+    assert cs["overall_state"] == "yellow", cs
+
+
+def test_commander_snapshot_derives_from_live_sections():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    cs = d["commander_snapshot"]
+    # mission/prompt counts must mirror the underlying sections, not invent data
+    assert cs["mission_count"] == (d["mission_board"].get("counts") or {}).get("total", 0)
+    assert cs["prompt_count"] == (d["prompt_library"].get("counts") or {}).get("total", 0)
+    fh = d["file_hygiene_report"]
+    if fh.get("state") == "ready":
+        assert cs["untracked_count"] == fh.get("total_untracked_count")
+        assert cs["staged_count"] == fh.get("staged_count")
+
+
+def test_commander_snapshot_endpoint_runs_no_new_commands(monkeypatch):
+    # Producing the snapshot must not spawn a subprocess or make an HTTP call.
+    # (git/route sections are fail-closed; the snapshot only reads their dicts.)
+    import subprocess
+    import urllib.request
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("snapshot must not run new commands / scans")
+
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    cs = r.json()["commander_snapshot"]
+    assert cs["overall_state"] in ("green", "yellow", "red")
+
+
+def test_commander_snapshot_exposes_no_execution_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    cs = client.get("/api/jarvis/status").json()["commander_snapshot"]
+
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+
+    keys = set(_keys(cs))
+    for forbidden in ("run_command", "exec", "shell", "place_order",
+                      "submit_order", "execute_trade", "stage", "commit",
+                      "delete", "trigger", "onclick"):
+        assert forbidden not in keys, f"forbidden control key: {forbidden}"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

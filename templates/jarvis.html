@@ -124,6 +124,17 @@
       border-radius:8px;padding:8px 10px;}
     .jv-prompt .plabel{display:block;font-size:9px;letter-spacing:.12em;
       text-transform:uppercase;color:var(--jv-dim);margin-bottom:4px;}
+    .jv-snap{border-width:2px;}
+    .jv-snap.s-green{border-color:var(--jv-ok);box-shadow:0 0 22px rgba(55,245,168,.18);}
+    .jv-snap.s-yellow{border-color:var(--jv-warn);box-shadow:0 0 22px rgba(255,195,77,.18);}
+    .jv-snap.s-red{border-color:var(--jv-bad);box-shadow:0 0 22px rgba(255,93,115,.20);}
+    .jv-snap .jv-badge{display:inline-block;font-size:15px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;padding:4px 14px;border-radius:8px;
+      border:1px solid var(--jv-edge);}
+    .jv-snap.s-green .jv-badge{color:var(--jv-ok);border-color:var(--jv-ok);}
+    .jv-snap.s-yellow .jv-badge{color:var(--jv-warn);border-color:var(--jv-warn);}
+    .jv-snap.s-red .jv-badge{color:var(--jv-bad);border-color:var(--jv-bad);}
+    .jv-snap .jv-headline{font-size:14px;color:#eaf6ff;margin:10px 0 4px;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -148,6 +159,11 @@
   </div>
 
   <div class="jv-grid">
+
+    <div class="jv-panel jv-wide jv-snap" id="pSnapshot">
+      <h2><span class="ic">&#x2726;</span>Commander's Snapshot</h2>
+      <div class="jv-loading">Synthesizing snapshot&hellip;</div>
+    </div>
 
     <div class="jv-panel" id="pCore">
       <h2><span class="ic">&#x25C6;</span>System Core</h2>
@@ -297,6 +313,41 @@
   }
 
   function render(d){
+    // Commander's Snapshot (derived top-level summary — display only)
+    var cs = d.commander_snapshot || {};
+    var snapEl = document.getElementById('pSnapshot');
+    if(snapEl){
+      var ov = (cs.overall_state || 'yellow').toLowerCase();
+      if(['green','yellow','red'].indexOf(ov) < 0){ ov = 'yellow'; }
+      snapEl.classList.remove('s-green','s-yellow','s-red');
+      snapEl.classList.add('s-' + ov);
+      var ledMap = {green:'online', yellow:'waiting', red:'blocked'};
+      var csHtml = '<div class="jv-badge">'+esc(ov.toUpperCase())+'</div>'+
+        '<div class="jv-headline">'+esc(cs.headline || '')+'</div>' +
+        row('Safety', cs.safety_status === 'locked' ? 'locked' : 'waiting',
+            esc((cs.safety_status || 'unknown').toUpperCase())) +
+        row('Health', cs.health_status === 'pass' ? 'online'
+              : (cs.health_status === 'fail' ? 'blocked' : 'waiting'),
+            esc((cs.health_status || 'unknown').toUpperCase())) +
+        row('Route smoke', cs.route_smoke_status === 'pass' ? 'online'
+              : (cs.route_smoke_status === 'fail' ? 'blocked' : 'waiting'),
+            esc((cs.route_smoke_status || 'unknown').toUpperCase())) +
+        row('Trading posture', cs.trading_posture === 'research_only' ? 'locked' : 'blocked',
+            esc((cs.trading_posture || 'unknown').toUpperCase())) +
+        row('Missions', '', esc(cs.mission_count != null ? cs.mission_count : 0)) +
+        row('Prompts', '', esc(cs.prompt_count != null ? cs.prompt_count : 0)) +
+        row('Staged', (cs.staged_count ? 'waiting' : 'online'),
+            esc(cs.staged_count != null ? cs.staged_count : '—')) +
+        row('Untracked', '', esc(cs.untracked_count != null ? cs.untracked_count : '—'));
+      var csWarn = cs.warnings || [];
+      if(csWarn.length){
+        csHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-warn)">Warnings: '+
+          csWarn.map(function(w){ return esc(w); }).join('; ')+'</div>';
+      }
+      var h2s = snapEl.querySelector('h2');
+      snapEl.innerHTML = (h2s ? h2s.outerHTML : '') + csHtml;
+    }
+
     // System Core
     var sc = d.system_core || {};
     var counts = sc.counts || {};
