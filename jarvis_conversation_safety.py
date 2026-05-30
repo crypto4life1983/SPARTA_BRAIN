@@ -59,6 +59,7 @@ _FORBIDDEN_TRADING = tuple(re.compile(p) for p in (
     r"\bplace\s+(?:a\s+|an\s+)?(?:trade|order)\b",
     r"\bsubmit\s+(?:an\s+)?order\b",
     r"\bexecute\s+(?:a\s+)?trade\b",
+    r"\bstart\s+trading\b",
     r"\bbuy\b",
     r"\bsell\b",
     r"\bgo\s+long\b",
@@ -74,7 +75,8 @@ _FORBIDDEN_TRADING = tuple(re.compile(p) for p in (
 
 _FORBIDDEN_EXECUTION = tuple(re.compile(p) for p in (
     r"\brun\b.*\b(?:script|command|cmd|test|tests|probe|tool|pipeline)\b",
-    r"\bexecute\b.*\b(?:command|script|cmd)\b",
+    r"\brun\s+git\b",
+    r"\bexecute\b.*\b(?:command|script|cmd|report|generator)\b",
     r"\b(?:trigger|do|start|kick\s+off)\b.*\brefresh\b",
     r"\brefresh\b",
     r"\bstage\b.*\bcommit\b",
@@ -96,6 +98,9 @@ _FORBIDDEN_MUTATION = tuple(re.compile(p) for p in (
     r"\bupdate\s+(?:the\s+)?template\b",
     r"\bsave\b.*\b(?:chat\s+)?log\b",
     r"\bsave\b.*\bto\s+disk\b",
+    r"\bwrite\b.*\bsnapshot\b",
+    r"\bsave\b.*\b(?:state|snapshot)\b",
+    r"\bclean\b.*\b(?:untracked|tree|files?)\b",
     r"\bdelete\b",
 ))
 
@@ -157,6 +162,17 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\btrad(?:e|es|ing)\b.*\b(?:status|update|overview|doing|going)\b",
     r"\b(?:status|update|overview|doing|going)\b.*\btrad(?:e|es|ing)\b",
     r"\bwith\s+trad(?:e|es|ing)\b",
+    # Read-only "what changed?" change-summary questions (Step 43). Answered
+    # conservatively from current status only: JARVIS keeps no baseline, so it
+    # never claims a verified change without a provided snapshot. Forbidden
+    # (refresh/run/write/commit/clean/trade) is still checked FIRST, so mixed
+    # phrases like "what changed and refresh status" stay refused.
+    r"\bchanged\b",
+    r"\bchange\s+summary\b",
+    r"\bwhat'?s\s+new\b",
+    r"\bwhat\s+is\s+new\b",
+    r"\bwhat\s+new\b",
+    r"\bsummar(?:ize|ise)\s+(?:current\s+)?changes\b",
     r"\bjarvis\s+docs\b",
     r"\bwhat\s+docs\b",
     r"\bdocs\s+exist\b",

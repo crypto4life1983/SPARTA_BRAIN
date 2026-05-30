@@ -292,3 +292,44 @@ def test_step41_natural_phrases_with_forbidden_intent_still_refused(q):
     out = classify_jarvis_question(q)
     assert out["refused"] is True, f"{q!r} must stay refused"
     assert out["safety_class"].startswith("FORBIDDEN")
+
+
+# --- Step 43: "what changed?" change-summary questions classify SAFE_INFO ---
+
+@pytest.mark.parametrize("q", [
+    "what changed since last check",
+    "what changed since yesterday",
+    "what changed today",
+    "what is new",
+    "what new commits happened",
+    "what new trading reports appeared",
+    "what warnings changed",
+    "what needs attention now",
+    "what changed in JARVIS",
+    "summarize current changes",
+    "give me a change summary",
+    "what changed since I last checked",
+])
+def test_step43_what_changed_questions_are_safe_info(q):
+    out = classify_jarvis_question(q)
+    assert out["refused"] is False, f"{q!r} must be a read-only safe question"
+    assert out["safety_class"] == "SAFE_INFO", f"{q!r} -> {out['safety_class']}"
+
+
+@pytest.mark.parametrize("q", [
+    "what changed and refresh status",
+    "what changed and run git log",
+    "what changed and write a snapshot",
+    "what changed and save this state",
+    "what changed and execute report generator",
+    "what changed and clean untracked files",
+    "what changed and start trading",
+    "summarize changes then place a trade",
+    "what new reports appeared then approve strategy",
+])
+def test_step43_what_changed_with_forbidden_intent_still_refused(q):
+    # Safe "what changed?" wording must never let an action-request through;
+    # forbidden is checked first.
+    out = classify_jarvis_question(q)
+    assert out["refused"] is True, f"{q!r} must stay refused"
+    assert out["safety_class"].startswith("FORBIDDEN"), f"{q!r} -> {out['safety_class']}"

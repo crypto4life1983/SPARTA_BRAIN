@@ -1,0 +1,85 @@
+{
+  "title": "JARVIS Step 43 — What Changed? Safe Classifier Coverage + Static Answers",
+  "generated_at": "2026-05-30T20:25:00",
+  "type": "classifier_plus_route_answer_quality_plus_tests_plus_docs",
+  "read_only": true,
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Recognize safe operator 'what changed?' questions (e.g. 'what changed since last check?') as read-only SAFE_INFO and answer them conservatively from current status only. JARVIS keeps no stored snapshot/baseline, so it explicitly says it cannot compare against a previous check yet and claims no verified changes. All safety/refusal behavior is preserved: forbidden intent is still matched first and overrides any safe wording. Implements the Step 42 plan's Option A + B starting point with no persistence.",
+  "relation_to_step_42": "Step 42 (a1ac1a6, JARVIS_CHANGE_SUMMARY_PLAN_READY) planned the future change-summary capability. Step 43 implements the safest first slice: recognize safe 'what changed?' phrasings and answer with a current-status summary only (Option A). Operator-supplied baseline comparison (Option B) and any snapshot storage (Options C/D) remain deferred; JARVIS never claims a change without a provided baseline.",
+  "files_changed": [
+    "jarvis_conversation_safety.py — added 6 read-only SAFE_INFO patterns for change-summary intent (\\bchanged\\b, \\bchange\\s+summary\\b, \\bwhat'?s\\s+new\\b, \\bwhat\\s+is\\s+new\\b, \\bwhat\\s+new\\b, \\bsummar(?:ize|ise)\\s+(?:current\\s+)?changes\\b); added 6 forbidden patterns so mixed action requests still refuse (forbidden checked first): TRADING start trading; EXECUTION run git and report|generator inside the execute clause; MUTATION write snapshot, save state/snapshot, clean untracked/tree/files.",
+    "app.py — added _jarvis_what_changed_answer() (READ-ONLY; summarizes current status from _jarvis_git, _jarvis_trading_detail, _jarvis_cache_freshness, and derived _jarvis_commander_snapshot; runs no git/refresh/execution, fetches nothing, writes nothing, stores no snapshot, never claims a verified change) and routed change-summary questions to it in _jarvis_ask_answer BEFORE the trading branch so 'what new trading reports appeared' is a change summary, not a posture answer.",
+    "tests/test_jarvis_conversation_safety.py — added Step 43 classifier tests (12 safe 'what changed?' phrasings -> SAFE_INFO; 9 mixed-forbidden phrasings -> FORBIDDEN).",
+    "tests/test_jarvis_ask_contract.py — added Step 43 ask-endpoint tests (11 phrasings answer refused=false, SAFE_INFO, say no baseline/cannot compare, summarize current status, no forbidden response fields; no invented/asserted changes; 9 mixed-forbidden refused; status shape unchanged).",
+    "docs/jarvis_step_43_what_changed_static_answers/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No templates/jarvis.html change (UI untouched; still sends only {question}).",
+    "No new endpoint added.",
+    "No snapshot storage; no server-side log; no browser write.",
+    "No refresh / execution / broker / paper / live control.",
+    "No data fetched; no trade run or simulated.",
+    "No broker / live / paper trading logic touched.",
+    "No trading / Factory / S26-S28 / Donchian / Hydra / base.html / storage file touched.",
+    "The dirty Crypto-D8 report files (crypto_d8_signal_density_power_audit/report.json and report.md) were NOT touched.",
+    "No change to the /api/jarvis/ask payload shape ({question} only) or response key set.",
+    "No change to /api/jarvis/status shape (24 keys).",
+    "No invented profit / performance / win-rate / readiness / validation / approval claims; no asserted changes without a baseline.",
+    "Nothing staged or committed."
+  ],
+  "what_changed_phrase_coverage": [
+    "what changed since last check",
+    "what changed since yesterday",
+    "what changed today",
+    "what is new",
+    "what new commits happened",
+    "what new trading reports appeared",
+    "what warnings changed",
+    "what needs attention now",
+    "what changed in JARVIS",
+    "summarize current changes",
+    "give me a change summary",
+    "what changed since I last checked"
+  ],
+  "example_answer_what_changed_since_last_check": {
+    "question": "what changed since last check?",
+    "refused": false,
+    "safety_class": "SAFE_INFO",
+    "sources_used": ["git", "trading_detail", "cache_freshness", "commander_snapshot"],
+    "answer_shape": "I cannot compare against a previous snapshot yet — JARVIS stores no baseline, so I am reporting current read-only status only and claiming no changes. Verified current status: current HEAD ... working tree ... most recent trading reports ... cache freshness overall ... commander snapshot state ... current warning count ... Unknown because no previous baseline is available: I keep no stored snapshot, so I cannot say what changed since a previous check, what is new, or which warnings changed compared to before. Provide a previous snapshot to compare against, or treat the above as current state only.",
+    "properties": [
+      "Separates 'Verified current status' from 'Unknown because no previous baseline is available'.",
+      "Never asserts a change; explicitly claims no changes without a baseline.",
+      "Invents no performance/readiness claims."
+    ]
+  },
+  "safety_refusal_confirmation": {
+    "mixed_forbidden_still_refused": [
+      "what changed and refresh status -> FORBIDDEN_EXECUTION",
+      "what changed and run git log -> FORBIDDEN_EXECUTION",
+      "what changed and write a snapshot -> FORBIDDEN_MUTATION",
+      "what changed and save this state -> FORBIDDEN_MUTATION",
+      "what changed and execute report generator -> FORBIDDEN_EXECUTION",
+      "what changed and clean untracked files -> FORBIDDEN_MUTATION",
+      "what changed and start trading -> FORBIDDEN_TRADING",
+      "summarize changes then place a trade -> FORBIDDEN_TRADING",
+      "what new reports appeared then approve strategy -> FORBIDDEN_TRADING"
+    ],
+    "response_has_no_command_keys": true,
+    "response_keys": ["answer", "safety_class", "sources_used", "refused", "refusal_reason"]
+  },
+  "status_shape_confirmation": {
+    "top_level_key_count": 24,
+    "online": true,
+    "read_only": true,
+    "trading_detail_flags": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false}
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "362 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_43_what_changed_static_answers/report.json", "result": "JSON_OK"},
+    {"cmd": "git diff --name-only", "result": "app.py, jarvis_conversation_safety.py, tests/test_jarvis_ask_contract.py, tests/test_jarvis_conversation_safety.py (templates/jarvis.html and test_jarvis_route.py unchanged; Crypto-D8 files not touched)"}
+  ],
+  "conclusion": "JARVIS now recognizes safe 'what changed?' operator questions as read-only SAFE_INFO and answers them with a conservative current-status summary that explicitly states it cannot compare against a previous baseline and claims no verified changes — the Step 42 Option A starting point, with no persistence, no snapshot, no storage, no log, no refresh, no execution, and no trading control. Forbidden intent still overrides safe wording (forbidden checked first), so mixed phrases like 'what changed and refresh status' or 'summarize changes then place a trade' stay refused. The ask response keeps its five fields with no command/action/order keys, and the /api/jarvis/status shape is unchanged at 24 keys with trading flags locked false. 362 tests pass. Nothing staged or committed.",
+  "verdict": "JARVIS_WHAT_CHANGED_STATIC_ANSWERS_READY"
+}

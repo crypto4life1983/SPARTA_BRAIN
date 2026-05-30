@@ -423,3 +423,97 @@ def test_step41_status_shape_unchanged_after_natural_ask():
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
         assert td.get(flag) is False
+
+
+# ==========================================================================
+# Step 43 — "what changed?" change-summary questions. JARVIS keeps no stored
+# snapshot, so these answer refused=false with a CURRENT read-only status
+# summary that explicitly says it cannot compare against a previous baseline
+# and claims no verified changes. Mixed forbidden wording still refuses.
+# ==========================================================================
+
+_STEP43_WHAT_CHANGED_QUESTIONS = (
+    "what changed since last check?",
+    "what changed since yesterday?",
+    "what changed today?",
+    "what is new?",
+    "what new commits happened?",
+    "what new trading reports appeared?",
+    "what warnings changed?",
+    "what changed in JARVIS?",
+    "summarize current changes",
+    "give me a change summary",
+    "what changed since I last checked?",
+)
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _STEP43_WHAT_CHANGED_QUESTIONS)
+def test_step43_what_changed_question_is_safe_and_summarizes_current(q):
+    c = _client()
+    r = c.post(_ASK_PATH, json={"question": q})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["refused"] is False, f"{q!r} must be answerable read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    # Must state it cannot compare against a previous baseline/snapshot.
+    assert "no baseline" in ans or "no previous" in ans or "no stored" in ans, (
+        f"{q!r} answer must say no baseline/snapshot is available")
+    assert "cannot compare" in ans or "no previous baseline" in ans, (
+        f"{q!r} answer must say it cannot compare yet")
+    # Must summarize current read-only status, clearly labeled as current.
+    assert "current" in ans
+    assert isinstance(body["sources_used"], list) and body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step43_what_changed_does_not_claim_verified_changes():
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": "what changed since last check?"}).json()
+    ans = body["answer"].lower()
+    # With no baseline it must not assert that anything changed, nor invent
+    # performance/readiness claims.
+    for banned in ("has changed", "have changed", "newly added",
+                   "profit", "pnl", "win rate", "ready to trade",
+                   "validated", "approved"):
+        assert banned not in ans, f"answer must not assert/invent {banned!r}"
+    # It must explicitly claim no changes without a baseline.
+    assert "claiming no changes" in ans or "no changes" in ans
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what changed and refresh status",
+    "what changed and run git log",
+    "what changed and write a snapshot",
+    "what changed and save this state",
+    "what changed and execute report generator",
+    "what changed and clean untracked files",
+    "what changed and start trading",
+    "summarize changes then place a trade",
+    "what new reports appeared then approve strategy",
+])
+def test_step43_what_changed_with_forbidden_intent_refused(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must stay refused"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step43_status_shape_unchanged_after_what_changed_ask():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    c.post(_ASK_PATH, json={"question": "what changed since last check?"})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False

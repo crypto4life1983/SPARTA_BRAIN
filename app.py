@@ -8426,6 +8426,92 @@ def _jarvis_trading_posture_answer():
     )
 
 
+def _jarvis_what_changed_answer():
+    """READ-ONLY. Answer a "what changed?" question conservatively. JARVIS keeps
+    NO stored snapshot/baseline, so it cannot compute a diff: it says so
+    explicitly, then summarizes only the CURRENT read-only status drawn from the
+    same helpers the status endpoint already uses (git, trading_detail,
+    cache_freshness, commander_snapshot). It runs no git/refresh/execution,
+    fetches nothing, writes nothing, and never claims a verified change without a
+    provided baseline. Returns (answer_text, sources_used)."""
+    git = _jarvis_safe(_jarvis_git)
+    if not isinstance(git, dict):
+        git = {}
+    trading = _jarvis_safe(_jarvis_trading_detail)
+    if not isinstance(trading, dict):
+        trading = {}
+    cache = _jarvis_safe(_jarvis_cache_freshness)
+    if not isinstance(cache, dict):
+        cache = {}
+
+    verified: list = []
+    # current HEAD / recent commit subject
+    head = git.get("head")
+    if isinstance(head, str) and head:
+        verified.append(f"current HEAD is {head} on branch {git.get('branch', '?')}")
+    commits = git.get("commits")
+    if isinstance(commits, list) and commits and isinstance(commits[0], dict):
+        subj = commits[0].get("subject")
+        if isinstance(subj, str) and subj:
+            verified.append(f'latest commit subject: "{subj}"')
+    # git clean/dirty posture
+    if isinstance(git.get("clean"), bool):
+        if git["clean"]:
+            verified.append("working tree is clean")
+        else:
+            verified.append(
+                f"working tree is dirty ({git.get('modified_count', '?')} modified, "
+                f"{git.get('untracked_count', '?')} untracked)")
+    # most-recent trading report names already exposed by status
+    reports = trading.get("latest_reports")
+    if isinstance(reports, list) and reports:
+        names = ", ".join(
+            r.get("name", "?") for r in reports[:3] if isinstance(r, dict))
+        if names:
+            verified.append(f"most recent trading reports on disk: {names}")
+    # cache freshness already exposed by status
+    overall = cache.get("overall")
+    if isinstance(overall, str) and overall:
+        verified.append(f"cache freshness overall: {overall}")
+
+    # commander snapshot state + current warning count (derived from the same
+    # read-only helpers the status endpoint hands to _jarvis_commander_snapshot)
+    sources = ["git", "trading_detail", "cache_freshness"]
+    operator_safety = _jarvis_safe(_jarvis_operator_safety)
+    safety_gates = _jarvis_safe(_jarvis_safety_gates)
+    health = _jarvis_safe(_jarvis_health_report)
+    route_smoke = _jarvis_safe(_jarvis_route_smoke_report)
+    mission_board = _jarvis_safe(_jarvis_mission_board)
+    prompt_library = _jarvis_safe(_jarvis_prompt_library)
+    file_hygiene = _jarvis_safe(_jarvis_file_hygiene_report)
+    snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
+        operator_safety, safety_gates, health, route_smoke, mission_board,
+        prompt_library, file_hygiene, trading, git, cache))
+    if isinstance(snapshot, dict):
+        state = snapshot.get("overall_state")
+        if isinstance(state, str) and state:
+            verified.append(f"commander snapshot state: {state}")
+        warns = snapshot.get("warnings")
+        if isinstance(warns, list):
+            verified.append(f"current warning count: {len(warns)}")
+        sources.append("commander_snapshot")
+
+    verified_text = (
+        "Verified current status: " + "; ".join(verified) + "."
+        if verified else
+        "Verified current status: I could not read any current status fields.")
+    unknown_text = (
+        " Unknown because no previous baseline is available: I keep no stored "
+        "snapshot, so I cannot say what changed since a previous check, what is "
+        "new, or which warnings changed compared to before. Provide a previous "
+        "snapshot to compare against, or treat the above as current state only.")
+    answer = (
+        "I cannot compare against a previous snapshot yet — JARVIS stores no "
+        "baseline, so I am reporting current read-only status only and claiming "
+        "no changes. " + verified_text + unknown_text)
+    return (answer, sources)
+
+
 def _jarvis_ask_answer(safety_class: str, q: str):
     """Build a conservative, read-only answer for an already-classified SAFE
     question. Returns (answer_text, sources_used). Reads only already-known
@@ -8457,6 +8543,20 @@ def _jarvis_ask_answer(safety_class: str, q: str):
             "nothing.",
             ["commander_snapshot"],
         )
+    # "What changed?" change-summary questions (Step 43). Checked BEFORE the
+    # trading branch so "what new trading reports appeared" is answered as a
+    # change summary, not a posture answer.
+    if (
+        "changed" in q
+        or "change summary" in q
+        or "summarize current changes" in q
+        or "summarise current changes" in q
+        or "what is new" in q
+        or "what's new" in q
+        or "whats new" in q
+        or "what new" in q
+    ):
+        return _jarvis_what_changed_answer()
     if (
         "trading" in q
         or "trades" in q
