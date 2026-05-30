@@ -1,0 +1,89 @@
+{
+  "title": "JARVIS Step 23 — Known Limits & Safe Roadmap",
+  "generated_at": "2026-05-30T06:30:00",
+  "type": "documentation_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "purpose": "Define JARVIS's current limits, what is intentionally blocked, which improvements are safe to make next, and what must remain forbidden unless explicitly authorized later. Documentation only — it adds no capability, control, or API change.",
+  "relation_to_steps_20_22": "Step 20 polished the UI; Step 21 proved the polished UI is live and safe; Step 22 documented how to operate and interpret it. Step 23 sets the forward-looking guardrails: what JARVIS is, what it deliberately cannot do, and a risk-tiered roadmap so future steps stay inside the read-only safety envelope.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_20_purpose": "Safe UI-only polish pass (templates/jarvis.html only).",
+    "step_21_commit": "4f55aae",
+    "step_21_purpose": "Post-polish live smoke memo (validation only). Conclusion JARVIS_POST_POLISH_SMOKE_PASS.",
+    "step_22_commit": "82ccf52",
+    "step_22_purpose": "Operator guide / runbook (documentation only)."
+  },
+  "jarvis_identity": [
+    "A read-only command center: it mirrors aggregated SPARTA_BRAIN state.",
+    "An observer, not an executor: it never runs commands, scripts, prompts, or missions.",
+    "A status / intelligence surface, not a trading controller: it holds no order path and no broker control."
+  ],
+  "known_limits": [
+    "No broker control — JARVIS cannot connect to or command any broker.",
+    "No paper or live trading readiness — paper_ready and live_ready are always false.",
+    "No execution buttons — the UI has no <button>, no actionable control.",
+    "No POST or refresh actions — GET-only; no /api/jarvis/refresh; data updates only via the page's own GET poll.",
+    "No autonomous decisions — JARVIS does not decide or act on its own.",
+    "No strategy recommendation engine yet — it shows research state but does not recommend or promote strategies.",
+    "No alerting automation yet — it does not push notifications, page, or message.",
+    "No write-back to trading systems — JARVIS never mutates any trading, research, or downstream system."
+  ],
+  "forbidden_unless_explicitly_authorized": [
+    "Broker integration of any kind.",
+    "Live or paper trade enablement (arming paper_ready / live_ready).",
+    "Order placement or any order path.",
+    "Execution UI controls (buttons, forms, onclick, POST).",
+    "Auto-refresh controls that mutate state.",
+    "Strategy promotion / approval controls that trigger downstream effects.",
+    "Changing read_only semantics (read_only must stay true and meaningful)."
+  ],
+  "safe_next_improvements": [
+    "More documentation memos.",
+    "Static help overlays (display-only, no behavior).",
+    "A panel glossary.",
+    "Status-interpretation tables (how to read green/yellow/red and each panel).",
+    "Read-only historical snapshots (display of already-committed point-in-time data).",
+    "A read-only archive view of committed JARVIS health reports.",
+    "Read-only links to committed reports/memos.",
+    "Visual clarity improvements with no new behavior (CSS/label/layout only)."
+  ],
+  "medium_risk_requires_separate_approval": [
+    "Passive auto-refresh polling (cadence/visibility changes to the existing GET poll — still read-only, but timing/behavior change warrants sign-off).",
+    "Dashboard filters (client-side show/hide of already-fetched data).",
+    "Alerting / notifications (any outbound signal).",
+    "External health-report ingestion (reading reports produced outside the current manual tools).",
+    "Stronger commander-snapshot summarization (richer derived synthesis of existing fields)."
+  ],
+  "high_risk_keep_blocked": [
+    "Broker / paper / live controls.",
+    "Any endpoint that writes state.",
+    "Approvals that trigger actions.",
+    "Strategy execution workflows."
+  ],
+  "recommended_step_options": {
+    "step_24": [
+      "JARVIS-PANEL-GLOSSARY-MEMO — a docs-only glossary mapping every panel and api_key to a plain-language definition and how-to-read note.",
+      "JARVIS-STATUS-INTERPRETATION-TABLE-MEMO — a docs-only reference for green/yellow/red and each section's states."
+    ],
+    "step_25": [
+      "JARVIS-DOCS-AUTO-CHECK-MEMO — a read-only memo that re-verifies the docs index against the live API and tracked docs.",
+      "JARVIS-REPORT-ARCHIVE-INDEX-MEMO — a docs-only index of all committed JARVIS step reports with commit hashes and conclusions."
+    ],
+    "step_26": [
+      "JARVIS-CACHE-FRESHNESS-AGE-BADGES — optional display-only age badges per cache row (UI-only, no controls); or",
+      "JARVIS-LIVE-REGRESSION-SMOKE (recurring) — re-run the live smoke memo after the next JARVIS commit."
+    ]
+  },
+  "operator_decision_rule": {
+    "green": "Healthy observation.",
+    "yellow": "Attention needed.",
+    "red": "Stop and investigate.",
+    "critical_note": "None of these colours means permission to execute trades. JARVIS is an observation surface; trade authorization is never granted by a dashboard colour."
+  },
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_step_23_known_limits_safe_roadmap/report.json", "result": "JSON_OK"}
+  ],
+  "conclusion": "Documentation-only known-limits and safe-roadmap memo created. No code, UI, tool, test, API, or trading surface was changed."
+}
