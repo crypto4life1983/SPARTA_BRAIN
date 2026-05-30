@@ -1,0 +1,128 @@
+{
+  "step": "S30-D1",
+  "title": "Deep Strategy Idea-Source Review (selection / research only)",
+  "created": "2026-05-30",
+  "kind": "deep_idea_source_review_only",
+  "memo_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "provenance": {
+    "head_at_memo": "73e1cb0",
+    "s29_d4_decision_commit": "9d5b9d8",
+    "head_note": "HEAD 73e1cb0 is a descendant of the S29-D4 decision-record commit 9d5b9d8; 9d5b9d8 verified ancestor of HEAD; no agentic_factory file touched by automation between 9d5b9d8 and HEAD; factory tree clean, nothing staged.",
+    "context_reports_read": [
+      "reports/factory_d11_validation_factory_closeout/report.md",
+      "reports/s25_d1_donchian_trade_order_monte_carlo/report.md",
+      "reports/s26_d18_trend_sr_ema_rsi_decision_gate/report.md",
+      "reports/s27_d4_mean_reversion_bull_is_baseline/report.md",
+      "reports/s28_d4_breakout_retest_is_baseline/report.md",
+      "reports/s29_d4_failed_breakout_reversal_is_baseline/report.md"
+    ]
+  },
+  "1_parked_branch_lessons": {
+    "dominant_universal_failure": "Top-winner / fat-tail dependence: ALL FIVE parked branches fail the top-3-winner-removal gate. Each is a small-N single-instrument directional trigger whose thin net hinges on a handful of fat-tail captures, which is indistinguishable from luck.",
+    "branches": {
+      "donchian_s23_s25": "PARKED. ENTRY_EDGE_NOT_SUPPORTED; net flips negative ex-top-3 (IS -3.82, OOS -1.93); OOS 16 trades; bootstrap P(total<=0)=20.9%; DD was path luck.",
+      "s26_trend_sr_ema_rsi": "PARKED (PARK_CANDIDATE). Thin IS edge ~0.06R; ENTRY_EDGE_INCONCLUSIVE (not distinct from trend filter); FRICTION_SENSITIVE (neg at 0.10R); post-2016-only with 2014-2016 collapse; OOS single-year-dominated.",
+      "s27_mean_reversion_bull": "PARKED (IS_FAIL). Net -1.75R; 18 trades (<25 floor); PF 0.84; exp -0.097R; 3/10 positive years; top-3 removal -6.25R; over-stacked confirmation starved sample.",
+      "s28_breakout_retest": "PARKED (IS_FAIL). Net -0.72R; 12 trades in 10 years; PF 0.91; exp -0.06R; 3/10 positive; top-3 removal -6.72R; 5-filter stack on raw breakout = clean negative.",
+      "s29_failed_breakout_reversal": "PARKED (IS_FAIL). Failed the IS gate despite being the inverse of a raw breakout; the breakout family is now exhausted on this data."
+    },
+    "secondary_failures": [
+      "Low trade count from over-stacked filters (S27=18, S28=12).",
+      "Thin expectancy with no friction headroom (S26 ~0.06R, S29) -> dies at >=0.10R/trade cost.",
+      "Entry edge not distinct from the regime/trend filter (S26 INCONCLUSIVE).",
+      "Poor year distribution (S27/S28 = 3/10 positive years).",
+      "Regime / calendar concentration (S26 post-2016-only; 2014-2016 chop sank it; OOS single-year-dominated).",
+      "Raw breakout / breakout-retest / failed-breakout family fails IS every time (Donchian, S28, S29)."
+    ],
+    "what_s30_must_avoid": [
+      "Single-instrument small-N directional triggers (all fail the top-3 gate).",
+      "Any breakout / breakout-retest / extreme-touch family.",
+      "Filter-stacking for 'quality' (starves trade count).",
+      "Edges < ~0.10R expectancy or that ride a trend filter.",
+      "Anything needing data not available offline."
+    ]
+  },
+  "2_scoring_framework": {
+    "scale": "each criterion scored Low / Med / High",
+    "criteria": {
+      "C1_causal_reason": "Concrete economic/structural mechanism, not a chart shape.",
+      "C2_entry_significance_testable": "Trigger testable vs random-day AND a structural null, isolating the claimed cause.",
+      "C3_expected_trade_count": "Comfortably clears >=40 IS floor; ideally hundreds.",
+      "C4_friction_headroom": "Per-event edge survives >=0.10R/trade realistic cost.",
+      "C5_multi_market_testability": "Independently confirmable on a genuinely separate instrument (NQ<->ES; micros NOT independent).",
+      "C6_regime_robustness": "Edge not dependent on one regime; survives 2014-2016 chop and post-2016 trend.",
+      "C7_daily_data_suitability": "Fully expressible on daily OHLCV with no intraday path dependency.",
+      "C8_low_top_winner_dependence": "Edge is the average of many small bets; net stays positive ex-top-3. THE gate that killed every parked branch.",
+      "C9_distinctness_from_parked": "Not a re-skin of Donchian/S26/S27/S28/S29.",
+      "C10_no_new_data_needed": "High = uses existing offline NQ/ES/MNQ/MES daily CSVs; Low = needs data we lack."
+    },
+    "offline_data_on_hand": {
+      "markets": ["NQ 2013-2025", "ES 2013-2025", "MNQ 2019-2025", "MES 2019-2025"],
+      "bars": "daily OHLCV only; header ts_event,open,high,low,close,volume,symbol",
+      "not_available": "no intraday, no term-structure/individual-contract series, no breadth, no other markets (no YM/Dow, no RTY/Russell)",
+      "micros_note": "MNQ/MES are same-underlying proxies; descriptive only, never independent confirmation."
+    }
+  },
+  "3_candidate_comparison": [
+    {"id": 1, "idea": "Volatility-contraction breakout", "scores": {"C1": "Med", "C2": "Med", "C3": "Med", "C4": "Med", "C5": "High", "C6": "Low", "C7": "High", "C8": "Low", "C9": "Low", "C10": "High"}, "biggest_failure_mode": "Re-inherits the unproven raw-breakout entry (exhausted breakout family).", "similarity_to_parked": "High (Donchian/S28)"},
+    {"id": 2, "idea": "Gap continuation / fade", "scores": {"C1": "Med", "C2": "High", "C3": "High", "C4": "Low", "C5": "High", "C6": "Med", "C7": "Med", "C8": "Med", "C9": "Med", "C10": "High"}, "biggest_failure_mode": "Thin per-gap edge eroded by cost (friction-fragile, S26 risk).", "similarity_to_parked": "Moderate"},
+    {"id": 3, "idea": "Overnight session-return decomposition (overnight-drift anomaly)", "scores": {"C1": "High", "C2": "High", "C3": "High", "C4": "Med", "C5": "High", "C6": "High", "C7": "High", "C8": "High", "C9": "High", "C10": "High"}, "biggest_failure_mode": "Small per-day edge vs friction; and futures open/close prints may not match the true overnight session -> mis-measured legs.", "similarity_to_parked": "None -- a many-bet anomaly-harvest, not a small-N directional trigger."},
+    {"id": 4, "idea": "Range expansion after inside-bar cluster", "scores": {"C1": "Med", "C2": "Med", "C3": "Med", "C4": "Med", "C5": "High", "C6": "Med", "C7": "High", "C8": "Low", "C9": "Med", "C10": "High"}, "biggest_failure_mode": "Directionless compression->expansion; same breakout-direction problem as #1.", "similarity_to_parked": "Moderate-High (breakout family)"},
+    {"id": 5, "idea": "Trend exhaustion after consecutive large-range days", "scores": {"C1": "Med", "C2": "Med", "C3": "Med", "C4": "Med", "C5": "High", "C6": "Low", "C7": "High", "C8": "Low", "C9": "Med", "C10": "High"}, "biggest_failure_mode": "Fades the structural index drift -> bleeds in persistent trends (S27 echo).", "similarity_to_parked": "Mean-reversion-in-bull (S27)"},
+    {"id": 6, "idea": "Turn-of-month / weekday calendar tendency", "scores": {"C1": "High", "C2": "High", "C3": "High", "C4": "Med", "C5": "High", "C6": "High", "C7": "High", "C8": "High", "C9": "High", "C10": "High"}, "biggest_failure_mode": "Calendar-effect overfitting (best-of-N window search) -> MUST hard-freeze the window definition before any run, no sweeps.", "similarity_to_parked": "None"},
+    {"id": 7, "idea": "Cross-market relative-strength NQ vs ES", "scores": {"C1": "Med", "C2": "Med", "C3": "Med", "C4": "Med", "C5": "Low", "C6": "Med", "C7": "High", "C8": "Med", "C9": "High", "C10": "High"}, "biggest_failure_mode": "Consumes BOTH NQ and ES as inputs -> no independent confirmation market left (disqualifying for our validation discipline).", "similarity_to_parked": "Low, but lost-independence is disqualifying"},
+    {"id": 8, "idea": "Vol-regime classifier no-trade overlay", "scores": {"C1": "High", "C2": "Low", "C3": "n/a", "C4": "n/a", "C5": "High", "C6": "High", "C7": "High", "C8": "n/a", "C9": "Low", "C10": "High"}, "biggest_failure_mode": "No standalone entries -> entry significance untestable; it is a filter, not a strategy. Repurpose as a future factory overlay.", "similarity_to_parked": "The S29-D1 idea-1 reject again"},
+    {"id": 9, "idea": "Carry / term-structure", "scores": {"C1": "High", "C2": "Med", "C3": "Med", "C4": "Med", "C5": "High", "C6": "High", "C7": "High", "C8": "Med", "C9": "High", "C10": "Low"}, "biggest_failure_mode": "Requires individual-contract / term-structure series NOT available offline -> cannot test. Disqualified on data, not merit.", "similarity_to_parked": "Low"},
+    {"id": 10, "idea": "Multi-day momentum crash / recovery", "scores": {"C1": "Med", "C2": "Med", "C3": "Med", "C4": "Med", "C5": "High", "C6": "Low", "C7": "High", "C8": "Low", "C9": "Med", "C10": "High"}, "biggest_failure_mode": "Crashes are rare -> small-N, event-/fat-tail-concentrated (the exact top-3 gate that parked everything).", "similarity_to_parked": "Moderate (rare-event reversal, S29 cousin)"}
+  ],
+  "4_ranking": [
+    "1. #3 Overnight session-return decomposition -- only idea that structurally defeats the top-3-winner gate (hundreds of small independent bets), causal risk-premium mechanism, native daily fit, NQ/ES independent, regime-robust, clean entry-significance. Binding open question = friction.",
+    "2. #6 Turn-of-month / weekday calendar -- also a many-bet structural-flow edge, regime-robust, distinct; behind #3 on count and a sharper overfit temptation requiring a hard-frozen window.",
+    "3. #2 Gap continuation/fade -- high count, daily-feasible, but thin per-event edge -> friction-fragile (S26 risk).",
+    "4. #7 Cross-market RS NQ vs ES -- distinct, but consumes both instruments -> no independent confirmation market (disqualifying).",
+    "5. #1 / #4 Vol-contraction & inside-bar breakouts -- re-inherit the exhausted IS-failing raw-breakout family.",
+    "6. #5 / #10 Exhaustion fade & crash-recovery -- regime-/event-concentrated, small-N, top-winner-dependent (S27/S29 echoes).",
+    "7. #9 Carry/term-structure -- strong idea, no data offline -> cannot test.",
+    "8. #8 Vol-regime overlay -- not a standalone strategy (no entries); a future factory overlay, not an S30 branch."
+  ],
+  "5_final_recommendation": {
+    "decision": "SELECT_ONE_FOR_S30_D2",
+    "selected": "Overnight session-return decomposition (overnight-drift anomaly) on daily NQ (primary) / ES (independent confirmation).",
+    "why_better_than_parked": [
+      "Direct antidote to the one failure all five parked branches share: it is the average of hundreds of independent daily bets, so its net cannot be dominated by 3 fat-tail winners -> attacks the top-3 gate at the root.",
+      "Causal, not chart-shaped (beats S26 INCONCLUSIVE): a named economic mechanism (overnight risk premium / inventory rebalancing); entry significance cleanly testable as overnight leg vs day-session leg vs random close-to-close.",
+      "Trade count is a non-issue (beats S27=18 / S28=12): every session is a bet -> thousands over 2013-2022, no filter-stacking.",
+      "Not a breakout (beats Donchian/S28/S29): outside the exhausted breakout family entirely.",
+      "Regime-robust (beats S26 post-2016/2014-2016 split): an all-days average, not a regime bet."
+    ],
+    "binding_caveat": "The per-day overnight edge is SMALL. The decisive pre-registered S30-D2 tests are (a) friction survival at >=0.10R/trade as a hard FAIL gate, and (b) measurement validity -- whether the offline daily futures open/close prints actually bracket the true overnight (cash close-to-open) session; settlement-timing smear would mis-measure the legs. These must be checked BEFORE any optimism.",
+    "not_a_forced_winner": "This is not a 'force a winner' selection. #3 is structurally distinct, data-feasible, causal, and high-count, genuinely breaking the documented failure pattern. Had the field been only breakout re-skins and small-N fades, the correct answer would have been NO_STRATEGY_SELECTED. It is not."
+  },
+  "6_proposed_next_step": {
+    "step": "S30-D2 (frozen strategy specification, spec only) -- ONLY if separately authorized",
+    "contents": [
+      "Freeze before any run: exact leg definitions (close->open overnight, open->close day), position rule, R/accounting convention, and friction floor as a hard pre-registered FAIL gate (>=0.10R/trade).",
+      "Pre-register entry-significance: overnight vs day-session vs random close-to-close null; fixed horizons; EDGE_LIKELY required (not INCONCLUSIVE).",
+      "Pre-register a measurement-validity check (futures open/close vs true overnight window) as a gating step that can kill the branch before IS.",
+      "IS 2013-2022 only; OOS 2023-2025 sealed until the OOS protocol is committed.",
+      "NQ primary, ES independent confirmation; MNQ/MES descriptive only.",
+      "No code, backtest, IS/OOS, optimization, sweep, data fetch, paper, or live in S30-D2 -- spec only, exactly like S29-D2."
+    ],
+    "authorization_note": "S30-D2 is NOT authorized by this memo. It requires a separate explicit instruction."
+  },
+  "7_forbidden_actions": [
+    "memo_only", "no_code", "no_backtest", "no_is_oos_run", "no_optimization",
+    "no_parameter_sweeps", "no_data_fetch", "no_paper_or_live", "no_broker_or_api",
+    "no_source_engine_test_changes", "donchian_s26_s27_s28_s29_read_only",
+    "jarvis_templates_hydra_untouched", "no_staging", "no_commit", "do_not_start_s30_d2"
+  ],
+  "8_final_line": "S30-D1 is idea-source review only; no strategy code, backtest, OOS, optimization, paper trading, or live trading is authorized.",
+  "trading_recommendation": "NONE. Idea-source review only. Donchian, S26, S27, S28, and S29 remain PARKED; no active strategy; no paper/live system exists or is authorized. The selected hypothesis (overnight session-return decomposition) is a research direction to be frozen and tested under the factory ladder, not a trade."
+}
