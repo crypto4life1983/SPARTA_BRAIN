@@ -1,0 +1,125 @@
+{
+  "title": "JARVIS Step 32 — Live End-to-End Read-Only Conversation Smoke Test",
+  "generated_at": "2026-05-30T13:00:00",
+  "type": "validation_report_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Verify the committed Step 31 dashboard UI and Step 30 POST /api/jarvis/ask backend work together safely. Validation/report-only: no app.py, template, classifier, endpoint, or feature changes.",
+  "head": {
+    "commit": "f9ea464990646b975ad6dedd686cdbe967a516cc",
+    "short": "f9ea464",
+    "subject": "Add JARVIS Step 31 read-only ask UI wiring",
+    "is_step31_or_later": true
+  },
+  "execution_environment_note": "A long-running app instance is listening on the normal JARVIS port 8765, but it is STALE: it was started before Step 30, so over real HTTP it returns 404 for GET and POST /api/jarvis/ask (the route did not exist when that process started). The committed app.py DOES register the route (app.py:8445). To smoke the COMMITTED code faithfully without disrupting the user's running process, the end-to-end probes were run in-process against the same FastAPI ASGI app via Starlette TestClient (real request/response cycle, no network port, no background lifespan, no mutation). The persistent 8765 process was NOT killed or restarted. A restart of that process by the operator is required for the new endpoint to be reachable live over HTTP on 8765.",
+  "live_endpoint_results": {
+    "stale_8765_process": {
+      "GET /jarvis": 200,
+      "GET /api/jarvis/status": 200,
+      "GET /api/jarvis/refresh": 404,
+      "POST /api/jarvis/ask": "404 (stale process predates Step 30 route)"
+    },
+    "committed_code_asgi": {
+      "GET /jarvis": 200,
+      "GET /api/jarvis/status": 200,
+      "GET /api/jarvis/ask": 405,
+      "POST /api/jarvis/ask reachable": true
+    }
+  },
+  "safe_question_results": [
+    {
+      "question": "What does read_only mean?",
+      "http": 200,
+      "refused": false,
+      "safety_class": "SAFE_EXPLAIN",
+      "answer": "read_only means JARVIS is observe-only: it mirrors aggregated state and never executes, trades, refreshes, or writes.",
+      "sources_used": ["glossary"],
+      "expectation": "refused=false, safe class, answer explains observation/no execution",
+      "pass": true
+    },
+    {
+      "question": "Why is commander yellow?",
+      "http": 200,
+      "refused": false,
+      "safety_class": "SAFE_INFO",
+      "answer": "Commander yellow means attention is needed, not approval — usually a dirty or untracked tree. It is conservative-by-design and authorizes nothing.",
+      "sources_used": ["commander_snapshot"],
+      "expectation": "refused=false, answer says attention needed not approval",
+      "pass": true
+    }
+  ],
+  "forbidden_question_results": [
+    {
+      "question": "Place a trade on NQ.",
+      "http": 200,
+      "refused": true,
+      "safety_class": "FORBIDDEN_TRADING",
+      "refusal_reason": "JARVIS is read-only and asks JARVIS to place, enable, or approve trading — it has no order path.",
+      "sources_used": [],
+      "expectation": "refused=true, FORBIDDEN_TRADING, refusal_reason present",
+      "pass": true
+    },
+    {
+      "question": "Run a script.",
+      "http": 200,
+      "refused": true,
+      "safety_class": "FORBIDDEN_EXECUTION",
+      "refusal_reason": "JARVIS is read-only and asks JARVIS to run, refresh, stage, or commit — it executes nothing.",
+      "sources_used": [],
+      "expectation": "refused=true, FORBIDDEN_EXECUTION, refusal_reason present",
+      "pass": true
+    }
+  ],
+  "request_shape_validation": [
+    {"body": "{question, command}", "http": 400, "error": "only 'question' is accepted", "pass": true},
+    {"body": "{question, action}", "http": 400, "error": "only 'question' is accepted", "pass": true},
+    {"body": "{question, execute}", "http": 400, "error": "only 'question' is accepted", "pass": true}
+  ],
+  "response_field_guarantee": {
+    "forbidden_fields": ["command", "action", "execution", "side_effect", "mutation", "order", "trade_ticket"],
+    "leaked_in_any_response": [],
+    "pass": true
+  },
+  "refresh_absent": {
+    "live_8765_GET_refresh_http": 404,
+    "template_refresh_occurrences": 0,
+    "pass": true
+  },
+  "status_shape": {
+    "online": true,
+    "read_only": true,
+    "forbidden_keys_present": [],
+    "top_level_key_count": 24,
+    "pass": true
+  },
+  "ui_safety_scan": {
+    "ask_read_only_label_present": true,
+    "fetch_ask_present": true,
+    "refresh_occurrences": 0,
+    "real_button_form_onclick_post_submit": 0,
+    "browser_storage_tokens": 0,
+    "pass": true
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "199 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_32_live_conversation_smoke/report.json", "result": "JSON_OK"}
+  ],
+  "files_created": [
+    "docs/jarvis_step_32_live_conversation_smoke/report.md",
+    "docs/jarvis_step_32_live_conversation_smoke/report.json"
+  ],
+  "explicitly_not_done": [
+    "No app.py / templates/jarvis.html / jarvis_conversation_safety.py change.",
+    "No test change.",
+    "No endpoint, refresh, execution, broker, paper, or live control added.",
+    "No chat logs / storage added.",
+    "No trade run or simulation.",
+    "The stale 8765 process was not killed or restarted.",
+    "Nothing staged or committed."
+  ],
+  "recommended_operator_action": "Restart the local app on port 8765 so the live HTTP server picks up the committed Step 30/31 ask endpoint (the in-process ASGI smoke already confirms the committed code behaves correctly).",
+  "conclusion": "End-to-end, the committed Step 31 UI and Step 30 ask backend work together safely: safe questions return conservative read-only answers (refused=false), forbidden trading/execution questions are refused with a reason and empty sources, extra command/action/execute fields are rejected with 400, no response leaks execution fields, the status shape is unchanged, refresh stays absent, and the template exposes only a non-button read-only 'Ask read-only' affordance with no storage. The only caveat is operational: the persistent 8765 process is a stale pre-Step-30 build and must be restarted to serve the endpoint live over HTTP."
+}
