@@ -412,6 +412,119 @@ def test_jarvis_mission_board_seed_file_is_tracked_safe():
     assert isinstance(data["missions"], list)
 
 
+# --- Step 05: read-only trading research detail ---------------------------
+
+def test_jarvis_status_has_trading_detail_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "trading_detail" in d
+    td = d["trading_detail"]
+    assert isinstance(td, dict)
+    assert td.get("state") in ("ready", "missing", "unavailable", "error")
+
+
+def test_jarvis_trading_detail_is_read_only_and_non_deployable():
+    import app as app_module
+    td = app_module._jarvis_trading_detail()
+    assert td.get("read_only") is True
+    assert td.get("paper_ready") is False
+    assert td.get("live_ready") is False
+    assert td.get("broker_control") is False
+    assert td.get("candidate_status") == "RESEARCH_CANDIDATE_ONLY"
+
+
+def test_jarvis_trading_detail_s26_detection():
+    import app as app_module
+    td = app_module._jarvis_trading_detail()
+    if td.get("state") == "ready":
+        s26 = td.get("s26") or {}
+        assert s26.get("status") == "RESEARCH_CANDIDATE_ONLY"
+        assert isinstance(s26.get("d17_friction_report_exists"), bool)
+        assert isinstance(s26.get("d18_decision_gate_exists"), bool)
+        assert isinstance(td.get("latest_reports"), list)
+        assert isinstance(td.get("warnings"), list)
+
+
+def test_jarvis_trading_detail_missing_dir_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    td = app_module._jarvis_trading_detail()
+    assert td.get("state") == "missing"
+    # Even when missing, posture flags must still be safe.
+    assert td.get("paper_ready") is False
+    assert td.get("live_ready") is False
+    assert td.get("broker_control") is False
+
+
+def test_jarvis_trading_detail_never_reads_raw_artifacts(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    reports = tmp_path / "trading_research" / "agentic_factory" / "reports"
+    d17 = reports / app_module._JARVIS_S26_D17_DIR
+    d17.mkdir(parents=True)
+    (d17 / "report.json").write_text(
+        json.dumps({"title": "t", "s26_current_status": {"level": "RESEARCH_CANDIDATE"}}),
+        encoding="utf-8",
+    )
+    # A raw artifact whose contents must never be opened.
+    raw = d17 / "s26_d17_friction_raw.json"
+    raw.write_text('{"SECRET_DO_NOT_READ": true}', encoding="utf-8")
+
+    opened = []
+    import pathlib
+    orig = pathlib.Path.read_text
+
+    def _tracking_read_text(self, *a, **k):
+        opened.append(str(self))
+        return orig(self, *a, **k)
+
+    monkeypatch.setattr(pathlib.Path, "read_text", _tracking_read_text)
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    td = app_module._jarvis_trading_detail()
+    assert td.get("state") == "ready"
+    # The raw file must appear in a warning but must NOT have been read.
+    assert any("raw" in str(p).lower() for p in [raw])
+    assert not any("friction_raw" in p for p in opened), opened
+    assert any("raw artifact present" in w for w in td.get("warnings", []))
+
+
+def test_jarvis_trading_detail_exposes_no_execution_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    td = client.get("/api/jarvis/status").json()["trading_detail"]
+
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+
+    keys = set(_keys(td))
+    for forbidden in ("place_order", "submit_order", "execute_trade",
+                      "start_bot", "stop_bot", "run_backtest", "fetch_data",
+                      "exec", "shell", "broker_login", "api_key"):
+        assert forbidden not in keys, f"forbidden trading control key: {forbidden}"
+
+
+def test_jarvis_trading_detail_does_not_run_subprocess(monkeypatch):
+    import subprocess
+    import app as app_module
+
+    def _boom(*a, **k):
+        raise AssertionError("trading detail must not run subprocesses")
+
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    td = app_module._jarvis_trading_detail()
+    assert td.get("read_only") is True
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

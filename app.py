@@ -7689,6 +7689,119 @@ def _jarvis_health_report() -> dict:
     return data
 
 
+_JARVIS_TRADING_REPORTS_REL = "trading_research/agentic_factory/reports"
+_JARVIS_S26_D17_DIR = "s26_d17_trend_sr_ema_rsi_friction_stress"
+_JARVIS_S26_D18_DIR = "s26_d18_trend_sr_ema_rsi_decision_gate"
+
+
+def _jarvis_safe_report_summary(path) -> str:
+    """Read ONLY a small set of whitelisted scalar fields from a report.json
+    so the console never dumps a full research file. Returns a short string."""
+    import json as _json
+    try:
+        d = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 — summary is best-effort, never fatal
+        return ""
+    if not isinstance(d, dict):
+        return ""
+    title = str(d.get("title", "")).strip()[:140]
+    status = d.get("s26_current_status")
+    level = status.get("level") if isinstance(status, dict) else None
+    decision = d.get("decision") or d.get("trading_recommendation")
+    parts = [p for p in (title, level,
+                         (str(decision).strip()[:80] if decision else None)) if p]
+    return " | ".join(parts)
+
+
+def _jarvis_trading_detail() -> dict:
+    """READ-ONLY. Summarizes committed/local trading-research report files
+    under trading_research/agentic_factory/reports/. It never runs a backtest,
+    fetches data, calls a broker, starts/stops a bot, reads secrets, or writes
+    anything. Raw artifacts (any '*raw*' file) are never opened — only detected."""
+    from datetime import datetime as _dt
+    reports_dir = BASE / _JARVIS_TRADING_REPORTS_REL
+    if not reports_dir.exists():
+        return {
+            "state": "missing",
+            "read_only": True,
+            "candidate_status": "RESEARCH_CANDIDATE_ONLY",
+            "paper_ready": False,
+            "live_ready": False,
+            "broker_control": False,
+            "message": f"{_JARVIS_TRADING_REPORTS_REL} not found",
+        }
+    warnings: list = []
+    d17_dir = reports_dir / _JARVIS_S26_D17_DIR
+    d18_dir = reports_dir / _JARVIS_S26_D18_DIR
+    d17_exists = (d17_dir / "report.json").exists()
+    d18_exists = (d18_dir / "report.json").exists()
+
+    # Detect (but never read) any raw friction artifact, as a hygiene warning.
+    try:
+        if d17_dir.exists():
+            for f in d17_dir.iterdir():
+                if "raw" in f.name.lower():
+                    warnings.append(f"raw artifact present (not read): {f.name}")
+    except Exception:  # noqa: BLE001
+        pass
+    if not d18_exists:
+        warnings.append("D18 decision gate report not found.")
+
+    # latest_research_head: read from the D18 memo if available (file-only,
+    # no git subprocess here).
+    latest_head = None
+    if d18_exists:
+        try:
+            import json as _json
+            d18 = _json.loads((d18_dir / "report.json").read_text(encoding="utf-8"))
+            if isinstance(d18, dict):
+                latest_head = d18.get("head_commit_short") or d18.get("head_commit")
+        except Exception:  # noqa: BLE001
+            latest_head = None
+
+    # latest_reports: a few most-recently-modified report.json files, with a
+    # short safe summary each. We only ever open report.json, never raw files.
+    latest_reports: list = []
+    try:
+        candidates = []
+        for sub in reports_dir.iterdir():
+            rj = sub / "report.json"
+            if sub.is_dir() and rj.exists() and "raw" not in rj.name.lower():
+                candidates.append(rj)
+        candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        for rj in candidates[:5]:
+            latest_reports.append({
+                "name": rj.parent.name,
+                "path": f"{_JARVIS_TRADING_REPORTS_REL}/{rj.parent.name}/report.json",
+                "kind": "json",
+                "modified_at": _dt.fromtimestamp(rj.stat().st_mtime).isoformat(
+                    timespec="seconds"),
+                "has_md": (rj.parent / "report.md").exists(),
+                "summary": _jarvis_safe_report_summary(rj),
+            })
+    except Exception as exc:  # noqa: BLE001
+        warnings.append(f"report scan partial: {type(exc).__name__}")
+
+    return {
+        "state": "ready",
+        "read_only": True,
+        "candidate_status": "RESEARCH_CANDIDATE_ONLY",
+        "paper_ready": False,
+        "live_ready": False,
+        "broker_control": False,
+        "latest_research_head": latest_head,
+        "latest_reports": latest_reports,
+        "s26": {
+            "state": "available" if (d17_exists or d18_exists) else "missing",
+            "latest_known_commit": latest_head or "066c16c",
+            "status": "RESEARCH_CANDIDATE_ONLY",
+            "d17_friction_report_exists": d17_exists,
+            "d18_decision_gate_exists": d18_exists,
+        },
+        "warnings": warnings,
+    }
+
+
 def _jarvis_mission_board() -> dict:
     """READ-ONLY. Loads the operator mission board from a tracked JSON file
     and returns it for display. JARVIS never executes a mission, never runs
@@ -7780,6 +7893,7 @@ def api_jarvis_status():
     brain_memory = _jarvis_safe(_jarvis_brain_memory)
     health_report = _jarvis_safe(_jarvis_health_report)
     mission_board = _jarvis_safe(_jarvis_mission_board)
+    trading_detail = _jarvis_safe(_jarvis_trading_detail)
     return {
         "online": True,
         "read_only": True,
@@ -7797,6 +7911,7 @@ def api_jarvis_status():
         "brain_memory": brain_memory,
         "health_report": health_report,
         "mission_board": mission_board,
+        "trading_detail": trading_detail,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
 

@@ -228,6 +228,11 @@
       <div class="jv-loading">Reading mission board&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pTradingDetail">
+      <h2><span class="ic">&#x25C8;</span>Trading Research Detail</h2>
+      <div class="jv-loading">Reading research reports&hellip;</div>
+    </div>
+
   </div>
 
   <p class="jv-foot">
@@ -512,6 +517,52 @@
         mbHtml += card;
       });
       setPanel('pMissions', mbHtml);
+    }
+
+    // Trading Research Detail (read-only — no broker, no paper, no live)
+    var td = d.trading_detail || {};
+    if(td.state === 'missing'){
+      setPanel('pTradingDetail',
+        row('Status', 'waiting', 'NO RESEARCH REPORTS') +
+        '<div class="jv-detail">'+esc(td.message || 'trading research reports not found')+'</div>');
+    } else if(td.state === 'unavailable' || td.state === 'error'){
+      setPanel('pTradingDetail', row('Status', 'bad', 'UNAVAILABLE', td.error || td.detail));
+    } else {
+      var s26 = td.s26 || {};
+      var tdHtml =
+        row('Candidate status', 'locked', esc(td.candidate_status || 'RESEARCH_CANDIDATE_ONLY')) +
+        row('Read-only', 'locked', td.read_only ? 'TRUE' : 'FALSE') +
+        row('Paper ready', td.paper_ready ? 'bad' : 'online', td.paper_ready ? 'TRUE' : 'FALSE') +
+        row('Live ready', td.live_ready ? 'bad' : 'online', td.live_ready ? 'TRUE' : 'FALSE') +
+        row('Broker control', td.broker_control ? 'bad' : 'online', td.broker_control ? 'TRUE' : 'FALSE') +
+        row('S26 state', s26.state === 'available' ? 'online' : 'waiting', (s26.state||'').toUpperCase()) +
+        row('S26 status', 'locked', esc(s26.status || '')) +
+        row('Latest research head', '', esc(s26.latest_known_commit || td.latest_research_head || '—')) +
+        row('D17 friction report', s26.d17_friction_report_exists ? 'online' : 'waiting',
+            s26.d17_friction_report_exists ? 'PRESENT' : 'MISSING') +
+        row('D18 decision gate', s26.d18_decision_gate_exists ? 'online' : 'waiting',
+            s26.d18_decision_gate_exists ? 'PRESENT' : 'MISSING');
+      var reps = td.latest_reports || [];
+      if(reps.length){
+        tdHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Latest reports</div>';
+        reps.forEach(function(r){
+          tdHtml += '<div class="jv-mcard"><div class="top">'+
+            '<span class="ttl">'+esc(r.name || '')+'</span>'+
+            '<span class="jv-tag">'+esc(r.kind || '')+'</span></div>'+
+            '<div class="meta">'+
+            '<span class="jv-tag">'+esc(r.modified_at || '')+'</span>'+
+            (r.has_md ? '<span class="jv-tag">+md</span>' : '')+
+            '</div>'+
+            (r.summary ? '<div class="jv-detail" style="margin-top:6px">'+esc(r.summary)+'</div>' : '')+
+            '</div>';
+        });
+      }
+      var warns = td.warnings || [];
+      if(warns.length){
+        tdHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-warn)">Warnings: '+
+          warns.map(function(w){ return esc(w); }).join('; ')+'</div>';
+      }
+      setPanel('pTradingDetail', tdHtml);
     }
   }
 
