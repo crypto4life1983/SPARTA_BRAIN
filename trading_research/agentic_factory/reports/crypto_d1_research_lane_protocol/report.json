@@ -1,0 +1,173 @@
+{
+  "step": "Crypto-D1",
+  "title": "Crypto-D1 Research Lane Protocol -- defines how crypto research runs under the completed validation factory (protocol/memo only)",
+  "created": "2026-05-30",
+  "kind": "research_lane_protocol_memo_only",
+  "memo_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "exchange_api": false,
+  "broker": false,
+  "provenance": {
+    "head_at_memo": "73e1cb0",
+    "head_note": "HEAD 73e1cb0 (descendant of S29-D4 decision-record commit 9d5b9d8). Factory tree clean; only the untracked crypto_d1_research_lane_protocol/ and s30_d1 report dirs present; nothing staged.",
+    "context_reports_read": [
+      "reports/factory_d11_validation_factory_closeout/report.md",
+      "reports/s30_d1_deep_strategy_idea_source_review/report.md",
+      "CLAUDE.md (SPARTA read-only default + operating rules)",
+      "brain_memory/identity.md",
+      "brain_memory/operating_rules.md",
+      "brain_memory/projects/trading_bot/project.md"
+    ],
+    "validation_factory_status": "Factory-D1..D10 complete; closed out at Factory-D11 (2026-05-30). The reusable validation ladder is the current research standard."
+  },
+  "1_purpose": "Crypto is added as a SEPARATE research lane under the completed validation factory. This memo defines the standing rules for that lane so crypto research is clean, conservative, and never mixed into the NQ/ES futures branches. It authorizes nothing operational: no data, no code, no test, no trade.",
+  "2_prior_crypto_work_status": {
+    "status": "HISTORICAL NOTES ONLY -- NOT validated candidates under the new factory.",
+    "scope": "Older crypto work included BTC/ETH/SOL/XRP-style bots, regime tests, momentum/breakout tests, Donchian-style crypto breakout, and trend/pullback ideas.",
+    "ruling": "All of it predates the validation factory rules and is NOT validated under the current standard. No old crypto result may be cited as proof. Any old idea must be re-entered as a NEW frozen Crypto spec and re-run through the full pipeline before it carries any weight.",
+    "no_carryover": "No old OOS conclusion, equity curve, or 'winning' parameter set carries over. Old work is context, not evidence."
+  },
+  "3_initial_symbols": {
+    "initial": ["BTC", "ETH", "SOL"],
+    "optional_later": ["XRP -- ONLY if data-quality and liquidity rules in section 5/11 pass"],
+    "note": "Start narrow. BTC is the primary; ETH and SOL provide multi-asset corroboration. XRP is gated on data quality and liquidity, not added by default."
+  },
+  "4_spot_vs_perpetuals": {
+    "spot": "Spot OHLCV avoids funding-rate complexity entirely -- cleaner accounting, no funding leg, simpler protocol.",
+    "perps": "Perpetual futures require explicit funding-rate handling; ignoring funding produces a wrong (usually optimistic) edge.",
+    "recommendation": "START with spot or spot-like OHLCV for a clean protocol. Only add perps AFTER funding-rate data is sourced and funding rules (section 9) are defined and frozen. Perps are blocked until then."
+  },
+  "5_exchange_data_source": {
+    "requirements": [
+      "Trusted exchange or data vendor (named and pinned per dataset).",
+      "Complete OHLCV with no silent gaps.",
+      "Clear, documented timezone/calendar (UTC expected).",
+      "No survivorship bias and no ambiguous data stitching across symbols/contracts.",
+      "Provenance recorded per dataset (source, range, retrieval method) the same way the futures CSVs are documented."
+    ],
+    "hard_rule": "No exchange API EXECUTION of any kind. Data-source selection is a read-only decision; execution endpoints are never wired. Data acquisition itself is deferred to a later, separately authorized step (Crypto-D2+) -- this memo fetches nothing."
+  },
+  "6_timeframe": {
+    "primary": "Daily first.",
+    "optional_later": "4H later, only after the daily protocol works end-to-end.",
+    "blocked": "No lower timeframe (1H/15m/intraday) until the daily protocol is proven under the factory. Lower TFs add path-dependency and microstructure noise the daily lane is designed to avoid."
+  },
+  "7_session_handling_24_7": {
+    "daily_boundary": "Crypto trades 24/7. Define the daily candle boundary as the UTC daily close (00:00 UTC) -- preferred and frozen per dataset.",
+    "weekends": "No weekend gaps expected (unlike futures); every calendar day should have a bar.",
+    "outages": "Exchange outages must be handled EXPLICITLY -- flagged, not silently forward-filled. A missing/halted day is a data-QA event (section 11), not an invisible zero-return bar."
+  },
+  "8_fees_slippage": {
+    "spot_fee": "Apply a conservative spot taker fee per side.",
+    "slippage": "Apply a conservative spread/slippage estimate per fill.",
+    "friction_posture": "Assume HIGHER friction than futures where appropriate -- crypto spreads/fees on alts (SOL, XRP) are wider and more variable than liquid index futures.",
+    "perps_friction": "Perp friction INCLUDES funding, and funding is added only when perps are explicitly enabled (section 4/9)."
+  },
+  "9_funding_rates": {
+    "required_for_perps": "Funding rates are REQUIRED for any perp test.",
+    "not_ignored": "Funding is never ignored or assumed zero.",
+    "block_rule": "If funding-rate data is unavailable or incomplete for a symbol/period, perps for that symbol/period are BLOCKED. Spot is unaffected."
+  },
+  "10_is_oos_windows": {
+    "proposed_IS": "2020-2023 (if complete data exists for the symbol).",
+    "proposed_OOS": "2024-2025.",
+    "blocked": "2026 is BLOCKED unless explicitly authorized (mirrors the futures hard-seal discipline).",
+    "data_contingency": "If a symbol lacks clean 2020 history (e.g. SOL/listing dates, XRP availability), propose a JUSTIFIED alternative window per symbol rather than fabricating or stitching history. The window must be frozen per symbol before any run.",
+    "one_shot": "OOS is one-shot against a committed protocol hash, exactly as the futures factory enforces (validation_oos_runner discipline). No tuning after OOS."
+  },
+  "11_data_qa_rules": [
+    "Duplicate timestamps -> reject/flag.",
+    "Missing daily bars -> flag explicitly (do not silently fill).",
+    "Invalid OHLC (high<low, close/open outside high-low, negatives) -> reject.",
+    "Zero-volume bars -> flag (possible outage or illiquid listing).",
+    "Exchange outage flags -> recorded as explicit events, not hidden.",
+    "Symbol continuity -> no ambiguous stitching across exchanges/pairs; one consistent series per symbol.",
+    "Stablecoin quote consistency -> document and reconcile USDT vs USD vs USDC quoting; do not silently mix quote currencies (USDT/USD differences are a known QA hazard)."
+  ],
+  "12_validation_ladder": {
+    "rule": "Crypto uses the SAME factory ladder as futures -- no separate, looser standard.",
+    "steps": [
+      "Frozen spec (pre-registered, no parameter freedom).",
+      "IS baseline (validation_is_runner discipline, hard OOS seal).",
+      "OOS protocol pre-registration (committed protocol hash).",
+      "OOS once (one-shot, no post-OOS tuning).",
+      "Entry significance (random-entry permutation over fixed horizons).",
+      "Sequence risk / Monte Carlo (trade-order shuffle, bootstrap, top-winner dependence).",
+      "Regime breakdown (bull/bear/chop concentration).",
+      "Multi-asset crypto robustness (BTC/ETH/SOL corroboration).",
+      "Walk-forward (rolling-window stability).",
+      "Friction stress (fee+slippage, +funding for perps).",
+      "Final decision gate (one research decision + one readiness level; PAPER/LIVE unreachable on default path)."
+    ]
+  },
+  "13_old_crypto_test_migration": {
+    "process": [
+      "Inventory old crypto tests (BTC/ETH/SOL/XRP bots, regime/momentum/breakout/Donchian/trend-pullback notes).",
+      "Classify each as HISTORICAL ONLY.",
+      "Do NOT reuse old OOS conclusions, curves, or claimed edges.",
+      "Any old idea must be rewritten as a NEW frozen Crypto spec before any retest.",
+      "NO parameter import from an old 'winning' test without explicit pre-registration in the new frozen spec (no silent carryover of tuned parameters)."
+    ],
+    "next_owner_step": "The inventory itself is Crypto-D2 (section 16) -- not performed here."
+  },
+  "14_pass_watch_fail_rules": {
+    "posture": "Conservative initial gates, aligned with the futures factory lessons (top-winner dependence killed every parked futures branch).",
+    "criteria": [
+      "Enough trades -- clears the minimum trade-count floor (no thin small-N samples).",
+      "Positive expectancy (per-trade R > 0 after costs).",
+      "Profit factor above threshold.",
+      "Low top-3-winner dependence -- net stays positive after removing the top 3 winners (the gate that parked all futures branches).",
+      "Sequence risk acceptable (Monte Carlo / bootstrap not dominated by path luck).",
+      "Friction/funding positive -- survives conservative fees+slippage (+funding for perps).",
+      "BTC/ETH/SOL corroboration if multi-symbol (edge not confined to one coin).",
+      "NO live/paper promotion regardless of result -- PASS means 'continue research', never 'go operational'."
+    ],
+    "verdict_meaning": {
+      "PASS": "Edge survives the ladder; continue research only.",
+      "WATCH": "Mixed/thin; park as candidate, no promotion.",
+      "FAIL": "Stop the branch."
+    }
+  },
+  "15_forbidden_actions": [
+    "no_live_trading",
+    "no_paper_trading",
+    "no_exchange_api_execution",
+    "no_auto_bot_launch",
+    "no_using_old_results_as_proof",
+    "no_mixing_crypto_with_futures_validation_claims",
+    "no_broker",
+    "no_data_fetch_this_step",
+    "no_code",
+    "no_backtest",
+    "no_optimization",
+    "no_strategy_test",
+    "do_not_modify_futures_strategy_branches",
+    "jarvis_templates_base_hydra_untouched",
+    "no_staging",
+    "no_commit_unless_separately_approved"
+  ],
+  "16_recommended_next_step": {
+    "step": "Crypto-D2: old crypto test inventory + data-source decision (memo only, STILL no backtest).",
+    "contents": [
+      "Inventory and classify all old crypto tests as historical-only.",
+      "Select and pin a trusted spot data source per initial symbol (BTC/ETH/SOL), with provenance and QA expectations -- selection decision only, no fetch.",
+      "Confirm per-symbol IS/OOS window feasibility against real listing/history availability."
+    ],
+    "authorization_note": "Crypto-D2 is NOT authorized by this memo. It requires a separate explicit instruction. No data fetch or code in Crypto-D2 either."
+  },
+  "17_final_line": "Crypto-D1 is a protocol-only step. No crypto strategy is validated, paper-ready, live-ready, or authorized for execution.",
+  "guardrails": {
+    "memo_only": true, "no_code": true, "no_backtest": true, "no_is_oos_run": true,
+    "no_optimization": true, "no_parameter_sweeps": true, "no_data_fetch": true,
+    "no_paper_or_live": true, "no_broker_or_exchange_api": true,
+    "no_futures_branch_changes": true, "jarvis_templates_base_hydra_untouched": true,
+    "crypto_is_separate_lane": true, "no_staging": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. Protocol/memo only. No crypto strategy is validated, paper-ready, or live-ready. Older crypto work is historical context only. Crypto is a separate research lane that must pass the same validation factory ladder as futures before any further claim."
+}
