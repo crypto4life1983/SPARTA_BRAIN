@@ -1,0 +1,155 @@
+{
+  "title": "JARVIS Step 33 — Voice Conversation Layer Safety Plan (docs-only)",
+  "generated_at": "2026-05-30T14:00:00",
+  "type": "documentation_plan_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Design the safest path to add voice/audio conversation to JARVIS so the operator can eventually speak to JARVIS and hear answers, while preserving the existing read-only safety model. This is a plan only — no microphone UI, no STT, no TTS, no endpoints, no storage, no code change.",
+  "relation_to_steps_20_32": "Steps 20-24 polished/documented the read-only dashboard. Step 25 planned the conversation layer; Step 26 shipped the display-only shell; Step 27 planned the answer-only backend; Step 28 shipped the pure safety classifier; Step 29 wrote the tests-first ask contract; Step 30 implemented the answer-only POST /api/jarvis/ask; Step 31 wired the read-only ask UI; Step 32 ran the live/ASGI smoke. Step 33 (this step) plans how voice can ride on top of that exact same text pipeline without weakening any guarantee: voice becomes only a new way to PRODUCE the question text; everything downstream (classifier, refusal, read-only answer) is unchanged.",
+  "current_committed_baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc",
+    "step_24_commit": "9523da8",
+    "step_25_commit": "6b88d9b",
+    "step_26_commit": "f2268f3",
+    "step_27_commit": "e961481",
+    "step_28_commit": "a5b47b4",
+    "step_29_commit": "ed8f23c",
+    "step_30_commit": "73e1cb0",
+    "step_31_commit": "f9ea464",
+    "step_32_commit": "b35f4be"
+  },
+  "current_conversation_capability": {
+    "text_ask_ui_exists": true,
+    "ask_endpoint_exists": "POST /api/jarvis/ask (Step 30)",
+    "safety_classifier_exists": "jarvis_conversation_safety.classify_jarvis_question (Step 28)",
+    "read_only_answers_only": true,
+    "no_execution_trading_mutation": true,
+    "note": "Voice changes none of this. It only adds an alternate input source that ends up as the same {question} string posted to the same endpoint."
+  },
+  "what_voice_jarvis_means": [
+    "Operator speaks into the microphone.",
+    "The browser turns speech into text (transcript) locally.",
+    "The transcript text is sent to the EXISTING POST /api/jarvis/ask.",
+    "The EXISTING safety classifier still decides safe vs forbidden.",
+    "The answer (or refusal) is displayed exactly as today.",
+    "Optionally, the browser's built-in text-to-speech reads the returned answer aloud."
+  ],
+  "required_voice_safety_pipeline": [
+    "1. Microphone permission requested explicitly by the operator (no auto-listen).",
+    "2. Speech-to-text produces a transcript in the browser.",
+    "3. Transcript preview is shown to the operator (fills the existing input).",
+    "4. Operator confirms by clicking the existing 'Ask read-only' control (no auto-submit).",
+    "5. POST /api/jarvis/ask receives ONLY {question: transcript}.",
+    "6. The classifier refuses forbidden content (trading/execution/mutation) unchanged.",
+    "7. The response (answer or refusal) is displayed.",
+    "8. Optional TTS reads the response ONLY after the answer has been returned — never the raw transcript, never a command."
+  ],
+  "voice_must_never": [
+    "Bypass the safety classifier.",
+    "Execute commands.",
+    "Trigger scripts.",
+    "Refresh status.",
+    "Write files.",
+    "Save audio.",
+    "Save transcripts.",
+    "Create chat logs.",
+    "Control broker / paper / live trading.",
+    "Place or approve trades.",
+    "Auto-submit dangerous (or any) requests."
+  ],
+  "browser_technology_options": {
+    "speech_to_text_first_version": "Web Speech API (SpeechRecognition / webkitSpeechRecognition) where available — browser-native, no server round-trip for audio.",
+    "text_to_speech": "Browser SpeechSynthesis (window.speechSynthesis) for reading answers aloud.",
+    "offline_local_stt": "Allowed LATER only with separate explicit approval (e.g. on-device model). Not in scope now.",
+    "external_stt_apis": "BLOCKED for now. Any cloud STT (sending audio off-device) requires separate explicit approval because it changes the privacy/data-egress posture.",
+    "graceful_degradation": "If the Web Speech API is unavailable, the voice control must do nothing harmful and the text input must keep working exactly as today."
+  },
+  "privacy_rules": [
+    "No audio storage (no recording saved to disk, server, or browser storage).",
+    "No transcript storage.",
+    "No localStorage / sessionStorage / IndexedDB / cookies for voice data.",
+    "No server-side logs of audio or transcripts.",
+    "No external STT API in the first version (audio never leaves the device).",
+    "Transcript exists only transiently in the input field until the operator submits or clears it."
+  ],
+  "ux_design": {
+    "phase_intent": "'Voice preview only' first — prove capture + transcript with zero auto-action.",
+    "microphone_control_label": "Clearly labeled 'Voice preview' (NOT 'Run', 'Execute', 'Trade', 'Approve', 'Refresh', or 'Talk').",
+    "transcript_target": "Transcript appears in the existing read-only ask input (#jvAskInput).",
+    "submit_gate": "Operator must explicitly click the existing 'Ask read-only' control to send; no auto-submit in the first version.",
+    "tts_default": "Optional and disabled by default (or behind a clearly labeled, off-by-default toggle); it only ever reads a returned answer, never a command or the raw transcript.",
+    "persistent_warning": "Keep the existing 'JARVIS answers only. No execution. No trading control.' banner visible for the voice affordance too."
+  },
+  "future_implementation_test_plan": [
+    "No audio storage tokens in the template/JS (no MediaRecorder save, no blob persistence).",
+    "No localStorage / sessionStorage / IndexedDB / cookie usage.",
+    "Transcript is sent only as {question}; the payload carries no other field.",
+    "No command / action / execute fields are ever posted.",
+    "Forbidden voice-transcribed requests (e.g. spoken 'place a trade') are refused by the classifier just like typed ones.",
+    "/api/jarvis/status shape is unchanged.",
+    "No /api/jarvis/refresh endpoint or wiring.",
+    "No execution / trading controls; the voice control is labeled 'Voice preview', the submit stays 'Ask read-only'.",
+    "Graceful no-op when the Web Speech API is unavailable.",
+    "TTS only reads a server-returned answer string, after the response, and is off by default."
+  ],
+  "roadmap": {
+    "step_34_recommendation": {
+      "name": "JARVIS-VOICE-PREVIEW-SHELL (UI-only)",
+      "scope": [
+        "Add a UI-only 'Voice preview' control to the conversation shell.",
+        "No backend changes.",
+        "No storage.",
+        "No auto-submit.",
+        "No TTS yet.",
+        "The control may be present but non-wired (or wired only to a visible 'preview' affordance) and must add no <button>/<form>/onclick/method=post."
+      ]
+    },
+    "step_35_recommendation": {
+      "name": "JARVIS-VOICE-STT-FILL (browser STT -> input only)",
+      "scope": [
+        "Wire browser speech-to-text to fill the existing input ONLY.",
+        "No auto-submit — operator still clicks 'Ask read-only'.",
+        "No audio/transcript storage; no external STT.",
+        "Graceful no-op if the Web Speech API is unavailable."
+      ]
+    },
+    "step_36_recommendation": {
+      "name": "JARVIS-VOICE-TTS-ANSWER (optional browser TTS)",
+      "scope": [
+        "Optional browser SpeechSynthesis that reads the RETURNED answer only.",
+        "Off by default or behind a clearly labeled toggle.",
+        "Never reads commands or the raw transcript; only fires after a response."
+      ]
+    },
+    "step_37_recommendation": {
+      "name": "JARVIS-VOICE-LIVE-SMOKE (end-to-end voice smoke test)",
+      "scope": [
+        "Live end-to-end voice smoke test: speak -> transcript -> Ask read-only -> answer/refusal -> optional TTS.",
+        "Validation/report-only; confirms safe + forbidden spoken questions behave identically to typed ones, with no storage, no refresh, no execution."
+      ]
+    }
+  },
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_step_33_voice_layer_safety_plan/report.json", "result": "JSON_OK"},
+    {"cmd": "git diff --name-only", "result": "no tracked files changed"},
+    {"cmd": "git diff --cached --name-only", "result": "nothing staged"}
+  ],
+  "files_created": [
+    "docs/jarvis_step_33_voice_layer_safety_plan/report.md",
+    "docs/jarvis_step_33_voice_layer_safety_plan/report.json"
+  ],
+  "explicitly_not_done": [
+    "No app.py / templates/jarvis.html / jarvis_conversation_safety.py / test change.",
+    "No microphone UI, no speech-to-text, no text-to-speech, no audio recording/storage, no wake word.",
+    "No endpoint, refresh, execution, broker, paper, or live control added.",
+    "No chat logs / storage added.",
+    "No trade run or simulation.",
+    "Nothing staged or committed."
+  ],
+  "conclusion": "Voice JARVIS is planned as a thin, additive input layer: the browser captures speech, turns it into a transcript locally, the operator confirms by clicking the existing 'Ask read-only' control, and the EXISTING /api/jarvis/ask + classifier handle everything downstream unchanged. The first version is preview-only with no auto-submit, no audio/transcript storage, no external STT, and optional off-by-default TTS that reads only returned answers. The roadmap sequences Steps 34 (UI preview shell), 35 (STT fill input), 36 (optional TTS), and 37 (live smoke), each separately approved, so voice never weakens the read-only, no-execution safety model."
+}
