@@ -1,0 +1,155 @@
+{
+  "memo": "JARVIS Step 11 — Read-Only Hardening Audit Memo",
+  "audited_commit": "4e21cc4",
+  "audited_commit_subject": "Add JARVIS Step 10 read-only system map panel",
+  "generated_at": "2026-05-30T00:00:00",
+  "scope": "Read-only audit of the JARVIS command center. No panel added. No code, UI, test, or tool files modified.",
+  "audited_files": [
+    "app.py",
+    "templates/jarvis.html",
+    "tests/test_jarvis_route.py",
+    "docs/JARVIS_COMMAND_CENTER_RELEASE_NOTE.md",
+    "docs/jarvis_mission_board.json",
+    "docs/jarvis_prompt_library.json",
+    "docs/jarvis_system_map.json",
+    "tools/jarvis_health_report.py",
+    "tools/jarvis_route_smoke_report.py",
+    "tools/jarvis_file_hygiene_report.py"
+  ],
+  "validation": {
+    "py_compile": {
+      "result": "PYCOMPILE_OK",
+      "targets": [
+        "app.py",
+        "tools/jarvis_health_report.py",
+        "tools/jarvis_route_smoke_report.py",
+        "tools/jarvis_file_hygiene_report.py"
+      ]
+    },
+    "scripts": {
+      "jarvis_health_report.py": {"exit_code": 0, "overall": "pass"},
+      "jarvis_route_smoke_report.py": {"exit_code": 0, "overall": "pass", "ok_count": "9/10", "note": "/money-spartan returns 404 (non-required route)"},
+      "jarvis_file_hygiene_report.py": {"exit_code": 0, "untracked": 4368, "modified": 0, "staged": 0}
+    },
+    "pytest": {
+      "command": "pytest tests/test_jarvis_route.py --rootdir=tests -q",
+      "result": "91 passed",
+      "note": "Used scoped --rootdir=tests to avoid corrupted hydra dir collection issues. Bare pytest not run."
+    }
+  },
+  "live_validation": {
+    "performed": true,
+    "base_url": "http://127.0.0.1:8765",
+    "jarvis_status_code": 200,
+    "api_jarvis_status_code": 200,
+    "commander_snapshot_present": true,
+    "commander_snapshot_state": "yellow",
+    "system_map_present": true,
+    "system_map_state": "ready",
+    "read_only_flag": true,
+    "ui_execution_controls": {"onclick": false, "form": false, "button": false, "post": false}
+  },
+  "read_only_posture": {
+    "confirmed": true,
+    "endpoint_doc": "api_jarvis_status() docstring: every section fail-closed; nothing executes, trades, uploads, or fires automation.",
+    "safe_wrapper": "_jarvis_safe(fn) catches all exceptions into an error dict; one failing section never crashes the 200 response.",
+    "fail_closed_sections": 21,
+    "browser_execution": false,
+    "broker_control": false,
+    "file_mutation_from_web": false
+  },
+  "cached_report_pattern": {
+    "summary": "Three offline tools write storage/jarvis/*.json (gitignored). The web route ONLY reads those files and never runs git, tests, or probes itself.",
+    "tools": [
+      "tools/jarvis_health_report.py -> storage/jarvis/health_report.json",
+      "tools/jarvis_route_smoke_report.py -> storage/jarvis/route_smoke_report.json",
+      "tools/jarvis_file_hygiene_report.py -> storage/jarvis/file_hygiene_report.json"
+    ],
+    "reader_states": ["missing", "unavailable", "ready"],
+    "storage_gitignored": true,
+    "correct": true
+  },
+  "system_map_consistency": {
+    "panels_documented": 21,
+    "scripts_documented": 3,
+    "tracked_data_files": 3,
+    "ignored_runtime_files": 3,
+    "live_api_sections": 21,
+    "all_sections_covered": true,
+    "panel_id_vs_api_key_naming_differences": [
+      {"system_map_panel_id": "operator_safety", "api_json_key": "safety"},
+      {"system_map_panel_id": "project_files", "api_json_key": "project"},
+      {"system_map_panel_id": "next_actions", "api_json_key": "recommended_next_actions"}
+    ],
+    "severity": "informational",
+    "note": "Cosmetic documentation naming only — not a safety bug. The system map uses logical panel ids that differ from three raw JSON keys."
+  },
+  "prompt_library_safety": {
+    "version": 1,
+    "count": 8,
+    "risk_levels": ["read_only"],
+    "all_allowed": true,
+    "rendered": "display-only text; no execution affordance",
+    "safe": true
+  },
+  "mission_board_safety": {
+    "version": 1,
+    "keys": ["version", "updated_at", "missions"],
+    "execution_fields_present": false,
+    "safe": true
+  },
+  "route_smoke_safety": {
+    "method": "GET-only probes executed offline by the tool; web reads cached JSON",
+    "note": "/money-spartan returns 404 — non-required route; flagged but not blocking",
+    "safe": true
+  },
+  "file_hygiene_safety": {
+    "commands": ["git status --porcelain", "git check-ignore"],
+    "mutation": "none (no delete/move/stage/commit)",
+    "safe": true
+  },
+  "commander_snapshot_logic": {
+    "kind": "derived",
+    "inputs": "operator_safety, safety_gates, health, route_smoke, mission_board, prompt_library, file_hygiene, trading_detail, git",
+    "runs_new_commands": false,
+    "current_state": "yellow",
+    "reason": "Large untracked backlog (4368) and dirty working tree keep it yellow; conservative-by-design, not an error.",
+    "safe": true
+  },
+  "ui_execution_control_scan": {
+    "file": "templates/jarvis.html",
+    "onclick": false,
+    "form": false,
+    "button": false,
+    "post": false,
+    "fetch_calls": 1,
+    "fetch_detail": "single GET to /api/jarvis/status with Accept: application/json; polled on a timer; no write verbs",
+    "safe": true
+  },
+  "tests_coverage": {
+    "total": 91,
+    "result": "all passed",
+    "covers": [
+      "endpoint returns 200 and read-only flags",
+      "each cached-report reader: missing / unavailable / ready states",
+      "tracked-JSON readers: prompt library, mission board, system map",
+      "system map: shape, fail-closed, script paths display-only, no execution fields",
+      "commander snapshot derived shape and no forbidden control keys",
+      "no forbidden trade-action language on page",
+      "app.py block has no broker/execution imports",
+      "readers do not spawn subprocess / urllib during status build"
+    ]
+  },
+  "risks_warnings": [
+    "Large untracked backlog (4368 files) keeps commander_snapshot yellow — operator hygiene item, not a safety defect.",
+    "/money-spartan route returns 404 in route smoke (non-required) — confirm whether the route was removed or renamed.",
+    "System map panel-id vs API-key naming mismatch on 3 entries — documentation polish only."
+  ],
+  "documentation_status": {
+    "release_note_present": true,
+    "system_map_present": true,
+    "stale_or_missing": "none blocking; minor system-map naming polish recommended"
+  },
+  "step_12_recommendation": "Reconcile the 3 system-map panel-id vs API-key naming differences (e.g. add an explicit api_key field to each system_map panel) and/or add a read-only Audit Consistency panel that surfaces this cross-reference as display-only. Keep strictly read-only — no buttons, forms, POST, or execution.",
+  "conclusion": "JARVIS_HARDENING_PASS"
+}
