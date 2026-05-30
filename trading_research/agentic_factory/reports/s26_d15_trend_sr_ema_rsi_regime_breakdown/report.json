@@ -1,0 +1,114 @@
+{
+  "step": "S26-D15",
+  "title": "Regime breakdown (frozen engine, validation only)",
+  "validation_only": true,
+  "optimization": false,
+  "strategy_change": false,
+  "new_filters": false,
+  "created": "2026-05-30",
+  "reference_commit": "ff6b779cd3d28833b2b488d6dfce14ca48997e23",
+  "reference_commit_short": "ff6b779",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "s26_current_status": {
+    "level": "RESEARCH_CANDIDATE",
+    "paper_ready": false,
+    "live_ready": false,
+    "deployable": false
+  },
+  "method": {
+    "data": "data_offline/ daily CSVs (gitignored); NQ/ES 2013-2025, MNQ/MES 2019-2025; no 2026; no data modified",
+    "windows": "IS 2013-2022, OOS 2023-2025 streamed separately per market (matches D3/D5/D12)",
+    "trend_regime": "DEGENERATE by construction: every entry requires close>EMA200 AND EMA50>EMA200, so 100% of trades are bull-stack. The trend filter IS the entry; it cannot discriminate trades.",
+    "volatility_regime": "ATR20/close at the SIGNAL bar; low/mid/high split by 33rd/67th percentile computed mechanically from each market's IS trades only, then the SAME thresholds applied to OOS. No threshold chosen after seeing OOS.",
+    "year_regime": "tagged by exit/realization year (matches prior year_R convention)",
+    "faithfulness_check": "NQ IS 117/+7.6536/PF1.2016/DD10.5943 and OOS 32/+7.9990/PF1.7694/DD2.1827; ES IS 125/+7.6725/PF1.2003/DD16.7281 and OOS 27/+11.4584/PF2.2352/DD2.0697 -- all match the committed D3/D5/D12 overalls exactly."
+  },
+  "NQ": {
+    "role": "reference_primary",
+    "vol_tertile_thresholds_is": {"t33_atr_pct": 0.010984, "t67_atr_pct": 0.01467},
+    "IS": {
+      "overall": {"trade_count": 117, "total_r": 7.6536, "profit_factor": 1.2016, "win_rate": 0.3932, "expectancy_r": 0.0654, "max_dd_r": 10.5943},
+      "by_volatility": {
+        "low": {"trade_count": 39, "total_r": 1.2853, "profit_factor": 1.0848, "win_rate": 0.2821, "share_of_net": 0.1679},
+        "mid": {"trade_count": 39, "total_r": 7.1403, "profit_factor": 1.5527, "win_rate": 0.4359, "share_of_net": 0.9329},
+        "high": {"trade_count": 39, "total_r": -0.772, "profit_factor": 0.9219, "win_rate": 0.4615, "share_of_net": -0.1009}
+      },
+      "by_year_total_r": {"2013": 3.2897, "2014": -1.2545, "2015": -2.7328, "2016": -4.447, "2017": 4.2862, "2018": 0.3501, "2019": 1.784, "2020": 4.8232, "2021": 2.543, "2022": -0.9883},
+      "drawdown_cluster": {"depth_r": 10.5943, "years": [2014, 2015, 2016], "trade_span": 34}
+    },
+    "OOS": {
+      "overall": {"trade_count": 32, "total_r": 7.999, "profit_factor": 1.7694, "win_rate": 0.5312, "expectancy_r": 0.25, "max_dd_r": 2.1827},
+      "by_volatility": {
+        "low": {"trade_count": 0, "total_r": 0.0, "share_of_net": 0.0},
+        "mid": {"trade_count": 17, "total_r": 6.7393, "profit_factor": 2.2043, "win_rate": 0.4706, "share_of_net": 0.8425},
+        "high": {"trade_count": 15, "total_r": 1.2597, "profit_factor": 1.2624, "win_rate": 0.6, "share_of_net": 0.1575}
+      },
+      "by_year_total_r": {"2023": 0.6547, "2024": 4.9348, "2025": 2.4094},
+      "by_year_share_of_net": {"2023": 0.0818, "2024": 0.6169, "2025": 0.3012},
+      "drawdown_cluster": {"depth_r": 2.1827, "years": [2025], "trade_span": 4}
+    }
+  },
+  "ES": {
+    "role": "independent_primary",
+    "vol_tertile_thresholds_is": {"t33_atr_pct": 0.009092, "t67_atr_pct": 0.011668},
+    "IS": {
+      "overall": {"trade_count": 125, "total_r": 7.6725, "profit_factor": 1.2003, "win_rate": 0.384, "expectancy_r": 0.0614, "max_dd_r": 16.7281},
+      "by_volatility": {
+        "low": {"trade_count": 42, "total_r": -0.485, "profit_factor": 0.9727, "win_rate": 0.3333, "share_of_net": -0.0632},
+        "mid": {"trade_count": 41, "total_r": 1.9807, "profit_factor": 1.1762, "win_rate": 0.3415, "share_of_net": 0.2582},
+        "high": {"trade_count": 42, "total_r": 6.1768, "profit_factor": 1.6626, "win_rate": 0.4762, "share_of_net": 0.8051}
+      },
+      "by_year_total_r": {"2013": 3.906, "2014": -3.5544, "2015": -4.5901, "2016": -8.3428, "2017": 7.0068, "2018": -0.7869, "2019": 3.6053, "2020": 5.0495, "2021": 5.7606, "2022": -0.3815},
+      "drawdown_cluster": {"depth_r": 16.7281, "years": [2014, 2015, 2016], "trade_span": 49}
+    },
+    "OOS": {
+      "overall": {"trade_count": 27, "total_r": 11.4584, "profit_factor": 2.2352, "win_rate": 0.5926, "expectancy_r": 0.4244, "max_dd_r": 2.0697},
+      "by_volatility": {
+        "low": {"trade_count": 4, "total_r": 2.0, "profit_factor": 2.0, "win_rate": 0.5, "share_of_net": 0.1745},
+        "mid": {"trade_count": 15, "total_r": 4.837, "profit_factor": 1.9541, "win_rate": 0.6, "share_of_net": 0.4221},
+        "high": {"trade_count": 8, "total_r": 4.6214, "profit_factor": 3.0943, "win_rate": 0.625, "share_of_net": 0.4033}
+      },
+      "by_year_total_r": {"2023": -0.925, "2024": 4.0465, "2025": 8.3369},
+      "by_year_share_of_net": {"2023": -0.0807, "2024": 0.3531, "2025": 0.7276},
+      "drawdown_cluster": {"depth_r": 2.0697, "years": [2024], "trade_span": 3}
+    }
+  },
+  "proxy_micro_descriptive": {
+    "note": "MNQ (proxy of NQ) and MES (proxy of ES) are same-underlying micros, PARTIAL_IS from 2019-05-05. Descriptive only; NOT independent; cannot change the verdict. Their PARTIAL IS spans a different, shorter regime window and their own ATR%-tertiles differ.",
+    "MNQ": {
+      "IS": {"trade_count": 27, "total_r": 6.3671, "profit_factor": 1.9367, "vol_low_share": 1.0356, "vol_mid_share": -0.5096, "vol_high_share": 0.4741},
+      "OOS": {"trade_count": 32, "total_r": 7.6833, "profit_factor": 1.7191, "year_2024_share": 0.6413}
+    },
+    "MES": {
+      "IS": {"trade_count": 28, "total_r": 10.3681, "profit_factor": 2.6569, "vol_low_share": 0.4388, "vol_mid_share": -0.0166, "vol_high_share": 0.5778},
+      "OOS": {"trade_count": 27, "total_r": 11.7895, "profit_factor": 2.3276, "year_2025_share": 0.7442}
+    }
+  },
+  "concentration_findings": {
+    "trend_regime": "Degenerate: 100% bull-stack by construction; no discrimination possible.",
+    "volatility_regime_cross_market_inconsistency": "NQ IS profit sits in MID vol (+7.14R, 93% of net) while HIGH vol is NEGATIVE (-0.77R, PF 0.92). ES IS profit sits in HIGH vol (+6.18R, 80% of net) while LOW vol is slightly NEGATIVE (-0.49R, PF 0.97). The edge does NOT live in the same volatility regime across the two primary markets -- a mixed/contradictory split, not a single consistent profitable regime.",
+    "year_concentration_oos": "OOS profit is single-year-dominated on BOTH markets: NQ 2024 = 61.7% of OOS net; ES 2025 = 72.8% of OOS net.",
+    "shared_is_drawdown": "Both markets share a deep 2014-2016 IS drawdown cluster (NQ 10.59R over 34 trades; ES 16.73R over 49 trades) -- the choppy post-2013 / 2015-2016 range was the hardest regime for the pullback-long edge on both.",
+    "single_narrow_regime_dependence": false,
+    "single_narrow_regime_dependence_note": "Profit is NOT isolated to one tiny regime: it is spread across mid+high volatility and several positive years (NQ 2013/2017/2020/2021; ES 2013/2017/2019/2020/2021). The D14 hard blocker 'profit only from one narrow regime' did NOT fire."
+  },
+  "verdict": "REGIME_RISK_INCONCLUSIVE",
+  "verdict_basis": {
+    "not_acceptable_reason": "The volatility-regime profile is inconsistent across NQ vs ES (high-vol negative on NQ, high-vol best on ES) and OOS is single-year-dominated on both markets; cannot cleanly call regime risk acceptable.",
+    "not_fail_reason": "No major regime consistently destroys the strategy across both markets; ES does not contradict NQ in net direction (both IS and OOS positive); the shared 2014-2016 drawdown still recovered to net positive.",
+    "inconclusive_over_concentrated_reason": "Per-regime samples are small after splitting (OOS vol cells 0-17 trades; IS/OOS year cells a handful) AND the volatility split is mixed/contradictory between markets rather than a single consistent dominant regime, so the honest call is INCONCLUSIVE with flagged concentration cautions, not a clean CONCENTRATED-on-one-regime.",
+    "flags": [
+      "2025/recent-year carries most OOS profit (NQ 2024 61.7%, ES 2025 72.8%) -- flagged.",
+      "Volatility regime that carries profit differs by market (NQ mid, ES high) -- flagged.",
+      "Low/high-vol cells go negative on one market each (NQ high -0.77R; ES low -0.49R) -- flagged.",
+      "Deep shared 2014-2016 IS drawdown -- flagged.",
+      "Small per-regime sample sizes after splitting -- flagged."
+    ]
+  },
+  "gate_decision": {
+    "blocks_d16": false,
+    "permits_d16": true,
+    "reason": "No D14 hard blocker fired (profit is not from one narrow regime; ES does not contradict NQ). REGIME_RISK_INCONCLUSIVE permits proceeding cautiously to S26-D16 walk-forward/rolling-window stability -- which is precisely the test to resolve the temporal/single-year concentration this step flagged. It is NOT a clearance to paper trade."
+  },
+  "trading_recommendation": "NONE. No deployment, no paper, no live. S26 stays RESEARCH_CANDIDATE."
+}
