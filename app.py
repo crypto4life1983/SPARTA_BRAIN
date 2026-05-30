@@ -7986,16 +7986,25 @@ def _jarvis_system_map() -> dict:
         return {"state": "unavailable", "error": "'panels' is not a list"}
     if not isinstance(scripts, list):
         return {"state": "unavailable", "error": "'scripts' is not a list"}
-    panel_required = ("id", "title", "kind")
+    panel_required = ("id", "title", "kind", "api_key")
     clean_panels = []
+    seen_api_keys: set = set()
     for p in panels:
         if not isinstance(p, dict) or any(k not in p for k in panel_required):
             return {"state": "unavailable",
                     "error": "a panel is missing required fields"}
+        # api_key documents which /api/jarvis/status key this panel reads. It is
+        # a plain DISPLAY string — never used to dispatch, import, or call code.
+        api_key = str(p.get("api_key"))
+        if api_key in seen_api_keys:
+            return {"state": "unavailable",
+                    "error": f"duplicate api_key: {api_key}"}
+        seen_api_keys.add(api_key)
         # Re-emit only documentation fields. `script` is a path STRING shown to
         # a human — it is never imported, run, or resolved to a callable.
         clean_panels.append({
             "id": str(p.get("id")),
+            "api_key": api_key,
             "title": str(p.get("title")),
             "kind": str(p.get("kind")),
             "source": str(p.get("source", "")),

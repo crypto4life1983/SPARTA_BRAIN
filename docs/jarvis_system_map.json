@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-30T00:00:00",
+  "updated_at": "2026-05-30T01:00:00",
   "posture": {
     "read_only": true,
     "browser_execution": false,
@@ -10,6 +10,7 @@
   "panels": [
     {
       "id": "commander_snapshot",
+      "api_key": "commander_snapshot",
       "title": "Commander's Snapshot",
       "kind": "derived",
       "source": "/api/jarvis/status",
@@ -20,6 +21,7 @@
     },
     {
       "id": "system_core",
+      "api_key": "system_core",
       "title": "System Core",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -30,6 +32,7 @@
     },
     {
       "id": "ai_brains",
+      "api_key": "ai_brains",
       "title": "AI Brains",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -40,6 +43,7 @@
     },
     {
       "id": "trading_bridge",
+      "api_key": "trading_bridge",
       "title": "Trading Bridge",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -50,6 +54,7 @@
     },
     {
       "id": "content_engine",
+      "api_key": "content_engine",
       "title": "Content Engine",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -60,6 +65,7 @@
     },
     {
       "id": "money_engine",
+      "api_key": "money_engine",
       "title": "Money Engine",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -70,6 +76,7 @@
     },
     {
       "id": "moving_company",
+      "api_key": "moving_company",
       "title": "Moving Company",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -80,6 +87,7 @@
     },
     {
       "id": "daily_mission",
+      "api_key": "daily_mission",
       "title": "Daily Mission",
       "kind": "derived",
       "source": "/api/jarvis/status",
@@ -90,6 +98,7 @@
     },
     {
       "id": "safety_gates",
+      "api_key": "safety_gates",
       "title": "Safety Gates",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -100,6 +109,7 @@
     },
     {
       "id": "git",
+      "api_key": "git",
       "title": "Git State",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -110,6 +120,7 @@
     },
     {
       "id": "operator_safety",
+      "api_key": "safety",
       "title": "Operator Safety",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -120,6 +131,7 @@
     },
     {
       "id": "project_files",
+      "api_key": "project",
       "title": "Project Files",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -130,6 +142,7 @@
     },
     {
       "id": "brain_memory",
+      "api_key": "brain_memory",
       "title": "Brain Memory",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -140,6 +153,7 @@
     },
     {
       "id": "next_actions",
+      "api_key": "recommended_next_actions",
       "title": "Recommended Next Actions",
       "kind": "static",
       "source": "/api/jarvis/status",
@@ -150,6 +164,7 @@
     },
     {
       "id": "health_report",
+      "api_key": "health_report",
       "title": "Health Report",
       "kind": "cached",
       "source": "storage/jarvis/health_report.json",
@@ -160,6 +175,7 @@
     },
     {
       "id": "mission_board",
+      "api_key": "mission_board",
       "title": "Mission Board",
       "kind": "tracked",
       "source": "docs/jarvis_mission_board.json",
@@ -170,6 +186,7 @@
     },
     {
       "id": "trading_detail",
+      "api_key": "trading_detail",
       "title": "Trading Research Detail",
       "kind": "live",
       "source": "/api/jarvis/status",
@@ -180,6 +197,7 @@
     },
     {
       "id": "route_smoke_report",
+      "api_key": "route_smoke_report",
       "title": "Route Smoke",
       "kind": "cached",
       "source": "storage/jarvis/route_smoke_report.json",
@@ -190,6 +208,7 @@
     },
     {
       "id": "prompt_library",
+      "api_key": "prompt_library",
       "title": "Prompt Library",
       "kind": "tracked",
       "source": "docs/jarvis_prompt_library.json",
@@ -200,6 +219,7 @@
     },
     {
       "id": "file_hygiene_report",
+      "api_key": "file_hygiene_report",
       "title": "File Hygiene",
       "kind": "cached",
       "source": "storage/jarvis/file_hygiene_report.json",
@@ -210,6 +230,7 @@
     },
     {
       "id": "system_map",
+      "api_key": "system_map",
       "title": "System Map",
       "kind": "tracked",
       "source": "docs/jarvis_system_map.json",

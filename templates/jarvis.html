@@ -743,13 +743,14 @@
         smp.broker_control ? 'ENABLED' : 'DISABLED');
       smHtml += row('File mutation from web', smp.file_mutation_from_web ? 'bad' : 'locked',
         smp.file_mutation_from_web ? 'ENABLED' : 'DISABLED');
-      // Compact panel list (id / title / kind) — text only, never interactive
+      // Compact panel list (id / api_key / title / kind) — text only, never interactive
       (sm.panels || []).forEach(function(p){
         var card = '<div class="jv-mcard"><div class="top">'+
           '<span class="ttl">'+esc(p.title || '')+'</span>'+
           '<span class="jv-tag">'+esc(p.kind || '')+'</span></div>'+
           '<div class="meta">'+
-          '<span class="jv-tag">'+esc(p.id || '')+'</span>'+
+          '<span class="jv-tag">id: '+esc(p.id || '')+'</span>'+
+          '<span class="jv-tag">api_key: '+esc(p.api_key || '')+'</span>'+
           (p.source ? '<span class="jv-tag">'+esc(p.source)+'</span>' : '')+
           '<span class="jv-tag">'+(p.writes_from_web ? 'WRITES FROM WEB' : 'READ ONLY')+'</span>'+
           '</div>';

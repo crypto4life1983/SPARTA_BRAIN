@@ -1177,7 +1177,7 @@ def test_jarvis_system_map_seed_file_is_valid_and_ready():
     assert isinstance(panels, list) and len(panels) >= 1
     assert isinstance(scripts, list) and len(scripts) >= 1
     for p in panels:
-        for key in ("id", "title", "kind"):
+        for key in ("id", "title", "kind", "api_key"):
             assert key in p, f"panel missing {key}"
     counts = sm.get("counts") or {}
     assert counts.get("panels") == len(panels)
@@ -1226,10 +1226,10 @@ def test_jarvis_system_map_valid_shape_passed_through(monkeypatch, tmp_path):
         "updated_at": "2026-05-30T00:00:00",
         "posture": {"read_only": True, "browser_execution": False,
                     "broker_control": False, "file_mutation_from_web": False},
-        "panels": [{"id": "p1", "title": "Panel One", "kind": "live",
-                    "source": "/api/jarvis/status", "cache_file": None,
-                    "script": None, "writes_from_web": False,
-                    "description": "desc"}],
+        "panels": [{"id": "p1", "api_key": "p1", "title": "Panel One",
+                    "kind": "live", "source": "/api/jarvis/status",
+                    "cache_file": None, "script": None,
+                    "writes_from_web": False, "description": "desc"}],
         "scripts": [{"path": "tools/x.py", "purpose": "manual",
                      "manual_only": True, "called_by_web": False}],
         "tracked_data_files": ["docs/jarvis_system_map.json"],
@@ -1242,6 +1242,7 @@ def test_jarvis_system_map_valid_shape_passed_through(monkeypatch, tmp_path):
     assert sm["version"] == 1
     assert sm["posture"]["read_only"] is True
     assert sm["panels"][0]["id"] == "p1"
+    assert sm["panels"][0]["api_key"] == "p1"
     assert sm["scripts"][0]["path"] == "tools/x.py"
     assert sm["counts"]["panels"] == 1
     assert sm["counts"]["scripts"] == 1
@@ -1318,6 +1319,111 @@ def test_jarvis_system_map_seed_file_is_tracked_safe():
     assert isinstance(data["panels"], list)
     for s in data["scripts"]:
         assert s.get("called_by_web") is False, "scripts must not be web-callable"
+
+
+# --- Step 12: system map api_key reconciliation ---------------------------
+
+def test_jarvis_system_map_every_panel_has_api_key():
+    import app as app_module
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "ready", sm
+    for p in sm["panels"]:
+        assert "api_key" in p, f"panel {p.get('id')} missing api_key"
+        assert isinstance(p["api_key"], str) and p["api_key"], p
+
+
+def test_jarvis_system_map_corrected_mappings():
+    # The three Step 11 naming differences are now documented explicitly.
+    import app as app_module
+    sm = app_module._jarvis_system_map()
+    by_id = {p["id"]: p["api_key"] for p in sm["panels"]}
+    assert by_id.get("operator_safety") == "safety"
+    assert by_id.get("project_files") == "project"
+    assert by_id.get("next_actions") == "recommended_next_actions"
+
+
+def test_jarvis_system_map_api_keys_match_live_status_keys():
+    # Every documented api_key (except the self-referential ones) must be a real
+    # key on the live /api/jarvis/status response.
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    body = client.get("/api/jarvis/status").json()
+    sm = body["system_map"]
+    for p in sm["panels"]:
+        assert p["api_key"] in body, (
+            f"panel {p['id']} api_key {p['api_key']} not in live status keys"
+        )
+
+
+def test_jarvis_system_map_duplicate_api_key_is_fail_closed(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    payload = {
+        "version": 1,
+        "posture": {"read_only": True},
+        "panels": [
+            {"id": "a", "api_key": "dup", "title": "A", "kind": "live"},
+            {"id": "b", "api_key": "dup", "title": "B", "kind": "live"},
+        ],
+        "scripts": [],
+    }
+    (d / "jarvis_system_map.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "unavailable"
+    assert "duplicate" in sm["error"]
+
+
+def test_jarvis_system_map_missing_api_key_is_fail_closed(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    payload = {
+        "version": 1,
+        "posture": {"read_only": True},
+        # panel has id/title/kind but no api_key -> must fail closed now
+        "panels": [{"id": "a", "title": "A", "kind": "live"}],
+        "scripts": [],
+    }
+    (d / "jarvis_system_map.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "unavailable"
+
+
+def test_jarvis_system_map_api_key_is_not_used_to_dispatch(monkeypatch):
+    # api_key is a display string only. Building the map must never spawn a
+    # subprocess or make an HTTP call based on it.
+    import subprocess
+    import urllib.request
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("system map must not execute anything")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert r.json()["system_map"]["state"] == "ready"
+
+
+def test_jarvis_system_map_seed_file_panels_carry_api_key():
+    import json
+    src = (_REPO_ROOT / "docs" / "jarvis_system_map.json").read_text(
+        encoding="utf-8"
+    )
+    data = json.loads(src)
+    keys = [p["api_key"] for p in data["panels"]]
+    assert all(isinstance(k, str) and k for k in keys)
+    assert len(keys) == len(set(keys)), "api_key values must be unique"
 
 
 # --- safety: no forbidden trade-action language ---------------------------
