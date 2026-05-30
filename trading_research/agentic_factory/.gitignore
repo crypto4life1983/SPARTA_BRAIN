@@ -15,3 +15,15 @@ reports/smoke_run_summary_*.md
 
 # Local-only generated data-quality scan reports
 reports/data_quality_*.md
+
+# Local-only S23-D10 Donchian baseline run outputs
+reports/s23_d10_2013_donchian_baseline/
+
+# Local-only S23-D11 Donchian IS-expansion run outputs
+reports/s23_d11_2013_2022_donchian_is/
+
+# Local-only S23-D12 NQ 2014-2022 data-prep run outputs
+reports/s23_d12_nq_2014_2022_data_prep/
+
+# Local-only S23-D13 NQ 2014-2022 databento transcode run outputs
+reports/s23_d13_nq_2014_2022_databento_transcode/
