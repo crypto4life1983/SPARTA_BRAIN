@@ -1,0 +1,123 @@
+{
+  "step": "S26-D4",
+  "title": "Pre-registered sealed OOS validation protocol: Trend + S/R + EMA/RSI (long-only)",
+  "created_date": "2026-05-29",
+  "type": "PROTOCOL ONLY - pre-registration committed BEFORE any OOS data is run. No OOS results, no OOS run, no optimization, no rule changes.",
+  "frozen_strategy_reference": {
+    "s26_d1_spec_commit": "af643aef58c63dd3bd904b4fb44406f4a2a55c3e",
+    "s26_d2_engine_commit": "1b1174e37c377b6331fa480a96115f286fb6a246",
+    "s26_d3_is_baseline_commit": "1bb70f9c3961cf4435d7953a69e06989f11a5dbb"
+  },
+  "frozen_strategy_rules": {
+    "direction": "long-only",
+    "accounting": "R-only (1R = 2N = 2.0 * ATR20 stop distance); no compounding, no pyramiding, one position at a time, flat-state entries only",
+    "trend_filter": "close[i] > EMA200[i] AND EMA50[i] > EMA200[i]",
+    "support_reference": "prior 20-day rolling low, lowest low over bars[i-20:i], EXCLUDES current bar (lookahead-safe)",
+    "pullback_gate": "low[i] <= support_ref[i] + 1.5 * ATR20[i]",
+    "rsi_band": "40 <= RSI14[i] <= 55",
+    "confirmation": "RSI14[i] > RSI14[i-1] OR close[i] > EMA20[i]",
+    "entry_execution": "fill at next bar (i+1) OPEN",
+    "stop": "entry - 2.0 * ATR20[i]  (hard -1R intrabar stop)",
+    "target": "+2R fixed take-profit (entry + 2R, 1R = 2N)",
+    "backstop": "if still open at a bar CLOSE and close < EMA50, exit at that close (trend invalidation)",
+    "exit_precedence_per_bar": "(1) -1R hard stop intrabar -> (2) +2R target intrabar -> (3) EMA50 close-break if still open",
+    "management_start": "bar AFTER the fill bar (fill bar i+1 only opens; exits managed from i+2)"
+  },
+  "is_reference_result": {
+    "window": "2013-2022",
+    "trade_count": 117,
+    "total_r": 7.6536,
+    "profit_factor": 1.2016,
+    "win_rate": 0.3932,
+    "expectancy_r": 0.0654,
+    "max_drawdown_r": 10.5943,
+    "best_trade_r": 2.0,
+    "worst_trade_r": -1.0,
+    "median_r": -0.1726,
+    "positive_years": 6,
+    "negative_years": 4,
+    "best_trade_share_of_net": 0.2613,
+    "total_r_without_top3": 1.6536,
+    "verdict": "IS_CONTINUE (marginal)"
+  },
+  "oos_window": {
+    "window": "2023-2025 only",
+    "status": "SEALED / UNSEEN until this protocol is committed",
+    "run_policy": "run exactly ONCE after this protocol is committed",
+    "no_parameter_changes_after_oos": true,
+    "no_added_filters_after_oos": true,
+    "no_subperiod_cherry_picking": true,
+    "input_files_oos": [
+      "data_offline/nq_c0_ohlcv_1d_2023.csv",
+      "data_offline/nq_c0_ohlcv_1d_2024.csv",
+      "data_offline/nq_c0_ohlcv_1d_2025.csv"
+    ],
+    "is_files_excluded_from_oos_run": "the 10 IS CSVs (2013-2022) are NOT pooled into the OOS run; OOS is judged standalone"
+  },
+  "oos_metrics_to_judge": [
+    "trade_count",
+    "total_r",
+    "profit_factor",
+    "win_rate",
+    "expectancy_r",
+    "max_drawdown_r",
+    "best_trade_r",
+    "worst_trade_r",
+    "median_r",
+    "year_by_year_r",
+    "positive_years_count",
+    "exit_reason_counts",
+    "best_trade_share_of_net",
+    "total_r_without_top3 (top-3 winner removal)",
+    "comparison_to_is_metrics"
+  ],
+  "pass_watch_fail": {
+    "precedence": "FAIL -> WATCH -> PASS (evaluate FAIL triggers first; any FAIL trigger forces FAIL regardless of PASS conditions)",
+    "PASS_all_must_hold": [
+      "OOS expectancy > 0",
+      "OOS profit factor >= 1.10",
+      "OOS trade count >= 20 (ideally >= 30)",
+      "OOS max DD <= 1.5 * IS max DD (<= 15.8915 R)",
+      "at least 2 of 3 OOS years positive",
+      "best trade share of net <= 50%",
+      "result remains positive after removing top 3 winners",
+      "no data QA defect"
+    ],
+    "WATCH_any_trigger": [
+      "OOS expectancy between -0.03R and +0.03R",
+      "PF between 0.95 and 1.10",
+      "trade count below 20",
+      "one year dominates most of the result",
+      "best trade share > 50%",
+      "top-3 removal turns result negative",
+      "max DD worse than IS but not catastrophic"
+    ],
+    "FAIL_any_trigger": [
+      "OOS expectancy < -0.03R",
+      "PF < 0.95",
+      "all or most OOS years negative",
+      "max DD > 1.5 * IS max DD (> 15.8915 R) with no recovery",
+      "result depends almost entirely on one or a few trades",
+      "structural data issue appears"
+    ]
+  },
+  "interpretation_rules": [
+    "PASS does NOT mean live trading.",
+    "PASS only means continue to S26-D6 entry-significance and S26-D7 Monte Carlo / sequence-risk.",
+    "WATCH means do NOT optimize; inspect the evidence and continue only if genuinely justified.",
+    "FAIL means park this branch or open a NEW branch with a fresh protocol - do NOT tune against OOS."
+  ],
+  "anti_overfit_rules": [
+    "no parameter changes",
+    "no post-OOS filters",
+    "no cherry-picking dates",
+    "no rerunning OOS with edited rules",
+    "if changing rules, make a NEW branch with a fresh pre-registered protocol"
+  ],
+  "derived_thresholds": {
+    "is_max_dd_r": 10.5943,
+    "oos_max_dd_pass_ceiling_r": 15.8915,
+    "note": "oos_max_dd_pass_ceiling_r = 1.5 * IS max DD, computed and fixed here BEFORE any OOS run."
+  },
+  "clear_line": "No OOS backtest has been run. No 2023-2025 results have been viewed. This is a pre-registered protocol only. The binding PASS/WATCH/FAIL gate is this committed protocol; the S26-D5 OOS run will be judged strictly against it, exactly once."
+}
