@@ -1,0 +1,130 @@
+{
+  "step": "Crypto-D3c",
+  "title": "Crypto-D3c -- Governance reconciliation memo for the auto-committed Crypto-D3b freeze",
+  "created": "2026-05-30",
+  "kind": "governance_reconciliation_memo",
+  "memo_only": true,
+  "network": false,
+  "data_fetch": false,
+  "exchange_api": false,
+  "broker": false,
+  "paper_or_live": false,
+  "backtest": false,
+  "strategy_test": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "modified_crypto_data_file": false,
+  "provenance": {
+    "head_at_memo": "5552356cad3203d5cb522b37451b89c914243d44",
+    "head_note": "background automation advances HEAD continuously; the ratified D3b commit 5b3d94c is confirmed an ancestor of HEAD",
+    "ratified_commit_full": "5b3d94ce136c7c681c338aa31e7a3d098f414695",
+    "ratified_commit_short": "5b3d94c",
+    "ratified_commit_message": "Freeze crypto spot daily data snapshot",
+    "crypto_d1_commit": "c8a59fee3e4804c416564d4673f7152e87fd3e60",
+    "crypto_d2_commit": "a035ab079d2d76c271076ad5edeadad0e7df7086",
+    "crypto_d3_commit": "31ebdaf88cd5edda1214cee65368a4eff6b20655",
+    "crypto_d3a_commit": "ce62a718f8c5bb4605617b66c67162ac3a614e83",
+    "crypto_d3a_evidence_update_commit": "ae25f432fab41e5421ae8a01e0021941bf01dc67",
+    "all_ancestors_of_head": true,
+    "s30_untouched": true,
+    "nothing_staged_at_memo_start": true
+  },
+  "1_issue": {
+    "summary": "Crypto-D3b (the factory-internal crypto data freeze) was committed by background automation as 5b3d94c BEFORE explicit human approval.",
+    "why_it_matters": "The validation factory is a strictly-gated, sequential process: every numbered step requires separate explicit approval before any git staging/commit. An autonomous commit of a factory/crypto artifact bypasses that gate, even when the artifact content is correct.",
+    "classification": "PROCESS_VIOLATION_CONTENT_CLEAN"
+  },
+  "2_audited_content": {
+    "commit": "5b3d94c",
+    "file_count": 7,
+    "files": [
+      "trading_research/agentic_factory/data_crypto/spot_binance_usdt_1d_2020_2025/BTCUSDT_1d_2020_2025.csv",
+      "trading_research/agentic_factory/data_crypto/spot_binance_usdt_1d_2020_2025/ETHUSDT_1d_2020_2025.csv",
+      "trading_research/agentic_factory/data_crypto/spot_binance_usdt_1d_2020_2025/SOLUSDT_1d_2020_2025.csv",
+      "trading_research/agentic_factory/data_crypto/spot_binance_usdt_1d_2020_2025/provenance.json",
+      "trading_research/agentic_factory/data_crypto/spot_binance_usdt_1d_2020_2025/MANIFEST.md",
+      "trading_research/agentic_factory/reports/crypto_d3b_factory_data_freeze/report.json",
+      "trading_research/agentic_factory/reports/crypto_d3b_factory_data_freeze/report.md"
+    ],
+    "no_temp_script_committed": true,
+    "no_py_or_keys_or_hidden_files": true
+  },
+  "3_qa_result": {
+    "BTCUSDT": {"rows": 2192, "date_start": "2020-01-01", "date_end": "2025-12-31"},
+    "ETHUSDT": {"rows": 2192, "date_start": "2020-01-01", "date_end": "2025-12-31"},
+    "SOLUSDT": {"rows": 1969, "date_start": "2020-08-11", "date_end": "2025-12-31"},
+    "duplicate_timestamps": 0,
+    "invalid_ohlc": 0,
+    "zero_or_negative_volume": 0,
+    "missing_calendar_days": 0,
+    "rows_in_2026": 0,
+    "quote_consistency": "USDT across all three",
+    "utc_daily_boundary": "00:00 UTC, %Y-%m-%d",
+    "qa_verdict": "CLEAN (independently recomputed during audit)"
+  },
+  "4_sha256_result": {
+    "BTCUSDT": "d87742b8e4c90eeadb3312561e8f63314c3139e6740c06e151b206ee06622941",
+    "ETHUSDT": "4a4d7b082b5c6c086c71d4dbc933e9d45f67b1632c9130a7df48d0daeb0180e7",
+    "SOLUSDT": "bd8b28f1fd7c6d5187bc3f60e609e22aa28c57d57477472e4b845059c07c5f32",
+    "matched_provenance_json": true,
+    "matched_report_json": true,
+    "note": "on-disk hashes recomputed during the D3b audit; identical to both provenance.json and report.json"
+  },
+  "5_source_integrity": {
+    "source_dir": "data/frozen_regime_inputs/ (gitignored, outside factory)",
+    "BTCUSDT_source": {"name": "btcusdt_1d_2020-01-01_2026-05-29.csv", "size_bytes": 132101, "mtime_utc": "2026-05-30T00:15:04Z"},
+    "ETHUSDT_source": {"name": "ethusdt_1d_2020-01-01_2026-05-29.csv", "size_bytes": 125579, "mtime_utc": "2026-05-30T00:15:04Z"},
+    "SOLUSDT_source": {"name": "solusdt_1d_2020-08-11_2026-05-29.csv", "size_bytes": 114188, "mtime_utc": "2026-05-30T00:15:04Z"},
+    "unchanged": true,
+    "proof": "current size/mtime exactly match the values provenance.json recorded at freeze time; the freeze was read-only on the source"
+  },
+  "6_safety_result": {
+    "no_credentials": true,
+    "no_api_or_private_keys": true,
+    "no_exchange_execution": true,
+    "no_broker": true,
+    "no_paper_or_live": true,
+    "no_strategy_test": true,
+    "no_data_fetch": true,
+    "no_network": true,
+    "no_perp_endpoints": true,
+    "scan_note": "every broker/fapi/order/trade keyword hit in the D3b tree is a negation or documentation string (e.g. 'broker': false, no_exchange_api_execution, 'perp would be fapi'); no active execution, credentials, or live/paper commands present"
+  },
+  "7_governance_decision": {
+    "decision": "RATIFY_D3B_IN_PLACE",
+    "do_not_revert": true,
+    "rationale": "The audited content is fully clean (QA CLEAN, SHA256 matched, 2026 sealed, source unmodified, no unsafe artifact). Reverting would discard verified-correct work and add churn; the defect was procedural, not substantive. The freeze is therefore accepted retroactively.",
+    "crypto_d3b_data_verdict": "DATA_READY_FOR_CRYPTO_D4_SPEC",
+    "scope_limit": "Ratification covers ONLY the D3b data freeze (the immutable, hash-pinned, 2026-sealed BTC/ETH/SOL spot daily USDT snapshot). It does NOT authorize Crypto-D4, any strategy, any fetch, or any execution."
+  },
+  "8_required_process_correction": {
+    "no_auto_commit": "Background automation MUST NOT auto-commit trading/factory/crypto artifacts without explicit user approval.",
+    "explicit_pathspec": "Future commits must use explicit pathspec (no 'git add .' / no broad directory adds).",
+    "stop_at_untracked": "Future auto-generated artifacts must stop at UNTRACKED status until a human approves staging/commit.",
+    "applies_to": "all factory steps (futures branches and crypto lane), including any future Crypto-D4+ artifacts",
+    "status": "RECOMMENDED_CORRECTION -- this memo records the requirement; enforcing it (pausing/guarding the automation) is a separate action not performed by this memo"
+  },
+  "9_next_allowed_step": {
+    "crypto_d4_spec": "Crypto-D4 (choose/re-freeze ONE crypto strategy spec, pre-registered, no parameter freedom) MAY proceed later -- but ONLY after this governance memo (Crypto-D3c) is committed, and only under separate explicit authorization.",
+    "not_authorized_now": true
+  },
+  "10_forbidden_actions": [
+    "no_crypto_d4_yet",
+    "no_strategy_test",
+    "no_exchange_api_execution",
+    "no_paper_or_live",
+    "no_broker",
+    "no_network",
+    "no_data_fetch",
+    "no_backtest",
+    "no_optimization",
+    "no_parameter_sweep",
+    "no_modification_of_crypto_data_files",
+    "no_perps_until_funding_rules_frozen",
+    "no_mixing_crypto_with_futures_validation_claims",
+    "do_not_touch_s30_or_futures_branches",
+    "jarvis_templates_base_hydra_untouched"
+  ],
+  "final_line": "Crypto-D3c ratifies the auto-committed Crypto-D3b freeze (5b3d94c) IN PLACE because its contents passed audit (QA CLEAN, SHA256 matched, 2026 sealed, source unmodified, no unsafe artifact); the process violation (automation auto-committed before approval) is recorded and must not repeat -- future auto-generated factory/crypto artifacts must stop at untracked until explicitly approved. No crypto strategy is specified, validated, paper-ready, live-ready, or authorized; Crypto-D4 is not started; perps remain blocked; S30 and the futures branches are untouched.",
+  "trading_recommendation": "NONE. Governance memo only. The Crypto-D3b data freeze is ratified (DATA_READY_FOR_CRYPTO_D4_SPEC) but no crypto strategy is validated, paper-ready, or live-ready; Crypto-D4 is not authorized; perps blocked; crypto stays a separate research lane; S30 stays PARKED after IS_FAIL and the futures branches are untouched."
+}
