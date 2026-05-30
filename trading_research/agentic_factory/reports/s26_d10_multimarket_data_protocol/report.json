@@ -1,0 +1,202 @@
+{
+  "step": "S26-D10",
+  "title": "Pre-registered multi-market data protocol (specification only)",
+  "spec_only": true,
+  "is_backtest": false,
+  "created": "2026-05-30",
+  "reference_commit": "a9cbfaa",
+  "prior_chain": {
+    "D3": "IS_CONTINUE (marginal)",
+    "D5": "OOS PASS",
+    "D6": "ENTRY_EDGE_INCONCLUSIVE",
+    "D7": "SEQUENCE_RISK_INCONCLUSIVE",
+    "D8": "CONCENTRATED_SUPPORT",
+    "D9": "DATA_LIMITED_INCONCLUSIVE (only NQ had clean local data)"
+  },
+  "purpose": "Define fair data requirements and PASS/FAIL gates for a FUTURE S26 multi-market robustness test (S26-D11) BEFORE any new MNQ/ES/MES data is run or viewed. Mirrors the D4-before-D5 pre-registration discipline. No data fetched, decoded, or inspected in this step.",
+  "frozen_engine_reference": "engine/trend_sr_ema_rsi_daily.py (UNCHANGED; the D11 run must use this exact frozen logic)",
+
+  "required_markets": {
+    "reference": ["NQ"],
+    "independent_confirmation_candidates": ["ES", "MES"],
+    "micro_of_reference": ["MNQ"],
+    "notes": "NQ is the reference only (already evaluated D3-D9, not independent). MNQ is the micro of NQ and is NOT an independent market (same underlying index); it tests instrument/contract-size robustness, not market robustness. ES and MES track the S&P 500 and are the genuinely independent underlying. MES is the micro of ES (same underlying as ES, not independent of ES)."
+  },
+
+  "independence_map": {
+    "NQ_MNQ": "same underlying (Nasdaq-100). MNQ confirms NQ only as a micro-contract replica, NOT as an independent market.",
+    "ES_MES": "same underlying (S&P 500). MES confirms ES only as a micro-contract replica, NOT as an independent market.",
+    "NQ_ES": "different underlyings (Nasdaq-100 vs S&P 500) — these count as TWO independent markets.",
+    "independent_market_count_rule": "Count independent markets by distinct underlying index, not by ticker. {NQ or MNQ} = 1 independent market (Nasdaq). {ES or MES} = 1 independent market (S&P). Maximum independent markets reachable from this symbol set beyond NQ = 1 (the S&P, via ES and/or MES)."
+  },
+
+  "file_naming_convention": {
+    "pattern": "data_offline/<sym>_c0_ohlcv_1d_<YYYY>.csv",
+    "examples": [
+      "data_offline/mnq_c0_ohlcv_1d_2019.csv",
+      "data_offline/es_c0_ohlcv_1d_2021.csv",
+      "data_offline/mes_c0_ohlcv_1d_2024.csv"
+    ],
+    "sym_tokens": {"NQ": "nq", "MNQ": "mnq", "ES": "es", "MES": "mes"},
+    "c0_meaning": "continuous front-month, roll-adjusted contract series (same convention as the committed NQ files).",
+    "one_file_per_year": true,
+    "rule": "D11 must discover files ONLY by this exact pattern. A market with zero matching files for all required years is DATA_FAIL (as in D9). No other directory is read; data_offline/ is the only data source by design."
+  },
+
+  "ohlcv_schema": {
+    "required_columns": ["ts_event", "open", "high", "low", "close"],
+    "optional_columns": ["volume", "symbol"],
+    "header_case_insensitive": true,
+    "column_types": {
+      "ts_event": "ISO-8601 date or datetime parseable by datetime.fromisoformat (e.g. 2019-01-02 or 2019-01-02T00:00:00)",
+      "open": "float", "high": "float", "low": "float", "close": "float"
+    },
+    "matches_existing_loader": "engine/trend_sr_ema_rsi_daily.py:load_daily_bars (timestamp_column='ts_event', case-insensitive header map, requires open/high/low/close).",
+    "rule": "Any file missing a required column, or with an unparseable ts_event, or with a non-numeric OHLC value, is REJECTED (its market cannot use it)."
+  },
+
+  "timestamp_date_convention": {
+    "granularity": "daily (1d) bars only — one row per trading day",
+    "column": "ts_event",
+    "format": "ISO-8601, parseable by datetime.fromisoformat",
+    "sort": "stream sorted ascending by ts_event before simulate (loader already does this)",
+    "timezone": "naive/exchange-local as in the existing NQ files; must be consistent within a market"
+  },
+
+  "windows": {
+    "IS": {"years": "2013-2022", "rule": "use where available; a market may have fewer IS years"},
+    "OOS": {"years": "2023-2025", "rule": "fresh/holdout; use where available"},
+    "separation": "IS and OOS streamed SEPARATELY per market; NO pooling across windows; standalone OOS warmup convention preserved (same as D5/D9). Hard assertion in the D11 runner must refuse IS/OOS file overlap."
+  },
+
+  "minimum_coverage_requirements": {
+    "per_market_min_total_bars": 750,
+    "per_window_min_bars": {"IS": 500, "OOS": 200},
+    "min_oos_years_present": 2,
+    "min_trade_count_for_a_window_to_count": 20,
+    "rationale": "Mirrors the D4/D5 protocol (OOS n>=20, ideal >=30). A market/window below these floors is reported but flagged LOW_SAMPLE and cannot by itself upgrade the verdict.",
+    "below_floor_handling": "A window below its bar floor or below 20 trades is NOT a fair confirmation; it is reported with metrics but marked LOW_SAMPLE/INSUFFICIENT and excluded from ROBUST_SUPPORT counting."
+  },
+
+  "duplicate_gap_tolerance": {
+    "duplicate_dates": {"max_allowed": 0, "action_if_exceeded": "REJECT market window (data-QA defect)"},
+    "invalid_ohlc_rows": {"definition": "high<low, or any of OHLC <=0, or high<max(open,close), or low>min(open,close)", "max_allowed": 0, "action_if_exceeded": "REJECT market window"},
+    "calendar_gaps": {"tolerance": "weekends/holidays expected; a gap >10 consecutive calendar days WITHIN a declared coverage year is flagged GAP_WARNING; >25% of a year's expected ~252 sessions missing => that year REJECTED for that market", "note": "gaps are descriptive QA; they do not get patched or interpolated."},
+    "no_interpolation_rule": "Missing bars are never filled, interpolated, or synthesized. A gap is reported, not repaired."
+  },
+
+  "partial_window_coverage": {
+    "context": "MNQ and MES micro contracts launched 2019 (CME micro e-mini equity index launch, May 2019). They therefore CANNOT have a full 2013-2022 IS window. ES and NQ (and their continuous c0 series) extend back to/through 2013.",
+    "rule": "When a market's data begins after the IS window start, D11 must DOCUMENT the actual available start date (first ts_event present) and classify the coverage as PARTIAL_IS, not silently treat the shortened window as a full IS.",
+    "coverage_classes": {
+      "FULL": "data spans the full required window (IS 2013-2022 and/or OOS 2023-2025) above the bar floors",
+      "PARTIAL_IS": "IS present but starts after 2013-01-01 (e.g. MNQ/MES from ~2019); report actual start date; usable only if it still meets the IS bar floor (>=500 bars) and >=20 trades, else INSUFFICIENT/LOW_SAMPLE",
+      "OOS_ONLY": "no usable IS, only 2023-2025 present; can contribute OOS evidence but cannot be a full IS+OOS confirmation",
+      "INSUFFICIENT": "below bar floor or below trade-count floor for the window",
+      "DATA_FAIL": "no matching clean files at all"
+    },
+    "effect_on_confirmation": "A PARTIAL_IS market may still confirm IF its shortened IS and its OOS each meet floors and pass the per-confirming-market thresholds; but the report must flag the shortened IS so the comparison is honest. A micro's partial window does not relax the no-proxy rule.",
+    "no_backfill": "A short window is never extended by borrowing the big-contract's earlier data (that would violate the no-proxy rule)."
+  },
+
+  "data_rejection_rules": [
+    "Missing required schema column -> REJECT file.",
+    "Unparseable ts_event or non-numeric OHLC -> REJECT file.",
+    "Duplicate dates > 0 -> REJECT window.",
+    "Invalid OHLC rows > 0 -> REJECT window.",
+    "Year with >25% sessions missing -> REJECT that year for that market.",
+    "Window below bar floor (IS<500 / OOS<200) -> window marked INSUFFICIENT (not counted for ROBUST_SUPPORT).",
+    "Window with <20 trades -> marked LOW_SAMPLE (not counted as a fair confirmation).",
+    "Zero matching files for a market across all required years -> market = DATA_FAIL.",
+    "Any rejection is logged in the D11 report with the exact reason; rejected data is NOT silently dropped."
+  ],
+
+  "no_proxy_rule": {
+    "statement": "MNQ may NOT be treated as NQ, and MES may NOT be treated as ES, for the purpose of INDEPENDENT confirmation. A micro contract is a same-underlying replica, not a new market.",
+    "allowed_use": "A micro (MNQ/MES) MAY be run and reported as a same-underlying robustness/replication check, but it must be EXPLICITLY marked role='proxy_micro' and EXCLUDED from the independent-market count.",
+    "forbidden": "No substituting one symbol's data for another. No relabeling. No averaging a micro into its big-contract result. No counting NQ+MNQ as two independent markets, nor ES+MES as two.",
+    "independent_count_definition": "Independent markets = distinct underlying indices with clean, non-rejected, non-LOW_SAMPLE data. From this symbol set, NQ-side and ES-side are the only two possible independent underlyings."
+  },
+
+  "symbol_to_loader_convention": {
+    "loader": "engine/trend_sr_ema_rsi_daily.py:load_daily_bars(csv_path, timestamp_column='ts_event')",
+    "per_symbol": {
+      "NQ":  {"glob": "data_offline/nq_c0_ohlcv_1d_*.csv",  "role": "reference",          "independent": false},
+      "MNQ": {"glob": "data_offline/mnq_c0_ohlcv_1d_*.csv", "role": "proxy_micro_of_NQ",  "independent": false},
+      "ES":  {"glob": "data_offline/es_c0_ohlcv_1d_*.csv",  "role": "independent_market", "independent": true},
+      "MES": {"glob": "data_offline/mes_c0_ohlcv_1d_*.csv", "role": "proxy_micro_of_ES",  "independent": false}
+    },
+    "rule": "The D11 runner maps each symbol to its glob and role from THIS table only. No new loader code beyond a thin discovery/streaming adapter that reuses load_daily_bars + simulate + summarize unchanged. If a symbol needs a different timestamp column, that is a data-prep defect to REPORT first, not to silently adapt."
+  },
+
+  "future_d11_gates": {
+    "evaluation_precedence": "WEAK_OR_NO_SUPPORT -> DATA_LIMITED_INCONCLUSIVE -> NQ_ONLY_SUPPORT -> PARTIAL_SUPPORT -> ROBUST_SUPPORT (first matching, evaluated from strongest downgrade upward; final label is the highest tier whose conditions are fully met and no stronger downgrade fires).",
+    "ROBUST_SUPPORT": {
+      "conditions": [
+        ">=2 INDEPENDENT markets beyond NQ are runnable (clean, non-rejected, not LOW_SAMPLE)",
+        "NOTE: from this symbol set only 1 independent market (S&P via ES) is reachable, so ROBUST_SUPPORT is UNREACHABLE unless a 3rd-underlying market (e.g. a non-equity-index) is added to the protocol later",
+        "every confirming independent market: IS total R > 0 AND OOS total R > 0 (or OOS legitimately absent with documented reason)",
+        "every confirming market: positive without top-3 winners (else flagged winner-dependent and downgraded)",
+        "no single year > 50% of that market's window net (else downgrade)",
+        "each window meets coverage + trade-count floors"
+      ]
+    },
+    "PARTIAL_SUPPORT": {
+      "conditions": [
+        "exactly 1 independent market beyond NQ is runnable AND confirms (IS>0 and OOS>0, positive without top-3, no single-year dominance, meets floors)",
+        "this is the realistic best-case from the current symbol set (ES-side confirming NQ-side)",
+        "MNQ/MES proxy_micro results may be reported as corroboration but do NOT upgrade beyond PARTIAL_SUPPORT"
+      ]
+    },
+    "NQ_ONLY_SUPPORT": {
+      "conditions": [
+        ">=1 independent market beyond NQ was RUNNABLE (clean data, met floors) but FAILED to confirm (IS<=0 or OOS<=0, or winner-dependent, or single-year-dominated)",
+        "NQ itself remains positive",
+        "i.e. the edge was tested off-NQ and did not transfer"
+      ]
+    },
+    "DATA_LIMITED_INCONCLUSIVE": {
+      "conditions": [
+        "fewer than 1 independent market beyond NQ is runnable (all DATA_FAIL / REJECTED / INSUFFICIENT / LOW_SAMPLE)",
+        "i.e. the transfer question cannot be fairly answered for lack of clean data",
+        "this is the D9 outcome and remains the default until clean independent data exists"
+      ]
+    },
+    "WEAK_OR_NO_SUPPORT": {
+      "conditions": [
+        "the frozen logic is non-positive across the available markets (including NQ degrading), OR",
+        "every runnable independent market fails AND results depend on a single lucky cluster"
+      ]
+    }
+  },
+
+  "minimum_evidence_thresholds": {
+    "independent_markets_for_robust": 2,
+    "note_on_reachability": "Only 1 independent market (S&P, via ES) is reachable from {NQ,MNQ,ES,MES}. Therefore the maximum attainable verdict from this symbol set is PARTIAL_SUPPORT. Reaching ROBUST_SUPPORT requires expanding the protocol to a 3rd distinct underlying in a future amendment.",
+    "per_confirming_market": {
+      "IS_total_r": "> 0",
+      "OOS_total_r": "> 0 (or OOS absent with documented reason; absent OOS cannot count as confirmation)",
+      "positive_without_top3": "required; else flagged winner-dependent and the market is downgraded",
+      "single_year_dominance": "no single year > 50% of window net; else classification downgraded one tier",
+      "must_report": ["trade_count", "total_r", "avg_r", "win_rate", "max_drawdown_r", "profit_factor", "top3_winner_r", "without_top3_r", "positive_without_top3", "per_year_r", "data_coverage", "qa_flags"]
+    },
+    "reporting_floor": "drawdown (max_drawdown_r) and trade_count MUST be reported for every market/window, including rejected/insufficient ones (with the reason)."
+  },
+
+  "hard_constraints_for_d11": [
+    "Use the frozen engine UNCHANGED; no parameter, rule, or variant changes.",
+    "Run each market/window exactly once; no reruns, no peeking-then-adjusting.",
+    "Pre-register (this D10) is binding; D11 may not alter these gates after seeing data.",
+    "Offline-only: no fetch, no decode/transcode in the run step (data must already be clean CSV in data_offline/).",
+    "Donchian/S23/S24 untouched; templates/base.html untouched; no unrelated repo files touched."
+  ],
+
+  "verdict": "PROTOCOL_REGISTERED",
+  "verdict_note": "This step only registers the protocol and future gates. No market was run, no data fetched/decoded/inspected, no parameters touched. S26 remains not deployable.",
+  "notes_of_record": [
+    "Specification only — no backtest, no data run, no engine/test change.",
+    "Pre-registered BEFORE any MNQ/ES/MES data is run or viewed (D4-before-D5 discipline).",
+    "Key honest constraint: the {NQ,MNQ,ES,MES} set yields at most ONE independent underlying beyond NQ (the S&P via ES/MES), so PARTIAL_SUPPORT is the ceiling unless a 3rd underlying is added later.",
+    "No temp runner or generated artifact is produced by this step."
+  ]
+}
