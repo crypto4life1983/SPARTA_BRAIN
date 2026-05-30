@@ -1,0 +1,339 @@
+{
+  "step": "S26-D12",
+  "title": "Multi-market robustness (frozen engine, validation only)",
+  "validation_only": true,
+  "optimization": false,
+  "created": "2026-05-30",
+  "reference_commit": "fb4fecd",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "nq_reference": {
+    "IS": {
+      "trade_count": 117,
+      "total_r": 7.6536,
+      "profit_factor": 1.2016,
+      "expectancy_r": 0.0654,
+      "max_drawdown_r": 10.5943
+    },
+    "OOS": {
+      "trade_count": 32,
+      "total_r": 7.999,
+      "profit_factor": 1.7694,
+      "expectancy_r": 0.25,
+      "max_drawdown_r": 2.1827
+    }
+  },
+  "results": {
+    "ES": {
+      "market": "ES",
+      "role": "independent_market",
+      "independent": true,
+      "coverage": "FULL",
+      "is_files": [
+        "es_c0_ohlcv_1d_2013.csv",
+        "es_c0_ohlcv_1d_2014.csv",
+        "es_c0_ohlcv_1d_2015.csv",
+        "es_c0_ohlcv_1d_2016.csv",
+        "es_c0_ohlcv_1d_2017.csv",
+        "es_c0_ohlcv_1d_2018.csv",
+        "es_c0_ohlcv_1d_2019.csv",
+        "es_c0_ohlcv_1d_2020.csv",
+        "es_c0_ohlcv_1d_2021.csv",
+        "es_c0_ohlcv_1d_2022.csv"
+      ],
+      "oos_files": [
+        "es_c0_ohlcv_1d_2023.csv",
+        "es_c0_ohlcv_1d_2024.csv",
+        "es_c0_ohlcv_1d_2025.csv"
+      ],
+      "IS": {
+        "bar_count": 3096,
+        "date_range": [
+          "2013-01-02",
+          "2022-12-30"
+        ],
+        "duplicate_dates": 0,
+        "invalid_ohlc_rows": 0,
+        "trade_count": 125,
+        "total_r": 7.6725,
+        "profit_factor": 1.2003,
+        "win_rate": 0.384,
+        "expectancy_r": 0.0614,
+        "max_drawdown_r": 16.7281,
+        "best_trade": 2.0,
+        "worst_trade": -1.0,
+        "median_r": -0.1542,
+        "year_r": {
+          "2013": 3.906,
+          "2014": -3.5544,
+          "2015": -4.5901,
+          "2016": -8.3428,
+          "2017": 7.0068,
+          "2018": -0.7869,
+          "2019": 3.6053,
+          "2020": 5.0495,
+          "2021": 5.7606,
+          "2022": -0.3815
+        },
+        "positive_years": 5,
+        "negative_years": 5,
+        "exit_reasons": {
+          "ema50_trend_break": 91,
+          "target": 19,
+          "stop": 15
+        },
+        "best_trade_share_of_net": 0.2607,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "total_without_top3": 1.6725,
+        "positive_without_top3": true
+      },
+      "OOS": {
+        "bar_count": 935,
+        "date_range": [
+          "2023-01-02",
+          "2025-12-31"
+        ],
+        "duplicate_dates": 0,
+        "invalid_ohlc_rows": 0,
+        "trade_count": 27,
+        "total_r": 11.4584,
+        "profit_factor": 2.2352,
+        "win_rate": 0.5926,
+        "expectancy_r": 0.4244,
+        "max_drawdown_r": 2.0697,
+        "best_trade": 2.0,
+        "worst_trade": -1.0,
+        "median_r": 0.0769,
+        "year_r": {
+          "2023": -0.925,
+          "2024": 4.0465,
+          "2025": 8.3369
+        },
+        "positive_years": 2,
+        "negative_years": 1,
+        "exit_reasons": {
+          "stop": 9,
+          "ema50_trend_break": 8,
+          "target": 9,
+          "end_of_data": 1
+        },
+        "best_trade_share_of_net": 0.1745,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "total_without_top3": 5.4584,
+        "positive_without_top3": true
+      }
+    },
+    "MES": {
+      "market": "MES",
+      "role": "proxy_micro_of_ES",
+      "independent": false,
+      "coverage": "PARTIAL_IS",
+      "is_files": [
+        "mes_c0_ohlcv_1d_2019.csv",
+        "mes_c0_ohlcv_1d_2020.csv",
+        "mes_c0_ohlcv_1d_2021.csv",
+        "mes_c0_ohlcv_1d_2022.csv"
+      ],
+      "oos_files": [
+        "mes_c0_ohlcv_1d_2023.csv",
+        "mes_c0_ohlcv_1d_2024.csv",
+        "mes_c0_ohlcv_1d_2025.csv"
+      ],
+      "IS": {
+        "bar_count": 1140,
+        "date_range": [
+          "2019-05-05",
+          "2022-12-30"
+        ],
+        "duplicate_dates": 0,
+        "invalid_ohlc_rows": 0,
+        "trade_count": 28,
+        "total_r": 10.3681,
+        "profit_factor": 2.6569,
+        "win_rate": 0.4643,
+        "expectancy_r": 0.3703,
+        "max_drawdown_r": 1.8296,
+        "best_trade": 2.0,
+        "worst_trade": -1.0,
+        "median_r": -0.0626,
+        "year_r": {
+          "2020": 4.9813,
+          "2021": 5.7606,
+          "2022": -0.3738
+        },
+        "positive_years": 2,
+        "negative_years": 1,
+        "exit_reasons": {
+          "target": 7,
+          "ema50_trend_break": 18,
+          "stop": 3
+        },
+        "best_trade_share_of_net": 0.1929,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "total_without_top3": 4.3681,
+        "positive_without_top3": true
+      },
+      "OOS": {
+        "bar_count": 935,
+        "date_range": [
+          "2023-01-02",
+          "2025-12-31"
+        ],
+        "duplicate_dates": 0,
+        "invalid_ohlc_rows": 0,
+        "trade_count": 27,
+        "total_r": 11.7895,
+        "profit_factor": 2.3276,
+        "win_rate": 0.5556,
+        "expectancy_r": 0.4366,
+        "max_drawdown_r": 2.0673,
+        "best_trade": 2.0,
+        "worst_trade": -1.0,
+        "median_r": 0.0752,
+        "year_r": {
+          "2023": -0.9771,
+          "2024": 3.9931,
+          "2025": 8.7735
+        },
+        "positive_years": 2,
+        "negative_years": 1,
+        "exit_reasons": {
+          "stop": 8,
+          "ema50_trend_break": 9,
+          "target": 9,
+          "end_of_data": 1
+        },
+        "best_trade_share_of_net": 0.1696,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "total_without_top3": 5.7895,
+        "positive_without_top3": true
+      }
+    },
+    "MNQ": {
+      "market": "MNQ",
+      "role": "proxy_micro_of_NQ",
+      "independent": false,
+      "coverage": "PARTIAL_IS",
+      "is_files": [
+        "mnq_c0_ohlcv_1d_2019.csv",
+        "mnq_c0_ohlcv_1d_2020.csv",
+        "mnq_c0_ohlcv_1d_2021.csv",
+        "mnq_c0_ohlcv_1d_2022.csv"
+      ],
+      "oos_files": [
+        "mnq_c0_ohlcv_1d_2023.csv",
+        "mnq_c0_ohlcv_1d_2024.csv",
+        "mnq_c0_ohlcv_1d_2025.csv"
+      ],
+      "IS": {
+        "bar_count": 1140,
+        "date_range": [
+          "2019-05-05",
+          "2022-12-30"
+        ],
+        "duplicate_dates": 0,
+        "invalid_ohlc_rows": 0,
+        "trade_count": 27,
+        "total_r": 6.3671,
+        "profit_factor": 1.9367,
+        "win_rate": 0.4815,
+        "expectancy_r": 0.2358,
+        "max_drawdown_r": 2.6177,
+        "best_trade": 2.0,
+        "worst_trade": -1.0,
+        "median_r": -0.0109,
+        "year_r": {
+          "2020": 4.8126,
+          "2021": 2.5421,
+          "2022": -0.9875
+        },
+        "positive_years": 2,
+        "negative_years": 1,
+        "exit_reasons": {
+          "target": 6,
+          "ema50_trend_break": 17,
+          "stop": 4
+        },
+        "best_trade_share_of_net": 0.3141,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "total_without_top3": 0.3671,
+        "positive_without_top3": true
+      },
+      "OOS": {
+        "bar_count": 935,
+        "date_range": [
+          "2023-01-02",
+          "2025-12-31"
+        ],
+        "duplicate_dates": 0,
+        "invalid_ohlc_rows": 0,
+        "trade_count": 32,
+        "total_r": 7.6833,
+        "profit_factor": 1.7191,
+        "win_rate": 0.5,
+        "expectancy_r": 0.2401,
+        "max_drawdown_r": 2.1906,
+        "best_trade": 2.0,
+        "worst_trade": -1.0,
+        "median_r": -0.0198,
+        "year_r": {
+          "2023": 0.6606,
+          "2024": 4.927,
+          "2025": 2.0958
+        },
+        "positive_years": 3,
+        "negative_years": 0,
+        "exit_reasons": {
+          "ema50_trend_break": 16,
+          "stop": 7,
+          "target": 8,
+          "end_of_data": 1
+        },
+        "best_trade_share_of_net": 0.2603,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "total_without_top3": 1.6833,
+        "positive_without_top3": true
+      }
+    }
+  },
+  "verdict": "PARTIAL_SUPPORT_WITH_CAUTION",
+  "verdict_basis": {
+    "es_is_positive": true,
+    "es_oos_positive": true,
+    "es_confirms": true,
+    "es_oos_best_year_share": 0.7276,
+    "es_oos_single_year_dominated": true,
+    "es_weak_flags": {
+      "oos_pf_below_1_10": false,
+      "oos_trades_below_30": true,
+      "oos_dd_over_1_5x_nq_oos": false,
+      "is_dd_over_1_5x_nq_is": true,
+      "is_pf_below_1_30": true
+    },
+    "micros_both_positive_is_and_oos": true,
+    "max_possible_verdict": "PARTIAL_SUPPORT (only 1 independent market beyond NQ)"
+  }
+}
