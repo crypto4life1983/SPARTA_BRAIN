@@ -525,6 +525,153 @@ def test_jarvis_trading_detail_does_not_run_subprocess(monkeypatch):
     assert td.get("read_only") is True
 
 
+# --- Step 06: cached route smoke report -----------------------------------
+
+def test_jarvis_status_has_route_smoke_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "route_smoke_report" in d
+    assert isinstance(d["route_smoke_report"], dict)
+    assert d["route_smoke_report"].get("state") in (
+        "ready", "missing", "unavailable", "error",
+    )
+
+
+def test_jarvis_route_smoke_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    rs = app_module._jarvis_route_smoke_report()
+    assert rs["state"] == "missing"
+    assert "tools/jarvis_route_smoke_report.py" in rs["message"]
+
+
+def test_jarvis_route_smoke_invalid_is_fail_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    (d / "route_smoke_report.json").write_text("{ not valid", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    rs = app_module._jarvis_route_smoke_report()
+    assert rs["state"] == "unavailable"
+    assert "error" in rs
+
+
+def test_jarvis_route_smoke_valid_is_passed_through(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    payload = {
+        "state": "ready", "generated_at": "2026-05-30T00:00:00",
+        "base_url": "http://127.0.0.1:8765", "overall": "pass",
+        "counts": {"total": 3, "pass": 3, "fail": 0},
+        "routes": [
+            {"path": "/", "status_code": 200, "ok": True,
+             "duration_seconds": 0.01, "required": True, "error": None},
+        ],
+    }
+    (d / "route_smoke_report.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    rs = app_module._jarvis_route_smoke_report()
+    assert rs["overall"] == "pass"
+    assert rs["routes"][0]["path"] == "/"
+    assert rs["counts"]["total"] == 3
+
+
+def test_jarvis_endpoint_does_not_probe_routes(monkeypatch):
+    # The web route must never open a socket / probe URLs to build the feed.
+    import urllib.request
+    import subprocess
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("endpoint must not probe routes / run subprocesses")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert "route_smoke_report" in r.json()
+
+
+def test_route_smoke_script_exists_and_compiles():
+    import py_compile
+    script = _REPO_ROOT / "tools" / "jarvis_route_smoke_report.py"
+    assert script.exists(), "tools/jarvis_route_smoke_report.py missing"
+    py_compile.compile(str(script), doraise=True)
+
+
+def test_route_smoke_script_has_no_secret_or_header_dumps():
+    src = (_REPO_ROOT / "tools" / "jarvis_route_smoke_report.py").read_text(
+        encoding="utf-8"
+    )
+    low = src.lower()
+    # No env/secret access and no auth/cookie header injection.
+    for tok in ("os.environ", "getenv", "environ.copy", "dotenv",
+                "load_secrets", "local_secrets", "authorization",
+                "cookie", "api_key", "bearer"):
+        assert tok not in low, f"route smoke script must not touch: {tok}"
+
+
+def test_route_smoke_module_builds_expected_shape(monkeypatch, tmp_path):
+    # Run the script's logic without making real HTTP calls: stub _probe.
+    import importlib.util
+    import json
+    script = _REPO_ROOT / "tools" / "jarvis_route_smoke_report.py"
+    spec = importlib.util.spec_from_file_location("jarvis_route_smoke_report", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def _fake_probe(base_url, path, timeout):
+        return {"path": path, "url": base_url + path, "status_code": 200,
+                "ok": True, "content_length": 10, "error": None,
+                "duration_seconds": 0.0}
+
+    monkeypatch.setattr(mod, "_probe", _fake_probe)
+    report = mod.build_report("http://127.0.0.1:8765", 1.0)
+    assert report["overall"] == "pass"
+    assert report["counts"]["total"] == len(mod.ROUTES)
+    assert report["counts"]["fail"] == 0
+    assert all(set(("path", "url", "status_code", "ok", "duration_seconds")) <= set(r)
+               for r in report["routes"])
+    assert "generated_at" in report and report["base_url"].startswith("http")
+    # A failing required route must flip overall to fail.
+    monkeypatch.setattr(
+        mod, "_probe",
+        lambda b, p, t: {"path": p, "url": b + p, "status_code": 500, "ok": False,
+                         "content_length": None, "error": "HTTP 500",
+                         "duration_seconds": 0.0},
+    )
+    bad = mod.build_report("http://127.0.0.1:8765", 1.0)
+    assert bad["overall"] == "fail"
+
+
+def test_route_smoke_report_exposes_no_execution_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    rs = client.get("/api/jarvis/status").json()["route_smoke_report"]
+
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+
+    keys = set(_keys(rs))
+    for forbidden in ("run_command", "exec", "shell", "place_order",
+                      "submit_order", "execute_trade", "probe_now", "trigger"):
+        assert forbidden not in keys, f"forbidden control key: {forbidden}"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

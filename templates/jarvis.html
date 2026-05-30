@@ -223,6 +223,11 @@
       <div class="jv-loading">Reading cached report&hellip;</div>
     </div>
 
+    <div class="jv-panel" id="pRouteSmoke">
+      <h2><span class="ic">&#x21C4;</span>Route Smoke <span class="jv-tag">CACHED</span></h2>
+      <div class="jv-loading">Reading cached route report&hellip;</div>
+    </div>
+
     <div class="jv-panel jv-wide" id="pMissions">
       <h2><span class="ic">&#x2691;</span>Mission Board</h2>
       <div class="jv-loading">Reading mission board&hellip;</div>
@@ -469,6 +474,34 @@
         }
       });
       setPanel('pHealth', hHtml);
+    }
+
+    // Route Smoke (cached, read-only — this page never probes routes itself)
+    var rs = d.route_smoke_report || {};
+    if(rs.state === 'missing'){
+      setPanel('pRouteSmoke',
+        row('Status', 'waiting', 'NO CACHED REPORT') +
+        '<div class="jv-detail">'+esc(rs.message || 'Run tools/jarvis_route_smoke_report.py to generate a cached route smoke report.')+'</div>');
+    } else if(rs.state === 'unavailable' || rs.state === 'error'){
+      setPanel('pRouteSmoke', row('Status', 'bad', 'UNAVAILABLE', rs.error || rs.detail));
+    } else {
+      var rsOverall = (rs.overall || '').toLowerCase();
+      var rsc = rs.counts || {};
+      var rsHtml = row('Overall', rsOverall === 'pass' ? 'online' : 'bad',
+                       (rs.overall || 'UNKNOWN').toUpperCase()) +
+        row('Base URL', '', esc(rs.base_url || '—')) +
+        row('Generated at', '', esc(rs.generated_at || '—')) +
+        row('Routes', '', 'total '+esc(rsc.total != null ? rsc.total : 0)+
+            '  pass '+esc(rsc.pass != null ? rsc.pass : 0)+
+            '  fail '+esc(rsc.fail != null ? rsc.fail : 0));
+      (rs.routes || []).forEach(function(rt){
+        var sc = rt.status_code != null ? rt.status_code : '—';
+        var dur = rt.duration_seconds != null ? ' · '+esc(rt.duration_seconds)+'s' : '';
+        rsHtml += row((rt.path || '—') + (rt.required ? ' *' : ''),
+          rt.ok ? 'online' : 'bad', String(sc) + dur,
+          rt.error ? String(rt.error).slice(0,200) : null);
+      });
+      setPanel('pRouteSmoke', rsHtml);
     }
 
     // Mission Board (read-only — JARVIS never executes a mission)

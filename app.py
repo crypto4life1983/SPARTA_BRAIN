@@ -7689,6 +7689,28 @@ def _jarvis_health_report() -> dict:
     return data
 
 
+def _jarvis_route_smoke_report() -> dict:
+    """READ-ONLY. Loads the cached route smoke report written offline by
+    tools/jarvis_route_smoke_report.py. The web route NEVER probes routes
+    itself — it only reflects whatever the last manual run produced."""
+    path = BASE / "storage" / "jarvis" / "route_smoke_report.json"
+    if not path.exists():
+        return {
+            "state": "missing",
+            "message": "Run tools/jarvis_route_smoke_report.py to generate a "
+                       "cached route smoke report.",
+        }
+    try:
+        import json as _json
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+        return {"state": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(data, dict):
+        return {"state": "unavailable", "error": "report is not a JSON object"}
+    data.setdefault("state", "ready")
+    return data
+
+
 _JARVIS_TRADING_REPORTS_REL = "trading_research/agentic_factory/reports"
 _JARVIS_S26_D17_DIR = "s26_d17_trend_sr_ema_rsi_friction_stress"
 _JARVIS_S26_D18_DIR = "s26_d18_trend_sr_ema_rsi_decision_gate"
@@ -7892,6 +7914,7 @@ def api_jarvis_status():
     project = _jarvis_safe(_jarvis_project_files)
     brain_memory = _jarvis_safe(_jarvis_brain_memory)
     health_report = _jarvis_safe(_jarvis_health_report)
+    route_smoke = _jarvis_safe(_jarvis_route_smoke_report)
     mission_board = _jarvis_safe(_jarvis_mission_board)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
     return {
@@ -7910,6 +7933,7 @@ def api_jarvis_status():
         "project": project,
         "brain_memory": brain_memory,
         "health_report": health_report,
+        "route_smoke_report": route_smoke,
         "mission_board": mission_board,
         "trading_detail": trading_detail,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
