@@ -1,0 +1,113 @@
+{
+  "step": "S26-D9",
+  "title": "Multi-market robustness (frozen S26 logic)",
+  "diagnostic_only": true,
+  "reference_commit": "6605654",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "data_source": "data_offline (offline CSV only; no fetch)",
+  "markets_available": [
+    "NQ"
+  ],
+  "markets_data_fail": [
+    "MNQ",
+    "ES",
+    "MES"
+  ],
+  "results": {
+    "NQ": {
+      "symbol": "NQ",
+      "status": "AVAILABLE",
+      "is_files": [
+        "nq_c0_ohlcv_1d_2013.csv",
+        "nq_c0_ohlcv_1d_2014.csv",
+        "nq_c0_ohlcv_1d_2015.csv",
+        "nq_c0_ohlcv_1d_2016.csv",
+        "nq_c0_ohlcv_1d_2017.csv",
+        "nq_c0_ohlcv_1d_2018.csv",
+        "nq_c0_ohlcv_1d_2019.csv",
+        "nq_c0_ohlcv_1d_2020.csv",
+        "nq_c0_ohlcv_1d_2021.csv",
+        "nq_c0_ohlcv_1d_2022.csv"
+      ],
+      "oos_files": [
+        "nq_c0_ohlcv_1d_2023.csv",
+        "nq_c0_ohlcv_1d_2024.csv",
+        "nq_c0_ohlcv_1d_2025.csv"
+      ],
+      "is": {
+        "bars_loaded": 3079,
+        "date_range": [
+          "2013-01-02",
+          "2022-12-30"
+        ],
+        "trade_count": 117,
+        "total_r": 7.6536,
+        "avg_r": 0.0654,
+        "win_rate": 0.3932,
+        "max_drawdown_r": 10.5943,
+        "profit_factor": 1.2016,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "without_top3_r": 1.6536,
+        "positive_without_top3": true
+      },
+      "oos": {
+        "bars_loaded": 934,
+        "date_range": [
+          "2023-01-02",
+          "2025-12-30"
+        ],
+        "trade_count": 32,
+        "total_r": 7.999,
+        "avg_r": 0.25,
+        "win_rate": 0.5312,
+        "max_drawdown_r": 2.1827,
+        "profit_factor": 1.7694,
+        "top3_winner_r": [
+          2.0,
+          2.0,
+          2.0
+        ],
+        "without_top3_r": 1.999,
+        "positive_without_top3": true
+      }
+    },
+    "MNQ": {
+      "symbol": "MNQ",
+      "status": "DATA_FAIL",
+      "reason": "No clean local daily CSV in data_offline matching 'mnq_c0_ohlcv_1d_YYYY.csv' for any IS or OOS year.",
+      "is": null,
+      "oos": null
+    },
+    "ES": {
+      "symbol": "ES",
+      "status": "DATA_FAIL",
+      "reason": "No clean local daily CSV in data_offline matching 'es_c0_ohlcv_1d_YYYY.csv' for any IS or OOS year.",
+      "is": null,
+      "oos": null
+    },
+    "MES": {
+      "symbol": "MES",
+      "status": "DATA_FAIL",
+      "reason": "No clean local daily CSV in data_offline matching 'mes_c0_ohlcv_1d_YYYY.csv' for any IS or OOS year.",
+      "is": null,
+      "oos": null
+    }
+  },
+  "verdict": "DATA_LIMITED_INCONCLUSIVE",
+  "verdict_reason": "Only 1 market (NQ) has clean local data; MNQ, ES, MES are DATA_FAIL. A fair multi-market robustness read is not possible. No fetch performed (offline-only).",
+  "nq_assert": {
+    "is_expected": [
+      117,
+      7.6536
+    ],
+    "oos_expected": [
+      32,
+      7.999
+    ],
+    "asserted_equal": true
+  }
+}
