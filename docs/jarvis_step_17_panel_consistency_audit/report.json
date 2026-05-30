@@ -1,0 +1,95 @@
+{
+  "title": "JARVIS Step 17 — Panel Consistency Audit Memo",
+  "generated_at": "2026-05-30T00:00:00",
+  "audited_commit": "34b09a5",
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "type": "audit_memo_only",
+  "read_only": true,
+  "conclusion": "CONSISTENT",
+  "conclusion_detail": "The live runtime surface (API sections, system_map api_key fields, and UI panel ids) is fully aligned with zero duplicates. The only drift is documentation lag: docs/jarvis_docs_index/report.json is audited_through_commit da1f1ee (Step 13) and does not yet list the cache_freshness section added in Step 15. This is labeled and non-blocking.",
+  "files_inspected": [
+    "app.py",
+    "templates/jarvis.html",
+    "tests/test_jarvis_route.py",
+    "docs/jarvis_system_map.json",
+    "docs/jarvis_mission_board.json",
+    "docs/jarvis_prompt_library.json",
+    "docs/jarvis_docs_index/report.json",
+    "docs/jarvis_docs_index/report.md",
+    "docs/jarvis_step_16_live_regression_smoke/report.json",
+    "docs/jarvis_step_16_live_regression_smoke/report.md"
+  ],
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_system_map.json", "result": "JSON_OK"},
+    {"cmd": "python -m json.tool docs/jarvis_mission_board.json", "result": "JSON_OK"},
+    {"cmd": "python -m json.tool docs/jarvis_prompt_library.json", "result": "JSON_OK"},
+    {"cmd": "python -m json.tool docs/jarvis_docs_index/report.json", "result": "JSON_OK"},
+    {"cmd": "python -m json.tool docs/jarvis_step_16_live_regression_smoke/report.json", "result": "JSON_OK"},
+    {"cmd": "python -m py_compile app.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_health_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_route_smoke_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_file_hygiene_report.py", "result": "PASS"},
+    {"cmd": "pytest tests/test_jarvis_route.py --rootdir=tests -q", "result": "108 passed"}
+  ],
+  "api_keys": {
+    "total_top_level": 24,
+    "meta_keys": ["online", "read_only"],
+    "section_keys_count": 22,
+    "section_keys": [
+      "commander_snapshot", "system_core", "ai_brains", "trading_bridge",
+      "content_engine", "money_engine", "moving_company", "daily_mission",
+      "safety_gates", "git", "safety", "project", "brain_memory",
+      "recommended_next_actions", "health_report", "route_smoke_report",
+      "file_hygiene_report", "mission_board", "prompt_library", "system_map",
+      "trading_detail", "cache_freshness"
+    ]
+  },
+  "system_map": {
+    "panel_count": 22,
+    "duplicate_api_keys": 0,
+    "api_keys_not_in_live_api": [],
+    "alignment": "All 22 system_map api_key values resolve to a live API section key. The 2 remaining live keys (online, read_only) are meta keys, not panels."
+  },
+  "ui_panel_checklist": [
+    {"panel": "Commander's Snapshot", "expected_id": "pSnapshot", "actual_id": "pSnapshot", "present": true},
+    {"panel": "Health Report", "expected_id": "pHealth", "actual_id": "pHealth", "present": true},
+    {"panel": "Route Smoke", "expected_id": "pRouteSmoke", "actual_id": "pRouteSmoke", "present": true},
+    {"panel": "File Hygiene", "expected_id": "pHygiene", "actual_id": "pHygiene", "present": true},
+    {"panel": "Cache Freshness", "expected_id": "pCacheFresh", "actual_id": "pCacheFreshness", "present": true, "note": "Step 17 spec used the shorthand 'pCacheFresh'; the actual committed id (Step 15) is 'pCacheFreshness'. No codebase drift — api_key, API key, and UI id all read 'cache_freshness'/'pCacheFreshness' consistently."},
+    {"panel": "Mission Board", "expected_id": "pMissions", "actual_id": "pMissions", "present": true},
+    {"panel": "Prompt Library", "expected_id": "pPromptLib", "actual_id": "pPromptLib", "present": true},
+    {"panel": "System Map", "expected_id": "pSystemMap", "actual_id": "pSystemMap", "present": true},
+    {"panel": "Trading Research Detail", "expected_id": "pTradingDetail", "actual_id": "pTradingDetail", "present": true}
+  ],
+  "docs_index_consistency": {
+    "file": "docs/jarvis_docs_index/report.json",
+    "audited_through_commit": "da1f1ee",
+    "api_sections_listed": 21,
+    "lists_cache_freshness": false,
+    "status": "STALE_NON_BLOCKING",
+    "detail": "The docs index was generated at Step 14 and is explicitly scoped to commit da1f1ee, so it predates the Step 15 cache_freshness section. Its api_sections list (21) does not include cache_freshness. Recommend refreshing it in Step 18."
+  },
+  "mission_board_consistency": {
+    "file": "docs/jarvis_mission_board.json",
+    "mission_count": 14,
+    "has_cache_freshness_mission": true,
+    "cache_mission_id": "JARVIS-CACHE-FRESHNESS",
+    "status": "CONSISTENT"
+  },
+  "prompt_library_consistency": {
+    "file": "docs/jarvis_prompt_library.json",
+    "prompt_count": 10,
+    "has_cache_freshness_prompt": true,
+    "cache_prompt_id": "JARVIS-CACHE-FRESHNESS",
+    "status": "CONSISTENT"
+  },
+  "non_blocking_warnings": [
+    "docs/jarvis_docs_index/report.json is scoped to commit da1f1ee and does not yet list the cache_freshness section (added in Step 15). Documentation lag only — the runtime surface is consistent.",
+    "Step 17 spec listed the cache panel id as 'pCacheFresh'; the actual committed id is 'pCacheFreshness'. Naming-shorthand difference only, not drift.",
+    "Large untracked backlog keeps commander_snapshot yellow (conservative by design, not an error).",
+    "/money-spartan may report a non-required 404 in the route smoke report.",
+    "A corrupted 'hydra ' directory can break bare pytest collection, so the scoped pytest command (--rootdir=tests) is used."
+  ],
+  "recommended_step_18": "Refresh docs/jarvis_docs_index (report.json + report.md): add the cache_freshness api section, add the cache_freshness system_map panel and the Step 16/17 memos to the tracked-data file list, bump api_sections to 22, and update audited_through_commit to the latest JARVIS commit."
+}
