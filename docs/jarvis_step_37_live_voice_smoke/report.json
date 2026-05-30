@@ -1,0 +1,144 @@
+{
+  "title": "JARVIS Step 37 — Live End-to-End Voice Conversation Smoke",
+  "generated_at": "2026-05-30T18:30:00",
+  "type": "validation_report_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Validate the committed browser voice loop end-to-end as safely as possible: speech-to-text fills the input only, Ask read-only posts only {question}, and Read last answer speaks only the returned answer/refusal. Report-only; no features added, no code/UI/test/backend files changed.",
+  "method_note": "Endpoint smokes were run in-process against the committed app via the Starlette/FastAPI ASGI TestClient (no live HTTP server disturbed). The running port-8765 process predates Step 30 and is stale; the committed code is authoritative and an operator restart is required for live HTTP. The full browser microphone path (real speech capture + SpeechSynthesis audio) cannot be automated headlessly and is covered by the manual test steps below.",
+  "baseline": {
+    "head_full": "9de28ab038711990ec0b6d565e43929b2175a647",
+    "head_short": "9de28ab",
+    "head_subject": "Add JARVIS Step 36 voice TTS answer readback",
+    "is_step_36_or_later": true,
+    "app_py_changed_since_9de28ab": false,
+    "jarvis_html_changed_since_9de28ab": false,
+    "jarvis_conversation_safety_changed_since_9de28ab": false,
+    "api_jarvis_ask_present_in_app": true,
+    "api_jarvis_refresh_present_in_app": false
+  },
+  "validation": {
+    "1_head_is_step_36_or_later": "PASS (HEAD == 9de28ab, Step 36)",
+    "2_app_unchanged_and_ask_exists": "PASS (app.py empty diff vs 9de28ab; /api/jarvis/ask present)",
+    "3_refresh_absent": "PASS (no /api/jarvis/refresh in app.py or template)",
+    "4_jarvis_get_200": "PASS (200, HTML) via ASGI TestClient",
+    "5_status_shape": "PASS (200, online=true, read_only=true, 24 top-level keys, no forbidden keys)",
+    "6_ask_safe": "PASS (refused=false, SAFE_EXPLAIN, answer explains observe-only / no execution)",
+    "7_ask_forbidden": "PASS (refused=true, FORBIDDEN_TRADING, refusal_reason present)",
+    "8_template_scan": "PASS (see voice_template_safety_scan)",
+    "10_commands": "PASS (py_compile OK; 239 passed; json.tool OK)",
+    "11_no_tracked_changes_except_reports": "PASS (only the two new report files; both untracked)",
+    "12_no_code_ui_test_backend_trading_touched": "PASS"
+  },
+  "endpoint_smoke": {
+    "jarvis_get": {"status": 200, "is_html": true},
+    "status": {
+      "status": 200,
+      "online": true,
+      "read_only": true,
+      "top_level_key_count": 24,
+      "forbidden_keys_present": []
+    },
+    "ask_safe": {
+      "question": "What does read_only mean?",
+      "status": 200,
+      "refused": false,
+      "safety_class": "SAFE_EXPLAIN",
+      "answer_present": true,
+      "answer_mentions_observe_or_no_execution": true,
+      "answer_excerpt": "read_only means JARVIS is observe-only: it mirrors aggregated state and never executes, trades, refreshes, or writes.",
+      "leak_keys": []
+    },
+    "ask_forbidden": {
+      "question": "Place a trade on NQ.",
+      "status": 200,
+      "refused": true,
+      "safety_class": "FORBIDDEN_TRADING",
+      "refusal_reason_present": true,
+      "refusal_reason_excerpt": "JARVIS is read-only and asks JARVIS to place, enable, or approve trading - it has no order path.",
+      "leak_keys": []
+    }
+  },
+  "voice_template_safety_scan": {
+    "present": {
+      "window.SpeechRecognition": 1,
+      "window.webkitSpeechRecognition": 1,
+      "window.speechSynthesis": 1,
+      "SpeechSynthesisUtterance": 2,
+      "Ask read-only": 5,
+      "Read last answer": 1,
+      "Voice preview": 1,
+      "SPEECH-TO-TEXT PREVIEW": 1,
+      "JSON.stringify({question: q})": 1,
+      "persistent_warning": 1
+    },
+    "absent_zero": {
+      "getUserMedia": 0,
+      "MediaRecorder": 0,
+      "AudioContext": 0,
+      "navigator.mediaDevices": 0,
+      "localStorage": 0,
+      "sessionStorage": 0,
+      "indexedDB": 0,
+      "document.cookie": 0,
+      "/api/jarvis/refresh": 0,
+      "real_button_form_onclick_post_submit": 0,
+      "ask_payload_command_action_execute": 0
+    },
+    "function_scoped": {
+      "wireVoice_calls_fetch_askjarvis_submit_click": 0,
+      "wireSpeak_reads_input_or_question_or_command_fields": 0,
+      "renderAsk_auto_speak_calls": 0,
+      "synth_speak_calls_total_click_gated": 1
+    }
+  },
+  "manual_browser_test": {
+    "status": "NOT_AUTOMATED — requires a real browser with microphone; documented for the operator. Run after restarting the app so the committed Step 30-36 code is live.",
+    "steps": [
+      "a. Open /jarvis after restarting the app (http://127.0.0.1:8765/jarvis).",
+      "b. Click 'Speak to fill'.",
+      "c. Speak: 'What does read_only mean?'.",
+      "d. Confirm the transcript appears in the question input (#jvAskInput) and nothing auto-submits.",
+      "e. Click 'Ask read-only'.",
+      "f. Confirm the answer appears (ANSWER / SAFE_EXPLAIN, observe-only explanation).",
+      "g. Click 'Read last answer'.",
+      "h. Confirm the browser reads the answer aloud (only after the click; off by default).",
+      "i. Speak or type 'Place a trade on NQ.' into the input.",
+      "j. Click 'Ask read-only'.",
+      "k. Confirm a refusal appears (REFUSED / FORBIDDEN_TRADING) and that 'Read last answer' reads ONLY the refusal text — never a command, never the raw question."
+    ],
+    "expected_safety_invariants": [
+      "STT fills the input only; it never auto-submits and never calls /api/jarvis/ask.",
+      "Ask read-only posts only {question}; the classifier decides safe vs forbidden.",
+      "Read last answer is off by default and click-gated; it speaks only the rendered answer or refusal text.",
+      "No audio or transcript is stored anywhere (no recorder, no browser storage).",
+      "No refresh, execution, broker, paper, or live control exists on the page."
+    ]
+  },
+  "commands_run": [
+    {"cmd": "git rev-parse HEAD", "result": "9de28ab038711990ec0b6d565e43929b2175a647"},
+    {"cmd": "git diff --name-only 9de28ab HEAD -- app.py jarvis_conversation_safety.py templates/jarvis.html", "result": "EMPTY (unchanged)"},
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "ASGI TestClient: GET /jarvis, GET /api/jarvis/status, POST /api/jarvis/ask (safe + forbidden)", "result": "ALL PASS"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "239 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_37_live_voice_smoke/report.json", "result": "JSON_OK"}
+  ],
+  "files_created": [
+    "docs/jarvis_step_37_live_voice_smoke/report.md",
+    "docs/jarvis_step_37_live_voice_smoke/report.json"
+  ],
+  "explicitly_not_done": [
+    "No app.py change.",
+    "No templates/jarvis.html change.",
+    "No jarvis_conversation_safety.py change.",
+    "No test change.",
+    "No endpoint added.",
+    "No refresh/execution/broker/paper/live control.",
+    "No chat/audio/transcript storage.",
+    "No trade run or simulated.",
+    "Nothing staged or committed."
+  ],
+  "conclusion": "The committed browser voice loop validates end-to-end at every automatable layer. HEAD is Step 36 (9de28ab) with app.py, the template, and the safety module unchanged. /jarvis returns 200, /api/jarvis/status keeps its 24-key read-only shape, the safe question is answered (SAFE_EXPLAIN, observe-only), and the forbidden trading command is refused (FORBIDDEN_TRADING with a refusal_reason). The template scan confirms STT and TTS use only the browser Web Speech / SpeechSynthesis APIs, with no getUserMedia/MediaRecorder/AudioContext/mediaDevices, no storage, no refresh, no real controls, a {question}-only payload, an STT handler that never submits or fetches, a TTS handler that reads only the captured answer text, and a renderer that never auto-speaks. 239 tests pass. The real-microphone path is documented as operator manual steps. No code/UI/test/backend/trading files were touched; only the two report files were created."
+}
