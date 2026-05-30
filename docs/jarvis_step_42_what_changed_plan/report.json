@@ -1,0 +1,96 @@
+{
+  "title": "JARVIS Step 42 — What Changed Since Last Check? Read-Only Plan",
+  "generated_at": "2026-05-30T20:10:00",
+  "type": "documentation_plan_only",
+  "status": "PLAN_ONLY_IMPLEMENTATION_DEFERRED",
+  "read_only": true,
+  "implemented": false,
+  "purpose": "Design a future read-only change-summary capability so JARVIS can eventually answer operator questions like 'what changed since last check?', 'what new commits happened?', and 'what needs my attention now?' without adding any execution, storage, refresh, or trading control. Plan only; nothing implemented.",
+  "relation_to_sealed_v1": [
+    {"step": 39, "commit": "13e43ad", "sealed": "Operator acceptance smoke after app restart (live port-8765 serves committed JARVIS code; text ask, voice STT, TTS, safety refusals verified)."},
+    {"step": 40, "commit": "7d80f76", "sealed": "v1 milestone seal; verdict JARVIS_V1_ACCEPTED_READ_ONLY_VOICE_COMMAND_CENTER."},
+    {"step": 41, "commit": "e67083f", "sealed": "Natural trading-status phrase coverage (casual phrasings classify SAFE_INFO; forbidden still checked first)."}
+  ],
+  "current_v1_baseline": [
+    "Read-only command center (read_only=true always; no mutation path).",
+    "Text ask via POST /api/jarvis/ask accepting only {question}.",
+    "Voice STT input fill (browser SpeechRecognition fills the box; no server audio, no auto-submit).",
+    "Manual TTS readback (operator-triggered speechSynthesis of last answer; no autoplay).",
+    "Answer-only /api/jarvis/ask returning exactly five fields (answer, safety_class, sources_used, refused, refusal_reason).",
+    "Deterministic safety classifier; forbidden checked first; unrecognized input fails closed to UNSUPPORTED.",
+    "No execution, no trading control, no refresh endpoint, no storage; paper_ready/live_ready/broker_control locked false."
+  ],
+  "what_changed_should_mean": [
+    "Compare read-only current status to a previous read-only snapshot.",
+    "Summarize new commits (git HEAD/recent-log not in prior snapshot).",
+    "Summarize new reports (new trading_detail.latest_reports / JARVIS docs entries).",
+    "Summarize changed warning counts (attention/warning counters from status).",
+    "Summarize trading posture changes if any (expected none; flags locked false).",
+    "Summarize cache_freshness changes (timestamp/age differences).",
+    "Summarize git cleanliness changes (clean/dirty tree and untracked counts from file_hygiene_report)."
+  ],
+  "what_it_must_not_mean": [
+    "No auto-refresh mutation (must not trigger refresh of caches/status).",
+    "No file writes from the browser.",
+    "No trading actions (no place/enable/connect/approve).",
+    "No script execution (must not run git, generators, or any process).",
+    "No broker/paper/live control.",
+    "No autonomous decisions (reports differences only; never acts on them)."
+  ],
+  "proposed_safe_data_sources": [
+    "Current /api/jarvis/status response (the live read-only snapshot).",
+    "Git HEAD / last commits already exposed by status.",
+    "trading_detail.latest_reports already exposed by status (read-only file scan).",
+    "cache_freshness already exposed by status.",
+    "file_hygiene_report / cache metadata already exposed by status.",
+    "Committed JARVIS docs (docs/jarvis_step_* memos)."
+  ],
+  "snapshot_options": {
+    "A": "No persistence: answer 'current status only'; no baseline, no comparison. Safest; zero storage.",
+    "B": "Operator-supplied baseline pasted into the question; compare only provided fields. No storage.",
+    "C": "Manually generated read-only snapshot file created by an offline script run by the operator at the terminal, never from the browser; JARVIS only reads it.",
+    "D": "Local server snapshot store, only after a separate explicitly approved step, never triggered by a browser write. Deferred."
+  },
+  "recommended_v1_1_approach": [
+    "Start with Option A + B first (current-status summary plus operator-pasted-baseline comparison; both zero-storage, zero-execution).",
+    "Do not add automatic snapshot storage yet (no Option C/D in v1.1).",
+    "Later add an offline manual snapshot report if needed (Option C, only if A+B insufficient and only as a separately approved docs+offline step)."
+  ],
+  "future_answer_behavior": [
+    "No baseline present: JARVIS says it can summarize current read-only status but cannot compare yet (no fabricated 'before').",
+    "Baseline provided: compare only the fields supplied; ignore fields not given rather than guessing.",
+    "Never invent changes; if a field is absent or unverifiable, say so.",
+    "Clearly separate verified changes vs unknowns (two explicit buckets)."
+  ],
+  "safe_questions_to_support_later": [
+    "what changed since last check",
+    "what changed since yesterday",
+    "what new commits happened",
+    "what new trading reports appeared",
+    "what warnings changed",
+    "what needs attention now"
+  ],
+  "forbidden_questions_must_still_refuse": [
+    "refresh status now -> FORBIDDEN_EXECUTION",
+    "run git log -> FORBIDDEN_EXECUTION",
+    "write a snapshot -> FORBIDDEN_MUTATION",
+    "save this state -> FORBIDDEN_MUTATION",
+    "execute report generator -> FORBIDDEN_EXECUTION",
+    "fix the dirty tree -> FORBIDDEN_MUTATION/FORBIDDEN_EXECUTION",
+    "clean untracked files -> FORBIDDEN_MUTATION/FORBIDDEN_EXECUTION",
+    "start trading based on changes -> FORBIDDEN_TRADING"
+  ],
+  "future_test_plan": [
+    "Classifier recognizes safe change-summary questions (SAFE_INFO / future SAFE_CHANGE_SUMMARY, refused=false).",
+    "Forbidden mixed requests still refuse (forbidden-first).",
+    "/api/jarvis/status shape unchanged (24 top-level keys; flags locked false).",
+    "No storage by default (no file written by the web surface).",
+    "No refresh endpoint added (/api/jarvis/refresh must not exist).",
+    "Ask response carries no command/action/execute/order fields (still five keys).",
+    "No broker/paper/live controls anywhere."
+  ],
+  "recommended_step_43": "Add safe classifier coverage + static answer behavior for 'what changed' questions, with no persistence (Option A current-status summary + Option B operator-supplied-baseline comparison). No snapshot storage, no refresh, no execution.",
+  "recommended_step_44": "Optional offline manual snapshot plan, docs-only (design but do not build the Option C offline snapshot script and the read-only file format JARVIS would read, never write from the browser). Separate approval required.",
+  "verdict": "JARVIS_CHANGE_SUMMARY_PLAN_READY",
+  "implementation_deferred_until_separate_approval": true
+}
