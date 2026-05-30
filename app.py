@@ -7960,6 +7960,90 @@ def _jarvis_prompt_library() -> dict:
     }
 
 
+def _jarvis_system_map() -> dict:
+    """READ-ONLY. Loads the JARVIS system map from a tracked JSON file and
+    returns it for DISPLAY ONLY. Script paths in the map are documentation
+    strings — JARVIS never executes them and never writes this file."""
+    path = BASE / "docs" / "jarvis_system_map.json"
+    if not path.exists():
+        return {"state": "missing",
+                "message": "docs/jarvis_system_map.json not found"}
+    try:
+        import json as _json
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+        return {"state": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(data, dict):
+        return {"state": "unavailable", "error": "system map is not a JSON object"}
+    if "version" not in data:
+        return {"state": "unavailable", "error": "missing 'version'"}
+    posture = data.get("posture")
+    panels = data.get("panels")
+    scripts = data.get("scripts")
+    if not isinstance(posture, dict):
+        return {"state": "unavailable", "error": "'posture' is not an object"}
+    if not isinstance(panels, list):
+        return {"state": "unavailable", "error": "'panels' is not a list"}
+    if not isinstance(scripts, list):
+        return {"state": "unavailable", "error": "'scripts' is not a list"}
+    panel_required = ("id", "title", "kind")
+    clean_panels = []
+    for p in panels:
+        if not isinstance(p, dict) or any(k not in p for k in panel_required):
+            return {"state": "unavailable",
+                    "error": "a panel is missing required fields"}
+        # Re-emit only documentation fields. `script` is a path STRING shown to
+        # a human — it is never imported, run, or resolved to a callable.
+        clean_panels.append({
+            "id": str(p.get("id")),
+            "title": str(p.get("title")),
+            "kind": str(p.get("kind")),
+            "source": str(p.get("source", "")),
+            "cache_file": p.get("cache_file"),
+            "script": p.get("script"),
+            "writes_from_web": bool(p.get("writes_from_web", False)),
+            "description": str(p.get("description", "")),
+        })
+    clean_scripts = []
+    for s in scripts:
+        if not isinstance(s, dict) or "path" not in s:
+            return {"state": "unavailable",
+                    "error": "a script entry is missing 'path'"}
+        clean_scripts.append({
+            "path": str(s.get("path")),
+            "purpose": str(s.get("purpose", "")),
+            "manual_only": bool(s.get("manual_only", True)),
+            "called_by_web": bool(s.get("called_by_web", False)),
+        })
+    by_kind: dict = {}
+    for p in clean_panels:
+        by_kind[p["kind"]] = by_kind.get(p["kind"], 0) + 1
+    tracked = data.get("tracked_data_files")
+    ignored = data.get("ignored_runtime_files")
+    return {
+        "state": "ready",
+        "version": data.get("version"),
+        "updated_at": data.get("updated_at"),
+        "posture": {
+            "read_only": bool(posture.get("read_only", False)),
+            "browser_execution": bool(posture.get("browser_execution", False)),
+            "broker_control": bool(posture.get("broker_control", False)),
+            "file_mutation_from_web": bool(posture.get("file_mutation_from_web", False)),
+        },
+        "panels": clean_panels,
+        "scripts": clean_scripts,
+        "tracked_data_files": tracked if isinstance(tracked, list) else [],
+        "ignored_runtime_files": ignored if isinstance(ignored, list) else [],
+        "counts": {
+            "panels": len(clean_panels),
+            "scripts": len(clean_scripts),
+            "by_kind": by_kind,
+            "tracked_data_files": len(tracked) if isinstance(tracked, list) else 0,
+            "ignored_runtime_files": len(ignored) if isinstance(ignored, list) else 0,
+        },
+    }
+
+
 def _jarvis_commander_snapshot(operator_safety, safety_gates, health,
                                route_smoke, mission_board, prompt_library,
                                file_hygiene, trading_detail, git) -> dict:
@@ -8118,6 +8202,7 @@ def api_jarvis_status():
     file_hygiene = _jarvis_safe(_jarvis_file_hygiene_report)
     mission_board = _jarvis_safe(_jarvis_mission_board)
     prompt_library = _jarvis_safe(_jarvis_prompt_library)
+    system_map = _jarvis_safe(_jarvis_system_map)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
     # Derived ONLY from the dicts already collected above — no new commands.
     commander_snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
@@ -8144,6 +8229,7 @@ def api_jarvis_status():
         "file_hygiene_report": file_hygiene,
         "mission_board": mission_board,
         "prompt_library": prompt_library,
+        "system_map": system_map,
         "trading_detail": trading_detail,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }

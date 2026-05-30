@@ -1156,6 +1156,170 @@ def test_commander_snapshot_exposes_no_execution_fields():
         assert forbidden not in keys, f"forbidden control key: {forbidden}"
 
 
+# --- Step 10: read-only system map panel ----------------------------------
+
+def test_jarvis_status_has_system_map_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    body = client.get("/api/jarvis/status").json()
+    assert "system_map" in body
+    assert body["system_map"]["state"] == "ready"
+
+
+def test_jarvis_system_map_seed_file_is_valid_and_ready():
+    import app as app_module
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "ready", sm
+    assert sm.get("version") == 1
+    panels = sm.get("panels")
+    scripts = sm.get("scripts")
+    assert isinstance(panels, list) and len(panels) >= 1
+    assert isinstance(scripts, list) and len(scripts) >= 1
+    for p in panels:
+        for key in ("id", "title", "kind"):
+            assert key in p, f"panel missing {key}"
+    counts = sm.get("counts") or {}
+    assert counts.get("panels") == len(panels)
+    assert counts.get("scripts") == len(scripts)
+
+
+def test_jarvis_system_map_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "missing"
+    assert "jarvis_system_map.json" in sm["message"]
+
+
+def test_jarvis_system_map_invalid_json_is_fail_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    (d / "jarvis_system_map.json").write_text("{ broken", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "unavailable"
+    assert "error" in sm
+
+
+def test_jarvis_system_map_bad_shape_is_fail_closed(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    # version present but a panel lacks required fields
+    payload = {"version": 1, "posture": {}, "panels": [{"id": "X"}], "scripts": []}
+    (d / "jarvis_system_map.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "unavailable"
+
+
+def test_jarvis_system_map_valid_shape_passed_through(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    payload = {
+        "version": 1,
+        "updated_at": "2026-05-30T00:00:00",
+        "posture": {"read_only": True, "browser_execution": False,
+                    "broker_control": False, "file_mutation_from_web": False},
+        "panels": [{"id": "p1", "title": "Panel One", "kind": "live",
+                    "source": "/api/jarvis/status", "cache_file": None,
+                    "script": None, "writes_from_web": False,
+                    "description": "desc"}],
+        "scripts": [{"path": "tools/x.py", "purpose": "manual",
+                     "manual_only": True, "called_by_web": False}],
+        "tracked_data_files": ["docs/jarvis_system_map.json"],
+        "ignored_runtime_files": ["storage/jarvis/health_report.json"],
+    }
+    (d / "jarvis_system_map.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    sm = app_module._jarvis_system_map()
+    assert sm["state"] == "ready"
+    assert sm["version"] == 1
+    assert sm["posture"]["read_only"] is True
+    assert sm["panels"][0]["id"] == "p1"
+    assert sm["scripts"][0]["path"] == "tools/x.py"
+    assert sm["counts"]["panels"] == 1
+    assert sm["counts"]["scripts"] == 1
+    assert sm["counts"]["by_kind"].get("live") == 1
+    assert sm["counts"]["tracked_data_files"] == 1
+    assert sm["counts"]["ignored_runtime_files"] == 1
+
+
+def test_jarvis_system_map_script_paths_are_display_only():
+    # Script paths in the map are documentation strings. They are surfaced as
+    # plain text, flagged manual-only, and never marked as called by the web.
+    import app as app_module
+    sm = app_module._jarvis_system_map()
+    for s in sm["scripts"]:
+        assert isinstance(s.get("path"), str)
+        assert s.get("called_by_web") is False, "script must not be web-callable"
+        # script entries expose no execution/control affordance
+        for forbidden in ("command", "cmd", "exec", "run", "shell", "callback",
+                          "handler", "onclick"):
+            assert forbidden not in s, f"script exposes control field: {forbidden}"
+
+
+def test_jarvis_system_map_does_not_execute_anything(monkeypatch):
+    # Building the system map must never spawn a subprocess, make an HTTP call,
+    # or run any script path it documents.
+    import subprocess
+    import urllib.request
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("system map must not execute anything")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert r.json()["system_map"]["state"] == "ready"
+
+
+def test_jarvis_system_map_exposes_no_execution_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    sm = client.get("/api/jarvis/status").json()["system_map"]
+
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+
+    keys = set(_keys(sm))
+    for forbidden in ("run_command", "exec", "shell", "place_order",
+                      "submit_order", "execute_trade", "callback", "handler",
+                      "onclick", "trigger"):
+        assert forbidden not in keys, f"forbidden control key: {forbidden}"
+
+
+def test_jarvis_system_map_seed_file_is_tracked_safe():
+    # The seed file lives under docs/ (tracked) and is pure data — no code.
+    import json
+    src = (_REPO_ROOT / "docs" / "jarvis_system_map.json").read_text(
+        encoding="utf-8"
+    )
+    data = json.loads(src)
+    assert data["version"] == 1
+    assert data["posture"]["read_only"] is True
+    assert isinstance(data["panels"], list)
+    for s in data["scripts"]:
+        assert s.get("called_by_web") is False, "scripts must not be web-callable"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

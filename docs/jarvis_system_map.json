@@ -1,0 +1,252 @@
+{
+  "version": 1,
+  "updated_at": "2026-05-30T00:00:00",
+  "posture": {
+    "read_only": true,
+    "browser_execution": false,
+    "broker_control": false,
+    "file_mutation_from_web": false
+  },
+  "panels": [
+    {
+      "id": "commander_snapshot",
+      "title": "Commander's Snapshot",
+      "kind": "derived",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Top-level green/yellow/red summary derived from existing status sections. Runs no new commands."
+    },
+    {
+      "id": "system_core",
+      "title": "System Core",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Server/brain state and library counts."
+    },
+    {
+      "id": "ai_brains",
+      "title": "AI Brains",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Detected AI brain modules and availability."
+    },
+    {
+      "id": "trading_bridge",
+      "title": "Trading Bridge",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Read-only view of sealed trading-research lifecycles. No order path."
+    },
+    {
+      "id": "content_engine",
+      "title": "Content Engine",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Content/clone engine status."
+    },
+    {
+      "id": "money_engine",
+      "title": "Money Engine",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Affiliate/money engine posture and product lock."
+    },
+    {
+      "id": "moving_company",
+      "title": "Moving Company",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Moving-company workflow signal."
+    },
+    {
+      "id": "daily_mission",
+      "title": "Daily Mission",
+      "kind": "derived",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Guidance actions derived from current content/money flags."
+    },
+    {
+      "id": "safety_gates",
+      "title": "Safety Gates",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Hard locked posture statements. The console cannot flip them."
+    },
+    {
+      "id": "git",
+      "title": "Git State",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Read-only git plumbing: branch, head, clean/dirty, change counts."
+    },
+    {
+      "id": "operator_safety",
+      "title": "Operator Safety",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Static posture flags asserting no execution/broker/secret/force-git affordance."
+    },
+    {
+      "id": "project_files",
+      "title": "Project Files",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Stat-only confirmation that key JARVIS artifacts exist."
+    },
+    {
+      "id": "brain_memory",
+      "title": "Brain Memory",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Stat-only scan of the brain_memory tree and known projects."
+    },
+    {
+      "id": "next_actions",
+      "title": "Recommended Next Actions",
+      "kind": "static",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Static read-only recommended next actions."
+    },
+    {
+      "id": "health_report",
+      "title": "Health Report",
+      "kind": "cached",
+      "source": "storage/jarvis/health_report.json",
+      "cache_file": "storage/jarvis/health_report.json",
+      "script": "tools/jarvis_health_report.py",
+      "writes_from_web": false,
+      "description": "Displays manually generated compile/test status from a cached report."
+    },
+    {
+      "id": "mission_board",
+      "title": "Mission Board",
+      "kind": "tracked",
+      "source": "docs/jarvis_mission_board.json",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Display-only operator mission board from a tracked JSON file."
+    },
+    {
+      "id": "trading_detail",
+      "title": "Trading Research Detail",
+      "kind": "live",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Read-only summary of committed/local research reports. No broker/paper/live."
+    },
+    {
+      "id": "route_smoke_report",
+      "title": "Route Smoke",
+      "kind": "cached",
+      "source": "storage/jarvis/route_smoke_report.json",
+      "cache_file": "storage/jarvis/route_smoke_report.json",
+      "script": "tools/jarvis_route_smoke_report.py",
+      "writes_from_web": false,
+      "description": "Displays a manually generated GET-only route smoke report from cache."
+    },
+    {
+      "id": "prompt_library",
+      "title": "Prompt Library",
+      "kind": "tracked",
+      "source": "docs/jarvis_prompt_library.json",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Display-only operator prompt library. Prompts are never executed."
+    },
+    {
+      "id": "file_hygiene_report",
+      "title": "File Hygiene",
+      "kind": "cached",
+      "source": "storage/jarvis/file_hygiene_report.json",
+      "cache_file": "storage/jarvis/file_hygiene_report.json",
+      "script": "tools/jarvis_file_hygiene_report.py",
+      "writes_from_web": false,
+      "description": "Displays a manually generated git/untracked hygiene summary from cache."
+    },
+    {
+      "id": "system_map",
+      "title": "System Map",
+      "kind": "tracked",
+      "source": "docs/jarvis_system_map.json",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Display-only map of how the command center is wired (this panel)."
+    }
+  ],
+  "scripts": [
+    {
+      "path": "tools/jarvis_health_report.py",
+      "purpose": "Generate cached compile/test health report manually.",
+      "manual_only": true,
+      "called_by_web": false
+    },
+    {
+      "path": "tools/jarvis_route_smoke_report.py",
+      "purpose": "Generate cached GET-only route smoke report manually.",
+      "manual_only": true,
+      "called_by_web": false
+    },
+    {
+      "path": "tools/jarvis_file_hygiene_report.py",
+      "purpose": "Generate cached git/untracked file-hygiene report manually.",
+      "manual_only": true,
+      "called_by_web": false
+    }
+  ],
+  "tracked_data_files": [
+    "docs/jarvis_mission_board.json",
+    "docs/jarvis_prompt_library.json",
+    "docs/jarvis_system_map.json"
+  ],
+  "ignored_runtime_files": [
+    "storage/jarvis/health_report.json",
+    "storage/jarvis/route_smoke_report.json",
+    "storage/jarvis/file_hygiene_report.json"
+  ]
+}

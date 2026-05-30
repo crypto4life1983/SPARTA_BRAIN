@@ -259,6 +259,11 @@
       <div class="jv-loading">Reading prompt library&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pSystemMap">
+      <h2><span class="ic">&#x29C9;</span>System Map <span class="jv-tag">DISPLAY ONLY</span></h2>
+      <div class="jv-loading">Reading system map&hellip;</div>
+    </div>
+
     <div class="jv-panel jv-wide" id="pTradingDetail">
       <h2><span class="ic">&#x25C8;</span>Trading Research Detail</h2>
       <div class="jv-loading">Reading research reports&hellip;</div>
@@ -702,6 +707,77 @@
         plHtml += card;
       });
       setPanel('pPromptLib', plHtml);
+    }
+
+    // System Map (DISPLAY ONLY — script paths are documentation, never executed)
+    var sm = d.system_map || {};
+    if(sm.state === 'missing'){
+      setPanel('pSystemMap',
+        row('Status', 'waiting', 'NO SYSTEM MAP') +
+        '<div class="jv-detail">'+esc(sm.message || 'docs/jarvis_system_map.json not found')+'</div>');
+    } else if(sm.state === 'unavailable' || sm.state === 'error'){
+      setPanel('pSystemMap', row('Status', 'bad', 'UNAVAILABLE', sm.error || sm.detail));
+    } else {
+      var smc = sm.counts || {};
+      var smp = sm.posture || {};
+      var smchips = '';
+      smchips += '<span class="jv-chip">Version: '+esc(sm.version != null ? sm.version : '—')+'</span>';
+      smchips += '<span class="jv-chip">Panels: '+esc(smc.panels != null ? smc.panels : 0)+'</span>';
+      smchips += '<span class="jv-chip">Scripts: '+esc(smc.scripts != null ? smc.scripts : 0)+'</span>';
+      smchips += '<span class="jv-chip">Tracked: '+esc(smc.tracked_data_files != null ? smc.tracked_data_files : 0)+'</span>';
+      smchips += '<span class="jv-chip">Ignored: '+esc(smc.ignored_runtime_files != null ? smc.ignored_runtime_files : 0)+'</span>';
+      var bk = smc.by_kind || {};
+      Object.keys(bk).forEach(function(k){
+        smchips += '<span class="jv-chip">'+esc(k)+': '+esc(bk[k])+'</span>';
+      });
+      var smHtml = '<div class="jv-counts">'+smchips+'</div>';
+      if(sm.updated_at){
+        smHtml += '<div class="jv-detail" style="margin-bottom:8px">Updated: '+esc(sm.updated_at)+'</div>';
+      }
+      // Posture flags — read-only / no browser execution / no broker / no web mutation
+      smHtml += row('Read-only', smp.read_only ? 'locked' : 'bad',
+        smp.read_only ? 'TRUE' : 'FALSE');
+      smHtml += row('Browser execution', smp.browser_execution ? 'bad' : 'locked',
+        smp.browser_execution ? 'ENABLED' : 'DISABLED');
+      smHtml += row('Broker control', smp.broker_control ? 'bad' : 'locked',
+        smp.broker_control ? 'ENABLED' : 'DISABLED');
+      smHtml += row('File mutation from web', smp.file_mutation_from_web ? 'bad' : 'locked',
+        smp.file_mutation_from_web ? 'ENABLED' : 'DISABLED');
+      // Compact panel list (id / title / kind) — text only, never interactive
+      (sm.panels || []).forEach(function(p){
+        var card = '<div class="jv-mcard"><div class="top">'+
+          '<span class="ttl">'+esc(p.title || '')+'</span>'+
+          '<span class="jv-tag">'+esc(p.kind || '')+'</span></div>'+
+          '<div class="meta">'+
+          '<span class="jv-tag">'+esc(p.id || '')+'</span>'+
+          (p.source ? '<span class="jv-tag">'+esc(p.source)+'</span>' : '')+
+          '<span class="jv-tag">'+(p.writes_from_web ? 'WRITES FROM WEB' : 'READ ONLY')+'</span>'+
+          '</div>';
+        if(p.description){ card += '<div class="jv-detail" style="margin-top:6px">'+esc(p.description)+'</div>'; }
+        card += '</div>';
+        smHtml += card;
+      });
+      // Scripts — documentation only, manual-only, never run from web
+      (sm.scripts || []).forEach(function(s){
+        var card = '<div class="jv-mcard"><div class="top">'+
+          '<span class="ttl">'+esc(s.path || '')+'</span>'+
+          '<span class="jv-tag">'+(s.called_by_web ? 'CALLED BY WEB' : 'MANUAL ONLY')+'</span></div>';
+        if(s.purpose){ card += '<div class="jv-detail" style="margin-top:6px">'+esc(s.purpose)+'</div>'; }
+        card += '</div>';
+        smHtml += card;
+      });
+      // Tracked data files & ignored runtime files (paths only)
+      var tdf = sm.tracked_data_files || [];
+      if(tdf.length){
+        smHtml += '<div class="jv-detail" style="margin-top:10px">Tracked data files</div>';
+        tdf.forEach(function(f){ smHtml += '<div class="jv-detail">'+esc(f)+'</div>'; });
+      }
+      var irf = sm.ignored_runtime_files || [];
+      if(irf.length){
+        smHtml += '<div class="jv-detail" style="margin-top:10px">Ignored runtime files</div>';
+        irf.forEach(function(f){ smHtml += '<div class="jv-detail">'+esc(f)+'</div>'; });
+      }
+      setPanel('pSystemMap', smHtml);
     }
 
     // Trading Research Detail (read-only — no broker, no paper, no live)
