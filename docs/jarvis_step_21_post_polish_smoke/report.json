@@ -1,0 +1,75 @@
+{
+  "title": "JARVIS Step 21 — Post-Polish Live Smoke Memo",
+  "generated_at": "2026-05-30T05:30:00",
+  "audited_commit": "4200253",
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "type": "validation_memo_only",
+  "read_only": true,
+  "conclusion": "JARVIS_POST_POLISH_SMOKE_PASS",
+  "conclusion_detail": "The Step 20 UI-only polish is live and healthy. /jarvis and /api/jarvis/status both return 200, all six new section dividers and the posture legend render, every key panel (including pCacheFreshness in its new grouped location) is present, the API shape is unchanged at 24 top-level keys with the read-only trading posture intact, and the served HTML contains no execution or refresh affordance.",
+  "validation": [
+    {"cmd": "python -m py_compile app.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_health_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_route_smoke_report.py", "result": "PASS"},
+    {"cmd": "python -m py_compile tools/jarvis_file_hygiene_report.py", "result": "PASS"},
+    {"cmd": "pytest tests/test_jarvis_route.py --rootdir=tests -q", "result": "108 passed"}
+  ],
+  "live_url_checks": [
+    {"url": "http://127.0.0.1:8765/jarvis", "method": "GET", "status": 200},
+    {"url": "http://127.0.0.1:8765/api/jarvis/status", "method": "GET", "status": 200}
+  ],
+  "api_shape": {
+    "online": true,
+    "read_only": true,
+    "top_level_key_count": 24,
+    "top_level_key_count_expected": 24,
+    "top_level_key_count_unchanged": true,
+    "cache_freshness_present": true,
+    "commander_snapshot_present": true,
+    "commander_snapshot_overall_state": "yellow",
+    "system_map_present": true,
+    "trading_detail": {
+      "read_only": true,
+      "paper_ready": false,
+      "live_ready": false,
+      "broker_control": false
+    }
+  },
+  "ui_sections_checklist": [
+    {"section": "Command Overview", "present": true},
+    {"section": "Core Systems", "present": true},
+    {"section": "Operations", "present": true},
+    {"section": "Safety & Reliability", "present": true},
+    {"section": "Research Visibility", "present": true},
+    {"section": "Documentation & Maps", "present": true}
+  ],
+  "ui_legend_present": true,
+  "ui_panels_checklist": [
+    {"panel": "pSnapshot", "present": true},
+    {"panel": "pCore", "present": true},
+    {"panel": "pBrains", "present": true},
+    {"panel": "pTrading", "present": true},
+    {"panel": "pHealth", "present": true},
+    {"panel": "pRouteSmoke", "present": true},
+    {"panel": "pHygiene", "present": true},
+    {"panel": "pMissions", "present": true},
+    {"panel": "pPromptLib", "present": true},
+    {"panel": "pSystemMap", "present": true},
+    {"panel": "pTradingDetail", "present": true},
+    {"panel": "pCacheFreshness", "present": true, "note": "renders in the new grouped Safety & Reliability location alongside Health Report and Route Smoke"}
+  ],
+  "safety_scan": {
+    "button": false,
+    "form": false,
+    "onclick": false,
+    "method_post": false,
+    "refresh_endpoint": false,
+    "detail": "Served /jarvis HTML contains no <button>, <form>, onclick, method=\"post\", or /api/jarvis/refresh reference. The console remains a single GET fetch to /api/jarvis/status, polled on a timer."
+  },
+  "known_non_blocking_warnings": [
+    "commander_snapshot may remain yellow due to the large untracked-file backlog and a dirty working tree (conservative by design, not an error). Observed overall_state = yellow this run.",
+    "/money-spartan may report a non-required 404 in the route smoke report.",
+    "A corrupted 'hydra ' directory can break bare pytest collection, so the scoped pytest command (--rootdir=tests) is used."
+  ]
+}
