@@ -208,7 +208,12 @@ def test_jarvis_status_shape_unchanged_after_step_28():
 
 
 def test_jarvis_template_still_has_no_controls():
+    # Step 31 intentionally wires the read-only /api/jarvis/ask endpoint into the
+    # UI, so the old ask-absence guard is obsolete and retired. The
+    # execution/refresh/mutation guards remain active: the template must add no
+    # real <button>, <form>, inline handler, submit, method="post", or refresh
+    # wiring.
     low = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8").lower()
     for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"',
-                "/api/jarvis/ask", "/api/jarvis/refresh"):
+                "/api/jarvis/refresh"):
         assert tok not in low, f"template must add no control: {tok}"

@@ -158,20 +158,22 @@
     /* Step 20 polish: compact long lists in wide panels */
     .jv-wide .jv-mcard{margin:7px 0;}
     .jv-wide .jv-detail{line-height:1.45;}
-    /* Step 26: read-only conversation shell (display-only, no execution) */
+    /* Step 26 shell + Step 31 read-only ask wiring (answers only, no execution) */
     .jv-conv-banner{display:inline-block;margin:2px 0 10px;font-size:11px;
       letter-spacing:.04em;color:var(--jv-warn);
       border:1px solid rgba(255,195,77,.4);border-radius:8px;padding:6px 12px;}
     .jv-conv-tips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px;}
-    .jv-conv-tips .jv-chip{cursor:default;}
+    .jv-conv-tips .jv-chip{cursor:pointer;}
     .jv-conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
       margin:10px 0 6px;}
     .jv-conv-input{flex:1 1 240px;min-width:180px;background:rgba(0,0,0,.28);
-      border:1px dashed rgba(63,224,255,.22);border-radius:8px;padding:9px 12px;
-      color:var(--jv-dim);font-size:13px;cursor:not-allowed;}
-    .jv-conv-send{font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-      color:var(--jv-dim);border:1px solid rgba(255,93,115,.4);border-radius:8px;
-      padding:8px 14px;cursor:not-allowed;opacity:.8;}
+      border:1px solid rgba(63,224,255,.32);border-radius:8px;padding:9px 12px;
+      color:var(--jv-fg);font-size:13px;}
+    .jv-ask-btn{font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--jv-cyan);border:1px solid rgba(63,224,255,.45);border-radius:8px;
+      padding:8px 14px;cursor:pointer;user-select:none;background:rgba(63,224,255,.06);}
+    .jv-ask-btn:hover{background:rgba(63,224,255,.14);}
+    .jv-ask-out{margin-top:8px;min-height:8px;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -331,19 +333,23 @@
       <div class="jv-loading">Reading system map&hellip;</div>
     </div>
 
-    <div class="jv-section"><span class="lbl">Talk to JARVIS</span><span class="ln"></span><span class="sub">read-only conversation shell &middot; planning mode</span></div>
+    <div class="jv-section"><span class="lbl">Talk to JARVIS</span><span class="ln"></span><span class="sub">read-only conversation shell &middot; answers only</span></div>
 
-    <!-- Step 26: Read-only conversation shell. DISPLAY ONLY / PLANNING MODE.
-         No backend, no endpoint, no send action. The input is disabled and the
-         "send" affordance is a non-interactive span. The render JS never targets
-         #pConversation, so this content stays static and is never replaced. -->
+    <!-- Step 26 shell + Step 31 read-only ask wiring. READ-ONLY / ANSWERS ONLY.
+         The input posts only the question field to the answer-only ask endpoint,
+         which delegates safety to the pure classifier and returns answers or
+         refusals. The submit affordance is a non-interactive span (role=button),
+         not a real button or submit element; there is no inline handler, no form,
+         no refresh control, and no client-side persistence. The render JS never
+         targets pConversation, so this static content is never replaced. -->
     <div class="jv-panel jv-wide" id="pConversation">
-      <h2><span class="ic">&#x2328;</span>Read-Only Conversation Shell <span class="jv-tag t-display">PLANNING MODE</span></h2>
+      <h2><span class="ic">&#x2328;</span>Read-Only Conversation Shell <span class="jv-tag t-display">READ-ONLY</span></h2>
       <div class="jv-conv-banner">
-        Planning mode only &middot; Read-only answers only &middot; No execution &middot;
+        JARVIS answers only. No execution. No trading control. &middot;
+        Read-only answers only &middot; No execution &middot;
         No broker, paper, or live trading control.
       </div>
-      <div class="jv-detail" style="margin-bottom:6px;">Suggested safe questions (display-only preview &mdash; nothing is sent):</div>
+      <div class="jv-detail" style="margin-bottom:6px;">Suggested safe questions (click to fill the box &mdash; nothing is sent until you ask):</div>
       <div class="jv-conv-tips">
         <span class="jv-chip">Why is commander yellow?</span>
         <span class="jv-chip">What needs attention?</span>
@@ -352,16 +358,17 @@
         <span class="jv-chip">What JARVIS docs exist?</span>
       </div>
       <div class="jv-conv-row">
-        <input class="jv-conv-input" type="text" disabled aria-disabled="true"
-               placeholder="Conversation layer not yet enabled &mdash; planning mode only" />
-        <span class="jv-conv-send" aria-disabled="true">Send disabled</span>
+        <input class="jv-conv-input" id="jvAskInput" type="text"
+               placeholder="Ask a read-only question&hellip;" aria-label="Ask JARVIS a read-only question" />
+        <span class="jv-ask-btn" id="jvAskBtn" role="button" tabindex="0"
+              aria-label="Ask read-only">Ask read-only</span>
       </div>
+      <div class="jv-ask-out" id="jvAskOut" aria-live="polite"></div>
       <div class="jv-detail">
-        This shell is a display-only preview. There is no send affordance, no
-        endpoint, and no answer backend yet. When enabled in a later,
-        separately-approved step it will return read-only answers only &mdash; it
-        will never execute, refresh, mutate state, or control broker, paper, or
-        live trading.
+        Answers only. This shell posts your question to a read-only endpoint that
+        returns conservative answers or refusals. It will never execute, refresh,
+        mutate state, write chat logs, or control broker, paper, or live trading.
+        Forbidden requests are shown as refusals, not carried out.
       </div>
     </div>
 
@@ -986,8 +993,73 @@
       });
   }
 
+  // Step 31: strictly read-only ask wiring. Posts ONLY the question field to
+  // the answer-only ask endpoint. No execution, refresh, mutation, broker,
+  // paper, or live control. No chat persistence, no client storage, no writes.
+  function renderAsk(out, d){
+    if(!d || typeof d !== 'object'){
+      out.innerHTML = '<div class="jv-detail" style="color:var(--jv-bad)">No answer.</div>';
+      return;
+    }
+    var refused = d.refused === true;
+    var cls = String(d.safety_class || '');
+    var color = refused ? 'var(--jv-warn)' : 'var(--jv-ok)';
+    var html = '<div class="jv-detail" style="color:'+color+'">'+
+      (refused ? 'REFUSED' : 'ANSWER')+' &middot; '+esc(cls)+'</div>';
+    if(d.answer){ html += '<div style="margin-top:4px">'+esc(String(d.answer))+'</div>'; }
+    if(refused && d.refusal_reason){
+      html += '<div class="jv-detail" style="margin-top:4px">Reason: '+esc(String(d.refusal_reason))+'</div>';
+    }
+    var src = d.sources_used || [];
+    if(src.length){
+      html += '<div class="jv-detail" style="margin-top:4px">Sources: '+
+        src.map(function(s){ return esc(String(s)); }).join(', ')+'</div>';
+    }
+    out.innerHTML = html;
+  }
+
+  function wireAsk(){
+    var input = document.getElementById('jvAskInput');
+    var btn = document.getElementById('jvAskBtn');
+    var out = document.getElementById('jvAskOut');
+    if(!input || !btn || !out) return;
+
+    function ask(){
+      var q = (input.value || '').trim();
+      if(!q){ out.innerHTML = '<div class="jv-detail">Type a read-only question first.</div>'; return; }
+      out.innerHTML = '<div class="jv-detail">Asking&hellip;</div>';
+      fetch('/api/jarvis/ask', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({question: q})
+      })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ renderAsk(out, d); })
+        .catch(function(e){
+          out.innerHTML = '<div class="jv-detail" style="color:var(--jv-bad)">Could not reach the read-only answer endpoint.</div>';
+        });
+    }
+
+    btn.addEventListener('click', ask);
+    btn.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); ask(); }
+    });
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); ask(); }
+    });
+
+    var chips = document.querySelectorAll('#pConversation .jv-chip');
+    Array.prototype.forEach.call(chips, function(chip){
+      chip.addEventListener('click', function(){
+        input.value = chip.textContent || '';
+        input.focus();
+      });
+    });
+  }
+
   tick(); setInterval(tick, 1000);
   load(); setInterval(load, 15000);
+  wireAsk();
 })();
 </script>
 {% endblock %}

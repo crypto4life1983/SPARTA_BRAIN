@@ -74,11 +74,15 @@ def _data_listing() -> set:
 # which implements the answer-only handler and activates the contract below.)
 # ==========================================================================
 
-def test_template_has_no_ask_fetch():
+def test_template_has_no_execution_or_refresh_control():
+    # Step 31 intentionally wired the shell to the answer-only POST
+    # /api/jarvis/ask, so the old ask-absence guard is retired. The
+    # execution/form/refresh guards remain active: the template must add no
+    # <button>, <form>, inline handler, submit, method="post", or refresh wiring.
     low = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8").lower()
     for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"',
-                "/api/jarvis/ask", "/api/jarvis/refresh"):
-        assert tok not in low, f"template must add no ask control: {tok}"
+                "/api/jarvis/refresh"):
+        assert tok not in low, f"template must add no execution/refresh control: {tok}"
 
 
 def test_status_shape_unchanged_in_step_29():

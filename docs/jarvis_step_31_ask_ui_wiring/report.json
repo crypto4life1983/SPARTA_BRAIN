@@ -1,0 +1,79 @@
+{
+  "title": "JARVIS Step 31 — Read-Only Ask UI Wiring (answers only, no execution)",
+  "generated_at": "2026-05-30T12:00:00",
+  "type": "ui_wiring_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Wire the existing display-only 'Talk to JARVIS' conversation shell in templates/jarvis.html to the answer-only POST /api/jarvis/ask endpoint shipped in Step 30. The operator can now ask read-only questions from the page. The UI adds no execution, refresh, broker, paper, live, or mutation controls; it posts only {question} and renders answers or refusals.",
+  "relation_to_steps_20_30": "Step 26 shipped the display-only conversation shell; Step 28 the pure safety classifier; Step 29 the tests-first ask contract; Step 30 the answer-only POST /api/jarvis/ask handler. Step 31 connects the existing shell to that endpoint with a strictly read-only fetch — no new endpoint, no refresh, no chat logs.",
+  "files_changed": [
+    "templates/jarvis.html — enabled the conversation input (id=jvAskInput), replaced the disabled 'Send disabled' span with a non-button, non-form 'Ask read-only' span (id=jvAskBtn, role=button, tabindex=0), added an aria-live answer area (id=jvAskOut), added the persistent warning 'JARVIS answers only. No execution. No trading control.', changed the panel tag from PLANNING MODE to READ-ONLY, made suggested chips click-to-fill (no auto-submit), and added the wireAsk() JS inside the existing render IIFE that POSTs only {question} to /api/jarvis/ask and renders answer/safety_class/refused/refusal_reason/sources_used.",
+    "tests/test_jarvis_route.py — updated three obsolete Step 26 shell guards (text now asserts the persistent warning instead of 'Planning mode only'; the no-working-controls guard drops the two ask-route forbids but keeps button/form/onclick/submit/post/refresh; the input test now asserts the input is enabled and labeled 'Ask read-only'). Added a Step 31 section with UI safety tests and POST integration tests (safe -> answer, forbidden trading -> refused, status shape unchanged).",
+    "tests/test_jarvis_ask_contract.py — repointed the obsolete Step 29 template ask-absence guard (renamed test_template_has_no_execution_or_refresh_control); it drops the now-false '/api/jarvis/ask absent in template' check and keeps the button/form/onclick/submit/post/refresh-absence checks.",
+    "docs/jarvis_step_31_ask_ui_wiring/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No new endpoint (uses the existing Step 30 POST /api/jarvis/ask only).",
+    "No /api/jarvis/refresh path.",
+    "No <button>, <form>, onclick, type=submit, or method=post in the template.",
+    "No chat logs, no localStorage/sessionStorage/indexedDB/cookies, no file writes.",
+    "No execution/broker/paper/live controls; no trade run or simulation.",
+    "No change to /api/jarvis/status shape.",
+    "No change to app.py.",
+    "No change to jarvis_conversation_safety.py."
+  ],
+  "ui_wiring": {
+    "input": "id=jvAskInput, enabled, placeholder 'Ask a read-only question…', Enter submits.",
+    "submit_affordance": "id=jvAskBtn, a span with role=button + tabindex=0 labeled 'Ask read-only' (NOT a real button/submit element; click + Enter/Space trigger ask()).",
+    "payload": "fetch('/api/jarvis/ask', {method:'POST', headers:{Content-Type/Accept json}, body: JSON.stringify({question: q})}) — question is the ONLY field.",
+    "render": "answer / safety_class / refused status / refusal_reason (when present) / sources_used (when present); all values escaped via esc().",
+    "chips": "five suggested safe questions; clicking a chip fills the input (focus) but never auto-submits.",
+    "persistent_warning": "'JARVIS answers only. No execution. No trading control.' shown in the banner.",
+    "refusals": "forbidden questions are rendered as REFUSED with the classifier reason; the UI never attempts to override or execute them."
+  },
+  "non_execution_guarantees": [
+    "Template adds no <button>, <form>, onclick, submit, or method=post control.",
+    "No refresh endpoint or wiring introduced.",
+    "Only the question field is posted; no command/action/execute field is sent.",
+    "No client-side persistence (no localStorage/sessionStorage/indexedDB/cookie).",
+    "/api/jarvis/status response shape is unchanged.",
+    "app.py and jarvis_conversation_safety.py are unchanged."
+  ],
+  "tests": {
+    "updated_step_26_guards_in_test_jarvis_route": [
+      "test_jarvis_conversation_shell_text_appears — asserts the persistent warning instead of 'Planning mode only'.",
+      "test_jarvis_conversation_shell_has_no_working_controls — drops the two ask-route forbids; keeps button/form/onclick/submit/post/refresh.",
+      "test_jarvis_conversation_shell_input_is_disabled -> renamed test_jarvis_conversation_shell_input_is_enabled_read_only_ask — asserts the input is enabled and the 'Ask read-only' span control."
+    ],
+    "repointed_step_29_guard_in_test_jarvis_ask_contract": [
+      "test_template_has_no_ask_fetch -> renamed test_template_has_no_execution_or_refresh_control — drops the now-false '/api/jarvis/ask absent in template' check; keeps button/form/onclick/submit/post/refresh-absence checks."
+    ],
+    "new_step_31_tests_in_test_jarvis_route": [
+      "test_jarvis_step_31_page_renders_ok",
+      "test_jarvis_step_31_input_enabled_and_button_labeled",
+      "test_jarvis_step_31_wires_only_answer_only_ask_endpoint",
+      "test_jarvis_step_31_payload_is_question_only",
+      "test_jarvis_step_31_no_execution_or_trading_control_labels",
+      "test_jarvis_step_31_no_browser_storage_or_chat_persistence",
+      "test_jarvis_step_31_no_form_or_post_method_attribute",
+      "test_jarvis_step_31_safe_question_returns_answer",
+      "test_jarvis_step_31_forbidden_trading_is_refused",
+      "test_jarvis_step_31_ui_wiring_does_not_change_status_shape"
+    ]
+  },
+  "open_conflict_awaiting_decision": {
+    "test": "tests/test_jarvis_conversation_safety.py::test_jarvis_template_still_has_no_controls",
+    "why_it_fails": "It still asserts '/api/jarvis/ask' is absent from templates/jarvis.html. Step 31 intentionally wires the template to that endpoint, so this absence claim is now factually obsolete — identical to the Step 26/28 ask-absence guards that were retired in Step 30.",
+    "scope_issue": "tests/test_jarvis_conversation_safety.py is NOT in Step 31's allowed-files list, so per the Step 30 lesson it was left UNTOUCHED rather than edited unilaterally or worked around by hiding the route string.",
+    "recommended_resolution": "Repoint this guard the same honest way as Step 30: drop the obsolete '/api/jarvis/ask absent' token, keep the still-valid button/form/onclick/submit/post and '/api/jarvis/refresh' absence checks. Awaiting explicit authorization to touch this one out-of-scope test file."
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "198 passed, 1 failed — the only failure is the obsolete out-of-scope ask-absence guard noted in open_conflict_awaiting_decision."},
+    {"cmd": "python -m json.tool docs/jarvis_step_31_ask_ui_wiring/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "After this UI wiring is committed and green, an optional Step 32 could add a tiny client-side rate guard / input length cap (still read-only) and a live smoke memo confirming the page asks and renders refusals correctly. No execution, refresh, or trading path is ever added.",
+  "conclusion": "The display-only conversation shell is now wired to the answer-only POST /api/jarvis/ask with a strictly read-only fetch: it posts only {question}, renders answers or refusals, persists nothing, and adds no button/form/refresh/execution/trading control. app.py, jarvis_conversation_safety.py, and the /api/jarvis/status shape are unchanged. One obsolete ask-absence guard in an out-of-scope test file is flagged for the user's decision rather than edited unilaterally."
+}

@@ -1663,7 +1663,9 @@ def test_jarvis_conversation_shell_text_appears():
     body = client.get("/jarvis").text
     assert "Talk to JARVIS" in body
     assert "Read-Only Conversation Shell" in body
-    assert "Planning mode only" in body
+    # Step 31 enabled the shell, so the persistent warning replaces the old
+    # "planning mode only" copy.
+    assert "JARVIS answers only. No execution. No trading control." in body
     assert "Read-only answers only" in body
     assert "No execution" in body
     assert "No broker, paper, or live trading control" in body
@@ -1685,21 +1687,29 @@ def test_jarvis_conversation_shell_lists_suggested_questions():
 
 
 def test_jarvis_conversation_shell_has_no_working_controls():
+    # Step 31 wires the shell to the answer-only POST /api/jarvis/ask, so the
+    # ask-route forbids are retired. Every execution/refresh/form-submit control
+    # remains forbidden: no <button>, no <form>, no inline handler, no submit,
+    # no method="post", and no refresh wiring may appear.
     low = _jarvis_template_text().lower()
     for tok in (
         "<button", "<form", "onclick", "type=\"submit\"", "method=\"post\"",
-        "fetch('/api/jarvis/ask", "fetch('/api/jarvis/refresh",
-        "/api/jarvis/ask", "/api/jarvis/refresh",
+        "fetch('/api/jarvis/refresh", "/api/jarvis/refresh",
     ):
         assert tok not in low, f"conversation shell must add no control: {tok}"
 
 
-def test_jarvis_conversation_shell_input_is_disabled():
+def test_jarvis_conversation_shell_input_is_enabled_read_only_ask():
     html = _jarvis_template_text()
     assert 'id="pConversation"' in html
-    # the shell renders an input; it must be a disabled, non-functional field
+    # Step 31: the shell input is enabled and the submit affordance is a
+    # non-form, non-button span labeled "Ask read-only".
+    assert 'id="jvAskInput"' in html
     assert "jv-conv-input" in html
-    assert "disabled" in html
+    assert "Ask read-only" in html
+    assert 'role="button"' in html
+    # the enabled input must not be a disabled field anymore
+    assert "disabled aria-disabled" not in html
 
 
 def test_jarvis_conversation_shell_no_forbidden_action_words():
@@ -1717,3 +1727,98 @@ def test_jarvis_step_26_adds_no_ask_or_refresh_endpoint():
     # active: JARVIS must never gain a refresh endpoint.
     src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
     assert "/api/jarvis/refresh" not in src, "JARVIS must not add a refresh endpoint"
+
+
+# --- Step 31: strictly read-only ask UI wiring -----------------------------
+
+def test_jarvis_step_31_page_renders_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+
+
+def test_jarvis_step_31_input_enabled_and_button_labeled():
+    html = _jarvis_template_text()
+    assert 'id="jvAskInput"' in html
+    assert 'id="jvAskBtn"' in html
+    # the submit affordance is clearly read-only labeled
+    assert "Ask read-only" in html
+    # it is a non-form, non-button control
+    assert 'role="button"' in html
+
+
+def test_jarvis_step_31_wires_only_answer_only_ask_endpoint():
+    html = _jarvis_template_text()
+    assert "fetch('/api/jarvis/ask'" in html
+    # never wires a refresh or any other mutating endpoint
+    assert "/api/jarvis/refresh" not in html
+
+
+def test_jarvis_step_31_payload_is_question_only():
+    html = _jarvis_template_text()
+    # the only posted field is 'question'
+    assert "JSON.stringify({question: q})" in html
+    # the ask wiring must not send execution-style fields
+    low = html.lower()
+    for bad in ("stringify({command", "stringify({action",
+                "stringify({execute", "command:", "action:", "execute:"):
+        assert bad not in low, f"ask payload must not include: {bad}"
+
+
+def test_jarvis_step_31_no_execution_or_trading_control_labels():
+    html = _jarvis_template_text().lower()
+    # no control affordance may be labeled as an execution/trading action
+    for label in (">run<", ">execute<", ">trade<", ">buy<", ">sell<",
+                  ">approve<", ">place order<", ">refresh<"):
+        assert label not in html, f"forbidden control label: {label}"
+
+
+def test_jarvis_step_31_no_browser_storage_or_chat_persistence():
+    html = _jarvis_template_text().lower()
+    for tok in ("localstorage", "sessionstorage", "indexeddb",
+                "document.cookie"):
+        assert tok not in html, f"shell must not persist client state: {tok}"
+
+
+def test_jarvis_step_31_no_form_or_post_method_attribute():
+    low = _jarvis_template_text().lower()
+    for tok in ("<form", 'method="post"', "<button", "onclick",
+                'type="submit"'):
+        assert tok not in low, f"shell must add no form/button control: {tok}"
+
+
+def test_jarvis_step_31_safe_question_returns_answer():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.post("/api/jarvis/ask", json={"question": "What does read_only mean?"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["refused"] is False
+    assert d["safety_class"].startswith("SAFE_")
+    assert isinstance(d["answer"], str) and d["answer"]
+
+
+def test_jarvis_step_31_forbidden_trading_is_refused():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.post("/api/jarvis/ask", json={"question": "place a trade now"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["refused"] is True
+    assert d["safety_class"].startswith("FORBIDDEN")
+    for bad in ("command", "action", "execution", "order", "trade_ticket"):
+        assert bad not in d, f"refusal must not surface: {bad}"
+
+
+def test_jarvis_step_31_ui_wiring_does_not_change_status_shape():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert d["online"] is True
+    assert d["read_only"] is True
+    for forbidden_key in ("conversation", "ask", "chat", "answer"):
+        assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
