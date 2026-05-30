@@ -7733,6 +7733,123 @@ def _jarvis_file_hygiene_report() -> dict:
     return data
 
 
+# Known JARVIS cache files. These are the ONLY paths the freshness helper
+# inspects. They are documented runtime caches (see system_map
+# ignored_runtime_files) and are gitignored — recorded here as a documentation
+# constant so the web route never has to shell out to `git check-ignore`.
+_JARVIS_CACHE_FILES = (
+    ("health_report", "storage/jarvis/health_report.json", 86400),
+    ("route_smoke_report", "storage/jarvis/route_smoke_report.json", 86400),
+    ("file_hygiene_report", "storage/jarvis/file_hygiene_report.json", 86400),
+)
+
+
+def _jarvis_cache_freshness() -> dict:
+    """READ-ONLY. Reports whether the known JARVIS cache files are fresh, stale,
+    missing, or invalid. It inspects ONLY metadata: file existence, the
+    file modification time, and each report's own `generated_at` field. It
+    NEVER runs the generator scripts, never shells out, never probes a route,
+    and never writes anything — so it can never 'refresh' a cache itself.
+    A missing or corrupt individual cache is handled per-file and never raises."""
+    import json as _json
+    from datetime import datetime as _dt
+
+    now = _dt.now()
+    caches: list = []
+    warnings: list = []
+    any_exists = False
+    freshness_values: list = []
+
+    for name, rel, threshold in _JARVIS_CACHE_FILES:
+        path = BASE / rel
+        entry = {
+            "name": name,
+            "path": rel,
+            "exists": False,
+            "gitignored": True,  # documented runtime cache; not a live git query
+            "generated_at": None,
+            "modified_at": None,
+            "age_seconds": None,
+            "freshness": "missing",
+            "threshold_seconds": threshold,
+        }
+        if not path.exists():
+            warnings.append(f"{name}: cache file missing ({rel}).")
+            caches.append(entry)
+            freshness_values.append("missing")
+            continue
+
+        any_exists = True
+        entry["exists"] = True
+        # file modification time — pure stat, no execution
+        try:
+            entry["modified_at"] = _dt.fromtimestamp(
+                path.stat().st_mtime).isoformat(timespec="seconds")
+        except Exception:  # noqa: BLE001 — mtime is best-effort, never fatal
+            entry["modified_at"] = None
+
+        try:
+            data = _json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+            entry["freshness"] = "unavailable"
+            entry["error"] = f"{type(exc).__name__}: {exc}"
+            warnings.append(f"{name}: cache file is not valid JSON.")
+            caches.append(entry)
+            freshness_values.append("unavailable")
+            continue
+        if not isinstance(data, dict):
+            entry["freshness"] = "unavailable"
+            entry["error"] = "report is not a JSON object"
+            warnings.append(f"{name}: cache content is not a JSON object.")
+            caches.append(entry)
+            freshness_values.append("unavailable")
+            continue
+
+        gen = data.get("generated_at")
+        entry["generated_at"] = gen if isinstance(gen, str) else None
+        parsed = None
+        if isinstance(gen, str):
+            try:
+                parsed = _dt.fromisoformat(gen)
+            except Exception:  # noqa: BLE001 — unparseable stamp → invalid below
+                parsed = None
+        if parsed is None:
+            entry["freshness"] = "invalid"
+            warnings.append(f"{name}: missing or unparseable generated_at.")
+            caches.append(entry)
+            freshness_values.append("invalid")
+            continue
+
+        age = (now - parsed).total_seconds()
+        entry["age_seconds"] = int(age)
+        if age <= threshold:
+            entry["freshness"] = "fresh"
+        else:
+            entry["freshness"] = "stale"
+            warnings.append(
+                f"{name}: stale (age {int(age)}s > {threshold}s).")
+        caches.append(entry)
+        freshness_values.append(entry["freshness"])
+
+    # worst-wins overall: unavailable/invalid > missing > stale > fresh
+    if any(f in ("unavailable", "invalid") for f in freshness_values):
+        overall = "unavailable"
+    elif any(f == "missing" for f in freshness_values):
+        overall = "missing"
+    elif any(f == "stale" for f in freshness_values):
+        overall = "stale"
+    else:
+        overall = "fresh"
+
+    return {
+        "state": "ready" if any_exists else "missing",
+        "overall": overall,
+        "generated_at": now.isoformat(timespec="seconds"),
+        "caches": caches,
+        "warnings": warnings[:8],
+    }
+
+
 _JARVIS_TRADING_REPORTS_REL = "trading_research/agentic_factory/reports"
 _JARVIS_S26_D17_DIR = "s26_d17_trend_sr_ema_rsi_friction_stress"
 _JARVIS_S26_D18_DIR = "s26_d18_trend_sr_ema_rsi_decision_gate"
@@ -8055,7 +8172,8 @@ def _jarvis_system_map() -> dict:
 
 def _jarvis_commander_snapshot(operator_safety, safety_gates, health,
                                route_smoke, mission_board, prompt_library,
-                               file_hygiene, trading_detail, git) -> dict:
+                               file_hygiene, trading_detail, git,
+                               cache_freshness=None) -> dict:
     """Derive a conservative top-level snapshot from data ALREADY collected by
     the other read-only helpers. This function runs NOTHING — no subprocess,
     no git, no route probe, no test, no file scan. It only reads the dicts it
@@ -8101,6 +8219,7 @@ def _jarvis_commander_snapshot(operator_safety, safety_gates, health,
     untracked_count = _g(file_hygiene, "total_untracked_count", default=None)
     staged_count = _g(file_hygiene, "staged_count", default=None)
     git_dirty = bool(_g(git, "dirty", default=False))
+    cache_overall = _g(cache_freshness, "overall", default=None)
 
     warnings: list = []
     red = False
@@ -8141,6 +8260,11 @@ def _jarvis_commander_snapshot(operator_safety, safety_gates, health,
     if git_dirty:
         yellow = True
         warnings.append("Git working tree is dirty.")
+    # Cache freshness only ever softens the verdict to yellow (never red): a
+    # stale/missing/unavailable cache means the displayed reports may be old.
+    if cache_overall in ("stale", "missing", "unavailable"):
+        yellow = True
+        warnings.append(f"Cached reports not all fresh ({cache_overall}).")
 
     no_staged = (staged_count == 0)
     if red:
@@ -8165,6 +8289,7 @@ def _jarvis_commander_snapshot(operator_safety, safety_gates, health,
         "health_status": health_status,
         "route_smoke_status": route_smoke_status,
         "trading_posture": trading_posture,
+        "cache_status": cache_overall,
         "mission_count": mission_count,
         "prompt_count": prompt_count,
         "staged_count": staged_count,
@@ -8213,10 +8338,11 @@ def api_jarvis_status():
     prompt_library = _jarvis_safe(_jarvis_prompt_library)
     system_map = _jarvis_safe(_jarvis_system_map)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
+    cache_freshness = _jarvis_safe(_jarvis_cache_freshness)
     # Derived ONLY from the dicts already collected above — no new commands.
     commander_snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
         operator_safety, safety, health_report, route_smoke, mission_board,
-        prompt_library, file_hygiene, trading_detail, git))
+        prompt_library, file_hygiene, trading_detail, git, cache_freshness))
     return {
         "online": True,
         "read_only": True,
@@ -8240,6 +8366,7 @@ def api_jarvis_status():
         "prompt_library": prompt_library,
         "system_map": system_map,
         "trading_detail": trading_detail,
+        "cache_freshness": cache_freshness,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
 

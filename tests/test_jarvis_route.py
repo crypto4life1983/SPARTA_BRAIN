@@ -1426,6 +1426,154 @@ def test_jarvis_system_map_seed_file_panels_carry_api_key():
     assert len(keys) == len(set(keys)), "api_key values must be unique"
 
 
+# --- Step 15: cache freshness panel ---------------------------------------
+
+def _write_cache(d, name, payload):
+    import json
+    (d / name).write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_jarvis_status_has_cache_freshness_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert "cache_freshness" in r.json()
+
+
+def test_jarvis_cache_freshness_all_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    # BASE points at an empty dir → no cache files exist.
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    cf = app_module._jarvis_cache_freshness()
+    assert cf["state"] == "missing"
+    assert cf["overall"] == "missing"
+    assert len(cf["caches"]) == 3
+    assert all(c["exists"] is False for c in cf["caches"])
+    assert all(c["freshness"] == "missing" for c in cf["caches"])
+
+
+def test_jarvis_cache_freshness_fresh_when_recent(monkeypatch, tmp_path):
+    from datetime import datetime
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    now_iso = datetime.now().isoformat(timespec="seconds")
+    for fname in ("health_report.json", "route_smoke_report.json",
+                  "file_hygiene_report.json"):
+        _write_cache(d, fname, {"generated_at": now_iso})
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    cf = app_module._jarvis_cache_freshness()
+    assert cf["state"] == "ready"
+    assert cf["overall"] == "fresh"
+    assert all(c["freshness"] == "fresh" for c in cf["caches"])
+    assert all(isinstance(c["age_seconds"], int) for c in cf["caches"])
+
+
+def test_jarvis_cache_freshness_stale_when_old(monkeypatch, tmp_path):
+    from datetime import datetime, timedelta
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    old_iso = (datetime.now() - timedelta(hours=48)).isoformat(timespec="seconds")
+    for fname in ("health_report.json", "route_smoke_report.json",
+                  "file_hygiene_report.json"):
+        _write_cache(d, fname, {"generated_at": old_iso})
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    cf = app_module._jarvis_cache_freshness()
+    assert cf["overall"] == "stale"
+    assert all(c["freshness"] == "stale" for c in cf["caches"])
+    assert all(c["age_seconds"] > c["threshold_seconds"] for c in cf["caches"])
+
+
+def test_jarvis_cache_freshness_invalid_timestamp_fails_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    _write_cache(d, "health_report.json", {"generated_at": "not-a-timestamp"})
+    _write_cache(d, "route_smoke_report.json", {})  # no generated_at at all
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    cf = app_module._jarvis_cache_freshness()
+    by_name = {c["name"]: c for c in cf["caches"]}
+    assert by_name["health_report"]["freshness"] == "invalid"
+    assert by_name["route_smoke_report"]["freshness"] == "invalid"
+    assert cf["overall"] == "unavailable"
+
+
+def test_jarvis_cache_freshness_corrupt_json_is_per_cache_unavailable(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    (d / "health_report.json").write_text("{ not valid json", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    cf = app_module._jarvis_cache_freshness()
+    by_name = {c["name"]: c for c in cf["caches"]}
+    assert by_name["health_report"]["freshness"] == "unavailable"
+    # one corrupt cache must not crash the whole helper
+    assert cf["state"] in ("ready", "missing")
+    assert cf["overall"] == "unavailable"
+
+
+def test_jarvis_cache_freshness_does_not_run_scripts_or_network(monkeypatch):
+    # The freshness helper inspects metadata only — never subprocess or urllib.
+    import subprocess
+    import urllib.request
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("cache freshness must not run scripts or network")
+
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert "cache_freshness" in r.json()
+
+
+def test_jarvis_cache_freshness_exposes_no_control_fields(monkeypatch, tmp_path):
+    from datetime import datetime
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    _write_cache(d, "health_report.json",
+                 {"generated_at": datetime.now().isoformat(timespec="seconds")})
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    cf = app_module._jarvis_cache_freshness()
+    forbidden = ("command", "cmd", "exec", "run", "shell", "action",
+                 "refresh", "regenerate", "callback", "handler", "script")
+    top_keys = set(cf.keys())
+    assert not (top_keys & set(forbidden))
+    for c in cf["caches"]:
+        assert not (set(c.keys()) & set(forbidden))
+
+
+def test_jarvis_system_map_includes_cache_freshness_panel():
+    import json
+    src = (_REPO_ROOT / "docs" / "jarvis_system_map.json").read_text(
+        encoding="utf-8"
+    )
+    data = json.loads(src)
+    panel = next((p for p in data["panels"] if p["id"] == "cache_freshness"), None)
+    assert panel is not None, "system map must document a cache_freshness panel"
+    assert panel["api_key"] == "cache_freshness"
+    assert panel["writes_from_web"] is False
+    assert panel["script"] is None
+
+
+def test_jarvis_cache_freshness_panel_in_template_has_no_controls():
+    html = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8")
+    assert "pCacheFreshness" in html
+    assert "Cache Freshness" in html
+    low = html.lower()
+    for tok in ("<button", "<form", "onclick", "type=\"submit\"",
+                "method=\"post\"", "fetch('/api/jarvis/refresh"):
+        assert tok not in low, f"cache panel must add no execution control: {tok}"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

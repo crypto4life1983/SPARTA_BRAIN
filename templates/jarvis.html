@@ -269,6 +269,11 @@
       <div class="jv-loading">Reading research reports&hellip;</div>
     </div>
 
+    <div class="jv-panel" id="pCacheFreshness">
+      <h2><span class="ic">&#x29D6;</span>Cache Freshness <span class="jv-tag">DISPLAY ONLY</span></h2>
+      <div class="jv-loading">Reading cache metadata&hellip;</div>
+    </div>
+
   </div>
 
   <p class="jv-foot">
@@ -339,6 +344,9 @@
             esc((cs.route_smoke_status || 'unknown').toUpperCase())) +
         row('Trading posture', cs.trading_posture === 'research_only' ? 'locked' : 'blocked',
             esc((cs.trading_posture || 'unknown').toUpperCase())) +
+        row('Cache', cs.cache_status === 'fresh' ? 'online'
+              : (cs.cache_status ? 'waiting' : 'waiting'),
+            esc((cs.cache_status || 'unknown').toUpperCase())) +
         row('Missions', '', esc(cs.mission_count != null ? cs.mission_count : 0)) +
         row('Prompts', '', esc(cs.prompt_count != null ? cs.prompt_count : 0)) +
         row('Staged', (cs.staged_count ? 'waiting' : 'online'),
@@ -825,6 +833,50 @@
           warns.map(function(w){ return esc(w); }).join('; ')+'</div>';
       }
       setPanel('pTradingDetail', tdHtml);
+    }
+
+    // Cache Freshness (DISPLAY ONLY — reads cache metadata, never refreshes)
+    var cf = d.cache_freshness || {};
+    if(cf.state === 'missing' && !(cf.caches && cf.caches.length)){
+      setPanel('pCacheFreshness',
+        row('Status', 'waiting', 'NO CACHES') +
+        '<div class="jv-detail">No cached reports found in storage/jarvis/.</div>');
+    } else if(cf.state === 'unavailable' || cf.state === 'error'){
+      setPanel('pCacheFreshness', row('Status', 'bad', 'UNAVAILABLE', cf.error || cf.detail));
+    } else {
+      var freshState = function(f){
+        if(f === 'fresh') return 'online';
+        if(f === 'stale' || f === 'missing') return 'waiting';
+        return 'bad';  // invalid / unavailable
+      };
+      var ov = (cf.overall || 'unknown');
+      var cfHtml = row('Overall', freshState(ov), esc(ov.toUpperCase())) +
+        row('Computed at', '', esc(cf.generated_at || ''));
+      var list = cf.caches || [];
+      list.forEach(function(c){
+        var age = (c.age_seconds != null)
+          ? (Math.floor(c.age_seconds / 3600) + 'h ' + (Math.floor(c.age_seconds / 60) % 60) + 'm')
+          : '—';
+        var thr = (c.threshold_seconds != null) ? Math.floor(c.threshold_seconds / 3600) + 'h' : '—';
+        cfHtml += '<div class="jv-mcard"><div class="top">'+
+          '<span class="ttl">'+esc(c.name || '')+'</span>'+
+          '<span class="jv-tag">'+esc((c.freshness || '').toUpperCase())+'</span></div>'+
+          '<div class="meta">'+
+          '<span class="jv-tag">age '+esc(age)+'</span>'+
+          '<span class="jv-tag">threshold '+esc(thr)+'</span>'+
+          (c.gitignored ? '<span class="jv-tag">gitignored</span>' : '')+
+          '</div>'+
+          '<div class="jv-detail" style="margin-top:6px">'+
+          'generated_at: '+esc(c.generated_at || '—')+
+          ' &middot; modified_at: '+esc(c.modified_at || '—')+'</div>'+
+          '</div>';
+      });
+      var cfWarn = cf.warnings || [];
+      if(cfWarn.length){
+        cfHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-warn)">Warnings: '+
+          cfWarn.map(function(w){ return esc(w); }).join('; ')+'</div>';
+      }
+      setPanel('pCacheFreshness', cfHtml);
     }
   }
 

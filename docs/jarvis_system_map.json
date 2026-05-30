@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-30T01:00:00",
+  "updated_at": "2026-05-30T03:00:00",
   "posture": {
     "read_only": true,
     "browser_execution": false,
@@ -238,6 +238,17 @@
       "script": null,
       "writes_from_web": false,
       "description": "Display-only map of how the command center is wired (this panel)."
+    },
+    {
+      "id": "cache_freshness",
+      "api_key": "cache_freshness",
+      "title": "Cache Freshness",
+      "kind": "derived",
+      "source": "/api/jarvis/status",
+      "cache_file": null,
+      "script": null,
+      "writes_from_web": false,
+      "description": "Reads only cache metadata (existence, modified time, generated_at) for the known storage/jarvis cache files and reports fresh/stale/missing/invalid. Never runs the generator scripts and never refreshes a cache."
     }
   ],
   "scripts": [
