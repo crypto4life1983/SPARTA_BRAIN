@@ -1,0 +1,106 @@
+{
+  "step": "S26-D13",
+  "title": "S26 closeout and research-readiness memo",
+  "memo_only": true,
+  "no_backtest": true,
+  "no_market_test": true,
+  "no_optimization": true,
+  "no_strategy_change": true,
+  "no_source_change": true,
+  "created": "2026-05-30",
+  "reference_commit": "cfe841d6c6dec006bb2fb9efa4451337d430349e",
+  "reference_commit_short": "cfe841d",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "branch_label": "trend_sr_ema_rsi_v1",
+  "branch_summary": {
+    "strategy": "Trend + support/retest + EMA/RSI confirmation",
+    "market_origin": "NQ continuous daily bars",
+    "direction": "long_only",
+    "accounting": "R_only (1R = 2N stop distance)",
+    "pyramiding": false,
+    "rules_source": "fixed/pre-registered in S26-D1",
+    "rule_digest": "long-only; close>EMA200 AND EMA50>EMA200; low<=20-day rolling low(excl current)+1.5*ATR20; 40<=RSI14<=55 AND (RSI14[i]>RSI14[i-1] OR close>EMA20); fill next-bar open; stop=entry-2*ATR20 (1R=2N); target +2R; EMA50 close-break backstop; exit precedence stop->target->ema50_break; one position, flat-state entries only"
+  },
+  "why_branch_created": {
+    "donchian_parked": {
+      "S23": "WATCH (IS+OOS positive but OOS n=16 too small -> not deployable)",
+      "S24": "ENTRY_EDGE_NOT_SUPPORTED (breakout entries fire after extended move; NO_EDGE all horizons IS & OOS)",
+      "S25": "SEQUENCE_RISK_FRAGILE (removing top-3 flips IS -3.82R and OOS -1.93R negative; OOS best trade 50.3% of net)"
+    },
+    "design_responses": [
+      "pullback/retest toward support instead of breakout-only entry -> less winner dependence",
+      "capped +2R target distributes outcomes (anti single-winner dependence)",
+      "min trade thresholds (IS>=40, OOS>=30) to avoid Donchian's low-OOS-n WATCH",
+      "more trades than Donchian"
+    ]
+  },
+  "evidence_chain": {
+    "D1": "spec pre-registered (hypothesis + fixed rules + ladder + gates)",
+    "D2": "engine + unit tests committed in new files (Donchian source untouched)",
+    "D3": "IS baseline 2013-2022 -> IS_CONTINUE (marginal)",
+    "D4": "sealed OOS protocol pre-registered and committed before any OOS run",
+    "D5": "OOS 2023-2025 run once -> PASS (all 8 gates met, no WATCH/FAIL)",
+    "D6": "entry-rule significance -> ENTRY_EDGE_INCONCLUSIVE",
+    "D7": "sequence-risk Monte Carlo / bootstrap -> SEQUENCE_RISK_INCONCLUSIVE",
+    "D8": "regime breakdown -> CONCENTRATED_SUPPORT",
+    "D9": "multi-market robustness (local data only) -> DATA_LIMITED_INCONCLUSIVE",
+    "D10": "multi-market data protocol pre-registered -> PROTOCOL_REGISTERED",
+    "D11": "multi-market data provisioned (ES/MES/MNQ from Databento) -> DATA_PROVISIONED",
+    "D12": "multi-market robustness (frozen run) -> PARTIAL_SUPPORT_WITH_CAUTION"
+  },
+  "key_metrics": {
+    "NQ_IS": {
+      "trade_count": 117, "total_r": 7.6536, "profit_factor": 1.2016,
+      "expectancy_r": 0.0654, "max_drawdown_r": 10.5943,
+      "best_trade_share_of_net": 0.261, "total_without_top3": 1.6536,
+      "positive_negative_years": "6/4"
+    },
+    "NQ_OOS": {
+      "trade_count": 32, "total_r": 7.9990, "profit_factor": 1.7694,
+      "expectancy_r": 0.2500, "max_drawdown_r": 2.1827,
+      "positive_years": "3/3", "total_without_top3": 1.9990,
+      "best_trade_share_of_net": 0.250
+    },
+    "entry_significance": "ENTRY_EDGE_INCONCLUSIVE",
+    "multimarket": {
+      "ES_independent": true,
+      "ES_IS": {"trade_count": 125, "total_r": 7.6725, "profit_factor": 1.2003, "max_drawdown_r": 16.7281},
+      "ES_OOS": {"trade_count": 27, "total_r": 11.4584, "profit_factor": 2.2352, "max_drawdown_r": 2.0697, "year_2025_share_of_net": 0.728},
+      "MES_role": "proxy_micro_of_ES (corroboration only, not independent)",
+      "MNQ_role": "proxy_micro_of_NQ (corroboration only, not independent)",
+      "D12_verdict": "PARTIAL_SUPPORT_WITH_CAUTION"
+    }
+  },
+  "final_s26_verdict": [
+    "S26 is the strongest candidate so far.",
+    "S26 is research-promising.",
+    "S26 is NOT deployable.",
+    "S26 is NOT paper-ready yet.",
+    "S26 should continue validation, but only under strict guardrails."
+  ],
+  "main_weaknesses": [
+    "IS expectancy is thin (+0.0654R/trade; PF 1.20 marginal).",
+    "IS max DD (10.59R) is high relative to total R (7.65R).",
+    "Entry significance is inconclusive (no EDGE_LIKELY horizon on IS).",
+    "ES IS max DD (16.73R) is high and exceeds 1.5x NQ IS DD.",
+    "ES OOS has only 27 trades (<30) and is 2025-dominated (72.8% of net).",
+    "Multi-market support is partial, not robust.",
+    "Only one independent extra market beyond NQ (the S&P via ES)."
+  ],
+  "correct_next_steps": [
+    {"id": "S26-D14", "what": "formal risk/readiness gate design, still no paper trading"},
+    {"id": "S26-D15", "what": "regime breakdown across NQ and ES"},
+    {"id": "S26-D16", "what": "walk-forward / rolling-window stability"},
+    {"id": "S26-D17", "what": "execution realism / slippage and commission stress"},
+    {"id": "post-D17", "what": "only after those, consider a separate paper-readiness memo"}
+  ],
+  "forbidden_next_steps": [
+    "Do not optimize parameters.",
+    "Do not add filters based on OOS.",
+    "Do not paper trade yet.",
+    "Do not deploy.",
+    "Do not market it as a profitable bot.",
+    "Do not mix this with Donchian."
+  ],
+  "final_line": "S26 remains a research candidate with partial independent support, not a deployable trading system."
+}
