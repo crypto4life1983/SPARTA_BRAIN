@@ -1,0 +1,102 @@
+{
+  "step": "S26-D14",
+  "title": "Risk/readiness gate design for S26 (design only)",
+  "design_only": true,
+  "is_paper_approval": false,
+  "no_backtest": true,
+  "no_market_test": true,
+  "no_optimization": true,
+  "no_strategy_change": true,
+  "no_execution_code": true,
+  "created": "2026-05-30",
+  "reference_commit": "91b693100863a47f2af5235e01ea560b82238eed",
+  "reference_commit_short": "91b6931",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "purpose": {
+    "statement": "Define the formal gate system that must be satisfied before any future paper-readiness memo for S26 can even be considered.",
+    "notes": [
+      "S26 is research-promising but not paper-ready.",
+      "D14 defines what must be true before any future paper-readiness memo can be considered.",
+      "This is NOT approval for paper trading."
+    ]
+  },
+  "current_evidence_summary": {
+    "NQ_IS": {"trade_count": 117, "total_r": 7.6536, "profit_factor": 1.2016, "expectancy_r": 0.0654, "max_drawdown_r": 10.5943},
+    "NQ_OOS": {"trade_count": 32, "total_r": 7.9990, "profit_factor": 1.7694, "expectancy_r": 0.2500, "max_drawdown_r": 2.1827},
+    "D6_entry_significance": "ENTRY_EDGE_INCONCLUSIVE",
+    "D12_multimarket": "PARTIAL_SUPPORT_WITH_CAUTION",
+    "weaknesses": [
+      "thin IS edge (PF 1.20, expectancy +0.0654R)",
+      "high IS max DD (10.59R vs total 7.65R)",
+      "inconclusive entry edge (no EDGE_LIKELY horizon on IS)",
+      "ES IS high max DD (16.73R, > 1.5x NQ IS DD)",
+      "ES OOS only 27 trades and 2025-dominated (72.8% of net)"
+    ]
+  },
+  "readiness_levels": {
+    "ladder": ["BLOCKED", "RESEARCH_CANDIDATE", "VALIDATION_CANDIDATE", "PAPER_REVIEW_CANDIDATE", "PAPER_READY", "LIVE_READY"],
+    "definitions": {
+      "BLOCKED": "A hard blocker has fired; the branch is parked, no further promotion until resolved or a new branch is opened.",
+      "RESEARCH_CANDIDATE": "Survives IS+OOS and basic robustness with caveats; cleared for deeper validation only.",
+      "VALIDATION_CANDIDATE": "Passed regime (D15), walk-forward (D16) and friction (D17) gates without a hard blocker.",
+      "PAPER_REVIEW_CANDIDATE": "All required gates met; eligible to be the subject of a separate paper-readiness memo (still not paper trading).",
+      "PAPER_READY": "A separate paper-readiness memo has explicitly approved a constrained paper test.",
+      "LIVE_READY": "Out of scope here; would require its own gate after a successful paper program."
+    },
+    "current_level": "RESEARCH_CANDIDATE"
+  },
+  "required_gates_before_paper_review_candidate": [
+    "D15 regime breakdown does not reveal catastrophic regime dependency.",
+    "D16 rolling/walk-forward stability does not show the result isolated to one period.",
+    "D17 execution/slippage/commission stress remains positive under conservative assumptions.",
+    "Entry significance remains at least inconclusive, not disproven (not NOT_SUPPORTED).",
+    "Multi-market support remains at least partial; ES cannot contradict NQ.",
+    "No top-year/top-trade dominance problem.",
+    "Drawdown assumptions are acceptable (within predefined tolerance).",
+    "No unresolved data QA issues."
+  ],
+  "hard_blockers": [
+    "Negative OOS after realistic friction (slippage + commission).",
+    "ES OOS fails badly or contradicts NQ.",
+    "Regime breakdown shows profit only from one narrow regime.",
+    "Walk-forward shows collapse outside one subperiod.",
+    "Entry significance later becomes NOT_SUPPORTED together with other risk weakness.",
+    "Monte Carlo / sequence risk becomes FRAGILE.",
+    "Max DD or loss cluster exceeds predefined tolerance.",
+    "Any code/data integrity issue.",
+    "Any manual/subjective rule added after OOS."
+  ],
+  "hypothetical_future_paper_risk_limits": {
+    "authorization_note": "DESIGN ONLY — not authorization. These limits would apply ONLY if a separate paper-readiness memo later approves a paper test.",
+    "limits": [
+      "Paper only if later approved separately.",
+      "One contract / micro only at first.",
+      "Fixed R-based stop required (no discretionary stop).",
+      "Daily max loss limit (predefined, e.g. in R).",
+      "Weekly max loss limit (predefined, e.g. in R).",
+      "Max open positions = 1.",
+      "No pyramiding.",
+      "No discretionary override.",
+      "No parameter changes during the paper test.",
+      "Minimum observation period before any upgrade is considered.",
+      "Kill switch after a defined drawdown or any rule breach."
+    ]
+  },
+  "required_future_validation_sequence": [
+    {"id": "S26-D15", "what": "regime breakdown"},
+    {"id": "S26-D16", "what": "rolling / walk-forward stability"},
+    {"id": "S26-D17", "what": "friction / slippage stress"},
+    {"id": "S26-D18", "what": "final research readiness review"},
+    {"id": "post-D18", "what": "separate paper-readiness memo only if all pass"}
+  ],
+  "forbidden_actions": [
+    "No deployment.",
+    "No paper trading yet.",
+    "No live trading.",
+    "No optimization against OOS.",
+    "No filter additions from OOS observations.",
+    "No mixing Donchian logic into S26.",
+    "No marketing as a profitable bot."
+  ],
+  "final_verdict": "S26 remains a RESEARCH_CANDIDATE. It is not PAPER_REVIEW_CANDIDATE, not PAPER_READY, and not LIVE_READY."
+}
