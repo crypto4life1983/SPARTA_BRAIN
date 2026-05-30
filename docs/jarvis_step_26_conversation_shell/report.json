@@ -1,0 +1,97 @@
+{
+  "title": "JARVIS Step 26 — Read-Only Conversation Shell (UI-only)",
+  "generated_at": "2026-05-30T08:00:00",
+  "type": "ui_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "purpose": "Add the first visible 'Talk to JARVIS' section to /jarvis as a UI shell only. It is clearly read-only / non-executing / planning-mode and adds NO backend ask endpoint, NO POST, NO execution, NO broker/paper/live control, NO refresh, and does NOT mutate state or write chat logs. The status API shape and read_only=true behavior are preserved unchanged.",
+  "relation_to_steps_20_25": "Step 20 polished the UI; Step 21 proved it live and safe; Step 22 gave the operator runbook; Step 23 set known limits and the safe roadmap; Step 24 added the panel glossary; Step 25 designed the read-only conversation layer plan. Step 26 implements ONLY the display-only shell from that plan (UI shell + suggested questions + safety banner), with no backend wired and all safety gates enforced by tests.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc",
+    "step_24_commit": "9523da8",
+    "step_25_commit": "6b88d9b"
+  },
+  "scope": {
+    "allowed_changes": [
+      "templates/jarvis.html — add the conversation shell section, panel, and scoped CSS (display-only).",
+      "tests/test_jarvis_route.py — add Step 26 safety/UI tests.",
+      "docs/jarvis_step_26_conversation_shell/report.md and report.json — this memo."
+    ],
+    "explicitly_not_done": [
+      "No /api/jarvis/ask endpoint added.",
+      "No POST endpoint added.",
+      "No command execution.",
+      "No broker/paper/live controls.",
+      "No refresh controls.",
+      "No state mutation.",
+      "No chat log writes.",
+      "No trade run or simulation.",
+      "No change to /api/jarvis/status shape.",
+      "No change to read_only=true behavior.",
+      "No touch of app.py, trading, Factory, S26-S28, Donchian, Hydra, base.html, or storage."
+    ]
+  },
+  "ui_implementation": {
+    "section_divider": "A new full-width divider labelled 'Talk to JARVIS' (sub: 'read-only conversation shell · planning mode').",
+    "panel": {
+      "id": "pConversation",
+      "title": "Read-Only Conversation Shell",
+      "tag": "PLANNING MODE (t-display)",
+      "kind": "static display-only — the render JS never targets #pConversation, so its content is never replaced and never fetched."
+    },
+    "safety_banner_lines": [
+      "Planning mode only",
+      "Read-only answers only",
+      "No execution",
+      "No broker, paper, or live trading control"
+    ],
+    "suggested_safe_questions": [
+      "Why is commander yellow?",
+      "What needs attention?",
+      "What does read_only mean?",
+      "What is the trading posture?",
+      "What JARVIS docs exist?"
+    ],
+    "input_field": "A single text input, rendered DISABLED (disabled + aria-disabled), placeholder 'Conversation layer not yet enabled — planning mode only'. It is non-functional.",
+    "send_affordance": "A non-interactive <span> reading 'Send disabled'. There is NO <button>, NO <form>, NO onclick, and NO send action of any kind.",
+    "explanatory_note": "A display-only note states there is no send affordance, no endpoint, and no answer backend yet; when enabled in a later separately-approved step it will return read-only answers only and will never execute, refresh, mutate, or control trading."
+  },
+  "non_execution_guarantees": [
+    "No <button> element anywhere in the template.",
+    "No <form> element.",
+    "No onclick (or any inline JS handler) on the shell.",
+    "No type=\"submit\".",
+    "No method=\"post\".",
+    "No fetch to /api/jarvis/ask or /api/jarvis/refresh.",
+    "Existing polling (GET /api/jarvis/status every 15s) and clock tick are unchanged.",
+    "The shell panel is not referenced by render(); JS never writes into it."
+  ],
+  "status_shape_confirmation": {
+    "online": true,
+    "read_only": true,
+    "top_level_keys_unchanged": true,
+    "no_new_status_keys": "The API adds no conversation/ask/chat/answer key; the shell is purely client-side template markup."
+  },
+  "tests_added": [
+    "test_jarvis_conversation_shell_route_and_api_still_ok — /jarvis 200 and /api/jarvis/status 200.",
+    "test_jarvis_conversation_shell_status_shape_unchanged — online/read_only true, required top-level keys present, no conversation/ask/chat/answer key added.",
+    "test_jarvis_conversation_shell_text_appears — 'Talk to JARVIS', 'Read-Only Conversation Shell', and all four banner lines render.",
+    "test_jarvis_conversation_shell_lists_suggested_questions — all five suggested questions render as static text.",
+    "test_jarvis_conversation_shell_has_no_working_controls — template has no <button>/<form>/onclick/type=submit/method=post and no /api/jarvis/ask or /api/jarvis/refresh.",
+    "test_jarvis_conversation_shell_input_is_disabled — #pConversation present and its input is disabled.",
+    "test_jarvis_conversation_shell_no_forbidden_action_words — page contains none of the forbidden trade-action phrases.",
+    "test_jarvis_step_26_adds_no_ask_or_refresh_endpoint — app.py has no /api/jarvis/ask or /api/jarvis/refresh."
+  ],
+  "validation": [
+    {"cmd": "python -m py_compile app.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "python -m py_compile tools/jarvis_health_report.py tools/jarvis_route_smoke_report.py tools/jarvis_file_hygiene_report.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py --rootdir=tests -q", "result": "PASS (existing + 8 new Step 26 tests)"},
+    {"cmd": "python -m json.tool docs/jarvis_step_26_conversation_shell/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "JARVIS-CONVERSATION-SAFETY-TESTS-FIRST then JARVIS-ASK-ANSWER-ONLY-ENDPOINT (Step 27, separate approval) — only after the shell and full safety-gate suite pass, add a strictly answer-only, non-mutating ask endpoint that returns text derived from read-only sources, with the complete refusal / no-execution / unchanged-shape test suite. The shell stays display-only until then.",
+  "conclusion": "UI-only read-only conversation shell added to /jarvis. No backend, no endpoint, no execution, no refresh, no mutation, no chat-log writes, no broker/paper/live control. Status API shape and read_only=true behavior preserved. Only templates/jarvis.html, tests/test_jarvis_route.py, and this docs folder were touched."
+}

@@ -1621,3 +1621,97 @@ def test_jarvis_app_block_has_no_broker_or_execution_imports():
     )
     for tok in forbidden:
         assert tok not in code, f"forbidden token in JARVIS block: {tok}"
+
+
+# --- Step 26: read-only conversation shell (UI-only, no backend) -----------
+
+def _jarvis_template_text():
+    return (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8")
+
+
+def test_jarvis_conversation_shell_route_and_api_still_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+    assert client.get("/api/jarvis/status").status_code == 200
+
+
+def test_jarvis_conversation_shell_status_shape_unchanged():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert d["online"] is True
+    assert d["read_only"] is True
+    # the shell is UI-only; it must add no new top-level status keys
+    for key in (
+        "system_core", "ai_brains", "trading_bridge", "content_engine",
+        "money_engine", "moving_company", "daily_mission", "safety_gates",
+        "commander_snapshot", "trading_detail", "system_map", "cache_freshness",
+    ):
+        assert key in d, f"missing status key: {key}"
+    # no conversation/ask key was added to the API surface
+    for forbidden_key in ("conversation", "ask", "chat", "answer"):
+        assert forbidden_key not in d, f"shell must not add status key: {forbidden_key}"
+
+
+def test_jarvis_conversation_shell_text_appears():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    body = client.get("/jarvis").text
+    assert "Talk to JARVIS" in body
+    assert "Read-Only Conversation Shell" in body
+    assert "Planning mode only" in body
+    assert "Read-only answers only" in body
+    assert "No execution" in body
+    assert "No broker, paper, or live trading control" in body
+
+
+def test_jarvis_conversation_shell_lists_suggested_questions():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    body = client.get("/jarvis").text
+    for q in (
+        "Why is commander yellow?",
+        "What needs attention?",
+        "What does read_only mean?",
+        "What is the trading posture?",
+        "What JARVIS docs exist?",
+    ):
+        assert q in body, f"missing suggested question: {q}"
+
+
+def test_jarvis_conversation_shell_has_no_working_controls():
+    low = _jarvis_template_text().lower()
+    for tok in (
+        "<button", "<form", "onclick", "type=\"submit\"", "method=\"post\"",
+        "fetch('/api/jarvis/ask", "fetch('/api/jarvis/refresh",
+        "/api/jarvis/ask", "/api/jarvis/refresh",
+    ):
+        assert tok not in low, f"conversation shell must add no control: {tok}"
+
+
+def test_jarvis_conversation_shell_input_is_disabled():
+    html = _jarvis_template_text()
+    assert 'id="pConversation"' in html
+    # the shell renders an input; it must be a disabled, non-functional field
+    assert "jv-conv-input" in html
+    assert "disabled" in html
+
+
+def test_jarvis_conversation_shell_no_forbidden_action_words():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    body = client.get("/jarvis").text.lower()
+    for pat in _FORBIDDEN_ON_PAGE:
+        assert re.search(pat, body) is None, f"forbidden phrase on page: {pat}"
+
+
+def test_jarvis_step_26_adds_no_ask_or_refresh_endpoint():
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/ask" not in src, "Step 26 must not add an ask endpoint"
+    assert "/api/jarvis/refresh" not in src, "Step 26 must not add a refresh endpoint"

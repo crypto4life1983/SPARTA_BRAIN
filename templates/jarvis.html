@@ -158,6 +158,20 @@
     /* Step 20 polish: compact long lists in wide panels */
     .jv-wide .jv-mcard{margin:7px 0;}
     .jv-wide .jv-detail{line-height:1.45;}
+    /* Step 26: read-only conversation shell (display-only, no execution) */
+    .jv-conv-banner{display:inline-block;margin:2px 0 10px;font-size:11px;
+      letter-spacing:.04em;color:var(--jv-warn);
+      border:1px solid rgba(255,195,77,.4);border-radius:8px;padding:6px 12px;}
+    .jv-conv-tips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px;}
+    .jv-conv-tips .jv-chip{cursor:default;}
+    .jv-conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      margin:10px 0 6px;}
+    .jv-conv-input{flex:1 1 240px;min-width:180px;background:rgba(0,0,0,.28);
+      border:1px dashed rgba(63,224,255,.22);border-radius:8px;padding:9px 12px;
+      color:var(--jv-dim);font-size:13px;cursor:not-allowed;}
+    .jv-conv-send{font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--jv-dim);border:1px solid rgba(255,93,115,.4);border-radius:8px;
+      padding:8px 14px;cursor:not-allowed;opacity:.8;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -315,6 +329,40 @@
     <div class="jv-panel jv-wide" id="pSystemMap">
       <h2><span class="ic">&#x29C9;</span>System Map <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
       <div class="jv-loading">Reading system map&hellip;</div>
+    </div>
+
+    <div class="jv-section"><span class="lbl">Talk to JARVIS</span><span class="ln"></span><span class="sub">read-only conversation shell &middot; planning mode</span></div>
+
+    <!-- Step 26: Read-only conversation shell. DISPLAY ONLY / PLANNING MODE.
+         No backend, no endpoint, no send action. The input is disabled and the
+         "send" affordance is a non-interactive span. The render JS never targets
+         #pConversation, so this content stays static and is never replaced. -->
+    <div class="jv-panel jv-wide" id="pConversation">
+      <h2><span class="ic">&#x2328;</span>Read-Only Conversation Shell <span class="jv-tag t-display">PLANNING MODE</span></h2>
+      <div class="jv-conv-banner">
+        Planning mode only &middot; Read-only answers only &middot; No execution &middot;
+        No broker, paper, or live trading control.
+      </div>
+      <div class="jv-detail" style="margin-bottom:6px;">Suggested safe questions (display-only preview &mdash; nothing is sent):</div>
+      <div class="jv-conv-tips">
+        <span class="jv-chip">Why is commander yellow?</span>
+        <span class="jv-chip">What needs attention?</span>
+        <span class="jv-chip">What does read_only mean?</span>
+        <span class="jv-chip">What is the trading posture?</span>
+        <span class="jv-chip">What JARVIS docs exist?</span>
+      </div>
+      <div class="jv-conv-row">
+        <input class="jv-conv-input" type="text" disabled aria-disabled="true"
+               placeholder="Conversation layer not yet enabled &mdash; planning mode only" />
+        <span class="jv-conv-send" aria-disabled="true">Send disabled</span>
+      </div>
+      <div class="jv-detail">
+        This shell is a display-only preview. There is no send affordance, no
+        endpoint, and no answer backend yet. When enabled in a later,
+        separately-approved step it will return read-only answers only &mdash; it
+        will never execute, refresh, mutate state, or control broker, paper, or
+        live trading.
+      </div>
     </div>
 
   </div>
