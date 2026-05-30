@@ -1,0 +1,115 @@
+{
+  "step": "Crypto-D9 frozen strategy-spec",
+  "created": "2026-05-30",
+  "spec_only": true,
+  "no_code": true,
+  "no_backtest": true,
+  "no_is_oos_run": true,
+  "head_ref_note": "ca4d9eb (D8 conservative framing) or descendant; D9 spec-only",
+  "data_reference": "data_crypto/spot_binance_usdt_1d_2020_2025 (frozen, D3b 5b3d94c, ratified D3c fe5594f)",
+  "selection_basis": "Crypto-D8 (ca4d9eb) SELECT_FAMILY_FOR_CRYPTO_D9_SPEC: daily crash-candle / 1-day-drop reversion; POWER_OK on BTC unfiltered (81 @ -5%, 33 @ -7%, maxYr<=0.43, regime-diverse incl 2022)",
+
+  "1_strategy_name": "Crypto Daily Crash-Candle Reversion v1",
+
+  "2_market_timeframe": {
+    "instruments": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+    "type": "spot",
+    "venue_data": "Binance USDT daily UTC frozen data",
+    "primary_symbol": "BTC",
+    "corroboration_symbols": ["ETH", "SOL"],
+    "is_window": "2020-2023",
+    "oos_window": "2024-2025 (SEALED)",
+    "2026": "SEALED OUT",
+    "perps": "BLOCKED"
+  },
+
+  "3_core_hypothesis": "A large one-day spot crypto selloff may create short-horizon mean reversion due to forced liquidation / panic selling / liquidity recovery. D8 proved enough raw event count but does NOT prove edge.",
+
+  "4_entry_rule": {
+    "direction": "long_only_spot",
+    "signal": "ret_1d <= -5%",
+    "ret_1d_definition": "close_t / close_{t-1} - 1",
+    "no_sma200_uptrend_filter": "omitted in v1 because D8 proved an SMA200/uptrend filter starves BTC below the event-count floor (CODR-1 collapsed to 9 BTC events)",
+    "no_confirmation_filter": "omitted in v1 because confirmation filters risk reducing BTC below the event-count floor",
+    "fill": "next daily open: open_{t+1}",
+    "position_limit": "one position per symbol",
+    "pyramiding": "none",
+    "signal_while_in_position": "ignore additional signals while a position is open"
+  },
+
+  "5_exit_rule": {
+    "rule": "exit at close of the 3rd bar after entry",
+    "bar_counting": "entry bar counts as bar 1",
+    "consequence": "if entry is at open_{t+1}, exit is close_{t+3}",
+    "stop": "none",
+    "profit_target": "none",
+    "intraday_assumptions": "none",
+    "data_end": "if data ends before the 3rd close, mark as data_end (boundary artifact only)"
+  },
+
+  "6_risk_accounting": {
+    "gross_first": true,
+    "return_pct_definition": "exit_price / entry_price - 1",
+    "net_friction_round_trip": 0.0030,
+    "stress_friction_round_trip": 0.0045,
+    "leverage": "none",
+    "sizing": "equal notional per trade for reporting",
+    "reporting_scope": ["per_symbol", "combined"],
+    "reporting_friction_levels": ["gross", "net_base_0.30pct", "net_stress_0.45pct"]
+  },
+
+  "7_pass_fail_gates": {
+    "hard_gates": [
+      "BTC primary >=30 IS events/trades",
+      "BTC net expectancy > 0 after 0.30% friction",
+      "BTC top-3 removal remains positive after 0.30% friction",
+      "Combined net PF > 1.3 after 0.30% friction",
+      "Stress friction 0.45% remains positive on combined",
+      "At least 2/3 symbols positive after 0.30% friction",
+      "No single year dominates >60% of net",
+      "Sequence risk not fragile (checked later)",
+      "OOS cannot be touched unless IS passes AND OOS protocol is committed"
+    ]
+  },
+
+  "8_validation_ladder": {
+    "Crypto-D10": "engine + tests only",
+    "Crypto-D11": "IS baseline",
+    "Crypto-D12": "OOS protocol",
+    "Crypto-D13": "OOS once only if IS passes",
+    "then": "entry/distribution significance, sequence risk, regime, multi-asset, walk-forward, friction, final decision"
+  },
+
+  "9_anti_overfit_rules": [
+    "No changing -5% threshold after results",
+    "No switching to -7% or -10% unless new branch",
+    "No adding SMA/trend filter after results",
+    "No confirmation filter after results",
+    "No changing 3-bar exit after results",
+    "No OOS before protocol",
+    "No paper/live",
+    "No perps/funding"
+  ],
+
+  "10_failure_modes": [
+    "Naked falling knife",
+    "Edge may be negative after friction",
+    "Top-winner dependence",
+    "BTC may fail despite ETH/SOL",
+    "Crash events may cluster in one year",
+    "Daily open may gap against the entry",
+    "3-day exit may miss longer recovery",
+    "No confirmation filter may admit low-quality signals",
+    "If daily raw crash spec fails IS, next step should be NEEDS_4H_DATA_PROTOCOL or a new branch, not tuning"
+  ],
+
+  "11_final_line": "Crypto-D9 is a frozen strategy-spec step only; no crypto backtest, OOS, exchange API, paper trading, or live trading is authorized.",
+
+  "forbidden_actions": [
+    "no_code", "no_backtest", "no_is_oos_run", "no_optimization", "no_parameter_sweep",
+    "no_network", "no_data_fetch", "no_exchange_api_execution", "no_broker",
+    "no_paper_or_live", "no_perps", "no_oos_use", "no_2024_2025_2026_rows",
+    "no_modification_of_frozen_data", "do_not_touch_s30_or_futures",
+    "jarvis_templates_base_hydra_untouched", "no_staging", "no_commit"
+  ]
+}
