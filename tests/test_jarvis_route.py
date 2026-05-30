@@ -1834,29 +1834,36 @@ def test_jarvis_step_34_page_renders_ok():
 
 
 def test_jarvis_step_34_voice_preview_text_appears():
+    # Step 35 supersedes the Step 34 *disabled* preview with an active
+    # speech-to-text control. The enduring "Voice preview" label remains; the
+    # old "COMING NEXT" / "No microphone access yet" copy is replaced by the
+    # Step 35 speech-to-text labels (asserted in the Step 35 tests below).
     body = _jarvis_template_text()
     assert "Voice preview" in body
-    assert "COMING NEXT" in body  # "Coming next" label, rendered as a tag
-    assert "No microphone access yet" in body
-    assert "No audio is recorded or stored" in body
+    assert "No audio or transcript is stored" in body
 
 
 def test_jarvis_step_34_voice_control_is_non_functional_span():
+    # Step 35 turns the preview into an active speech-to-text control, but it
+    # stays a <span role="button"> wired with addEventListener — never a real
+    # <button>/<form>/submit. The enduring invariant (no real form control) holds.
     html = _jarvis_template_text()
     assert 'id="jvVoicePreview"' in html
-    assert "Voice preview disabled" in html
+    assert 'id="jvVoiceBtn"' in html
     assert 'role="button"' in html
-    # it must not be a real button/form/submit control
     low = html.lower()
     for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
         assert tok not in low, f"voice preview must add no control: {tok}"
 
 
 def test_jarvis_step_34_no_microphone_or_audio_apis():
+    # Step 35 intentionally adds browser SpeechRecognition (input-fill only), so
+    # that token is now allowed. The dangerous capture/synthesis/recorder APIs
+    # must still be absent: no raw mic capture, no recorder, no audio graph, no
+    # text-to-speech (TTS is deferred to Step 36).
     low = _jarvis_template_text().lower()
-    for tok in ("getusermedia", "speechrecognition", "webkitspeechrecognition",
-                "speechsynthesis", "mediarecorder", "audiocontext",
-                "navigator.mediadevices"):
+    for tok in ("getusermedia", "speechsynthesis", "mediarecorder",
+                "audiocontext", "navigator.mediadevices"):
         assert tok not in low, f"voice preview must not use audio API: {tok}"
 
 
@@ -1892,3 +1899,148 @@ def test_jarvis_step_34_status_shape_unchanged():
     assert d["read_only"] is True
     for forbidden_key in ("conversation", "ask", "chat", "answer", "voice", "audio", "transcript"):
         assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
+
+
+# --- Step 35: browser speech-to-text fills the question box ONLY -------------
+# Voice is only a new way to PRODUCE the question text. It fills #jvAskInput,
+# never auto-submits, never calls the ask endpoint from voice, and stores
+# nothing. The operator must still click "Ask read-only", so the existing
+# classifier always decides safe vs forbidden — even for spoken questions.
+
+
+def _jarvis_wirevoice_body():
+    """Isolate the wireVoice() function body so we can prove the voice handler
+    itself never submits, fetches, or stores. wireAsk() (which legitimately
+    posts {question}) is defined earlier and is excluded by this slice."""
+    html = _jarvis_template_text()
+    start = html.index("function wireVoice(){")
+    end = html.index("tick(); setInterval(tick", start)
+    return html[start:end]
+
+
+def test_jarvis_step_35_page_renders_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+
+
+def test_jarvis_step_35_voice_stt_labels_appear():
+    body = _jarvis_template_text()
+    assert "Voice preview" in body
+    assert "SPEECH-TO-TEXT PREVIEW" in body  # "Speech-to-text preview" tag
+    assert "Transcript fills the question box only" in body
+    assert "You must click Ask read-only" in body
+    assert "No audio or transcript is stored" in body
+
+
+def test_jarvis_step_35_uses_browser_speech_recognition_only():
+    body = _jarvis_template_text()
+    # The only allowed STT mechanism is the browser Web Speech API.
+    assert "window.SpeechRecognition" in body
+    assert "window.webkitSpeechRecognition" in body
+
+
+def test_jarvis_step_35_no_forbidden_audio_or_tts_apis():
+    low = _jarvis_template_text().lower()
+    # No raw mic capture, no recorder, no audio graph, no text-to-speech (TTS is
+    # deferred to Step 36), no external STT, no media devices.
+    for tok in ("getusermedia", "mediarecorder", "audiocontext",
+                "speechsynthesis", "navigator.mediadevices"):
+        assert tok not in low, f"Step 35 must not use audio/TTS API: {tok}"
+
+
+def test_jarvis_step_35_no_external_stt_or_fetch_in_voice():
+    voice = _jarvis_wirevoice_body()
+    low = voice.lower()
+    # The voice handler must never call any endpoint or external STT service.
+    for tok in ("fetch(", "xmlhttprequest", "/api/jarvis/ask",
+                "/api/jarvis/refresh", "http://", "https://"):
+        assert tok not in low, f"voice handler must make no network call: {tok}"
+
+
+def test_jarvis_step_35_no_browser_storage_tokens():
+    low = _jarvis_template_text().lower()
+    for tok in ("localstorage", "sessionstorage", "indexeddb", "document.cookie"):
+        assert tok not in low, f"voice must not persist client state: {tok}"
+
+
+def test_jarvis_step_35_voice_does_not_auto_submit():
+    voice = _jarvis_wirevoice_body()
+    low = voice.lower()
+    # No auto-submit: the handler must not invoke the ask flow or click submit.
+    for tok in ("askjarvis", "ask(", ".submit(", ".click(", "requestsubmit"):
+        assert tok not in low, f"voice must not auto-submit: {tok}"
+
+
+def test_jarvis_step_35_voice_fills_input_only():
+    voice = _jarvis_wirevoice_body()
+    # On a transcript the handler writes the value of the existing input only.
+    assert "input.value = transcript" in voice
+    assert 'getElementById(\'jvAskInput\')' in voice
+
+
+def test_jarvis_step_35_graceful_when_unavailable():
+    voice = _jarvis_wirevoice_body()
+    assert "Speech recognition unavailable in this browser." in voice
+
+
+def test_jarvis_step_35_ask_payload_remains_question_only():
+    html = _jarvis_template_text()
+    assert "JSON.stringify({question: q})" in html
+    low = html.lower()
+    for bad in ("stringify({command", "stringify({action", "stringify({execute",
+                "stringify({transcript", "stringify({audio"):
+        assert bad not in low, f"ask payload must stay question-only, found: {bad}"
+
+
+def test_jarvis_step_35_no_refresh_or_real_control():
+    html = _jarvis_template_text()
+    assert "/api/jarvis/refresh" not in html
+    low = html.lower()
+    for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
+        assert tok not in low, f"Step 35 must add no real control: {tok}"
+
+
+def test_jarvis_step_35_persistent_warning_present():
+    assert "JARVIS answers only. No execution. No trading control." in _jarvis_template_text()
+
+
+def test_jarvis_step_35_status_shape_unchanged():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert d["online"] is True
+    assert d["read_only"] is True
+    for forbidden_key in ("conversation", "ask", "chat", "answer", "voice",
+                          "audio", "transcript"):
+        assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
+
+
+def test_jarvis_step_35_spoken_forbidden_phrase_still_classifier_gated():
+    # A spoken question becomes the same {question} string. Posting a forbidden
+    # phrase to the unchanged endpoint must still be refused by the classifier,
+    # exactly like a typed one — voice never bypasses the safety layer.
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.post("/api/jarvis/ask", json={"question": "go long on gold now"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["refused"] is True
+    assert d["safety_class"].startswith("FORBIDDEN")
+    for bad in ("command", "action", "execution", "order", "trade_ticket"):
+        assert bad not in d, f"refusal must not surface: {bad}"
+
+
+def test_jarvis_step_35_spoken_safe_phrase_is_answered():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.post("/api/jarvis/ask", json={"question": "What does read_only mean?"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["refused"] is False
+    assert d["safety_class"].startswith("SAFE_")
+    assert isinstance(d["answer"], str) and d["answer"]

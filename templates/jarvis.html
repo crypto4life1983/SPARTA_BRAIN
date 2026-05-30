@@ -182,9 +182,14 @@
     .jv-voice-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
       margin-top:8px;}
     .jv-voice-ctl{font-size:11px;letter-spacing:.10em;text-transform:uppercase;
-      color:var(--jv-dim);border:1px solid rgba(255,255,255,.18);
-      border-radius:8px;padding:8px 14px;cursor:not-allowed;user-select:none;
-      opacity:.7;}
+      color:var(--jv-cyan);border:1px solid rgba(63,224,255,.4);
+      border-radius:8px;padding:8px 14px;cursor:pointer;user-select:none;
+      background:rgba(63,224,255,.05);}
+    .jv-voice-ctl:hover{background:rgba(63,224,255,.12);}
+    .jv-voice-ctl.is-listening{color:var(--jv-warn);
+      border-color:rgba(255,195,77,.55);background:rgba(255,195,77,.08);}
+    .jv-voice-ctl.is-disabled{color:var(--jv-dim);cursor:not-allowed;
+      border-color:rgba(255,255,255,.18);background:none;opacity:.7;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -382,25 +387,26 @@
         Forbidden requests are shown as refusals, not carried out.
       </div>
 
-      <!-- Step 34: UI-only Voice preview shell. This is a static placeholder
-           that shows where voice will live later. It does NOT capture, record,
-           transcribe, or play audio: no microphone permission, no media-capture
-           call, no speech recognition or synthesis, no recorder, no audio
-           pipeline, and no client storage. The control is a non-interactive span
-           (role=button), never a real button/form/submit and never auto-submits. -->
+      <!-- Step 35: Voice speech-to-text that fills the question box ONLY.
+           It uses the browser's built-in Web Speech recognition when available
+           and writes the transcript into #jvAskInput. It never auto-submits,
+           never calls the ask endpoint from voice, and stores nothing (no
+           recorder, no audio pipeline, no client persistence). The operator must
+           still click "Ask read-only" to send, so the classifier always decides.
+           The control is a non-interactive span (role=button), not a real
+           button/form/submit. -->
       <div class="jv-voice-preview" id="jvVoicePreview">
         <div class="jv-voice-head">
-          Voice preview <span class="jv-tag t-display">COMING NEXT</span>
+          Voice preview <span class="jv-tag t-display">SPEECH-TO-TEXT PREVIEW</span>
         </div>
         <div class="jv-detail">
-          No microphone access yet &middot; No audio is recorded or stored &middot;
-          This is a display-only placeholder for a future, separately-approved
-          speech step. The read-only text flow above is unchanged.
+          Transcript fills the question box only &middot; You must click Ask read-only &middot;
+          No audio or transcript is stored. The read-only text flow above is unchanged.
         </div>
         <div class="jv-voice-row">
-          <span class="jv-voice-ctl" role="button" tabindex="0" aria-disabled="true"
-                aria-label="Voice preview disabled">Voice preview disabled</span>
-          <span class="jv-detail">Speaking is not enabled in this build.</span>
+          <span class="jv-voice-ctl" id="jvVoiceBtn" role="button" tabindex="0"
+                aria-label="Speak to fill the question box">Speak to fill</span>
+          <span class="jv-detail" id="jvVoiceStatus" aria-live="polite">Idle.</span>
         </div>
       </div>
     </div>
@@ -1090,9 +1096,72 @@
     });
   }
 
+  // Step 35: browser speech-to-text that fills #jvAskInput ONLY. It never
+  // auto-submits, never calls the ask endpoint, and stores nothing. The operator
+  // must still click "Ask read-only", so the classifier always decides.
+  function wireVoice(){
+    var btn = document.getElementById('jvVoiceBtn');
+    var status = document.getElementById('jvVoiceStatus');
+    var input = document.getElementById('jvAskInput');
+    if(!btn || !status || !input) return;
+
+    function setStatus(msg){ status.textContent = msg; }
+
+    var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!Recognition){
+      btn.classList.add('is-disabled');
+      btn.setAttribute('aria-disabled', 'true');
+      setStatus('Speech recognition unavailable in this browser.');
+      return;
+    }
+
+    var rec = new Recognition();
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    var listening = false;
+
+    function start(){
+      if(listening) return;
+      try { rec.start(); } catch(e){ /* already starting */ }
+    }
+
+    rec.onstart = function(){
+      listening = true;
+      btn.classList.add('is-listening');
+      setStatus('Listening… speak your read-only question.');
+    };
+    rec.onerror = function(e){
+      setStatus('Voice input error: ' + esc(String((e && e.error) || 'unknown')) +
+        '. You can still type your question.');
+    };
+    rec.onend = function(){
+      listening = false;
+      btn.classList.remove('is-listening');
+    };
+    rec.onresult = function(e){
+      var transcript = '';
+      try { transcript = (e.results[0][0].transcript || '').trim(); } catch(err) { transcript = ''; }
+      if(transcript){
+        // Fill the question box ONLY. No submit, no fetch, no storage.
+        input.value = transcript;
+        input.focus();
+        setStatus('Transcript ready — review it, then click "Ask read-only".');
+      } else {
+        setStatus('No speech detected. Try again or type your question.');
+      }
+    };
+
+    btn.addEventListener('click', start);
+    btn.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); start(); }
+    });
+  }
+
   tick(); setInterval(tick, 1000);
   load(); setInterval(load, 15000);
   wireAsk();
+  wireVoice();
 })();
 </script>
 {% endblock %}

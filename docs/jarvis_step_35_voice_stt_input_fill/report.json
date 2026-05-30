@@ -1,0 +1,85 @@
+{
+  "title": "JARVIS Step 35 — Browser Speech-to-Text Input Fill Only",
+  "generated_at": "2026-05-30T16:30:00",
+  "type": "ui_stt_wiring_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Enable the existing Voice preview area to use the browser Web Speech API, when available, to fill the existing JARVIS ask input (#jvAskInput) with a transcript. Voice is only a new way to PRODUCE the question text. It never auto-submits, never calls the ask endpoint from voice, and stores no audio or transcript. The operator must still click 'Ask read-only', so the existing safety classifier always decides safe vs forbidden.",
+  "relation_to_steps_20_34": "Step 26 shipped the display-only conversation shell; Step 30 the answer-only POST /api/jarvis/ask; Step 31 the read-only ask UI; Step 32 the live/ASGI smoke; Step 33 the docs-only voice layer safety plan; Step 34 the UI-only disabled voice preview shell. Step 35 implements the first interactive roadmap item from Step 33: browser speech-to-text that fills the existing input only — no backend, no storage, no auto-submit, no TTS.",
+  "files_changed": [
+    "templates/jarvis.html — replaced the Step 34 disabled voice-preview span with an active speech-to-text control. The control stays a non-interactive <span role=button> (id=jvVoiceBtn) wired only with addEventListener (click + Enter/Space). Added wireVoice() inside the existing render IIFE: it reads window.SpeechRecognition || window.webkitSpeechRecognition, and on a transcript writes input.value only. It never auto-submits, never fetches, and stores nothing. Added .is-listening/.is-disabled CSS states. The read-only ask flow and {question}-only payload are untouched.",
+    "tests/test_jarvis_route.py — reconciled three Step 34 tests that asserted the OLD disabled state (the Step 35 control supersedes 'Voice preview disabled'/'COMING NEXT'/'No microphone access yet', and intentionally adds SpeechRecognition), keeping every still-valid safety invariant; added a Step 35 section (16 tests).",
+    "docs/jarvis_step_35_voice_stt_input_fill/report.md and report.json — this memo."
+  ],
+  "step_34_tests_reconciled": [
+    "test_jarvis_step_34_voice_preview_text_appears — old 'COMING NEXT'/'No microphone access yet' copy is replaced by Step 35 speech-to-text labels; still asserts the enduring 'Voice preview' label and 'No audio or transcript is stored'.",
+    "test_jarvis_step_34_voice_control_is_non_functional_span — control is now active but stays a <span role=button> (asserts id=jvVoiceBtn); keeps the no real <button>/<form>/onclick/submit/post invariant.",
+    "test_jarvis_step_34_no_microphone_or_audio_apis — SpeechRecognition/webkitSpeechRecognition now allowed (intentionally added); still forbids getUserMedia/SpeechSynthesis/MediaRecorder/AudioContext/navigator.mediaDevices."
+  ],
+  "explicitly_not_done": [
+    "No app.py change.",
+    "No jarvis_conversation_safety.py change.",
+    "No backend endpoint added.",
+    "No text-to-speech (SpeechSynthesis deferred to Step 36).",
+    "No getUserMedia / MediaRecorder / AudioContext / navigator.mediaDevices.",
+    "No external STT API; no fetch/XHR from the voice handler; audio never leaves the device.",
+    "No audio recording or storage; no transcript storage.",
+    "No localStorage / sessionStorage / IndexedDB / cookies.",
+    "No auto-submit: the voice handler never calls the ask flow or clicks submit.",
+    "No call to /api/jarvis/ask from voice; the existing manual 'Ask read-only' posts only {question}.",
+    "No refresh / execution / broker / paper / live control.",
+    "No change to the /api/jarvis/ask payload — still {question} only.",
+    "No change to /api/jarvis/status shape.",
+    "Nothing staged or committed."
+  ],
+  "stt_input_fill_summary": {
+    "location": "Inside the existing #pConversation 'Talk to JARVIS' panel, in the #jvVoicePreview block below the read-only ask note.",
+    "control": "<span class=jv-voice-ctl id=jvVoiceBtn role=button tabindex=0>Speak to fill</span> — wired with addEventListener (click + Enter/Space), never a real button/form/submit.",
+    "mechanism": "window.SpeechRecognition || window.webkitSpeechRecognition (browser Web Speech API only). interimResults=false, maxAlternatives=1, lang=en-US.",
+    "on_result": "input.value = transcript; input.focus(); status updated to 'Transcript ready — review it, then click \"Ask read-only\".' No submit, no fetch, no storage.",
+    "graceful_degradation": "If SpeechRecognition is unavailable the control disables itself and shows 'Speech recognition unavailable in this browser.'; the text input keeps working as before.",
+    "ask_flow": "Unchanged: #jvAskInput + 'Ask read-only' span still POST only {question} to /api/jarvis/ask; the classifier decides.",
+    "persistent_warning": "'JARVIS answers only. No execution. No trading control.' retained."
+  },
+  "voice_safety_scan": {
+    "speech_recognition_present": true,
+    "webkit_speech_recognition_present": true,
+    "getusermedia_mediarecorder_audiocontext_speechsynthesis_mediadevices": 0,
+    "external_stt_or_fetch_in_voice_handler": 0,
+    "browser_storage_tokens": 0,
+    "voice_auto_submit_tokens": 0,
+    "voice_fills_input_value_only": true,
+    "ask_payload_question_only": true,
+    "real_button_form_onclick_post_submit": 0,
+    "refresh_occurrences": 0,
+    "persistent_warning_present": true
+  },
+  "tests": {
+    "new_step_35_tests": [
+      "test_jarvis_step_35_page_renders_ok",
+      "test_jarvis_step_35_voice_stt_labels_appear",
+      "test_jarvis_step_35_uses_browser_speech_recognition_only",
+      "test_jarvis_step_35_no_forbidden_audio_or_tts_apis",
+      "test_jarvis_step_35_no_external_stt_or_fetch_in_voice",
+      "test_jarvis_step_35_no_browser_storage_tokens",
+      "test_jarvis_step_35_voice_does_not_auto_submit",
+      "test_jarvis_step_35_voice_fills_input_only",
+      "test_jarvis_step_35_graceful_when_unavailable",
+      "test_jarvis_step_35_ask_payload_remains_question_only",
+      "test_jarvis_step_35_no_refresh_or_real_control",
+      "test_jarvis_step_35_persistent_warning_present",
+      "test_jarvis_step_35_status_shape_unchanged",
+      "test_jarvis_step_35_spoken_forbidden_phrase_still_classifier_gated",
+      "test_jarvis_step_35_spoken_safe_phrase_is_answered"
+    ]
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "223 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_35_voice_stt_input_fill/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "Step 36 (JARVIS-VOICE-TTS, separate approval): optional browser SpeechSynthesis that reads the returned answer only, off by default / clearly toggled. Never reads commands or the raw transcript; only after a response is returned.",
+  "conclusion": "The voice preview is now an active speech-to-text control that fills #jvAskInput only. It uses the browser Web Speech API exclusively, never auto-submits, never calls the ask endpoint from voice, and stores no audio or transcript. The operator must still click 'Ask read-only', so the existing classifier decides safe vs forbidden for spoken questions exactly as for typed ones. app.py and jarvis_conversation_safety.py are untouched; the {question}-only payload, the persistent warning, and the /api/jarvis/status shape are all unchanged. Nothing staged or committed."
+}
