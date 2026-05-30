@@ -1822,3 +1822,73 @@ def test_jarvis_step_31_ui_wiring_does_not_change_status_shape():
     assert d["read_only"] is True
     for forbidden_key in ("conversation", "ask", "chat", "answer"):
         assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
+
+
+# --- Step 34: UI-only voice preview shell (no mic, no STT/TTS, no storage) --
+
+def test_jarvis_step_34_page_renders_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+
+
+def test_jarvis_step_34_voice_preview_text_appears():
+    body = _jarvis_template_text()
+    assert "Voice preview" in body
+    assert "COMING NEXT" in body  # "Coming next" label, rendered as a tag
+    assert "No microphone access yet" in body
+    assert "No audio is recorded or stored" in body
+
+
+def test_jarvis_step_34_voice_control_is_non_functional_span():
+    html = _jarvis_template_text()
+    assert 'id="jvVoicePreview"' in html
+    assert "Voice preview disabled" in html
+    assert 'role="button"' in html
+    # it must not be a real button/form/submit control
+    low = html.lower()
+    for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
+        assert tok not in low, f"voice preview must add no control: {tok}"
+
+
+def test_jarvis_step_34_no_microphone_or_audio_apis():
+    low = _jarvis_template_text().lower()
+    for tok in ("getusermedia", "speechrecognition", "webkitspeechrecognition",
+                "speechsynthesis", "mediarecorder", "audiocontext",
+                "navigator.mediadevices"):
+        assert tok not in low, f"voice preview must not use audio API: {tok}"
+
+
+def test_jarvis_step_34_no_browser_storage_tokens():
+    low = _jarvis_template_text().lower()
+    for tok in ("localstorage", "sessionstorage", "indexeddb", "document.cookie"):
+        assert tok not in low, f"voice preview must not persist: {tok}"
+
+
+def test_jarvis_step_34_no_refresh_endpoint_in_template():
+    assert "/api/jarvis/refresh" not in _jarvis_template_text()
+
+
+def test_jarvis_step_34_ask_payload_remains_question_only():
+    html = _jarvis_template_text()
+    assert "JSON.stringify({question: q})" in html
+    low = html.lower()
+    for bad in ("stringify({command", "stringify({action", "stringify({execute",
+                "command:", "action:", "execute:"):
+        assert bad not in low, f"ask payload must stay question-only, found: {bad}"
+
+
+def test_jarvis_step_34_persistent_warning_present():
+    assert "JARVIS answers only. No execution. No trading control." in _jarvis_template_text()
+
+
+def test_jarvis_step_34_status_shape_unchanged():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert d["online"] is True
+    assert d["read_only"] is True
+    for forbidden_key in ("conversation", "ask", "chat", "answer", "voice", "audio", "transcript"):
+        assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"

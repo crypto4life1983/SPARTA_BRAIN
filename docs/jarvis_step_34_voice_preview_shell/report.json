@@ -1,0 +1,75 @@
+{
+  "title": "JARVIS Step 34 — UI-Only Voice Preview Shell",
+  "generated_at": "2026-05-30T15:00:00",
+  "type": "ui_only_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Add a visible, display-only voice-preview area to the existing JARVIS conversation panel so the operator can see where voice will live later. No real speech-to-text or text-to-speech is implemented; no microphone is requested; no audio or transcript is captured or stored. The existing read-only text ask flow is unchanged.",
+  "relation_to_steps_20_33": "Step 26 shipped the display-only conversation shell; Step 30 the answer-only POST /api/jarvis/ask; Step 31 the read-only ask UI; Step 32 the live/ASGI smoke; Step 33 the docs-only voice layer safety plan. Step 34 implements the first roadmap item from Step 33: a UI-only voice preview shell with no backend, no audio APIs, and no storage.",
+  "files_changed": [
+    "templates/jarvis.html — added a display-only voice-preview subsection (id=jvVoicePreview) inside the existing #pConversation panel, plus minimal CSS (.jv-voice-preview/.jv-voice-head/.jv-voice-row/.jv-voice-ctl). The control is a non-interactive <span role=button> labeled 'Voice preview disabled'. No audio API, no storage, no auto-submit; the existing ask flow and payload are untouched.",
+    "tests/test_jarvis_route.py — added a Step 34 section proving the page renders, the voice-preview copy appears, the control is a non-functional span, and the template uses no microphone/STT/TTS API, no browser storage, no refresh, no real button/form/submit, keeps {question}-only payload, keeps the persistent warning, and leaves the status shape unchanged.",
+    "docs/jarvis_step_34_voice_preview_shell/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No app.py change.",
+    "No jarvis_conversation_safety.py change.",
+    "No backend endpoint added.",
+    "No speech-to-text, no text-to-speech.",
+    "No microphone permission request, no media-capture call.",
+    "No SpeechRecognition / webkitSpeechRecognition / SpeechSynthesis / MediaRecorder / AudioContext.",
+    "No audio recording or storage; no transcript storage.",
+    "No localStorage / sessionStorage / IndexedDB / cookies.",
+    "No auto-submit behavior.",
+    "No refresh / execution / broker / paper / live control.",
+    "No change to the /api/jarvis/ask payload — still {question} only.",
+    "No change to /api/jarvis/status shape.",
+    "Nothing staged or committed."
+  ],
+  "ui_shell_summary": {
+    "location": "Inside the existing #pConversation 'Talk to JARVIS' panel, below the read-only ask explanatory note.",
+    "container": "div.jv-voice-preview id=jvVoicePreview",
+    "labels": [
+      "Voice preview",
+      "COMING NEXT (tag; the 'Coming next' label)",
+      "No microphone access yet",
+      "No audio is recorded or stored"
+    ],
+    "control": "<span class=jv-voice-ctl role=button tabindex=0 aria-disabled=true>Voice preview disabled</span> — non-interactive, no handler, never auto-submits.",
+    "ask_flow": "Unchanged: #jvAskInput + 'Ask read-only' span still POST only {question} to /api/jarvis/ask.",
+    "persistent_warning": "'JARVIS answers only. No execution. No trading control.' retained."
+  },
+  "voice_safety_scan": {
+    "voice_preview_text_occurrences": 3,
+    "no_microphone_access_yet_present": true,
+    "no_audio_is_recorded_or_stored_present": true,
+    "audio_stt_tts_api_tokens": 0,
+    "browser_storage_tokens": 0,
+    "real_button_form_onclick_post_submit": 0,
+    "refresh_occurrences": 0,
+    "ask_payload_question_only": true,
+    "persistent_warning_present": true
+  },
+  "tests": {
+    "new_step_34_tests": [
+      "test_jarvis_step_34_page_renders_ok",
+      "test_jarvis_step_34_voice_preview_text_appears",
+      "test_jarvis_step_34_voice_control_is_non_functional_span",
+      "test_jarvis_step_34_no_microphone_or_audio_apis",
+      "test_jarvis_step_34_no_browser_storage_tokens",
+      "test_jarvis_step_34_no_refresh_endpoint_in_template",
+      "test_jarvis_step_34_ask_payload_remains_question_only",
+      "test_jarvis_step_34_persistent_warning_present",
+      "test_jarvis_step_34_status_shape_unchanged"
+    ]
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "208 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_34_voice_preview_shell/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "Step 35 (JARVIS-VOICE-STT-FILL, separate approval): wire browser speech-to-text to fill the existing input only — no auto-submit, no audio/transcript storage, no external STT, graceful no-op when the Web Speech API is unavailable.",
+  "conclusion": "A display-only voice-preview shell now sits inside the conversation panel, clearly labeled 'Voice preview / Coming next / No microphone access yet / No audio is recorded or stored', with a non-interactive 'Voice preview disabled' span. It adds no microphone request, no audio/STT/TTS API, no recorder, no storage, and no auto-submit. The read-only text ask flow, the {question}-only payload, the persistent warning, and the /api/jarvis/status shape are all unchanged. app.py and jarvis_conversation_safety.py are untouched."
+}

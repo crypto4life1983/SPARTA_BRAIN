@@ -174,6 +174,17 @@
       padding:8px 14px;cursor:pointer;user-select:none;background:rgba(63,224,255,.06);}
     .jv-ask-btn:hover{background:rgba(63,224,255,.14);}
     .jv-ask-out{margin-top:8px;min-height:8px;}
+    /* Step 34: UI-only voice preview shell (no mic, no audio, no storage) */
+    .jv-voice-preview{margin-top:14px;padding:10px 12px;border-radius:8px;
+      border:1px dashed rgba(63,224,255,.28);background:rgba(0,0,0,.18);}
+    .jv-voice-head{font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--jv-cyan);margin-bottom:6px;}
+    .jv-voice-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      margin-top:8px;}
+    .jv-voice-ctl{font-size:11px;letter-spacing:.10em;text-transform:uppercase;
+      color:var(--jv-dim);border:1px solid rgba(255,255,255,.18);
+      border-radius:8px;padding:8px 14px;cursor:not-allowed;user-select:none;
+      opacity:.7;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -369,6 +380,28 @@
         returns conservative answers or refusals. It will never execute, refresh,
         mutate state, write chat logs, or control broker, paper, or live trading.
         Forbidden requests are shown as refusals, not carried out.
+      </div>
+
+      <!-- Step 34: UI-only Voice preview shell. This is a static placeholder
+           that shows where voice will live later. It does NOT capture, record,
+           transcribe, or play audio: no microphone permission, no media-capture
+           call, no speech recognition or synthesis, no recorder, no audio
+           pipeline, and no client storage. The control is a non-interactive span
+           (role=button), never a real button/form/submit and never auto-submits. -->
+      <div class="jv-voice-preview" id="jvVoicePreview">
+        <div class="jv-voice-head">
+          Voice preview <span class="jv-tag t-display">COMING NEXT</span>
+        </div>
+        <div class="jv-detail">
+          No microphone access yet &middot; No audio is recorded or stored &middot;
+          This is a display-only placeholder for a future, separately-approved
+          speech step. The read-only text flow above is unchanged.
+        </div>
+        <div class="jv-voice-row">
+          <span class="jv-voice-ctl" role="button" tabindex="0" aria-disabled="true"
+                aria-label="Voice preview disabled">Voice preview disabled</span>
+          <span class="jv-detail">Speaking is not enabled in this build.</span>
+        </div>
       </div>
     </div>
 
