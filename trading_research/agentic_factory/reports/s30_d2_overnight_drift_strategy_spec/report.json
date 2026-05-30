@@ -1,0 +1,149 @@
+{
+  "step": "S30-D2",
+  "title": "Overnight Session-Return Decomposition / Overnight Drift -- FROZEN strategy specification (spec only)",
+  "created": "2026-05-30",
+  "kind": "frozen_strategy_spec_only",
+  "spec_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "provenance": {
+    "head_at_spec": "9e1c565",
+    "s30_d1_commit": "9e1c565f19c54ce00695de73aeff7560089f766c",
+    "head_note": "HEAD is exactly the S30-D1 commit 9e1c565; factory tree clean except the known untracked reports/crypto_d1_research_lane_protocol/ folder (untouched here); nothing staged; no automation-touched factory file since S30-D1.",
+    "context_reports_read": [
+      "reports/s30_d1_deep_strategy_idea_source_review/report.md",
+      "reports/factory_d11_validation_factory_closeout/report.md",
+      "reports/s29_d4_failed_breakout_reversal_is_baseline/report.md",
+      "reports/s26_d18_trend_sr_ema_rsi_decision_gate/report.md",
+      "reports/s25_d1_donchian_trade_order_monte_carlo/report.md"
+    ]
+  },
+  "1_strategy_name": "Overnight Session-Return Decomposition / Overnight Drift",
+  "2_market_timeframe": {
+    "primary_market": "NQ continuous futures, daily bars",
+    "independent_confirmation_later": "ES continuous futures, daily bars (separate later step)",
+    "bars": "daily only",
+    "intraday": "NONE in v1",
+    "year_2026": "FORBIDDEN -- not used",
+    "in_sample": "2013-2022",
+    "out_of_sample": "2023-2025 -- SEALED until the OOS protocol is pre-registered and committed",
+    "micros_note": "MNQ/MES are same-underlying proxies, descriptive only; never independent confirmation."
+  },
+  "3_core_hypothesis": "A systematic overnight risk premium may exist: the return from prior close to next open (overnight leg) may differ from, and be more reliably positive than, the open-to-close day-session leg. The edge, if real, must come from MANY small repeated overnight observations, not from a few large trend captures. This is the structural antidote to the failure that parked every prior branch (small-N directional triggers whose net hinged on 3 fat-tail winners and failed the top-3-removal gate): an every-session overnight harvest is the average of thousands of independent daily bets and cannot be dominated by a handful of days -- a property that is itself a pre-registered gate.",
+  "4_measurement_definition": {
+    "prior_close": "close[t-1]",
+    "next_open": "open[t]",
+    "overnight_return": "open[t] - close[t-1]  (the leg harvested in v1)",
+    "day_session_return": "close[t] - open[t]",
+    "total_day_return": "close[t] - close[t-1]  (= overnight + day_session by construction)",
+    "measurement_validity_is_a_HARD_GATE": "Daily futures bars may use session-specific open/close conventions; the daily open/close prints may NOT cleanly bracket the intended overnight (prior-settle -> next-open) window.",
+    "required_checks_before_any_edge_claim": [
+      "S30-D3/D4 must verify the offline daily open/close for NQ (and ES) actually represent the overnight/day boundary the hypothesis assumes, e.g. overnight + day_session reconstructs total_day_return exactly, and open/close correspond to a consistent session convention across the entire 2013-2022 window.",
+      "If the daily bar open/close cannot be trusted to represent the overnight/day split, the branch MUST STOP and either be re-scoped as requiring intraday/session-level data we do not have offline, or be parked. No edge claim may be made on a mis-measured leg."
+    ]
+  },
+  "5_direction_v1": {
+    "decision": "LONG overnight exposure only.",
+    "definition": "Enter long at close[t-1], exit at open[t]. Hold the overnight leg only.",
+    "one_position_per_day": true,
+    "shorting": "NONE in v1.",
+    "day_session_exposure": "NONE in v1 (open->close leg is measured for comparison per section 11 but never traded in v1).",
+    "why_long_only_overnight": "Cleanest single expression of the risk-premium hypothesis; matches the documented direction of the equity-index overnight anomaly; fades nothing; stacks no filters; keeps the first frozen test unambiguous. A short or day-session variant is a SEPARATE later branch, not a v1 tweak."
+  },
+  "6_eligibility_filters": {
+    "v1_rule": "ALL valid trading days eligible. No trend filter. No RSI/EMA filter. No volatility filter -- tests the raw overnight effect directly and maximizes observation count (attacks the S27/S28 low-count failure).",
+    "eligible_day": "close[t-1] and open[t] both present, finite, and > 0; t-1 and t are consecutive valid trading sessions (no gap across a data hole or holiday boundary that breaks the prior-close -> next-open chain).",
+    "excluded": "missing/invalid/zero open or close; the first bar of the dataset (no t-1); any bar where session-consecutiveness fails.",
+    "considered_and_rejected_v1": "A volatility guard (e.g. skip when ATR20[t-1] is extreme) -- rejected to avoid a free parameter / overfit surface; any such guard is a NEW branch, not a v1 option."
+  },
+  "7_entry_exit_timing": {
+    "entry": "close[t-1]",
+    "exit": "open[t]",
+    "trade_date": "t",
+    "no_lookahead": "entry uses the known prior close; exit is the next session open.",
+    "no_intraday_stop_or_target": "daily bars cannot observe the overnight path, so an intra-overnight stop/target would be fabricated. Position held flat from prior close to next open with NO path-dependent exit."
+  },
+  "8_accounting_method": {
+    "rationale": "Overnight drift is small and frequent; an R-based stop/target does not fit v1 (there is no stop). Accounting is distribution-based.",
+    "primary_metric": "raw per-day overnight return in points and in percent ((open[t]-close[t-1])/close[t-1]).",
+    "secondary_normalized_metric": "normalized_return = (open[t]-close[t-1]) / ATR20[t-1]  (Wilder ATR over 20 daily bars, computed on data through t-1 only -- no lookahead).",
+    "report_both": true,
+    "no_artificial_stop_target": "Do NOT force an artificial stop/target if the daily data cannot support it.",
+    "frozen": {"atr_period": 20, "normalization_anchor": "ATR20[t-1]"}
+  },
+  "9_cost_friction": {
+    "round_trip": "one round trip per day (enter at prior close, exit at next open).",
+    "pre_register_units": "per-round-trip cost expressed in points, in percent, and as a fraction of ATR20[t-1].",
+    "test_levels_later": ["low", "moderate", "high", "severe"],
+    "freeze_note": "exact point/percent values to be frozen in S30-D3 engine constants before any run, then never changed.",
+    "hard_rule": "If the expected per-day overnight edge is smaller than realistic friction, the branch FAILS. A frequent tiny edge that does not clear cost is not a strategy (the S26 FRICTION_SENSITIVE lesson applied up front)."
+  },
+  "10_validation_ladder_plan": {
+    "note": "Pre-registered S30 sub-step plan using the completed validation factory (Factory-D2..D11). No step is run now.",
+    "S30-D3": "engine + tests only (frozen rules; no run) -- INCLUDES the section-4 measurement-validity check as code.",
+    "S30-D4": "IS baseline (2013-2022) via validation_is_runner; hard 2023-2025 seal; + measurement-validity gate report.",
+    "S30-D5": "OOS protocol pre-registration via validation_oos_runner; COMMIT before any OOS.",
+    "S30-D6": "OOS run ONCE (2023-2025) against the committed protocol.",
+    "S30-D7": "distribution / overnight-significance via validation_entry_significance (adapted per section 11).",
+    "S30-D8": "sequence risk / bootstrap + top-day dependence via validation_sequence_risk.",
+    "S30-D9": "regime breakdown via validation_regime.",
+    "S30-D10": "ES multi-market independent confirmation.",
+    "S30-D11": "walk-forward stability via validation_walk_forward.",
+    "S30-D12": "friction stress at low/moderate/high/severe via validation_friction.",
+    "S30-D13": "final decision / readiness gate via validation_decision."
+  },
+  "11_significance_adaptation": {
+    "note": "This is a daily calendar exposure, not sparse discrete entries, so entry-significance is adapted to a DISTRIBUTION test.",
+    "test_A_vs_zero": "overnight returns vs zero (is the mean/median overnight return reliably positive?).",
+    "test_B_vs_day_session": "overnight returns vs day-session returns (is the overnight leg reliably different from / better than the open->close leg? -- isolates WHEN the premium accrues).",
+    "test_C_vs_random": "real overnight sequence vs a sign-flip / permutation / bootstrap baseline (is the observed mean beyond random sign/order?).",
+    "fixed_tests_only": true,
+    "no_calendar_cherry_picking": "No cherry-picking weekdays or months in v1. Any weekday/month/turn-of-month conditioning is a SEPARATE pre-registered branch, never added to v1 after seeing results."
+  },
+  "12_pass_watch_fail_gates": {
+    "measurement_validity": "PASS open/close cleanly reconstruct overnight/day split on full IS | WATCH minor reconcilable gaps | FAIL split not representable -> STOP/PARK",
+    "is_observation_count": "PASS thousands (~every eligible day 2013-2022) | WATCH hundreds | FAIL dozens (a measurement bug)",
+    "mean_overnight_return_is": "PASS reliably > 0 | WATCH ~0 / marginal | FAIL <= 0",
+    "distribution_health": "PASS positive median or acceptable skew, not one-sided tail | WATCH borderline | FAIL median <= 0 with mean propped by tail",
+    "gain_loss_or_win_rate": "PASS favorable & reported | WATCH borderline | FAIL unfavorable",
+    "net_after_fixed_friction": "PASS positive at moderate cost | WATCH positive only at low cost | FAIL negative at moderate cost",
+    "top_day_fat_tail_dependence": "PASS net stays positive after removing top 1% of days AND top 3 days | WATCH thin without them | FAIL net flips negative ex-top-days (the universal parked-branch killer)",
+    "positive_years": "PASS >=6/10 | WATCH 5/10 | FAIL <5/10",
+    "oos": "PASS positive after friction | WATCH positive only pre-friction | FAIL negative after friction",
+    "es_corroboration": "PASS same direction & sign on ES | WATCH weak/mixed | FAIL ES contradicts NQ",
+    "walk_forward": "PASS edge present across multiple eras | WATCH concentrated | FAIL only one era carries the result"
+  },
+  "13_anti_overfit_rules": [
+    "No adding weekday / month / turn-of-month filters after any result (each is a new branch).",
+    "No switching from the overnight leg to the day-session leg after seeing results.",
+    "No changing atr_period (20) or the frozen friction levels after any result.",
+    "No parameter sweeps; no grid search; no 'best of N'.",
+    "No OOS run before the OOS protocol is pre-registered AND committed.",
+    "No paper/live promotion from the spec or from IS results; paper/live requires a separate readiness memo with explicit override fields.",
+    "Any rule change opens a NEW branch -- S30 is never tuned in place."
+  ],
+  "14_main_expected_failure_modes": [
+    "Measurement failure: daily bar open/close do not represent the desired session boundary (the binding section-4 gate) -> any edge is an artifact.",
+    "Friction failure: the per-day edge is too small to clear realistic cost (the S26 failure).",
+    "Regime concentration: edge concentrated in crisis / high-vol years rather than durable across 2013-2022.",
+    "Tail risk: overnight gaps create fat-tail losses, and/or the apparent edge is itself a few extreme up-gaps (the top-day-dependence gate).",
+    "No multi-market corroboration: ES does not confirm NQ's direction.",
+    "Distribution fragility: the mean depends on a handful of extreme days (the inverse risk to the count advantage).",
+    "Calendar/holiday artifacts: futures session calendar / holiday handling breaks the prior-close -> next-open chain and injects spurious 'overnight' returns."
+  ],
+  "15_final_line": "S30-D2 is a frozen hypothesis specification only; no strategy code, backtest, OOS, optimization, paper trading, or live trading is authorized.",
+  "guardrails": {
+    "spec_only": true, "no_code": true, "no_backtest": true, "no_is_oos_run": true,
+    "no_optimization": true, "no_parameter_sweeps": true, "no_data_fetch": true,
+    "no_paper_or_live": true, "no_broker_or_api": true, "no_source_engine_test_changes": true,
+    "oos_2023_2025_sealed": true, "no_2026": true,
+    "donchian_s26_s27_s28_s29_read_only": true, "crypto_d1_untouched": true,
+    "jarvis_templates_hydra_untouched": true, "no_staging": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. Frozen specification only. Donchian, S26, S27, S28, S29 remain PARKED; no active strategy code; no paper/live system exists or is authorized. The frozen S30 overnight-drift rules are a research hypothesis to be tested under the factory ladder -- gated first on measurement validity and friction -- not a trade."
+}
