@@ -1,0 +1,131 @@
+{
+  "title": "JARVIS Step 40 — v1 Milestone Seal / Operator Summary",
+  "generated_at": "2026-05-30T20:10:00",
+  "type": "documentation_milestone_seal_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "head_at_seal": {"short": "13e43ad", "subject": "Add JARVIS Step 39 operator acceptance smoke report"},
+  "1_purpose": "Record the official JARVIS v1 milestone: what has been built (Steps 20-39), what is verified, what remains blocked, how the operator should use it, and the next safe phase. Documentation only — no code, UI, test, endpoint, storage, or trading change.",
+  "2_timeline": [
+    {"step": 20, "commit": "4200253", "subject": "UI polish (safe UI-only polish pass)"},
+    {"step": 21, "commit": "4f55aae", "subject": "live smoke memo (post-polish)"},
+    {"step": 22, "commit": "82ccf52", "subject": "operator guide / runbook"},
+    {"step": 23, "commit": "37d7dcc", "subject": "known limits & safe roadmap"},
+    {"step": 24, "commit": "9523da8", "subject": "panel glossary"},
+    {"step": 25, "commit": "6b88d9b", "subject": "read-only conversation plan"},
+    {"step": 26, "commit": "f2268f3", "subject": "conversation shell"},
+    {"step": 27, "commit": "e961481", "subject": "answer-only backend safety plan"},
+    {"step": 28, "commit": "a5b47b4", "subject": "safety classifier"},
+    {"step": 29, "commit": "ed8f23c", "subject": "ask endpoint contract tests"},
+    {"step": 30, "commit": "73e1cb0", "subject": "answer-only ask handler"},
+    {"step": 31, "commit": "f9ea464", "subject": "read-only ask UI wiring"},
+    {"step": 32, "commit": "b35f4be", "subject": "live conversation smoke"},
+    {"step": 33, "commit": "f79dd5c", "subject": "voice layer safety plan"},
+    {"step": 34, "commit": "2849279", "subject": "voice preview shell"},
+    {"step": 35, "commit": "e4b7b8d", "subject": "speech-to-text input fill"},
+    {"step": 36, "commit": "9de28ab", "subject": "TTS answer readback"},
+    {"step": 37, "commit": "44226a4", "subject": "live voice smoke"},
+    {"step": 38, "commit": "2e21014", "subject": "improved ask answer quality"},
+    {"step": 39, "commit": "13e43ad", "subject": "operator acceptance smoke"}
+  ],
+  "3_can_do": [
+    "Display the JARVIS command center (/jarvis).",
+    "Show read-only aggregated status (/api/jarvis/status, 24-key shape).",
+    "Answer typed questions (POST /api/jarvis/ask, answer-only).",
+    "Accept voice-to-text input that fills the question box only (browser STT).",
+    "Read returned answers aloud on explicit click (browser TTS, off by default).",
+    "Explain the trading posture from read-only status (observation-only).",
+    "Refuse forbidden trading/execution/mutation requests deterministically."
+  ],
+  "4_cannot_do": [
+    "Execute commands.",
+    "Run scripts.",
+    "Refresh state.",
+    "Write files.",
+    "Save chat / audio / transcripts.",
+    "Control broker / paper / live trading.",
+    "Approve strategies.",
+    "Place trades.",
+    "Mutate trading systems."
+  ],
+  "5_operator_workflow": [
+    "Restart the app if needed so the latest committed code is live on port 8765.",
+    "Open http://127.0.0.1:8765/jarvis.",
+    "Review the read-only status panels.",
+    "Type a question, or click 'Speak to fill' to dictate it (STT fills the box only).",
+    "Click 'Ask read-only' to get an answer.",
+    "Optionally click 'Read last answer' to hear it (off by default, click-gated).",
+    "Treat any refusal as expected safety confirmation, not an error."
+  ],
+  "6_trading_posture": {
+    "state": "observation-only",
+    "read_only": true,
+    "paper_ready": false,
+    "live_ready": false,
+    "broker_control": false,
+    "permission_to_trade": false
+  },
+  "7_safety_architecture": [
+    "Read-only UI: no real button/form/submit, no onclick, no method=post.",
+    "Answer-only endpoint: POST /api/jarvis/ask accepts ONLY {question}, returns text or refusal.",
+    "Deterministic safety classifier (jarvis_conversation_safety.py): forbidden checked first, fail-closed to UNSUPPORTED.",
+    "Contract tests pin the safe behavior (ask contract + classifier + route suites).",
+    "Refusal behavior: forbidden trading/execution/mutation always refused with a reason.",
+    "No command/action/execute payloads accepted or emitted.",
+    "No refresh endpoint anywhere.",
+    "No storage: no chat/audio/transcript files, no localStorage/sessionStorage/IndexedDB/cookies."
+  ],
+  "8_verification_summary": {
+    "latest_acceptance_step": 39,
+    "real_http_jarvis": "200",
+    "real_http_status": "200 (24 keys, online=true, read_only=true, trading flags locked false)",
+    "real_http_ask": "working (SAFE_INFO trading posture; SAFE_EXPLAIN read_only; FORBIDDEN_TRADING refusal; extra fields -> HTTP 400)",
+    "tests": "269 passed, 0 failed, 0 skipped (Step 38/39 state)"
+  },
+  "9_operational_notes": [
+    "Browser STT/TTS availability depends on browser support; both degrade gracefully when unavailable.",
+    "The real microphone capture and spoken-readback path cannot be fully headless-tested; it is covered by operator manual steps.",
+    "An app restart may be needed after code updates so the live server serves current HEAD.",
+    "PID numbers observed during smokes are temporary runtime details and are NOT part of this seal."
+  ],
+  "10_recommended_next_safe_phase": [
+    {"step": 41, "title": "v1 operator manual / quick-start card", "type": "docs-only"},
+    {"step": 42, "title": "read-only 'What changed since last check?' plan", "type": "plan-only"},
+    {"step": 43, "title": "read-only historical status archive plan", "type": "plan-only"},
+    {"step": 44, "title": "passive alerting plan only", "type": "plan-only"},
+    {"step": 45, "title": "no-execution approval boundary memo", "type": "docs-only"}
+  ],
+  "11_blocked_next_phase": [
+    "No broker integration.",
+    "No paper/live enablement.",
+    "No strategy approvals.",
+    "No script execution.",
+    "No auto-refresh mutation.",
+    "No autonomous trading."
+  ],
+  "12_seal_verdict": {
+    "verdict": "JARVIS_V1_ACCEPTED_READ_ONLY_VOICE_COMMAND_CENTER",
+    "accepted_as": "observer / advisor only, not executor"
+  },
+  "files_created": [
+    "docs/jarvis_step_40_v1_milestone_seal/report.md",
+    "docs/jarvis_step_40_v1_milestone_seal/report.json"
+  ],
+  "explicitly_not_done": [
+    "No app.py change.",
+    "No templates/jarvis.html change.",
+    "No jarvis_conversation_safety.py change.",
+    "No test change.",
+    "No tools change.",
+    "No endpoint added.",
+    "No UI change.",
+    "No refresh/execution/broker/paper/live control.",
+    "No storage.",
+    "No trade run or simulated.",
+    "No trading/Factory/S26-S28/Donchian/Hydra/base.html/storage file touched.",
+    "Nothing staged or committed."
+  ],
+  "conclusion": "JARVIS v1 is sealed as an accepted read-only, voice-enabled command center built across Steps 20-39 (HEAD 13e43ad). It can display the command center, show read-only status, answer typed and voice-dictated questions, read answers aloud on click, explain the observation-only trading posture, and deterministically refuse forbidden trading/execution/mutation requests. It cannot execute, run scripts, refresh, write, store, control broker/paper/live, approve strategies, place trades, or mutate trading systems. Verification at Step 39 confirmed real HTTP /jarvis 200, /api/jarvis/status 200 (24-key read-only shape), a working answer-only ask endpoint, and 269 passing tests. The next safe phase is documentation/plan-only (Steps 41-45); broker, paper/live, strategy approvals, execution, auto-refresh mutation, and autonomous trading remain explicitly blocked. Seal verdict: JARVIS_V1_ACCEPTED_READ_ONLY_VOICE_COMMAND_CENTER — accepted as observer/advisor only, not executor."
+}
