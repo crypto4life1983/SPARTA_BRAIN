@@ -33,6 +33,7 @@ from engine import validation_regime
 from engine import validation_walk_forward
 from engine import validation_friction
 from engine import validation_decision
+from engine import validation_synthetic_smoke
 
 
 CLI_VERSION = "sparta-validation-factory-cli 0.9.0 (research-only, offline)"
@@ -120,6 +121,8 @@ def _print_help() -> None:
     print("  describe --module M           show a module's purpose + required inputs")
     print("  synthetic-smoke --module M --output-dir DIR")
     print("                                write a synthetic-data demo report (safe modules only)")
+    print("  synthetic-e2e --output-dir DIR")
+    print("                                run the full synthetic end-to-end ladder demo")
     print("  version                       print the CLI version string")
     print("")
     print("Safety: no optimization, no parameter sweeps, no data fetch, no paper/live,")
@@ -270,6 +273,18 @@ def _cmd_synthetic_smoke(args: Sequence[str]) -> int:
     return 0
 
 
+def _cmd_synthetic_e2e(args: Sequence[str]) -> int:
+    output_dir = _get_opt(args, "--output-dir")
+    if not output_dir or not output_dir.strip():
+        print("error: synthetic-e2e requires --output-dir DIR", file=sys.stderr)
+        return 2
+    manifest = validation_synthetic_smoke.run_synthetic_validation_smoke(output_dir)
+    print(f"synthetic end-to-end demo wrote {len(manifest['modules'])} module reports")
+    print(f"research_decision: {manifest['research_decision']}")
+    print(f"readiness_level: {manifest['readiness_level']}")
+    return 0
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Parse a single command and dispatch. Returns a process exit code."""
     args = list(sys.argv[1:] if argv is None else argv)
@@ -289,6 +304,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return _cmd_describe(rest)
     if cmd == "synthetic-smoke":
         return _cmd_synthetic_smoke(rest)
+    if cmd == "synthetic-e2e":
+        return _cmd_synthetic_e2e(rest)
     print(f"error: unsupported command: {cmd}", file=sys.stderr)
     _print_help()
     return 2

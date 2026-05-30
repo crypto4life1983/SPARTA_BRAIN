@@ -132,3 +132,18 @@ def test_real_data_module_refused_for_smoke(tmp_path):
     assert CLI.main(["synthetic-smoke", "--module", "oos_run", "--output-dir", dest]) != 0
     # refusal wrote nothing.
     assert not os.path.exists(dest)
+
+
+# 13 -- synthetic-e2e runs the full ladder demo into a temp dir and exits 0.
+def test_synthetic_e2e_runs(tmp_path):
+    dest = str(tmp_path / "e2e")
+    rc = CLI.main(["synthetic-e2e", "--output-dir", dest])
+    assert rc == 0
+    assert os.path.isfile(os.path.join(dest, "final_decision", "report.json"))
+    assert os.path.isfile(os.path.join(dest, "is_baseline", "report.json"))
+
+
+# 14 -- synthetic-e2e refuses a missing output dir and writes nothing.
+def test_synthetic_e2e_missing_output_dir_refused(tmp_path):
+    assert CLI.main(["synthetic-e2e"]) != 0
+    assert list(tmp_path.iterdir()) == []
