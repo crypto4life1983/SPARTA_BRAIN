@@ -27,3 +27,6 @@ reports/s23_d12_nq_2014_2022_data_prep/
 
 # Local-only S23-D13 NQ 2014-2022 databento transcode run outputs
 reports/s23_d13_nq_2014_2022_databento_transcode/
+
+# Local-only S23-D14 Donchian 2013-2022 IS baseline run outputs
+reports/s23_d14_2013_2022_donchian_is_baseline/
