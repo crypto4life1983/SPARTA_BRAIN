@@ -217,3 +217,34 @@ def test_jarvis_template_still_has_no_controls():
     for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"',
                 "/api/jarvis/refresh"):
         assert tok not in low, f"template must add no control: {tok}"
+
+
+# --- Step 38: read-only trading-status questions classify SAFE_INFO --------
+
+@pytest.mark.parametrize("q", [
+    "how are we doing with trading?",
+    "what is the trading status?",
+    "what is the trading posture?",
+    "are we ready for paper trading?",
+    "are we ready for live trading?",
+])
+def test_step38_trading_status_questions_are_safe_info(q):
+    out = classify_jarvis_question(q)
+    assert out["refused"] is False, f"{q!r} must be a read-only safe question"
+    assert out["safety_class"] == "SAFE_INFO"
+
+
+@pytest.mark.parametrize("q", [
+    "enable paper trading",
+    "enable live trading",
+    "connect broker",
+    "approve strategy",
+    "place a trade on NQ",
+    "explain the trading posture then place a trade",
+])
+def test_step38_trading_action_questions_still_forbidden(q):
+    # The new safe patterns must never let an action-request through; forbidden
+    # is checked first, so these stay refused.
+    out = classify_jarvis_question(q)
+    assert out["refused"] is True, f"{q!r} must stay refused"
+    assert out["safety_class"].startswith("FORBIDDEN")

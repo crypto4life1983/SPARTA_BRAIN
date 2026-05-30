@@ -142,6 +142,14 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bwhat\s+is\s+the\s+status\b",
     r"\bstatus\b",
     r"\btrading\s+posture\b",
+    r"\btrading\s+status\b",
+    # Read-only trading-posture questions. Forbidden patterns (e.g. "enable
+    # paper trading", "connect broker") are matched FIRST, so these only
+    # classify safe for genuinely read-only status questions.
+    r"\bhow\s+are\s+we\s+doing\b",
+    r"\bready\s+for\s+(?:paper|live)\s+trading\b",
+    r"\b(?:paper|live)[_\s]?ready\b",
+    r"\bbroker[_\s]?control\b",
     r"\bjarvis\s+docs\b",
     r"\bwhat\s+docs\b",
     r"\bdocs\s+exist\b",

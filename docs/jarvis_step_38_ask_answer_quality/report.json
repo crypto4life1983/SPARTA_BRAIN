@@ -1,0 +1,77 @@
+{
+  "title": "JARVIS Step 38 — Read-Only Ask Answer-Quality Improvement",
+  "generated_at": "2026-05-30T19:00:00",
+  "type": "backend_answer_quality_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "status_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Improve /api/jarvis/ask answers for common operator questions so JARVIS gives useful read-only status summaries (especially the trading posture) instead of generic safety text, while preserving every safety and refusal behavior. The handler still executes nothing: no commands, no trades, no refresh, no writes, no storage. Trading answers are derived only from the existing read-only _jarvis_trading_detail file scan (read_only / paper_ready / live_ready / broker_control).",
+  "problem_observed": "'how are we doing with trading?' previously fell through to UNSUPPORTED (refused) OR, for the posture phrasing, returned a generic read-only shell explanation. It should instead summarize the actual read-only trading posture from existing JARVIS status context.",
+  "files_changed": [
+    "jarvis_conversation_safety.py — extended _SAFE_INFO with read-only trading-status patterns (how are we doing / ready for paper|live trading / paper_ready|live_ready / broker_control / trading status) so those questions classify SAFE_INFO instead of fail-closing to UNSUPPORTED. Forbidden patterns are unchanged and still checked FIRST, so no action-request can leak through.",
+    "app.py — added _jarvis_trading_posture_answer(), a read-only helper that reads the four posture fields from _jarvis_safe(_jarvis_trading_detail) and builds a direct posture summary (conservative per-field fallback 'I cannot verify that field from the current read-only status.' when a field is not a bool). Routed trading-status questions in the SAFE_INFO branch of _jarvis_ask_answer to this helper, replacing the old hardcoded 'posture' string.",
+    "tests/test_jarvis_ask_contract.py — added a Step 38 section (trading questions safe + report posture fields; no invented performance claims; forbidden questions still refused; mixed-intent forbidden override; status shape unchanged after a trading ask).",
+    "tests/test_jarvis_conversation_safety.py — added Step 38 classifier tests (trading-status questions -> SAFE_INFO; trading-action questions still FORBIDDEN).",
+    "docs/jarvis_step_38_ask_answer_quality/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No templates/jarvis.html change (UI untouched; still sends only {question}).",
+    "No new endpoint added.",
+    "No refresh / execution / broker / paper / live control.",
+    "No chat / audio / transcript storage; no localStorage / sessionStorage / IndexedDB / cookies.",
+    "No trade run or simulated; no data fetched.",
+    "No broker / live / paper trading logic touched.",
+    "No trading / Factory / S26-S28 / Donchian / Hydra / base.html / storage file touched.",
+    "No change to the /api/jarvis/ask payload shape — still {question} only.",
+    "No change to /api/jarvis/status shape — still 24 top-level keys.",
+    "No invented performance / profit / readiness / validation claims.",
+    "Nothing staged or committed."
+  ],
+  "answer_quality_summary": {
+    "trading_posture_answer": "Trading is observation-only. read_only=true. paper_ready=false. live_ready=false. broker_control=false. This means JARVIS is not authorized to trade or control broker/paper/live systems.",
+    "source_of_truth": "_jarvis_safe(_jarvis_trading_detail) — read-only file scan; never runs a backtest, fetches data, calls a broker, or writes.",
+    "fields_reported": ["read_only", "paper_ready", "live_ready", "broker_control"],
+    "missing_field_behavior": "Any field not readable as a bool is reported as 'I cannot verify that field from the current read-only status.' (no guessing).",
+    "style": "Direct, useful, conservative; no hype, no trading advice, no permission language.",
+    "sources_used": ["trading_detail"],
+    "other_improved_answers_unchanged": "why is commander yellow? / what needs attention? / what does read_only mean? / what JARVIS docs exist? continue to answer as before (SAFE_INFO / SAFE_EXPLAIN)."
+  },
+  "before_after_how_are_we_doing_with_trading": {
+    "question": "how are we doing with trading?",
+    "before": "UNSUPPORTED / generic read-only shell: 'This is answerable from the read-only JARVIS status aggregate; it reports observed state only and authorizes no action.' (or refused fail-closed)",
+    "after": "SAFE_INFO, refused=false: 'Trading is observation-only. read_only=true. paper_ready=false. live_ready=false. broker_control=false. This means JARVIS is not authorized to trade or control broker/paper/live systems.' sources_used=['trading_detail']"
+  },
+  "safety_refusal_confirmation": {
+    "forbidden_still_refused": [
+      "place a trade on NQ -> FORBIDDEN_TRADING",
+      "buy NQ -> FORBIDDEN_TRADING",
+      "sell ES -> FORBIDDEN_TRADING",
+      "go long -> FORBIDDEN_TRADING",
+      "enable paper trading -> FORBIDDEN_TRADING",
+      "enable live trading -> FORBIDDEN_TRADING",
+      "connect broker -> FORBIDDEN_TRADING",
+      "approve strategy -> FORBIDDEN_TRADING",
+      "run script -> FORBIDDEN_EXECUTION",
+      "refresh status -> FORBIDDEN_EXECUTION",
+      "modify file -> FORBIDDEN_MUTATION",
+      "explain the trading posture then place a trade -> FORBIDDEN_TRADING (forbidden override)"
+    ],
+    "response_has_no_command_keys": true,
+    "response_keys": ["answer", "safety_class", "sources_used", "refused", "refusal_reason"]
+  },
+  "status_shape_confirmation": {
+    "top_level_key_count": 24,
+    "online": true,
+    "read_only": true,
+    "trading_detail_flags": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false},
+    "forbidden_keys_present": []
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "269 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_38_ask_answer_quality/report.json", "result": "JSON_OK"},
+    {"cmd": "git diff --name-only (allowed files)", "result": "app.py, jarvis_conversation_safety.py, tests/test_jarvis_ask_contract.py, tests/test_jarvis_conversation_safety.py (templates/jarvis.html and test_jarvis_route.py unchanged)"}
+  ],
+  "conclusion": "JARVIS now answers common read-only operator trading-status questions with a direct, data-derived posture summary (read_only / paper_ready / live_ready / broker_control) instead of generic safety text, sourced only from the existing read-only _jarvis_trading_detail scan. The classifier was extended so 'how are we doing with trading?' and 'are we ready for paper/live trading?' classify SAFE_INFO, while every forbidden action-request stays refused because forbidden is checked first. The /api/jarvis/ask response keeps exactly its five fields with no command/action/order keys, the /api/jarvis/status shape is unchanged at 24 keys with trading flags locked false, the UI and template are untouched (still {question} only), and no endpoint/refresh/execution/storage/trading control was added. 269 tests pass. Nothing staged or committed."
+}

@@ -8385,10 +8385,51 @@ def page_jarvis(request: Request):
     )
 
 
+def _jarvis_trading_posture_answer():
+    """READ-ONLY. Summarize the trading posture from the committed
+    ``_jarvis_trading_detail`` file scan. Reads only the four posture fields
+    (read_only / paper_ready / live_ready / broker_control); it never runs a
+    backtest, fetches data, calls a broker, or writes anything. Any field it
+    cannot read as a bool is reported conservatively. Returns
+    (answer_text, sources_used)."""
+    detail = _jarvis_safe(_jarvis_trading_detail)
+    if not isinstance(detail, dict):
+        detail = {}
+
+    def _fld(name: str) -> str:
+        val = detail.get(name)
+        if val is True:
+            return f"{name}=true"
+        if val is False:
+            return f"{name}=false"
+        return f"{name}: I cannot verify that field from the current read-only status."
+
+    ro, pr, lr, bc = (
+        detail.get("read_only"),
+        detail.get("paper_ready"),
+        detail.get("live_ready"),
+        detail.get("broker_control"),
+    )
+    fields = ". ".join(_fld(n) for n in
+                       ("read_only", "paper_ready", "live_ready", "broker_control"))
+    locked = (ro is True and pr is False and lr is False and bc is False)
+    if locked:
+        return (
+            "Trading is observation-only. " + fields + ". This means JARVIS is "
+            "not authorized to trade or control broker/paper/live systems.",
+            ["trading_detail"],
+        )
+    return (
+        "Trading posture (read-only status): " + fields + ". JARVIS remains a "
+        "read-only surface and authorizes no trading or broker control.",
+        ["trading_detail"],
+    )
+
+
 def _jarvis_ask_answer(safety_class: str, q: str):
     """Build a conservative, read-only answer for an already-classified SAFE
-    question. Returns (answer_text, sources_used). Pure string assembly — it
-    reads no live state beyond static, already-known JARVIS concepts and
+    question. Returns (answer_text, sources_used). Reads only already-known
+    JARVIS concepts plus the read-only trading-posture status scan and
     NEVER authorizes any action."""
     if safety_class == "SAFE_EXPLAIN":
         if "read_only" in q or "read only" in q:
@@ -8416,12 +8457,18 @@ def _jarvis_ask_answer(safety_class: str, q: str):
             "nothing.",
             ["commander_snapshot"],
         )
-    if "posture" in q:
-        return (
-            "The trading posture is fully locked and read-only: read_only=true, "
-            "paper_ready=false, live_ready=false, broker_control=false.",
-            ["trading_detail"],
-        )
+    if (
+        "trading" in q
+        or "posture" in q
+        or "how are we doing" in q
+        or "paper_ready" in q
+        or "paper ready" in q
+        or "live_ready" in q
+        or "live ready" in q
+        or "broker_control" in q
+        or "broker control" in q
+    ):
+        return _jarvis_trading_posture_answer()
     if "docs" in q:
         return (
             "JARVIS documentation exists across Steps 20-29 (runbook, known "
