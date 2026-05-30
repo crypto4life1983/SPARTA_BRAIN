@@ -1,0 +1,92 @@
+{
+  "title": "JARVIS Step 29 — /api/jarvis/ask Endpoint Contract Tests (tests-first, no handler)",
+  "generated_at": "2026-05-30T09:30:00",
+  "type": "tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "purpose": "Write the safety/behaviour contract tests for a FUTURE POST /api/jarvis/ask endpoint BEFORE any handler is implemented. The tests document the required safe behaviour while proving no handler exists in this step. No endpoint, route, POST handler, app.py change, or template change is introduced.",
+  "relation_to_steps_20_28": "Step 20 polished the UI; Step 21 proved it live and safe; Step 22 runbook; Step 23 known limits & roadmap; Step 24 panel glossary; Step 25 conversation layer plan; Step 26 display-only conversation shell; Step 27 answer-only backend safety plan; Step 28 pure local safety classifier (jarvis_conversation_safety.py). Step 29 implements the second Step 27/28 recommendation — JARVIS-ASK-ENDPOINT-TESTS-FIRST: pin the endpoint contract before any handler is written.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc",
+    "step_24_commit": "9523da8",
+    "step_25_commit": "6b88d9b",
+    "step_26_commit": "f2268f3",
+    "step_27_commit": "e961481",
+    "step_28_commit": "a5b47b4"
+  },
+  "files_changed": [
+    "tests/test_jarvis_ask_contract.py — new contract test suite for the future endpoint.",
+    "docs/jarvis_step_29_ask_endpoint_contract_tests/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No /api/jarvis/ask endpoint implemented.",
+    "No POST handler added.",
+    "No route wired.",
+    "No change to app.py.",
+    "No change to templates/jarvis.html.",
+    "No change to jarvis_conversation_safety.py.",
+    "No change to /api/jarvis/status shape.",
+    "No execution or refresh controls.",
+    "No broker/paper/live trading logic touched.",
+    "No trade run or simulation."
+  ],
+  "skip_strategy": {
+    "mechanism": "pytest.mark.skipif keyed on whether a route for /api/jarvis/ask is registered in app.app.routes.",
+    "marker": "requires_ask = pytest.mark.skipif(_ENDPOINT_ABSENT, reason=...)",
+    "reason_text": "Step 29 contract test for future endpoint; implementation intentionally absent.",
+    "behaviour_now": "The future-contract tests are SKIPPED (endpoint absent), so the default suite stays green.",
+    "behaviour_later": "When a separately-approved step registers /api/jarvis/ask, _ask_route_exists() returns True and every contract test activates automatically with NO edit to the test file.",
+    "always_run_tests": [
+      "test_ask_endpoint_is_currently_absent",
+      "test_post_ask_is_not_routed_today",
+      "test_app_py_has_no_ask_route",
+      "test_template_has_no_ask_fetch",
+      "test_status_shape_unchanged_in_step_29",
+      "test_classifier_is_importable_for_future_endpoint"
+    ]
+  },
+  "future_contract": [
+    "POST /api/jarvis/ask accepts only a question string.",
+    "Reject missing/blank question (200+refused or 400/422).",
+    "Do not accept command/action/execute fields; response carries no command/action/execution field.",
+    "Safe questions -> 200, answer, safety_class, sources_used, refused=false.",
+    "Forbidden questions -> 200 or 400 deterministically, refused=true, safety_class begins with FORBIDDEN, refusal_reason present, no command/action/execution field.",
+    "Must not write chat logs by default.",
+    "Must not mutate the filesystem.",
+    "Must not change /api/jarvis/status shape.",
+    "Must keep broker_control/paper_ready/live_ready false.",
+    "Must not trigger refresh.",
+    "GET /api/jarvis/ask must not be supported (405) unless separately authorized."
+  ],
+  "current_step_assertions": [
+    "/api/jarvis/ask is absent from the route table (POST returns 404/405).",
+    "app.py has no /api/jarvis/ask route.",
+    "templates/jarvis.html has no ask fetch / form / button / onclick / method=post.",
+    "/api/jarvis/status shape unchanged (online/read_only true, no conversation/ask/chat/answer key).",
+    "jarvis_conversation_safety.classify_jarvis_question importable and returns SAFE_INFO for a known safe question."
+  ],
+  "contract_tests": [
+    "test_contract_post_accepts_only_question_string",
+    "test_contract_rejects_missing_or_blank_question",
+    "test_contract_rejects_command_action_execute_fields",
+    "test_contract_safe_question_returns_answer (SAFE_INFO / SAFE_EXPLAIN / SAFE_NEXT_REVIEW_STEP)",
+    "test_contract_forbidden_question_is_refused (execution/trading/mutation + mixed override)",
+    "test_contract_does_not_write_chat_logs",
+    "test_contract_does_not_mutate_filesystem",
+    "test_contract_does_not_change_status_shape",
+    "test_contract_keeps_broker_paper_live_locked",
+    "test_contract_does_not_trigger_refresh",
+    "test_contract_get_ask_not_supported"
+  ],
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "PASS (existing + classifier + 6 active contract tests; future-contract tests skipped)"},
+    {"cmd": "python -m json.tool docs/jarvis_step_29_ask_endpoint_contract_tests/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "JARVIS-ASK-ANSWER-ONLY-HANDLER (Step 30, separate approval) — implement a strictly answer-only, non-mutating POST /api/jarvis/ask that delegates to jarvis_conversation_safety.classify_jarvis_question, returns read-only text derived from already-aggregated status/docs, writes nothing, triggers no refresh, and keeps broker/paper/live false. Implementing it will turn the skipped Step 29 contract tests green with no test edits. No broker/paper/live/refresh/execution capability is introduced without explicit, separate authorization.",
+  "conclusion": "Tests-first contract for a future /api/jarvis/ask endpoint added, plus Step 29 docs. The future-contract tests are skipped until the route exists (so the default suite stays green) and encode every required safety property; current-step tests prove the endpoint is absent. No endpoint, route, POST handler, app.py change, template change, classifier change, or status-shape change was introduced."
+}
