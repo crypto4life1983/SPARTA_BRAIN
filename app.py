@@ -8459,6 +8459,7 @@ def _jarvis_ask_answer(safety_class: str, q: str):
         )
     if (
         "trading" in q
+        or "trades" in q
         or "posture" in q
         or "how are we doing" in q
         or "paper_ready" in q

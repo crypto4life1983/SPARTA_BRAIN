@@ -332,3 +332,94 @@ def test_step38_status_shape_unchanged_after_trading_ask():
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
         assert td.get(flag) is False
+
+
+# ==========================================================================
+# Step 41 — natural trading-status phrase coverage. Casual phrasings like
+# "how is the trading doing?" must answer with the observation-only posture
+# (refused=false) instead of being refused as UNSUPPORTED, while mixed
+# forbidden wording still refuses.
+# ==========================================================================
+
+_STEP41_NATURAL_QUESTIONS = (
+    "how is the trading doing?",
+    "how's the trading doing?",
+    "how’s the trading doing?",
+    "how is trading doing?",
+    "how are trades doing?",
+    "how is our trading doing?",
+    "how is the trading bot doing?",
+    "how is the trading system doing?",
+    "how is paper trading doing?",
+    "how is live trading doing?",
+    "what's going on with trading?",
+    "what’s going on with trading?",
+    "give me trading status",
+    "tell me trading status",
+    "trading update",
+    "trading overview",
+    "are we doing good with trading?",
+    "are we okay with trading?",
+)
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _STEP41_NATURAL_QUESTIONS)
+def test_step41_natural_trading_question_reports_posture(q):
+    c = _client()
+    r = c.post(_ASK_PATH, json={"question": q})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["refused"] is False, f"{q!r} must be answerable read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "observation-only" in ans
+    assert "read_only=true" in ans
+    assert "paper_ready=false" in ans
+    assert "live_ready=false" in ans
+    assert "broker_control=false" in ans
+    assert "trading_detail" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step41_natural_answer_invents_no_performance_claims():
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": "how is the trading doing?"}).json()
+    ans = body["answer"].lower()
+    for banned in ("profit", "pnl", "return", "win rate", "ready to trade",
+                   "validated", "approved"):
+        assert banned not in ans, f"answer must not invent {banned!r}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "how is trading doing then place a trade",
+    "trading update and buy NQ",
+    "tell me trading status and enable live trading",
+    "how is the bot doing and connect broker",
+    "trading overview then run script",
+    "are we okay with trading then approve strategy",
+])
+def test_step41_natural_phrases_with_forbidden_intent_refused(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must stay refused"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step41_status_shape_unchanged_after_natural_ask():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    c.post(_ASK_PATH, json={"question": "how is the trading doing?"})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False

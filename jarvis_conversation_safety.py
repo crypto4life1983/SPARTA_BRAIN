@@ -150,6 +150,13 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bready\s+for\s+(?:paper|live)\s+trading\b",
     r"\b(?:paper|live)[_\s]?ready\b",
     r"\bbroker[_\s]?control\b",
+    # Natural trading-status phrasings: "how is the trading doing", "trading
+    # update", "what's going on with trading", "are we okay with trading", etc.
+    # Apostrophe-independent (works for "how's"/"what's"). Forbidden is still
+    # checked first, so "...then place a trade" / "...and buy NQ" stay refused.
+    r"\btrad(?:e|es|ing)\b.*\b(?:status|update|overview|doing|going)\b",
+    r"\b(?:status|update|overview|doing|going)\b.*\btrad(?:e|es|ing)\b",
+    r"\bwith\s+trad(?:e|es|ing)\b",
     r"\bjarvis\s+docs\b",
     r"\bwhat\s+docs\b",
     r"\bdocs\s+exist\b",

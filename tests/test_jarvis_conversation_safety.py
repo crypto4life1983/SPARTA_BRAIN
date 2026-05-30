@@ -248,3 +248,47 @@ def test_step38_trading_action_questions_still_forbidden(q):
     out = classify_jarvis_question(q)
     assert out["refused"] is True, f"{q!r} must stay refused"
     assert out["safety_class"].startswith("FORBIDDEN")
+
+
+# --- Step 41: natural trading-status phrasings classify SAFE_INFO ----------
+
+@pytest.mark.parametrize("q", [
+    "how is the trading doing?",
+    "how's the trading doing?",
+    "how’s the trading doing?",        # curly apostrophe
+    "how is trading doing?",
+    "how are trades doing?",
+    "how is our trading doing?",
+    "how is the trading bot doing?",
+    "how is the trading system doing?",
+    "how is paper trading doing?",
+    "how is live trading doing?",
+    "what's going on with trading?",
+    "what’s going on with trading?",    # curly apostrophe
+    "give me trading status",
+    "tell me trading status",
+    "trading update",
+    "trading overview",
+    "are we doing good with trading?",
+    "are we okay with trading?",
+])
+def test_step41_natural_trading_status_phrases_are_safe_info(q):
+    out = classify_jarvis_question(q)
+    assert out["refused"] is False, f"{q!r} must be a read-only safe question"
+    assert out["safety_class"] == "SAFE_INFO"
+
+
+@pytest.mark.parametrize("q", [
+    "how is trading doing then place a trade",
+    "trading update and buy NQ",
+    "tell me trading status and enable live trading",
+    "how is the bot doing and connect broker",
+    "trading overview then run script",
+    "are we okay with trading then approve strategy",
+])
+def test_step41_natural_phrases_with_forbidden_intent_still_refused(q):
+    # Natural safe wording must never let an action-request through; forbidden
+    # is checked first.
+    out = classify_jarvis_question(q)
+    assert out["refused"] is True, f"{q!r} must stay refused"
+    assert out["safety_class"].startswith("FORBIDDEN")

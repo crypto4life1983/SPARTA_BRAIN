@@ -1,0 +1,88 @@
+{
+  "title": "JARVIS Step 41 — Natural Trading-Status Phrase Coverage",
+  "generated_at": "2026-05-30T20:40:00",
+  "type": "classifier_plus_route_answer_quality_plus_tests_plus_docs",
+  "read_only": true,
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Recognize casual, natural trading-status questions (e.g. 'how is the trading doing?') as read-only SAFE_INFO questions and answer them with the observation-only trading posture, instead of refusing them as UNSUPPORTED. All safety/refusal behavior is preserved: forbidden intent is still matched first and overrides any safe wording.",
+  "observed_issue": "In the live dashboard, 'how is the trading doing?' returned REFUSED / UNSUPPORTED. It is a safe read-only status question and should answer like the existing 'how are we doing with trading?' path.",
+  "files_changed": [
+    "jarvis_conversation_safety.py — added 3 read-only SAFE_INFO patterns covering natural trading-status phrasings: trad(e|es|ing) co-occurring with status/update/overview/doing/going (both orders), and 'with trad(e|es|ing)'. Apostrophe-independent (works for 'how's'/'what's', straight or curly). Forbidden patterns unchanged and still checked FIRST.",
+    "app.py — added 'trades' to the SAFE_INFO trading-routing condition in _jarvis_ask_answer so 'how are trades doing?' (no 'trading' substring) reaches _jarvis_trading_posture_answer(). No other logic changed; the posture answer and its read-only source are unchanged from Step 38.",
+    "tests/test_jarvis_conversation_safety.py — added Step 41 classifier tests (18 natural phrasings -> SAFE_INFO; 6 mixed-forbidden phrasings -> FORBIDDEN).",
+    "tests/test_jarvis_ask_contract.py — added Step 41 ask-endpoint tests (natural phrasings answer the posture with all four fields and trading_detail source; no invented performance claims; mixed-forbidden refused; status shape unchanged).",
+    "docs/jarvis_step_41_natural_trading_status_phrases/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No templates/jarvis.html change (UI untouched; still sends only {question}).",
+    "No new endpoint added.",
+    "No refresh / execution / broker / paper / live control.",
+    "No storage of any kind.",
+    "No trade run or simulated; no data fetched.",
+    "No broker / live / paper trading logic touched.",
+    "No trading / Factory / S26-S28 / Donchian / Hydra / base.html / storage file touched.",
+    "No change to the /api/jarvis/ask payload shape ({question} only) or response key set.",
+    "No change to /api/jarvis/status shape (24 keys).",
+    "No invented profit / performance / win-rate / readiness / validation / approval claims.",
+    "Nothing staged or committed."
+  ],
+  "phrase_coverage": {
+    "now_safe_info_refused_false": [
+      "how is the trading doing",
+      "how's the trading doing",
+      "how is trading doing",
+      "how are trades doing",
+      "how is our trading doing",
+      "how is the trading bot doing",
+      "how is the trading system doing",
+      "how is paper trading doing",
+      "how is live trading doing",
+      "what's going on with trading",
+      "give me trading status",
+      "tell me trading status",
+      "trading update",
+      "trading overview",
+      "are we doing good with trading",
+      "are we okay with trading"
+    ],
+    "apostrophe_note": "Patterns do not depend on the apostrophe, so both straight ('how's) and curly ('how’s) variants classify SAFE_INFO."
+  },
+  "before_after_how_is_the_trading_doing": {
+    "question": "how is the trading doing?",
+    "before": "REFUSED / UNSUPPORTED (no safe pattern matched; fail-closed).",
+    "after": "SAFE_INFO, refused=false: 'Trading is observation-only. read_only=true. paper_ready=false. live_ready=false. broker_control=false. This means JARVIS is not authorized to trade or control broker/paper/live systems.' sources_used=['trading_detail']"
+  },
+  "expected_answer_fields": {
+    "state": "observation-only",
+    "read_only": "true",
+    "paper_ready": "false",
+    "live_ready": "false",
+    "broker_control": "false",
+    "permission": "JARVIS is not authorized to trade or control broker/paper/live systems."
+  },
+  "safety_refusal_confirmation": {
+    "mixed_forbidden_still_refused": [
+      "how is trading doing then place a trade -> FORBIDDEN_TRADING",
+      "trading update and buy NQ -> FORBIDDEN_TRADING",
+      "tell me trading status and enable live trading -> FORBIDDEN_TRADING",
+      "how is the bot doing and connect broker -> FORBIDDEN_TRADING",
+      "trading overview then run script -> FORBIDDEN_EXECUTION",
+      "are we okay with trading then approve strategy -> FORBIDDEN_TRADING"
+    ],
+    "response_has_no_command_keys": true,
+    "response_keys": ["answer", "safety_class", "sources_used", "refused", "refusal_reason"]
+  },
+  "status_shape_confirmation": {
+    "top_level_key_count": 24,
+    "online": true,
+    "read_only": true,
+    "trading_detail_flags": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false}
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "319 passed, 0 failed, 0 skipped"},
+    {"cmd": "python -m json.tool docs/jarvis_step_41_natural_trading_status_phrases/report.json", "result": "JSON_OK"},
+    {"cmd": "git diff --name-only", "result": "app.py, jarvis_conversation_safety.py, tests/test_jarvis_ask_contract.py, tests/test_jarvis_conversation_safety.py (templates/jarvis.html and test_jarvis_route.py unchanged)"}
+  ],
+  "conclusion": "JARVIS now recognizes natural, casual trading-status phrasings as read-only SAFE_INFO questions and answers them with the observation-only posture (read_only=true, paper_ready=false, live_ready=false, broker_control=false) sourced only from the existing read-only trading_detail scan. The fix is a 3-pattern classifier extension plus a one-keyword ('trades') routing addition in the existing Step 38 answer path; no new endpoint, UI, storage, refresh, execution, or trading control was added. Forbidden intent still overrides safe wording (forbidden is checked first), so mixed phrases like 'trading update and buy NQ' stay refused. The ask response keeps its five fields with no command/action/order keys, and the /api/jarvis/status shape is unchanged at 24 keys with trading flags locked false. 319 tests pass. Nothing staged or committed."
+}
