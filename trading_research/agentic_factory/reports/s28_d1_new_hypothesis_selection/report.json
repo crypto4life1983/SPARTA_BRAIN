@@ -1,0 +1,154 @@
+{
+  "step": "S28-D1",
+  "title": "New strategy hypothesis selection memo (comparison only)",
+  "memo_only": true,
+  "code": false,
+  "backtest": false,
+  "optimization": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "created": "2026-05-30",
+  "head_commit_short": "4505fbf",
+  "parked_branches_context": {
+    "donchian": {
+      "status": "PARKED",
+      "s23": "WATCH (positive IS+OOS but OOS only 16 trades; not deployable)",
+      "s24": "ENTRY_EDGE_NOT_SUPPORTED (raw breakout entry no edge vs random darts)",
+      "s25": "SEQUENCE_RISK_FRAGILE (IS bootstrap P(<=0)=20.9%; removing top 3 flips IS -3.82R and OOS -1.93R negative; OOS ~50% one trade)"
+    },
+    "s26_trend_sr_ema_rsi": {
+      "status": "PARK_CANDIDATE",
+      "notes": "OOS PASS both primaries but ENTRY_EDGE_INCONCLUSIVE, PARTIAL_SUPPORT_WITH_CAUTION, REGIME_RISK_INCONCLUSIVE, WALK_FORWARD_INCONCLUSIVE, FRICTION_SENSITIVE; thin IS edge (PF~1.20, exp~0.065R); whole record post-2016; 2014-2016 NQ+ES collapse; OOS single-year-dominated"
+    },
+    "s27_mean_reversion_bull": {
+      "status": "PARKED after IS_FAIL",
+      "notes": "IS 2013-2022: 18 trades, -1.7506R, PF 0.8372, expectancy -0.097R, 3/10 positive years, anti-Donchian top-3 gate FAIL (-6.25R ex top3); capped +1.5R target rarely reached, two-step confirmation too restrictive; no OOS used"
+    }
+  },
+  "must_avoid": {
+    "weak_or_inconclusive_entry_edge": "Donchian (NOT_SUPPORTED) and S26 (INCONCLUSIVE) both failed to show the entry beats random-in-regime. The next entry must be a discrete, separable event that CAN be significance-tested AND must actually pass before any continue.",
+    "thin_or_negative_is_expectancy": "S26 ~0.065R; S27 negative. Need real per-trade headroom, not a marginal edge.",
+    "high_friction_sensitivity": "S26 IS went negative at 0.10R/trade. Prefer fewer, larger-R trades with friction headroom.",
+    "regime_concentration_2014_2016": "The ONE failure shared by Donchian and S26 is the 2014-2016 choppy-regime collapse; both lived entirely in the post-2016 trend. The next idea must either be counter-cyclical OR carry an explicit mechanical no-trade regime gate.",
+    "top_winner_dependence": "Donchian net flips negative without its top 3 trades. Avoid fat-tail-winner dependence; per-trade outcomes should be repeatable.",
+    "low_trade_count": "Donchian OOS 16, S27 IS 18. Over-restrictive multi-step confirmations starve the sample. Keep the entry selective but not rare."
+  },
+  "data_reality": {
+    "daily_provisioned": ["NQ", "ES", "MNQ", "MES"],
+    "columns_present": ["ts_event", "open", "high", "low", "close", "volume", "symbol"],
+    "volume_available_daily": true,
+    "intraday_provisioned": false,
+    "other_index_underlyings_provisioned": false,
+    "independent_underlyings": ["Nasdaq (NQ/MNQ)", "S&P (ES/MES)"],
+    "implication": "Daily OHLCV including real volume is available for NQ and ES with no new fetch. Any volume- or ATR-expansion proxy is testable immediately. Intraday or a new underlying would need a separately-authorized data fetch."
+  },
+  "candidates": [
+    {
+      "id": 1,
+      "name": "Volatility-confirmed trend continuation",
+      "hypothesis": "In an uptrend, enter continuation only after a volatility/range expansion confirms the move's direction, on the thesis that expansion-backed continuations persist.",
+      "why_real_entry_edge": "An expansion gate could in principle separate real continuations from drift.",
+      "avoids_prior_weaknesses": "Bigger moves give some friction headroom vs S26.",
+      "reintroduces_prior_weaknesses": "Same trend-continuation family as the parked S26; the entry is again hard to separate from the trend filter and it would collapse in the same 2014-2016 chop.",
+      "expected_trade_count": "moderate",
+      "friction_sensitivity": "moderate",
+      "regime_risk": "HIGH -- identical trend dependence and 2014-2016 vulnerability to S26",
+      "multi_market_testability": "good (daily NQ/ES, no new data)",
+      "data_requirements": "none new",
+      "biggest_failure_mode": "Re-discovers S26: entry significance inconclusive again, 2014-2016 collapse again.",
+      "first_clean_test_design": "Daily NQ IS 2013-2022: continuation entries WITH vs WITHOUT the expansion gate vs random-in-uptrend, to isolate the gate's marginal edge.",
+      "entry_significance_cleanly_testable": "yes (vs random-in-regime), but expected to be inconclusive like S26",
+      "verdict": "WEAK -- closest to a parked family; least new information."
+    },
+    {
+      "id": 2,
+      "name": "Breakout-retest with volatility-expansion confirmation (+ mechanical bad-regime no-trade gate)",
+      "hypothesis": "Wait for a clean break of a prior daily resistance level; do NOT enter the breakout. Enter only on a subsequent RETEST that HOLDS the broken level (prior resistance becomes support), and only when a volatility/volume expansion confirms participation. Skip everything in a mechanically-flagged low-vol/chop regime.",
+      "why_real_entry_edge": "The retest-that-holds is a discrete, datable, behaviorally-grounded event (trapped breakout sellers + new demand at the reclaimed shelf) that is structurally DISTINCT from both Donchian's raw breakout and S26's pullback-in-uptrend. Its marginal value can be measured directly against entering on the raw breakout.",
+      "avoids_prior_weaknesses": "Distinct entry event from both parked families; the retest filter is designed to reject the false breakouts that define chop; the vol/volume-expansion gate yields fewer, larger-R trades (friction headroom) and is computable from real daily volume already present; an explicit no-trade regime gate folds in candidate 4's insight to attack the 2014-2016 collapse head-on.",
+      "reintroduces_prior_weaknesses": "Still trend-following in spirit, so a pure chop regime is dangerous -- which is precisely why the vol-expansion gate and the bad-regime no-trade filter are part of the hypothesis, not optional add-ons.",
+      "expected_trade_count": "low-moderate (selective; bigger moves)",
+      "friction_sensitivity": "low-moderate -- wider stops on larger structures give good headroom",
+      "regime_risk": "MEDIUM -- chop is the native risk, but the retest filter + vol gate + explicit no-trade regime gate directly target it (vs S26 which had no such gate)",
+      "multi_market_testability": "EXCELLENT -- daily NQ + independent ES (plus MNQ/MES corroboration), no new data",
+      "data_requirements": "none new (daily OHLCV incl. real volume already provisioned)",
+      "biggest_failure_mode": "Choppy regime still generates failed retests; mitigated by the vol gate + no-trade regime filter and bounded by an R-stop. If the retest does not beat raw-breakout entry in significance testing, PARK immediately (do not repeat S26's 'inconclusive but continue').",
+      "first_clean_test_design": "Daily NQ IS 2013-2022, FROZEN before any OOS: mechanical level definition (e.g. prior swing high / N-day high), breakout rule, retest-hold rule, vol/volume-expansion gate, no-trade regime gate, R-stop and R-target. THEN run TWO significance tests: (a) retest entries vs random-in-uptrend; (b) retest entries vs entering on the raw breakout -- isolating the retest's marginal edge AND producing information about the parked Donchian. Only after IS is frozen, evaluate ES independently and 2023-2025 OOS.",
+      "entry_significance_cleanly_testable": "yes -- and uniquely it supports a SECOND test (retest vs raw-breakout) that isolates the new component's marginal value",
+      "verdict": "STRONGEST -- separable & double-testable entry event, distinct from parked families, friction headroom, daily independent NQ/ES, with regime mitigation built into the hypothesis."
+    },
+    {
+      "id": 3,
+      "name": "Pullback with market confirmation preserving independent validation",
+      "hypothesis": "Enter a pullback in an uptrend that is confirmed by a market signal computed from NQ ALONE; only LATER validate on ES independently, never folding ES into the NQ entry.",
+      "why_real_entry_edge": "NQ-internal confirmation could filter low-quality pullbacks while keeping ES as a clean independent validator.",
+      "avoids_prior_weaknesses": "Explicitly fixes the S27-D1 Idea-3 flaw (it does NOT consume ES as the independent market), preserving multi-market validation.",
+      "reintroduces_prior_weaknesses": "Mechanism is a pullback-in-uptrend -- the SAME family as the parked S26. High risk of re-discovering S26's inconclusive entry; the NQ-only 'confirmation' is unlikely to add separable edge S26 already could not show.",
+      "expected_trade_count": "moderate",
+      "friction_sensitivity": "moderate (S26-like)",
+      "regime_risk": "HIGH -- shares S26's 2014-2016 pullback-in-chop failure",
+      "multi_market_testability": "good and methodologically clean (ES kept independent)",
+      "data_requirements": "none new",
+      "biggest_failure_mode": "Collapses back into S26: entry significance inconclusive again.",
+      "first_clean_test_design": "Daily NQ IS 2013-2022: pullback entries WITH vs WITHOUT the NQ-internal confirmation vs random-in-uptrend; only if the confirmation adds clear edge, validate on ES.",
+      "entry_significance_cleanly_testable": "yes, but likely inconclusive given S26 precedent",
+      "verdict": "MODERATE -- methodologically clean but too close to the parked S26."
+    },
+    {
+      "id": 4,
+      "name": "Bad-regime avoidance / no-trade classifier",
+      "hypothesis": "Not a new entry. Build a mechanical, pre-registered daily classifier that flags 'favorable' vs 'chop/bad' regime (especially 2014-2016-style), and trade only in favorable regime.",
+      "why_real_entry_edge": "It carries NO entry edge of its own -- by construction it produces no trades; its value is conditional on an underlying entry that already has edge.",
+      "avoids_prior_weaknesses": "Directly targets the ONE failure shared by every parked branch -- the 2014-2016 choppy-regime collapse -- rather than hoping a filter incidentally helps.",
+      "reintroduces_prior_weaknesses": "Regime classifiers are easy to overfit; and gating an edgeless entry (S26/S27) creates no edge.",
+      "expected_trade_count": "n/a (a filter, not an entry)",
+      "friction_sensitivity": "n/a",
+      "regime_risk": "this IS the regime tool",
+      "multi_market_testability": "good -- a regime label is computable and persistence-testable on daily NQ and ES independently, read-only, without touching S26/S27",
+      "data_requirements": "none new",
+      "biggest_failure_mode": "Produces nothing tradeable on its own; best used as a gate folded INTO a chosen entry (which is exactly what the winner does).",
+      "first_clean_test_design": "Define the regime label mechanically; test on daily NQ/ES whether the label is separable and persistent, and (read-only, descriptively) whether favorable-regime gating would have changed the parked branches' committed trade lists.",
+      "entry_significance_cleanly_testable": "n/a (no entry)",
+      "verdict": "STRONG INSIGHT, NOT A STANDALONE BRANCH -- its core idea is absorbed into the winner as a no-trade regime gate."
+    },
+    {
+      "id": 5,
+      "name": "Time-based / seasonal tendency with trend filter",
+      "hypothesis": "Enter only during a pre-registered calendar window (e.g. a month/turn-of-month/day-of-week tendency) while a trend filter holds.",
+      "why_real_entry_edge": "Some calendar tendencies have weak documented persistence; combined with a trend gate they could be tradeable.",
+      "avoids_prior_weaknesses": "Distinct mechanism from all parked families; trivially significance-testable (window vs out-of-window).",
+      "reintroduces_prior_weaknesses": "Weak theoretical edge; calendar effects are notoriously regime-dependent and prone to spurious discovery; narrow windows starve the trade count.",
+      "expected_trade_count": "low (narrow windows) -- risks the S27/Donchian low-count problem",
+      "friction_sensitivity": "low-moderate",
+      "regime_risk": "HIGH -- seasonal effects decay and flip across regimes",
+      "multi_market_testability": "good (daily NQ/ES)",
+      "data_requirements": "none new",
+      "biggest_failure_mode": "Spurious seasonal artifact that does not generalize OOS or to ES.",
+      "first_clean_test_design": "Daily NQ IS 2013-2022: pre-register the window BEFORE looking; in-window vs out-of-window returns vs random calendar windows; validate on ES.",
+      "entry_significance_cleanly_testable": "yes, cleanly -- but high spurious-discovery risk",
+      "verdict": "WEAK-MODERATE -- clean to test but weak prior and overfit-prone."
+    }
+  ],
+  "ranking_best_to_worst": [2, 4, 3, 5, 1],
+  "selected_hypothesis": {
+    "id": 2,
+    "name": "Breakout-retest with volatility-expansion confirmation + mechanical bad-regime no-trade gate",
+    "why_selected": "It is the only candidate that pairs a DISCRETE, separable, and DOUBLE-testable entry event (retest-that-holds, testable both vs random-in-regime AND vs raw-breakout entry) with built-in regime mitigation. The retest entry is structurally distinct from both parked families (Donchian = raw breakout; S26 = pullback-in-uptrend), giving genuinely new information rather than re-discovery. It uses real daily volume already provisioned (no fetch), offers friction headroom via fewer/larger-R trades, and is immediately validatable on NQ and independent ES. Crucially, it absorbs candidate 4's core insight as a hard no-trade regime gate, attacking the 2014-2016 chop collapse that sank Donchian and S26 -- the one failure none of the prior entry redesigns escaped.",
+    "key_risks": [
+      "Chop is still the native risk of a trend-following structure; the vol-expansion gate and no-trade regime filter must do real work, not cosmetic filtering.",
+      "Overfitting the level/breakout/retest/vol-gate definitions -- all must be frozen before any result, with no sweeps (the S26/S27 anti-overfit discipline).",
+      "Trade-count starvation if the retest + vol gate + regime gate stack too restrictively (watch the Donchian/S27 low-count failure).",
+      "Entry-significance must actually PASS: if the retest does not beat raw-breakout entry, PARK immediately rather than continuing 'inconclusive' like S26."
+    ],
+    "first_s28_d2_spec_direction": "Pre-register a FROZEN spec on daily NQ IS 2013-2022 (OOS 2023-2025 sealed): (1) mechanical resistance level (e.g. prior N-day high / confirmed swing high); (2) breakout rule (close beyond level by a fixed buffer); (3) retest-hold rule (price returns to the level within a fixed window and closes back above it); (4) volatility/volume-expansion gate using ATR and the real daily volume column; (5) a mechanical bad-regime NO-TRADE gate (e.g. trend-vs-chop label) defined before any result; (6) fixed R-stop and capped R-target with conservative same-bar precedence; (7) one position at a time, R-only. Pre-register BOTH significance tests (retest vs random-in-regime; retest vs raw-breakout) and the full pass/watch/fail ladder BEFORE any IS run. No optimization; spec frozen before results."
+  },
+  "guardrails": {
+    "no_code": true, "no_backtest": true, "no_optimization": true, "no_data_fetch": true,
+    "no_paper_or_live": true, "no_broker_or_api": true,
+    "no_modification_of_s26_s27_donchian": true,
+    "jarvis_templates_hydra_untouched": true,
+    "note": "This memo selects a direction only. It authorizes no code, no backtest, no data fetch. S28-D2 (spec pre-registration) is a separate, to-be-authorized step."
+  },
+  "final_line": "S28-D1 is hypothesis selection only; no strategy code, backtest, OOS, paper, or live trading is authorized.",
+  "trading_recommendation": "NONE. Research-direction memo only. Donchian, S26, and S27 stay PARKED; no new strategy is validated."
+}
