@@ -228,6 +228,11 @@
       <div class="jv-loading">Reading cached route report&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pHygiene">
+      <h2><span class="ic">&#x2756;</span>File Hygiene <span class="jv-tag">CACHED</span></h2>
+      <div class="jv-loading">Reading cached hygiene report&hellip;</div>
+    </div>
+
     <div class="jv-panel jv-wide" id="pMissions">
       <h2><span class="ic">&#x2691;</span>Mission Board</h2>
       <div class="jv-loading">Reading mission board&hellip;</div>
@@ -507,6 +512,51 @@
           rt.error ? String(rt.error).slice(0,200) : null);
       });
       setPanel('pRouteSmoke', rsHtml);
+    }
+
+    // File Hygiene (cached, read-only — this page never runs git / scans files)
+    var fh = d.file_hygiene_report || {};
+    if(fh.state === 'missing'){
+      setPanel('pHygiene',
+        row('Status', 'waiting', 'NO CACHED REPORT') +
+        '<div class="jv-detail">'+esc(fh.message || 'Run tools/jarvis_file_hygiene_report.py to generate a cached file hygiene report.')+'</div>');
+    } else if(fh.state === 'unavailable' || fh.state === 'error'){
+      setPanel('pHygiene', row('Status', 'bad', 'UNAVAILABLE', fh.error || fh.detail));
+    } else {
+      var staged = fh.staged_count != null ? fh.staged_count : 0;
+      var fhHtml = row('Generated at', '', esc(fh.generated_at || '—')) +
+        row('Git read', fh.git_ok ? 'online' : 'bad', fh.git_ok ? 'OK' : 'UNAVAILABLE') +
+        row('Untracked', '', esc(fh.total_untracked_count != null ? fh.total_untracked_count : 0)) +
+        row('Tracked modified', '', esc(fh.tracked_modified_count != null ? fh.tracked_modified_count : 0)) +
+        row('Staged', staged > 0 ? 'warn' : 'online', esc(staged));
+      var dirs = fh.top_untracked_dirs || [];
+      if(dirs.length){
+        fhHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Top untracked dirs</div>';
+        dirs.forEach(function(dd){
+          fhHtml += row(esc(dd.dir || '—'), '', esc(dd.count != null ? dd.count : 0));
+        });
+      }
+      var rrs = fh.runtime_report_status || {};
+      var rrKeys = Object.keys(rrs);
+      if(rrKeys.length){
+        fhHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Cached reports (gitignored)</div>';
+        rrKeys.forEach(function(k){
+          var st = rrs[k] || {};
+          fhHtml += row(esc(k), st.gitignored ? 'online' : 'warn',
+            (st.exists ? 'present' : 'absent') + (st.gitignored ? ' · ignored' : ' · NOT ignored'));
+        });
+      }
+      var safe = fh.known_safe_areas || [];
+      if(safe.length){
+        fhHtml += '<div class="jv-detail" style="margin-top:8px">Known safe/generated: '+
+          safe.map(function(s){ return esc(s); }).join('; ')+'</div>';
+      }
+      var fhWarn = fh.warnings || [];
+      if(fhWarn.length){
+        fhHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-warn)">Warnings: '+
+          fhWarn.map(function(w){ return esc(w); }).join('; ')+'</div>';
+      }
+      setPanel('pHygiene', fhHtml);
     }
 
     // Mission Board (read-only — JARVIS never executes a mission)

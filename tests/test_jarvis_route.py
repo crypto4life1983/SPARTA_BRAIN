@@ -825,6 +825,174 @@ def test_jarvis_prompt_library_seed_file_is_tracked_safe():
         assert p.get("risk") == "read_only", "seed prompts must be read_only"
 
 
+# --- Step 08: read-only file hygiene panel --------------------------------
+
+def test_jarvis_status_has_file_hygiene_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "file_hygiene_report" in d
+    assert isinstance(d["file_hygiene_report"], dict)
+    assert d["file_hygiene_report"].get("state") in (
+        "ready", "missing", "unavailable", "error",
+    )
+
+
+def test_jarvis_file_hygiene_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    fh = app_module._jarvis_file_hygiene_report()
+    assert fh["state"] == "missing"
+    assert "jarvis_file_hygiene_report.py" in fh["message"]
+
+
+def test_jarvis_file_hygiene_invalid_is_fail_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    (d / "file_hygiene_report.json").write_text("{ broken", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    fh = app_module._jarvis_file_hygiene_report()
+    assert fh["state"] == "unavailable"
+    assert "error" in fh
+
+
+def test_jarvis_file_hygiene_non_object_is_fail_closed(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    (d / "file_hygiene_report.json").write_text(json.dumps([1, 2, 3]), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    fh = app_module._jarvis_file_hygiene_report()
+    assert fh["state"] == "unavailable"
+
+
+def test_jarvis_file_hygiene_valid_is_passed_through(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "storage" / "jarvis"
+    d.mkdir(parents=True)
+    payload = {
+        "generated_at": "2026-05-30T00:00:00",
+        "git_ok": True,
+        "total_untracked_count": 4369,
+        "tracked_modified_count": 0,
+        "staged_count": 0,
+        "top_untracked_dirs": [{"dir": "data", "count": 1200}],
+        "known_safe_areas": ["storage/jarvis/"],
+        "warnings": [],
+    }
+    (d / "file_hygiene_report.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    fh = app_module._jarvis_file_hygiene_report()
+    assert fh["state"] == "ready"
+    assert fh["total_untracked_count"] == 4369
+    assert fh["top_untracked_dirs"][0]["dir"] == "data"
+
+
+def test_jarvis_file_hygiene_endpoint_does_not_run_git(monkeypatch):
+    # Hitting the endpoint must never run git / spawn a subprocess for hygiene;
+    # it only reflects the cached report. (Other sections are fail-closed too.)
+    import subprocess
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("endpoint must not run git / scan files")
+
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert "file_hygiene_report" in r.json()
+
+
+def test_file_hygiene_script_exists_and_compiles():
+    import py_compile
+    script = _REPO_ROOT / "tools" / "jarvis_file_hygiene_report.py"
+    assert script.exists(), "tools/jarvis_file_hygiene_report.py missing"
+    py_compile.compile(str(script), doraise=True)
+
+
+def test_file_hygiene_script_has_no_secret_or_mutation_commands():
+    src = (_REPO_ROOT / "tools" / "jarvis_file_hygiene_report.py").read_text(
+        encoding="utf-8"
+    )
+    low = src.lower()
+    # No env/secret access.
+    for tok in ("os.environ", "getenv", "dotenv", "local_secrets",
+                "authorization", "cookie", "api_key", "bearer"):
+        assert tok not in low, f"hygiene script must not touch: {tok}"
+    # No mutating git / filesystem commands — read-only by construction.
+    for tok in ('"add"', "'add'", '"commit"', "'commit'", '"rm"', "'rm'",
+                '"clean"', "'clean'", '"reset"', "'reset'", '"checkout"',
+                "'checkout'", '"restore"', "'restore'", '"stash"', "'stash'",
+                '"push"', "'push'", "os.remove", "shutil.rmtree", "path.unlink",
+                ".write_bytes("):
+        assert tok not in low, f"hygiene script must not mutate via: {tok}"
+
+
+def test_file_hygiene_module_builds_expected_shape(monkeypatch):
+    # Run build_report without touching the real repo: stub the git wrapper.
+    import importlib.util
+    script = _REPO_ROOT / "tools" / "jarvis_file_hygiene_report.py"
+    spec = importlib.util.spec_from_file_location("jarvis_file_hygiene_report", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    porcelain = (
+        "?? data/a.json\n"
+        "?? data/b.json\n"
+        "?? tools/x.py\n"
+        " M app.py\n"
+        "M  templates/jarvis.html\n"
+    )
+
+    def _fake_git(args):
+        if args[:1] == ["status"]:
+            return 0, porcelain
+        if args[:1] == ["check-ignore"]:
+            return 0, ""
+        return 0, ""
+
+    monkeypatch.setattr(mod, "_git", _fake_git)
+    report = mod.build_report()
+    assert report["state"] == "ready"
+    assert report["git_ok"] is True
+    assert report["total_untracked_count"] == 3
+    # ' M' = worktree modified; 'M ' = staged.
+    assert report["tracked_modified_count"] == 1
+    assert report["staged_count"] == 1
+    top = {d["dir"]: d["count"] for d in report["top_untracked_dirs"]}
+    assert top.get("data") == 2 and top.get("tools") == 1
+    # A staged file must raise an operator warning.
+    assert any("STAGED" in w for w in report["warnings"])
+
+
+def test_file_hygiene_report_exposes_no_mutation_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    fh = client.get("/api/jarvis/status").json()["file_hygiene_report"]
+
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+
+    keys = set(_keys(fh))
+    for forbidden in ("delete", "remove", "clean", "stage", "commit", "exec",
+                      "run_command", "shell", "rmtree", "unlink", "trigger"):
+        assert forbidden not in keys, f"forbidden mutation key: {forbidden}"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

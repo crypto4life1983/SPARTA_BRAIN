@@ -7711,6 +7711,28 @@ def _jarvis_route_smoke_report() -> dict:
     return data
 
 
+def _jarvis_file_hygiene_report() -> dict:
+    """READ-ONLY. Loads the cached file-hygiene report written offline by
+    tools/jarvis_file_hygiene_report.py. The web route NEVER runs git or scans
+    the working tree itself — it only reflects the last manual run."""
+    path = BASE / "storage" / "jarvis" / "file_hygiene_report.json"
+    if not path.exists():
+        return {
+            "state": "missing",
+            "message": "Run tools/jarvis_file_hygiene_report.py to generate a "
+                       "cached file hygiene report.",
+        }
+    try:
+        import json as _json
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+        return {"state": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(data, dict):
+        return {"state": "unavailable", "error": "report is not a JSON object"}
+    data.setdefault("state", "ready")
+    return data
+
+
 _JARVIS_TRADING_REPORTS_REL = "trading_research/agentic_factory/reports"
 _JARVIS_S26_D17_DIR = "s26_d17_trend_sr_ema_rsi_friction_stress"
 _JARVIS_S26_D18_DIR = "s26_d18_trend_sr_ema_rsi_decision_gate"
@@ -7973,6 +7995,7 @@ def api_jarvis_status():
     brain_memory = _jarvis_safe(_jarvis_brain_memory)
     health_report = _jarvis_safe(_jarvis_health_report)
     route_smoke = _jarvis_safe(_jarvis_route_smoke_report)
+    file_hygiene = _jarvis_safe(_jarvis_file_hygiene_report)
     mission_board = _jarvis_safe(_jarvis_mission_board)
     prompt_library = _jarvis_safe(_jarvis_prompt_library)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
@@ -7993,6 +8016,7 @@ def api_jarvis_status():
         "brain_memory": brain_memory,
         "health_report": health_report,
         "route_smoke_report": route_smoke,
+        "file_hygiene_report": file_hygiene,
         "mission_board": mission_board,
         "prompt_library": prompt_library,
         "trading_detail": trading_detail,
