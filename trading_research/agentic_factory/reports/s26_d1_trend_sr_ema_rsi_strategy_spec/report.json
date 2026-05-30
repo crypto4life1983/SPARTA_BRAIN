@@ -1,0 +1,145 @@
+{
+  "step": "S26-D1",
+  "title": "Pre-registered strategy hypothesis spec: Trend + Support/Resistance + EMA/RSI confirmation (NQ daily, long-only v1)",
+  "created_date": "2026-05-29",
+  "type": "STRATEGY HYPOTHESIS / SPECIFICATION ONLY (pre-registration). NO engine, NO backtest, NO results, NO optimization.",
+  "status": "SPEC-ONLY. No backtest has been run. No code has been written for this branch.",
+  "branch_label": "trend_sr_ema_rsi_v1",
+  "why_donchian_was_parked": {
+    "s23_verdict": "WATCH",
+    "s24_verdict": "ENTRY_EDGE_NOT_SUPPORTED",
+    "s25_verdict": "SEQUENCE_RISK_FRAGILE",
+    "weaknesses_this_branch_must_avoid": [
+      "Weak raw entry edge: Donchian breakout entries fire AFTER an extended move, so the immediate forward window carries mean-reversion drag (S24: NO_EDGE at all horizons 5/10/20/40, IS and OOS). FIX: enter on a PULLBACK/retest toward support inside an established trend, not on breakout extension.",
+      "Dependence on a few large winners: removing the top 3 trades flips both IS (-3.82R) and OOS (-1.93R) negative; OOS best trade was 50.3% of net (S25). FIX: use a fixed 2R take-profit so outcomes are distributed rather than fat-tail-dependent, and add an explicit no-top-3-dependence PASS gate.",
+      "Sequence fragility: realized Donchian drawdown sat at ~11th percentile of trade-order shuffles; IS bootstrap had ~21% probability of total R <= 0 (S25 FRAGILE). FIX: require sequence-risk to be NOT FRAGILE as a pre-fixed gate.",
+      "Low OOS trade count: Donchian produced only 16 OOS trades, too small for confidence (the live WATCH trigger). FIX: pre-fix minimum IS/OOS trade-count thresholds and treat sub-threshold OOS as an automatic WATCH."
+    ]
+  },
+  "new_hypothesis": {
+    "statement": "In an established daily uptrend, a controlled pullback toward recent support that shows momentum stabilizing (RSI in a mid band, then turning up or price reclaiming EMA20) offers a positive-expectancy, distributed-outcome long entry, with risk fixed at 2N and reward capped at 2R. The hypothesized edge is in BUYING THE RETEST (mean-reversion-into-trend), the opposite of Donchian's breakout-extension entry whose edge was not supported.",
+    "direction_decision": "LONG-ONLY for v1.",
+    "direction_rationale": "Long-only minimizes degrees of freedom and avoids asymmetric short-side overfit on a single market; NQ daily has a strong secular up-drift, so a long-only trend-pullback test is the cleanest first read. A symmetric short version is deferred to a later branch with its own fresh OOS, only if v1 survives."
+  },
+  "market_and_timeframe": {
+    "market_v1": "NQ continuous daily bars (NQ.c.0, UTC-calendar daily) - same data construction already validated in S23-D13/D16.",
+    "later_robustness_markets": ["MNQ", "ES", "MES"],
+    "later_robustness_note": "Multi-market robustness is D9 only, and only if the candidate survives. NOT in D1.",
+    "timeframe_v1": "Daily bars first - the existing offline data pipeline is daily and already structural-QA validated.",
+    "intraday_note": "Intraday is a separate future branch, not now."
+  },
+  "fixed_rules": {
+    "indicators": {
+      "EMA20": "20-period EMA of close",
+      "EMA50": "50-period EMA of close",
+      "EMA200": "200-period EMA of close",
+      "RSI14": "Wilder RSI, period 14, on close",
+      "ATR20": "Wilder ATR, period 20 (same N construction as the frozen Donchian engine)",
+      "support_ref": "rolling 20-day low = lowest low over the prior 20 bars EXCLUDING the current bar (bars[i-20:i])"
+    },
+    "indicator_warmup": "No signal may fire until all indicators are fully warm: i >= 200 (EMA200) and ATR20/RSI14 seeded. Use prior-bar-only data; no lookahead.",
+    "trend_filter_long": "close[i] > EMA200[i] AND EMA50[i] > EMA200[i] (bullish stack).",
+    "support_method_choice": {
+      "chosen": "Option B - rolling 20-day low as the support reference zone",
+      "rejected": ["Option A prior-20-day swing high/low (needs fractal/pivot detection - more DOF)", "Option C rolling pivot levels (needs lookback+lookforward window - extra parameters and lookahead risk)"],
+      "why": "The rolling 20-day low is fully deterministic, parameter-light, and lookahead-safe (prior bars only). It is a transparent proxy for recent support and requires no subjective chart drawing. NOTE: this REUSES a Donchian-style level only as a support REFERENCE; the entry logic is the OPPOSITE of Donchian (we buy a pullback toward support, not a breakout above resistance), so it does not inherit Donchian's NOT_SUPPORTED entry edge."
+    },
+    "entry_long": {
+      "all_conditions_must_hold_on_signal_bar_i": [
+        "C1 Trend: close[i] > EMA200[i] AND EMA50[i] > EMA200[i]",
+        "C2 Support proximity (pullback occurred): low[i] <= support_ref[i] + 1.5 * ATR20[i]  (price has retraced to within 1.5 ATR of the prior 20-day low)",
+        "C3 RSI pullback band: 40 <= RSI14[i] <= 55",
+        "C4 Confirmation/turn: RSI14[i] > RSI14[i-1]  OR  close[i] > EMA20[i]  (momentum turning up OR price reclaiming EMA20)"
+      ],
+      "execution": "Enter at the OPEN of the NEXT bar (i+1). Fully lookahead-safe: all conditions use data through bar i close; fill at bar i+1 open.",
+      "no_subjective_inputs": "No hand-drawn levels, no discretionary zones. All thresholds are fixed constants."
+    },
+    "stop": {
+      "chosen_rule": "Hard stop = entry_price - 2.0 * ATR20[i] (ATR from signal bar i). 1R = 2.0 * ATR20 = the initial stop distance.",
+      "rejected_alt": "support-minus-ATR-buffer stop (rejected to keep ONE fixed deterministic rule and a clean constant 1R for R-only accounting).",
+      "intrabar": "Hard stop is checked using bar low (long); management begins the bar AFTER entry; stop checked BEFORE target (conservative)."
+    },
+    "exit": {
+      "primary_exit": "Fixed +2R take-profit target = entry_price + 2.0 * (2.0 * ATR20[i]) ... i.e. +2R where 1R = 2N stop distance.",
+      "risk_exit": "Hard stop at -1R (2N) as defined above.",
+      "secondary_backstop": "Trend-invalidation: if still open at a bar CLOSE and close < EMA50, exit at that close (avoids dead money / large trend-reversal giveback).",
+      "precedence_per_bar": [
+        "1) intrabar: hard stop (-1R) checked first (bar low)",
+        "2) intrabar: +2R target checked next (bar high)",
+        "3) on close, if still open: EMA50 trend-break close exit"
+      ],
+      "why_capped_target": "A fixed 2R cap is the deliberate antidote to S25 single-winner dependence: it distributes outcomes instead of relying on rare fat-tailed runners. This intentionally tests a DIFFERENT edge hypothesis (repeatable distributed R from retests) than Donchian's let-winners-run profile."
+    },
+    "risk_accounting": {
+      "unit": "R-only (1R = initial 2N stop distance). No dollars, point value, costs, or roll in v1.",
+      "compounding": false,
+      "pyramiding": false,
+      "max_concurrent_positions": 1,
+      "position_handling": "One position at a time; new signals ignored while in a position (flat-state entries only)."
+    }
+  },
+  "data_windows": {
+    "IS": "2013-2022",
+    "OOS": "2023-2025",
+    "oos_treatment": "SEALED / unseen until the D4 OOS protocol is committed.",
+    "anti_overfit_window_rule": "Same as S23: NO parameter changes after OOS is seen; run OOS ONCE; no subperiod cherry-picking."
+  },
+  "validation_ladder": {
+    "D2": "Implement engine + tests (new module files; do NOT modify Donchian source). Stdlib-first, offline, deterministic, lookahead-safe.",
+    "D3": "Run IS 2013-2022 baseline (single continuous stream).",
+    "D4": "Pre-register the sealed OOS protocol and COMMIT it BEFORE any OOS run (mirror S23-D15).",
+    "D5": "Run OOS 2023-2025 exactly ONCE, judged strictly against the D4 protocol.",
+    "D6": "Entry-rule significance on the new entries (reuse engine/signal_significance). Must clear the NOT_SUPPORTED bar.",
+    "D7": "Trade-order Monte Carlo + bootstrap sequence-risk (mirror S25). Must clear FRAGILE.",
+    "D8": "Regime breakdown (trend vs chop / by year / by volatility).",
+    "D9": "Multi-market robustness (MNQ/ES/MES) as FRESH future OOS - only if the candidate has survived D5-D8."
+  },
+  "pass_watch_fail_criteria": {
+    "note": "Pre-fixed BEFORE any test is run. Precedence FAIL -> WATCH -> PASS, same as S23-D15.",
+    "trade_count": {
+      "min_is_trades_target": 40,
+      "preferred_is_trades": 60,
+      "min_oos_trades_for_confidence": 30,
+      "oos_below_threshold_action": "Automatic WATCH (this is exactly the trigger that held Donchian at WATCH; not repeating that mistake silently)."
+    },
+    "PASS_all_must_hold": [
+      "IS trades >= 40 AND OOS trades >= 30",
+      "OOS expectancy > 0",
+      "OOS profit factor >= 1.20",
+      "OOS max drawdown <= 1.5 x IS max DD",
+      "majority of IS years positive AND at least one positive OOS year",
+      "no top-3 winner dependence: OOS total R remains POSITIVE after removing the top 3 winners",
+      "D6 entry significance is NOT ENTRY_EDGE_NOT_SUPPORTED",
+      "D7 sequence risk is NOT SEQUENCE_RISK_FRAGILE",
+      "no data-QA defect"
+    ],
+    "WATCH_any_trigger": [
+      "OOS trades between 1 and 29 (below confidence threshold)",
+      "OOS profit factor between 1.05 and 1.20",
+      "OOS expectancy near flat (0 to +0.05R)",
+      "removing top 3 winners leaves OOS only marginally positive",
+      "one year strongly dominates the result",
+      "D6 entry significance INCONCLUSIVE (not SUPPORTED, not NOT_SUPPORTED)"
+    ],
+    "FAIL_any_trigger": [
+      "OOS expectancy <= 0",
+      "OOS profit factor < 1.05",
+      "OOS max drawdown materially exceeds 1.5 x IS max DD without recovery",
+      "removing top 3 winners flips OOS NEGATIVE (the exact Donchian S25 failure)",
+      "D6 entry significance ENTRY_EDGE_NOT_SUPPORTED",
+      "D7 sequence risk SEQUENCE_RISK_FRAGILE",
+      "all OOS years negative OR structural data issue"
+    ]
+  },
+  "anti_overfit_guardrails": [
+    "No parameter sweeps in v1 - every constant above is FIXED before testing.",
+    "No changing the support/resistance definition (Option B) after seeing any result.",
+    "No adding filters after OOS is seen.",
+    "No tuning RSI band, ATR multiple, EMA lengths, or target multiple to results.",
+    "If a change is genuinely needed, it becomes a NEW separately-labeled branch with a fresh pre-registered OOS - never a retrofit of this one.",
+    "IS and OOS kept separate; no pooling to manufacture significance.",
+    "Donchian source files, reports, and verdicts are untouched and not re-run."
+  ],
+  "proposed_next_step": "S26-D2: implement the engine and unit tests in NEW module files (e.g. engine/trend_sr_ema_rsi.py + tests), without modifying any Donchian source. No backtest results in D2 beyond test fixtures.",
+  "clear_line": "NO BACKTEST HAS BEEN RUN. This is a pre-registered hypothesis/specification only. No engine code for this branch exists yet. No optimization, no results, no trading or paper claims."
+}
