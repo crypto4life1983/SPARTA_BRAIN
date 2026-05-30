@@ -1,0 +1,128 @@
+{
+  "step": "S27-D2",
+  "title": "Mean Reversion After Overextension Inside Bull Trend -- frozen strategy spec (pre-registration)",
+  "spec_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "created": "2026-05-30",
+  "reference_commit_short": "dc53087",
+  "selected_hypothesis_commit": "dc53087468ab955c85dacb70241c8b3387593883",
+  "design_context": {
+    "must_fix_s26_weaknesses": [
+      "entry edge inconclusive -> entry is a DISCRETE two-step event (overextension THEN one-bar reversal) that can be significance-tested against random-in-regime entries",
+      "thin IS edge -> conservative capped design with a real PF gate (>=1.30)",
+      "2014-2016 shared NQ/ES chop collapse -> mean reversion is counter-cyclical to chop; regime breakdown (D9) will check it explicitly",
+      "OOS single-year dominance -> positive-years and top-3 winner gates",
+      "friction sensitivity -> friction gate (D12) with explicit R-cost thresholds",
+      "partial independent support -> ES used as the independent confirmation market (D10), never folded into the entry"
+    ],
+    "must_avoid_donchian_winner_dependence": "Donchian (S24 ENTRY_EDGE_NOT_SUPPORTED, S25 SEQUENCE_RISK_FRAGILE) made its money from a few fat-tail trend-capture winners -- removing the top 3 trades flipped IS and OOS negative. S27 deliberately uses a CAPPED target (+1.5R) so per-trade outcomes are bounded and repeatable rather than dependent on rare mega-winners, and adds a HARD gate: IS net must remain POSITIVE after removing the top 3 winners."
+  },
+  "spec": {
+    "1_strategy_name": "Mean Reversion After Overextension Inside Bull Trend",
+    "2_market_and_timeframe": {
+      "primary": "NQ continuous futures, daily bars",
+      "independent_confirmation_later": "ES daily (D10 only; never part of the entry)",
+      "intraday": "none in v1",
+      "no_2026": true,
+      "IS": "2013-2022",
+      "OOS": "2023-2025 (SEALED until the OOS protocol step is committed)",
+      "proxy_micros_descriptive": "MNQ/MES (from 2019) corroboration only, never independent"
+    },
+    "3_core_hypothesis": "In a confirmed bull trend, sharp short-term overextensions to the downside tend to mean-revert over the next several bars. The edge must come from the DISCRETE overextension-then-reversal event, not from broad trend drift -- which is exactly why the entry is built to be significance-testable against random bull-trend entries.",
+    "4_bull_trend_filter": {
+      "rules": ["close > EMA200", "EMA50 > EMA200", "EMA200 slope over last 20 bars >= 0"],
+      "ema200_slope_included": true,
+      "slope_definition": "EMA200[i] - EMA200[i-20] >= 0 (non-negative 20-bar change of EMA200)",
+      "why_slope_included": "Falling-knife risk in a rolling-over top is the #1 failure mode of buying dips. Requiring a non-negative EMA200 slope restricts entries to a genuinely RISING trend, not a topping market. It is a fixed, mechanical, binary gate -- no optimization, no sweep -- and directly tightens the otherwise-loose bull filter.",
+      "long_only": true
+    },
+    "5_overextension_trigger": {
+      "all_must_hold_on_signal_bar": [
+        "close <= EMA20 - 1.0 * ATR20  (close is at least 1.0 ATR20 below EMA20)",
+        "RSI14 <= 35",
+        "close is the LOWEST close of the last 5 bars (current bar inclusive)"
+      ],
+      "no_subjective_levels": true,
+      "rationale": "A single, fully mechanical overextension definition. Each clause is measurable and reproducible; no discretionary support/resistance drawing."
+    },
+    "6_reversal_confirmation": {
+      "chosen_option": "B -- one-bar reversal confirmation",
+      "rule": "After the overextension trigger on bar i, require close[i+1] > close[i]. If satisfied, the setup is confirmed on bar i+1. If close[i+1] <= close[i], the setup is ABANDONED (expires; no entry).",
+      "why_B_over_A": "Option B gives (1) less falling-knife risk -- we wait for one up-bar before committing, and (2) cleaner entry-significance testing -- the entry is a discrete, datable TWO-STEP event (overextension THEN reversal) that can be compared against random entries drawn from the same bull-trend bars to isolate the trigger's marginal edge."
+    },
+    "7_entry_timing": {
+      "signal_bar": "bar i (overextension trigger true)",
+      "confirmation_bar": "bar i+1 (close[i+1] > close[i])",
+      "entry": "next bar open = open of bar i+2",
+      "no_same_bar_lookahead": true,
+      "expiry": "if confirmation fails at i+1, no entry; a new signal must form fresh"
+    },
+    "8_stop": {
+      "rule": "stop = entry - 1.5 * ATR20 (ATR20 as of the signal bar i)",
+      "R_unit": "1R = 1.5 * ATR20 = the stop distance. All results in R only.",
+      "why_1.5_ATR": "Tighter than S26's 2N because mean-reversion entries are taken near a local extreme right after a reversal bar, so the invalidation level (a fresh low below the reversal) is closer. 1.5*ATR still leaves friction headroom comparable to S26's 2N."
+    },
+    "9_exit": {
+      "target": "+1.5R (= entry + 1.5 * 1R = entry + 2.25 * ATR20)",
+      "stop": "-1R (= the 1.5*ATR20 stop above)",
+      "time_stop": "exit at the CLOSE of the 10th bar held if neither stop nor target hit",
+      "ema20_reclaim_exit": "NOT used in v1 (kept out to keep the exit fixed and simple)",
+      "exit_precedence": "stop -> target -> time_stop. If stop and target are both touched on the same bar, STOP fills first (conservative).",
+      "why_capped_target": "A fixed +1.5R cap makes per-trade outcomes bounded and repeatable, deliberately avoiding Donchian's fat-tail-winner dependence."
+    },
+    "10_position_rules": ["one position at a time", "no pyramiding", "no compounding", "R-only accounting", "no shorting in v1"],
+    "11_validation_ladder": {
+      "D3": "implement engine + tests only (no results)",
+      "D4": "IS baseline 2013-2022",
+      "D5": "OOS protocol pre-registration",
+      "D6": "OOS run ONCE (2023-2025)",
+      "D7": "entry significance (overextension+reversal vs random-in-bull-trend)",
+      "D8": "Monte Carlo / sequence risk",
+      "D9": "regime breakdown (incl. explicit 2014-2016 chop check)",
+      "D10": "ES multi-market robustness (independent confirmation)",
+      "D11": "walk-forward stability",
+      "D12": "friction stress",
+      "D13": "decision gate"
+    },
+    "12_pass_watch_fail_thresholds": {
+      "note": "Pre-registered BEFORE any results. Conservative. PASS = all met; WATCH = minor misses; FAIL = any hard floor breached.",
+      "is_trade_count_floor": {"pass": ">=40", "watch": "25-39", "fail": "<25"},
+      "oos_trade_count_floor": {"pass": ">=20", "watch": "12-19", "fail": "<12"},
+      "expectancy": {"pass": "> 0 on IS and OOS", "fail": "<= 0 on either"},
+      "profit_factor": {"pass": ">=1.30", "watch": "1.10-1.29", "fail": "<1.10"},
+      "max_dd_cap": {"pass": "IS max DD <= IS net R", "fail": "IS max DD > 1.5x IS net R"},
+      "positive_years": {"pass": ">=6 of 10 IS years positive", "watch": "5/10", "fail": "<5/10"},
+      "top3_winner_dependence_cap": {"pass": "IS net stays POSITIVE after removing top 3 winners", "fail": "IS net goes negative without top 3 (Donchian failure mode)"},
+      "entry_significance_requirement": {"pass": "EDGE_LIKELY vs random-in-bull-trend", "watch": "INCONCLUSIVE (not disproven)", "fail": "NOT_SUPPORTED"},
+      "sequence_risk_requirement": {"pass": "bootstrap prob(total R<=0) < 10%", "watch": "10-20%", "fail": ">=20% (Donchian was 20.9%)"},
+      "friction_requirement": {"pass": "IS positive at 0.05R AND OOS positive at 0.10R per trade", "fail": "OOS negative at <=0.05R"}
+    },
+    "13_anti_overfit_rules": [
+      "no parameter sweeps",
+      "no changing RSI/ATR/EMA/target/stop/slope/time-stop after seeing results",
+      "if any rule changes, open a NEW branch (do not mutate S27 in place)",
+      "no OOS peeking before the OOS protocol is committed",
+      "no paper/live promotion from this spec or from IS results"
+    ],
+    "14_expected_failure_modes": [
+      "falling-knife risk (dips inside a rolling-over trend) -- mitigated by EMA200 slope gate + reversal confirmation + R-stop",
+      "bull filter too loose -- mitigated by the slope gate",
+      "signal count too low (two-step confirmation is restrictive) -- watch IS/OOS trade floors",
+      "target too optimistic (+1.5R rarely reached on snap-backs) -- watch win rate vs time-stop exits",
+      "choppy-regime false positives (oversold keeps going) -- D9 regime check",
+      "friction sensitivity on a tighter 1.5*ATR stop -- D12 friction stress"
+    ],
+    "15_final_line": "S27-D2 is a frozen hypothesis specification only; no backtest, OOS, paper, or live trading is authorized."
+  },
+  "guardrails": {
+    "no_code": true, "no_backtest": true, "no_is_oos_run": true, "no_optimization": true,
+    "no_parameter_sweeps": true, "no_data_fetch": true, "no_paper_or_live": true, "no_broker_or_api": true,
+    "s26_untouched": true, "donchian_untouched": true, "jarvis_templates_hydra_untouched": true
+  },
+  "trading_recommendation": "NONE. Frozen spec only. S26 and Donchian stay PARKED; S27 is an unbuilt, unvalidated hypothesis."
+}
