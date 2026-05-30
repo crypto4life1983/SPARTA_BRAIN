@@ -1,0 +1,110 @@
+{
+  "step": "S26-D17",
+  "title": "Friction / slippage / commission stress (frozen engine, validation only)",
+  "validation_only": true,
+  "optimization": false,
+  "parameter_changes": false,
+  "strategy_change": false,
+  "new_filters": false,
+  "created": "2026-05-30",
+  "reference_commit": "ca0077f231ef4122dbc42aa06f1a5b83493caaea",
+  "reference_commit_short": "ca0077f",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "s26_current_status": {"level": "RESEARCH_CANDIDATE", "paper_ready": false, "live_ready": false, "deployable": false},
+  "cost_model": {
+    "method": "Each completed round-trip trade's realized r_multiple is reduced by a flat constant C expressed in R. Same C applied to every trade. No entry/exit/stop/target change; cost is applied to the already-frozen trade outcomes only.",
+    "why_R_units": "1R is the strategy's own per-trade risk unit (stop = entry - 2*ATR20, so 1R = 2N). Expressing cost in R makes the deduction comparable across markets and trades without needing a dollar model. Converting a real per-trade $ cost to R requires dividing by the $ value of 1R for that trade; that depends on point value and ATR at entry and is NOT computed here -- these are conservative fixed-R scenarios.",
+    "adjusted_total_r": "base_total - C * n",
+    "pf_expectancy_winrate_dd": "recomputed on the cost-adjusted per-trade R sequence (chronological order preserved)",
+    "break_even_cost_per_trade_r": "base_total / n (the C that drives adjusted_total to exactly 0)",
+    "scenarios": {"A_low": 0.02, "B_moderate": 0.05, "C_high": 0.10, "D_severe": 0.20}
+  },
+  "faithfulness_check": "Base (C=0) reproduces committed splits EXACTLY: NQ IS 117/+7.6536/PF1.2016/DD10.5943, NQ OOS 32/+7.9990/PF1.7694/DD2.1827, ES IS 125/+7.6725/PF1.2003/DD16.7281, ES OOS 27/+11.4584/PF2.2352/DD2.0697.",
+  "NQ": {
+    "role": "reference_primary",
+    "IS_2013_2022": {
+      "base": {"trade_count": 117, "total_r": 7.6536, "profit_factor": 1.2016, "win_rate": 0.3932, "expectancy_r": 0.0654, "max_dd_r": 10.5943},
+      "break_even_cost_per_trade_r": 0.0654,
+      "A_low_0.02": {"total_r": 5.3136, "profit_factor": 1.1349, "expectancy_r": 0.0454, "win_rate": 0.3932, "max_dd_r": 11.2743, "positive": true},
+      "B_moderate_0.05": {"total_r": 1.8036, "profit_factor": 1.0434, "expectancy_r": 0.0154, "win_rate": 0.3504, "max_dd_r": 12.2943, "positive": true},
+      "C_high_0.10": {"total_r": -4.0464, "profit_factor": 0.9111, "expectancy_r": -0.0346, "win_rate": 0.3162, "max_dd_r": 15.2723, "positive": false},
+      "D_severe_0.20": {"total_r": -15.7464, "profit_factor": 0.7073, "expectancy_r": -0.1346, "win_rate": 0.265, "max_dd_r": 23.3723, "positive": false}
+    },
+    "OOS_2023_2025": {
+      "base": {"trade_count": 32, "total_r": 7.999, "profit_factor": 1.7694, "win_rate": 0.5312, "expectancy_r": 0.25, "max_dd_r": 2.1827},
+      "break_even_cost_per_trade_r": 0.25,
+      "A_low_0.02": {"total_r": 7.359, "profit_factor": 1.688, "expectancy_r": 0.23, "win_rate": 0.5312, "max_dd_r": 2.2627, "positive": true},
+      "B_moderate_0.05": {"total_r": 6.399, "profit_factor": 1.5721, "expectancy_r": 0.2, "win_rate": 0.4688, "max_dd_r": 2.3827, "positive": true},
+      "C_high_0.10": {"total_r": 4.799, "profit_factor": 1.3978, "expectancy_r": 0.15, "win_rate": 0.4375, "max_dd_r": 2.5827, "positive": true},
+      "D_severe_0.20": {"total_r": 1.599, "profit_factor": 1.1139, "expectancy_r": 0.05, "win_rate": 0.375, "max_dd_r": 3.5576, "positive": true}
+    }
+  },
+  "ES": {
+    "role": "independent_primary",
+    "IS_2013_2022": {
+      "base": {"trade_count": 125, "total_r": 7.6725, "profit_factor": 1.2003, "win_rate": 0.384, "expectancy_r": 0.0614, "max_dd_r": 16.7281},
+      "break_even_cost_per_trade_r": 0.0614,
+      "A_low_0.02": {"total_r": 5.1725, "profit_factor": 1.1298, "expectancy_r": 0.0414, "win_rate": 0.376, "max_dd_r": 17.7081, "positive": true},
+      "B_moderate_0.05": {"total_r": 1.4225, "profit_factor": 1.0337, "expectancy_r": 0.0114, "win_rate": 0.368, "max_dd_r": 19.2373, "positive": true},
+      "C_high_0.10": {"total_r": -4.8275, "profit_factor": 0.8957, "expectancy_r": -0.0386, "win_rate": 0.328, "max_dd_r": 21.9873, "positive": false},
+      "D_severe_0.20": {"total_r": -17.3275, "profit_factor": 0.6847, "expectancy_r": -0.1386, "win_rate": 0.288, "max_dd_r": 29.6773, "positive": false}
+    },
+    "OOS_2023_2025": {
+      "base": {"trade_count": 27, "total_r": 11.4584, "profit_factor": 2.2352, "win_rate": 0.5926, "expectancy_r": 0.4244, "max_dd_r": 2.0697},
+      "break_even_cost_per_trade_r": 0.4244,
+      "A_low_0.02": {"total_r": 10.9184, "profit_factor": 2.1487, "expectancy_r": 0.4044, "win_rate": 0.5556, "max_dd_r": 2.1297, "positive": true},
+      "B_moderate_0.05": {"total_r": 10.1084, "profit_factor": 2.0224, "expectancy_r": 0.3744, "win_rate": 0.5185, "max_dd_r": 2.2197, "positive": true},
+      "C_high_0.10": {"total_r": 8.7584, "profit_factor": 1.8294, "expectancy_r": 0.3244, "win_rate": 0.4815, "max_dd_r": 2.497, "positive": true},
+      "D_severe_0.20": {"total_r": 6.0584, "profit_factor": 1.5065, "expectancy_r": 0.2244, "win_rate": 0.4815, "max_dd_r": 3.097, "positive": true}
+    }
+  },
+  "proxy_micro_descriptive": {
+    "note": "MNQ/MES are same-underlying micros, PARTIAL history (from 2019); descriptive only, NOT independent, cannot change the verdict. Their IS spans only the post-2016 trending era so their IS break-even cushion is much larger than the full-history primaries' -- NOT comparable to NQ/ES IS.",
+    "MNQ": {
+      "IS_2013_2022": {"trade_count": 27, "total_r": 6.3671, "break_even_cost_per_trade_r": 0.2358, "C_high_0.10_total_r": 3.6671, "C_high_positive": true, "D_severe_0.20_total_r": 0.9671, "D_severe_positive": true},
+      "OOS_2023_2025": {"trade_count": 32, "total_r": 7.6833, "break_even_cost_per_trade_r": 0.2401, "C_high_0.10_total_r": 4.4833, "C_high_positive": true, "D_severe_0.20_total_r": 1.2833, "D_severe_positive": true}
+    },
+    "MES": {
+      "IS_2013_2022": {"trade_count": 28, "total_r": 10.3681, "break_even_cost_per_trade_r": 0.3703, "C_high_0.10_total_r": 7.5681, "C_high_positive": true, "D_severe_0.20_total_r": 4.7681, "D_severe_positive": true},
+      "OOS_2023_2025": {"trade_count": 27, "total_r": 11.7895, "break_even_cost_per_trade_r": 0.4366, "C_high_0.10_total_r": 9.0895, "C_high_positive": true, "D_severe_0.20_total_r": 6.3895, "D_severe_positive": true}
+    }
+  },
+  "break_even_summary": {
+    "NQ_IS": 0.0654, "NQ_OOS": 0.25, "ES_IS": 0.0614, "ES_OOS": 0.4244,
+    "MNQ_IS": 0.2358, "MNQ_OOS": 0.2401, "MES_IS": 0.3703, "MES_OOS": 0.4366,
+    "note": "Break-even C = the per-trade R cost that zeroes total R. The two FULL-HISTORY IS windows have the SMALLEST cushion (ES IS 0.0614R, NQ IS 0.0654R) -- the binding constraint. OOS cushions are 4-7x larger."
+  },
+  "sensitivity_ranking_most_to_least_fragile": [
+    {"window": "ES_IS_2013_2022", "break_even_cost_per_trade_r": 0.0614, "note": "most fragile: negative by C=0.10R"},
+    {"window": "NQ_IS_2013_2022", "break_even_cost_per_trade_r": 0.0654, "note": "negative by C=0.10R"},
+    {"window": "NQ_OOS_2023_2025", "break_even_cost_per_trade_r": 0.25, "note": "survives to severe (C=0.20R) positive"},
+    {"window": "ES_OOS_2023_2025", "break_even_cost_per_trade_r": 0.4244, "note": "most robust: survives severe with +6.06R"}
+  ],
+  "findings": {
+    "oos_robust": "BOTH NQ and ES OOS stay POSITIVE under every scenario including SEVERE (C=0.20R): NQ OOS +1.599R, ES OOS +6.058R at severe. OOS PF stays >1.1 throughout. OOS is robust to friction.",
+    "is_thin_and_friction_negative": "BOTH full-history IS windows have a thin edge that survives LOW and MODERATE friction but goes NEGATIVE at HIGH friction (C=0.10R): NQ IS -4.05R, ES IS -4.83R. By severe (C=0.20R) IS is deeply negative (NQ -15.75R, ES -17.33R) and IS max DD inflates (NQ 10.59->23.37R, ES 16.73->29.68R).",
+    "is_break_even_tiny": "The IS break-even cost is only ~0.06R on both primaries -- a very small cushion. Even modest per-trade friction materially erodes the IS edge.",
+    "no_oos_negative": "No hard-blocker condition fired: OOS does not go negative under low OR moderate (nor even high/severe) friction on either primary.",
+    "micros_descriptive": "MNQ/MES (post-2016-only IS) survive all scenarios on both windows, but their IS sits entirely in the favorable trending era so their large IS cushion is NOT comparable to the full-history primaries."
+  },
+  "verdict": "FRICTION_SENSITIVE",
+  "verdict_basis": {
+    "not_robust_reason": "FRICTION_ROBUST would require the full edge (incl. IS) to hold under high friction. Both full-history IS windows go NEGATIVE at high friction (C=0.10R): NQ IS -4.05R, ES IS -4.83R, with IS break-even only ~0.06R. The conservative call cannot certify ROBUST while IS flips negative under high friction on both primaries.",
+    "not_fragile_reason": "FRICTION_FRAGILE (IS or ES negative under MODERATE friction) did NOT fire: at moderate C=0.05R both IS windows are still positive (NQ +1.80R, ES +1.42R) and OOS is strongly positive on both.",
+    "not_fail_reason": "FRICTION_FAIL (OOS negative under low/moderate, or both NQ/ES fail) did NOT fire: OOS stays positive on BOTH primaries under every scenario including severe.",
+    "sensitive_reason": "Results survive LOW and MODERATE friction across both markets and OOS survives even SEVERE friction, but the thin full-history IS edge becomes negative under HIGH friction on both primaries -- the textbook 'survives low/moderate, weak under high/severe' pattern. OOS robust; IS fragile.",
+    "flags": [
+      "IS edge is thin: break-even ~0.06R on both primaries -- smallest cushion in the study -- flagged.",
+      "Both full-history IS windows go NEGATIVE at high friction (C=0.10R) -- flagged.",
+      "IS max DD inflates sharply under friction (ES IS 16.73R -> 29.68R at severe) -- flagged.",
+      "OOS robust to severe friction, but OOS is the short post-2016 window already flagged in D15/D16 for single-regime dependence -- friction robustness does NOT cure regime concentration."
+    ]
+  },
+  "gate_decision": {
+    "blocks_d18": false,
+    "permits_d18": true,
+    "d14_hard_blocker_negative_oos_after_friction_fired": false,
+    "reason": "The D14 hard blocker 'Negative OOS after realistic friction' did NOT fire -- OOS stays positive on both primaries through severe friction. FRICTION_SENSITIVE permits proceeding to S26-D18 final research-readiness review, carrying the thin-IS-edge friction fragility as an explicit caution. NOT a clearance to paper trade; D17 does not upgrade readiness."
+  },
+  "trading_recommendation": "NONE. No deployment, no paper, no live. S26 stays RESEARCH_CANDIDATE."
+}
