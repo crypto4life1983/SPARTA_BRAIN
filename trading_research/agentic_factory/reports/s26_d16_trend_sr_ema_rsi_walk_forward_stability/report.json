@@ -1,0 +1,158 @@
+{
+  "step": "S26-D16",
+  "title": "Walk-forward / rolling-window stability (frozen engine, validation only)",
+  "validation_only": true,
+  "optimization": false,
+  "parameter_changes": false,
+  "strategy_change": false,
+  "new_filters": false,
+  "created": "2026-05-30",
+  "reference_commit": "51486b38723876bf7230bd918b0c4c2638fc2e13",
+  "reference_commit_short": "51486b3",
+  "frozen_engine": "engine/trend_sr_ema_rsi_daily.py (unchanged)",
+  "s26_current_status": {"level": "RESEARCH_CANDIDATE", "paper_ready": false, "live_ready": false, "deployable": false},
+  "method": {
+    "rolling_basis": "Frozen engine run ONCE on the full continuous per-market stream (NQ/ES 2013-2025, MNQ/MES 2019-2025); closed trades bucketed by exit-year; year / rolling-3yr / rolling-5yr aggregated from those buckets. Continuous stream keeps indicators warm from 2013 (a standalone short window would blank its first ~200 bars to EMA200 warmup).",
+    "is_oos_basis": "IS 2013-2022 and OOS 2023-2025 re-run as SEPARATE standalone streams to reproduce the committed D3/D5/D12 splits.",
+    "reconciliation": "Continuous-stream 2013-2022 buckets reproduce committed IS EXACTLY (NQ +7.6536R/117, ES +7.6725R/125). Continuous 2023-2025 carries MORE trades than the re-warmed standalone OOS (NQ 39 vs 32; ES 31 vs 27) because the standalone OOS loses its first ~200 bars to warmup. Both bases are reported; neither changes a rule.",
+    "no_2026": true, "data_modified": false
+  },
+  "NQ": {
+    "role": "reference_primary",
+    "continuous_full": {"years": [2013, 2025], "trade_count": 156, "total_r": 16.8159},
+    "year_by_year": {
+      "2013": {"n": 3, "total_r": 3.2897, "positive": true},
+      "2014": {"n": 17, "total_r": -1.2545, "positive": false},
+      "2015": {"n": 21, "total_r": -2.7328, "positive": false},
+      "2016": {"n": 10, "total_r": -4.447, "positive": false},
+      "2017": {"n": 16, "total_r": 4.2862, "positive": true},
+      "2018": {"n": 12, "total_r": 0.3501, "positive": true},
+      "2019": {"n": 11, "total_r": 1.784, "positive": true},
+      "2020": {"n": 9, "total_r": 4.8232, "positive": true},
+      "2021": {"n": 14, "total_r": 2.543, "positive": true},
+      "2022": {"n": 4, "total_r": -0.9883, "positive": false},
+      "2023": {"n": 13, "total_r": 1.818, "positive": true},
+      "2024": {"n": 12, "total_r": 4.9348, "positive": true},
+      "2025": {"n": 14, "total_r": 2.4094, "positive": true}
+    },
+    "rolling_3yr": {
+      "2013-2015": {"n": 41, "total_r": -0.6976, "profit_factor": 0.9438, "expectancy_r": -0.017, "max_dd_r": 5.6079, "positive": false},
+      "2014-2016": {"n": 48, "total_r": -8.4343, "profit_factor": 0.5103, "expectancy_r": -0.1757, "max_dd_r": 10.5943, "positive": false},
+      "2015-2017": {"n": 47, "total_r": -2.8936, "profit_factor": 0.8111, "expectancy_r": -0.0616, "max_dd_r": 8.3629, "positive": false},
+      "2016-2018": {"n": 38, "total_r": 0.1893, "profit_factor": 1.0121, "expectancy_r": 0.005, "max_dd_r": 5.1454, "positive": true},
+      "2017-2019": {"n": 39, "total_r": 6.4203, "profit_factor": 1.4853, "expectancy_r": 0.1646, "max_dd_r": 3.3098, "positive": true},
+      "2018-2020": {"n": 32, "total_r": 6.9573, "profit_factor": 1.7782, "expectancy_r": 0.2174, "max_dd_r": 3.3098, "positive": true},
+      "2019-2021": {"n": 34, "total_r": 9.1502, "profit_factor": 2.0429, "expectancy_r": 0.2691, "max_dd_r": 2.6513, "positive": true},
+      "2020-2022": {"n": 27, "total_r": 6.3779, "profit_factor": 1.9383, "expectancy_r": 0.2362, "max_dd_r": 2.6202, "positive": true},
+      "2021-2023": {"n": 31, "total_r": 3.3727, "profit_factor": 1.3354, "expectancy_r": 0.1088, "max_dd_r": 3.6202, "positive": true},
+      "2022-2024": {"n": 29, "total_r": 5.7645, "profit_factor": 1.5875, "expectancy_r": 0.1988, "max_dd_r": 3.182, "positive": true},
+      "2023-2025": {"n": 39, "total_r": 9.1623, "profit_factor": 1.6924, "expectancy_r": 0.2349, "max_dd_r": 3.182, "positive": true}
+    },
+    "rolling_5yr": {
+      "2013-2017": {"n": 67, "total_r": -0.8584, "profit_factor": 0.9638, "expectancy_r": -0.0128, "max_dd_r": 10.5943, "positive": false},
+      "2014-2018": {"n": 76, "total_r": -3.798, "profit_factor": 0.8613, "expectancy_r": -0.05, "max_dd_r": 10.5943, "positive": false},
+      "2015-2019": {"n": 70, "total_r": -0.7595, "profit_factor": 0.9667, "expectancy_r": -0.0109, "max_dd_r": 8.3629, "positive": false},
+      "2016-2020": {"n": 58, "total_r": 6.7964, "profit_factor": 1.336, "expectancy_r": 0.1172, "max_dd_r": 5.1454, "positive": true},
+      "2017-2021": {"n": 62, "total_r": 13.7865, "profit_factor": 1.7285, "expectancy_r": 0.2224, "max_dd_r": 3.3098, "positive": true},
+      "2018-2022": {"n": 50, "total_r": 8.512, "profit_factor": 1.597, "expectancy_r": 0.1702, "max_dd_r": 3.3098, "positive": true},
+      "2019-2023": {"n": 51, "total_r": 9.9799, "profit_factor": 1.6829, "expectancy_r": 0.1957, "max_dd_r": 3.6202, "positive": true},
+      "2020-2024": {"n": 52, "total_r": 13.1308, "profit_factor": 1.8468, "expectancy_r": 0.2525, "max_dd_r": 3.6202, "positive": true},
+      "2021-2025": {"n": 57, "total_r": 10.717, "profit_factor": 1.5777, "expectancy_r": 0.188, "max_dd_r": 3.6202, "positive": true}
+    },
+    "rolling_summary": {"r3_positive": 8, "r3_total": 11, "r5_positive": 6, "r5_total": 9, "negative_windows_all_contain_2014_2016": true},
+    "IS_OOS_standalone": {
+      "IS_2013_2022": {"trade_count": 117, "total_r": 7.6536, "profit_factor": 1.2016, "expectancy_r": 0.0654, "max_dd_r": 10.5943, "positive": true},
+      "OOS_2023_2025": {"trade_count": 32, "total_r": 7.999, "profit_factor": 1.7694, "expectancy_r": 0.25, "max_dd_r": 2.1827, "positive": true}
+    }
+  },
+  "ES": {
+    "role": "independent_primary",
+    "continuous_full": {"years": [2013, 2025], "trade_count": 156, "total_r": 19.6301},
+    "year_by_year": {
+      "2013": {"n": 5, "total_r": 3.906, "positive": true},
+      "2014": {"n": 12, "total_r": -3.5544, "positive": false},
+      "2015": {"n": 27, "total_r": -4.5901, "positive": false},
+      "2016": {"n": 16, "total_r": -8.3428, "positive": false},
+      "2017": {"n": 13, "total_r": 7.0068, "positive": true},
+      "2018": {"n": 13, "total_r": -0.7869, "positive": false},
+      "2019": {"n": 11, "total_r": 3.6053, "positive": true},
+      "2020": {"n": 8, "total_r": 5.0495, "positive": true},
+      "2021": {"n": 16, "total_r": 5.7606, "positive": true},
+      "2022": {"n": 4, "total_r": -0.3815, "positive": false},
+      "2023": {"n": 8, "total_r": -0.4258, "positive": false},
+      "2024": {"n": 12, "total_r": 4.0465, "positive": true},
+      "2025": {"n": 11, "total_r": 8.3369, "positive": true}
+    },
+    "rolling_3yr": {
+      "2013-2015": {"n": 44, "total_r": -4.2385, "profit_factor": 0.7025, "expectancy_r": -0.0963, "max_dd_r": 8.3853, "positive": false},
+      "2014-2016": {"n": 55, "total_r": -16.4873, "profit_factor": 0.2638, "expectancy_r": -0.2998, "max_dd_r": 16.7281, "positive": false},
+      "2015-2017": {"n": 56, "total_r": -5.9262, "profit_factor": 0.6906, "expectancy_r": -0.1058, "max_dd_r": 13.9954, "positive": false},
+      "2016-2018": {"n": 42, "total_r": -2.1229, "profit_factor": 0.8575, "expectancy_r": -0.0505, "max_dd_r": 8.3428, "positive": false},
+      "2017-2019": {"n": 37, "total_r": 9.8252, "profit_factor": 2.0536, "expectancy_r": 0.2655, "max_dd_r": 3.0304, "positive": true},
+      "2018-2020": {"n": 32, "total_r": 7.868, "profit_factor": 1.9924, "expectancy_r": 0.2459, "max_dd_r": 3.0304, "positive": true},
+      "2019-2021": {"n": 35, "total_r": 14.4155, "profit_factor": 2.687, "expectancy_r": 0.4119, "max_dd_r": 2.2435, "positive": true},
+      "2020-2022": {"n": 28, "total_r": 10.4286, "profit_factor": 2.6648, "expectancy_r": 0.3725, "max_dd_r": 1.8311, "positive": true},
+      "2021-2023": {"n": 28, "total_r": 4.9533, "profit_factor": 1.6243, "expectancy_r": 0.1769, "max_dd_r": 2.1487, "positive": true},
+      "2022-2024": {"n": 24, "total_r": 3.2391, "profit_factor": 1.3954, "expectancy_r": 0.135, "max_dd_r": 2.6065, "positive": true},
+      "2023-2025": {"n": 31, "total_r": 11.9575, "profit_factor": 2.1095, "expectancy_r": 0.3857, "max_dd_r": 2.6065, "positive": true}
+    },
+    "rolling_5yr": {
+      "2013-2017": {"n": 73, "total_r": -5.5746, "profit_factor": 0.7851, "expectancy_r": -0.0764, "max_dd_r": 16.7281, "positive": false},
+      "2014-2018": {"n": 81, "total_r": -10.2675, "profit_factor": 0.6437, "expectancy_r": -0.1268, "max_dd_r": 16.7281, "positive": false},
+      "2015-2019": {"n": 80, "total_r": -3.1077, "profit_factor": 0.8769, "expectancy_r": -0.0388, "max_dd_r": 13.9954, "positive": false},
+      "2016-2020": {"n": 61, "total_r": 6.5319, "profit_factor": 1.3328, "expectancy_r": 0.1071, "max_dd_r": 8.3428, "positive": true},
+      "2017-2021": {"n": 61, "total_r": 20.6354, "profit_factor": 2.3787, "expectancy_r": 0.3383, "max_dd_r": 3.0304, "positive": true},
+      "2018-2022": {"n": 52, "total_r": 13.2471, "profit_factor": 2.0716, "expectancy_r": 0.2548, "max_dd_r": 3.0304, "positive": true},
+      "2019-2023": {"n": 47, "total_r": 13.6082, "profit_factor": 2.0742, "expectancy_r": 0.2895, "max_dd_r": 2.2435, "positive": true},
+      "2020-2024": {"n": 48, "total_r": 14.0493, "profit_factor": 2.0155, "expectancy_r": 0.2927, "max_dd_r": 2.6065, "positive": true},
+      "2021-2025": {"n": 51, "total_r": 17.3367, "profit_factor": 2.1398, "expectancy_r": 0.3399, "max_dd_r": 2.6065, "positive": true}
+    },
+    "rolling_summary": {"r3_positive": 7, "r3_total": 11, "r5_positive": 6, "r5_total": 9, "negative_windows_all_contain_2014_2016": true},
+    "IS_OOS_standalone": {
+      "IS_2013_2022": {"trade_count": 125, "total_r": 7.6725, "profit_factor": 1.2003, "expectancy_r": 0.0614, "max_dd_r": 16.7281, "positive": true},
+      "OOS_2023_2025": {"trade_count": 27, "total_r": 11.4584, "profit_factor": 2.2352, "expectancy_r": 0.4244, "max_dd_r": 2.0697, "positive": true}
+    }
+  },
+  "proxy_micro_descriptive": {
+    "note": "MNQ/MES are same-underlying micros, PARTIAL history from 2019; descriptive only, NOT independent, cannot change the verdict. Every MNQ/MES rolling 3yr and 5yr window (all start >=2019, i.e. post-2016) is positive -- consistent with the big contracts' post-2016 strength.",
+    "MNQ": {"full_total_r": 15.4192, "full_n": 66, "all_rolling_positive": true},
+    "MES": {"full_total_r": 22.6654, "full_n": 59, "all_rolling_positive": true}
+  },
+  "common_weak_windows": {
+    "window": "2014-2016 (and every rolling window that contains it)",
+    "NQ_3yr_2014_2016": {"total_r": -8.4343, "profit_factor": 0.5103},
+    "ES_3yr_2014_2016": {"total_r": -16.4873, "profit_factor": 0.2638},
+    "note": "BOTH primary markets collapse over 2014-2016 simultaneously (choppy / non-trending regime). ES is far worse (-16.49R, PF 0.26). ALL negative rolling windows on both markets contain 2014-2016 -- a shared, un-diversified regime weakness (consistent with the D15 shared 2014-2016 drawdown cluster)."
+  },
+  "common_strong_windows": {
+    "windows": ["2017-2021", "2019-2021", "2020-2024", "2021-2025"],
+    "note": "Every rolling window that lies entirely in the post-2016 trending era is positive on BOTH markets; ES generally stronger than NQ in the same windows. NQ and ES AGREE on both weak and strong windows -- ES does not contradict NQ."
+  },
+  "oos_vs_prior_windows": {
+    "nq_2023_2025_continuous_3yr_r": 9.1623,
+    "nq_comparable_prior_3yr": {"2019-2021": 9.1502, "2018-2020": 6.9573},
+    "es_2023_2025_continuous_3yr_r": 11.9575,
+    "es_comparable_prior_3yr": {"2019-2021": 14.4155, "2020-2022": 10.4286},
+    "verdict": "OOS (2023-2025) is STRONG but NOT an isolated outlier -- it sits in line with (NQ) or below (ES) the 2019-2021 window. The OOS strength is consistent with the broader post-2016 regime, not a single lucky spike. CAVEAT: the entire positive record IS the post-2016 trending era; the strategy has not demonstrated survival of a multi-year choppy regime (2014-2016 lost on both)."
+  },
+  "verdict": "WALK_FORWARD_INCONCLUSIVE",
+  "verdict_basis": {
+    "not_stable_reason": "The S26-D16 STABLE bar requires 'no catastrophic multi-year collapse'. 2014-2016 IS a multi-year collapse on both markets (ES 3yr -16.49R, PF 0.26; NQ 3yr -8.43R, PF 0.51), and the ENTIRE positive track record is the single post-2016 trending regime. Cannot cleanly certify STABLE.",
+    "not_fragile_reason": "Performance does NOT hinge on a few lucky windows: NQ 8/11 and ES 7/11 rolling-3yr windows positive, both 6/9 rolling-5yr positive, broadly positive across the whole 2017-2025 era on both markets and on the micros.",
+    "not_fail_reason": "No collapse in major LONG windows post-2016; ES does not contradict NQ (they agree on weak AND strong windows); OOS is in-line with prior post-2016 windows, not a contradiction.",
+    "inconclusive_reason": "Mixed but not catastrophic overall: strong and consistent post-2016 stability across both markets, undercut by a shared, un-diversified 2014-2016 multi-year regime weakness and a single-regime (trending) dependence.",
+    "flags": [
+      "2014-2016 very bad on both markets (ES PF 0.26) -- flagged.",
+      "All negative rolling windows contain 2014-2016 -- common regime risk, no NQ/ES diversification -- flagged.",
+      "Whole positive record is the post-2016 trending era; choppy-regime survival unproven -- flagged.",
+      "OOS strong but in-line with 2019-2021, not an isolated spike -- noted as reassuring, not upgrading."
+    ]
+  },
+  "gate_decision": {
+    "blocks_d17": false,
+    "permits_d17": true,
+    "d14_hard_blocker_collapse_outside_one_subperiod_fired": false,
+    "reason": "The collapse is CONFINED to one identifiable subperiod (2014-2016); outside it every window is positive, so the D14 hard blocker 'walk-forward shows collapse outside one subperiod' did NOT fire. WALK_FORWARD_INCONCLUSIVE permits proceeding to S26-D17 friction/slippage stress (especially important given the thin IS edge). NOT a clearance to paper trade; D16 does not upgrade readiness."
+  },
+  "trading_recommendation": "NONE. No deployment, no paper, no live. S26 stays RESEARCH_CANDIDATE."
+}
