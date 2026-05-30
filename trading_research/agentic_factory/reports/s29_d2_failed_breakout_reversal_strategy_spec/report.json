@@ -1,0 +1,151 @@
+{
+  "step": "S29-D2",
+  "title": "Failed-Breakout / False-Break Reversal -- FROZEN strategy specification (spec only)",
+  "created": "2026-05-30",
+  "kind": "frozen_strategy_spec_only",
+  "spec_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "provenance": {
+    "head_at_spec": "139bb60",
+    "s29_d1_commit": "139bb60bb920da143bb42ee38b123130616b5b95",
+    "head_note": "HEAD is exactly the S29-D1 commit 139bb60; factory tree clean, nothing staged, no automation-touched factory files since S29-D1.",
+    "context_reports_read": [
+      "reports/s29_d1_new_strategy_idea_sourcing/report.md",
+      "reports/s28_d4_breakout_retest_is_baseline/report.md",
+      "reports/s26_d18_trend_sr_ema_rsi_decision_gate/report.md",
+      "reports/factory_d11_validation_factory_closeout/report.md"
+    ]
+  },
+  "1_strategy_name": "Failed-Breakout / False-Break Reversal",
+  "2_market_timeframe": {
+    "primary_market": "NQ continuous futures, daily bars",
+    "independent_confirmation_later": "ES continuous futures, daily bars (separate later step)",
+    "bars": "daily only",
+    "intraday": "NONE in v1",
+    "year_2026": "FORBIDDEN -- not used",
+    "in_sample": "2013-2022",
+    "out_of_sample": "2023-2025 -- SEALED until the OOS protocol is pre-registered and committed",
+    "micros_note": "MNQ/MES are same-underlying proxies, descriptive only; never independent confirmation."
+  },
+  "3_core_hypothesis": "A daily bar that violates a prior daily extreme intrabar but FAILS to close beyond the prior range (a false break) traps breakout traders who are then forced to cover, mechanically reverting price over the next several bars. The edge must come from the FAILURE EVENT itself, not from broad trend drift -- this is what the entry-significance test (vs random entries inside the same eligible regime universe, and vs raw prior-extreme touches) is designed to prove.",
+  "4_direction": {
+    "v1_decision": "LONG-ONLY false DOWNSIDE break.",
+    "definition": "Price breaks below the prior 20-day low intrabar but closes back ABOVE it, trapping breakout-shorts -> go long the reversal.",
+    "why_long_only": [
+      "Simpler and safer for v1 -- one direction, one frozen trigger, maximal clarity for the entry-significance test.",
+      "Index futures carry a structural upward drift over 2013-2022; a long-only false-downside-break fades a failed flush WITH the drift rather than fighting it (a short-only or symmetric version would fight the drift and behave differently on the two sides, complicating the clean test).",
+      "The falling-knife risk of buying a new-low break is handled by the minimal regime guard (section 6), which only blocks CONFIRMED downtrends, not the edge itself.",
+      "Distinct from every parked branch: S26/S27 were trend/pullback CONTINUATION longs; this is a FAILURE-event reversal long whose edge is isolated from the trend filter by the entry-significance control."
+    ],
+    "symmetric_deferred": "A symmetric long+short (adding false UPSIDE break shorts on the prior 20-day high) is explicitly DEFERRED to a future separately-authorized branch; v1 is long-only to keep the first clean test unambiguous."
+  },
+  "5_false_break_level": {
+    "level": "prior 20-day low, EXCLUDING the current bar (a 20-bar rolling low shifted by one bar).",
+    "long_false_downside_break_trigger": "low_t < prior_20_low_t AND close_t > prior_20_low_t",
+    "frozen": {"lookback_n": 20, "reference": "prior (shifted) 20-bar low", "current_bar_excluded": true},
+    "short_side_v1": "NOT USED in v1 (long-only). For the record, the symmetric short trigger would be: high_t > prior_20_high_t AND close_t < prior_20_high_t -- deferred."
+  },
+  "6_regime_background_filter": {
+    "selected_option": "B -- avoid a CONFIRMED downtrend (minimal falling-knife guard).",
+    "rule": "Block a long entry if (close_t < EMA200_t AND EMA50_t < EMA200_t). Otherwise the long is eligible.",
+    "frozen": {"ema_fast": 50, "ema_slow": 200, "block_when": "close < EMA200 AND EMA50 < EMA200"},
+    "rationale": [
+      "By De Morgan this equals Option A (allow when close>=EMA200 OR EMA50>=EMA200); chosen in the 'avoid confirmed downtrend' framing because it is the MOST PERMISSIVE guard -- it blocks only the both-bearish falling-knife regime.",
+      "Maximizing eligibility directly attacks the S27 (18 trades) / S28 (12 trades) low-trade-count failure: the filter is a guard, NOT an edge driver, so it is kept minimal.",
+      "It avoids the S26 failure (edge indistinguishable from the trend filter) because entry significance is tested WITHIN this eligible universe -- the false-break event must beat random entries drawn from the same non-downtrend days."
+    ]
+  },
+  "7_entry_timing": {
+    "signal_bar": "the false-break bar (low pierces prior_20_low but close returns above it, in an eligible regime).",
+    "entry": "NEXT bar open (t+1 open).",
+    "no_lookahead": "No same-bar lookahead -- the signal is only known at the signal-bar close; the fill is the following open."
+  },
+  "8_stop": {
+    "type": "LEVEL-BASED (thesis-invalidation stop).",
+    "rule": "stop_price = signal_bar_low - 0.25 * ATR20_at_signal_bar.",
+    "frozen": {"atr_period": 20, "buffer_atr_mult": 0.25, "anchor": "signal-bar low"},
+    "one_R_definition": "1R = entry_open - stop_price (entry at t+1 open).",
+    "why_level_based": "The thesis is that the false-break extreme holds; if price takes out the signal-bar low (plus a 0.25*ATR noise buffer) the setup is invalidated, so the stop is anchored to that level rather than a fixed ATR distance from entry."
+  },
+  "9_target_exit": {
+    "target": "+1.5R (target_price = entry_open + 1.5 * R).",
+    "stop": "-1R (by construction, the level stop in section 8).",
+    "time_stop": "exit at the CLOSE of the 10th bar after entry if neither stop nor target has been hit.",
+    "same_bar_resolution": "if a bar's range touches BOTH stop and target, assume STOP first (conservative).",
+    "frozen": {"target_R": 1.5, "stop_R": 1.0, "time_stop_bars": 10, "same_bar": "stop_first"},
+    "optional_mean_exit": "NONE in v1 (no EMA20 / range-midpoint exit) -- kept out to avoid an extra free parameter."
+  },
+  "10_position_rules": {
+    "concurrent_positions": "ONE at a time (no new entry while a position is live).",
+    "pyramiding": "NONE.",
+    "compounding": "NONE.",
+    "accounting": "R-only.",
+    "discretion": "NONE -- fully mechanical, no override."
+  },
+  "11_entry_significance_protocol": {
+    "primary_test": "real false-break entries vs the SAME COUNT of random entries drawn from the same eligible regime universe (non-confirmed-downtrend days).",
+    "secondary_test": "real false-break entries vs raw prior-20-low TOUCH entries (low_t < prior_20_low_t, regardless of close) -- the raw-breakout null, to prove the FAILURE (close back inside), not the touch, carries the edge.",
+    "fixed_horizons": [5, 10, 20, 40],
+    "no_horizon_shopping": true,
+    "promotion_requirement": "entry edge must reach EDGE_LIKELY (not merely INCONCLUSIVE) to license continuation; INCONCLUSIVE is the S26 trap and is not sufficient."
+  },
+  "12_validation_ladder_plan": {
+    "note": "Pre-registered S29 sub-step plan using the completed validation factory (Factory-D2..D11). No step is run now.",
+    "S29-D3": "engine + tests only (frozen rules; no run).",
+    "S29-D4": "IS baseline (2013-2022) via validation_is_runner; hard 2023-2025 seal.",
+    "S29-D5": "OOS protocol pre-registration via validation_oos_runner; COMMIT before any OOS.",
+    "S29-D6": "OOS run ONCE (2023-2025) against the committed protocol.",
+    "S29-D7": "entry significance via validation_entry_significance (section 11).",
+    "S29-D8": "sequence risk / Monte Carlo via validation_sequence_risk.",
+    "S29-D9": "regime breakdown via validation_regime.",
+    "S29-D10": "ES multi-market independent confirmation.",
+    "S29-D11": "walk-forward via validation_walk_forward.",
+    "S29-D12": "friction stress via validation_friction.",
+    "S29-D13": "final decision / readiness gate via validation_decision."
+  },
+  "13_pass_watch_fail_gates": {
+    "is_trade_count": "PASS >=40 | WATCH 25-39 | FAIL <25",
+    "oos_trade_count": "PASS >=15 | WATCH 8-14 | FAIL <8",
+    "profit_factor": "PASS >=1.30 | WATCH 1.10-1.29 | FAIL <1.10",
+    "expectancy": "PASS >0 on IS (required)",
+    "max_dd_cap": "PASS IS max DD <= IS net R | FAIL IS max DD > 1.5x IS net R",
+    "positive_years": "PASS >=6/10 | WATCH 5/10 | FAIL <5/10",
+    "top3_winner_dependence": "PASS net stays POSITIVE without the top 3 winners | FAIL net flips negative ex-top-3 (the Donchian/S25 gate)",
+    "sequence_risk_bootstrap_p_total_le_0": "PASS <10% | WATCH 10-20% | FAIL >=20% (Donchian IS was 20.9%)",
+    "entry_significance": "REQUIRED EDGE_LIKELY (INCONCLUSIVE is not a pass)",
+    "friction": "PASS full-history edge positive under >=0.10R/trade | FAIL negative at 0.10R (the S26 binding weakness)"
+  },
+  "14_anti_overfit_rules": [
+    "No changing the lookback (20), ATR period (20), ATR stop buffer (0.25), target (1.5R), stop (1R), time stop (10 bars), or EMA periods (50/200) after seeing any result.",
+    "No OOS run before the OOS protocol is pre-registered AND committed.",
+    "No parameter sweeps; no grid search; no 'best of N'.",
+    "No adding or removing filters after OOS.",
+    "Any rule change opens a NEW branch -- S29 is never tuned in place.",
+    "No paper/live promotion from the spec or from IS results; paper/live requires a separate readiness memo with explicit override fields."
+  ],
+  "15_expected_failure_modes": [
+    "False breaks can keep breaking -- a failed flush may resume lower (falling knife) despite the regime guard.",
+    "Low trade count if false-break-and-close-back events are rarer than expected on daily NQ (the S27/S28 risk).",
+    "Level stop too tight around the volatile false-break extreme -> premature stop-outs (the 0.25*ATR buffer may be insufficient or, if widened later, that is a NEW branch).",
+    "Mean reversion may depend on the volatility regime -> regime concentration (the inverse of S26; surfaced by the regime + walk-forward modules).",
+    "Daily bars hide the intraday path; same-bar stop-vs-target ordering is assumed (stop-first), which may understate or overstate fills.",
+    "A future symmetric short side may behave very differently from the long side (deferred for this reason).",
+    "Friction sensitivity if the +1.5R target produces small average R and a per-trade cost erodes the thin edge (the S26 failure)."
+  ],
+  "16_final_line": "S29-D2 is a frozen hypothesis specification only; no strategy code, backtest, OOS, optimization, paper trading, or live trading is authorized.",
+  "guardrails": {
+    "spec_only": true, "no_code": true, "no_backtest": true, "no_is_oos_run": true,
+    "no_optimization": true, "no_parameter_sweeps": true, "no_data_fetch": true,
+    "no_paper_or_live": true, "no_broker_or_api": true, "no_source_engine_test_changes": true,
+    "oos_2023_2025_sealed": true, "no_2026": true,
+    "donchian_s26_s27_s28_read_only": true, "jarvis_templates_hydra_untouched": true,
+    "no_staging": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. Frozen specification only. Donchian, S26, S27, S28 remain PARKED; no active strategy code; no paper/live system exists or is authorized. The frozen S29 rules are a research hypothesis to be tested under the factory ladder, not a trade."
+}
