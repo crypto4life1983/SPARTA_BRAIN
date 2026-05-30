@@ -62,8 +62,8 @@
     @keyframes jvspin{to{transform:rotate(360deg);}}
 
     /* panels */
-    .jv-grid{display:grid;gap:16px;position:relative;z-index:2;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+    .jv-grid{display:grid;gap:18px;position:relative;z-index:2;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
     .jv-panel{background:var(--jv-panel);border:1px solid var(--jv-edge);
       border-radius:14px;padding:16px 16px 14px;backdrop-filter:blur(3px);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 30px rgba(0,10,25,.45);
@@ -134,7 +134,30 @@
     .jv-snap.s-green .jv-badge{color:var(--jv-ok);border-color:var(--jv-ok);}
     .jv-snap.s-yellow .jv-badge{color:var(--jv-warn);border-color:var(--jv-warn);}
     .jv-snap.s-red .jv-badge{color:var(--jv-bad);border-color:var(--jv-bad);}
-    .jv-snap .jv-headline{font-size:14px;color:#eaf6ff;margin:10px 0 4px;}
+    .jv-snap .jv-headline{font-size:15px;color:#eaf6ff;margin:12px 0 4px;line-height:1.5;}
+    /* Step 20 polish: prominent snapshot verdict */
+    .jv-snap .jv-badge{font-size:18px;padding:6px 18px;margin-bottom:2px;}
+    /* Step 20 polish: full-width section dividers (display only, no behavior) */
+    .jv-section{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;
+      flex-wrap:wrap;margin:10px 2px 0;}
+    .jv-section .lbl{font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+      color:var(--jv-cyan);font-weight:700;white-space:nowrap;}
+    .jv-section .sub{font-size:10px;letter-spacing:.06em;color:var(--jv-dim);
+      white-space:nowrap;}
+    .jv-section .ln{flex:1 1 60px;height:1px;min-width:30px;
+      background:linear-gradient(90deg,var(--jv-edge),transparent);}
+    /* Step 20 polish: tag legend + colour-coded posture tags */
+    .jv-legend{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;
+      align-items:center;margin:0 2px 2px;font-size:10px;color:var(--jv-dim);
+      letter-spacing:.04em;}
+    .jv-legend .lg{display:inline-flex;align-items:center;gap:6px;}
+    .jv-tag.t-read{border-color:rgba(63,224,255,.5);color:#bfe9ff;}
+    .jv-tag.t-cache{border-color:rgba(255,195,77,.55);color:#ffe2ad;}
+    .jv-tag.t-display{border-color:rgba(42,108,255,.6);color:#bcd0ff;}
+    .jv-tag.t-manual{border-color:rgba(255,93,115,.5);color:#ffd2d6;}
+    /* Step 20 polish: compact long lists in wide panels */
+    .jv-wide .jv-mcard{margin:7px 0;}
+    .jv-wide .jv-detail{line-height:1.45;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -160,10 +183,22 @@
 
   <div class="jv-grid">
 
+    <div class="jv-legend">
+      <span>Posture legend:</span>
+      <span class="lg"><span class="jv-tag t-read">READ ONLY</span> live status, no writes</span>
+      <span class="lg"><span class="jv-tag t-cache">CACHED</span> offline report, read only</span>
+      <span class="lg"><span class="jv-tag t-display">DISPLAY ONLY</span> tracked docs, no execution</span>
+      <span class="lg"><span class="jv-tag t-manual">MANUAL SCRIPT ONLY</span> never run from the browser</span>
+    </div>
+
+    <div class="jv-section"><span class="lbl">Command Overview</span><span class="ln"></span><span class="sub">single-glance verdict</span></div>
+
     <div class="jv-panel jv-wide jv-snap" id="pSnapshot">
       <h2><span class="ic">&#x2726;</span>Commander's Snapshot</h2>
       <div class="jv-loading">Synthesizing snapshot&hellip;</div>
     </div>
+
+    <div class="jv-section"><span class="lbl">Core Systems</span><span class="ln"></span><span class="sub">server, brains, repository</span></div>
 
     <div class="jv-panel" id="pCore">
       <h2><span class="ic">&#x25C6;</span>System Core</h2>
@@ -175,8 +210,25 @@
       <div class="jv-loading">Probing&hellip;</div>
     </div>
 
+    <div class="jv-panel" id="pGit">
+      <h2><span class="ic">&#x2387;</span>Git State</h2>
+      <div class="jv-loading">Reading repository&hellip;</div>
+    </div>
+
+    <div class="jv-panel" id="pProject">
+      <h2><span class="ic">&#x1F5C2;</span>Project Files</h2>
+      <div class="jv-loading">Checking artifacts&hellip;</div>
+    </div>
+
+    <div class="jv-panel" id="pBrainMem">
+      <h2><span class="ic">&#x2699;</span>Brain Memory</h2>
+      <div class="jv-loading">Scanning memory tree&hellip;</div>
+    </div>
+
+    <div class="jv-section"><span class="lbl">Operations</span><span class="ln"></span><span class="sub">engines &amp; daily plan</span></div>
+
     <div class="jv-panel" id="pTrading">
-      <h2><span class="ic">&#x25A3;</span>Trading Bridge <span class="jv-tag">READ-ONLY</span></h2>
+      <h2><span class="ic">&#x25A3;</span>Trading Bridge <span class="jv-tag t-read">READ-ONLY</span></h2>
       <div class="jv-loading">Scanning lifecycles&hellip;</div>
     </div>
 
@@ -200,6 +252,13 @@
       <div class="jv-loading">Computing&hellip;</div>
     </div>
 
+    <div class="jv-panel" id="pNext">
+      <h2><span class="ic">&#x2766;</span>Recommended Next Actions</h2>
+      <div class="jv-loading">Computing&hellip;</div>
+    </div>
+
+    <div class="jv-section"><span class="lbl">Safety &amp; Reliability</span><span class="ln"></span><span class="sub">gates, posture &amp; cached health</span></div>
+
     <div class="jv-panel" id="pSafety">
       <h2><span class="ic">&#x26E8;</span>Safety Gates</h2>
       <!-- Static fallback so gates are present even before JS runs / if it fails. -->
@@ -209,69 +268,53 @@
       <div class="jv-gate"><span class="lab">Live automation</span><span class="st">BLOCKED</span></div>
     </div>
 
-    <div class="jv-panel" id="pGit">
-      <h2><span class="ic">&#x2387;</span>Git State</h2>
-      <div class="jv-loading">Reading repository&hellip;</div>
-    </div>
-
     <div class="jv-panel" id="pOpSafety">
       <h2><span class="ic">&#x26E8;</span>Operator Safety</h2>
       <div class="jv-loading">Confirming posture&hellip;</div>
     </div>
 
-    <div class="jv-panel" id="pProject">
-      <h2><span class="ic">&#x1F5C2;</span>Project Files</h2>
-      <div class="jv-loading">Checking artifacts&hellip;</div>
-    </div>
-
-    <div class="jv-panel" id="pBrainMem">
-      <h2><span class="ic">&#x2699;</span>Brain Memory</h2>
-      <div class="jv-loading">Scanning memory tree&hellip;</div>
-    </div>
-
-    <div class="jv-panel" id="pNext">
-      <h2><span class="ic">&#x2766;</span>Recommended Next Actions</h2>
-      <div class="jv-loading">Computing&hellip;</div>
-    </div>
-
     <div class="jv-panel" id="pHealth">
-      <h2><span class="ic">&#x2695;</span>Health Report</h2>
+      <h2><span class="ic">&#x2695;</span>Health Report <span class="jv-tag t-cache">CACHED</span></h2>
       <div class="jv-loading">Reading cached report&hellip;</div>
     </div>
 
     <div class="jv-panel" id="pRouteSmoke">
-      <h2><span class="ic">&#x21C4;</span>Route Smoke <span class="jv-tag">CACHED</span></h2>
+      <h2><span class="ic">&#x21C4;</span>Route Smoke <span class="jv-tag t-cache">CACHED</span></h2>
       <div class="jv-loading">Reading cached route report&hellip;</div>
     </div>
 
+    <div class="jv-panel" id="pCacheFreshness">
+      <h2><span class="ic">&#x29D6;</span>Cache Freshness <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
+      <div class="jv-loading">Reading cache metadata&hellip;</div>
+    </div>
+
     <div class="jv-panel jv-wide" id="pHygiene">
-      <h2><span class="ic">&#x2756;</span>File Hygiene <span class="jv-tag">CACHED</span></h2>
+      <h2><span class="ic">&#x2756;</span>File Hygiene <span class="jv-tag t-cache">CACHED</span></h2>
       <div class="jv-loading">Reading cached hygiene report&hellip;</div>
     </div>
 
+    <div class="jv-section"><span class="lbl">Research Visibility</span><span class="ln"></span><span class="sub">read-only research &middot; no broker</span></div>
+
+    <div class="jv-panel jv-wide" id="pTradingDetail">
+      <h2><span class="ic">&#x25C8;</span>Trading Research Detail <span class="jv-tag t-read">READ ONLY</span></h2>
+      <div class="jv-loading">Reading research reports&hellip;</div>
+    </div>
+
+    <div class="jv-section"><span class="lbl">Documentation &amp; Maps</span><span class="ln"></span><span class="sub">tracked, display-only</span></div>
+
     <div class="jv-panel jv-wide" id="pMissions">
-      <h2><span class="ic">&#x2691;</span>Mission Board</h2>
+      <h2><span class="ic">&#x2691;</span>Mission Board <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
       <div class="jv-loading">Reading mission board&hellip;</div>
     </div>
 
     <div class="jv-panel jv-wide" id="pPromptLib">
-      <h2><span class="ic">&#x261B;</span>Prompt Library <span class="jv-tag">DISPLAY ONLY</span></h2>
+      <h2><span class="ic">&#x261B;</span>Prompt Library <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
       <div class="jv-loading">Reading prompt library&hellip;</div>
     </div>
 
     <div class="jv-panel jv-wide" id="pSystemMap">
-      <h2><span class="ic">&#x29C9;</span>System Map <span class="jv-tag">DISPLAY ONLY</span></h2>
+      <h2><span class="ic">&#x29C9;</span>System Map <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
       <div class="jv-loading">Reading system map&hellip;</div>
-    </div>
-
-    <div class="jv-panel jv-wide" id="pTradingDetail">
-      <h2><span class="ic">&#x25C8;</span>Trading Research Detail</h2>
-      <div class="jv-loading">Reading research reports&hellip;</div>
-    </div>
-
-    <div class="jv-panel" id="pCacheFreshness">
-      <h2><span class="ic">&#x29D6;</span>Cache Freshness <span class="jv-tag">DISPLAY ONLY</span></h2>
-      <div class="jv-loading">Reading cache metadata&hellip;</div>
     </div>
 
   </div>
