@@ -1,0 +1,203 @@
+{
+  "step": "S29-D1",
+  "title": "New strategy idea-sourcing memo (selection/research only) using completed validation-factory lessons",
+  "created": "2026-05-30",
+  "kind": "idea_sourcing_memo_only",
+  "memo_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "provenance": {
+    "head_at_memo": "42b5db7",
+    "factory_d11_commit": "42b5db7e849e3a9c4aa03d6c5ecfea631afd8887",
+    "head_note": "HEAD is exactly the Factory-D11 commit 42b5db7; factory tree clean, nothing staged, no automation-touched factory files since D11.",
+    "reports_read_for_lessons": [
+      "reports/factory_d11_validation_factory_closeout/report.md",
+      "reports/s25_d1_donchian_trade_order_monte_carlo/report.md",
+      "reports/s26_d18_trend_sr_ema_rsi_decision_gate/report.md",
+      "reports/s27_d4_mean_reversion_bull_is_baseline/report.md",
+      "reports/s28_d4_breakout_retest_is_baseline/report.md"
+    ]
+  },
+  "1_current_factory_complete_context": {
+    "summary": "The reusable research-validation factory (Factory-D1 through D11) is complete, committed, and demonstrated end-to-end on synthetic data. It is NOT a paper/live system.",
+    "available_modules": [
+      "validation_reports (schema + writer)",
+      "validation_is_runner (IS-only, hard 2023-2025 OOS seal)",
+      "validation_oos_runner (protocol-committed one-shot OOS)",
+      "validation_entry_significance (fixed-horizon random-entry permutation test)",
+      "validation_sequence_risk (trade-order MC + bootstrap + top-winner dependence)",
+      "validation_regime / validation_walk_forward / validation_friction",
+      "validation_decision (research-decision + readiness gate; paper/live unreachable by default)",
+      "validation_cli + validation_synthetic_smoke"
+    ],
+    "implication": "Any new frozen S29 hypothesis can be run through the same controlled, anti-overfit ladder with uniform reports and identical git/data guardrails. The bottleneck is now a strong hypothesis, not tooling."
+  },
+  "2_parked_branch_lessons": {
+    "donchian_s23_s24_s25": "Profitable curve hid a weak entry: ENTRY_EDGE_NOT_SUPPORTED (S24); net flips negative removing the top 3 trades; realized drawdown only ~11th percentile of shuffles (path luck); OOS only 16 trades. A profitable equity curve is NOT an edge.",
+    "s26_trend_sr_ema_rsi": "OOS PASS is not enough. Thin ~0.06R IS edge, FRICTION_SENSITIVE; entry significance INCONCLUSIVE (entry never distinguished from the trend filter); regime INCONCLUSIVE and inconsistent across NQ/ES; whole record lives in the post-2016 trend with a shared 2014-2016 collapse; OOS single-year-dominated (NQ 2024 61.7%, ES 2025 72.8%). PARK_CANDIDATE.",
+    "s27_mean_reversion_bull": "IS_FAIL. Net -1.75R, only 18 trades (<25 floor), PF 0.84, expectancy -0.097R, 3/10 positive years, top-3 removal -6.25R. Two-step confirmation over-restricted the sample. IS_FAIL must stop before OOS.",
+    "s28_breakout_retest": "IS_FAIL. Net -0.72R, only 12 trades in 10 years, PF 0.91, expectancy -0.06R, 3/10 positive years, top-3 removal -6.72R. A 5-filter stack starved the trade count. Raw breakout entry plus heavy filtering = clean negative.",
+    "what_s29_must_avoid": [
+      "raw breakout fragility (Donchian, S28)",
+      "weak / inconclusive entry edge not distinct from a trend filter (Donchian, S26)",
+      "top-winner / fat-tail dependence (net dies without top 3)",
+      "low trade count from over-stacked confirmations (S27 18, S28 12)",
+      "2014-2016 chop collapse / single-regime (post-2016) dependence (S26)",
+      "thin IS expectancy with no friction headroom (S26 ~0.06R)",
+      "friction sensitivity (full-history edge negative under realistic cost)",
+      "OOS or single-year concentration (S26)"
+    ]
+  },
+  "3_candidate_comparison": [
+    {
+      "id": 1,
+      "name": "Bad-regime avoidance / no-trade classifier (standalone overlay)",
+      "hypothesis": "A mechanical classifier can flag low-expectancy 'do-not-trade' regimes (e.g. 2014-2016-style chop) and improve any strategy by sitting out.",
+      "why_edge_may_exist": "Volatility/trend state is autocorrelated; bad regimes are partly identifiable in advance.",
+      "avoids_prior_failures": "Directly encodes the S26 chop-collapse lesson; but it is a FILTER, not an entry.",
+      "expected_trade_count": "ZERO standalone -- it generates no entries of its own.",
+      "friction_sensitivity": "N/A standalone.",
+      "regime_risk": "It IS a regime model, but contributes no standalone P&L.",
+      "multimarket_testability": "Testable as an overlay, not as a strategy.",
+      "data_requirement": "Daily OHLC only.",
+      "first_clean_test": "Would require pairing with an existing entry -- i.e. an overlay on a parked branch.",
+      "biggest_failure_mode": "No entries => cannot be evaluated as a branch; only meaningful bolted onto another strategy (would be a tweak of a parked branch).",
+      "entry_significance_testable": "NO -- there is no entry to test."
+    },
+    {
+      "id": 2,
+      "name": "Volatility compression -> expansion after multi-day range contraction",
+      "hypothesis": "Multi-day volatility contraction (e.g. NR7 / inside-day / narrow ATR) precedes a directional expansion; enter on the break of the contracted range.",
+      "why_edge_may_exist": "Volatility clustering is one of the most robust empirical regularities -- compression reliably precedes expansion.",
+      "avoids_prior_failures": "Edge is in the volatility STATE (regime-agnostic; compression happens in trend AND chop), so less single-regime-dependent than S26.",
+      "expected_trade_count": "Moderate-to-good (compression setups recur several times per year).",
+      "friction_sensitivity": "Decent headroom -- expansion moves can be large.",
+      "regime_risk": "Lower regime concentration than S26; compression occurs across regimes.",
+      "multimarket_testability": "High -- NQ and ES independently on daily OHLC.",
+      "data_requirement": "Daily OHLC only (available).",
+      "first_clean_test": "IS baseline of range-break entries conditioned on a pre-registered compression trigger; entry significance vs random days.",
+      "biggest_failure_mode": "Compression predicts MAGNITUDE, not DIRECTION; a directional break entry re-inherits the unproven raw-breakout edge -> entry significance may come back INCONCLUSIVE on direction (the S26 trap).",
+      "entry_significance_testable": "YES, but the directional component is the weak link."
+    },
+    {
+      "id": 3,
+      "name": "Failed-breakout (false-break) reversal",
+      "hypothesis": "A breakout of an N-day extreme that FAILS (price closes back inside the prior range) predicts a reversal away from the false break; fade it.",
+      "why_edge_may_exist": "Structural / behavioral: a false break traps breakout entrants who are then forced to cover, mechanically pushing price back -- a DIRECTIONAL edge with a causal mechanism, not just autocorrelation.",
+      "avoids_prior_failures": "It is the INVERSE of the two breakout failures (Donchian, S28); counter-trend reversal, so it does not ride a trend filter (unlike S26/S27) and is not post-2016-trend-dependent -- it may even profit in the 2014-2016 chop where S26 collapsed.",
+      "expected_trade_count": "Moderate -- false breaks recur regularly; keep ONE trigger to preserve >=40 IS trades.",
+      "friction_sensitivity": "Reversals can be sharp -> reasonable headroom; must still be verified full-history under >=0.10R.",
+      "regime_risk": "Likely CONCENTRATED in choppy/range regimes (the OPPOSITE of S26) -- a complement, and the regime module will be informative; must check it survives trend regimes.",
+      "multimarket_testability": "High -- NQ primary, ES independent, daily OHLC.",
+      "data_requirement": "Daily OHLC only (available).",
+      "first_clean_test": "IS baseline of false-break fades vs (a) a random-day null AND (b) a raw-breakout-day null, to prove the FAILURE carries the edge.",
+      "biggest_failure_mode": "Definitional parameter risk ('what counts as failed'); regime-concentration in chop with losses in strong trends.",
+      "entry_significance_testable": "YES, cleanly -- false-break forward returns vs random-day and vs raw-breakout nulls; direction is predicted."
+    },
+    {
+      "id": 4,
+      "name": "Trend-day continuation after strong close + next-day confirmation",
+      "hypothesis": "A strong-close trend day predicts next-day continuation; enter on confirmation.",
+      "why_edge_may_exist": "Short-horizon return autocorrelation / momentum.",
+      "avoids_prior_failures": "Weakly -- it is close to S26 trend-following and risks the same failures.",
+      "expected_trade_count": "High (fires often).",
+      "friction_sensitivity": "HIGH -- continuation moves are small; thin edge, friction-sensitive (the S26 weakness).",
+      "regime_risk": "HIGH -- strongly trend-regime-dependent; 2014-2016 chop collapse risk.",
+      "multimarket_testability": "High.",
+      "data_requirement": "Daily OHLC only.",
+      "first_clean_test": "IS baseline of confirmed continuation entries; entry significance vs random.",
+      "biggest_failure_mode": "Entry edge hard to distinguish from the trend itself (S26 redux); thin and friction-sensitive.",
+      "entry_significance_testable": "Partially -- hard to separate from trend exposure."
+    },
+    {
+      "id": 5,
+      "name": "Pullback-to-VWAP/EMA proxy with breadth-style confirmation (NQ internal)",
+      "hypothesis": "Pullbacks to a moving-average mean in an uptrend resume; breadth confirms.",
+      "why_edge_may_exist": "Mean-reversion within trend.",
+      "avoids_prior_failures": "Poorly -- this is essentially S26 (EMA pullback) and S27 (mean reversion in bull trend), both PARKED; risks being a tweak of a parked branch.",
+      "expected_trade_count": "Moderate.",
+      "friction_sensitivity": "Likely thin (S26 showed pullback entries INCONCLUSIVE).",
+      "regime_risk": "Trend-regime-dependent (same as S26).",
+      "multimarket_testability": "Moderate.",
+      "data_requirement": "Needs breadth/internal data NQ may not have on daily OHLC -> data-requirement risk.",
+      "first_clean_test": "IS baseline; but S26 already returned INCONCLUSIVE on the same family.",
+      "biggest_failure_mode": "Re-tests an already-parked family; breadth data may be unavailable.",
+      "entry_significance_testable": "Already effectively tested in S26 -> INCONCLUSIVE."
+    },
+    {
+      "id": 6,
+      "name": "Daily opening-gap fade (gap relative to prior close)",
+      "hypothesis": "Large daily opening gaps partially fill; fade the gap toward the prior close.",
+      "why_edge_may_exist": "Overreaction / mean reversion of overnight gaps.",
+      "avoids_prior_failures": "Distinct from all parked branches; counter-trend, not trend-dependent.",
+      "expected_trade_count": "Moderate (depends on gap-size threshold).",
+      "friction_sensitivity": "HIGH -- gap-fade targets are small; thin edge.",
+      "regime_risk": "Moderate; gap behavior shifts with volatility regime.",
+      "multimarket_testability": "Testable on daily OHLC, but daily bars under-represent the true open/overnight dynamics (better on intraday) -> measurement risk.",
+      "data_requirement": "Daily OHLC (imperfect for an overnight-driven effect).",
+      "first_clean_test": "IS baseline of gap fades vs random; horizon = same-day close.",
+      "biggest_failure_mode": "Thin per-trade edge + daily bars are a poor instrument for an intraday/overnight effect.",
+      "entry_significance_testable": "YES, but small effect size and instrument mismatch."
+    }
+  ],
+  "4_ranking_best_to_worst": [
+    "1. Idea 3 -- Failed-breakout (false-break) reversal: directional structural edge, anti-trend-concentration, daily-testable on NQ/ES, distinct from every parked branch, entry significance cleanly testable.",
+    "2. Idea 2 -- Volatility compression -> expansion: robust vol-clustering basis and lower regime concentration, but the directional break entry re-inherits the unproven raw-breakout edge.",
+    "3. Idea 4 -- Trend-day continuation: high trade count but thin, friction-sensitive, trend-regime-dependent (S26 redux).",
+    "4. Idea 1 -- Bad-regime no-trade classifier: conceptually valuable but NOT a standalone branch (no entries, entry significance untestable); better repurposed later as an overlay/factory module.",
+    "5. Idea 6 -- Opening-gap fade: distinct but thin and poorly served by daily bars (instrument mismatch).",
+    "6. Idea 5 -- Pullback-to-VWAP/EMA + breadth: too close to the already-parked S26/S27 family and needs breadth data NQ may lack."
+  ],
+  "5_selected_hypothesis": {
+    "branch": "S29",
+    "name": "Failed-breakout (false-break) reversal on daily NQ/ES",
+    "statement": "When price breaks an N-day extreme intrabar but closes back inside the prior range (a failed breakout), fade the break: enter in the reversal direction with an R-based stop beyond the false-break extreme and a fixed-R / mean-revert target."
+  },
+  "6_why_it_won": [
+    "Strongest, most DISTINCT entry edge with a causal mechanism (trapped breakout traders forced to cover) -- it predicts DIRECTION, not just magnitude, which is exactly what every parked branch lacked.",
+    "Most directly avoids the documented failure modes: it is the inverse of the Donchian/S28 raw-breakout failures and is counter-trend, so it does not ride a trend filter (S26/S27) and is not post-2016-trend-dependent -- it may even profit in the 2014-2016 chop that sank S26.",
+    "Entry significance is cleanly testable against BOTH a random-day null and a raw-breakout null, so the factory can prove the FAILURE (not the breakout) carries the edge.",
+    "Daily-data testable on NQ primary and ES independently with existing data; no intraday dependency.",
+    "Not a tweak of any parked branch -- no parked branch was a reversal/fade."
+  ],
+  "7_why_the_others_lost": {
+    "idea_2_vol_compression": "Strong second, but compression predicts magnitude not direction; the directional break entry re-inherits the unproven raw-breakout edge and risks an INCONCLUSIVE entry-significance result like S26.",
+    "idea_4_trend_continuation": "Too close to S26 trend-following; thin, friction-sensitive, trend-regime-concentrated -> repeats the S26 failure.",
+    "idea_1_no_trade_classifier": "Generates no entries standalone; cannot meet 'strongest entry edge' or 'entry significance testable'; only useful bolted onto a parked branch -> a tweak, not a new branch.",
+    "idea_6_gap_fade": "Thin per-trade edge and daily bars are a poor instrument for an overnight/intraday effect.",
+    "idea_5_pullback_breadth": "Essentially the already-parked S26/S27 mean-reversion-in-trend family (S26 entry significance was INCONCLUSIVE) and needs breadth data NQ may lack."
+  },
+  "8_key_risks": [
+    "Regime concentration in choppy/range regimes with losses in strong trends -- must be checked by the regime + walk-forward modules (expected to be the OPPOSITE concentration to S26).",
+    "Definitional parameter risk: 'what counts as a failed break' (N, close-back threshold) must be FROZEN in S29-D2 before any run; no post-hoc tuning.",
+    "Trade-count risk: do NOT stack multiple confirmation filters (the S27/S28 trade-count killer); keep ONE trigger + stop + target, target >=40 IS trades.",
+    "Friction: a reversal edge must stay positive full-history under >=0.10R/trade, not just OOS.",
+    "Top-winner dependence: net must stay positive without the top 3 trades (the Donchian/S25 gate).",
+    "Year/OOS concentration: profit must spread across years, not sit in one (the S26 gate)."
+  ],
+  "9_proposed_s29_d2_spec_direction": {
+    "core_trigger": "Single frozen trigger: an N-day (e.g. 20-day) extreme is exceeded intrabar but the bar closes back inside the prior range -> fade in the reversal direction. Symmetric for failed upside and failed downside breaks.",
+    "risk_model": "R-based: stop just beyond the false-break extreme; target a fixed R (and/or revert-to-mean such as EMA20 / prior swing). R-only accounting, one position at a time.",
+    "anti_overfit_pre_registration": "Freeze N, the close-back-inside definition, stop and target BEFORE any run. No parameter sweeps; any change opens a new branch.",
+    "pre_registered_is_gates": "Trade-count floor >=40 (FAIL <25); PF >=1.30; expectancy >0; positive years >=6/10; net positive WITHOUT top 3 winners; IS max DD <= IS net.",
+    "entry_significance_plan": "Test false-break forward returns vs (a) a random-day null and (b) a raw-breakout-day null; require EDGE_LIKELY, not merely beating random.",
+    "regime_and_walk_forward_plan": "Explicitly classify trend vs chop; EXPECT chop concentration and test trend-regime survival; surface 2014-2016 behavior specifically (the inverse test of S26).",
+    "friction_plan": "Require the FULL-HISTORY edge positive under a conservative per-trade R-cost (>=0.10R), not just OOS.",
+    "multimarket_plan": "NQ primary; ES as the one genuinely independent confirmation; micros descriptive only.",
+    "discipline": "IS first under the sealed 2013-2022 window; pre-register the OOS protocol and COMMIT it before touching 2023-2025; one-shot OOS; no tuning after OOS."
+  },
+  "10_final_line": "S29-D1 is idea sourcing only; no strategy code, backtest, OOS, optimization, paper trading, or live trading is authorized.",
+  "guardrails": {
+    "memo_only": true, "no_code": true, "no_backtest": true, "no_is_oos_run": true,
+    "no_optimization": true, "no_parameter_sweeps": true, "no_data_fetch": true,
+    "no_paper_or_live": true, "no_broker_or_api": true, "no_source_engine_test_changes": true,
+    "donchian_s26_s27_s28_read_only": true, "jarvis_templates_hydra_untouched": true,
+    "no_staging": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. Idea-sourcing memo only. Donchian, S26, S27, S28 remain PARKED; no active strategy; no paper/live system exists or is authorized. The selected S29 hypothesis (failed-breakout reversal) is a research direction, not a trade."
+}
