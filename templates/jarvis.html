@@ -233,6 +233,11 @@
       <div class="jv-loading">Reading mission board&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pPromptLib">
+      <h2><span class="ic">&#x261B;</span>Prompt Library <span class="jv-tag">DISPLAY ONLY</span></h2>
+      <div class="jv-loading">Reading prompt library&hellip;</div>
+    </div>
+
     <div class="jv-panel jv-wide" id="pTradingDetail">
       <h2><span class="ic">&#x25C8;</span>Trading Research Detail</h2>
       <div class="jv-loading">Reading research reports&hellip;</div>
@@ -550,6 +555,52 @@
         mbHtml += card;
       });
       setPanel('pMissions', mbHtml);
+    }
+
+    // Prompt Library (DISPLAY ONLY — JARVIS never executes prompt text)
+    var pl = d.prompt_library || {};
+    if(pl.state === 'missing'){
+      setPanel('pPromptLib',
+        row('Status', 'waiting', 'NO PROMPT LIBRARY') +
+        '<div class="jv-detail">'+esc(pl.message || 'docs/jarvis_prompt_library.json not found')+'</div>');
+    } else if(pl.state === 'unavailable' || pl.state === 'error'){
+      setPanel('pPromptLib', row('Status', 'bad', 'UNAVAILABLE', pl.error || pl.detail));
+    } else {
+      var pc = pl.counts || {};
+      var pchips = '';
+      pchips += '<span class="jv-chip">Total: '+esc(pc.total != null ? pc.total : 0)+'</span>';
+      pchips += '<span class="jv-chip">Version: '+esc(pl.version != null ? pl.version : '—')+'</span>';
+      if(pc.allowed != null){ pchips += '<span class="jv-chip">Allowed: '+esc(pc.allowed)+'</span>'; }
+      var pbc = pc.by_category || {};
+      Object.keys(pbc).forEach(function(k){
+        pchips += '<span class="jv-chip">'+esc(k)+': '+esc(pbc[k])+'</span>';
+      });
+      var pbr = pc.by_risk || {};
+      Object.keys(pbr).forEach(function(k){
+        pchips += '<span class="jv-chip">'+esc(k)+' risk: '+esc(pbr[k])+'</span>';
+      });
+      var plHtml = '<div class="jv-counts">'+pchips+'</div>';
+      if(pl.updated_at){
+        plHtml += '<div class="jv-detail" style="margin-bottom:8px">Updated: '+esc(pl.updated_at)+'</div>';
+      }
+      (pl.prompts || []).forEach(function(p){
+        var card = '<div class="jv-mcard"><div class="top">'+
+          '<span class="ttl">'+esc(p.title || '')+'</span>'+
+          '<span class="jv-tag">'+esc(p.risk || '')+'</span></div>'+
+          '<div class="meta">'+
+          '<span class="jv-tag">'+esc(p.id || '')+'</span>'+
+          '<span class="jv-tag">'+esc(p.category || '')+'</span>'+
+          '<span class="jv-tag">'+(p.allowed ? 'ALLOWED' : 'NOT ALLOWED')+'</span>'+
+          '</div>';
+        // Prompt text is rendered DISPLAY ONLY. No button, no handler, nothing
+        // executes it, and there is no copy-and-run affordance.
+        card += '<div class="jv-prompt"><span class="plabel">Prompt (display only)</span>'+
+          esc(p.prompt || '')+'</div>';
+        if(p.notes){ card += '<div class="jv-detail" style="margin-top:6px">'+esc(p.notes)+'</div>'; }
+        card += '</div>';
+        plHtml += card;
+      });
+      setPanel('pPromptLib', plHtml);
     }
 
     // Trading Research Detail (read-only — no broker, no paper, no live)

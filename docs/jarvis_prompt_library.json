@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "updated_at": "2026-05-30T00:00:00",
+  "prompts": [
+    {
+      "id": "JARVIS-SMOKE-VERIFY",
+      "title": "Verify live JARVIS dashboard",
+      "category": "jarvis",
+      "risk": "read_only",
+      "prompt": "Run a read-only smoke validation of /jarvis and /api/jarvis/status. Confirm HTTP 200 and that every panel renders. Do not modify files or commit anything.",
+      "allowed": true,
+      "notes": "Manual operator prompt only. Display-only in JARVIS."
+    },
+    {
+      "id": "JARVIS-HEALTH-REPORT",
+      "title": "Generate cached health report",
+      "category": "ops",
+      "risk": "read_only",
+      "prompt": "Run tools/jarvis_health_report.py to refresh storage/jarvis/health_report.json. This only writes a cached report; it does not change app code or commit anything.",
+      "allowed": true,
+      "notes": "Offline cached-report generator. JARVIS reads the result; the web app never runs it."
+    },
+    {
+      "id": "JARVIS-ROUTE-SMOKE",
+      "title": "Generate cached route smoke report",
+      "category": "ops",
+      "risk": "read_only",
+      "prompt": "Run tools/jarvis_route_smoke_report.py against the local server to refresh storage/jarvis/route_smoke_report.json. GET-only probes; no bodies stored; no commit.",
+      "allowed": true,
+      "notes": "Offline GET-only probe. The web route only reads the cached result."
+    },
+    {
+      "id": "JARVIS-MISSION-REVIEW",
+      "title": "Review mission board",
+      "category": "jarvis",
+      "risk": "read_only",
+      "prompt": "Read docs/jarvis_mission_board.json and summarize open missions by status and priority. Do not execute any mission and do not edit the file.",
+      "allowed": true,
+      "notes": "Display-only review of the tracked mission board."
+    },
+    {
+      "id": "JARVIS-GIT-STATUS",
+      "title": "Check JARVIS git status only",
+      "category": "git",
+      "risk": "read_only",
+      "prompt": "Report git status --short and git diff --cached --name-only. Do not stage, commit, push, reset, or modify anything. Reading only.",
+      "allowed": true,
+      "notes": "Inspection only. No staging or commits."
+    },
+    {
+      "id": "JARVIS-NEXT-PANEL-PLAN",
+      "title": "Draft next JARVIS read-only panel plan",
+      "category": "planning",
+      "risk": "read_only",
+      "prompt": "Draft a plan for the next read-only JARVIS panel that follows the cached-file / fail-closed reader pattern. Output the plan as text only; write no code and commit nothing.",
+      "allowed": true,
+      "notes": "Planning prompt. Produces text, not changes."
+    },
+    {
+      "id": "JARVIS-AUDIT-EXEC-CONTROLS",
+      "title": "Audit JARVIS for execution controls",
+      "category": "safety",
+      "risk": "read_only",
+      "prompt": "Audit templates/jarvis.html and the /jarvis + /api/jarvis/status handlers for any buttons, forms, onclick, POST routes, or copy-and-run behavior. Report findings as text. Make no changes.",
+      "allowed": true,
+      "notes": "Read-only safety audit of the console surface."
+    },
+    {
+      "id": "JARVIS-UNTRACKED-REVIEW",
+      "title": "Review untracked files without deleting/staging",
+      "category": "git",
+      "risk": "read_only",
+      "prompt": "List untracked files and briefly describe what they appear to be. Do not stage, delete, move, or commit any of them. Reading and describing only.",
+      "allowed": true,
+      "notes": "Inspection only. Never deletes or stages."
+    }
+  ]
+}

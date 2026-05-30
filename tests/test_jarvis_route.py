@@ -672,6 +672,159 @@ def test_route_smoke_report_exposes_no_execution_fields():
         assert forbidden not in keys, f"forbidden control key: {forbidden}"
 
 
+# --- Step 07: read-only prompt library ------------------------------------
+
+def test_jarvis_status_has_prompt_library_key():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "prompt_library" in d
+    assert isinstance(d["prompt_library"], dict)
+    assert d["prompt_library"].get("state") in (
+        "ready", "missing", "unavailable", "error",
+    )
+
+
+def test_jarvis_prompt_library_seed_file_is_valid_and_ready():
+    import app as app_module
+    pl = app_module._jarvis_prompt_library()
+    assert pl["state"] == "ready", pl
+    assert pl.get("version") == 1
+    prompts = pl.get("prompts")
+    assert isinstance(prompts, list) and 6 <= len(prompts) <= 10
+    for p in prompts:
+        for key in ("id", "title", "category", "risk", "prompt", "allowed"):
+            assert key in p, f"prompt missing {key}"
+    counts = pl.get("counts") or {}
+    assert counts.get("total") == len(prompts)
+
+
+def test_jarvis_prompt_library_missing_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    pl = app_module._jarvis_prompt_library()
+    assert pl["state"] == "missing"
+    assert "jarvis_prompt_library.json" in pl["message"]
+
+
+def test_jarvis_prompt_library_invalid_json_is_fail_closed(monkeypatch, tmp_path):
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    (d / "jarvis_prompt_library.json").write_text("{ broken", encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    pl = app_module._jarvis_prompt_library()
+    assert pl["state"] == "unavailable"
+    assert "error" in pl
+
+
+def test_jarvis_prompt_library_bad_shape_is_fail_closed(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    # prompts present but a prompt lacks required fields
+    payload = {"version": 1, "prompts": [{"id": "X", "title": "no fields"}]}
+    (d / "jarvis_prompt_library.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    pl = app_module._jarvis_prompt_library()
+    assert pl["state"] == "unavailable"
+
+
+def test_jarvis_prompt_library_valid_shape_passed_through(monkeypatch, tmp_path):
+    import json
+    import app as app_module
+    d = tmp_path / "docs"
+    d.mkdir(parents=True)
+    payload = {
+        "version": 1,
+        "updated_at": "2026-05-30T00:00:00",
+        "prompts": [{
+            "id": "T1", "title": "Test", "category": "jarvis",
+            "risk": "read_only", "prompt": "Read only. Do nothing.",
+            "allowed": True, "notes": "n",
+        }],
+    }
+    (d / "jarvis_prompt_library.json").write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    pl = app_module._jarvis_prompt_library()
+    assert pl["state"] == "ready"
+    assert pl["version"] == 1
+    assert pl["prompts"][0]["prompt"] == "Read only. Do nothing."
+    assert pl["counts"]["total"] == 1
+    assert pl["counts"]["by_category"].get("jarvis") == 1
+    assert pl["counts"]["by_risk"].get("read_only") == 1
+
+
+def test_jarvis_prompt_library_prompt_is_text_only():
+    import app as app_module
+    pl = app_module._jarvis_prompt_library()
+    for p in pl["prompts"]:
+        # The prompt is a plain display string — never a callable, command
+        # list, or execution descriptor.
+        assert isinstance(p.get("prompt"), str)
+        # prompt dicts expose no execution/control fields
+        for forbidden in ("command", "cmd", "exec", "run", "shell", "action",
+                           "callback", "handler"):
+            assert forbidden not in p, f"prompt exposes control field: {forbidden}"
+
+
+def test_jarvis_prompt_library_does_not_execute_anything(monkeypatch):
+    # Reading the library must never spawn a subprocess, make an HTTP call, or
+    # otherwise run prompt text.
+    import subprocess
+    import urllib.request
+    import app as app_module
+    from fastapi.testclient import TestClient
+
+    def _boom(*a, **k):
+        raise AssertionError("prompt library must not execute anything")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    monkeypatch.setattr(subprocess, "run", _boom)
+    monkeypatch.setattr(subprocess, "Popen", _boom)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    assert r.json()["prompt_library"]["state"] == "ready"
+
+
+def test_jarvis_prompt_library_exposes_no_execution_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    pl = client.get("/api/jarvis/status").json()["prompt_library"]
+
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+
+    keys = set(_keys(pl))
+    for forbidden in ("run_command", "exec", "shell", "place_order",
+                      "submit_order", "execute_trade", "callback", "handler",
+                      "onclick", "trigger"):
+        assert forbidden not in keys, f"forbidden control key: {forbidden}"
+
+
+def test_jarvis_prompt_library_seed_file_is_tracked_safe():
+    # The seed file lives under docs/ (tracked) and is pure data — no code.
+    import json
+    src = (_REPO_ROOT / "docs" / "jarvis_prompt_library.json").read_text(
+        encoding="utf-8"
+    )
+    data = json.loads(src)
+    assert data["version"] == 1
+    assert isinstance(data["prompts"], list)
+    for p in data["prompts"]:
+        assert p.get("risk") == "read_only", "seed prompts must be read_only"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

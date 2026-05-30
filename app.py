@@ -7880,6 +7880,64 @@ def _jarvis_mission_board() -> dict:
     }
 
 
+def _jarvis_prompt_library() -> dict:
+    """READ-ONLY. Loads the operator prompt library from a tracked JSON file
+    and returns it for DISPLAY ONLY. JARVIS never executes a prompt, never
+    sends prompt text anywhere, and never writes this file — it only reflects
+    the text so a human can read it."""
+    path = BASE / "docs" / "jarvis_prompt_library.json"
+    if not path.exists():
+        return {"state": "missing",
+                "message": "docs/jarvis_prompt_library.json not found"}
+    try:
+        import json as _json
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — fail-closed on bad/corrupt file
+        return {"state": "unavailable", "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(data, dict):
+        return {"state": "unavailable", "error": "prompt library is not a JSON object"}
+    if "version" not in data:
+        return {"state": "unavailable", "error": "missing 'version'"}
+    prompts = data.get("prompts")
+    if not isinstance(prompts, list):
+        return {"state": "unavailable", "error": "'prompts' is not a list"}
+    required = ("id", "title", "category", "risk", "prompt", "allowed")
+    clean = []
+    for p in prompts:
+        if not isinstance(p, dict) or any(k not in p for k in required):
+            return {"state": "unavailable",
+                    "error": "a prompt is missing required fields"}
+        # Re-emit only known, display-only fields. The prompt is plain text
+        # that is NEVER executed — it is shown to a human operator and nothing
+        # more.
+        clean.append({
+            "id": str(p.get("id")),
+            "title": str(p.get("title")),
+            "category": str(p.get("category")),
+            "risk": str(p.get("risk")),
+            "prompt": str(p.get("prompt")),
+            "allowed": bool(p.get("allowed", False)),
+            "notes": str(p.get("notes", "")),
+        })
+    by_category: dict = {}
+    by_risk: dict = {}
+    for p in clean:
+        by_category[p["category"]] = by_category.get(p["category"], 0) + 1
+        by_risk[p["risk"]] = by_risk.get(p["risk"], 0) + 1
+    return {
+        "state": "ready",
+        "version": data.get("version"),
+        "updated_at": data.get("updated_at"),
+        "prompts": clean,
+        "counts": {
+            "total": len(clean),
+            "by_category": by_category,
+            "by_risk": by_risk,
+            "allowed": sum(1 for p in clean if p["allowed"]),
+        },
+    }
+
+
 _JARVIS_NEXT_ACTIONS = [
     "Review the latest sealed lifecycles in the Trading Bridge (read-only).",
     "Open /guide to confirm the JARVIS module manual entry is accurate.",
@@ -7916,6 +7974,7 @@ def api_jarvis_status():
     health_report = _jarvis_safe(_jarvis_health_report)
     route_smoke = _jarvis_safe(_jarvis_route_smoke_report)
     mission_board = _jarvis_safe(_jarvis_mission_board)
+    prompt_library = _jarvis_safe(_jarvis_prompt_library)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
     return {
         "online": True,
@@ -7935,6 +7994,7 @@ def api_jarvis_status():
         "health_report": health_report,
         "route_smoke_report": route_smoke,
         "mission_board": mission_board,
+        "prompt_library": prompt_library,
         "trading_detail": trading_detail,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
