@@ -8385,6 +8385,117 @@ def page_jarvis(request: Request):
     )
 
 
+def _jarvis_ask_answer(safety_class: str, q: str):
+    """Build a conservative, read-only answer for an already-classified SAFE
+    question. Returns (answer_text, sources_used). Pure string assembly — it
+    reads no live state beyond static, already-known JARVIS concepts and
+    NEVER authorizes any action."""
+    if safety_class == "SAFE_EXPLAIN":
+        if "read_only" in q or "read only" in q:
+            return (
+                "read_only means JARVIS is observe-only: it mirrors aggregated "
+                "state and never executes, trades, refreshes, or writes.",
+                ["glossary"],
+            )
+        return (
+            "That is a read-only field/panel explanation drawn from the "
+            "committed JARVIS glossary and runbook docs.",
+            ["glossary", "system_map"],
+        )
+    if safety_class == "SAFE_NEXT_REVIEW_STEP":
+        return (
+            "The safest next step is review only: read the status panels and the "
+            "Step 20-29 docs. This authorizes no trading and no execution.",
+            ["system_map", "docs"],
+        )
+    # SAFE_INFO
+    if "yellow" in q or "commander" in q:
+        return (
+            "Commander yellow means attention is needed, not approval — usually a "
+            "dirty or untracked tree. It is conservative-by-design and authorizes "
+            "nothing.",
+            ["commander_snapshot"],
+        )
+    if "posture" in q:
+        return (
+            "The trading posture is fully locked and read-only: read_only=true, "
+            "paper_ready=false, live_ready=false, broker_control=false.",
+            ["trading_detail"],
+        )
+    if "docs" in q:
+        return (
+            "JARVIS documentation exists across Steps 20-29 (runbook, known "
+            "limits, glossary, conversation plan/shell, safety classifier, and "
+            "this ask contract).",
+            ["docs"],
+        )
+    if "attention" in q or "needs" in q:
+        return (
+            "What needs attention is whatever the commander snapshot flags yellow "
+            "or red; review those panels. Nothing here authorizes action.",
+            ["commander_snapshot"],
+        )
+    return (
+        "This is answerable from the read-only JARVIS status aggregate; it "
+        "reports observed state only and authorizes no action.",
+        ["commander_snapshot", "system_core"],
+    )
+
+
+@app.post("/api/jarvis/ask")
+async def api_jarvis_ask(request: Request):
+    """Answer-only, read-only JARVIS Q&A.
+
+    Delegates safety classification to the pure
+    ``jarvis_conversation_safety.classify_jarvis_question``. This handler
+    executes nothing: it runs no commands/scripts, places no trades, triggers
+    no refresh, writes no files or chat logs, and mutates no state. It accepts
+    ONLY a ``question`` string and returns read-only text or a refusal."""
+    from fastapi.responses import JSONResponse
+    from jarvis_conversation_safety import classify_jarvis_question
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"error": "invalid JSON body"})
+    if not isinstance(body, dict):
+        return JSONResponse(status_code=400, content={"error": "body must be an object"})
+    # Accept ONLY 'question'. Any command/action/execute or other field is
+    # rejected by shape, never interpreted.
+    if set(body) - {"question"}:
+        return JSONResponse(status_code=400, content={"error": "only 'question' is accepted"})
+    if "question" not in body:
+        return JSONResponse(status_code=400, content={"error": "missing 'question'"})
+    question = body["question"]
+    if not isinstance(question, str):
+        return JSONResponse(status_code=400, content={"error": "'question' must be a string"})
+
+    verdict = classify_jarvis_question(question)
+    safety_class = verdict["safety_class"]
+    if verdict["refused"]:
+        reason = verdict["reason"]
+        return {
+            "answer": reason
+            + " I can instead explain already-known read-only status, e.g. why "
+            "the commander snapshot is yellow or what a field means.",
+            "safety_class": safety_class,
+            "sources_used": [],
+            "refused": True,
+            "refusal_reason": reason,
+        }
+
+    answer, sources = _jarvis_ask_answer(
+        safety_class, verdict["normalized_question"].lower()
+    )
+    return {
+        "answer": answer,
+        "safety_class": safety_class,
+        "sources_used": sources,
+        "refused": False,
+        "refusal_reason": "",
+    }
+
+
 # === END SPARTA JARVIS Command Center block ================================
 
 

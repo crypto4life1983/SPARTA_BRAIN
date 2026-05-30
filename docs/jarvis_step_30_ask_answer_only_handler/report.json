@@ -1,0 +1,115 @@
+{
+  "title": "JARVIS Step 30 — Answer-Only /api/jarvis/ask Handler (minimal, read-only)",
+  "generated_at": "2026-05-30T10:00:00",
+  "type": "code_plus_tests_plus_docs",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Implement the smallest safe POST /api/jarvis/ask endpoint that satisfies the Step 29 contract. It is answer-only, read-only, non-mutating, and delegates all safety classification to jarvis_conversation_safety.classify_jarvis_question. The UI is NOT wired to it.",
+  "relation_to_steps_20_29": "Step 20 polished the UI; 21 live smoke; 22 runbook; 23 known limits & roadmap; 24 panel glossary; 25 conversation layer plan; 26 display-only conversation shell; 27 answer-only backend safety plan; 28 pure local safety classifier; 29 tests-first ask contract (skipped until the route existed). Step 30 implements the answer-only handler so the Step 29 contract tests activate and pass.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc",
+    "step_24_commit": "9523da8",
+    "step_25_commit": "6b88d9b",
+    "step_26_commit": "f2268f3",
+    "step_27_commit": "e961481",
+    "step_28_commit": "a5b47b4",
+    "step_29_commit": "ed8f23c"
+  },
+  "files_changed": [
+    "app.py — added POST /api/jarvis/ask handler and the _jarvis_ask_answer helper, inside the existing JARVIS block (additive).",
+    "tests/test_jarvis_ask_contract.py — retired the three Step 29 'endpoint absent' assertions now that the handler exists; the @requires_ask contract tests now activate unchanged.",
+    "tests/test_jarvis_route.py — repointed the obsolete Step 26 ask-absence guard to refresh-only (still asserts /api/jarvis/refresh is absent; all UI safety assertions unchanged).",
+    "tests/test_jarvis_conversation_safety.py — repointed the obsolete Step 28 ask-absence guard to refresh-only (renamed to test_step_28_adds_no_refresh_or_execution_endpoint; all classifier assertions unchanged).",
+    "docs/jarvis_step_30_ask_answer_only_handler/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No change to templates/jarvis.html.",
+    "No UI wiring of the conversation shell to the endpoint.",
+    "No UI fetch logic added.",
+    "No chat logs written.",
+    "No file writes.",
+    "No state mutation.",
+    "No script execution / subprocess / os.system / shell / git call.",
+    "No refresh trigger.",
+    "No broker/paper/live controls.",
+    "No trade run or simulation.",
+    "No change to /api/jarvis/status shape.",
+    "No change to jarvis_conversation_safety.py.",
+    "No GET handler for /api/jarvis/ask (framework returns 405)."
+  ],
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/jarvis/ask",
+    "accepts": "JSON object with ONLY a 'question' string.",
+    "rejects": [
+      "invalid / non-object JSON body -> 400",
+      "any field other than 'question' (command/action/execute/...) -> 400",
+      "missing 'question' -> 400",
+      "non-string 'question' -> 400"
+    ],
+    "blank_question": "Delegated to the classifier -> UNSUPPORTED, returned as 200 with refused=true.",
+    "response_fields": ["answer", "safety_class", "sources_used", "refused", "refusal_reason"],
+    "never_in_response": ["command", "action", "execution", "side_effect", "mutation", "order", "trade_ticket"],
+    "safe_behavior": "refused=false; conservative read-only answer assembled from already-known JARVIS concepts; sources_used names the read-only sources.",
+    "forbidden_behavior": "refused=true; safety_class begins with FORBIDDEN; short refusal_reason from the classifier; sources_used=[].",
+    "get": "Not registered; FastAPI returns 405 Method Not Allowed.",
+    "delegation": "All safety classification is done by classify_jarvis_question(question); the handler adds only request-shape validation and conservative answer text."
+  },
+  "answer_behavior": {
+    "read_only": "read_only means observe-only / no execution.",
+    "commander_yellow": "attention needed, not approval.",
+    "trading_posture": "read_only=true, paper_ready=false, live_ready=false, broker_control=false.",
+    "jarvis_docs": "exist across Steps 20-29.",
+    "safest_next_step": "review status/panels/docs; authorizes no trading.",
+    "conservatism": "Answers are static/conservative concepts; the handler does not invent live status numbers."
+  },
+  "non_execution_guarantees": [
+    "No subprocess / os.system / shell / git / broker / trading import in the handler.",
+    "No file write and no chat-log write anywhere in the request path.",
+    "No /api/jarvis/refresh path introduced.",
+    "broker_control / paper_ready / live_ready remain false (unchanged by the handler).",
+    "/api/jarvis/status response shape is unchanged."
+  ],
+  "tests": {
+    "activated_from_step_29": [
+      "test_contract_post_accepts_only_question_string",
+      "test_contract_rejects_missing_or_blank_question",
+      "test_contract_rejects_command_action_execute_fields",
+      "test_contract_safe_question_returns_answer (SAFE_INFO / SAFE_EXPLAIN / SAFE_NEXT_REVIEW_STEP)",
+      "test_contract_forbidden_question_is_refused (execution / trading / mutation + mixed override)",
+      "test_contract_does_not_write_chat_logs",
+      "test_contract_does_not_mutate_filesystem",
+      "test_contract_does_not_change_status_shape",
+      "test_contract_keeps_broker_paper_live_locked",
+      "test_contract_does_not_trigger_refresh",
+      "test_contract_get_ask_not_supported"
+    ],
+    "retired_in_step_30": [
+      "test_ask_endpoint_is_currently_absent (test_jarvis_ask_contract.py)",
+      "test_post_ask_is_not_routed_today (test_jarvis_ask_contract.py)",
+      "test_app_py_has_no_ask_route (test_jarvis_ask_contract.py)"
+    ],
+    "repointed_to_refresh_only_in_step_30": [
+      "test_jarvis_route.py::test_jarvis_step_26_adds_no_ask_or_refresh_endpoint — drops the obsolete '/api/jarvis/ask absent' check; still asserts '/api/jarvis/refresh' absent; UI safety assertions untouched.",
+      "test_jarvis_conversation_safety.py::test_step_28_adds_no_ask_endpoint -> renamed test_step_28_adds_no_refresh_or_execution_endpoint — drops the obsolete '/api/jarvis/ask absent' check; still asserts '/api/jarvis/refresh' absent."
+    ],
+    "note": "Step 30 adds an answer-only ask endpoint by design, so the Step 26/28 ask-absence guards became factually obsolete. They were repointed (not deleted) to keep enforcing the still-valid refresh/execution-absence property. The route string is NOT hidden; no contract or forbidden-request test was weakened.",
+    "still_active_current_step": [
+      "test_template_has_no_ask_fetch",
+      "test_status_shape_unchanged_in_step_29",
+      "test_classifier_is_importable_for_future_endpoint"
+    ]
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py --rootdir=tests -q", "result": "PASS (no skips remaining for the ask contract)"},
+    {"cmd": "python -m json.tool docs/jarvis_step_30_ask_answer_only_handler/report.json", "result": "JSON_OK"}
+  ],
+  "recommended_next_safe_step": "JARVIS-ASK-UI-WIRING (Step 31, separate approval) — only after this answer-only handler is committed and green, wire the existing display-only conversation shell to POST /api/jarvis/ask with a strictly read-only fetch (no execution controls, no refresh, no chat-log writes), gated by its own UI safety tests. Until then the shell stays display-only and the endpoint is backend-only.",
+  "conclusion": "A minimal answer-only POST /api/jarvis/ask handler was added that delegates safety to the pure classifier, returns read-only answers or refusals, writes nothing, mutates nothing, and triggers no refresh or trading. The Step 29 contract tests now activate and pass. templates/jarvis.html is unchanged, no UI wiring was added, no chat logs were written, and /api/jarvis/status shape is preserved."
+}

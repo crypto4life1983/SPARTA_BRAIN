@@ -188,9 +188,12 @@ def test_classifier_module_imports_nothing_dangerous():
         assert tok not in low, f"classifier must not reference: {tok}"
 
 
-def test_step_28_adds_no_ask_endpoint():
+def test_step_28_adds_no_refresh_or_execution_endpoint():
+    # Step 30 intentionally introduced an answer-only POST /api/jarvis/ask, so
+    # the old ask-absence guard is retired. The refresh/execution guard remains
+    # active: the classifier work must never add a refresh endpoint.
     src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
-    assert "/api/jarvis/ask" not in src, "Step 28 must not add an ask endpoint"
+    assert "/api/jarvis/refresh" not in src, "must not add a refresh endpoint"
 
 
 def test_jarvis_status_shape_unchanged_after_step_28():

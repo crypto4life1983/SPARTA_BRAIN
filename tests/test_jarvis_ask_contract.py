@@ -5,18 +5,17 @@ not-yet-built ``POST /api/jarvis/ask`` endpoint **before** any handler exists.
 
 Strategy
 --------
-- **Current-step assertions** (always run): the endpoint is absent today,
-  ``app.py`` has no ask route, the template has no ask fetch, and the status
-  shape / UI controls are unchanged. These keep the default suite green.
-- **Future-contract assertions** (skipped until the route exists): each pins one
-  required behavior of the endpoint. They are guarded by
-  ``@requires_ask`` which uses ``skipif`` keyed on whether the route is
-  registered. When a later, separately-approved step implements the endpoint,
-  these tests activate automatically with **no edit** to this file — and they
-  encode the safety contract the implementation must satisfy.
+- **Current-step assertions** (always run): the template has no ask fetch, and
+  the status shape / UI controls are unchanged. These keep the suite green.
+- **Contract assertions** (``@requires_ask``): each pins one required behavior
+  of the endpoint, guarded by ``skipif`` keyed on whether the route is
+  registered. They were authored in Step 29 while the endpoint was absent (and
+  therefore skipped); Step 30 implements the answer-only handler, so they now
+  activate automatically with **no edit** to the asserts and enforce the safety
+  contract the implementation must satisfy.
 
-No endpoint, route, or backend logic is added by this step. Importing this file
-executes nothing beyond reading already-aggregated app metadata.
+Importing this file executes nothing beyond reading already-aggregated app
+metadata.
 """
 from __future__ import annotations
 
@@ -71,24 +70,9 @@ def _data_listing() -> set:
 
 # ==========================================================================
 # Current-step assertions — these RUN now and keep the suite green.
+# (The original Step 29 "endpoint absent" assertions were retired in Step 30,
+# which implements the answer-only handler and activates the contract below.)
 # ==========================================================================
-
-def test_ask_endpoint_is_currently_absent():
-    assert _ENDPOINT_ABSENT, "Step 29 is tests-only; /api/jarvis/ask must not exist yet"
-
-
-def test_post_ask_is_not_routed_today():
-    c = _client()
-    r = c.post(_ASK_PATH, json={"question": "what is the status?"})
-    # With no handler registered FastAPI returns 404 (or 405 if only other
-    # verbs were ever added). Either proves no working ask handler exists.
-    assert r.status_code in (404, 405), f"unexpected status for absent ask: {r.status_code}"
-
-
-def test_app_py_has_no_ask_route():
-    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
-    assert _ASK_PATH not in src, "Step 29 must not add an ask route to app.py"
-
 
 def test_template_has_no_ask_fetch():
     low = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8").lower()

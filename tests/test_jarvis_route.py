@@ -1712,6 +1712,8 @@ def test_jarvis_conversation_shell_no_forbidden_action_words():
 
 
 def test_jarvis_step_26_adds_no_ask_or_refresh_endpoint():
+    # Step 30 intentionally introduced an answer-only POST /api/jarvis/ask, so
+    # the old ask-absence guard is retired. The refresh/execution guard remains
+    # active: JARVIS must never gain a refresh endpoint.
     src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
-    assert "/api/jarvis/ask" not in src, "Step 26 must not add an ask endpoint"
-    assert "/api/jarvis/refresh" not in src, "Step 26 must not add a refresh endpoint"
+    assert "/api/jarvis/refresh" not in src, "JARVIS must not add a refresh endpoint"
