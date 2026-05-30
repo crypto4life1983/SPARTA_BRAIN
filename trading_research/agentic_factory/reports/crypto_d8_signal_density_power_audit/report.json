@@ -1,0 +1,811 @@
+{
+  "step": "Crypto-D8 signal-density / statistical-power audit",
+  "created": "2026-05-30",
+  "is_only": true,
+  "is_last_year": 2023,
+  "head_ref_note": "344a7e7 (D7 closeout) or descendant; D8 read-only audit",
+  "data_reference": "data_crypto/spot_binance_usdt_1d_2020_2025 (frozen, D3c fe5594f)",
+  "is_days": {
+    "BTC": 1461,
+    "ETH": 1461,
+    "SOL": 1238
+  },
+  "is_ranges": {
+    "BTC": [
+      "2020-01-01",
+      "2023-12-31"
+    ],
+    "ETH": [
+      "2020-01-01",
+      "2023-12-31"
+    ],
+    "SOL": [
+      "2020-08-11",
+      "2023-12-31"
+    ]
+  },
+  "rows_after_2023_used": 0,
+  "families": [
+    {
+      "family": "daily_crash_candle",
+      "threshold": "ret_1d<=-5%",
+      "by_symbol": {
+        "BTC": {
+          "count": 81,
+          "by_year": {
+            "2020": 16,
+            "2021": 35,
+            "2022": 24,
+            "2023": 6
+          },
+          "per_100_days": 5.544,
+          "max_year_share": 0.432,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 123,
+          "by_year": {
+            "2020": 29,
+            "2021": 48,
+            "2022": 40,
+            "2023": 6
+          },
+          "per_100_days": 8.419,
+          "max_year_share": 0.39,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 192,
+          "by_year": {
+            "2020": 40,
+            "2021": 62,
+            "2022": 63,
+            "2023": 27
+          },
+          "per_100_days": 15.509,
+          "max_year_share": 0.328,
+          "top_year": 2022
+        }
+      }
+    },
+    {
+      "family": "daily_crash_candle",
+      "threshold": "ret_1d<=-7%",
+      "by_symbol": {
+        "BTC": {
+          "count": 33,
+          "by_year": {
+            "2020": 6,
+            "2021": 14,
+            "2022": 12,
+            "2023": 1
+          },
+          "per_100_days": 2.259,
+          "max_year_share": 0.424,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 65,
+          "by_year": {
+            "2020": 17,
+            "2021": 26,
+            "2022": 21,
+            "2023": 1
+          },
+          "per_100_days": 4.449,
+          "max_year_share": 0.4,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 119,
+          "by_year": {
+            "2020": 25,
+            "2021": 39,
+            "2022": 41,
+            "2023": 14
+          },
+          "per_100_days": 9.612,
+          "max_year_share": 0.345,
+          "top_year": 2022
+        }
+      }
+    },
+    {
+      "family": "daily_crash_candle",
+      "threshold": "ret_1d<=-10%",
+      "by_symbol": {
+        "BTC": {
+          "count": 12,
+          "by_year": {
+            "2020": 2,
+            "2021": 5,
+            "2022": 5,
+            "2023": 0
+          },
+          "per_100_days": 0.821,
+          "max_year_share": 0.417,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 27,
+          "by_year": {
+            "2020": 6,
+            "2021": 11,
+            "2022": 10,
+            "2023": 0
+          },
+          "per_100_days": 1.848,
+          "max_year_share": 0.407,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 50,
+          "by_year": {
+            "2020": 12,
+            "2021": 16,
+            "2022": 19,
+            "2023": 3
+          },
+          "per_100_days": 4.039,
+          "max_year_share": 0.38,
+          "top_year": 2022
+        }
+      }
+    },
+    {
+      "family": "multiday_liquidation",
+      "threshold": "2d_ret<=-10%",
+      "by_symbol": {
+        "BTC": {
+          "count": 30,
+          "by_year": {
+            "2020": 8,
+            "2021": 13,
+            "2022": 9,
+            "2023": 0
+          },
+          "per_100_days": 2.053,
+          "max_year_share": 0.433,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 57,
+          "by_year": {
+            "2020": 13,
+            "2021": 22,
+            "2022": 22,
+            "2023": 0
+          },
+          "per_100_days": 3.901,
+          "max_year_share": 0.386,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 105,
+          "by_year": {
+            "2020": 24,
+            "2021": 27,
+            "2022": 43,
+            "2023": 11
+          },
+          "per_100_days": 8.481,
+          "max_year_share": 0.41,
+          "top_year": 2022
+        }
+      }
+    },
+    {
+      "family": "multiday_liquidation",
+      "threshold": "3d_ret<=-15%",
+      "by_symbol": {
+        "BTC": {
+          "count": 14,
+          "by_year": {
+            "2020": 3,
+            "2021": 4,
+            "2022": 7,
+            "2023": 0
+          },
+          "per_100_days": 0.958,
+          "max_year_share": 0.5,
+          "top_year": 2022
+        },
+        "ETH": {
+          "count": 35,
+          "by_year": {
+            "2020": 9,
+            "2021": 12,
+            "2022": 14,
+            "2023": 0
+          },
+          "per_100_days": 2.396,
+          "max_year_share": 0.4,
+          "top_year": 2022
+        },
+        "SOL": {
+          "count": 55,
+          "by_year": {
+            "2020": 13,
+            "2021": 13,
+            "2022": 24,
+            "2023": 5
+          },
+          "per_100_days": 4.443,
+          "max_year_share": 0.436,
+          "top_year": 2022
+        }
+      }
+    },
+    {
+      "family": "vol_compression",
+      "threshold": "10d_range/close<=8%",
+      "by_symbol": {
+        "BTC": {
+          "count": 196,
+          "by_year": {
+            "2020": 44,
+            "2021": 1,
+            "2022": 26,
+            "2023": 125
+          },
+          "per_100_days": 13.415,
+          "max_year_share": 0.638,
+          "top_year": 2023
+        },
+        "ETH": {
+          "count": 91,
+          "by_year": {
+            "2020": 5,
+            "2021": 0,
+            "2022": 10,
+            "2023": 76
+          },
+          "per_100_days": 6.229,
+          "max_year_share": 0.835,
+          "top_year": 2023
+        },
+        "SOL": {
+          "count": 1,
+          "by_year": {
+            "2020": 0,
+            "2021": 0,
+            "2022": 0,
+            "2023": 1
+          },
+          "per_100_days": 0.081,
+          "max_year_share": 1.0,
+          "top_year": 2023
+        }
+      },
+      "next_day_expansion_subset": {
+        "BTC": {
+          "count": 9,
+          "by_year": {
+            "2020": 1,
+            "2021": 0,
+            "2022": 4,
+            "2023": 4
+          }
+        },
+        "ETH": {
+          "count": 7,
+          "by_year": {
+            "2020": 1,
+            "2021": 0,
+            "2022": 1,
+            "2023": 5
+          }
+        },
+        "SOL": {
+          "count": 1,
+          "by_year": {
+            "2020": 0,
+            "2021": 0,
+            "2022": 0,
+            "2023": 1
+          }
+        }
+      }
+    },
+    {
+      "family": "vol_compression",
+      "threshold": "10d_range/close<=12%",
+      "by_symbol": {
+        "BTC": {
+          "count": 609,
+          "by_year": {
+            "2020": 145,
+            "2021": 56,
+            "2022": 149,
+            "2023": 259
+          },
+          "per_100_days": 41.684,
+          "max_year_share": 0.425,
+          "top_year": 2023
+        },
+        "ETH": {
+          "count": 345,
+          "by_year": {
+            "2020": 46,
+            "2021": 15,
+            "2022": 45,
+            "2023": 239
+          },
+          "per_100_days": 23.614,
+          "max_year_share": 0.693,
+          "top_year": 2023
+        },
+        "SOL": {
+          "count": 46,
+          "by_year": {
+            "2020": 0,
+            "2021": 0,
+            "2022": 19,
+            "2023": 27
+          },
+          "per_100_days": 3.716,
+          "max_year_share": 0.587,
+          "top_year": 2023
+        }
+      },
+      "next_day_expansion_subset": {
+        "BTC": {
+          "count": 22,
+          "by_year": {
+            "2020": 6,
+            "2021": 2,
+            "2022": 9,
+            "2023": 5
+          }
+        },
+        "ETH": {
+          "count": 13,
+          "by_year": {
+            "2020": 5,
+            "2021": 0,
+            "2022": 3,
+            "2023": 5
+          }
+        },
+        "SOL": {
+          "count": 2,
+          "by_year": {
+            "2020": 0,
+            "2021": 0,
+            "2022": 1,
+            "2023": 1
+          }
+        }
+      }
+    },
+    {
+      "family": "vol_compression",
+      "threshold": "10d_range/close<=16%",
+      "by_symbol": {
+        "BTC": {
+          "count": 851,
+          "by_year": {
+            "2020": 210,
+            "2021": 125,
+            "2022": 213,
+            "2023": 303
+          },
+          "per_100_days": 58.248,
+          "max_year_share": 0.356,
+          "top_year": 2023
+        },
+        "ETH": {
+          "count": 598,
+          "by_year": {
+            "2020": 112,
+            "2021": 66,
+            "2022": 120,
+            "2023": 300
+          },
+          "per_100_days": 40.931,
+          "max_year_share": 0.502,
+          "top_year": 2023
+        },
+        "SOL": {
+          "count": 135,
+          "by_year": {
+            "2020": 0,
+            "2021": 1,
+            "2022": 40,
+            "2023": 94
+          },
+          "per_100_days": 10.905,
+          "max_year_share": 0.696,
+          "top_year": 2023
+        }
+      },
+      "next_day_expansion_subset": {
+        "BTC": {
+          "count": 26,
+          "by_year": {
+            "2020": 7,
+            "2021": 4,
+            "2022": 9,
+            "2023": 6
+          }
+        },
+        "ETH": {
+          "count": 16,
+          "by_year": {
+            "2020": 5,
+            "2021": 2,
+            "2022": 4,
+            "2023": 5
+          }
+        },
+        "SOL": {
+          "count": 7,
+          "by_year": {
+            "2020": 0,
+            "2021": 0,
+            "2022": 2,
+            "2023": 5
+          }
+        }
+      }
+    },
+    {
+      "family": "trend_continuation",
+      "threshold": "close>SMA200 & ret_1d>=+5%",
+      "by_symbol": {
+        "BTC": {
+          "count": 52,
+          "by_year": {
+            "2020": 9,
+            "2021": 29,
+            "2022": 0,
+            "2023": 14
+          },
+          "per_100_days": 3.559,
+          "max_year_share": 0.558,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 99,
+          "by_year": {
+            "2020": 22,
+            "2021": 64,
+            "2022": 0,
+            "2023": 13
+          },
+          "per_100_days": 6.776,
+          "max_year_share": 0.646,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 109,
+          "by_year": {
+            "2020": 0,
+            "2021": 71,
+            "2022": 2,
+            "2023": 36
+          },
+          "per_100_days": 8.805,
+          "max_year_share": 0.651,
+          "top_year": 2021
+        }
+      }
+    },
+    {
+      "family": "trend_continuation",
+      "threshold": "close>SMA200 & ret_1d>=+7%",
+      "by_symbol": {
+        "BTC": {
+          "count": 30,
+          "by_year": {
+            "2020": 6,
+            "2021": 18,
+            "2022": 0,
+            "2023": 6
+          },
+          "per_100_days": 2.053,
+          "max_year_share": 0.6,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 57,
+          "by_year": {
+            "2020": 15,
+            "2021": 38,
+            "2022": 0,
+            "2023": 4
+          },
+          "per_100_days": 3.901,
+          "max_year_share": 0.667,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 78,
+          "by_year": {
+            "2020": 0,
+            "2021": 53,
+            "2022": 1,
+            "2023": 24
+          },
+          "per_100_days": 6.3,
+          "max_year_share": 0.679,
+          "top_year": 2021
+        }
+      }
+    },
+    {
+      "family": "mean_reversion_in_uptrend",
+      "threshold": "close>SMA200 & ret_1d<=-5%",
+      "by_symbol": {
+        "BTC": {
+          "count": 30,
+          "by_year": {
+            "2020": 3,
+            "2021": 22,
+            "2022": 0,
+            "2023": 5
+          },
+          "per_100_days": 2.053,
+          "max_year_share": 0.733,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 67,
+          "by_year": {
+            "2020": 14,
+            "2021": 47,
+            "2022": 1,
+            "2023": 5
+          },
+          "per_100_days": 4.586,
+          "max_year_share": 0.701,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 67,
+          "by_year": {
+            "2020": 0,
+            "2021": 52,
+            "2022": 3,
+            "2023": 12
+          },
+          "per_100_days": 5.412,
+          "max_year_share": 0.776,
+          "top_year": 2021
+        }
+      }
+    },
+    {
+      "family": "mean_reversion_in_uptrend",
+      "threshold": "close>SMA200 & ret_1d<=-7%",
+      "by_symbol": {
+        "BTC": {
+          "count": 9,
+          "by_year": {
+            "2020": 2,
+            "2021": 7,
+            "2022": 0,
+            "2023": 0
+          },
+          "per_100_days": 0.616,
+          "max_year_share": 0.778,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 33,
+          "by_year": {
+            "2020": 7,
+            "2021": 25,
+            "2022": 0,
+            "2023": 1
+          },
+          "per_100_days": 2.259,
+          "max_year_share": 0.758,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 39,
+          "by_year": {
+            "2020": 0,
+            "2021": 31,
+            "2022": 2,
+            "2023": 6
+          },
+          "per_100_days": 3.15,
+          "max_year_share": 0.795,
+          "top_year": 2021
+        }
+      }
+    },
+    {
+      "family": "mean_reversion_in_uptrend",
+      "threshold": "close>SMA200 & ret_1d<=-10%",
+      "by_symbol": {
+        "BTC": {
+          "count": 4,
+          "by_year": {
+            "2020": 1,
+            "2021": 3,
+            "2022": 0,
+            "2023": 0
+          },
+          "per_100_days": 0.274,
+          "max_year_share": 0.75,
+          "top_year": 2021
+        },
+        "ETH": {
+          "count": 13,
+          "by_year": {
+            "2020": 2,
+            "2021": 11,
+            "2022": 0,
+            "2023": 0
+          },
+          "per_100_days": 0.89,
+          "max_year_share": 0.846,
+          "top_year": 2021
+        },
+        "SOL": {
+          "count": 11,
+          "by_year": {
+            "2020": 0,
+            "2021": 10,
+            "2022": 0,
+            "2023": 1
+          },
+          "per_100_days": 0.889,
+          "max_year_share": 0.909,
+          "top_year": 2021
+        }
+      }
+    }
+  ],
+  "cross_asset_leadership": {
+    "family": "cross_asset_leadership",
+    "aligned_is_days": 1237,
+    "btc_leads_up": {
+      "label": "BTC ret>=+5% & ETH,SOL ret<+5%",
+      "count": 22,
+      "by_year": {
+        "2020": 5,
+        "2021": 11,
+        "2022": 2,
+        "2023": 4
+      },
+      "per_100_aligned": 1.778,
+      "max_year_share": 0.5
+    },
+    "btc_leads_down": {
+      "label": "BTC ret<=-5% & ETH,SOL ret>-5%",
+      "count": 4,
+      "by_year": {
+        "2020": 0,
+        "2021": 3,
+        "2022": 1,
+        "2023": 0
+      },
+      "per_100_aligned": 0.323,
+      "max_year_share": 0.75
+    }
+  },
+  "calendar": {
+    "BTC": {
+      "weekday_counts": {
+        "Mon": 208,
+        "Tue": 208,
+        "Wed": 209,
+        "Thu": 209,
+        "Fri": 209,
+        "Sat": 209,
+        "Sun": 209
+      },
+      "weekday_total": 1043,
+      "weekend_total": 418,
+      "total_bars": 1461
+    },
+    "ETH": {
+      "weekday_counts": {
+        "Mon": 208,
+        "Tue": 208,
+        "Wed": 209,
+        "Thu": 209,
+        "Fri": 209,
+        "Sat": 209,
+        "Sun": 209
+      },
+      "weekday_total": 1043,
+      "weekend_total": 418,
+      "total_bars": 1461
+    },
+    "SOL": {
+      "weekday_counts": {
+        "Mon": 176,
+        "Tue": 177,
+        "Wed": 177,
+        "Thu": 177,
+        "Fri": 177,
+        "Sat": 177,
+        "Sun": 177
+      },
+      "weekday_total": 884,
+      "weekend_total": 354,
+      "total_bars": 1238
+    }
+  },
+  "power_verdicts": {
+    "daily_crash_candle [ret_1d<=-7%]": {
+      "btc_count": 33,
+      "btc_max_year_share": 0.424,
+      "eth_count": 65,
+      "sol_count": 119,
+      "verdict": "POWER_OK"
+    },
+    "multiday_liquidation [2d_ret<=-10%]": {
+      "btc_count": 30,
+      "btc_max_year_share": 0.433,
+      "eth_count": 57,
+      "sol_count": 105,
+      "verdict": "POWER_OK"
+    },
+    "vol_compression [10d_range/close<=12%]": {
+      "btc_count": 609,
+      "btc_max_year_share": 0.425,
+      "eth_count": 345,
+      "sol_count": 46,
+      "verdict": "POWER_OK"
+    },
+    "trend_continuation [close>SMA200 & ret_1d>=+5%]": {
+      "btc_count": 52,
+      "btc_max_year_share": 0.558,
+      "eth_count": 99,
+      "sol_count": 109,
+      "verdict": "POWER_OK"
+    },
+    "mean_reversion_in_uptrend [close>SMA200 & ret_1d<=-7%]": {
+      "btc_count": 9,
+      "btc_max_year_share": 0.778,
+      "eth_count": 33,
+      "sol_count": 39,
+      "verdict": "NEEDS_4H_DATA"
+    },
+    "cross_asset_leadership [BTC leads down -5%]": {
+      "btc_count": 4,
+      "btc_max_year_share": 0.75,
+      "eth_count": "n/a (joint)",
+      "sol_count": "n/a (joint)",
+      "verdict": "NEEDS_4H_DATA"
+    },
+    "calendar_seasonality": {
+      "btc_count": 1461,
+      "verdict": "POWER_OK (count) but friction-dominated per Crypto-D7 (E)"
+    }
+  },
+  "year_concentration_notes": [
+    "daily_crash_candle (-5% and -7%): BTC max single-year share 0.43/0.42 -> NOT one-year-concentrated; events present in all four IS years including the 2022 bear (24 and 12 BTC events). This is the only family that is both >=30 on BTC AND regime-diverse.",
+    "mean_reversion_in_uptrend (the CODR-1 family): BTC -7% = 9 events (exactly the D6 CODR-1 trade-pool driver), max_year_share 0.78, ZERO events in 2022. The close>SMA200 uptrend gate is what starves and concentrates the signal, not a scarcity of crashes.",
+    "trend_continuation: BTC >=30 on +5% (52) but ZERO 2022 events and 0.56 share in 2021 -> bull-only, and structurally top-winner-dependent (Crypto-D7 option C, already-parked trend family).",
+    "vol_compression: very high counts but driven by parameter choice (threshold) and heavily concentrated in 2023 low-vol regime (BTC 12% share 0.43 borderline, 8% share 0.64) -> parameter-freedom risk flagged in Crypto-D7 option A.",
+    "cross_asset_leadership: BTC-leads-down only 4 events -> POWER_TOO_LOW; corroboration is baked into the signal (Crypto-D7 option B paradox).",
+    "calendar: weekday/weekend counts are near-perfectly uniform (24/7 market) -> any seasonal edge is tiny and friction-dominated (Crypto-D7 option E)."
+  ],
+  "recommendation": {
+    "verdict": "SELECT_FAMILY_FOR_CRYPTO_D9_SPEC",
+    "selected_family": "daily_crash_candle (1-day drop reversion), decoupled from the CODR-1 close>SMA200 uptrend gate",
+    "primary_threshold": "ret_1d<=-5% (BTC 81 events, 4-year spread, max_year_share 0.43)",
+    "secondary_threshold": "ret_1d<=-7% (BTC 33 events, still POWER_OK)",
+    "rationale": "Only the raw daily-crash family clears BTC>=30 IS events AND is regime-diverse (present in the 2022 bear). The D8 audit isolates the CODR-1 root cause: it was the combination of -7% AND close>SMA200 that produced exactly 9 BTC events (max_year_share 0.78, zero 2022). Removing the uptrend gate restores >=30 BTC events with cross-regime distribution, giving a Crypto-D9 spec a fighting chance at the >=30-trade and not-one-year-concentrated gates. Trend-continuation and vol-compression were rejected for top-winner dependence / parameter-freedom; cross-asset and calendar for too-low power / friction domination (consistent with Crypto-D7).",
+    "caveats": [
+      "This is a COUNTING result only. It says the family CAN fire >=30 times on BTC across regimes; it says NOTHING about whether those events carry a positive, friction-survivable, top-3-robust edge. That is for a future separately-authorized Crypto-D9 IS baseline.",
+      "-10% daily crash (BTC 12) and 3d<=-15% (BTC 14) remain sub-30 -> NEEDS_4H_DATA if a deeper-flush variant is ever wanted.",
+      "No spec is frozen here. Crypto-D9 must write its own pre-registered spec with a fresh ladder and a new id."
+    ]
+  },
+  "forbidden_actions": [
+    "no_oos_use", "no_2024_2025_2026_rows", "no_strategy_backtest", "no_pnl_simulation",
+    "no_optimization", "no_parameter_sweep", "no_old_strategy_rerun", "no_network",
+    "no_data_fetch", "no_exchange_api_execution", "no_broker", "no_paper_or_live",
+    "no_modification_of_frozen_data", "do_not_touch_s30_or_futures",
+    "jarvis_templates_base_hydra_untouched", "no_staging", "no_commit"
+  ],
+  "final_line": "Crypto-D8 is a signal-density and statistical-power audit only; no crypto strategy is validated, backtested, paper-ready, live-ready, or authorized for execution."
+}
