@@ -110,6 +110,90 @@ def test_jarvis_status_moving_company_is_placeholder():
     assert mv.get("leads") is None and mv.get("tasks") is None
 
 
+# --- Step 02: operator intelligence sections ------------------------------
+
+def test_jarvis_status_has_operator_sections():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    for key in ("git", "safety", "project", "brain_memory",
+                "recommended_next_actions"):
+        assert key in d, f"missing operator key: {key}"
+
+
+def test_jarvis_status_operator_safety_flags_true():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    s = client.get("/api/jarvis/status").json()["safety"]
+    for flag in ("read_only", "no_execution_control", "no_broker_control",
+                 "no_secret_display", "no_force_git"):
+        assert s.get(flag) is True, f"safety flag not True: {flag}"
+
+
+def test_jarvis_status_git_section_shape():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    g = client.get("/api/jarvis/status").json()["git"]
+    # Either a healthy snapshot or a fail-closed 'unavailable' — never a crash.
+    assert g.get("state") in ("online", "unavailable")
+    if g.get("state") == "online":
+        assert isinstance(g.get("modified_count"), int)
+        assert isinstance(g.get("untracked_count"), int)
+        assert isinstance(g.get("commits"), list)
+
+
+def test_jarvis_status_project_file_booleans():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    p = client.get("/api/jarvis/status").json()["project"]
+    for key in ("release_note_exists", "jarvis_template_exists",
+                "tests_file_exists"):
+        assert isinstance(p.get(key), bool), f"not a bool: {key}"
+
+
+def test_jarvis_status_brain_memory_does_not_expose_log_contents():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    bm = client.get("/api/jarvis/status").json()["brain_memory"]
+    assert "projects" in bm
+    # The probe must not surface the gitignored logs dir as a project key.
+    assert "logs" not in (bm.get("projects") or {})
+
+
+def test_jarvis_status_next_actions_is_list():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    na = client.get("/api/jarvis/status").json()["recommended_next_actions"]
+    assert isinstance(na, list) and len(na) >= 1
+    assert all(isinstance(x, str) for x in na)
+
+
+def test_jarvis_status_exposes_no_execution_fields():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    # No control affordance should be exposed as a key anywhere in the feed.
+    def _keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield str(k).lower()
+                yield from _keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from _keys(v)
+    all_keys = set(_keys(d))
+    for forbidden in ("place_order", "submit_order", "execute_trade",
+                      "command", "shell", "push", "reset", "force_push"):
+        assert forbidden not in all_keys, f"forbidden key in feed: {forbidden}"
+
+
 # --- safety: no forbidden trade-action language ---------------------------
 
 _FORBIDDEN_ON_PAGE = (

@@ -7558,6 +7558,124 @@ def _jarvis_daily_mission(content: dict, money: dict) -> dict:
     return {"state": "online", "actions": actions[:5]}
 
 
+# --- JARVIS Step 02: Operator Intelligence (read-only) ---------------------
+# These probes add operator situational awareness only. They run read-only
+# git plumbing, stat a few known paths, and emit static posture flags. No
+# probe writes, executes, trades, uploads, or mutates repo state.
+
+def _jarvis_run_git(args: list) -> str:
+    """Run a single read-only git command and return stripped stdout.
+    Raises on non-zero exit so the caller's fail-closed wrapper engages."""
+    import subprocess as _sp
+    proc = _sp.run(
+        ["git", *args],
+        cwd=str(BASE),
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError((proc.stderr or "git failed").strip())
+    return (proc.stdout or "").strip()
+
+
+def _jarvis_git() -> dict:
+    """READ-ONLY git snapshot: branch, short HEAD, clean/dirty, change
+    counts, and the last 3 commit subjects. No mutation, no fetch, no push."""
+    branch = _jarvis_run_git(["rev-parse", "--abbrev-ref", "HEAD"])
+    head = _jarvis_run_git(["rev-parse", "--short", "HEAD"])
+    porcelain = _jarvis_run_git(["status", "--porcelain"])
+    lines = [ln for ln in porcelain.splitlines() if ln.strip()]
+    untracked = len([ln for ln in lines if ln.startswith("??")])
+    modified = len(lines) - untracked
+    log = _jarvis_run_git(["log", "-3", "--format=%h %s"])
+    commits = []
+    for ln in log.splitlines():
+        ln = ln.strip()
+        if not ln:
+            continue
+        parts = ln.split(" ", 1)
+        sh = parts[0]
+        subj = parts[1] if len(parts) > 1 else ""
+        commits.append({"short_hash": sh, "subject": subj})
+    clean = not lines
+    return {
+        "state": "online",
+        "branch": branch,
+        "head": head,
+        "clean": clean,
+        "dirty": not clean,
+        "modified_count": modified,
+        "untracked_count": untracked,
+        "commits": commits,
+        "detail": "Working tree clean." if clean
+                  else f"{modified} modified, {untracked} untracked.",
+    }
+
+
+def _jarvis_operator_safety() -> dict:
+    """Static read-only posture flags. The console exposes no execution,
+    broker, secret, or force-git affordance — these assert that contract."""
+    return {
+        "state": "locked",
+        "read_only": True,
+        "no_execution_control": True,
+        "no_broker_control": True,
+        "no_secret_display": True,
+        "no_force_git": True,
+        "detail": "Operator panel is observation-only. No controls are exposed.",
+    }
+
+
+def _jarvis_project_files() -> dict:
+    """Confirm key JARVIS artifacts exist on disk. Stat only — never reads
+    contents, never touches ignored logs or secrets."""
+    checks = {
+        "release_note_exists":
+            (BASE / "docs" / "JARVIS_COMMAND_CENTER_RELEASE_NOTE.md").exists(),
+        "jarvis_template_exists":
+            (BASE / "templates" / "jarvis.html").exists(),
+        "tests_file_exists":
+            (BASE / "tests" / "test_jarvis_route.py").exists(),
+    }
+    present = sum(1 for v in checks.values() if v)
+    return {
+        "state": "online" if present == len(checks) else "waiting",
+        "detail": f"{present}/{len(checks)} expected files present.",
+        **checks,
+    }
+
+
+def _jarvis_brain_memory() -> dict:
+    """Stat the brain_memory tree and a few known project folders. Does NOT
+    read file contents and never touches the gitignored logs/ directory."""
+    root = BASE / "brain_memory"
+    if not root.exists():
+        return {"state": "not_connected", "exists": False,
+                "detail": "brain_memory/ not found.", "projects": {}}
+    projects_dir = root / "projects"
+    known = ("trading_bot", "hydra_video", "youtube_growth", "affiliate_system")
+    projects = {}
+    if projects_dir.exists():
+        for name in known:
+            projects[name] = (projects_dir / name).is_dir()
+    found = sum(1 for v in projects.values() if v)
+    return {
+        "state": "online",
+        "exists": True,
+        "projects": projects,
+        "detail": f"{found}/{len(known)} known project folders present.",
+    }
+
+
+_JARVIS_NEXT_ACTIONS = [
+    "Review the latest sealed lifecycles in the Trading Bridge (read-only).",
+    "Open /guide to confirm the JARVIS module manual entry is accurate.",
+    "Check brain_memory project next_actions before starting new work.",
+    "Run the JARVIS test suite before committing any console change.",
+]
+
+
 @app.get("/api/jarvis/status")
 def api_jarvis_status():
     """Read-only aggregate feed for the JARVIS console. Every section is
@@ -7575,6 +7693,14 @@ def api_jarvis_status():
             money if isinstance(money, dict) else {},
         )
     )
+    git = _jarvis_safe(_jarvis_git)
+    if not isinstance(git, dict) or git.get("state") == "error":
+        git = {"state": "unavailable",
+               "detail": (git or {}).get("detail", "git unavailable")
+                         if isinstance(git, dict) else "git unavailable"}
+    operator_safety = _jarvis_safe(_jarvis_operator_safety)
+    project = _jarvis_safe(_jarvis_project_files)
+    brain_memory = _jarvis_safe(_jarvis_brain_memory)
     return {
         "online": True,
         "read_only": True,
@@ -7586,6 +7712,11 @@ def api_jarvis_status():
         "moving_company": moving,
         "daily_mission": mission,
         "safety_gates": safety,
+        "git": git,
+        "safety": operator_safety,
+        "project": project,
+        "brain_memory": brain_memory,
+        "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
 
 
