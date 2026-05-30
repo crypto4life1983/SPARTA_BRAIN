@@ -1,0 +1,129 @@
+{
+  "step": "S28-D4",
+  "title": "Breakout-Retest with Volatility Expansion and Mechanical Bad-Regime Gate -- IN-SAMPLE baseline (NQ daily, 2013-2022 only)",
+  "created": "2026-05-30",
+  "kind": "is_baseline_measurement",
+  "spec_only": false,
+  "code": false,
+  "backtest": true,
+  "is_run": true,
+  "oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "provenance": {
+    "s28_d1_hypothesis_selection_commit": "c8f5a46a0cd9a3732e0a9ed9c107d52c230e31d0",
+    "s28_d2_frozen_spec_commit": "5204fe1e3dafd40749769256abc3b77b6970f50f",
+    "s28_d3_engine_and_tests_commit": "e7ce9a9e1cfb0209e34b03daf78774ef03aec5ea",
+    "head_at_run_context": "bdcca5a",
+    "head_note": "HEAD bdcca5a is a JARVIS-only background-automation commit (app.py, templates/jarvis.html, tests/test_jarvis_route.py, tools/jarvis_file_hygiene_report.py); it touched NO agentic_factory file and S28-D3 (e7ce9a9) remains its ancestor. The frozen engine was run unmodified.",
+    "engine_module": "engine/s28_breakout_retest.py",
+    "engine_unmodified_since": "e7ce9a9"
+  },
+  "inputs": {
+    "market": "NQ continuous futures, daily bars",
+    "in_sample_years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+    "is_files": [
+      "data_offline/nq_c0_ohlcv_1d_2013.csv",
+      "data_offline/nq_c0_ohlcv_1d_2014.csv",
+      "data_offline/nq_c0_ohlcv_1d_2015.csv",
+      "data_offline/nq_c0_ohlcv_1d_2016.csv",
+      "data_offline/nq_c0_ohlcv_1d_2017.csv",
+      "data_offline/nq_c0_ohlcv_1d_2018.csv",
+      "data_offline/nq_c0_ohlcv_1d_2019.csv",
+      "data_offline/nq_c0_ohlcv_1d_2020.csv",
+      "data_offline/nq_c0_ohlcv_1d_2021.csv",
+      "data_offline/nq_c0_ohlcv_1d_2022.csv"
+    ],
+    "oos_2023_2025_used": false,
+    "oos_confirmation": "The 2023/2024/2025 CSVs exist on disk but were never opened; the runner asserts no OOS year string appears in any loaded path. OOS remains SEALED per S28-D2."
+  },
+  "frozen_constants_echo": {
+    "EMA_MID": 50, "EMA_SLOW": 200, "ATR_PERIOD": 20, "VOL_SMA_PERIOD": 20,
+    "SLOPE_LOOKBACK": 20, "RESISTANCE_LOOKBACK": 55, "TR_ATR_MULT": 1.25,
+    "VOL_MULT": 1.2, "RETEST_WINDOW": 10, "RETEST_ATR_MULT": 0.25,
+    "BAD_REGIME_ATR_MULT": 1.0, "STOP_ATR_MULT": 2.0, "TARGET_R_MULTIPLE": 2.0,
+    "TIME_STOP_BARS": 20
+  },
+  "data_qa": {
+    "total_bars": 3079,
+    "date_range": ["2013-01-02", "2022-12-30"],
+    "per_year_row_counts": {
+      "2013": 289, "2014": 302, "2015": 312, "2016": 310, "2017": 309,
+      "2018": 312, "2019": 312, "2020": 312, "2021": 311, "2022": 310
+    },
+    "rows_outside_is_years": 0,
+    "duplicate_dates_count": 0,
+    "invalid_ohlc_count": 0,
+    "qa_verdict": "CLEAN -- no duplicate dates, no invalid OHLC rows, no out-of-range rows; every bar falls in 2013-2022."
+  },
+  "metrics": {
+    "trade_count": 12,
+    "total_r": -0.72,
+    "profit_factor": 0.91,
+    "win_count": 4,
+    "loss_count": 8,
+    "flat_count": 0,
+    "win_rate": 0.333,
+    "expectancy_r": -0.06,
+    "avg_r": -0.06,
+    "median_r": -1.0,
+    "best_r": 2.0,
+    "worst_r": -1.0,
+    "max_drawdown_r": 4.0,
+    "year_by_year_r": {
+      "2013": 0.0, "2014": 2.0, "2015": -1.0, "2016": -1.0, "2017": 1.28,
+      "2018": 1.0, "2019": 0.0, "2020": -1.0, "2021": -2.0, "2022": 0.0
+    },
+    "year_by_year_trades": {
+      "2013": 0, "2014": 1, "2015": 1, "2016": 1, "2017": 1, "2018": 2,
+      "2019": 3, "2020": 1, "2021": 2, "2022": 0
+    },
+    "positive_years": 3,
+    "positive_years_list": [2014, 2017, 2018],
+    "negative_years_list": [2015, 2016, 2020, 2021],
+    "zero_years_list": [2013, 2019, 2022],
+    "exit_reason_counts": {"target": 3, "stop": 8, "time_stop": 1},
+    "exit_reason_note": "8 losers all -1R hard stops; 3 winners hit +2R target; 1 winner exited via 20-bar time stop at +1.28R (2017).",
+    "best_trade_share_of_net": "undefined (net is negative; best trade is +2.0R against a -0.72R net)",
+    "top3_winner_r": 6.0,
+    "total_r_ex_top3": -6.72,
+    "anti_donchian_top3_gate": {
+      "net_r": -0.72,
+      "top3_r": 6.0,
+      "net_r_ex_top3": -6.72,
+      "passes": false,
+      "note": "Net is already NEGATIVE with all trades included; removing the top 3 winners drives it to -6.72R. The Donchian fat-tail-dependence failure mode is present in the strongest possible form."
+    }
+  },
+  "setup_diagnostics_non_authoritative": {
+    "note": "find_setups_or_entries() does NOT model the one-position / one-active-setup constraint, so its counts are a diagnostic superset and are NOT the trade count. The authoritative trade count is 12 from simulate_s28().",
+    "raw_breakout_setups_scanned": 30,
+    "entry_candidates": 14,
+    "failed_retest": 12,
+    "expired_no_retest": 4,
+    "entries_skipped_by_one_position_rule": 2
+  },
+  "s28_d2_prescreen": {
+    "note": "Pre-registered S28-D2 thresholds applied to IS only (PASS/WATCH/FAIL). OOS gates are NOT evaluated here (OOS sealed).",
+    "is_trade_count": {"value": 12, "pass": ">=30", "watch": "20-29", "fail": "<20", "result": "FAIL"},
+    "profit_factor": {"value": 0.91, "pass": ">=1.40", "watch": "1.15-1.39", "fail": "<1.15", "result": "FAIL"},
+    "expectancy": {"value": -0.06, "pass": ">0 on IS", "fail": "<=0 on IS", "result": "FAIL"},
+    "positive_years": {"value": "3/10", "pass": ">=6/10", "watch": "5/10", "fail": "<5/10", "result": "FAIL"},
+    "top3_winner_dependence": {"value": "net_ex_top3 = -6.72R", "pass": "IS net positive after removing top 3", "fail": "IS net negative without top 3", "result": "FAIL"},
+    "max_dd_cap": {"value": "IS max DD 4.0R vs IS net -0.72R", "pass": "IS max DD <= IS net R", "fail": "IS max DD > 1.5x IS net R", "result": "FAIL (net is negative; drawdown cap automatically breached)"}
+  },
+  "verdict": "IS_FAIL",
+  "verdict_basis": "Every pre-registered IS hard floor is breached: trade count 12 (<20), profit factor 0.91 (<1.15), expectancy -0.06R (<=0), only 3/10 positive years (<5/10), and the anti-Donchian top-3 gate fails decisively (net -0.72R, net-ex-top-3 -6.72R). The record is net-negative and entirely carried by 3 fat-tail winners -- exactly the Donchian failure mode S28 was designed to avoid.",
+  "conservative_interpretation": "On its own pre-registered IS terms, S28 v1 shows no edge. The selective stack (rising-trend filter + 55-bar high + range expansion + volume expansion + retest-hold + bad-regime gate) is so restrictive that it produced only 12 trades in 10 years, and those 12 are net-negative with brittle fat-tail dependence. This is a clean negative -- not 'inconclusive'. Per the S28-D2 anti-overfit rules and the explicit 'do not continue inconclusive like S26' instruction, S28 should be PARKED as IS_FAIL. No parameter changes, no filter tweaks, no OOS peek are permitted on this branch; any new idea opens a NEW pre-registered branch.",
+  "recommendation": "NONE. No trading, no paper, no live, no OOS. PARK S28 as IS_FAIL. Donchian, S26, S27 remain PARKED. Do NOT proceed to S28-D5/OOS (the 2023-2025 seal stays intact). Do NOT optimize or re-tune S28 in place (anti-overfit rule). A future hypothesis must start a fresh pre-registered branch.",
+  "guardrails": {
+    "is_only": true, "oos_sealed": true, "no_optimization": true,
+    "no_parameter_sweeps": true, "no_data_fetch": true, "no_paper_or_live": true,
+    "no_broker_or_api": true, "engine_unmodified": true,
+    "s26_untouched": true, "s27_untouched": true, "donchian_untouched": true,
+    "jarvis_templates_hydra_untouched": true
+  },
+  "trading_recommendation": "NONE. S28 is PARKED IS_FAIL on a net-negative, fat-tail-dependent in-sample record."
+}
