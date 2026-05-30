@@ -17,10 +17,13 @@
   "paper_or_live": false,
   "modified_any_crypto_data_file": false,
   "provenance": {
-    "head_at_memo": "2849279752b9218fbc138fb3c2ca1069471e547b",
+    "head_at_finalize": "ce62a718f8c5bb4605617b66c67162ac3a614e83",
+    "head_when_automation_drafted": "2849279752b9218fbc138fb3c2ca1069471e547b",
+    "head_note": "background automation advances HEAD continuously; both the draft HEAD and finalize HEAD are confirmed; D1/D2/D3 all ancestors of the finalize HEAD",
     "crypto_d1_commit": "c8a59fee3e4804c416564d4673f7152e87fd3e60",
     "crypto_d2_commit": "a035ab079d2d76c271076ad5edeadad0e7df7086",
-    "both_ancestors_of_head": true,
+    "crypto_d3_commit": "31ebdaf88cd5edda1214cee65368a4eff6b20655",
+    "d1_d2_d3_all_ancestors_of_head": true,
     "s30_untouched": true,
     "nothing_staged": true
   },
@@ -51,6 +54,19 @@
       "orchestrator": "tools/regime_shadow_fresh_data_update.py (Phase 5F): crypto refresh via fetch_binance_crypto_daily_frozen.fetch_and_stage, gated --allow-network-for-crypto, CRYPTO_INTERVAL='1d', whitelist BTCUSDT/ETHUSDT/SOLUSDT, endpoint api.binance.com/api/v3/klines only"
     },
     "manifest_corroboration": "reports/crypto_regime_data_acquisition_manifest.json: source data.binance.vision (Binance spot) -- corroborates Binance-spot lineage BUT documents a 1h acquisition into a DIFFERENT folder (SPARTA_RESEARCH_LAB\\...\\data\\raw); supportive context, NOT the 1:1 record for these daily files",
+    "run_record_sha_linkage_independently_verified": {
+      "records": [
+        "reports/regime_intelligence/shadow_validation/health/latest_status.json",
+        "reports/regime_intelligence/shadow_validation/logs/fresh_data_update_20260530T001513Z.json"
+      ],
+      "run_finished_utc": "2026-05-30T00:15:13Z",
+      "pipeline": "actions_taken=[update_crypto, merge_crypto_shards, update_dxy_fred, run_shadow]; args.update_crypto=true; allow_network_for_crypto=true; symbols=[BTCUSDT,ETHUSDT,SOLUSDT]; interval=1d",
+      "recorded_shas": {"btcusdt": "863182c1e883e0ed01ef3ad368fb1ae2324ab522caf0cc8a7964f54e02ffd00d", "ethusdt": "8b987ce547d070de57f7e88d2fca94b8ed9c179b0808bb82157339b205446aac", "solusdt": "3ee27dbe7a81ba59eb90dd7dc656d0cd729355e9af638389189e822478842da6"},
+      "on_disk_sha256_recomputed": {"btcusdt": "863182c1e883e0ed01ef3ad368fb1ae2324ab522caf0cc8a7964f54e02ffd00d", "ethusdt": "8b987ce547d070de57f7e88d2fca94b8ed9c179b0808bb82157339b205446aac", "solusdt": "3ee27dbe7a81ba59eb90dd7dc656d0cd729355e9af638389189e822478842da6"},
+      "match": true,
+      "implication_source": "on-disk bytes EXACTLY match the producing pipeline's run-record shas -> the current files ARE the output of the Binance-spot update_crypto->merge_crypto_shards pipeline; source provenance confirmed beyond inference",
+      "implication_immutability": "same record shows update_crypto fetched only the 2026-05-29 single-row shard (rows_written=1, ..._2026-05-29_2026-05-29.csv) then merged into the cumulative ..._2020-01-01_2026-05-29.csv -> dataset is daily incremental append-merge, bytes/end-date change every day -> no fixed immutable snapshot exists"
+    },
     "dataset_stability": {
       "gitignored": true,
       "superseded_backups_count": 72,
@@ -72,7 +88,7 @@
     "summary": "9 of 10 source-provenance fields PINNED; the single unmet item is dataset immutability (a dataset-stability gap, not a source-provenance gap)"
   },
   "5_final_provenance_verdict": "PROVENANCE_PARTIAL_NOT_READY",
-  "5_verdict_nuance": "Source provenance is now pinned (Binance public SPOT klines, api.binance.com/api/v3/klines, USDT, daily-native 1d, UTC 00:00, retrieval script identified) -- a clear upgrade from Crypto-D3's UNKNOWN; no new fetch is required to establish origin. The data is NOT ready only because the on-disk dataset is a live, daily-refreshed, gitignored copy (72 superseded backups; rolling end date), not an immutable content-hashed frozen snapshot. A validation-factory backing dataset must be frozen and hash-pinned for reproducibility.",
+  "5_verdict_nuance": "Source provenance is now pinned (Binance public SPOT klines, api.binance.com/api/v3/klines, USDT, daily-native 1d, UTC 00:00, retrieval script identified) and INDEPENDENTLY VERIFIED via live sha256 linkage (on-disk file hashes exactly match the producing pipeline's run-record, see 3_evidence_found.run_record_sha_linkage_independently_verified) -- a clear upgrade from Crypto-D3's UNKNOWN; no new fetch is required to establish origin. The data is NOT ready only because the on-disk dataset is a live, daily-refreshed, gitignored copy (72 superseded backups; rolling end date), not an immutable content-hashed frozen snapshot. A validation-factory backing dataset must be frozen and hash-pinned for reproducibility.",
   "6_if_pinned_proceed_conditions": {
     "can_proceed_to_d4_now": false,
     "reason": "source pinned but dataset not frozen; must be frozen into the factory first",

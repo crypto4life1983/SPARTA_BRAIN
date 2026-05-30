@@ -8,9 +8,10 @@ staging, no commit.** It searches local files only to determine whether the prov
 of the existing `data/frozen_regime_inputs/` BTC/ETH/SOL daily candles can be pinned.
 
 - **Created:** 2026-05-30
-- **HEAD at memo:** `2849279` (Crypto-D1 `c8a59fe` and Crypto-D2 `a035ab0` confirmed
-  ancestors). Nothing staged; this folder is untracked. S30 untouched and remains
-  PARKED after IS_FAIL.
+- **HEAD at finalize:** `ce62a71` (automation draft was at `2849279`; background
+  automation advances HEAD continuously). Crypto-D1 `c8a59fe`, Crypto-D2 `a035ab0`,
+  and Crypto-D3 `31ebdaf` all confirmed ancestors. Nothing staged; this folder is
+  untracked. S30 untouched and remains PARKED after IS_FAIL.
 - **Read-only:** local README/manifests/reports/tools/config only. No CSV/data file was
   modified. Nothing fetched.
 
@@ -63,6 +64,27 @@ close that gap from local evidence only.
   into a **different** folder (`SPARTA_RESEARCH_LAB\...\data\raw`) — supportive context,
   **not** the 1:1 record for these daily files.
 
+**Live run-record sha256 linkage (INDEPENDENTLY VERIFIED — ties the exact on-disk bytes
+to the Binance-spot pipeline):**
+
+- `reports/regime_intelligence/shadow_validation/health/latest_status.json` and the
+  matching run-log `reports/regime_intelligence/shadow_validation/logs/fresh_data_update_20260530T001513Z.json`
+  (run finished `2026-05-30T00:15:13Z`) record, per file, the producing pipeline's
+  `actions_taken=[update_crypto, merge_crypto_shards, ...]`, `args.update_crypto=true`
+  with `allow_network_for_crypto=true`, `symbols=[BTCUSDT,ETHUSDT,SOLUSDT]`,
+  `interval=1d`, and a per-file sha256 + last-date.
+- **I recomputed the sha256 of the three on-disk daily files and they EXACTLY match the
+  recorded shas:** BTC `863182c1…ffd00d`, ETH `8b987ce5…446aac`, SOL `3ee27dbe…42da6`.
+  This is a **live linkage** proving the current on-disk bytes ARE the output of the
+  Binance-spot `update_crypto`→`merge_crypto_shards` pipeline — confirming source
+  provenance beyond inference.
+- **The same record also confirms the immutability gap:** the `update_crypto` action
+  fetched only the **2026-05-29 single-row shard** (`rows_written: 1`, output
+  `…_2026-05-29_2026-05-29.csv`) and then merged it into the cumulative
+  `…_2020-01-01_2026-05-29.csv`. The dataset is produced by **daily incremental
+  append-merge**, so its bytes (and end date) change every day — exactly why no fixed
+  immutable snapshot exists yet.
+
 **Dataset-stability evidence (the remaining gap):**
 
 - `data/frozen_regime_inputs/` is **gitignored** (not a committed frozen snapshot).
@@ -96,8 +118,9 @@ close that gap from local evidence only.
 
 The **source provenance is now pinned** (Binance public **spot** klines,
 `api.binance.com/api/v3/klines`, USDT, **daily-native 1d**, UTC 00:00 boundary,
-retrieval script identified) — a clear upgrade from Crypto-D3's "UNKNOWN". **No new
-fetch is required** to establish origin. **But the data is NOT yet ready** because the
+retrieval script identified), and **independently verified** by a live sha256 linkage
+(on-disk file hashes match the producing pipeline's run-record, §3) — a clear upgrade
+from Crypto-D3's "UNKNOWN". **No new fetch is required** to establish origin. **But the data is NOT yet ready** because the
 on-disk dataset is a **live, daily-refreshed, gitignored copy**, not an immutable,
 content-hashed frozen snapshot. A validation-factory backing dataset must be frozen and
 hash-pinned (like the offline futures CSVs), so a tuned/validated result is reproducible
