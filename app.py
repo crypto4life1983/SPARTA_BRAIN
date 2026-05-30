@@ -140,6 +140,34 @@ async def lifespan(app: FastAPI):
         ),
         sort_order=92,
     )
+    # SPARTA JARVIS Command Center — additive, read-only cinematic console.
+    db.upsert_manual_entry(
+        "jarvis_command_center",
+        module_name="Jarvis Command Center",
+        category="Dashboard",
+        status="READY",
+        short_description=(
+            "Cinematic read-only command console that aggregates existing "
+            "system, AI, trading, content, money, and safety signals."
+        ),
+        how_it_works=(
+            "GET /jarvis renders a holographic single page; it polls "
+            "GET /api/jarvis/status, which fans out to existing read-only "
+            "probes (three-brain tools, command lifecycle scan, paper "
+            "status, settings flags, safety log). Every section fails closed "
+            "to 'not connected' / 'waiting for signal' and never invents a "
+            "metric or profit number. Nothing executes, trades, or uploads."
+        ),
+        when_to_use=(
+            "When you want one glanceable console showing whether each "
+            "subsystem is online, plus the locked safety gates."
+        ),
+        user_action=(
+            "Open http://127.0.0.1:8765/jarvis. Read-only; no buttons that "
+            "trade, upload, or fire automation."
+        ),
+        sort_order=10,
+    )
     db.upsert_manual_entry(
         "trade_decision_ledger",
         module_name="Trade Decision Ledger",
@@ -7336,6 +7364,246 @@ async def page_research_orchestrator(request: Request):
 
 
 # === END SPARTA Research Orchestrator v2 block =============================
+
+
+# ===========================================================================
+# SPARTA JARVIS Command Center (additive, read-only)
+#
+# A cinematic single-page status console that AGGREGATES existing read-only
+# signals. It never executes anything: no trading, no uploads, no automation
+# firing, no credential access. Every section fails closed — if a source is
+# missing it reports "not connected" / "waiting for signal" and NEVER invents
+# a metric or a profit number.
+#
+# The page is /jarvis; the live data feed is GET /api/jarvis/status.
+# ===========================================================================
+
+def _jarvis_safe(fn):
+    """Run a section probe, converting any failure into a fail-closed dict
+    so one broken source never takes the whole console down."""
+    try:
+        return fn()
+    except Exception as exc:  # noqa: BLE001 — console must always render
+        return {"state": "error", "detail": f"{type(exc).__name__}: {exc}"}
+
+
+def _jarvis_system_core() -> dict:
+    from datetime import datetime as _dt
+    counts = _jarvis_safe(db.get_counts)
+    return {
+        "state": "online",
+        "server": "running",
+        "now": _dt.now().isoformat(timespec="seconds"),
+        "counts": counts if isinstance(counts, dict) else {},
+    }
+
+
+def _jarvis_ai_brains() -> dict:
+    """Claude / Codex / Gemini via the three-brain probe; Ollama by PATH
+    presence only (cheap + honest — we do not claim a model is 'online')."""
+    import shutil as _shutil
+    brains = {}
+    try:
+        from spartacus.three_brain_router import detect_available_tools
+        tools = detect_available_tools()
+        for name in ("claude", "codex", "gemini"):
+            info = tools.get(name, {}) or {}
+            brains[name] = {
+                "state": "ready" if info.get("available") else "not_connected",
+                "detail": info.get("note") or "",
+                "version": info.get("version"),
+            }
+    except Exception as exc:  # noqa: BLE001
+        for name in ("claude", "codex", "gemini"):
+            brains[name] = {"state": "error", "detail": f"{type(exc).__name__}: {exc}"}
+    # Ollama: report install presence only, not a live model status.
+    if _shutil.which("ollama"):
+        model = (db.get_setting("model_name") or "").strip()
+        brains["ollama"] = {
+            "state": "installed",
+            "detail": f"default model: {model}" if model else "installed on PATH",
+        }
+    else:
+        brains["ollama"] = {"state": "not_connected", "detail": "ollama not found on PATH"}
+    return {"state": "online", "brains": brains}
+
+
+def _jarvis_trading_bridge() -> dict:
+    """READ-ONLY. Counts sealed lifecycles and reads the paper-status card.
+    No order, no broker, no execution affordance anywhere in this path."""
+    lifecycles = []
+    try:
+        rows = _command_scan_lifecycles(_COMMAND_REPORTS_DIR, _COMMAND_DECISIONS_FILE)
+        for r in rows[:6]:
+            lifecycles.append({
+                "id": getattr(r, "lifecycle_id", ""),
+                "verdict": getattr(r, "sealed_verdict", "") or "—",
+            })
+    except Exception as exc:  # noqa: BLE001
+        return {"state": "waiting", "detail": f"{type(exc).__name__}: {exc}",
+                "read_only": True, "locked": True}
+    paper = None
+    try:
+        from paper_trading.weekly_rs_s21_forward_paper_harness import status as _paper_status
+        ps = _paper_status.paper_status()
+        if isinstance(ps, dict):
+            paper = {"mode": ps.get("mode") or "DIAGNOSTIC_ONLY",
+                     "live": "BLOCKED"}
+    except Exception:  # noqa: BLE001 — paper card is optional
+        paper = None
+    return {
+        "state": "online" if lifecycles else "waiting",
+        "read_only": True,
+        "locked": True,
+        "lifecycle_count": len(lifecycles),
+        "lifecycles": lifecycles,
+        "paper": paper,
+        "detail": "Read-only lifecycle viewer. Live trading blocked." if lifecycles
+                  else "No sealed lifecycles found yet — waiting for signal.",
+    }
+
+
+def _jarvis_content_engine() -> dict:
+    auto = (db.get_setting("auto_mode_enabled") or "false").lower() == "true"
+    auto_video = (db.get_setting("auto_video_enabled") or "false").lower() == "true"
+    autopilot = (db.get_setting("autopilot_enabled") or "false").lower() == "true"
+    yt_connected = bool((db.get_setting("youtube_oauth_token") or "").strip())
+    return {
+        "state": "online",
+        "hydra": {"state": "ready", "detail": "Local talking-head pipeline"},
+        "victory": {"state": "ready", "detail": "Funnel + ship tracker"},
+        "youtube_autopilot": {
+            "state": "armed" if autopilot else "idle",
+            "detail": "Autopilot enabled" if autopilot else "Autopilot idle",
+        },
+        "auto_mode": {"state": "armed" if auto else "idle",
+                      "auto_video": auto_video},
+        "youtube_account": {
+            "state": "connected" if yt_connected else "not_connected",
+            "detail": "OAuth token present" if yt_connected
+                      else "Not connected — connect in Settings",
+        },
+    }
+
+
+def _jarvis_money_engine() -> dict:
+    amazon = (db.get_setting("amazon_autopilot_enabled") or "true").lower() == "true"
+    registry = (BASE / "data" / "asset_registry.json").exists()
+    return {
+        "state": "online",
+        "affiliate": {"state": "compliance_first",
+                      "detail": "No fake claims, no fake links"},
+        "amazon": {"state": "armed" if amazon else "idle",
+                   "detail": "Morning brief enabled" if amazon else "Brief idle"},
+        "product_lock": {
+            "state": "locked" if registry else "waiting",
+            "detail": "asset_registry.json present" if registry
+                      else "No asset registry yet — waiting for signal",
+        },
+    }
+
+
+def _jarvis_moving_company() -> dict:
+    # Placeholder only by design — no external fetch, no scraping.
+    return {
+        "state": "placeholder",
+        "leads": None,
+        "tasks": None,
+        "detail": "Placeholder only — no external fetch wired up.",
+    }
+
+
+def _jarvis_safety_gates() -> dict:
+    """Hard, non-negotiable gates surfaced as locked status. These are
+    posture statements, not toggles — the console cannot flip them."""
+    blocked = None
+    try:
+        from spartacus.agents._shared import load_json
+        rows = load_json(_safety_log_path(), default=[])
+        if isinstance(rows, list):
+            blocked = len([r for r in rows if not r.get("passed")])
+    except Exception:  # noqa: BLE001
+        blocked = None
+    return {
+        "state": "locked",
+        "gates": [
+            {"name": "Trading execution", "status": "LOCKED",
+             "detail": "Read-only. No order path exists in this console."},
+            {"name": "Approvals", "status": "REQUIRED",
+             "detail": "Human approval required before any action."},
+            {"name": "YouTube upload", "status": "APPROVAL_REQUIRED",
+             "detail": "Uploads pass the safety gate + human review."},
+            {"name": "Live automation", "status": "BLOCKED",
+             "detail": "No automation fires from this page."},
+        ],
+        "safety_blocked_count": blocked,
+    }
+
+
+def _jarvis_daily_mission(content: dict, money: dict) -> dict:
+    """Derive a few recommended actions from current state. These are
+    guidance strings derived from real flags — never invented metrics."""
+    actions = []
+    try:
+        if content.get("youtube_account", {}).get("state") == "not_connected":
+            actions.append("Connect YouTube in Settings to enable uploads.")
+        if content.get("auto_mode", {}).get("state") == "idle":
+            actions.append("Auto mode is idle — run a manual cycle when ready.")
+        if money.get("product_lock", {}).get("state") == "waiting":
+            actions.append("No asset registry yet — lock a product to arm the money engine.")
+    except Exception:  # noqa: BLE001
+        pass
+    if not actions:
+        actions.append("All core signals nominal — hold position and review reports.")
+    return {"state": "online", "actions": actions[:5]}
+
+
+@app.get("/api/jarvis/status")
+def api_jarvis_status():
+    """Read-only aggregate feed for the JARVIS console. Every section is
+    fail-closed; nothing here executes, trades, uploads, or fires automation."""
+    system = _jarvis_safe(_jarvis_system_core)
+    ai = _jarvis_safe(_jarvis_ai_brains)
+    trading = _jarvis_safe(_jarvis_trading_bridge)
+    content = _jarvis_safe(_jarvis_content_engine)
+    money = _jarvis_safe(_jarvis_money_engine)
+    moving = _jarvis_safe(_jarvis_moving_company)
+    safety = _jarvis_safe(_jarvis_safety_gates)
+    mission = _jarvis_safe(
+        lambda: _jarvis_daily_mission(
+            content if isinstance(content, dict) else {},
+            money if isinstance(money, dict) else {},
+        )
+    )
+    return {
+        "online": True,
+        "read_only": True,
+        "system_core": system,
+        "ai_brains": ai,
+        "trading_bridge": trading,
+        "content_engine": content,
+        "money_engine": money,
+        "moving_company": moving,
+        "daily_mission": mission,
+        "safety_gates": safety,
+    }
+
+
+@app.get("/jarvis", response_class=HTMLResponse)
+def page_jarvis(request: Request):
+    """Cinematic read-only command center. No execution affordances."""
+    from datetime import datetime as _dt
+    return templates.TemplateResponse(
+        "jarvis.html",
+        {
+            "request": request,
+            "page": "jarvis",
+            "server_time": _dt.now().isoformat(timespec="seconds"),
+        },
+    )
+
+
+# === END SPARTA JARVIS Command Center block ================================
 
 
 if __name__ == "__main__":
