@@ -1,0 +1,118 @@
+{
+  "step": "S27-D4",
+  "title": "Mean Reversion After Overextension Inside Bull Trend -- IS baseline (NQ daily 2013-2022)",
+  "baseline_measurement_only": true,
+  "oos_used": false,
+  "optimization": false,
+  "parameter_change": false,
+  "strategy_rule_change": false,
+  "created": "2026-05-30",
+  "provenance_commits": {
+    "s27_d1_hypothesis_selection": "dc53087468ab955c85dacb70241c8b3387593883",
+    "s27_d2_frozen_spec": "4a678ce935850164aec00e32f45390ee456d1fad",
+    "s27_d3_engine_tests": "d016127c77cd46116f632064de850c1fa8f0b103"
+  },
+  "engine": "engine/s27_mean_reversion_bull.py (frozen, unchanged)",
+  "input_files": [
+    "data_offline/nq_c0_ohlcv_1d_2013.csv",
+    "data_offline/nq_c0_ohlcv_1d_2014.csv",
+    "data_offline/nq_c0_ohlcv_1d_2015.csv",
+    "data_offline/nq_c0_ohlcv_1d_2016.csv",
+    "data_offline/nq_c0_ohlcv_1d_2017.csv",
+    "data_offline/nq_c0_ohlcv_1d_2018.csv",
+    "data_offline/nq_c0_ohlcv_1d_2019.csv",
+    "data_offline/nq_c0_ohlcv_1d_2020.csv",
+    "data_offline/nq_c0_ohlcv_1d_2021.csv",
+    "data_offline/nq_c0_ohlcv_1d_2022.csv"
+  ],
+  "oos_files_NOT_used": [
+    "data_offline/nq_c0_ohlcv_1d_2023.csv",
+    "data_offline/nq_c0_ohlcv_1d_2024.csv",
+    "data_offline/nq_c0_ohlcv_1d_2025.csv"
+  ],
+  "oos_2023_2025_confirmed_unused": true,
+  "data_qa": {
+    "total_bars": 3079,
+    "date_range": ["2013-01-02", "2022-12-30"],
+    "duplicate_dates_count": 0,
+    "duplicate_dates": [],
+    "invalid_ohlc_rows": 0,
+    "per_year_row_counts": {
+      "2013": 289, "2014": 302, "2015": 312, "2016": 310, "2017": 309,
+      "2018": 312, "2019": 312, "2020": 312, "2021": 311, "2022": 310
+    }
+  },
+  "metrics": {
+    "trade_count": 18,
+    "total_r": -1.750602,
+    "profit_factor": 0.837162,
+    "win_rate": 0.333333,
+    "expectancy_r": -0.097256,
+    "max_drawdown_r": 2.5,
+    "best_trade_r": 1.5,
+    "worst_trade_r": -1.0,
+    "average_r": -0.097256,
+    "median_r": -1.0,
+    "year_by_year_r": {
+      "2013": 0.0, "2014": 0.0, "2015": -1.010438, "2016": 0.5, "2017": 0.0,
+      "2018": 0.5, "2019": -0.740163, "2020": 1.5, "2021": -2.5, "2022": 0.0
+    },
+    "positive_years_count": 3,
+    "exit_reason_counts": {"stop": 10, "target": 6, "time_stop": 2},
+    "best_trade_share_of_net": "undefined (net R is negative)",
+    "top3_r": 4.5,
+    "total_r_without_top3": -6.250602,
+    "anti_donchian_top3_gate_pass": false
+  },
+  "s27_d2_pre_screen": {
+    "note": "Gates pre-registered in S27-D2 BEFORE any result was seen. Compared here, not changed.",
+    "is_trade_count_floor": {
+      "pass_threshold": ">=40", "watch_band": "25-39", "fail_threshold": "<25",
+      "observed": 18, "result": "FAIL"
+    },
+    "profit_factor": {
+      "pass_threshold": ">=1.30", "watch_band": "1.10-1.29", "fail_threshold": "<1.10",
+      "observed": 0.837162, "result": "FAIL"
+    },
+    "expectancy_positive": {
+      "pass_threshold": "> 0 on IS", "observed": -0.097256, "result": "FAIL"
+    },
+    "top3_removal_positive": {
+      "pass_threshold": "IS net stays positive after removing top 3 winners",
+      "observed_net_ex_top3": -6.250602, "result": "FAIL"
+    },
+    "positive_years": {
+      "pass_threshold": ">=6 of 10", "watch_band": "5/10", "fail_threshold": "<5/10",
+      "observed": 3, "result": "FAIL"
+    },
+    "max_dd_assessment": {
+      "rule": "IS max DD <= IS net R (pass); > 1.5x IS net R (fail)",
+      "observed_max_dd_r": 2.5, "observed_net_r": -1.750602,
+      "note": "Net R is negative, so the DD<=net-R relationship is moot; the binding failures are net loss, the sub-25 trade count, sub-1.10 PF, negative expectancy, and the failed top-3 gate."
+    }
+  },
+  "verdict": "IS_FAIL",
+  "verdict_basis": [
+    "IS net R is NEGATIVE (-1.75R) -- the strategy loses money in-sample even WITH its winners.",
+    "Trade count 18 is below the pre-registered hard FAIL floor (<25).",
+    "Profit factor 0.84 is below the FAIL threshold (<1.10).",
+    "Expectancy is negative (-0.0973R/trade); the pass gate required > 0.",
+    "Positive years 3/10 is below the FAIL floor (<5/10).",
+    "Anti-Donchian top-3 gate FAILS: removing the 3 best trades drops net to -6.25R (already negative WITH them).",
+    "Multiple independent pre-registered hard floors are breached simultaneously."
+  ],
+  "conservative_interpretation": {
+    "IS_CONTINUE_means": "IS baseline is acceptable; it does NOT mean OOS will pass. Would still require a pre-registered OOS protocol before any OOS look.",
+    "IS_WATCH_means": "Minor misses only; continue ONLY if the evidence clearly justifies committing an OOS protocol.",
+    "IS_FAIL_means": "Park or redesign as a NEW branch. Do NOT tune, sweep, or relax any S27 parameter to rescue this branch."
+  },
+  "recommendation": "STOP and PARK S27. The IS baseline fails multiple pre-registered hard floors and is net-negative in-sample. Per the S27-D2 anti-overfit rules, do NOT optimize, sweep, or relax parameters to rescue it; any future variant must be a NEW branch with its own frozen pre-registration. Do NOT pre-register or run the S27-D5 OOS protocol -- there is no IS edge to validate out-of-sample.",
+  "guardrails": {
+    "no_broker": true, "no_network": true, "no_live": true, "no_paper": true,
+    "no_paper_promotion": true, "no_optimization": true, "no_parameter_change": true,
+    "no_strategy_rule_change": true, "no_oos_data_use": true,
+    "engine_tests_unchanged": true, "s26_untouched": true, "donchian_untouched": true,
+    "jarvis_templates_hydra_untouched": true, "no_stage": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. IS baseline only, and it FAILED. No deployment, no paper, no live. S26 and Donchian stay PARKED; S27 is recommended for PARK."
+}
