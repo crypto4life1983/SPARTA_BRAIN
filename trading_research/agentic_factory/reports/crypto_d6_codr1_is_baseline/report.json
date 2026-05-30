@@ -1,0 +1,507 @@
+{
+  "step": "Crypto-D6",
+  "title": "CODR-1 in-sample (IS) baseline on frozen BTC/ETH/SOL spot daily data",
+  "created": "2026-05-30",
+  "scope_note": "IN-SAMPLE BASELINE ONLY. No OOS, no 2024/2025/2026, no optimization, no parameter or rule change, no network, no exchange API, no broker, no paper, no live. Frozen data read-only; not modified. S30/futures untouched; JARVIS/templates/base.html/hydra untouched. No staging, no commit.",
+  "references": {
+    "crypto_d1_protocol": "c8a59fe",
+    "crypto_d2_inventory": "a035ab0",
+    "crypto_d3_data_source": "31ebdaf",
+    "crypto_d3a_provenance": "ae25f43",
+    "crypto_d3b_data_freeze": "5b3d94c",
+    "crypto_d3c_governance_ratification": "fe5594f",
+    "crypto_d4_spec": "5552356",
+    "crypto_d5_engine_tests": "4614190"
+  },
+  "frozen_snapshot": "trading_research/agentic_factory/data_crypto/spot_binance_usdt_1d_2020_2025/",
+  "input_files": {
+    "BTC": "BTCUSDT_1d_2020_2025.csv",
+    "ETH": "ETHUSDT_1d_2020_2025.csv",
+    "SOL": "SOLUSDT_1d_2020_2025.csv"
+  },
+  "is_windows": {
+    "BTC": "2020-01-01..2023-12-31",
+    "ETH": "2020-01-01..2023-12-31",
+    "SOL": "2020-08-11..2023-12-31 (PARTIAL IS -- reduced power, reported separately)"
+  },
+  "oos_seal_confirmation": {
+    "uses_2024": false,
+    "uses_2025": false,
+    "uses_2026": false,
+    "boundary_rule": "Only bars with year<=2023 are passed to the engine. Trades that cannot complete the 5-bar horizon by 2023-12-31 exit as 'data_end' marked-to-market at the 2023-12-31 close -- no 2024+ bar is ever read.",
+    "rows_after_2023_used": {
+      "BTC": 0,
+      "ETH": 0,
+      "SOL": 0
+    }
+  },
+  "data_qa_is_slice": {
+    "BTC": {
+      "rows": 1461,
+      "date_start": "2020-01-01",
+      "date_end": "2023-12-31",
+      "duplicate_timestamps": 0,
+      "invalid_ohlc": 0,
+      "zero_or_negative_volume": 0,
+      "rows_after_2023": 0
+    },
+    "ETH": {
+      "rows": 1461,
+      "date_start": "2020-01-01",
+      "date_end": "2023-12-31",
+      "duplicate_timestamps": 0,
+      "invalid_ohlc": 0,
+      "zero_or_negative_volume": 0,
+      "rows_after_2023": 0
+    },
+    "SOL": {
+      "rows": 1238,
+      "date_start": "2020-08-11",
+      "date_end": "2023-12-31",
+      "duplicate_timestamps": 0,
+      "invalid_ohlc": 0,
+      "zero_or_negative_volume": 0,
+      "rows_after_2023": 0
+    }
+  },
+  "frozen_rules": {
+    "direction": "long_spot",
+    "trend_filter": "close_t > SMA200_t",
+    "shock_trigger": "ret_t <= -0.07",
+    "entry_fill": "open_{t+1}",
+    "position": "one per symbol; no pyramiding",
+    "protective_stop": "close <= entry*0.90 (-10%), precedence",
+    "time_stop": "close of 5th held bar",
+    "profit_target": "NONE"
+  },
+  "friction_model": {
+    "base_round_trip": 0.003,
+    "stress_round_trip_plus50pct": 0.0045,
+    "application": "per-trade additive (no compounding): net = gross - friction",
+    "note": "engine returns are GROSS; friction applied here as a reporting layer"
+  },
+  "per_symbol": {
+    "BTC": {
+      "symbol": "BTC",
+      "qa": {
+        "rows": 1461,
+        "date_start": "2020-01-01",
+        "date_end": "2023-12-31",
+        "duplicate_timestamps": 0,
+        "invalid_ohlc": 0,
+        "zero_or_negative_volume": 0,
+        "rows_after_2023": 0
+      },
+      "trade_count": 9,
+      "gross_total_return_pct": -0.022254655088095543,
+      "gross_average_return_pct": -0.0024727394542328382,
+      "gross_median_return_pct": -0.0011481226123933874,
+      "win_rate": 0.4444444444444444,
+      "profit_factor_gross": 0.9108911613880232,
+      "average_hold_bars": 5.0,
+      "best_trade_pct": 0.09420057879339705,
+      "worst_trade_pct": -0.12110325281127399,
+      "exit_reason_counts": {
+        "time_stop": 8,
+        "protective_stop": 1
+      },
+      "year_breakdown": {
+        "2020": {
+          "trade_count": 2,
+          "gross_total_return_pct": 0.09305245618100366,
+          "average_return_pct": 0.04652622809050183
+        },
+        "2021": {
+          "trade_count": 7,
+          "gross_total_return_pct": -0.1153071112690992,
+          "average_return_pct": -0.016472444467014173
+        }
+      },
+      "positive_years": 1,
+      "anti_top3_gate_gross": {
+        "trade_count": 9,
+        "net_return_pct": -0.022254655088095543,
+        "top3_return_pct": 0.21098266186565584,
+        "net_ex_top3_return_pct": -0.23323731695375138,
+        "passes_ex_top3": false
+      },
+      "friction_base_0p30": {
+        "trade_count": 9,
+        "net_total_return_pct": -0.04925465508809556,
+        "net_average_return_pct": -0.00547273945423284,
+        "net_win_rate": 0.4444444444444444,
+        "net_profit_factor": 0.8139556783404428
+      },
+      "friction_stress_0p45": {
+        "trade_count": 9,
+        "net_total_return_pct": -0.06275465508809555,
+        "net_average_return_pct": -0.006972739454232839,
+        "net_win_rate": 0.4444444444444444,
+        "net_profit_factor": 0.7694935810849071
+      },
+      "anti_top3_gate_net_0p30": {
+        "net_return_pct": -0.04925465508809556,
+        "top3_return_pct": 0.20198266186565583,
+        "net_ex_top3_return_pct": -0.2512373169537514,
+        "passes_ex_top3": false
+      },
+      "anti_top3_gate_net_0p45": {
+        "net_return_pct": -0.06275465508809555,
+        "top3_return_pct": 0.19748266186565583,
+        "net_ex_top3_return_pct": -0.2602373169537514,
+        "passes_ex_top3": false
+      }
+    },
+    "ETH": {
+      "symbol": "ETH",
+      "qa": {
+        "rows": 1461,
+        "date_start": "2020-01-01",
+        "date_end": "2023-12-31",
+        "duplicate_timestamps": 0,
+        "invalid_ohlc": 0,
+        "zero_or_negative_volume": 0,
+        "rows_after_2023": 0
+      },
+      "trade_count": 27,
+      "gross_total_return_pct": 0.347954651226534,
+      "gross_average_return_pct": 0.012887209304686445,
+      "gross_median_return_pct": 0.010313094986249327,
+      "win_rate": 0.5185185185185185,
+      "profit_factor_gross": 1.2782971312003644,
+      "average_hold_bars": 4.444444444444445,
+      "best_trade_pct": 0.24754047960647663,
+      "worst_trade_pct": -0.25693655266966253,
+      "exit_reason_counts": {
+        "protective_stop": 7,
+        "time_stop": 20
+      },
+      "year_breakdown": {
+        "2020": {
+          "trade_count": 7,
+          "gross_total_return_pct": 0.2681706325256785,
+          "average_return_pct": 0.03831009036081122
+        },
+        "2021": {
+          "trade_count": 19,
+          "gross_total_return_pct": 0.12730850492961432,
+          "average_return_pct": 0.006700447627874438
+        },
+        "2023": {
+          "trade_count": 1,
+          "gross_total_return_pct": -0.04752448622875882,
+          "average_return_pct": -0.04752448622875882
+        }
+      },
+      "positive_years": 2,
+      "anti_top3_gate_gross": {
+        "trade_count": 27,
+        "net_return_pct": 0.347954651226534,
+        "top3_return_pct": 0.6264181315819597,
+        "net_ex_top3_return_pct": -0.2784634803554257,
+        "passes_ex_top3": false
+      },
+      "friction_base_0p30": {
+        "trade_count": 27,
+        "net_total_return_pct": 0.26695465122653395,
+        "net_average_return_pct": 0.009887209304686442,
+        "net_win_rate": 0.5185185185185185,
+        "net_profit_factor": 1.2070540903210603
+      },
+      "friction_stress_0p45": {
+        "trade_count": 27,
+        "net_total_return_pct": 0.22645465122653394,
+        "net_average_return_pct": 0.008387209304686442,
+        "net_win_rate": 0.5185185185185185,
+        "net_profit_factor": 1.173024761497365
+      },
+      "anti_top3_gate_net_0p30": {
+        "net_return_pct": 0.26695465122653395,
+        "top3_return_pct": 0.6174181315819597,
+        "net_ex_top3_return_pct": -0.35046348035542574,
+        "passes_ex_top3": false
+      },
+      "anti_top3_gate_net_0p45": {
+        "net_return_pct": 0.22645465122653394,
+        "top3_return_pct": 0.6129181315819596,
+        "net_ex_top3_return_pct": -0.3864634803554257,
+        "passes_ex_top3": false
+      }
+    },
+    "SOL": {
+      "symbol": "SOL",
+      "qa": {
+        "rows": 1238,
+        "date_start": "2020-08-11",
+        "date_end": "2023-12-31",
+        "duplicate_timestamps": 0,
+        "invalid_ohlc": 0,
+        "zero_or_negative_volume": 0,
+        "rows_after_2023": 0
+      },
+      "trade_count": 30,
+      "gross_total_return_pct": 0.6937180065407744,
+      "gross_average_return_pct": 0.02312393355135915,
+      "gross_median_return_pct": 0.03225568817728586,
+      "win_rate": 0.5333333333333333,
+      "profit_factor_gross": 1.5283983477255714,
+      "average_hold_bars": 4.366666666666666,
+      "best_trade_pct": 0.28707210804741323,
+      "worst_trade_pct": -0.2141438729101275,
+      "exit_reason_counts": {
+        "time_stop": 21,
+        "protective_stop": 9
+      },
+      "year_breakdown": {
+        "2021": {
+          "trade_count": 24,
+          "gross_total_return_pct": 0.712163802428758,
+          "average_return_pct": 0.029673491767864917
+        },
+        "2022": {
+          "trade_count": 2,
+          "gross_total_return_pct": -0.006181263751140698,
+          "average_return_pct": -0.003090631875570349
+        },
+        "2023": {
+          "trade_count": 4,
+          "gross_total_return_pct": -0.012264532136842865,
+          "average_return_pct": -0.0030661330342107163
+        }
+      },
+      "positive_years": 1,
+      "anti_top3_gate_gross": {
+        "trade_count": 30,
+        "net_return_pct": 0.6937180065407744,
+        "top3_return_pct": 0.6413394348150299,
+        "net_ex_top3_return_pct": 0.05237857172574456,
+        "passes_ex_top3": true
+      },
+      "friction_base_0p30": {
+        "trade_count": 30,
+        "net_total_return_pct": 0.6037180065407743,
+        "net_average_return_pct": 0.020123933551359146,
+        "net_win_rate": 0.5333333333333333,
+        "net_profit_factor": 1.4455913015362407
+      },
+      "friction_stress_0p45": {
+        "trade_count": 30,
+        "net_total_return_pct": 0.5587180065407743,
+        "net_average_return_pct": 0.018623933551359145,
+        "net_win_rate": 0.5333333333333333,
+        "net_profit_factor": 1.406083613910767
+      },
+      "anti_top3_gate_net_0p30": {
+        "net_return_pct": 0.6037180065407743,
+        "top3_return_pct": 0.6323394348150299,
+        "net_ex_top3_return_pct": -0.028621428274255498,
+        "passes_ex_top3": false
+      },
+      "anti_top3_gate_net_0p45": {
+        "net_return_pct": 0.5587180065407743,
+        "top3_return_pct": 0.6278394348150298,
+        "net_ex_top3_return_pct": -0.06912142827425549,
+        "passes_ex_top3": false
+      }
+    }
+  },
+  "combined": {
+    "trade_count": 66,
+    "gross_total_return_pct": 1.0194180026792128,
+    "gross_average_return_pct": 0.015445727313321406,
+    "gross_median_return_pct": 0.01094333432984751,
+    "win_rate": 0.5151515151515151,
+    "profit_factor_gross": 1.3624062136858022,
+    "average_hold_bars": 4.484848484848484,
+    "best_trade_pct": 0.28707210804741323,
+    "worst_trade_pct": -0.25693655266966253,
+    "exit_reason_counts": {
+      "time_stop": 49,
+      "protective_stop": 17
+    },
+    "per_symbol_counts": {
+      "BTC": 9,
+      "ETH": 27,
+      "SOL": 30
+    },
+    "year_breakdown": {
+      "2020": {
+        "trade_count": 9,
+        "gross_total_return_pct": 0.3612230887066822,
+        "average_return_pct": 0.04013589874518691
+      },
+      "2021": {
+        "trade_count": 50,
+        "gross_total_return_pct": 0.7241651960892731,
+        "average_return_pct": 0.014483303921785462
+      },
+      "2022": {
+        "trade_count": 2,
+        "gross_total_return_pct": -0.006181263751140698,
+        "average_return_pct": -0.003090631875570349
+      },
+      "2023": {
+        "trade_count": 5,
+        "gross_total_return_pct": -0.05978901836560169,
+        "average_return_pct": -0.011957803673120337
+      }
+    },
+    "positive_years": 2,
+    "anti_top3_gate_gross": {
+      "trade_count": 66,
+      "net_return_pct": 1.0194180026792128,
+      "top3_return_pct": 0.7630249691715432,
+      "net_ex_top3_return_pct": 0.25639303350766973,
+      "passes_ex_top3": true
+    },
+    "friction_base_0p30": {
+      "trade_count": 66,
+      "net_total_return_pct": 0.8214180026792127,
+      "net_average_return_pct": 0.012445727313321405,
+      "net_win_rate": 0.5151515151515151,
+      "net_profit_factor": 1.282379479241966
+    },
+    "friction_stress_0p45": {
+      "trade_count": 66,
+      "net_total_return_pct": 0.7224180026792127,
+      "net_average_return_pct": 0.010945727313321406,
+      "net_win_rate": 0.5151515151515151,
+      "net_profit_factor": 1.2443147389474787
+    },
+    "anti_top3_gate_net_0p30": {
+      "net_return_pct": 0.8214180026792127,
+      "top3_return_pct": 0.7540249691715432,
+      "net_ex_top3_return_pct": 0.0673930335076696,
+      "passes_ex_top3": true
+    },
+    "anti_top3_gate_net_0p45": {
+      "net_return_pct": 0.7224180026792127,
+      "top3_return_pct": 0.7495249691715431,
+      "net_ex_top3_return_pct": -0.027106966492330402,
+      "passes_ex_top3": false
+    },
+    "sequence_risk_preliminary": {
+      "n_trades": 66,
+      "total_r": 10.194180026792129,
+      "net_positive": true,
+      "top_winner": {
+        "trade_count": 66,
+        "net_r": 10.194180026792129,
+        "top3_r": 7.630249691715432,
+        "net_r_ex_top3": 2.563930335076697,
+        "best_r": 2.8707210804741323,
+        "best_trade_share": 0.28160392232914894,
+        "passes": true
+      },
+      "drawdown": {
+        "realized_max_dd": 6.599112930034812,
+        "longest_losing_streak": 3,
+        "worst_5_trade_window": -5.476530760373168
+      },
+      "shuffle": {
+        "n_iter": 5000,
+        "seed": 0,
+        "realized_max_dd": 6.599112930034812,
+        "dd_mean": 6.982177410288537,
+        "dd_p50": 6.672227108103506,
+        "dd_p95": 10.786140495808501,
+        "realized_dd_percentile": 48.48,
+        "drawdown_tail_extreme": false
+      },
+      "bootstrap": {
+        "n_iter": 5000,
+        "seed": 0,
+        "prob_total_le_0": 0.1482,
+        "mean_total": 10.052654900270452,
+        "p05": -5.741323163197697,
+        "p50": 9.934215348491593,
+        "p95": 26.07236693518248
+      },
+      "verdict": "SEQUENCE_RISK_INCONCLUSIVE"
+    },
+    "sequence_risk_available": true
+  },
+  "gate_evaluation": {
+    "BTC": {
+      "trade_count": 9,
+      "ge_30_trades": false,
+      "gross_expectancy_pos": false,
+      "net030_expectancy_pos": false,
+      "pf_gross_gt_1p3": false,
+      "pf_net030_gt_1p3": false,
+      "top3_gross_pass": false,
+      "top3_net030_pass": false,
+      "top3_net045_pass": false
+    },
+    "ETH": {
+      "trade_count": 27,
+      "ge_30_trades": false,
+      "gross_expectancy_pos": true,
+      "net030_expectancy_pos": true,
+      "pf_gross_gt_1p3": false,
+      "pf_net030_gt_1p3": false,
+      "top3_gross_pass": false,
+      "top3_net030_pass": false,
+      "top3_net045_pass": false
+    },
+    "SOL": {
+      "trade_count": 30,
+      "ge_30_trades": true,
+      "gross_expectancy_pos": true,
+      "net030_expectancy_pos": true,
+      "pf_gross_gt_1p3": true,
+      "pf_net030_gt_1p3": true,
+      "top3_gross_pass": true,
+      "top3_net030_pass": false,
+      "top3_net045_pass": false
+    },
+    "COMBINED": {
+      "trade_count": 66,
+      "ge_30_trades": true,
+      "gross_expectancy_pos": true,
+      "net030_expectancy_pos": true,
+      "pf_gross_gt_1p3": true,
+      "pf_net030_gt_1p3": false,
+      "pf_net045_gt_1p3": false,
+      "top3_gross_pass": true,
+      "top3_net030_pass": true,
+      "top3_net045_pass": false
+    },
+    "corroboration_net030_count": 2,
+    "per_symbol_top3_gross_pass_count": 1
+  },
+  "frozen_gates": {
+    "min_trades_per_symbol": 30,
+    "expectancy": "mean per-trade > 0 after costs",
+    "profit_factor": "> 1.3",
+    "top3_winner_removal": "net stays positive ex top-3 winners (HARD)",
+    "friction_stress": "survive +50% friction (0.45% round-trip)",
+    "multi_asset_corroboration": ">= 2/3 same-sign positive expectancy"
+  },
+  "verdict": "IS_FAIL",
+  "verdict_reasons": [
+    "BTC (PRIMARY) fails hard: 9 trades (<30), gross expectancy NEG, PF_gross 0.911 (<1.3), top-3 gate FAIL.",
+    "Combined PF after pre-registered 0.30% friction 1.282 < 1.3 (gross passes, friction does not -> never CONTINUE).",
+    "Combined top-3-winner-removal FAILS under +50% friction stress (net_ex_top3 -0.0271).",
+    "The hard top-3 gate (the gate that parked every futures branch) passes on only 1/3 symbols gross -- the combined-pool pass is pooling-dependent, not per-symbol robust."
+  ],
+  "btc_primary_hard_fail": true,
+  "recommendation": "PARK CODR-1 v1. Do NOT pre-register an OOS protocol and do NOT run OOS (Crypto-D7/D8 not reached). The IS baseline does not clear the frozen gates: the primary symbol (BTC) is unprofitable and fails the hard top-3 gate, the edge is concentrated in the 2020-2021 bull (the trend filter suppresses trades in 2022-2023), and combined profitability does not survive friction on profit-factor or the +50% stress top-3 gate. Any future attempt requires a NEW spec id and a fresh ladder, not a tweak.",
+  "forbidden_actions": [
+    "no_oos_use",
+    "no_2024_2025_2026",
+    "no_optimization",
+    "no_parameter_change",
+    "no_strategy_rule_change",
+    "no_network",
+    "no_exchange_api_execution",
+    "no_broker",
+    "no_paper_or_live",
+    "no_modification_of_frozen_data",
+    "do_not_touch_s30_or_futures",
+    "jarvis_templates_base_hydra_untouched",
+    "no_staging",
+    "no_commit"
+  ],
+  "trading_recommendation": "NONE -- research IS baseline only; CODR-1 PARKED after IS_FAIL."
+}
