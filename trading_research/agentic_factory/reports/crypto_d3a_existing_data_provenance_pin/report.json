@@ -1,0 +1,112 @@
+{
+  "step": "Crypto-D3a",
+  "title": "Crypto-D3a -- Existing-Data Provenance Pin Attempt (provenance/memo only, no fetch)",
+  "created": "2026-05-30",
+  "kind": "existing_data_provenance_pin",
+  "memo_only": true,
+  "network": false,
+  "data_fetch": false,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "strategy_test": false,
+  "exchange_api": false,
+  "broker": false,
+  "paper_or_live": false,
+  "modified_any_crypto_data_file": false,
+  "provenance": {
+    "head_at_memo": "2849279752b9218fbc138fb3c2ca1069471e547b",
+    "crypto_d1_commit": "c8a59fee3e4804c416564d4673f7152e87fd3e60",
+    "crypto_d2_commit": "a035ab079d2d76c271076ad5edeadad0e7df7086",
+    "both_ancestors_of_head": true,
+    "s30_untouched": true,
+    "nothing_staged": true
+  },
+  "1_crypto_d3_summary": {
+    "prior_verdict": "DATA_NOT_READY_FETCH_AUTH_REQUIRED",
+    "data_location": "data/frozen_regime_inputs/ (outside factory, gitignored)",
+    "structural_qa": "CLEAN: BTC/ETH 2020-01-01..2026-05-29 (2341 rows), SOL 2020-08-11..2026-05-29 (2118 rows); 0 dup, 0 invalid OHLC, 0 zero/neg volume, 0 missing calendar days; one USDT quote",
+    "blocking_reason": "provenance unpinned (source exchange, spot-vs-perp, retrieval method undocumented for these exact files)"
+  },
+  "2_evidence_searched": [
+    "data/frozen_regime_inputs/README.md (drop-zone contract)",
+    "reports/crypto_regime_data_acquisition_manifest.json (acquisition manifest)",
+    "tools/stage_frozen_regime_csv.py (frozen-CSV normalizer/staging)",
+    "tools/regime_shadow_fresh_data_update.py (Phase 5F fresh-data orchestrator)",
+    "tools/fetch_binance_crypto_daily_frozen.py (Phase 3H Binance daily klines fetcher)",
+    "repo-wide grep: frozen_regime_inputs, daily aggregation/resample, btcusdt_1d, Binance/Kraken/Coinbase, spot/perp, USDT, SPARTA_RESEARCH_LAB",
+    "directory listing of data/frozen_regime_inputs/ incl. *.superseded.* backups"
+  ],
+  "3_evidence_found": {
+    "producer_code_path": {
+      "fetcher": "tools/fetch_binance_crypto_daily_frozen.py (Phase 3H)",
+      "fetcher_docstring": "Fetches public SPOT daily klines for BTCUSDT/ETHUSDT/SOLUSDT from the Binance public market data endpoint; writes canonical frozen CSV under data/frozen_regime_inputs/",
+      "endpoint": "https://api.binance.com/api/v3/klines (Binance SPOT market data API; perps would be fapi.binance.com)",
+      "url_guard": "rejects account/order/trade/userdata/signed/signature/apikey/secret; no API key; no signed/account/trading endpoints",
+      "symbols": "ALLOWED_SYMBOLS = {BTCUSDT, ETHUSDT, SOLUSDT} (USDT-quoted)",
+      "interval": "ALLOWED_INTERVAL = '1d' (daily-native, NOT aggregated from 1h)",
+      "utc_boundary": "open_time(ms epoch) -> datetime.fromtimestamp(.., tz=utc).strftime('%Y-%m-%d'); Binance 1d klines anchored 00:00 UTC",
+      "orchestrator": "tools/regime_shadow_fresh_data_update.py (Phase 5F): crypto refresh via fetch_binance_crypto_daily_frozen.fetch_and_stage, gated --allow-network-for-crypto, CRYPTO_INTERVAL='1d', whitelist BTCUSDT/ETHUSDT/SOLUSDT, endpoint api.binance.com/api/v3/klines only"
+    },
+    "manifest_corroboration": "reports/crypto_regime_data_acquisition_manifest.json: source data.binance.vision (Binance spot) -- corroborates Binance-spot lineage BUT documents a 1h acquisition into a DIFFERENT folder (SPARTA_RESEARCH_LAB\\...\\data\\raw); supportive context, NOT the 1:1 record for these daily files",
+    "dataset_stability": {
+      "gitignored": true,
+      "superseded_backups_count": 72,
+      "superseded_pattern": "*.csv.superseded.<timestamp>; end date rolls forward over time (2026-05-20, -21, -22, -26, -27, -29)",
+      "implication": "the 'frozen' file is LIVE daily-refreshed by the Phase 5F updater; content and end date change daily; no committed content-hashed immutable snapshot of a specific retrieval exists for these exact files"
+    }
+  },
+  "4_provenance_fields_checklist": {
+    "source_exchange_vendor": {"status": "PINNED", "value": "Binance public market data -- api.binance.com/api/v3/klines"},
+    "spot_vs_perp": {"status": "PINNED", "value": "SPOT (spot endpoint; perp=fapi; docstring 'public spot daily klines'; URL guard forbids account/order/trade/signed)"},
+    "symbol_convention": {"status": "PINNED", "value": "BTCUSDT / ETHUSDT / SOLUSDT (USDT majors)"},
+    "quote_currency": {"status": "PINNED", "value": "USDT (consistent across all three)"},
+    "timeframe_origin_native_vs_aggregated": {"status": "PINNED", "value": "daily-native (ALLOWED_INTERVAL='1d', fetched directly at 1d, not 1h->1d aggregation)"},
+    "utc_day_boundary": {"status": "PINNED", "value": "open_time->UTC date %Y-%m-%d; Binance 1d anchored 00:00 UTC"},
+    "retrieval_method_or_source_script": {"status": "PINNED", "value": "tools/fetch_binance_crypto_daily_frozen.py fetch_and_stage (gated --allow-network-for-crypto); orchestrated by tools/regime_shadow_fresh_data_update.py"},
+    "date_range": {"status": "PINNED_PER_FILE", "value": "BTC/ETH 2020-01-01..2026-05-29; SOL 2020-08-11..2026-05-29"},
+    "2026_inclusion_and_seal": {"status": "PINNED", "value": "2026 present (149 bars/symbol); MUST be sealed (Crypto-D1 sec10)"},
+    "immutable_frozen_snapshot": {"status": "NOT_MET", "value": "gitignored + 72 .superseded.* backups = live daily-refreshed; end date rolls forward; no committed per-file sha256"},
+    "summary": "9 of 10 source-provenance fields PINNED; the single unmet item is dataset immutability (a dataset-stability gap, not a source-provenance gap)"
+  },
+  "5_final_provenance_verdict": "PROVENANCE_PARTIAL_NOT_READY",
+  "5_verdict_nuance": "Source provenance is now pinned (Binance public SPOT klines, api.binance.com/api/v3/klines, USDT, daily-native 1d, UTC 00:00, retrieval script identified) -- a clear upgrade from Crypto-D3's UNKNOWN; no new fetch is required to establish origin. The data is NOT ready only because the on-disk dataset is a live, daily-refreshed, gitignored copy (72 superseded backups; rolling end date), not an immutable content-hashed frozen snapshot. A validation-factory backing dataset must be frozen and hash-pinned for reproducibility.",
+  "6_if_pinned_proceed_conditions": {
+    "can_proceed_to_d4_now": false,
+    "reason": "source pinned but dataset not frozen; must be frozen into the factory first",
+    "rules_once_frozen": {
+      "2026_seal": "drop all 2026 bars; IS=2020-2023, OOS=2024-2025 (Crypto-D1 sec10); 2026 blocked unless separately authorized",
+      "sol_per_symbol_window": "start 2020-08-11 (listing); tri-symbol joint tests align to common 2020-08-11+ index or pre-registered per-symbol windows",
+      "quote_rule": "USDT, documented, reconciled vs USD/USDC (no silent mixing)"
+    }
+  },
+  "7_if_not_pinned_recommendation": {
+    "primary_recommended": "Factory-internal FREEZE (no fetch): snapshot the current data/frozen_regime_inputs BTC/ETH/SOL 1d CSVs into the factory data area under a frozen naming convention; SEAL OUT 2026 at freeze time (keep <= 2025-12-31); write a per-file provenance sidecar (source=Binance spot api/v3/klines, USDT, 1d-native, UTC, retrieval script + snapshot date, sha256 per file); commit the immutable snapshot + sidecar for reproducibility.",
+    "alternative": "Crypto-D3b re-provision with its own explicit --allow-network-for-crypto authorization (a clean re-pull) if preferred over snapshotting the live copy.",
+    "authorization": "Neither freeze nor fetch is authorized by this memo; each needs a separate explicit instruction. This memo fetches nothing and modifies no data file."
+  },
+  "8_forbidden_actions": [
+    "no_strategy_testing",
+    "no_exchange_api_execution",
+    "no_paper_or_live",
+    "no_broker",
+    "no_network",
+    "no_data_fetch",
+    "no_code",
+    "no_backtest",
+    "no_optimization",
+    "no_parameter_sweep",
+    "no_modification_of_crypto_csv_or_data_files",
+    "no_perps_until_funding_rules_frozen",
+    "no_using_old_results_as_proof",
+    "no_mixing_crypto_with_futures_validation_claims",
+    "do_not_touch_s30_or_futures_branches",
+    "jarvis_templates_base_hydra_untouched",
+    "no_staging",
+    "no_commit"
+  ],
+  "final_line": "Crypto-D3a pins the SOURCE provenance of the existing local crypto data (Binance public spot daily klines, USDT, UTC) but the on-disk dataset is a live, gitignored, daily-refreshed copy, not an immutable frozen snapshot -- verdict PROVENANCE_PARTIAL_NOT_READY; a separately authorized factory-internal freeze (no fetch) is the next step, and no crypto strategy is specified, validated, paper-ready, live-ready, or authorized for execution.",
+  "trading_recommendation": "NONE. Provenance pin only. Source provenance is pinned (Binance spot, USDT, daily-native, UTC) but the dataset is not yet a frozen immutable snapshot, so verdict PROVENANCE_PARTIAL_NOT_READY. No crypto strategy is validated, paper-ready, or live-ready; perps remain blocked; crypto stays a separate research lane; S30 and the futures branches are untouched and S30 remains PARKED after IS_FAIL."
+}
