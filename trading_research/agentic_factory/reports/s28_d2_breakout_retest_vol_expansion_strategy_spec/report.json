@@ -1,0 +1,141 @@
+{
+  "step": "S28-D2",
+  "title": "Breakout-Retest with Volatility Expansion and Mechanical Bad-Regime Gate -- frozen strategy spec (pre-registration)",
+  "spec_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "created": "2026-05-30",
+  "reference_commit_short": "c8f5a46",
+  "selected_hypothesis_commit": "c8f5a46a0cd9a3732e0a9ed9c107d52c230e31d0",
+  "design_context": {
+    "must_avoid_donchian": "Donchian's RAW breakout entry was ENTRY_EDGE_NOT_SUPPORTED and SEQUENCE_RISK_FRAGILE (net flips negative without the top 3 winners). S28 does NOT enter the breakout; it enters the retest-that-holds and pre-registers a significance test that the retest must BEAT the raw breakout.",
+    "must_avoid_s26": "S26 was FRICTION_SENSITIVE, REGIME_RISK_INCONCLUSIVE, and collapsed in the 2014-2016 chop with no no-trade gate. S28 adds an explicit mechanical bad-regime NO-TRADE gate and uses wider-structure stops for friction headroom.",
+    "must_avoid_s27": "S27 mean-reversion FAILED IS with only 18 trades and negative expectancy (capped target rarely reached, two-step confirmation too restrictive). S28 pre-registers explicit trade-count floors and keeps the entry selective-but-not-rare; +2R target on larger structures.",
+    "entry_must_be_significance_testable": "The retest-hold is a discrete datable event tested two ways: vs random-in-universe AND vs raw-breakout entry, at fixed horizons."
+  },
+  "spec": {
+    "1_strategy_name": "Breakout-Retest with Volatility Expansion and Mechanical Bad-Regime Gate",
+    "2_market_and_timeframe": {
+      "primary": "NQ continuous futures, daily bars",
+      "independent_confirmation_later": "ES daily (D10 only; never part of the entry)",
+      "intraday": "none in v1",
+      "no_2026": true,
+      "IS": "2013-2022",
+      "OOS": "2023-2025 (SEALED until the OOS protocol step is committed)",
+      "proxy_micros_descriptive": "MNQ/MES (from 2019) corroboration only, never independent"
+    },
+    "3_core_hypothesis": "A raw breakout alone is noisy, but a breakout that expands volatility/participation, then RETESTS and HOLDS the prior resistance level, may identify genuine acceptance above resistance (prior resistance becomes support). The edge must come from the retest-hold event AFTER expansion -- not from raw breakout chasing -- which is exactly why entry significance is pre-registered against BOTH random-in-universe and raw-breakout entries.",
+    "4_trend_background_filter": {
+      "rules": ["close > EMA200", "EMA50 > EMA200", "EMA200[i] - EMA200[i-20] >= 0"],
+      "ema200_slope_included": true,
+      "slope_definition": "non-negative 20-bar change of EMA200",
+      "why": "Long-only context. The slope gate (consistent with the lesson from S26/S27) restricts to a genuinely rising trend, not a topping/rolling market, and is a fixed mechanical binary gate -- no optimization."
+    },
+    "5_resistance_and_breakout": {
+      "resistance_definition": "highest HIGH over the prior 55 bars, EXCLUDING the current bar",
+      "breakout_rule": "a bar is a BREAKOUT bar if close > resistance",
+      "range_expansion_required": "true range of the breakout bar >= 1.25 * ATR20 (ATR20 through the breakout bar)",
+      "volume_expansion_required": "volume of the breakout bar >= 1.20 * SMA20(volume) (20-bar simple average of volume, prior+current)",
+      "volume_source": "real daily volume column (present in the provisioned daily CSVs)",
+      "volume_fallback": "If a future data concern makes volume unusable, a range-expansion-only variant (TR >= 1.25*ATR20) would be a SEPARATE branch, not a silent fallback. v1 REQUIRES volume expansion.",
+      "captured_at_breakout": ["resistance_level", "ATR20_at_breakout"]
+    },
+    "6_retest_window": {
+      "window_bars": "up to 10 bars AFTER the breakout bar",
+      "retest_rule": "on a candidate bar j in the window: low[j] <= resistance + 0.25 * ATR20_at_breakout",
+      "hold_rule": "AND close[j] >= resistance  (the retest bar closes back above the reclaimed level)",
+      "signal_bar": "the first bar in the window satisfying BOTH retest and hold = the retest-hold (signal) bar",
+      "expiry_no_retest": "if no bar in the 10-bar window satisfies the retest rule, the setup EXPIRES",
+      "expiry_failure": "if close < resistance on any in-window bar BEFORE a retest-hold occurs, the setup FAILS/expires (acceptance lost)",
+      "one_active_setup": "only one pending breakout setup is tracked at a time"
+    },
+    "7_entry_timing": {
+      "signal_bar": "the retest-hold bar",
+      "entry": "next bar open = open of (signal bar + 1)",
+      "no_same_bar_lookahead": true,
+      "one_position_at_a_time": true
+    },
+    "8_bad_regime_no_trade_gate": {
+      "chosen_option": "A -- near-mean / non-rising chop filter",
+      "rule": "NO TRADE (setup is suppressed) if  abs(close - EMA200) <= 1.0 * ATR20  AND  (EMA50[i] - EMA50[i-20]) <= 0",
+      "evaluated_on": "the retest-hold (signal) bar",
+      "why_A": "Directly targets the documented 2014-2016 failure regime (price oscillating near the 200MA with a flat/falling intermediate trend). Genuine trend breakouts of 55-day highs sit well above EMA200, so this gate rarely blocks real trends and mainly blocks the near-mean chop that sank S26/Donchian. Mechanical, stdlib (EMA arrays already computed), no subjective labels.",
+      "flat_or_negative_definition": "EMA50 20-bar change <= 0"
+    },
+    "9_stop": {
+      "rule": "stop = entry - 2.0 * ATR20 (ATR20 as of the retest-hold signal bar)",
+      "R_unit": "1R = 2.0 * ATR20 = the stop distance. All results in R only.",
+      "why_atr_based": "ATR-based stop gives clean, consistent R accounting and wider headroom on larger breakout structures (friction headroom that S26 lacked)."
+    },
+    "10_exit": {
+      "target": "+2.0R (= entry + 2 * 1R = entry + 4.0 * ATR20)",
+      "stop": "-1R (= the 2.0*ATR20 stop above)",
+      "time_stop": "exit at the CLOSE of the 20th bar held if neither stop nor target hit",
+      "failure_exit_close_below_resistance": "NOT used in v1 (deliberately omitted to keep the exit fixed and simple, mirroring S26/S27 v1 minimalism). Adding it later opens a new branch.",
+      "exit_precedence": "stop -> target -> time_stop. If stop and target are both touched on the same bar, STOP fills first (conservative).",
+      "management_begins": "the bar AFTER the fill bar (conservative; the fill bar opens the position but is not itself an exit bar)"
+    },
+    "11_position_rules": ["long-only", "one position at a time", "no pyramiding", "no compounding", "R-only accounting", "one active setup at a time"],
+    "12_entry_significance_protocol": {
+      "test_1": "retest-hold entries vs the SAME COUNT of random entries drawn from the same trend/regime-allowed universe (bull filter true, bad-regime gate passed)",
+      "test_2": "retest-hold entries vs RAW BREAKOUT entries (enter at the breakout bar's next open) -- isolates the retest's marginal edge AND tests against the parked Donchian style",
+      "horizons_bars": [5, 10, 20, 40],
+      "requirement_note": "The retest must beat random AND beat the raw breakout to be EDGE_LIKELY. If it does not beat raw-breakout, PARK -- do not continue 'inconclusive' like S26."
+    },
+    "13_validation_ladder": {
+      "D3": "implement engine + tests only (no results)",
+      "D4": "IS baseline 2013-2022",
+      "D5": "OOS protocol pre-registration",
+      "D6": "OOS run ONCE (2023-2025)",
+      "D7": "entry significance (retest vs random AND vs raw breakout)",
+      "D8": "Monte Carlo / sequence risk",
+      "D9": "regime breakdown (incl. explicit 2014-2016 chop check)",
+      "D10": "ES multi-market robustness (independent confirmation)",
+      "D11": "walk-forward stability",
+      "D12": "friction stress",
+      "D13": "decision gate"
+    },
+    "14_pass_watch_fail_thresholds": {
+      "note": "Pre-registered BEFORE any results. Conservative. PASS = all met; WATCH = minor misses; FAIL = any hard floor breached.",
+      "is_trade_count_floor": {"pass": ">=30", "watch": "20-29", "fail": "<20"},
+      "oos_trade_count_floor": {"pass": ">=15", "watch": "10-14", "fail": "<10"},
+      "profit_factor": {"pass": ">=1.40", "watch": "1.15-1.39", "fail": "<1.15"},
+      "expectancy": {"pass": "> 0 on IS and OOS", "fail": "<= 0 on either"},
+      "max_dd_cap": {"pass": "IS max DD <= IS net R", "fail": "IS max DD > 1.5x IS net R"},
+      "positive_years": {"pass": ">=6 of 10 IS years positive", "watch": "5/10", "fail": "<5/10"},
+      "top3_winner_dependence_cap": {"pass": "IS net stays POSITIVE after removing top 3 winners", "fail": "IS net goes negative without top 3 (Donchian failure mode)"},
+      "entry_significance_requirement": {"pass": "EDGE_LIKELY vs random AND beats raw-breakout", "watch": "INCONCLUSIVE (not disproven)", "fail": "NOT_SUPPORTED, or does not beat raw breakout"},
+      "sequence_risk_requirement": {"pass": "bootstrap prob(total R<=0) < 10%", "watch": "10-20%", "fail": ">=20% (Donchian was 20.9%)"},
+      "friction_requirement": {"pass": "IS positive at 0.05R AND OOS positive at 0.10R per trade", "fail": "OOS negative at <=0.05R"}
+    },
+    "15_anti_overfit_rules": [
+      "no changing the breakout length (55), ATR multipliers (1.25 TR, 0.25 retest, 2.0 stop), volume multiplier (1.20), retest window (10), time stop (20), or regime-gate constants after seeing results",
+      "no OOS peeking before the OOS protocol is committed",
+      "no parameter sweeps",
+      "no adding or removing filters after OOS",
+      "if any rule changes, open a NEW branch (do not mutate S28 in place)",
+      "no paper/live promotion from this spec or from IS results"
+    ],
+    "16_expected_failure_modes": [
+      "too few trades (selective stack: 55-bar high + range + volume + retest + regime gate) -- watch the IS/OOS trade floors",
+      "retest rule too strict (price breaks out and never returns within 10 bars) -- expiry rate may be high",
+      "volume filter too restrictive (kills otherwise-valid retests) -- watch trade count",
+      "late entries after the move is exhausted (retest happens far into the move) -- watch win rate vs time-stop exits",
+      "friction sensitivity -- mitigated by the wider 2.0*ATR stop but stress-tested at D12",
+      "false breakouts in chop -- mitigated by the bad-regime no-trade gate + retest-hold requirement",
+      "dependence on post-2016 trend regimes -- D9 regime breakdown checks 2014-2016 explicitly"
+    ],
+    "17_final_line": "S28-D2 is a frozen hypothesis specification only; no strategy code, backtest, OOS, paper, or live trading is authorized."
+  },
+  "guardrails": {
+    "no_code": true, "no_backtest": true, "no_is_oos_run": true, "no_optimization": true,
+    "no_parameter_sweeps": true, "no_data_fetch": true, "no_paper_or_live": true, "no_broker_or_api": true,
+    "s26_untouched": true, "s27_untouched": true, "donchian_untouched": true,
+    "jarvis_templates_hydra_untouched": true
+  },
+  "trading_recommendation": "NONE. Frozen spec only. Donchian, S26, and S27 stay PARKED; S28 is an unbuilt, unvalidated hypothesis."
+}
