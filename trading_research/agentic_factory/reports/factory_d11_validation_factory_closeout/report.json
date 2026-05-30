@@ -1,0 +1,93 @@
+{
+  "step": "Factory-D11",
+  "title": "Validation Factory Closeout -- core reusable validation factory complete (memo only)",
+  "created": "2026-05-30",
+  "kind": "closeout_memo_only",
+  "memo_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "provenance": {
+    "head_at_memo_context": "9523da8",
+    "factory_d10_commit": "940e611936e1f6f4ef2f39f12b8814475a9cedaa",
+    "head_note": "HEAD 9523da8 is a descendant of the Factory-D10 commit 940e611; automation advanced HEAD but touched NO trading_research/agentic_factory file (git diff --name-only 940e611..HEAD -- trading_research/agentic_factory/ is empty).",
+    "factory_records_read": [
+      "reports/factory_d1_reusable_validation_runner_plan/report.md",
+      "engine/validation_reports.py",
+      "engine/validation_is_runner.py",
+      "engine/validation_oos_runner.py",
+      "engine/validation_entry_significance.py",
+      "engine/validation_sequence_risk.py",
+      "engine/validation_regime.py",
+      "engine/validation_walk_forward.py",
+      "engine/validation_friction.py",
+      "engine/validation_decision.py",
+      "engine/validation_cli.py",
+      "engine/validation_synthetic_smoke.py"
+    ]
+  },
+  "1_factory_completion_summary": {
+    "Factory-D1": "Reusable validation runner PLAN ONLY (ladder A-L spec, data/git safety rules, lessons from parked branches). reports/factory_d1_reusable_validation_runner_plan/.",
+    "Factory-D2": "Standard validation report schema + writer. engine/validation_reports.py -- make_report / validate_report / write_report (refuse-before-write report.json + report.md).",
+    "Factory-D3": "IS-only baseline runner harness. engine/validation_is_runner.py -- runs one frozen callable on an explicit IS window; hard 2023/2024/2025 OOS seal at path AND bar-date layers.",
+    "Factory-D4": "OOS protocol + run enforcement. engine/validation_oos_runner.py -- refuses OOS without a committed protocol hash; refuses IS years / 2026 inside an OOS window; one-shot discipline.",
+    "Factory-D5": "Entry-significance integration. engine/validation_entry_significance.py -- same-count random-entry permutation test over FIXED horizons (no horizon shopping).",
+    "Factory-D6": "Sequence-risk / Monte Carlo integration. engine/validation_sequence_risk.py -- trade-order shuffle + bootstrap + top-winner dependence (the S25 path-luck lesson).",
+    "Factory-D7": "Regime / walk-forward / friction modules. engine/validation_regime.py + engine/validation_walk_forward.py + engine/validation_friction.py -- concentration, rolling-window stability, per-trade cost stress (the S26 lessons).",
+    "Factory-D8": "Final decision / readiness orchestration. engine/validation_decision.py -- maps per-module verdicts to one research decision + one readiness level; paper/live tiers unreachable on the default path.",
+    "Factory-D9": "Minimal safe CLI wrapper. engine/validation_cli.py -- list-modules / describe / synthetic-smoke / version; no dynamic import, no real-data run, no paper/live command.",
+    "Factory-D10": "Synthetic end-to-end smoke demo. engine/validation_synthetic_smoke.py + synthetic-e2e CLI command -- fake in-memory data drives the full ladder into per-module reports; no real strategy, no real market data."
+  },
+  "2_what_the_factory_can_now_do": [
+    "Generate a standard, schema-validated report.json + report.md for any module (validation_reports).",
+    "Run an IS-only baseline for a frozen strategy callable with a hard OOS seal (validation_is_runner).",
+    "Enforce OOS protocol pre-registration and one-shot OOS execution against a committed protocol hash (validation_oos_runner).",
+    "Wrap entry-edge significance testing across fixed horizons (validation_entry_significance).",
+    "Run trade-order Monte Carlo / bootstrap sequence-risk analysis (validation_sequence_risk).",
+    "Break a record down by regime, by rolling walk-forward window, and under a friction ladder (validation_regime / validation_walk_forward / validation_friction).",
+    "Map all module verdicts to one conservative research decision + readiness level (validation_decision).",
+    "Offer safe CLI discovery (list-modules / describe) and a synthetic-data smoke + end-to-end demo (validation_cli / validation_synthetic_smoke)."
+  ],
+  "3_what_the_factory_cannot_do_yet": [
+    "No real paper trading.",
+    "No live trading.",
+    "No broker adapter.",
+    "No order execution.",
+    "No automatic strategy optimization.",
+    "No automatic parameter mutation.",
+    "No automatic promotion of a candidate to any operational tier.",
+    "No real-money readiness -- PAPER_READY / LIVE_READY are unreachable without a separate readiness memo with explicit override fields."
+  ],
+  "4_parked_strategy_summary": {
+    "donchian": "PARKED (reference baseline only; profitable curve but ENTRY_EDGE_NOT_SUPPORTED + sequence fragility / path luck).",
+    "s26": "PARKED -- PARK_CANDIDATE (OOS passed but thin FRICTION_SENSITIVE edge, INCONCLUSIVE entry/regime, single-year/post-2016 concentration).",
+    "s27": "PARKED -- IS_FAIL (net-negative in-sample; stopped before OOS).",
+    "s28": "PARKED -- IS_FAIL (net-negative in-sample; stopped before OOS).",
+    "operational_status": "No strategy is paper-ready or live-ready. No active strategy."
+  },
+  "5_safety_rules": [
+    "Explicit pathspec commits only; never `git add .`; never `git add trading_research/agentic_factory/`.",
+    "No OOS run before a committed OOS protocol hash.",
+    "No strategy tuning after OOS (one-shot OOS discipline).",
+    "No paper/live promotion without a separate readiness memo (explicit override fields required).",
+    "Offline/inert modules only: no network, no broker, no data fetch, no dynamic code loading.",
+    "Hard OOS seal (2023/2024/2025) and 2026 block enforced inside the runners."
+  ],
+  "6_recommended_next_step": {
+    "preferred": "S29-D1: new strategy idea-sourcing memo (no code) that uses the factory lessons -- the core factory is now good enough for research use.",
+    "alternative": "Factory-D12: optional docs / CLI polish.",
+    "rationale": "The reusable validation ladder (D1-D10) is complete and demonstrated end-to-end on synthetic data; the highest-value next move is sourcing a new frozen strategy hypothesis to run through it, not more factory infrastructure."
+  },
+  "7_final_line": "Factory core is complete for research validation. It is not a paper/live trading system.",
+  "guardrails": {
+    "memo_only": true, "no_code": true, "no_backtest": true, "no_is_oos_run": true,
+    "no_optimization": true, "no_data_fetch": true, "no_paper_or_live": true,
+    "no_broker_or_api": true, "no_source_engine_test_changes": true,
+    "donchian_s26_s27_s28_read_only": true, "jarvis_templates_hydra_untouched": true,
+    "no_staging": true, "no_commit": true
+  },
+  "trading_recommendation": "NONE. Closeout memo only. Donchian, S26, S27, S28 remain PARKED; no active strategy; no paper/live system exists or is authorized."
+}
