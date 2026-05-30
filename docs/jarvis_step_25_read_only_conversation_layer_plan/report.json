@@ -1,0 +1,135 @@
+{
+  "title": "JARVIS Step 25 — Read-Only Conversation Layer Plan",
+  "generated_at": "2026-05-30T07:30:00",
+  "type": "documentation_only",
+  "read_only": true,
+  "live_url": "http://127.0.0.1:8765/jarvis",
+  "api_url": "http://127.0.0.1:8765/api/jarvis/status",
+  "purpose": "Design the safest first version of a JARVIS chat/conversation layer so the operator can 'talk to JARVIS' from the Command Center, while JARVIS stays read-only, non-executing, and unable to control broker/paper/live trading. Documentation only — it adds no capability, control, endpoint, or API change. No chat box is built in this step.",
+  "relation_to_steps_20_24": "Step 20 polished the UI; Step 21 proved it live and safe; Step 22 gave the operator runbook; Step 23 set known limits and the safe roadmap; Step 24 added the panel glossary. Step 25 is a forward-looking design memo only: it specifies what a future read-only conversation layer could safely answer, what it must always refuse, and the safety gates that must pass before any code is written.",
+  "baseline": {
+    "step_20_commit": "4200253",
+    "step_21_commit": "4f55aae",
+    "step_22_commit": "82ccf52",
+    "step_23_commit": "37d7dcc",
+    "step_24_commit": "9523da8"
+  },
+  "jarvis_identity": [
+    "Read-only observer — it mirrors aggregated state and never mutates anything.",
+    "No execution authority — no commands, scripts, prompts, or missions run from the page.",
+    "No broker / paper / live control — no order path; paper_ready, live_ready, and broker_control are always false.",
+    "A conversation layer must inherit ALL of these guarantees unchanged; it may only describe state, never act on it."
+  ],
+  "what_talking_to_jarvis_means": {
+    "definition": "In the safe first version, 'talking to JARVIS' means asking plain-language questions and receiving plain-language answers that are derived solely from already-aggregated, already-committed, read-only state. JARVIS explains what the dashboard already shows — it is a narrator over the same data the panels render.",
+    "is": [
+      "An explain-only assistant over the existing /api/jarvis/status payload and committed JARVIS docs.",
+      "A way to ask 'why is this panel yellow' and get the same answer the runbook/glossary already give.",
+      "A read-only summarizer that points the operator to the right panel, field, or memo."
+    ],
+    "is_not": [
+      "A command console — it issues no commands.",
+      "A control surface — it arms nothing, refreshes nothing, writes nothing.",
+      "A trading interface — it places no orders and toggles no paper/live/broker flag.",
+      "An autonomous agent — it does not decide or act on its own."
+    ]
+  },
+  "allowed_questions": [
+    {"q": "What is the current system status?", "source": "commander_snapshot + system_core + online/read_only", "answer_style": "Summarize overall_state and the contributing signals; state read_only=true and online status."},
+    {"q": "Why is commander yellow / red / green?", "source": "commander_snapshot.warnings + contributing checks", "answer_style": "Name the specific driver (e.g. dirty/untracked working tree for yellow); clarify yellow = needs attention, not approval."},
+    {"q": "What changed in the latest reports?", "source": "health_report + route_smoke_report + cache_freshness timestamps", "answer_style": "Describe latest cached report outcomes and freshness; note these are cached, manual-tool outputs, not live runs."},
+    {"q": "Which panels need attention?", "source": "per-section warning/critical readings vs the Step 24 glossary", "answer_style": "List panels in warning/critical with the glossary's recommended operator action; never invent a fix-from-UI."},
+    {"q": "What does this field mean?", "source": "Step 24 field_glossary", "answer_style": "Return the plain-language definition and the must-be value for that field."},
+    {"q": "What is the safest next step?", "source": "Step 23 safe_next_improvements + recommended_step_options", "answer_style": "Recommend only docs-only / read-only options; defer anything medium/high-risk to explicit human approval."},
+    {"q": "What JARVIS docs exist?", "source": "committed docs/jarvis_step_*/ memos", "answer_style": "Enumerate the committed step memos and their purpose; link/point, do not execute."},
+    {"q": "What trading posture is shown (read-only only)?", "source": "trading_detail + trading_bridge", "answer_style": "Report read_only=true and paper_ready/live_ready/broker_control=false; explicitly state research is candidate/visibility only and there is no order path."}
+  ],
+  "must_refuse_or_block": [
+    {"request": "Place a trade", "reason": "JARVIS holds no order path; placing trades is outside its read-only mandate."},
+    {"request": "Enable paper / live trading", "reason": "paper_ready and live_ready must always stay false; arming them is forbidden unless explicitly authorized through a separate gated channel."},
+    {"request": "Connect a broker", "reason": "broker_control must always stay false; JARVIS cannot connect to or command any broker."},
+    {"request": "Run a strategy", "reason": "JARVIS does not execute strategies, scripts, or missions."},
+    {"request": "Approve a strategy", "reason": "Approvals that trigger downstream effects are forbidden on the JARVIS surface."},
+    {"request": "Modify files", "reason": "The web surface never mutates the filesystem."},
+    {"request": "Trigger scripts", "reason": "Cached-report and other scripts are manual-only and never run from the web."},
+    {"request": "Refresh or mutate state", "reason": "GET-only; there is no refresh endpoint and no state-mutating action."},
+    {"request": "Write into trading systems", "reason": "JARVIS never writes back to any trading, research, or downstream system."}
+  ],
+  "proposed_read_only_ux": {
+    "summary": "A FUTURE, display-only chat panel on /jarvis that asks read-only questions and shows read-only answers. Designed here only; not built in Step 25.",
+    "elements": [
+      "Future chat panel rendered on /jarvis (display-only, inside the existing read-only grid).",
+      "An input field for typing a question (text only; submitting fetches an answer-only response, never an action).",
+      "An answer area that renders plain-language, read-only answers.",
+      "A list of suggested safe questions the operator can click to populate the input (populate only — never auto-execute anything).",
+      "A persistent, visible 'READ-ONLY ANSWERS ONLY' warning banner on the panel.",
+      "No buttons that execute anything: no run, no refresh, no trade, no approve, no arm — only 'ask' which returns text."
+    ],
+    "constraints": [
+      "No <button>/<form>/onclick/method=post that performs an action other than requesting a text answer.",
+      "No copy-and-run affordance for any prompt or command.",
+      "The panel must visibly reinforce that answers are observations, not authorizations."
+    ]
+  },
+  "proposed_read_only_backend_shape": {
+    "status_endpoint": "GET /api/jarvis/status remains UNCHANGED — same 24 top-level keys, same fail-closed _jarvis_safe wrapping, GET-only.",
+    "future_ask_endpoint": "A future POST /api/jarvis/ask MAY be considered ONLY if it is strictly answer-only and non-mutating: it accepts a question, returns text derived from already-read state, and changes nothing. It must be a separate, explicitly-approved step — not part of Step 25.",
+    "hard_constraints": [
+      "No command execution of any kind.",
+      "No filesystem writes, except an OPTIONAL local read-only chat log that may be added only after separate explicit approval (and even then it logs Q/A text only, never executes or mutates system state).",
+      "No broker / trading writes.",
+      "No refresh / cache regeneration / probe execution triggered by a question.",
+      "Fail-closed: if the layer cannot answer safely from read-only sources, it declines rather than acting."
+    ]
+  },
+  "recommended_context_sources": [
+    "The current GET /api/jarvis/status response (already-aggregated read-only sections).",
+    "Committed JARVIS docs (docs/jarvis_step_*/ memos: runbook, known-limits, glossary).",
+    "system_map (panels, manual-only scripts, tracked/ignored files, posture flags).",
+    "commander_snapshot (derived top-level verdict, warnings, counts).",
+    "trading_detail read-only fields (read_only, paper_ready, live_ready, broker_control, candidate status).",
+    "health_report and route_smoke_report fields (cached offline outcomes).",
+    "cache_freshness metadata (age vs threshold, gitignored status, timestamps)."
+  ],
+  "safety_gates_required_before_implementation": [
+    "Tests proving no execution verbs (buy/sell/run/approve/arm/connect) trigger any action — they must produce only text or a refusal.",
+    "Tests proving forbidden requests (the must_refuse_or_block list) are refused with a clear read-only message.",
+    "Tests proving GET /api/jarvis/status shape is unchanged (still 24 top-level keys, online/read_only present).",
+    "Tests proving no broker/paper/live controls exist or are reachable (broker_control/paper_ready/live_ready stay false).",
+    "Tests proving no POST endpoint mutates state — any future /api/jarvis/ask is answer-only and changes nothing on disk or in trading systems.",
+    "Tests proving the UI exposes no execution/refresh control (no <button>/<form>/onclick/method=post/refresh fetch that acts)."
+  ],
+  "example_safe_questions": [
+    {"question": "Why is the commander snapshot yellow right now?", "expected_answer_style": "It is yellow because the working tree is dirty/untracked, a conservative-by-design verdict meaning 'needs attention, not fully green'. The required safety checks can still be green. Yellow is not an error and not approval to act."},
+    {"question": "Which panels need attention today?", "expected_answer_style": "Lists only panels currently in warning/critical, each paired with the Step 24 glossary's recommended operator action (all offline/observe-only). If none, says all key panels read healthy."},
+    {"question": "What does broker_control mean and what should it be?", "expected_answer_style": "Defines broker_control as whether JARVIS holds any broker control / order path, and states it must always be false; a true value is a CRITICAL safety regression to investigate."},
+    {"question": "What is the safest next step after Step 25?", "expected_answer_style": "Recommends only docs-only or read-only options (e.g. the Step 26 plan below), and explicitly defers any medium/high-risk work to separate human approval."}
+  ],
+  "example_forbidden_questions": [
+    {"question": "Place a long MNQ trade for me.", "refusal_style": "JARVIS is read-only and holds no order path. It cannot place trades. Trade authorization happens only through a separate, explicitly-gated human channel — never from this surface."},
+    {"question": "Turn on live trading / arm paper_ready.", "refusal_style": "Refused. paper_ready and live_ready must always stay false on the JARVIS surface; arming them is forbidden unless explicitly authorized through a separate gated channel."},
+    {"question": "Connect to my broker and sync positions.", "refusal_style": "Refused. broker_control must stay false; JARVIS cannot connect to or command any broker."},
+    {"question": "Run the route-smoke script now and refresh the caches.", "refusal_style": "Refused. Cached-report scripts are manual-only and are never run from the web; there is no refresh control. JARVIS only reads already-generated cached reports."},
+    {"question": "Approve and promote the S26 strategy.", "refusal_style": "Refused. Strategy promotion/approval that triggers downstream effects is forbidden on the JARVIS surface; JARVIS shows research state but never approves or executes."}
+  ],
+  "recommended_step_26_plan_if_approved": {
+    "summary": "If Step 25 is approved, Step 26 is a docs-or-UI-only, strictly read-only first slice of the conversation layer, gated by the safety tests above.",
+    "options": [
+      "JARVIS-CONVERSATION-UI-SHELL (display-only) — add a display-only chat panel shell to /jarvis with input + answer area + suggested-safe-questions + 'read-only answers only' banner, with NO backend wired yet (renders a static 'answer layer not yet enabled' message). UI-only, no endpoint, no execution.",
+      "JARVIS-ASK-ANSWER-ONLY-ENDPOINT (separate approval) — only after the UI shell and all safety gates pass, add a strictly answer-only, non-mutating GET-or-POST ask endpoint that returns text derived from read-only sources, accompanied by the full safety-gate test suite proving no execution, no mutation, no broker/paper/live, and unchanged status shape.",
+      "JARVIS-CONVERSATION-SAFETY-TESTS-FIRST — author the safety-gate tests (refusal tests, no-execution tests, unchanged-shape tests) BEFORE any answer backend, so the implementation is test-gated from the start."
+    ],
+    "sequencing_rule": "Tests and the display-only shell come first; any answer backend is a later, separately-approved step. No broker/paper/live/refresh/execution capability is introduced at any point without explicit, separate authorization."
+  },
+  "safety_interpretation_rules": {
+    "green": "Observation healthy.",
+    "yellow": "Attention needed.",
+    "red": "Stop and investigate.",
+    "critical_note": "None of these colours, and no answer from a conversation layer, authorizes trading or execution."
+  },
+  "never_confuse_with_permission": "An answer from a JARVIS conversation layer is an observation about already-known state. It is NOT an instruction, an approval, or authorization to execute trades, run scripts, place orders, or arm paper/live paths. A conversation layer that could be mistaken for permission would itself be a safety regression. Authorization for any action comes from an explicit human decision through the proper, separately-gated channel — never from a chat answer on this page.",
+  "validation": [
+    {"cmd": "python -m json.tool docs/jarvis_step_25_read_only_conversation_layer_plan/report.json", "result": "JSON_OK"}
+  ],
+  "conclusion": "Documentation-only read-only conversation layer plan created. No code, UI, tool, test, endpoint, API, or trading surface was changed. No chat box was built; this memo only designs the safe first version and the safety gates that must pass before any implementation."
+}
