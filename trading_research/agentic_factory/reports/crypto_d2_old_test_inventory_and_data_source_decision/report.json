@@ -1,0 +1,170 @@
+{
+  "step": "Crypto-D2",
+  "title": "Crypto-D2 -- Old Crypto Test Inventory + Data-Source Decision (memo only)",
+  "created": "2026-05-30",
+  "kind": "inventory_and_data_source_decision_memo_only",
+  "memo_only": true,
+  "code": false,
+  "backtest": false,
+  "is_oos_run": false,
+  "optimization": false,
+  "parameter_sweeps": false,
+  "data_fetch": false,
+  "paper_or_live": false,
+  "exchange_api": false,
+  "broker": false,
+  "strategy_test": false,
+  "provenance": {
+    "head_at_memo": "f79dd5c",
+    "head_note": "HEAD f79dd5c. Crypto-D1 commit c8a59fe is in history (confirmed ancestor). Factory tree: nothing staged. An untracked reports/s30_d4_overnight_drift_is_baseline/ folder exists from background automation and was NOT touched, staged, or created by this crypto session.",
+    "crypto_d1_commit": "c8a59fee3e4804c416564d4673f7152e87fd3e60",
+    "context_read_only": [
+      "reports/crypto_d1_research_lane_protocol/report.md (binding protocol)",
+      "reports/crypto_d1_research_lane_protocol/report.json",
+      "brain_memory/projects/trading_bot/project.md",
+      "brain_memory/projects/trading_bot/lessons.md",
+      "brain_memory/projects/trading_bot/decisions.md",
+      "brain_memory/projects/trading_bot/next_actions.md",
+      "brain_memory/knowledge/trading_lessons.md"
+    ],
+    "data_fetched": false
+  },
+  "1_crypto_d1_reference": {
+    "crypto_d1_commit": "c8a59fe (c8a59fee3e4804c416564d4673f7152e87fd3e60)",
+    "binding_rules": [
+      "Crypto is a SEPARATE research lane under the completed validation factory; never mixed into NQ/ES futures branches (S30 overnight-drift, Donchian, S26-S29).",
+      "No crypto result may be cited alongside a futures validation claim.",
+      "No paper/live, no exchange API execution, no broker, no auto-bot launch.",
+      "Old crypto work is historical context, not evidence. Any old idea must be re-entered as a NEW frozen Crypto spec and re-run through the full ladder; no parameter, curve, or OOS conclusion carries over."
+    ]
+  },
+  "2_old_crypto_inventory": {
+    "note": "From local memory/reports only -- nothing fetched. All items predate the validation-factory standard; each is HISTORICAL_ONLY.",
+    "items": [
+      {
+        "id": 1,
+        "name": "Crypto trading bot + Streamlit dashboard",
+        "detail": "Scoring layers, strategy performance, trade frequency, R-leak, regime control; Binance/Kraken live feeds. A live-feed bot/analytics stack with scoring + regime control; not a single frozen hypothesis.",
+        "symbols": "BTC/ETH + alts",
+        "timeframe": "mixed",
+        "type": "Bot / infrastructure / execution",
+        "new_rules_status": "HISTORICAL_ONLY",
+        "retest_worth": "Infra only -- re-architect under factory; not a strategy to re-test as-is"
+      },
+      {
+        "id": 2,
+        "name": "ema_pullback strategy",
+        "detail": "Trend/pullback long, drawdown context flagged for ETH/USD.",
+        "symbols": "ETH/USD (and others)",
+        "timeframe": "daily-ish",
+        "type": "Strategy / backtest",
+        "new_rules_status": "HISTORICAL_ONLY",
+        "retest_worth": "Possibly -- but it is the S26/S27 family (trend-continuation / pullback) that the futures factory already PARKED; re-test only as a freshly frozen spec, low priority"
+      },
+      {
+        "id": 3,
+        "name": "Regime HMM 'mid-vol transit' study",
+        "detail": "regime_detection_exp; preregistered_split; K=3/K=4 hidden-Markov regime models; P(low->high)/P(high->low); cross-coin transfer M1-M4; 4000-sample aligned parametric bootstrap; label-switching diagnostics; Checkpoints A-D. In-sample: rare direct low<->high transitions ('transit only via mid-vol') BTC 0.004, ETH 0.002, SOL 0.000 at K=3; holdout durability left OPEN; SOL cross-coin transfer FAILED -> BTC<->ETH-only boundary recorded.",
+        "symbols": "BTC, ETH, SOL",
+        "timeframe": "daily features",
+        "type": "Regime classifier / overlay study",
+        "new_rules_status": "HISTORICAL_ONLY",
+        "retest_worth": "As a regime/no-trade overlay, not a standalone entry branch (S30-D1: an overlay is not a strategy). Holdout was never closed -- claim is unproven"
+      },
+      {
+        "id": 4,
+        "name": "Perp funding-rate acquisition + anomaly work",
+        "detail": "H1-Auth-1: SOL/BTC/ETH funding; FTX-collapse-week anomaly 2022-11-09..18; Binance raises funding frequency in extreme vol; REST vs data.binance.vision archive acquisition; us-normalisation hazard; only BTC/ETH have USD-M dated chains, perp >=3 feasible. Diagnosed a cadence anomaly as the FTX week, not a defect.",
+        "symbols": "BTC, ETH, SOL",
+        "timeframe": "funding cadence",
+        "type": "Data / funding provisioning",
+        "new_rules_status": "HISTORICAL_ONLY",
+        "retest_worth": "Useful as data-provisioning know-how for a future perp lane -- but perps are BLOCKED until funding is sourced + frozen (Crypto-D1 sec4/sec9)"
+      },
+      {
+        "id": 5,
+        "name": "Generic bot scoring / R-leak / trade-frequency / regime-control analytics",
+        "detail": "Performance scoring + leakage analytics layered on the bot.",
+        "symbols": "portfolio",
+        "timeframe": "mixed",
+        "type": "Analytics / tooling",
+        "new_rules_status": "HISTORICAL_ONLY",
+        "retest_worth": "Archive -- tooling, not a hypothesis"
+      }
+    ],
+    "explicitly_out_of_scope": "The NQ/ES futures factory branches (Donchian S23-S25, S26-S29, S30 overnight-drift) and the external-research-hunter cross-asset work (cross-asset Donchian, RSI2 mean-reversion via yfinance proxy, SPY vol-targeting) are futures/equities/cross-asset, NOT crypto. Listed only to prevent mis-attribution into the crypto inventory."
+  },
+  "3_old_result_classification": {
+    "item_1_bot_dashboard_live_feeds": "REJECT_OR_ARCHIVE (execution/infra; no exchange API to be wired; not a frozen hypothesis)",
+    "item_2_ema_pullback_eth_usd": "POSSIBLE_RETEST_CANDIDATE but DATA_REQUIRED_BEFORE_RETEST; low priority (parked S26/S27 family)",
+    "item_3_regime_hmm_mid_vol_transit": "DATA_REQUIRED_BEFORE_RETEST as an overlay/context model only; HISTORICAL_ONLY_DO_NOT_USE as proof (holdout never closed; SOL transfer failed)",
+    "item_4_perp_funding_acquisition_anomaly": "DATA_REQUIRED_BEFORE_RETEST; perps remain BLOCKED until funding sourced + frozen",
+    "item_5_scoring_r_leak_analytics": "REJECT_OR_ARCHIVE (tooling)",
+    "net": "No old crypto item is a validated candidate. Nothing carries an edge into the new lane. The only items worth a future fresh-frozen retest are #2 (a trend/pullback spec, low priority) and, as an overlay, #3 -- both gated on clean data first."
+  },
+  "4_data_source_decision": {
+    "spot_first": "Spot OHLCV first (no funding leg, cleaner accounting).",
+    "symbols_first": "BTC, ETH, SOL (XRP deferred until QA/liquidity pass).",
+    "timeframe_first": "Daily UTC candles first (00:00 UTC boundary), 4H deferred, no intraday in v1.",
+    "perps": "BLOCKED until funding-rate data is sourced and funding rules frozen (Crypto-D1 sec4/sec9) -- item #4's funding history is know-how, not authorization.",
+    "quote_currency": "Pick ONE spot quote and document it (USDT vs USD vs USDC is a known QA hazard -- Crypto-D1 sec11); reconcile, never silently mix.",
+    "fetch": false
+  },
+  "5_spot_vs_perps": "Start with spot (or spot-like) OHLCV. Do NOT test perps until funding rates, fees, and exchange-specific mechanics are explicitly defined and frozen. The old perp/funding work (item #4) confirms the hazard -- Binance changes funding cadence in extreme volatility (the FTX week) -- which is exactly why perps must wait for a frozen funding protocol. Spot is unaffected and goes first.",
+  "6_exchange_vendor_requirements": [
+    "Reliable, complete OHLCV with volume; no silent gaps.",
+    "UTC daily boundary (00:00 UTC), documented and pinned per dataset.",
+    "Clear symbol convention (e.g. BTCUSDT spot) and one consistent series per symbol -- no ambiguous stitching across exchanges/pairs.",
+    "No silent exchange-outage fills -- outages flagged as explicit QA events.",
+    "Stable quote currency with USD/USDT/USDC rules documented and reconciled.",
+    "Named, pinned provenance per dataset (source, range, retrieval method), mirroring how the offline futures CSVs are documented.",
+    "Candidate sources (decision only, not yet fetched): a primary archive of spot daily klines (e.g. an exchange's published daily-kline archive, which prior local notes found gave clean uniform-ms timestamps) plus one independent second source for cross-checking BTC/ETH/SOL. Final vendor pinned in Crypto-D3 -- no fetch here."
+  ],
+  "7_qa_checklist": [
+    "Duplicate timestamps -> reject/flag.",
+    "Missing daily candles -> flag explicitly (do NOT silently forward-fill).",
+    "Zero/negative OHLC, or high<low / close|open outside high-low -> reject.",
+    "Zero-volume bars -> flag (possible outage or illiquid listing).",
+    "Exchange-outage days -> recorded as explicit events, never hidden.",
+    "Symbol continuity -> one consistent series per symbol; no cross-exchange stitching.",
+    "Timezone consistency -> all bars on the same UTC daily boundary.",
+    "24/7 handling -> no expected weekend/holiday gaps; every calendar day has a bar; a missing day is a QA event, not a zero-return bar.",
+    "BTC/ETH/SOL calendar alignment -> identical date index across the three symbols for any multi-asset comparison.",
+    "Per-symbol history feasibility -> BTC/ETH have full 2020+ history; SOL's exchange history starts mid-2020, so SOL needs a justified per-symbol window (Crypto-D1 sec10) rather than fabricated/stitched pre-listing history."
+  ],
+  "8_proposed_future_sequence": {
+    "Crypto-D3": "data-source / data-QA provisioning only (pin vendor, run QA checklist; still no strategy)",
+    "Crypto-D4": "choose / re-freeze ONE crypto strategy spec (pre-registered, no parameter freedom)",
+    "Crypto-D5": "implement engine + tests only (no run)",
+    "Crypto-D6": "IS baseline (hard OOS seal)",
+    "Crypto-D7": "OOS protocol pre-registration (committed protocol hash)",
+    "Crypto-D8": "OOS once (one-shot)",
+    "Crypto-D9_plus": "entry significance -> sequence risk -> regime -> multi-asset (BTC/ETH/SOL) -> walk-forward -> friction -> final decision gate"
+  },
+  "9_forbidden_actions": [
+    "no_live_trading",
+    "no_paper_trading",
+    "no_exchange_api_execution",
+    "no_auto_bot_launch",
+    "no_data_fetch",
+    "no_code",
+    "no_backtest",
+    "no_optimization",
+    "no_parameter_sweep",
+    "no_strategy_test_before_data_protocol",
+    "no_using_old_results_as_proof",
+    "no_mixing_crypto_with_futures_validation_claims",
+    "do_not_touch_s30_or_futures_branches",
+    "jarvis_templates_base_hydra_untouched",
+    "no_staging",
+    "no_commit"
+  ],
+  "10_final_recommendation": {
+    "next_step": "Crypto-D3 (spot data-source + data-QA provisioning, selection/QA only) should be the next step.",
+    "inventory_sufficiency": "The inventory is sufficient -- old crypto work is fully catalogued and uniformly historical-only; no further inventory is needed before Crypto-D3.",
+    "rationale": "The blocker to any crypto strategy work is clean, QA'd spot data, so data provisioning is the correct and only next move.",
+    "authorization": "Crypto-D3 is NOT authorized by this memo -- it requires a separate explicit instruction, and even then performs no strategy work and (until its own authorization) no fetch."
+  },
+  "final_line": "Crypto-D2 is inventory and data-source decision only; no crypto strategy is validated, paper-ready, live-ready, or authorized for execution.",
+  "trading_recommendation": "NONE. Inventory + data-source decision only. No crypto strategy is validated, paper-ready, or live-ready. All old crypto work (BTC/ETH/SOL/XRP bots, the regime-HMM study, ema_pullback, perp/funding acquisition) is historical context only and must be re-frozen and re-run through the validation factory before carrying any weight. Crypto remains a separate research lane; S30 and the futures branches are untouched."
+}
