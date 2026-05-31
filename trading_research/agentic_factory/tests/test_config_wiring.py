@@ -34,7 +34,7 @@ def test_run_once_uses_config_strategy(tmp_path):
 
 
 def test_load_config_includes_strategy_block():
-    cfg = factory_loop._load_config("config/factory_config.yaml")
+    cfg = factory_loop._load_config(factory_loop._resolve("config/factory_config.yaml"))
     assert "strategy" in cfg
     assert cfg["strategy"]["session_start"] == "14:30"
     assert cfg["strategy"]["session_end"] == "21:00"
