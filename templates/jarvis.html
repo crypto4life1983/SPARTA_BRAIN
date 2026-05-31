@@ -1248,6 +1248,49 @@
     }).then(function(r){ return r.json(); });
   }
 
+  // Split text into short, sentence-sized chunks. Chrome/Edge silently cut a
+  // single SpeechSynthesisUtterance off after ~15s (~300 chars); speaking one
+  // short chunk at a time is the standard workaround so long answers finish.
+  function jvChunkText(text){
+    var clean = (text || '').replace(/\s+/g, ' ').trim();
+    if(!clean){ return []; }
+    var raw = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+    var chunks = [];
+    raw.forEach(function(s){
+      s = s.trim();
+      while(s.length > 200){
+        var cut = s.lastIndexOf(' ', 200);
+        if(cut <= 0){ cut = 200; }
+        chunks.push(s.slice(0, cut).trim());
+        s = s.slice(cut).trim();
+      }
+      if(s){ chunks.push(s); }
+    });
+    return chunks;
+  }
+
+  // Speak text as a sequence of short utterances (see jvChunkText). Each chunk
+  // is queued only after the previous one ends, so the engine never hits the
+  // long-utterance cutoff. onEnd fires once after the last chunk (or on skip).
+  function jvSpeakChunks(synth, text, onEnd){
+    var chunks = jvChunkText(text);
+    if(!chunks.length){ if(onEnd){ onEnd(); } return false; }
+    try { synth.cancel(); } catch(e){ /* nothing queued */ }
+    var i = 0, done = false;
+    function finish(){ if(done){ return; } done = true; if(onEnd){ onEnd(); } }
+    function next(){
+      if(i >= chunks.length){ finish(); return; }
+      var u = new SpeechSynthesisUtterance(chunks[i]);
+      u.lang = 'en-US';
+      u.rate = 1;
+      u.onend = function(){ i += 1; next(); };
+      u.onerror = function(){ i += 1; next(); };
+      synth.speak(u);
+    }
+    next();
+    return true;
+  }
+
   // Read the LAST rendered answer / refusal text aloud (browser SpeechSynthesis
   // only). Speaks ONLY jvLastAnswerText — never the question, never a command.
   // Used by the click-gated "Read last answer" button and by conversation mode
@@ -1260,14 +1303,7 @@
       if(onEnd){ onEnd(); }
       return false;
     }
-    try { synth.cancel(); } catch(e){ /* nothing queued */ }
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US';
-    u.rate = 1;
-    u.onend = function(){ if(onEnd){ onEnd(); } };
-    u.onerror = function(){ if(onEnd){ onEnd(); } };
-    synth.speak(u);
-    return true;
+    return jvSpeakChunks(synth, text, onEnd);
   }
 
   // Voice Conversation Mode turn: transcript -> auto Ask read-only -> render ->
@@ -1608,11 +1644,7 @@
         setStatus('No answer yet — ask a read-only question first.');
         return;
       }
-      try { synth.cancel(); } catch(e){ /* nothing queued */ }
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'en-US';
-      u.rate = 1;
-      synth.speak(u);
+      jvSpeakChunks(synth, text);
       setStatus('Reading the last answer aloud…');
     }
 

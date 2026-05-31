@@ -2152,8 +2152,11 @@ def test_jarvis_step_36_read_aloud_requires_explicit_control():
     body = _jarvis_template_text()
     assert 'id="jvSpeakAnswerBtn"' in body
     speak = _jarvis_wirespeak_body()
-    # The single synth.speak call is bound only to an explicit click/key control.
-    assert "synth.speak(u)" in speak
+    # Read-aloud is bound only to an explicit click/key control. The actual
+    # speech call now lives in the shared jvSpeakChunks() helper (sentence-by-
+    # sentence playback that avoids the browser's long-utterance cutoff), so
+    # wireSpeak delegates to it rather than calling synth.speak directly.
+    assert "jvSpeakChunks(synth, text)" in speak
     assert "addEventListener('click', speak)" in speak
 
 
