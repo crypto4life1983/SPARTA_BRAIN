@@ -332,6 +332,33 @@
       <div class="jv-loading">Reading research reports&hellip;</div>
     </div>
 
+    <div class="jv-section"><span class="lbl">Strategy Factory Readiness</span><span class="ln"></span><span class="sub">read-only observation &middot; no execution &middot; no broker</span></div>
+
+    <div class="jv-panel jv-wide" id="pFactoryReadiness">
+      <h2><span class="ic">&#x2699;</span>Strategy Factory Readiness <span class="jv-tag t-read">READ ONLY</span></h2>
+      <div class="jv-loading">Computing readiness&hellip;</div>
+    </div>
+
+    <div class="jv-panel jv-wide" id="pFactoryStatus">
+      <h2><span class="ic">&#x2692;</span>Factory Status <span class="jv-tag t-read">READ ONLY</span></h2>
+      <div class="jv-loading">Reading factory reports&hellip;</div>
+    </div>
+
+    <div class="jv-panel jv-wide" id="pSurvivalLedger">
+      <h2><span class="ic">&#x2696;</span>Pass / Fail &amp; Survival Ledger <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
+      <div class="jv-loading">Reading survival ledger&hellip;</div>
+    </div>
+
+    <div class="jv-panel jv-wide" id="pCandidateRegistry">
+      <h2><span class="ic">&#x2630;</span>Strategy Candidate Registry <span class="jv-tag t-read">RESEARCH ONLY</span></h2>
+      <div class="jv-loading">Reading candidate registry&hellip;</div>
+    </div>
+
+    <div class="jv-panel" id="pFreshness">
+      <h2><span class="ic">&#x21BB;</span>Live-Server Freshness <span class="jv-tag t-read">READ ONLY</span></h2>
+      <div class="jv-loading">Comparing build to HEAD&hellip;</div>
+    </div>
+
     <div class="jv-section"><span class="lbl">Documentation &amp; Maps</span><span class="ln"></span><span class="sub">tracked, display-only</span></div>
 
     <div class="jv-panel jv-wide" id="pMissions">
@@ -1040,6 +1067,132 @@
       }
       setPanel('pCacheFreshness', cfHtml);
     }
+
+    // --- Bundle B: Strategy Factory readiness (READ-ONLY observation) -------
+    // Live-Server Freshness (T6): boot HEAD vs current git HEAD; display only.
+    var fg = d.freshness_guard || {};
+    var fgState = (fg.state === 'fresh') ? 'online'
+                : (fg.state === 'stale') ? 'bad' : 'waiting';
+    setPanel('pFreshness',
+      row('Build', fgState, esc((fg.state || 'unknown').toUpperCase())) +
+      row('Server build', '', esc(fg.server_head || '—')) +
+      row('Git HEAD', '', esc(fg.current_head || '—')) +
+      row('Stale', fg.stale ? 'bad' : 'online', fg.stale ? 'YES — RESTART NEEDED' : 'NO') +
+      (fg.detail ? '<div class="jv-detail" style="margin-top:6px">'+esc(fg.detail)+'</div>' : ''));
+
+    // Factory Status (T1): recent committed report decisions, read-only.
+    var fs = d.factory_status || {};
+    if(fs.state === 'missing' || fs.state === 'error'){
+      setPanel('pFactoryStatus', row('Status', 'waiting', (fs.state||'').toUpperCase(),
+        fs.detail || 'no factory reports'));
+    } else {
+      var fsHtml = row('Reports', 'online', String(fs.report_count != null ? fs.report_count : '—')) +
+        row('Read-only', 'locked', fs.read_only ? 'TRUE' : 'FALSE');
+      var decs = fs.latest_decisions || [];
+      if(decs.length){
+        fsHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Latest decisions</div>';
+        decs.forEach(function(r){
+          var unk = (r.decision === 'UNKNOWN');
+          fsHtml += '<div class="jv-mcard"><div class="top">'+
+            '<span class="ttl">'+esc(r.name || '')+'</span>'+
+            '<span class="jv-tag">'+esc(r.modified_at || '')+'</span></div>'+
+            '<div class="jv-detail" style="margin-top:6px;color:'+(unk?'var(--jv-warn)':'inherit')+'">'+
+            esc(r.decision || 'UNKNOWN')+
+            (r.decision_field ? ' <span class="jv-tag">'+esc(r.decision_field)+'</span>' : '')+
+            '</div></div>';
+        });
+      }
+      if(fs.note){ fsHtml += '<div class="jv-detail" style="margin-top:8px">'+esc(fs.note)+'</div>'; }
+      setPanel('pFactoryStatus', fsHtml);
+    }
+
+    // Pass/Fail & Survival Ledger (T2): aggregate, display-only.
+    var sl = d.survival_ledger || {};
+    if(sl.state === 'not_found' || sl.state === 'error'){
+      setPanel('pSurvivalLedger', row('Status', 'waiting',
+        sl.state === 'not_found' ? 'NOT_FOUND' : 'UNAVAILABLE', sl.detail || ''));
+    } else {
+      var slHtml = row('Status', 'locked', esc(sl.status || 'UNKNOWN')) +
+        row('Strategies', 'online', String(sl.strategy_count != null ? sl.strategy_count : '—'));
+      var mkRow = function(r){
+        return '<div class="jv-mcard"><div class="top">'+
+          '<span class="ttl">'+esc(r.strategy || '?')+'</span>'+
+          '<span class="jv-tag">score '+esc(String(r.survival_score))+'</span></div>'+
+          '<div class="meta">'+
+          '<span class="jv-tag">closed '+esc(String(r.closed_trades))+'</span>'+
+          '<span class="jv-tag">open '+esc(String(r.open_trades))+'</span>'+
+          '<span class="jv-tag">'+esc(r.historical_drawdown_behavior || '—')+'</span>'+
+          '</div></div>';
+      };
+      var most = sl.most_survivable || [];
+      if(most.length){
+        slHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Most survivable</div>';
+        most.forEach(function(r){ slHtml += mkRow(r); });
+      }
+      var weak = sl.weakest || [];
+      if(weak.length){
+        slHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Weakest</div>';
+        weak.forEach(function(r){ slHtml += mkRow(r); });
+      }
+      if(sl.note){ slHtml += '<div class="jv-detail" style="margin-top:8px">'+esc(sl.note)+'</div>'; }
+      setPanel('pSurvivalLedger', slHtml);
+    }
+
+    // Strategy Candidate Registry (T3): research candidates, NOT video assets.
+    var cr = d.candidate_registry || {};
+    if(cr.state === 'not_found' || cr.state === 'error'){
+      setPanel('pCandidateRegistry', row('Status', 'waiting',
+        cr.state === 'not_found' ? 'NOT_FOUND' : 'UNAVAILABLE', cr.detail || ''));
+    } else {
+      var crHtml =
+        row('Candidate status', 'locked', esc(cr.candidate_status || 'RESEARCH_CANDIDATE_ONLY')) +
+        row('Candidates', 'online', String(cr.candidate_count != null ? cr.candidate_count : '—')) +
+        row('Paper ready', cr.paper_ready ? 'bad' : 'online', cr.paper_ready ? 'TRUE' : 'FALSE') +
+        row('Live ready', cr.live_ready ? 'bad' : 'online', cr.live_ready ? 'TRUE' : 'FALSE') +
+        row('Broker control', cr.broker_control ? 'bad' : 'online', cr.broker_control ? 'TRUE' : 'FALSE');
+      var cands = cr.candidates || [];
+      if(cands.length){
+        crHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Candidates</div>';
+        cands.forEach(function(c){
+          crHtml += '<div class="jv-mcard"><div class="top">'+
+            '<span class="ttl">'+esc(c.strategy || '?')+'</span>'+
+            '<span class="jv-tag">'+esc(c.observation_tier || 'UNKNOWN')+'</span></div>'+
+            '<div class="meta">'+
+            '<span class="jv-tag">score '+esc(String(c.survival_score))+'</span>'+
+            '<span class="jv-tag">'+esc(c.deployment_status || 'RESEARCH_ONLY')+'</span>'+
+            (c.last_seen_at ? '<span class="jv-tag">seen '+esc(c.last_seen_at)+'</span>' : '')+
+            '</div></div>';
+        });
+      }
+      if(cr.note){ crHtml += '<div class="jv-detail" style="margin-top:8px">'+esc(cr.note)+'</div>'; }
+      setPanel('pCandidateRegistry', crHtml);
+    }
+
+    // Strategy Factory Readiness banner — derived ONLY from the four panels
+    // above. Read-only verdict; opens no Factory run and triggers nothing.
+    var rdReasons = [];
+    if(fs.state !== 'ready') rdReasons.push('factory status unavailable');
+    if(sl.state !== 'ready') rdReasons.push('survival ledger unavailable');
+    if(!(cr.state === 'ready' || cr.state === 'empty')) rdReasons.push('candidate registry unavailable');
+    if(fg.stale) rdReasons.push('live server STALE — restart before relying on panels');
+    if(fg.state === 'unknown') rdReasons.push('freshness UNKNOWN');
+    var ready = (rdReasons.length === 0);
+    var rdHtml =
+      row('Observation plane', ready ? 'online' : 'waiting',
+          ready ? 'READY' : 'INCOMPLETE') +
+      row('Factory status', fs.state === 'ready' ? 'online' : 'waiting', (fs.state||'unknown').toUpperCase()) +
+      row('Survival ledger', sl.state === 'ready' ? 'online' : 'waiting', (sl.state||'unknown').toUpperCase()) +
+      row('Candidate registry', (cr.state === 'ready' || cr.state === 'empty') ? 'online' : 'waiting', (cr.state||'unknown').toUpperCase()) +
+      row('Live build', fg.stale ? 'bad' : (fg.state === 'fresh' ? 'online' : 'waiting'),
+          fg.stale ? 'STALE' : (fg.state||'unknown').toUpperCase()) +
+      row('Execution path', 'locked', 'NONE — OBSERVATION ONLY');
+    if(rdReasons.length){
+      rdHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-warn)">Pending: '+
+        rdReasons.map(function(x){ return esc(x); }).join('; ')+'</div>';
+    } else {
+      rdHtml += '<div class="jv-detail" style="margin-top:8px">Read-only observation plane complete: Factory decisions, pass/fail survival, candidate registry, and live-build freshness are all visible. No trigger or execution path exists.</div>';
+    }
+    setPanel('pFactoryReadiness', rdHtml);
   }
 
   function tick(){

@@ -9,7 +9,7 @@ timestamped JSON snapshot (plus a ``latest_snapshot.json`` pointer) under
 - the snapshot carries the required read-only display fields,
 - the snapshot excludes every forbidden token (secrets/credentials/order/
   command/action/execute/audio/transcript/...),
-- the live ``/api/jarvis/status`` shape is unchanged (24 keys, flags locked),
+- the live ``/api/jarvis/status`` shape is unchanged (28 keys, flags locked),
 - the browser has no snapshot control and no snapshot/refresh endpoint exists.
 
 All filesystem writes go to ``tmp_path`` so the real storage tree is never
@@ -169,7 +169,9 @@ def test_status_shape_unchanged():
     import app as app_module
     status = app_module.api_jarvis_status()
     assert isinstance(status, dict)
-    assert len(status) == 24
+    # 24 base sections + 4 Bundle B read-only observation panels
+    # (factory_status, survival_ledger, candidate_registry, freshness_guard).
+    assert len(status) == 28
     assert status["read_only"] is True
     trading = status["trading_detail"]
     assert trading["read_only"] is True

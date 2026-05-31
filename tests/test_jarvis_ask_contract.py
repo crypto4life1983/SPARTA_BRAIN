@@ -701,7 +701,7 @@ def test_step47_status_shape_unchanged_after_compare_ask(monkeypatch, tmp_path):
     c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 24
+    assert len(after) == 28
     assert after["read_only"] is True
 
 

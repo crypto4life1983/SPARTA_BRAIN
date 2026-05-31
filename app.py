@@ -7613,6 +7613,64 @@ def _jarvis_git() -> dict:
     }
 
 
+def _jarvis_capture_boot_head():
+    """Capture the short HEAD this process booted with, ONCE at import.
+    Fail-closed to None so a git-less environment never breaks startup."""
+    try:
+        return _jarvis_run_git(["rev-parse", "--short", "HEAD"])
+    except Exception:  # noqa: BLE001 — boot capture is best-effort.
+        return None
+
+
+# Recorded a single time when app.py is imported (the running build's HEAD).
+# Because uvicorn runs with reload=False, this value stays pinned to the
+# commit the live process was started on, even after new commits land — which
+# is exactly what the freshness guard compares against to detect staleness.
+_JARVIS_SERVER_BOOT_HEAD = _jarvis_capture_boot_head()
+
+
+def _jarvis_freshness_guard(server_head=None, current_head=None) -> dict:
+    """READ-ONLY freshness check (Bundle B / T6). Compares the HEAD this live
+    process booted on against the current on-disk git HEAD. If they differ the
+    running server is serving stale code (uvicorn reload=False) and an operator
+    restart is needed. Pure comparison: runs one read-only `git rev-parse`,
+    writes nothing, executes nothing, restarts nothing. Params are injectable
+    for testing; production callers pass neither."""
+    boot = server_head if server_head is not None else _JARVIS_SERVER_BOOT_HEAD
+    if current_head is not None:
+        cur = current_head
+    else:
+        try:
+            cur = _jarvis_run_git(["rev-parse", "--short", "HEAD"])
+        except Exception:  # noqa: BLE001 — unknown is safe, never fatal.
+            cur = None
+    if not boot or not cur:
+        return {
+            "state": "unknown",
+            "read_only": True,
+            "server_head": boot,
+            "current_head": cur,
+            "stale": False,
+            "detail": "Cannot compare HEADs (git or boot head unavailable); "
+                      "freshness UNKNOWN.",
+        }
+    stale = boot != cur
+    return {
+        "state": "stale" if stale else "fresh",
+        "read_only": True,
+        "server_head": boot,
+        "current_head": cur,
+        "stale": stale,
+        "detail": (
+            f"Live server booted on {boot} but git HEAD is now {cur}: "
+            f"running build is STALE — restart per the Step 49 protocol to "
+            f"serve current code."
+            if stale else
+            f"Live server build {boot} matches git HEAD {cur}: fresh."
+        ),
+    }
+
+
 def _jarvis_operator_safety() -> dict:
     """Static read-only posture flags. The console exposes no execution,
     broker, secret, or force-git affordance — these assert that contract."""
@@ -7853,6 +7911,7 @@ def _jarvis_cache_freshness() -> dict:
 _JARVIS_TRADING_REPORTS_REL = "trading_research/agentic_factory/reports"
 _JARVIS_S26_D17_DIR = "s26_d17_trend_sr_ema_rsi_friction_stress"
 _JARVIS_S26_D18_DIR = "s26_d18_trend_sr_ema_rsi_decision_gate"
+_JARVIS_SURVIVAL_REL = "data/profit_brain_strategy_survival.json"
 
 
 def _jarvis_safe_report_summary(path) -> str:
@@ -7960,6 +8019,228 @@ def _jarvis_trading_detail() -> dict:
             "d18_decision_gate_exists": d18_exists,
         },
         "warnings": warnings,
+    }
+
+
+# --- Bundle B (T1/T3): read-only Strategy Factory observation layer ---------
+# These helpers surface decision/pass-fail/candidate information that already
+# exists in committed research files. They open ONLY report.json (never any
+# '*raw*' artifact), classify nothing, run no backtest, call no broker, write
+# nothing, and trigger no Factory run. Missing/corrupt data fails closed to
+# UNKNOWN / NOT_FOUND — never an invented decision.
+
+_JARVIS_DECISION_PRIORITY = (
+    "decision", "verdict", "final_verdict", "gate_decision", "is_verdict",
+    "final_recommendation", "trading_recommendation", "recommendation",
+)
+
+
+def _jarvis_report_decision(d: dict) -> dict:
+    """Extract one short decision/verdict string from a report dict, fail-closed.
+    Report schemas vary widely (plain `verdict`, numbered `5_verdict`, suffixed
+    `final_s26_verdict`, `gate_decision`, `trading_recommendation`, ...), so we
+    try an exact priority list first, then a suffix/numbered fallback. Returns
+    {"decision": str|None, "field": str|None}; None means UNKNOWN to callers."""
+    import re as _re
+    if not isinstance(d, dict):
+        return {"decision": None, "field": None}
+    for key in _JARVIS_DECISION_PRIORITY:
+        v = d.get(key)
+        if isinstance(v, str) and v.strip():
+            return {"decision": v.strip()[:120], "field": key}
+    for k, v in d.items():
+        if not isinstance(k, str) or not (isinstance(v, str) and v.strip()):
+            continue
+        kl = k.lower()
+        if (kl.endswith("_verdict") or kl.endswith("_decision")
+                or _re.match(r"^\d+_(verdict|decision|recommendation)$", kl)):
+            return {"decision": v.strip()[:120], "field": k}
+    return {"decision": None, "field": None}
+
+
+def _jarvis_factory_status() -> dict:
+    """READ-ONLY Strategy Factory status (Bundle B / T1). Lists the most
+    recently modified factory reports with each one's extracted decision so the
+    console shows Factory progress at a glance. Opens only report.json; reads a
+    bounded set; never executes, never writes, never runs a Factory job."""
+    import json as _json
+    from datetime import datetime as _dt
+    reports_dir = BASE / _JARVIS_TRADING_REPORTS_REL
+    if not reports_dir.exists():
+        return {
+            "state": "missing",
+            "read_only": True,
+            "report_count": 0,
+            "latest_decisions": [],
+            "detail": f"{_JARVIS_TRADING_REPORTS_REL} not found (NOT_FOUND).",
+        }
+    dirs = []
+    try:
+        for sub in reports_dir.iterdir():
+            rj = sub / "report.json"
+            if sub.is_dir() and rj.exists() and "raw" not in rj.name.lower():
+                dirs.append(rj)
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "state": "error",
+            "read_only": True,
+            "report_count": 0,
+            "latest_decisions": [],
+            "detail": f"report scan failed: {type(exc).__name__}",
+        }
+    dirs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    latest_decisions = []
+    for rj in dirs[:10]:
+        try:
+            d = _json.loads(rj.read_text(encoding="utf-8"))
+            dec = _jarvis_report_decision(d if isinstance(d, dict) else {})
+            decision = dec["decision"] or "UNKNOWN"
+            field = dec["field"]
+        except Exception:  # noqa: BLE001 — one bad file never sinks the panel.
+            decision, field = "UNKNOWN", None
+        latest_decisions.append({
+            "name": rj.parent.name,
+            "decision": decision,
+            "decision_field": field,
+            "modified_at": _dt.fromtimestamp(rj.stat().st_mtime).isoformat(
+                timespec="seconds"),
+        })
+    return {
+        "state": "ready",
+        "read_only": True,
+        "report_count": len(dirs),
+        "latest_decisions": latest_decisions,
+        "note": "Read-only view of committed factory reports. JARVIS runs no "
+                "Factory job; runs stay operator-CLI/offline.",
+    }
+
+
+def _jarvis_survival_ledger() -> dict:
+    """READ-ONLY pass/fail & survival ledger (Bundle B / T2). Surfaces the
+    aggregate strategy-survival picture from the committed profit-brain file.
+    Reads display-only; missing -> NOT_FOUND; corrupt -> fail closed. Writes
+    nothing, computes no new score, places no trade."""
+    import json as _json
+    path = BASE / _JARVIS_SURVIVAL_REL
+    if not path.exists():
+        return {
+            "state": "not_found",
+            "read_only": True,
+            "detail": f"{_JARVIS_SURVIVAL_REL} not found (NOT_FOUND).",
+        }
+    try:
+        d = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 — corrupt file fails closed.
+        return {
+            "state": "error",
+            "read_only": True,
+            "detail": "survival file unreadable/corrupt -> fail closed.",
+        }
+    if not isinstance(d, dict):
+        return {"state": "error", "read_only": True,
+                "detail": "survival file not an object -> fail closed."}
+
+    def _row(x):
+        if not isinstance(x, dict):
+            return None
+        return {
+            "strategy": x.get("strategy"),
+            "survival_score": x.get("survival_score"),
+            "closed_trades": x.get("closed_trades"),
+            "open_trades": x.get("open_trades"),
+            "lifespan_days": x.get("lifespan_days"),
+            "historical_drawdown_behavior": x.get("historical_drawdown_behavior"),
+            "last_seen_at": x.get("last_seen_at"),
+        }
+
+    strategies = d.get("strategies")
+    strat_count = len(strategies) if isinstance(strategies, dict) else 0
+    most = [r for r in (_row(x) for x in (d.get("most_survivable") or [])) if r]
+    weak = [r for r in (_row(x) for x in (d.get("weakest") or [])) if r]
+    return {
+        "state": "ready",
+        "read_only": True,
+        "status": d.get("status", "UNKNOWN"),
+        "strategy_count": strat_count,
+        "most_survivable": most[:5],
+        "weakest": weak[:5],
+        "note": "Observed survival metrics only; no strategy is paper/live "
+                "ready and JARVIS deploys nothing.",
+    }
+
+
+def _jarvis_candidate_registry() -> dict:
+    """READ-ONLY strategy-candidate registry (Bundle B / T3). Distinct from the
+    VIDEO asset registries: this enumerates research strategy candidates from
+    the committed survival file with a derived (display-only) observation tier.
+    Every candidate is RESEARCH_ONLY — paper/live/broker all false. Reads only;
+    writes nothing; deploys nothing."""
+    import json as _json
+    path = BASE / _JARVIS_SURVIVAL_REL
+    if not path.exists():
+        return {
+            "state": "not_found",
+            "read_only": True,
+            "candidate_status": "RESEARCH_CANDIDATE_ONLY",
+            "paper_ready": False,
+            "live_ready": False,
+            "broker_control": False,
+            "candidates": [],
+            "detail": f"{_JARVIS_SURVIVAL_REL} not found (NOT_FOUND).",
+        }
+    try:
+        d = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 — corrupt fails closed.
+        return {
+            "state": "error",
+            "read_only": True,
+            "candidate_status": "RESEARCH_CANDIDATE_ONLY",
+            "paper_ready": False,
+            "live_ready": False,
+            "broker_control": False,
+            "candidates": [],
+            "detail": "survival file unreadable/corrupt -> fail closed.",
+        }
+    strategies = d.get("strategies") if isinstance(d, dict) else None
+    candidates = []
+    if isinstance(strategies, dict):
+        for name, x in strategies.items():
+            if not isinstance(x, dict):
+                continue
+            score = x.get("survival_score")
+            if isinstance(score, (int, float)):
+                tier = ("OBSERVED_SURVIVOR" if score >= 10
+                        else "WEAK_CANDIDATE" if score > 0
+                        else "NO_EDGE_YET")
+            else:
+                tier = "UNKNOWN"
+            candidates.append({
+                "strategy": x.get("strategy", name),
+                "observation_tier": tier,
+                "survival_score": score,
+                "closed_trades": x.get("closed_trades"),
+                "open_trades": x.get("open_trades"),
+                "first_seen_at": x.get("first_seen_at"),
+                "last_seen_at": x.get("last_seen_at"),
+                "deployment_status": "RESEARCH_ONLY",
+            })
+        candidates.sort(
+            key=lambda c: (c["survival_score"]
+                           if isinstance(c["survival_score"], (int, float))
+                           else -1),
+            reverse=True)
+    return {
+        "state": "ready" if candidates else "empty",
+        "read_only": True,
+        "candidate_status": "RESEARCH_CANDIDATE_ONLY",
+        "paper_ready": False,
+        "live_ready": False,
+        "broker_control": False,
+        "candidate_count": len(candidates),
+        "candidates": candidates,
+        "note": "Research strategy candidates (NOT video assets). Tiers are "
+                "display-only labels derived from observed survival_score; no "
+                "candidate is deployable from JARVIS.",
     }
 
 
@@ -8339,6 +8620,10 @@ def api_jarvis_status():
     system_map = _jarvis_safe(_jarvis_system_map)
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
     cache_freshness = _jarvis_safe(_jarvis_cache_freshness)
+    factory_status = _jarvis_safe(_jarvis_factory_status)
+    survival_ledger = _jarvis_safe(_jarvis_survival_ledger)
+    candidate_registry = _jarvis_safe(_jarvis_candidate_registry)
+    freshness_guard = _jarvis_safe(_jarvis_freshness_guard)
     # Derived ONLY from the dicts already collected above — no new commands.
     commander_snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
         operator_safety, safety, health_report, route_smoke, mission_board,
@@ -8367,6 +8652,10 @@ def api_jarvis_status():
         "system_map": system_map,
         "trading_detail": trading_detail,
         "cache_freshness": cache_freshness,
+        "factory_status": factory_status,
+        "survival_ledger": survival_ledger,
+        "candidate_registry": candidate_registry,
+        "freshness_guard": freshness_guard,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
 

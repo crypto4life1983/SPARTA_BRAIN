@@ -1,0 +1,87 @@
+{
+  "title": "JARVIS Checkpoint Bundle B — Strategy Factory Read-Only Observation Layer",
+  "generated_at": "2026-05-30T23:10:00",
+  "baseline_commit": "307d994",
+  "head_at_implementation": "102202a",
+  "head_note": "The background crypto/factory process advanced HEAD from the Bundle A baseline 307d994 to 102202a (commits 3d46c14, 102202a touched only trading_research/agentic_factory test/diagnosis files). Bundle B was implemented on 102202a; baseline 307d994 remains in history. No factory file was modified by Bundle B.",
+  "scope": "Ship ONLY the CRITICAL read-only observation layer (T1, T2, T3) plus the freshness guard (T6). Additive and read-only. No trading execution logic changed; no broker/paper/live control created; no Factory run triggered; no strategy optimization; no crypto/futures research execution; no trading-file mutation; no runtime snapshot committed.",
+  "read_only": true,
+  "tasks_delivered": {
+    "T1_factory_status": {
+      "key": "factory_status",
+      "helper": "_jarvis_factory_status()",
+      "source": "trading_research/agentic_factory/reports/*/report.json (opens only report.json; never any *raw* artifact)",
+      "behavior": "Lists the 10 most-recently-modified factory reports with an extracted decision/verdict each; report_count over all dirs. Missing dir -> state=missing/NOT_FOUND; unreadable report -> that row shows UNKNOWN, never an invented decision.",
+      "decision_extraction": "_jarvis_report_decision(): exact priority keys (decision, verdict, final_verdict, gate_decision, is_verdict, final_recommendation, trading_recommendation, recommendation), then suffix (_verdict/_decision) and numbered (^\\d+_(verdict|decision|recommendation)$) fallback. No match -> UNKNOWN.",
+      "live_observed": {"state": "ready", "report_count": 58}
+    },
+    "T2_survival_ledger": {
+      "key": "survival_ledger",
+      "helper": "_jarvis_survival_ledger()",
+      "source": "data/profit_brain_strategy_survival.json",
+      "behavior": "Surfaces status, strategy_count, top-5 most_survivable and top-5 weakest (strategy/survival_score/closed_trades/open_trades/lifespan_days/drawdown_behavior/last_seen_at). Missing -> NOT_FOUND; corrupt -> fail closed (error). Computes no new score.",
+      "live_observed": {"state": "ready", "status": "PARTIAL", "strategy_count": 7, "top_survivor": {"strategy": "G", "survival_score": 17.1}}
+    },
+    "T3_candidate_registry": {
+      "key": "candidate_registry",
+      "helper": "_jarvis_candidate_registry()",
+      "source": "data/profit_brain_strategy_survival.json (strategies map)",
+      "behavior": "Enumerates RESEARCH strategy candidates (explicitly distinct from the VIDEO asset registries). Each has a display-only observation_tier derived from survival_score (>=10 OBSERVED_SURVIVOR, >0 WEAK_CANDIDATE, ==0 NO_EDGE_YET, else UNKNOWN) and deployment_status=RESEARCH_ONLY. candidate_status=RESEARCH_CANDIDATE_ONLY; paper_ready/live_ready/broker_control all false.",
+      "live_observed": {"state": "ready", "candidate_count": 7, "paper_ready": false, "live_ready": false, "broker_control": false}
+    },
+    "T6_freshness_guard": {
+      "key": "freshness_guard",
+      "helper": "_jarvis_freshness_guard(server_head=None, current_head=None)",
+      "boot_capture": "_JARVIS_SERVER_BOOT_HEAD captured ONCE at import via _jarvis_run_git(['rev-parse','--short','HEAD']), fail-closed to None.",
+      "behavior": "Compares the HEAD the live process booted on against current on-disk git HEAD. Equal -> fresh; differ -> stale (detail tells operator to restart per Step 49 protocol); either missing -> unknown (fail-safe, stale=false). Pure read-only comparison; restarts nothing.",
+      "rationale": "uvicorn runs reload=False, so a running process keeps booting-commit code until a manual restart; this guard makes that staleness visible without a manual probe.",
+      "live_observed": {"state": "fresh", "server_head": "102202a", "current_head": "102202a", "stale": false}
+    }
+  },
+  "ui": {
+    "section": "Strategy Factory Readiness (read-only observation; no execution; no broker)",
+    "panels_added": ["pFactoryReadiness", "pFactoryStatus", "pSurvivalLedger", "pCandidateRegistry", "pFreshness"],
+    "readiness_banner": "pFactoryReadiness — derived ONLY from the four panels already fetched; shows READY when factory_status/survival_ledger/candidate_registry are available and the live build is fresh, else INCOMPLETE with a Pending list. Always shows 'Execution path: NONE — OBSERVATION ONLY'. Warns prominently when the live build is STALE.",
+    "controls_added": "none — no <button>, <form>, onclick, method=post, snapshot, or refresh affordance introduced (verified by template tests)."
+  },
+  "status_shape": {
+    "before": 24,
+    "after": 28,
+    "new_keys": ["factory_status", "survival_ledger", "candidate_registry", "freshness_guard"],
+    "all_fail_closed_via": "_jarvis_safe",
+    "trading_flags_locked": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false}
+  },
+  "tests": {
+    "new_file": "tests/test_jarvis_factory_panels.py (15 tests: status wiring/28-key, no-trading-enable, freshness fresh/stale/unknown + boot-head shape, decision priority/numbered/suffix/unknown/non-dict, factory/survival/candidate read-only shape, template panels-present/no-controls)",
+    "updated_assertions": [
+      "tests/test_jarvis_snapshot_report.py: docstring 24->28 keys; assert len(status) == 28 (was 24)",
+      "tests/test_jarvis_ask_contract.py: assert len(after) == 28 (was 24)"
+    ],
+    "snapshot_whitelist": "No change needed — status_key_count is dynamic (len(keys)) and already whitelisted in snapshot compare; it will correctly report the verified 24->28 difference against an older baseline.",
+    "result": "408 passed, 0 failed, 0 skipped (test_jarvis_route, test_jarvis_conversation_safety, test_jarvis_ask_contract, test_jarvis_snapshot_report, test_jarvis_factory_panels)"
+  },
+  "read_only_no_trading_guarantees": [
+    "All four helpers read committed/local files only and run at most one read-only `git rev-parse`.",
+    "No helper executes a backtest, fetches data, calls a broker, starts/stops a bot, optimizes a strategy, reads secrets, or writes any file.",
+    "candidate_registry pins paper_ready/live_ready/broker_control = false and deployment_status = RESEARCH_ONLY for every candidate.",
+    "No /api/jarvis/snapshot and no /api/jarvis/refresh route added; template has no execution/refresh/snapshot control.",
+    "Missing/corrupt data fails closed to UNKNOWN / NOT_FOUND — never an invented decision or score.",
+    "The freshness guard restarts nothing; it only reports a comparison."
+  ],
+  "explicitly_not_done": [
+    "Did not open Strategy Factory v1.",
+    "Did not modify trading execution logic or any trading_research/agentic_factory file.",
+    "Did not create any broker/paper/live/execution/refresh/snapshot control or endpoint.",
+    "Did not run, simulate, or optimize any strategy; ran no backtest, no crypto/futures research execution.",
+    "Did not stage or commit any runtime snapshot (storage/jarvis/snapshots) or the untracked backlog.",
+    "Did not perform any broad process kill or restart the live server."
+  ],
+  "validation": {
+    "py_compile": "PYCOMPILE_OK (app.py)",
+    "pytest_scoped": "408 passed, 0 failed, 0 skipped",
+    "report_json_valid": "to be confirmed via python -m json.tool",
+    "git_status": "only Bundle B files staged: app.py, templates/jarvis.html, tests/test_jarvis_snapshot_report.py, tests/test_jarvis_ask_contract.py, tests/test_jarvis_factory_panels.py, docs/jarvis_checkpoint_bundle_b/*"
+  },
+  "final_verdict": "READY_FOR_STRATEGY_FACTORY_V1",
+  "verdict_rationale": "The three CRITICAL observation panels that Bundle A flagged as unbuilt (T1 Factory status, T2 pass/fail-survival ledger, T3 candidate registry) plus the T6 live-server freshness guard are implemented additive and read-only, wired into a 28-key fail-closed status feed, surfaced in a dedicated 'Strategy Factory Readiness' UI section with a clear READY/INCOMPLETE banner, and covered by 15 new tests (408 total passing). JARVIS now shows Factory readiness, candidate/pass-fail/freshness information from committed reports only, with missing data shown as UNKNOWN/NOT_FOUND and a prominent stale-build warning — while adding NO trigger or execution path. Strategy Factory v1 was NOT opened, per scope."
+}
