@@ -1897,3 +1897,189 @@ def test_op_forbidden_command_still_refuses(q):
     assert body.get("refusal_reason")
     for field in _FORBIDDEN_RESPONSE_FIELDS:
         assert field not in body
+
+
+# ==========================================================================
+# SPARTA Brain Knowledge Map v1
+# JARVIS must answer whole-system module questions (not just trading): what does
+# SPARTA Brain do / explain all modules / what is the YouTube builder / Hydra /
+# affiliate / automation / moving company / brain memory / dashboards / roadmap.
+# All read-only: unknown/planned modules are reported honestly (never invented),
+# forbidden execution/upload/trading commands still refuse, and no new route,
+# storage, or execution path is added.
+# ==========================================================================
+
+_KM_MODULE_QUESTIONS = [
+    ("what is the youtube builder", "youtube builder"),
+    ("what is hydra", "hydra"),
+    ("what is the affiliate system", "affiliate"),
+    ("what automation do we have", "automation"),
+    ("what is brain memory", "brain memory"),
+    ("what dashboards exist", "dashboards"),
+    ("what is the moving company workflow", "moving company"),
+]
+
+_KM_ALL_MODULES_QUESTIONS = [
+    "what does sparta brain do",
+    "explain all the modules",
+    "what can you do",
+]
+
+
+@requires_ask
+@pytest.mark.parametrize("q,needle", _KM_MODULE_QUESTIONS)
+def test_km_module_questions_return_useful_answers(q, needle):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+    low = body["answer"].lower()
+    assert needle in low, f"{q!r} answer must describe the module ({needle!r})"
+    assert "read-only" in low, f"{q!r} answer must state it is read-only"
+    assert "authorizes no action" in low
+    assert "knowledge_map" in body["sources_used"]
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"{q!r} must not invent {banned!r}"
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _KM_ALL_MODULES_QUESTIONS)
+def test_km_all_modules_lists_the_system(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+    low = body["answer"].lower()
+    # The map must name several distinct modules, not just trading.
+    for name in ("jarvis", "strategy factory", "youtube", "hydra"):
+        assert name in low, f"{q!r} overview must mention {name!r}"
+    assert "read-only" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+
+
+@requires_ask
+def test_km_roadmap_says_planned_not_built():
+    body = _client().post(_ASK_PATH, json={"question": "what is the roadmap"}).json()
+    assert body["refused"] is False
+    low = body["answer"].lower()
+    assert "roadmap" in low
+    assert "planned" in low
+    assert "not built" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+
+
+@requires_ask
+def test_km_unknown_module_reported_not_invented():
+    # The moving-company workflow is NOT built. JARVIS must say so honestly and
+    # must not claim it is shipped/operational/running.
+    body = _client().post(
+        _ASK_PATH, json={"question": "what is the moving company workflow"}).json()
+    assert body["refused"] is False
+    low = body["answer"].lower()
+    assert "planned" in low, "must report the unbuilt module as planned"
+    assert "moving company" in low
+    for invented in ("shipped", "operational", "is running", "is live", "fully built"):
+        assert invented not in low, f"must not invent capability: {invented!r}"
+
+
+@requires_ask
+def test_km_operator_mode_shows_module_detail():
+    body = _client().post(
+        _ASK_PATH,
+        json={"question": "what is the youtube builder operator mode"}).json()
+    assert body["refused"] is False
+    low = body["answer"].lower()
+    assert "operator detail" in low
+    assert "module key" in low
+    assert "youtube builder" in low
+
+
+@requires_ask
+def test_km_demo_mode_is_plain_language():
+    body = _client().post(
+        _ASK_PATH,
+        json={"question": "describe the youtube builder to a customer"}).json()
+    assert body["refused"] is False
+    low = body["answer"].lower()
+    assert "youtube builder" in low
+    assert "read-only" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "upload to youtube",
+    "publish the video",
+    "generate a video",
+    "run the hydra engine",
+    "what is the youtube builder then upload to youtube",
+    "explain the affiliate system then place a trade",
+    "describe hydra and then render the video",
+])
+def test_km_forbidden_command_still_refuses(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must refuse"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_km_module_questions_classify_safe():
+    from jarvis_conversation_safety import classify_jarvis_question
+    for q, _ in _KM_MODULE_QUESTIONS:
+        out = classify_jarvis_question(q)
+        assert out["refused"] is False, f"{q!r} should be a read-only safe question"
+        assert out["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+
+
+@requires_ask
+def test_km_status_questions_stay_on_existing_branches():
+    # The knowledge map must NOT hijack the dedicated status branches.
+    c = _client()
+    fac = c.post(_ASK_PATH, json={"question": "factory status"}).json()
+    assert "strategy factory" in fac["answer"].lower()
+    assert "factory_status" in fac["sources_used"]
+
+    trd = c.post(_ASK_PATH, json={"question": "what is the trading status"}).json()
+    low = trd["answer"].lower()
+    assert "operator detail" not in low
+    assert "knowledge_map" not in trd["sources_used"]
+
+    brn = c.post(_ASK_PATH, json={"question": "what is sparta brain status"}).json()
+    assert "sparta brain status" in brn["answer"].lower()
+    assert "knowledge_map" not in brn["sources_used"]
+
+
+@requires_ask
+def test_km_adds_no_routes_and_writes_nothing():
+    c = _client()
+    paths = sorted({getattr(r, "path", "") for r in c.app.routes
+                    if getattr(r, "path", "").startswith("/api/jarvis/")})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    for q, _ in _KM_MODULE_QUESTIONS:
+        c.post(_ASK_PATH, json={"question": q})
+    for q in _KM_ALL_MODULES_QUESTIONS + ["what is the roadmap"]:
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "knowledge map must not write files"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+
+
+@requires_ask
+def test_km_keeps_status_shape_and_trading_flags_locked():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    for q, _ in _KM_MODULE_QUESTIONS:
+        c.post(_ASK_PATH, json={"question": q})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False

@@ -87,6 +87,19 @@ _FORBIDDEN_EXECUTION = tuple(re.compile(p) for p in (
     r"\bopen\b.*\bterminal\b",
     r"\bopen\s+(?:a\s+|the\s+)?shell\b",
     r"\btrigger\b",
+    # Knowledge Map v1 — publishing / content-generation execution. JARVIS
+    # describes the YouTube builder, Hydra video engine, affiliate system, and
+    # clone/content engine, but it must never start an upload, publish a video,
+    # generate content, or run a builder/engine. These are matched FIRST so
+    # action-mixed phrases ("upload to youtube", "generate a video", "run the
+    # hydra engine") refuse before any knowledge-map answer is produced.
+    r"\bupload\b.*\b(?:youtube|video|shorts?|content|clip|channel|reel)\b",
+    r"\b(?:youtube|video|shorts?|content|clip|reel)\b.*\bupload\b",
+    r"\bpublish\b.*\b(?:video|youtube|shorts?|content|post|channel|clip|reel|affiliate)\b",
+    r"\bgenerate\b.*\b(?:content|video|caption|script|reply|post|shorts?|reel|clip)\b",
+    r"\b(?:produce|create|make|render)\b.*\b(?:a\s+|the\s+)?(?:video|content|short|shorts?|reel|clip|render)\b",
+    r"\brun\b.*\b(?:builder|hydra|affiliate|automation|clone\s+engine|content\s+generator|generator|youtube)\b",
+    r"\bstart\b.*\b(?:upload|render|campaign|automation\s+cycle|brain\s+cycle)\b",
 ))
 
 _FORBIDDEN_MUTATION = tuple(re.compile(p) for p in (
@@ -278,6 +291,28 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\b(?:is\s+)?(?:the\s+)?system\s+working\b",
     r"\bis\s+it\s+working\b",
     r"\bworking\s+(?:fine|well|ok|okay|good)\b",
+    # SPARTA Brain Knowledge Map v1 — read-only questions about the whole system
+    # and its individual modules (not just trading). Definitional / all-modules /
+    # roadmap intents. Forbidden patterns (upload/publish/generate/run-builder/
+    # trade) are matched FIRST, so action-mixed phrases still refuse.
+    r"\byoutube\b",
+    r"\bhydra\b",
+    r"\baffiliate\b",
+    r"\bautomation\b",
+    r"\bmoving\s+company\b",
+    r"\bbrain\s+memory\b",
+    r"\bdashboards?\b",
+    r"\bclone\s+engine\b",
+    r"\bknowledge\s+map\b",
+    r"\broadmap\b",
+    r"\bvideo\s+engine\b",
+    r"\banimation\s+engine\b",
+    r"\bcontent\s+generation\b",
+    r"\b(?:all|every|which|what)\s+(?:the\s+)?(?:modules?|features?|parts?|components?)\b",
+    r"\bwhat\s+(?:does|do)\s+(?:sparta|you)\b",
+    r"\bwhat\s+can\s+(?:sparta|you)\b",
+    r"\bwhat\s+do\s+you\s+do\b",
+    r"\bwhole\s+system\b",
 ))
 
 _SAFE_GROUPS = (

@@ -9257,6 +9257,22 @@ def _jarvis_conversational_answer(q: str):
     if cos is not None:
         return cos
 
+    # --- SPARTA Brain Knowledge Map v1 — whole-system module map ----------
+    # Read-only answers for "what does SPARTA Brain do / explain all modules /
+    # what is the YouTube builder / Hydra / affiliate / automation / moving
+    # company / brain memory / dashboards / roadmap". Engages ONLY on
+    # all-modules, roadmap, or definitional per-module questions and EXCLUDES
+    # status frames, so the existing factory/brain/trading/workflow status
+    # branches below keep their behavior. Invents no capability; says
+    # "planned"/"unknown" honestly; runs nothing.
+    try:
+        from jarvis_knowledge_map import build_knowledge_map_answer
+        km = build_knowledge_map_answer(q, operator=_operator)
+        if km is not None:
+            return km
+    except Exception:
+        pass
+
     # --- Executive Briefing Mode v1 — good morning / overnight / exec summary --
     # Greeting "good morning", briefing requests, an overnight update, an
     # executive summary, and "tell me more" all produce the structured
@@ -9630,6 +9646,17 @@ def _jarvis_ask_answer(safety_class: str, q: str):
         cos = _jarvis_chief_of_staff_answer(q)
         if cos is not None:
             return cos
+        # SPARTA Brain Knowledge Map v1 — "explain the YouTube builder / Hydra /
+        # affiliate / all modules" classify SAFE_EXPLAIN. Answer those read-only
+        # from the committed module map before the generic glossary fallback.
+        try:
+            from jarvis_knowledge_map import (build_knowledge_map_answer,
+                                              wants_operator)
+            km = build_knowledge_map_answer(q, operator=wants_operator(q))
+            if km is not None:
+                return km
+        except Exception:
+            pass
         if "warning" in q:
             agg = _jarvis_safe(api_jarvis_status)
             cs = agg.get("commander_snapshot") if isinstance(agg, dict) else {}

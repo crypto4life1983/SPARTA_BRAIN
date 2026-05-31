@@ -1,0 +1,151 @@
+{
+  "bundle": "SPARTA_BRAIN_KNOWLEDGE_MAP_V1",
+  "date": "2026-05-31",
+  "verdict": "SPARTA_BRAIN_KNOWLEDGE_MAP_READY",
+  "goal": "Give JARVIS a read-only understanding of all major SPARTA Brain modules (not only trading) so it can answer 'what does SPARTA Brain do / explain all modules / what is the YouTube builder / Hydra / affiliate / automation / moving company / brain memory / dashboards / roadmap' in executive, operator, and product-demo registers. Read-only only; no execution; no broker/paper/live trading; no YouTube upload; no content-generation job; no file mutation outside approved docs/tests/code; no fake capabilities; unknown/unbuilt modules reported honestly; forbidden commands still refuse.",
+  "scope": "Additive, read-only. One new pure data+rendering module, two answer call-sites, classifier pattern additions, tests, and docs. No new routes, storage, or execution path.",
+  "files_added": [
+    "jarvis_knowledge_map.py",
+    "docs/sparta_brain_knowledge_map_v1/report.md",
+    "docs/sparta_brain_knowledge_map_v1/report.json"
+  ],
+  "files_changed": [
+    "app.py",
+    "jarvis_conversation_safety.py"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "classifier_changed": true,
+  "template_changed": false,
+  "new_routes": false,
+  "new_storage": false,
+  "new_execution": false,
+  "implementation": {
+    "data_source": {
+      "file": "jarvis_knowledge_map.py",
+      "type": "pure data + rendering, no side effects",
+      "modules_mapped": 11,
+      "module_fields": ["key", "name", "keywords", "purpose", "status", "can", "cannot", "safety", "demo", "location"],
+      "modules": [
+        {"key": "jarvis", "name": "JARVIS", "status": "shipped"},
+        {"key": "strategy_factory", "name": "Strategy Factory", "status": "shipped"},
+        {"key": "trading_research", "name": "Trading Research", "status": "shipped (partial)"},
+        {"key": "youtube_builder", "name": "YouTube Builder", "status": "shipped"},
+        {"key": "hydra", "name": "Hydra / Video Engine", "status": "shipped"},
+        {"key": "affiliate", "name": "Affiliate System", "status": "shipped"},
+        {"key": "automation", "name": "Automation Workflows", "status": "shipped"},
+        {"key": "moving_company", "name": "Moving Company Workflow", "status": "planned"},
+        {"key": "brain_memory", "name": "Brain Memory", "status": "shipped"},
+        {"key": "dashboards", "name": "Dashboards", "status": "shipped"},
+        {"key": "safety", "name": "Safety & Governance", "status": "shipped"}
+      ],
+      "roadmap_items": 5,
+      "registers": ["executive (default)", "operator (technical detail)", "product-demo (customer/investor/friend)"],
+      "public_helpers": ["find_module", "is_all_modules_query", "is_roadmap_query", "is_definitional", "asks_about_module", "wants_operator", "wants_demo", "build_knowledge_map_answer"]
+    },
+    "answer_wiring": {
+      "file": "app.py",
+      "call_sites": [
+        "_jarvis_conversational_answer(q): after the Chief-of-Staff check and BEFORE the briefing/factory/brain/trading/workflow status branches (SAFE_INFO path)",
+        "_jarvis_ask_answer(): SAFE_EXPLAIN branch, after the Chief-of-Staff check"
+      ],
+      "gating": "Engages ONLY on all-modules, roadmap, or a definitional/inquiry per-module question, and EXCLUDES status frames (status/progress/how is/update on/state of), so the existing factory/brain/trading/workflow status branches keep their behavior. Imported lazily inside a try/except so any import issue falls through harmlessly."
+    },
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "forbidden_added_to": "_FORBIDDEN_EXECUTION (matched FIRST)",
+      "forbidden_added": [
+        "upload <youtube|video|shorts|content|clip|channel|reel>",
+        "<youtube|video|shorts|content|clip|reel> upload",
+        "publish <video|youtube|shorts|content|post|channel|clip|reel|affiliate>",
+        "generate <content|video|caption|script|reply|post|shorts|reel|clip>",
+        "<produce|create|make|render> <video|content|short|reel|clip|render>",
+        "run <builder|hydra|affiliate|automation|clone engine|content generator|generator|youtube>",
+        "start <upload|render|campaign|automation cycle|brain cycle>"
+      ],
+      "safe_added_to": "_SAFE_INFO",
+      "safe_added": [
+        "youtube", "hydra", "affiliate", "automation", "moving company",
+        "brain memory", "dashboards", "clone engine", "knowledge map", "roadmap",
+        "video engine", "animation engine", "content generation",
+        "all/every/which/what (the) modules/features/parts/components",
+        "what does/do sparta|you", "what can sparta|you", "what do you do", "whole system"
+      ]
+    }
+  },
+  "behavior_after": {
+    "what_does_sparta_brain_do": "All-modules executive overview naming every module + status; ends authorizing no action.",
+    "explain_all_modules": "Same all-modules overview (classifies SAFE_EXPLAIN; answered via the SAFE_EXPLAIN call-site).",
+    "what_is_the_youtube_builder": "Per-module read: purpose, status shipped, can/cannot (cannot upload/publish), safety, authorizes no action.",
+    "what_is_hydra": "Per-module read of the video engine; cannot render/publish from JARVIS.",
+    "what_is_the_affiliate_system": "Per-module read; no income claims; cannot post/publish/run a campaign.",
+    "what_automation_do_we_have": "Per-module read of automation scripts; cannot trigger/schedule from JARVIS.",
+    "what_is_the_moving_company_workflow": "Reported as PLANNED (not built); no invented capability.",
+    "what_is_brain_memory": "Per-module read of the file-based memory store.",
+    "what_dashboards_exist": "Lists /guide, /clone, /jarvis as read-only views.",
+    "what_is_the_roadmap": "Lists planned, NOT-built items honestly.",
+    "operator_mode": "Adds module key, status, and committed location.",
+    "product_demo_mode": "Plain-language explanation for a customer/investor/friend; still read-only.",
+    "status_questions": "factory/trading/sparta-brain/workflow status questions still route to their existing branches (knowledge map does not hijack them).",
+    "forbidden_commands": "upload/publish/generate/run-builder/render and all trading commands still refuse FORBIDDEN (classifier unchanged-first ordering)."
+  },
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_youtube_upload": true,
+    "no_content_generation_job": true,
+    "no_mutation": true,
+    "no_storage": true,
+    "forbidden_first_unchanged": true,
+    "no_invented_capabilities": true,
+    "unknown_or_unbuilt_reported_honestly": true,
+    "no_invented_pnl_or_performance": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"],
+    "data_source_is_pure": true,
+    "executive_default_preserved": true,
+    "status_branches_not_hijacked": true
+  },
+  "tests": {
+    "file": "tests/test_jarvis_ask_contract.py",
+    "section": "SPARTA Brain Knowledge Map v1",
+    "new_test_count": 25,
+    "new_tests": [
+      "test_km_module_questions_return_useful_answers (x7)",
+      "test_km_all_modules_lists_the_system (x3)",
+      "test_km_roadmap_says_planned_not_built",
+      "test_km_unknown_module_reported_not_invented",
+      "test_km_operator_mode_shows_module_detail",
+      "test_km_demo_mode_is_plain_language",
+      "test_km_forbidden_command_still_refuses (x7)",
+      "test_km_module_questions_classify_safe",
+      "test_km_status_questions_stay_on_existing_branches",
+      "test_km_adds_no_routes_and_writes_nothing",
+      "test_km_keeps_status_shape_and_trading_flags_locked"
+    ]
+  },
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ') that breaks pytest root enumeration; unrelated to this change.",
+    "knowledge_map_new_tests": "25 passed",
+    "regression_full_files": "618 passed (test_jarvis_ask_contract.py + test_jarvis_conversation_safety.py + test_jarvis_route.py, in 696.71s)",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "module_questions_useful": true,
+    "all_modules_overview_lists_system": true,
+    "unknown_module_not_invented": true,
+    "operator_and_demo_registers_work": true,
+    "status_branches_preserved": true,
+    "forbidden_still_refused": true,
+    "no_new_routes": true,
+    "no_storage": true,
+    "no_new_execution": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}
