@@ -230,6 +230,30 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\btechnical\s+details?\b",
     r"\bdiagnostics?\b",
     r"\bexact\s+counts?\b",
+    # JARVIS Chief of Staff Mode v1 — read-only strategic + product-demo
+    # intents, answered as advice only from the existing status aggregate.
+    # Forbidden patterns are still matched FIRST. Note: "sell" stays a forbidden
+    # trading token, so "are we ready to sell" deliberately refuses — use
+    # "ready to demo / ship / launch" for product-readiness questions.
+    r"\bwork\s+on\s+(?:today|next|now)\b",
+    r"\bwhat\s+should\s+we\s+work\b",
+    r"\bwhat\s+to\s+work\s+on\b",
+    r"\bsmartest\b",
+    r"\bnext\s+move\b",
+    r"\bbest\s+(?:next\s+)?move\b",
+    r"\bpriorit(?:y|ies)\b",
+    r"\bmost\s+important\b",
+    r"\bbig\s+picture\b",
+    r"\bwhere\s+(?:we\s+are|are\s+we|do\s+we\s+stand)\b",
+    r"\bwhy\b.*\bmatters?\b",
+    r"\bwhat\s+should\s+i\s+tell\b",
+    r"\bready\s+to\s+(?:demo|ship|launch|pitch)\b",
+    r"\bready\s+for\s+a\s+demo\b",
+    r"\bdemo\b",
+    r"\bpitch\b",
+    r"\bdescribe\b",
+    r"\bwhat\s+(?:is|are)\s+jarvis\b",
+    r"\bwho\s+is\s+jarvis\b",
 ))
 
 _SAFE_GROUPS = (

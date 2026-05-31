@@ -1,0 +1,128 @@
+{
+  "bundle": "JARVIS_CHIEF_OF_STAFF_MODE_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_CHIEF_OF_STAFF_READY",
+  "goal": "Upgrade JARVIS from executive briefing to Chief-of-Staff quality: contextual, strategic, product-demo-ready, and able to recommend what matters next. JARVIS should sound like it understands Mahmoud, SPARTA Brain, current priorities, and the project journey, while staying strictly read-only and inventing no trades or performance.",
+  "files_changed": [
+    "jarvis_conversation_safety.py",
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_chief_of_staff_v1/report.md",
+    "docs/jarvis_chief_of_staff_v1/report.json"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "implementation": {
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "change": "Appended SAFE_INFO regex patterns for chief-of-staff strategic + product-demo intents at the END of the _SAFE_INFO tuple. Forbidden patterns are still matched FIRST and unchanged.",
+      "new_safe_info_patterns": [
+        "work on today/next/now",
+        "what should we work",
+        "what to work on",
+        "smartest",
+        "next move",
+        "best (next) move",
+        "priority/priorities",
+        "most important",
+        "big picture",
+        "where we are / where are we / where do we stand",
+        "why ... matters",
+        "what should i tell",
+        "ready to demo/ship/launch/pitch",
+        "ready for a demo",
+        "demo",
+        "pitch",
+        "describe",
+        "what is/are jarvis",
+        "who is jarvis"
+      ],
+      "sell_note": "\\bsell\\b remains a FORBIDDEN_TRADING pattern and was NOT weakened. 'are we ready to sell' deliberately refuses as FORBIDDEN_TRADING. Product-readiness is supported via 'ready to demo/ship/launch/pitch'."
+    },
+    "answer_layer": {
+      "file": "app.py",
+      "function_added": "_jarvis_chief_of_staff_answer(q)",
+      "function_changed": "_jarvis_conversational_answer(q), _jarvis_ask_answer(safety_class, q)",
+      "design": "New module-level _jarvis_chief_of_staff_answer reads ONLY the api_jarvis_status aggregate and returns (answer, sources) or None. It produces two answer styles: (1) a product-demo overview when the question frames a description of a known subject (SPARTA Brain / JARVIS / Strategy Factory / the system/product/platform) AND is not a status query; (2) a strategic chief-of-staff read for work/priority/next-move/big-picture/where-we-stand/why-it-matters/what-to-tell/demo-readiness questions.",
+      "strategic_structure": "Current situation -> what changed recently -> why it matters -> recommended focus -> what not to do -> one clear next action, framed as 'advice only, read-only' that 'authorizes no action and executes nothing'.",
+      "wiring": "Called at the TOP of both the SAFE_EXPLAIN branch of _jarvis_ask_answer and at the top of _jarvis_conversational_answer (before Executive Briefing Mode), so it serves both SAFE_EXPLAIN (e.g. 'explain where we are') and SAFE_INFO routes.",
+      "unknown_handling": "If factory_status.state != 'ready' or no committed decision exists, the 'what changed recently' line says 'no recent change is confirmed from read-only state' rather than inventing one.",
+      "non_hijack": "Demo overview requires _demo_frame AND _demo_subject AND NOT _status_word, so existing status branches ('what is the Strategy Factory status?', 'what is SPARTA Brain status?') are untouched. Strategic triggers are specific substrings that do not match existing intents like 'what should we focus on today' / 'what is the next step'.",
+      "reads_only": ["api_jarvis_status aggregate (commander_snapshot, system_core, factory_status, candidate_registry, trading_detail, recommended_next_actions)"]
+    },
+    "template_change": false,
+    "template_note": "Voice + conversation mode already POST to /api/jarvis/ask, so they inherit chief-of-staff answers with no template edit."
+  },
+  "product_demo_framing": {
+    "sparta_brain": "an AI command center (local dashboard bringing the whole operation into one place)",
+    "jarvis": "the voice interface and chief of staff (plain-language Q&A from read-only system state)",
+    "strategy_factory": "the research engine that produces and reviews strategy candidates",
+    "trading": "research-only until validation passes; no live or paper trades executed; places no orders"
+  },
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_refresh_route": true,
+    "no_snapshot_route": true,
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_chat_audio_transcript_storage": true,
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true,
+    "no_invented_pnl_or_performance": true,
+    "no_invented_trades": true,
+    "no_fabricated_strategy_success": true,
+    "unknown_data_says_unknown": true,
+    "recommendations_are_advice_only": true,
+    "operator_mode_still_available": true,
+    "classifier_still_gates_every_question": true,
+    "forbidden_first_unchanged": true,
+    "sell_still_forbidden_trading": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"]
+  },
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added_section": "JARVIS Chief of Staff Mode v1",
+  "tests_added": [
+    "test_cos_strategic_answer_is_structured_and_readonly (x7)",
+    "test_cos_recommendation_is_advice_not_command (x3)",
+    "test_cos_demo_overview_describes_product_readonly (x4)",
+    "test_cos_unknown_data_is_not_invented",
+    "test_cos_forbidden_intent_still_refused (x6)",
+    "test_cos_sell_stays_forbidden_trading (x2)",
+    "test_cos_operator_mode_still_works",
+    "test_cos_adds_no_routes_and_writes_nothing",
+    "test_cos_does_not_change_status_shape"
+  ],
+  "new_test_count": 26,
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "cos_and_regression_subset": "119 passed, 102 deselected",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_factory_ask_snapshot": "252 passed",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "strategic_answers_structured_and_readonly": true,
+    "recommendations_advice_only": true,
+    "demo_overview_readonly": true,
+    "unknown_not_invented": true,
+    "no_invented_performance": true,
+    "no_invented_trades": true,
+    "forbidden_still_refused": true,
+    "sell_still_forbidden_trading": true,
+    "operator_mode_still_works": true,
+    "no_new_routes": true,
+    "no_storage": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

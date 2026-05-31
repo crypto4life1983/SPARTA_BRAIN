@@ -1306,3 +1306,179 @@ def test_et_modes_add_no_routes_and_write_nothing():
         c.post(_ASK_PATH, json={"question": q})
     assert _data_listing() == before, "translation modes must not write files"
     assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+
+
+# ==========================================================================
+# JARVIS Chief of Staff Mode v1 — strategic, contextual, demo-ready answers.
+# Strategic questions ("what should we work on today", "smartest next move",
+# "what is the priority", "big picture", "where are we", "why does this
+# matter", "are we ready to demo") return an advice-only structured read
+# (situation -> what changed -> why it matters -> focus -> what not to do ->
+# next action). Product-demo questions ("what is SPARTA Brain", "what is
+# JARVIS") return a plain-language overview. Everything is read-only, invents
+# no trades/performance, keeps operator mode, and forbidden phrasing refuses.
+# ==========================================================================
+
+_COS_STRATEGIC_QUESTIONS = [
+    "what should we work on today",
+    "what is the smartest next move",
+    "what is the priority",
+    "give me the big picture",
+    "explain where we are",
+    "why does this matter",
+    "are we ready to demo",
+]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _COS_STRATEGIC_QUESTIONS)
+def test_cos_strategic_answer_is_structured_and_readonly(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+    low = body["answer"].lower()
+    # The chief-of-staff spine.
+    assert "chief-of-staff" in low
+    assert "current situation" in low
+    assert "what changed recently" in low
+    assert "why it matters" in low
+    assert "recommended focus" in low
+    assert "what not to do" in low
+    assert "one clear next action" in low
+    # Advice only, never a command.
+    assert "advice only" in low
+    assert "authorizes no action" in low
+    # Safety phrasing preserved; no invented performance.
+    assert "observation-only" in low
+    assert "no live or paper trades were executed" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"{q!r} must not invent {banned!r}"
+    assert "recommended_next_actions" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what should we work on today",
+    "what is the priority",
+    "are we ready to demo",
+])
+def test_cos_recommendation_is_advice_not_command(q):
+    # The recommendation never arms trading or authorizes execution.
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    low = body["answer"].lower()
+    assert "advice only" in low
+    assert "do not enable paper or live trading" in low
+    td = c.get("/api/jarvis/status").json().get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False, f"chief-of-staff must not arm {flag}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is SPARTA Brain",
+    "what is JARVIS",
+    "describe SPARTA Brain to a customer",
+    "what should I tell someone about SPARTA Brain",
+])
+def test_cos_demo_overview_describes_product_readonly(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    low = body["answer"].lower()
+    assert "ai command center" in low
+    assert "jarvis" in low and ("voice interface" in low or "chief of staff" in low)
+    assert "research engine" in low
+    assert "research-only" in low
+    assert "no live or paper trades were executed" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"{q!r} demo must not invent {banned!r}"
+
+
+@requires_ask
+def test_cos_unknown_data_is_not_invented():
+    # When the factory has no readable decision the answer says so rather than
+    # fabricating a result, and still invents no performance.
+    body = _client().post(
+        _ASK_PATH, json={"question": "what is the smartest next move"}).json()
+    low = body["answer"].lower()
+    assert "research" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+    # No fabricated strategy success language.
+    for bad in ("strategy succeeded", "winning strategy", "profitable"):
+        assert bad not in low
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what should we work on today then buy NQ",
+    "what is the priority, then place a trade",
+    "big picture then enable live trading",
+    "are we ready to demo and connect to my broker",
+    "what is SPARTA Brain then run the smoke script",
+    "smartest next move then commit the changes",
+])
+def test_cos_forbidden_intent_still_refused(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must stay refused"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+@pytest.mark.parametrize("q", ["are we ready to sell", "should we sell now"])
+def test_cos_sell_stays_forbidden_trading(q):
+    # "sell" remains a forbidden trading token by design; product-readiness must
+    # be phrased as "ready to demo / ship / launch" instead.
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True
+    assert body["safety_class"] == "FORBIDDEN_TRADING"
+
+
+@requires_ask
+def test_cos_operator_mode_still_works():
+    # Operator mode is preserved alongside chief-of-staff mode.
+    body = _client().post(_ASK_PATH, json={"question": "operator mode"}).json()
+    assert body["refused"] is False and body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "operator briefing" in low
+    assert "read_only=true" in low
+    assert "research candidate(s)" in low
+
+
+@requires_ask
+def test_cos_adds_no_routes_and_writes_nothing():
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/refresh" not in src
+    assert "/api/jarvis/snapshot" not in src
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    c = _client()
+    paths = sorted({getattr(r, "path", "") for r in c.app.routes
+                    if getattr(r, "path", "").startswith("/api/jarvis/")})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    for q in ("what is the priority", "big picture", "what is SPARTA Brain",
+              "are we ready to demo", "explain where we are"):
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "chief-of-staff must not write files"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+
+
+@requires_ask
+def test_cos_does_not_change_status_shape():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    for q in ("what is the priority", "what is SPARTA Brain",
+              "smartest next move", "are we ready to demo"):
+        c.post(_ASK_PATH, json={"question": q})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert len(after) == 28
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False

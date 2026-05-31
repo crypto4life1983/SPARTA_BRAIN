@@ -8981,6 +8981,124 @@ def _jarvis_what_changed_answer():
     return (answer, sources)
 
 
+def _jarvis_chief_of_staff_answer(q: str):
+    """READ-ONLY Chief-of-Staff answers: strategic guidance and product-demo
+    descriptions.
+
+    Strategic intents ("what should we work on today", "smartest next move",
+    "what is the priority", "big picture", "where are we", "why does this
+    matter", "are we ready to demo") return a structured advice-only read:
+    current situation -> what changed recently -> why it matters -> recommended
+    focus -> what not to do -> one clear next action.
+
+    Product-demo intents ("what is SPARTA Brain", "what is JARVIS", "describe /
+    pitch / tell someone about the system") return a plain-language product
+    overview.
+
+    Everything is read-only and ADVICE ONLY: it recommends, it never commands or
+    authorizes any action. It reads only the ``api_jarvis_status`` aggregate,
+    invents no trades / performance / strategy success, and says "unknown" when
+    data is missing. Returns ``(answer, sources)`` or ``None`` to fall through.
+    """
+    status = _jarvis_safe(api_jarvis_status)
+    status = status if isinstance(status, dict) else {}
+
+    def _sub(key: str) -> dict:
+        v = status.get(key)
+        return v if isinstance(v, dict) else {}
+
+    cs = _sub("commander_snapshot")
+    state = cs.get("overall_state") or "unknown"
+    warns = cs.get("warnings") if isinstance(cs.get("warnings"), list) else []
+    fs = _sub("factory_status")
+    actions = status.get("recommended_next_actions")
+    focus = (actions[0] if isinstance(actions, list) and actions
+             and isinstance(actions[0], str)
+             else "Continue read-only validation of the existing research queue.")
+
+    # --- product-demo description (what is X / pitch / describe / tell) ----
+    _status_word = ("status" in q or "progress" in q or "update" in q
+                    or "how is" in q or "how's" in q)
+    _demo_frame = ("what is" in q or "what's" in q or "whats" in q
+                   or "describe" in q or "pitch" in q or "tell" in q
+                   or "explain" in q or "overview of" in q)
+    _demo_subject = ("sparta brain" in q or "jarvis" in q
+                     or "strategy factory" in q or "the system" in q
+                     or "the product" in q or "this product" in q
+                     or "the platform" in q)
+    if _demo_frame and _demo_subject and not _status_word:
+        return (
+            "Quick product overview (read-only). SPARTA Brain is an AI command "
+            "center — a local dashboard that brings the whole operation into one "
+            "place. JARVIS is its voice interface and chief of staff: you ask in "
+            "plain language and it answers from read-only system state. The "
+            "Strategy Factory is the research engine that produces and reviews "
+            "strategy candidates. Trading stays research-only until validation "
+            "passes — no live or paper trades were executed, and the system "
+            "places no orders. This is a read-only description and authorizes no "
+            "action.",
+            ["system_core", "factory_status", "trading_detail"])
+
+    # --- strategic chief-of-staff intents ---------------------------------
+    _demo_ready = (
+        "ready to demo" in q or "ready to ship" in q or "ready to launch" in q
+        or "ready to pitch" in q or "ready for a demo" in q or "can we demo" in q
+        or "demo ready" in q or "demo-ready" in q)
+    _strategic = (
+        "work on today" in q or "work on next" in q
+        or "what should we work on" in q or "what to work on" in q
+        or "smartest" in q or "next move" in q or "best move" in q
+        or "best next move" in q
+        or "priority" in q or "priorities" in q or "most important" in q
+        or "big picture" in q
+        or "where we are" in q or "where are we" in q or "where do we stand" in q
+        or ("why" in q and "matter" in q)
+        or "what should i tell" in q
+        or _demo_ready)
+    if not _strategic:
+        return None
+
+    decs = (fs.get("latest_decisions")
+            if isinstance(fs.get("latest_decisions"), list) else [])
+    top = next((d for d in decs if isinstance(d, dict)), None)
+    if fs.get("state") == "ready" and top:
+        recent = ("the most recent committed research checkpoint recorded "
+                  f"\"{top.get('decision', 'a research outcome')}\" (read-only, "
+                  "research only)")
+    elif fs.get("state") == "ready":
+        recent = ("recent work is limited to committed read-only research "
+                  "checkpoints")
+    else:
+        recent = "no recent change is confirmed from read-only state"
+
+    readiness = ""
+    if _demo_ready:
+        readiness = (
+            "On demo-readiness: SPARTA Brain and JARVIS are ready to show as a "
+            "read-only command center and assistant; trading is intentionally "
+            "research-only and is not part of any live demo. ")
+
+    answer = (
+        "Here is the chief-of-staff read (advice only, read-only). "
+        + readiness
+        + f"Current situation: SPARTA Brain is online and the commander snapshot "
+        f"is {state} with {len(warns)} item(s) flagged; all trading is "
+        "observation-only — no live or paper trades were executed, so there is no "
+        "performance to report. "
+        f"What changed recently: {recent}. "
+        "Why it matters: nothing moves toward paper or live trading until "
+        "validation passes, and that discipline is what protects the capital and "
+        "the credibility of the system. "
+        f"Recommended focus: {focus} "
+        "What not to do: do not enable paper or live trading, do not treat "
+        "research candidates as if they were proven, and do not skip the "
+        "validation gate. "
+        f"One clear next action: {focus} "
+        "This is advice only — it authorizes no action and executes nothing.")
+    return (answer, ["commander_snapshot", "system_core", "factory_status",
+                     "recommended_next_actions", "trading_detail"])
+
+
 def _jarvis_conversational_answer(q: str):
     """READ-ONLY natural-language answers for the Conversational Intelligence
     layer: greetings, "how are you", morning briefing, Strategy Factory status,
@@ -9086,6 +9204,14 @@ def _jarvis_conversational_answer(q: str):
             return ("Some maintenance items require attention, and there are a few "
                     "project housekeeping tasks that should be reviewed.")
         return "Nothing needs your attention right now."
+
+    # --- Chief of Staff Mode v1 — strategic guidance / product demo --------
+    # Checked FIRST so strategic phrasings ("priority", "big picture", "where
+    # are we", "smartest next move", "what is SPARTA Brain") win before the
+    # briefing / brain / factory branches. Advice only, read-only.
+    cos = _jarvis_chief_of_staff_answer(q)
+    if cos is not None:
+        return cos
 
     # --- Executive Briefing Mode v1 — good morning / overnight / exec summary --
     # Greeting "good morning", briefing requests, an overnight update, an
@@ -9334,6 +9460,12 @@ def _jarvis_ask_answer(safety_class: str, q: str):
     JARVIS concepts plus the read-only trading-posture status scan and
     NEVER authorizes any action."""
     if safety_class == "SAFE_EXPLAIN":
+        # Chief-of-Staff strategic/demo phrasings often arrive as "explain where
+        # we are" / "explain why this matters" / "explain SPARTA Brain to a
+        # customer", which classify SAFE_EXPLAIN. Answer those read-only first.
+        cos = _jarvis_chief_of_staff_answer(q)
+        if cos is not None:
+            return cos
         if "warning" in q:
             agg = _jarvis_safe(api_jarvis_status)
             cs = agg.get("commander_snapshot") if isinstance(agg, dict) else {}
