@@ -1,0 +1,91 @@
+{
+  "bundle": "JARVIS_CONVERSATIONAL_INTELLIGENCE_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_CONVERSATIONAL_INTELLIGENCE_READY",
+  "goal": "Upgrade JARVIS read-only /api/jarvis/ask from robotic status/refusal answers into a natural conversational assistant (greeting, how-are-you, morning briefing, last-24h trading recap, SPARTA Brain status, Strategy Factory status, what-needs-attention) while preserving all read-only and trading-safety rules.",
+  "files_changed": [
+    "jarvis_conversation_safety.py",
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_conversational_intelligence_v1/report.md",
+    "docs/jarvis_conversational_intelligence_v1/report.json"
+  ],
+  "implementation": {
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "change": "Added SAFE_INFO regex patterns for natural conversational phrasings. Forbidden patterns matched FIRST and unchanged.",
+      "new_safe_info_patterns": [
+        "greetings: ^(hi|hey|hello|hiya|yo|sup|gm|greetings), ^good (morning|afternoon|evening|day), good morning",
+        "how are you / how's it going / how are u / how are things / how you doing",
+        "brief / briefing / brief me",
+        "strategy factory; factory (status|state|update|report|reports|progress|overview|summary); (status|state|update|overview|progress).*factory",
+        "sparta brain; brain status",
+        "what happened; last 24; past 24; 24 hours; last day; our trades; my trades"
+      ]
+    },
+    "answer_layer": {
+      "file": "app.py",
+      "function_added": "_jarvis_conversational_answer(q)",
+      "wired_into": "_jarvis_ask_answer SAFE_INFO branch (first; returns None to fall through to existing structured answers)",
+      "reads_only": ["api_jarvis_status aggregate", "committed report summaries already exposed by status"],
+      "intents": ["greeting", "how_are_you", "morning_briefing", "strategy_factory_status", "sparta_brain_status", "trading_24h_recap", "general_system_status"]
+    },
+    "template_change": false,
+    "template_note": "Voice conversation mode already posts to /api/jarvis/ask, so it inherits the improved answers and unchanged classifier gate with no template edit."
+  },
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_refresh_route": true,
+    "no_snapshot_route": true,
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_chat_audio_transcript_storage": true,
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true,
+    "no_invented_pnl_or_performance": true,
+    "missing_data_says_unknown": true,
+    "classifier_still_gates_every_question": true,
+    "forbidden_first_unchanged": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"]
+  },
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added": [
+    "test_ci_greetings_return_natural_response",
+    "test_ci_how_are_you_is_natural_status",
+    "test_ci_morning_briefing_summarizes_readonly",
+    "test_ci_trading_24h_is_readonly_and_no_fake_pnl",
+    "test_ci_trading_24h_keeps_broker_paper_live_locked",
+    "test_ci_factory_status_summarizes_dry_run",
+    "test_ci_sparta_brain_status_summarizes_system",
+    "test_ci_forbidden_intent_in_conversation_still_refused",
+    "test_ci_no_new_routes_or_execution_added",
+    "test_ci_conversation_writes_no_files_or_chat_logs",
+    "test_ci_conversation_does_not_change_status_shape",
+    "test_ci_voice_conversation_mode_uses_same_ask_endpoint"
+  ],
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory (on-disk name 'hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_factory_ask_snapshot": "168 passed",
+    "factory_ask_snapshot_prev": "134 passed (before this bundle)",
+    "new_conversational_tests": 34,
+    "failures": 0
+  },
+  "validation": {
+    "jarvis_page_200": true,
+    "jarvis_status_200": true,
+    "ask_get_405": true,
+    "ask_answers_natural_questions": true,
+    "forbidden_still_refused": true,
+    "voice_conversation_uses_same_ask_endpoint": true,
+    "report_json_ok": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

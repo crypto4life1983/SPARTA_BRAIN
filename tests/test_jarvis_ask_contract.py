@@ -722,3 +722,235 @@ def test_step47_no_snapshot_or_refresh_endpoint():
     src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
     assert "/api/jarvis/snapshot" not in src
     assert "/api/jarvis/refresh" not in src
+
+
+# ==========================================================================
+# JARVIS Conversational Intelligence v1 — natural read-only conversation.
+# Greetings, "how are you", morning briefing, Strategy Factory status, SPARTA
+# Brain status, and a last-24h trading recap must answer naturally (refused=
+# false, SAFE_INFO) from the read-only status aggregate, WITHOUT inventing any
+# trade performance and WITHOUT loosening any refusal, route, or storage guard.
+# ==========================================================================
+
+_CI_BANNED_PERF = ("profit", "pnl", "win rate", "return of", "% return",
+                   "ready to trade", "validated", "approved", "made $", "earned")
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "hi",
+    "hello",
+    "hey jarvis",
+    "good morning",
+    "good evening",
+])
+def test_ci_greetings_return_natural_response(q):
+    c = _client()
+    r = c.post(_ASK_PATH, json={"question": q})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["refused"] is False, f"{q!r} greeting must be answered read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    # A natural greeting that orients the operator, not a robotic flag dump.
+    assert ("hello" in ans or "good morning" in ans or "online" in ans)
+    assert "read-only" in ans
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "how are you?",
+    "how are you doing?",
+    "how's it going?",
+])
+def test_ci_how_are_you_is_natural_status(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "online" in ans and "read-only" in ans
+    # Grounded in the real commander snapshot, not invented.
+    assert "commander" in ans
+    assert "commander_snapshot" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "give me a morning briefing",
+    "brief me",
+    "morning briefing please",
+])
+def test_ci_morning_briefing_summarizes_readonly(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "briefing" in ans
+    # Names the read-only trading posture and the factory, offers a next step.
+    assert "observation-only" in ans
+    assert "read_only=true" in ans
+    assert "factory" in ans
+    # No invented performance.
+    for banned in _CI_BANNED_PERF:
+        assert banned not in ans, f"briefing must not invent {banned!r}"
+    assert "commander_snapshot" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what happened in trading last 24 hours?",
+    "what happened with our trades?",
+    "trading recap for the last 24 hours",
+    "what happened with my trades yesterday?",
+])
+def test_ci_trading_24h_is_readonly_and_no_fake_pnl(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must be answerable read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    # Must clearly state no live/paper trades and no realized performance.
+    assert "no live or paper trades" in ans
+    assert "observation-only" in ans
+    assert "read_only=true" in ans
+    assert "paper_ready=false" in ans
+    assert "live_ready=false" in ans
+    # Must NOT invent any numeric / performance claim.
+    for banned in _CI_BANNED_PERF:
+        assert banned not in ans, f"trading recap must not invent {banned!r}"
+    assert "trading_detail" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_ci_trading_24h_keeps_broker_paper_live_locked():
+    c = _client()
+    c.post(_ASK_PATH, json={"question": "what happened in trading last 24 hours?"})
+    td = c.get("/api/jarvis/status").json().get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False, f"recap must not arm {flag}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is the Strategy Factory status?",
+    "factory status",
+    "strategy factory progress",
+])
+def test_ci_factory_status_summarizes_dry_run(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "strategy factory" in ans
+    # Must frame it as read-only research / dry-run with no Factory execution.
+    assert "read-only" in ans
+    assert ("dry-run" in ans or "research" in ans)
+    assert "runs no factory job" in ans
+    for banned in _CI_BANNED_PERF:
+        assert banned not in ans
+    assert "factory_status" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is SPARTA Brain status?",
+    "sparta brain status",
+    "brain status",
+])
+def test_ci_sparta_brain_status_summarizes_system(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "sparta brain" in ans
+    assert "read-only" in ans
+    assert "commander" in ans
+    assert "system_core" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "good morning then buy NQ",
+    "brief me then place a trade",
+    "morning briefing then enable live trading",
+    "how are you, also connect to my broker",
+    "what happened with our trades, now go long",
+    "strategy factory status then approve the strategy",
+    "sparta brain status and run the smoke script",
+    "what happened in trading last 24 hours then refresh status",
+])
+def test_ci_forbidden_intent_in_conversation_still_refused(q):
+    # Natural/conversational wording must never bypass the classifier: a
+    # forbidden action mixed into a greeting/briefing stays refused.
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must stay refused"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_ci_no_new_routes_or_execution_added():
+    # The conversational layer adds NO endpoint and NO execution/refresh path.
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/refresh" not in src
+    assert "/api/jarvis/snapshot" not in src
+    c = _client()
+    ask_routes = [r for r in c.app.routes
+                  if getattr(r, "path", "").startswith("/api/jarvis/")]
+    paths = sorted({getattr(r, "path", "") for r in ask_routes})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+
+
+@requires_ask
+def test_ci_conversation_writes_no_files_or_chat_logs():
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    c = _client()
+    for q in ("good morning", "give me a morning briefing",
+              "what happened with our trades?", "what is SPARTA Brain status?"):
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "conversation must not write data/chat logs"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+    for name in _data_listing() - before:
+        assert "chat" not in name.lower() and "log" not in name.lower()
+
+
+@requires_ask
+def test_ci_conversation_does_not_change_status_shape():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    for q in ("hello", "how are you?", "morning briefing",
+              "what is the Strategy Factory status?"):
+        c.post(_ASK_PATH, json={"question": q})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert len(after) == 28
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False
+
+
+@requires_ask
+def test_ci_voice_conversation_mode_uses_same_ask_endpoint():
+    # Voice conversation mode posts the spoken question to the SAME read-only
+    # ask endpoint, so the classifier always gates it. Confirm a spoken-style
+    # natural question is answered and a spoken forbidden phrase is refused.
+    c = _client()
+    safe = c.post(_ASK_PATH, json={"question": "good morning"}).json()
+    assert safe["refused"] is False and safe["safety_class"] == "SAFE_INFO"
+    bad = c.post(_ASK_PATH, json={"question": "good morning, place a trade"}).json()
+    assert bad["refused"] is True and bad["safety_class"].startswith("FORBIDDEN")
+    html = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8")
+    assert "/api/jarvis/ask" in html

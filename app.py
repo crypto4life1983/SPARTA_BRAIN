@@ -8981,6 +8981,175 @@ def _jarvis_what_changed_answer():
     return (answer, sources)
 
 
+def _jarvis_conversational_answer(q: str):
+    """READ-ONLY natural-language answers for the Conversational Intelligence
+    layer: greetings, "how are you", morning briefing, Strategy Factory status,
+    SPARTA Brain status, a last-24h trading recap, and a general system status
+    summary.
+
+    It reads ONLY the already-aggregated read-only status (``api_jarvis_status``)
+    and the committed report summaries it already exposes. It runs no command,
+    no backtest, no broker call, places no order, triggers no refresh, and writes
+    nothing. It NEVER invents profit/loss, fills, or performance: when no live or
+    paper trade data exists it says so explicitly.
+
+    Returns ``(answer_text, sources_used)`` for a recognised conversational
+    intent, or ``None`` so the caller falls through to the structured answers.
+    """
+    import re as _re
+
+    def _agg() -> dict:
+        d = _jarvis_safe(api_jarvis_status)
+        return d if isinstance(d, dict) else {}
+
+    def _sub(status: dict, key: str) -> dict:
+        v = status.get(key)
+        return v if isinstance(v, dict) else {}
+
+    def _snapshot_line(status: dict):
+        cs = _sub(status, "commander_snapshot")
+        state = cs.get("overall_state") or "unknown"
+        headline = cs.get("headline") or ""
+        warns = cs.get("warnings") if isinstance(cs.get("warnings"), list) else []
+        return state, headline, warns
+
+    _LOCKED_POSTURE = (
+        "read_only=true, paper_ready=false, live_ready=false, broker_control=false")
+
+    # --- morning briefing -------------------------------------------------
+    if "brief" in q:
+        status = _agg()
+        state, headline, warns = _snapshot_line(status)
+        fs = _sub(status, "factory_status")
+        actions = status.get("recommended_next_actions")
+        first_action = (actions[0] if isinstance(actions, list) and actions
+                        else "Review the read-only status panels.")
+        attn = (f"{len(warns)} item(s) need attention: " + "; ".join(warns[:3])
+                if warns else "Nothing is currently flagged for attention.")
+        factory_bit = (
+            f"Strategy Factory: {fs.get('report_count', 0)} committed research "
+            "reports (dry-run / research-candidate only; JARVIS runs no Factory "
+            "job)." if fs.get("state") == "ready"
+            else "Strategy Factory: status not available right now.")
+        answer = (
+            f"Good morning. Here is your read-only briefing. Commander status is "
+            f"{state} — {headline} Trading is observation-only ({_LOCKED_POSTURE}); "
+            "no live or paper trades have run, so there is no realized performance "
+            f"to report. {factory_bit} {attn} Safest next step: {first_action} "
+            "This is a read-only summary and authorizes no action.")
+        return (answer, ["commander_snapshot", "trading_detail", "factory_status",
+                         "daily_mission"])
+
+    # --- Strategy Factory status -----------------------------------------
+    if "factory" in q:
+        status = _agg()
+        fs = _sub(status, "factory_status")
+        if fs.get("state") != "ready":
+            detail = fs.get("detail") or "status not available"
+            return (
+                f"Strategy Factory status: {detail}. This is a read-only view; "
+                "JARVIS runs no Factory job and authorizes nothing.",
+                ["factory_status"])
+        decs = fs.get("latest_decisions") if isinstance(fs.get("latest_decisions"), list) else []
+        top = [d for d in decs[:3] if isinstance(d, dict)]
+        dlines = "; ".join(f"{d.get('name', '?')} -> {d.get('decision', 'UNKNOWN')}"
+                           for d in top)
+        return (
+            f"Strategy Factory (read-only, dry-run / research only): "
+            f"{fs.get('report_count', 0)} committed reports on disk. "
+            f"Latest decisions: {dlines if dlines else 'none readable'}. These are "
+            "research candidates only — JARVIS runs no Factory job, places no "
+            "trades, and authorizes nothing.",
+            ["factory_status"])
+
+    # --- SPARTA Brain status ---------------------------------------------
+    if "sparta brain" in q or "brain status" in q:
+        status = _agg()
+        sc = _sub(status, "system_core")
+        ai = _sub(status, "ai_brains")
+        state, headline, warns = _snapshot_line(status)
+        brains = ai.get("brains") if isinstance(ai.get("brains"), dict) else {}
+        ready = [n for n, v in brains.items()
+                 if isinstance(v, dict) and v.get("state") in ("ready", "installed")]
+        return (
+            f"SPARTA Brain status (read-only): system core is "
+            f"{sc.get('state', 'unknown')}, server {sc.get('server', 'unknown')}. "
+            f"Commander snapshot is {state} — {headline} ({len(warns)} warning(s)). "
+            f"AI brains available: {', '.join(ready) if ready else 'none detected'}. "
+            "Everything here is observation-only; nothing is executed, traded, or "
+            "stored.",
+            ["system_core", "ai_brains", "commander_snapshot"])
+
+    # --- last-24h trading recap / "what happened with our trades" ---------
+    _has_trade = ("trad" in q or "trade" in q or "trades" in q)
+    _time_words = ("24 hour", "24 hours", "24h", "last 24", "past 24", "last day",
+                   "past day", "yesterday", "overnight", "today", "last night",
+                   "recap")
+    if (("happened" in q and _has_trade)
+            or (_has_trade and any(w in q for w in _time_words))
+            or "our trades" in q or "my trades" in q):
+        status = _agg()
+        td = _sub(status, "trading_detail")
+        reports = td.get("latest_reports") if isinstance(td.get("latest_reports"), list) else []
+        names = ", ".join(r.get("name", "?") for r in reports[:3]
+                          if isinstance(r, dict))
+        recent = (f"The most recent committed research reports on disk are: "
+                  f"{names}. " if names
+                  else "No trading research reports were found on disk. ")
+        return (
+            "Read-only trading update: no live or paper trades have been placed in "
+            "the last 24 hours, or at any time — trading is observation-only "
+            f"({_LOCKED_POSTURE}), so there are no fills and no realized "
+            "performance to report. " + recent + "JARVIS only reads committed "
+            "research artifacts; it runs no backtest, places no orders, and "
+            "authorizes nothing.",
+            ["trading_detail"])
+
+    # --- "how are you" ----------------------------------------------------
+    if (_re.search(r"\bhow\s+are\s+you\b", q) or _re.search(r"\bhow\s+are\s+u\b", q)
+            or "how's it going" in q or "hows it going" in q
+            or "how you doing" in q or _re.search(r"\bhow\s+(?:are|r)\s+things\b", q)):
+        status = _agg()
+        state, headline, warns = _snapshot_line(status)
+        return (
+            f"I'm online and read-only. Commander snapshot is {state} — {headline} "
+            f"({len(warns)} warning(s)). Trading stays observation-only "
+            f"({_LOCKED_POSTURE}). Ask me for a morning briefing, trading status, "
+            "Strategy Factory status, or what needs attention.",
+            ["commander_snapshot", "trading_detail"])
+
+    # --- greeting ---------------------------------------------------------
+    if _re.match(r"^(?:hi|hey|hello|hiya|yo|sup|gm|greetings)\b", q) or \
+            _re.match(r"^good\s+(?:morning|afternoon|evening|day)\b", q):
+        status = _agg()
+        state, _headline, warns = _snapshot_line(status)
+        return (
+            "Hello — JARVIS online and read-only. Right now the commander snapshot "
+            f"is {state} with {len(warns)} warning(s), and trading is "
+            f"observation-only ({_LOCKED_POSTURE}). I can give you a morning "
+            "briefing, the trading status, the Strategy Factory status, the SPARTA "
+            "Brain status, or tell you what needs attention — just ask.",
+            ["commander_snapshot", "trading_detail"])
+
+    # --- general system / overall status (not trading/factory/change paths) ---
+    if (("status" in q or "how is everything" in q or "overall" in q)
+            and "trad" not in q and "posture" not in q
+            and "changed" not in q and "new" not in q
+            and "factory" not in q and "attention" not in q and "needs" not in q):
+        status = _agg()
+        sc = _sub(status, "system_core")
+        state, headline, warns = _snapshot_line(status)
+        return (
+            f"System status (read-only): core is {sc.get('state', 'unknown')}, "
+            f"server {sc.get('server', 'unknown')}; commander snapshot is {state} — "
+            f"{headline} ({len(warns)} warning(s)). Trading is observation-only "
+            f"({_LOCKED_POSTURE}). This reports observed state only and authorizes "
+            "no action.",
+            ["system_core", "commander_snapshot", "trading_detail"])
+
+    return None
+
+
 def _jarvis_ask_answer(safety_class: str, q: str):
     """Build a conservative, read-only answer for an already-classified SAFE
     question. Returns (answer_text, sources_used). Reads only already-known
@@ -9004,7 +9173,13 @@ def _jarvis_ask_answer(safety_class: str, q: str):
             "Step 20-29 docs. This authorizes no trading and no execution.",
             ["system_map", "docs"],
         )
-    # SAFE_INFO
+    # SAFE_INFO — try the natural conversational layer first (greetings,
+    # briefing, factory/brain status, trading recap, general status). Falls
+    # through to the structured answers below when q is not a conversational
+    # intent, so all existing behavior is preserved.
+    convo = _jarvis_conversational_answer(q)
+    if convo is not None:
+        return convo
     if "yellow" in q or "commander" in q:
         return (
             "Commander yellow means attention is needed, not approval — usually a "

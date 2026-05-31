@@ -179,6 +179,33 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bwhich\s+docs\b",
     r"\bis\s+it\s+read[_\s]?only\b",
     r"\bread[_\s]?only\b",
+    # JARVIS Conversational Intelligence v1 — natural greetings, briefings, and
+    # status conversation. All read-only and answerable from the existing status
+    # aggregate / committed report summaries. Forbidden patterns are still
+    # matched FIRST, so mixed phrases like "good morning then buy NQ" or
+    # "brief me then place a trade" stay refused.
+    r"^(?:hi|hey|hello|hiya|yo|sup|gm|greetings)\b",
+    r"^good\s+(?:morning|afternoon|evening|day)\b",
+    r"\bgood\s+morning\b",
+    r"\bhow\s+are\s+you\b",
+    r"\bhow\s+are\s+u\b",
+    r"\bhow'?s\s+it\s+going\b",
+    r"\bhow\s+(?:are|r)\s+(?:you|u|things)\b",
+    r"\bhow\s+you\s+doing\b",
+    r"\bbrief(?:ing)?\b",
+    r"\bbrief\s+me\b",
+    r"\bstrategy\s+factory\b",
+    r"\bfactory\s+(?:status|state|update|report|reports|progress|overview|summary)\b",
+    r"\b(?:status|state|update|overview|progress)\b.*\bfactory\b",
+    r"\bsparta\s+brain\b",
+    r"\bbrain\s+status\b",
+    r"\bwhat\s+happened\b",
+    r"\blast\s+24\b",
+    r"\bpast\s+24\b",
+    r"\b24\s*hours?\b",
+    r"\blast\s+day\b",
+    r"\bour\s+trades?\b",
+    r"\bmy\s+trades?\b",
 ))
 
 _SAFE_GROUPS = (
