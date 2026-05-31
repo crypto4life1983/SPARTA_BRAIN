@@ -1,0 +1,147 @@
+{
+  "step": "Repo-Hygiene-D3",
+  "title": "Automation Commit Guard - diagnosis + guard plan (PLAN/MEMO ONLY)",
+  "created": "2026-05-30",
+  "plan_only": true,
+  "no_edits_made": true,
+  "no_automation_changed": true,
+  "no_scheduler_changed": true,
+  "no_jarvis_code_changed": true,
+  "no_strategy_or_data_work": true,
+  "head_at_diagnosis": "102202a92dd8c53e5365b72610675cd38647a65e",
+  "1_current_repo_state": {
+    "head": "102202a (Fix deterministic config wiring test path)",
+    "staged_files": "none (git diff --cached empty)",
+    "factory_tree": "clean (no modified/untracked inside trading_research/agentic_factory/ except this new D3 report folder)",
+    "jarvis_files_modified_or_staged": "none currently",
+    "head_moved_during_d2_to_d3_gap": "Yes: HEAD advanced c02ec13 -> 307d994 (JARVIS Checkpoint Bundle A) between the D2 work and the D3 preflight - a live instance of the race being diagnosed.",
+    "active_git_hooks": "none (only *.sample present in .git/hooks)",
+    "scheduled_tasks_doing_git": "none found referencing sparta/jarvis/brain/agentic/commit"
+  },
+  "2_evidence_found": {
+    "no_unattended_git_committer": "No active hook, no scheduled task, and no daemon performs git add/commit. auto_brain_cycle.bat runs python tools/trading_brain_auto.py --commit, but that tool's commit() only appends to brain_memory text files (append_decision/lesson/next_action/system_change) - it does NOT run git add or git commit. auto_start.bat only launches the dashboard. brain_brief.py / brain_telegram_notify.py do not commit.",
+    "only_programmatic_git_committer": "sparta_commander/research_orchestrator/safe_executor.py (git add/commit at lines ~243/276) is a GATED Commander-lane executor, not the JARVIS step-builder, and is not the source of the interleaved JARVIS step commits.",
+    "real_source_of_jarvis_commits": "A separate INTERACTIVE workstream (another Claude/agent session or operator terminal) that authors docs/jarvis_step_NN_* deliverables and commits them to master. Same git identity ryahai <support@ryah.ai> as the factory commits, which is why the two streams are indistinguishable by author.",
+    "interleave_log": [
+      "20:32 crypto D9 spec 6e0c85b",
+      "20:35 JARVIS Step 44 5d0bdf3",
+      "21:29 crypto engine ce499c6 / JARVIS Step 45 b737e4a",
+      "21:34 JARVIS Step 46 381ad99",
+      "21:41 crypto IS 923e786",
+      "21:46 crypto OOS protocol 8b14308",
+      "21:59 crypto OOS_FAIL b9180ea",
+      "22:02 JARVIS Step 47 52cd272",
+      "22:12 JARVIS Step 48 8133af3",
+      "22:14 crypto D14 close 00fa1f0",
+      "22:15 JARVIS Step 49 c02ec13",
+      "22:42:08 JARVIS Bundle A 307d994",
+      "22:42:25 factory D1 3d46c14",
+      "22:47 factory D2 102202a"
+    ],
+    "jarvis_commit_blast_radius": "JARVIS commits touch docs/jarvis_*, AND repo-root code: app.py, templates/jarvis.html, tests/test_jarvis_*, tools/jarvis_*. Verified across 307d994, c02ec13, 8133af3, 52cd272 (app.py + tests), 381ad99 (templates/jarvis.html + tests), b737e4a (tools + tests).",
+    "critical_disjointness_finding": "NONE of the inspected JARVIS commits touched trading_research/agentic_factory/. The two workstreams have so far committed to DISJOINT path subtrees. The factory turns touch only trading_research/agentic_factory/; the JARVIS turns touch docs/jarvis_*, app.py, templates/jarvis.html, tools/jarvis_*, tests/test_jarvis_*."
+  },
+  "3_risk_model": {
+    "what_causes_head_races": "Two concurrent workstreams committing to the SAME master branch. HEAD advances between factory approval turns because the JARVIS workstream commits in the gap. This is a coordination/branch-topology issue, not a rogue script.",
+    "touches_factory_tree": "No - no observed JARVIS commit reached into trading_research/agentic_factory/. Subtrees are disjoint in practice.",
+    "can_stage_unrelated_files": "Only if a turn uses `git add .` / `git add <dir>`. The factory turns already avoid this via explicit pathspec, so a factory commit cannot sweep JARVIS files and vice versa. The risk is latent, contained only by manual discipline.",
+    "commits_only_jarvis_or_sometimes_factory": "Observed: JARVIS commits are JARVIS-only (docs/jarvis_*, app.py, jarvis templates/tests/tools). They do NOT include factory files. The earlier D9 near-miss was a JARVIS-workstream commit landing a deliverable before the factory turn's approval - a timing/ordering hazard, not a wrong-files sweep.",
+    "can_be_paused_safely": "Yes in principle, because the JARVIS committer is an interactive session, not a daemon - 'pausing' means operator coordination (do not run the JARVIS session during a factory commit window). There is no cron to disable.",
+    "branch_workflow_vs_pausing": "A dedicated factory-research branch is structurally stronger than pausing: it removes the shared-HEAD coupling entirely, so HEAD ancestry on the research branch is stable regardless of JARVIS activity on master, and a deliberate merge is the only integration point. Pausing relies on human timing every turn; branching relies on topology once.",
+    "residual_risk_level": "MEDIUM - contained today purely by explicit-pathspec + per-turn preflight (manual discipline). Not enforced by any guard."
+  },
+  "4_guard_options_comparison": {
+    "A_pause_jarvis_during_factory_sessions": {
+      "benefit": "Zero code change; immediately available; eliminates interleave during the window.",
+      "risk": "Relies on human timing every single turn; easy to forget; does not fix the underlying shared-branch coupling; JARVIS work backs up.",
+      "files_affected": "none (operational protocol only)",
+      "complexity": "trivial (operational)",
+      "recommendation": "Useful stopgap, not a durable fix."
+    },
+    "B_separate_branch_for_factory_research": {
+      "benefit": "Removes shared-HEAD coupling at the topology level: factory branch HEAD is stable regardless of JARVIS commits on master; deliberate merge is the single integration point; preflight ancestry checks become reliable.",
+      "risk": "Operator must remember to checkout/stay on the branch; merge step adds a small ceremony; if the operator commits factory work to master by habit the benefit is lost.",
+      "files_affected": "none (git branch only; no source edit)",
+      "complexity": "low (git workflow change)",
+      "recommendation": "RECOMMENDED primary structural fix."
+    },
+    "C_commit_guard_sentinel_file": {
+      "benefit": "A lightweight lock/sentinel (e.g. trading_research/agentic_factory/.commit_lock) that each workstream checks in preflight; whoever holds it commits, the other waits. Cheap; documents intent.",
+      "risk": "Advisory only unless enforced by a hook (a hook would be a D4/D5 change requiring approval); both sides must honor it; stale lock if a session crashes.",
+      "files_affected": "a new sentinel/doc file under the factory; OPTIONAL future pre-commit hook (D4/D5, separate approval)",
+      "complexity": "low (advisory) / medium (if hook-enforced)",
+      "recommendation": "Good lighter-weight fallback if branch isolation is rejected; pairs well with B."
+    },
+    "D_restrict_automation_pathspec_to_jarvis_only": {
+      "benefit": "Guarantees the JARVIS committer can never stage factory files, even with git add .",
+      "risk": "Requires EDITING the JARVIS workstream's commit logic - out of scope for D3 (plan only) and prohibited until D4/D5 with explicit authorization; the JARVIS committer is interactive, so there may be no single script to edit.",
+      "files_affected": "JARVIS step-builder commit path (location not a single confirmed script; interactive session)",
+      "complexity": "medium-high; gated behind D4/D5 approval",
+      "recommendation": "Defer; not actionable as a plan-only step."
+    },
+    "E_automation_stops_at_staged_state_no_commit": {
+      "benefit": "Automation prepares changes but a human performs the commit, centralizing the commit decision.",
+      "risk": "Defeats much of the automation's purpose; high friction; still needs someone to remember; does not by itself prevent interleave if the human commits both streams to master.",
+      "files_affected": "JARVIS commit path (edit) - gated to D4/D5",
+      "complexity": "medium; gated",
+      "recommendation": "Not recommended - too restrictive for the benefit."
+    },
+    "F_do_nothing_but_always_explicit_pathspec": {
+      "benefit": "Already in force; zero new work; has prevented every wrong-files sweep so far; cd repo-root && git commit -- <explicit paths>.",
+      "risk": "Purely manual discipline; one lapse (a git add .) re-opens the sweep risk; does not stop HEAD races, only mis-staging.",
+      "files_affected": "none",
+      "complexity": "none (status quo)",
+      "recommendation": "KEEP as the permanent always-on safety net, but it is necessary-not-sufficient; pair with B."
+    }
+  },
+  "5_recommended_guard_path": {
+    "primary": "B (dedicated factory-research branch) - the durable structural fix that removes shared-HEAD coupling without editing any JARVIS/automation code.",
+    "permanent_safety_net": "F (explicit-pathspec commits, already standing) - keep on every commit regardless of branch.",
+    "lighter_fallback_if_B_rejected": "C (advisory sentinel/lock file checked in preflight) - optionally hardened into a pre-commit hook later under D4/D5 approval.",
+    "stopgap": "A (pause JARVIS during a factory commit window) - acceptable only until B is adopted.",
+    "deferred": "D and E both require editing the JARVIS/automation commit path and are PROHIBITED in this plan-only step; route to D4/D5 with explicit authorization if ever pursued.",
+    "rationale": "The race is a branch-topology + coordination problem, not a rogue committer. Fixing topology (B) is stronger and lower-blast-radius than editing automation code (D/E). F already prevents file sweeps; B additionally stabilizes HEAD ancestry. No code/scheduler/JARVIS change is required to adopt B+F."
+  },
+  "6_exact_future_implementation_steps": {
+    "adopt_B_branch_isolation": [
+      "1. From a clean tree on master at the intended base, create branch: git switch -c factory-research (or git branch factory-research && git switch factory-research).",
+      "2. Do all factory work + decision-record commits on factory-research using the SAME explicit-pathspec method.",
+      "3. Preflight each turn checks the factory-research HEAD only; JARVIS commits on master no longer move it.",
+      "4. Integrate deliberately: when a milestone is ready, git switch master && git merge --no-ff factory-research (or open a local merge), resolving only factory paths.",
+      "5. Never git add .; continue cd C:/SPARTA_BRAIN && git commit -m MSG -- <explicit factory paths>."
+    ],
+    "keep_F_safety_net": [
+      "Every commit on any branch uses explicit repo-root-relative pathspecs; never git add . or git add <dir>."
+    ],
+    "optional_C_sentinel": [
+      "Define a documented advisory lock convention (e.g. a .commit_lock note) both workstreams check in preflight.",
+      "Hardening it into an enforced pre-commit hook is a D4/D5 item requiring explicit approval (hooks change repo behavior)."
+    ]
+  },
+  "7_files_likely_to_be_edited_in_d4_d5": {
+    "B_branch_isolation": "No source file edits (git branch/workflow only). Possibly a short doc note in trading_research/agentic_factory/ describing the branch protocol.",
+    "C_sentinel_advisory": "A new advisory note/lock file under trading_research/agentic_factory/ (doc only).",
+    "C_or_D_enforced_hook_if_ever_approved": ".git/hooks/pre-commit (a real behavior change; explicit approval required; out of scope until D4/D5).",
+    "D_or_E_automation_edit_if_ever_approved": "The JARVIS step-builder commit path - location is an interactive session, not a confirmed single script; would require locating and editing that committer; explicit approval required.",
+    "not_to_edit": "tools/trading_brain_auto.py is NOT the git committer and must not be edited for this. Do not edit auto_brain_cycle.bat / auto_start.bat for the race (they do not git-commit)."
+  },
+  "8_forbidden_actions": [
+    "no_disabling_automation_yet",
+    "no_editing_jarvis_code_yet",
+    "no_changing_hooks_or_schedulers_yet",
+    "no_strategy_runs",
+    "no_backtest",
+    "no_oos_use",
+    "no_data_fetch",
+    "no_optimization",
+    "no_paper_or_live",
+    "no_exchange_api",
+    "no_broker",
+    "no_modification_of_frozen_crypto_data",
+    "do_not_touch_s30_or_futures",
+    "do_not_touch_hydra",
+    "no_staging",
+    "no_commit"
+  ],
+  "final_line": "Repo-Hygiene-D3 is a diagnosis and guard-plan memo only; no automation, scheduler, JARVIS, or trading behavior was changed."
+}
