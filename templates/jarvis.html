@@ -190,6 +190,9 @@
       border-color:rgba(255,195,77,.55);background:rgba(255,195,77,.08);}
     .jv-voice-ctl.is-disabled{color:var(--jv-dim);cursor:not-allowed;
       border-color:rgba(255,255,255,.18);background:none;opacity:.7;}
+    .jv-voice-ctl.is-active{color:var(--jv-bg,#04121a);font-weight:600;
+      border-color:var(--jv-cyan);background:var(--jv-cyan);}
+    .jv-voice-mode{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;}
     @media (prefers-reduced-motion:reduce){
       .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
     }
@@ -427,8 +430,23 @@
           Voice preview <span class="jv-tag t-display">SPEECH-TO-TEXT PREVIEW</span>
         </div>
         <div class="jv-detail">
-          Transcript fills the question box only &middot; You must click Ask read-only &middot;
-          No audio or transcript is stored. The read-only text flow above is unchanged.
+          Two modes, both read-only &middot; No audio or transcript is stored &middot;
+          Every spoken question is classifier-gated exactly like a typed one.
+        </div>
+        <!-- Voice mode toggle. Preview (default) only fills the question box; you
+             still click Ask read-only. Conversation auto-asks the SAME read-only
+             endpoint and reads the returned answer aloud — it composes the two
+             click-gated actions that already exist, adds no execution, no broker /
+             paper / live control, and stores nothing. Both options are spans
+             (role=radio) wired with addEventListener, never a real form control. -->
+        <div class="jv-voice-mode" id="jvVoiceMode" role="radiogroup" aria-label="Voice mode">
+          <span class="jv-voice-ctl is-active" id="jvModePreview" role="radio" tabindex="0"
+                aria-checked="true" aria-label="Voice preview mode">Voice Preview Mode</span>
+          <span class="jv-voice-ctl" id="jvModeConversation" role="radio" tabindex="0"
+                aria-checked="false" aria-label="Voice conversation mode">Voice Conversation Mode</span>
+        </div>
+        <div class="jv-detail" id="jvModeHint" aria-live="polite">
+          Preview mode: Transcript fills the question box only. You must click Ask read-only. Nothing is sent automatically.
         </div>
         <div class="jv-voice-row">
           <span class="jv-voice-ctl" id="jvVoiceBtn" role="button" tabindex="0"
@@ -478,6 +496,13 @@
   // click-gated read-aloud. Never the question, never a command/action/execute
   // field. Reset on every ask; not persisted anywhere.
   var jvLastAnswerText = '';
+
+  // Voice conversation mode state. 'preview' (default) only fills the question
+  // box; 'conversation' auto-asks the read-only endpoint and reads the answer
+  // aloud. jvVoiceBusy is a single-flight guard so overlapping requests cannot
+  // stack a second capture / ask / read-aloud on top of an in-flight turn.
+  var jvVoiceMode = 'preview';
+  var jvVoiceBusy = false;
 
   function led(state){
     var ok = ['online','ready','installed','connected','armed','locked','compliance_first'];
@@ -1210,6 +1235,104 @@
       });
   }
 
+  // Shared read-only question post. Used by BOTH the manual "Ask read-only"
+  // button and Voice Conversation Mode. It targets ONLY the answer-only,
+  // classifier-gated endpoint and sends ONLY {question}. No execution, no
+  // refresh, no broker / paper / live control, no storage. Returns the parsed
+  // answer object so callers can render (and, in conversation mode, read aloud).
+  function jvPostQuestion(q){
+    return fetch('/api/jarvis/ask', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({question: q})
+    }).then(function(r){ return r.json(); });
+  }
+
+  // Read the LAST rendered answer / refusal text aloud (browser SpeechSynthesis
+  // only). Speaks ONLY jvLastAnswerText — never the question, never a command.
+  // Used by the click-gated "Read last answer" button and by conversation mode
+  // after an answer is rendered. Calls onEnd when speech finishes / is skipped
+  // so the conversation turn can return to ready.
+  function jvSpeakAnswer(onEnd){
+    var synth = window.speechSynthesis;
+    var text = (jvLastAnswerText || '').trim();
+    if(!synth || typeof window.SpeechSynthesisUtterance === 'undefined' || !text){
+      if(onEnd){ onEnd(); }
+      return false;
+    }
+    try { synth.cancel(); } catch(e){ /* nothing queued */ }
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 1;
+    u.onend = function(){ if(onEnd){ onEnd(); } };
+    u.onerror = function(){ if(onEnd){ onEnd(); } };
+    synth.speak(u);
+    return true;
+  }
+
+  // Voice Conversation Mode turn: transcript -> auto Ask read-only -> render ->
+  // auto read the returned answer/refusal aloud -> ready. Still read-only: it
+  // composes the SAME two click-gated actions the operator can already trigger
+  // by hand (Ask read-only + Read last answer). No new capability, no execution,
+  // no storage. jvVoiceBusy is released only when the whole turn settles.
+  function jvRunConversation(transcript, setStatus){
+    var askOut = document.getElementById('jvAskOut');
+    setStatus('Asking read-only…');
+    jvPostQuestion(transcript)
+      .then(function(d){
+        if(askOut){ renderAsk(askOut, d); }
+        setStatus('Reading the answer aloud…');
+        var spoke = jvSpeakAnswer(function(){
+          jvVoiceBusy = false;
+          setStatus('Ready. Click "Speak to fill" to ask again, or type a question.');
+        });
+        if(!spoke){
+          jvVoiceBusy = false;
+          setStatus('Answer ready below. Click "Speak to fill" to ask again.');
+        }
+      })
+      .catch(function(){
+        jvVoiceBusy = false;
+        if(askOut){
+          askOut.innerHTML = '<div class="jv-detail" style="color:var(--jv-bad)">Could not reach the read-only answer endpoint.</div>';
+        }
+        setStatus('Could not reach the read-only endpoint. Ready to try again, or type a question.');
+      });
+  }
+
+  // Toggle between Preview (default) and Conversation voice modes. Switching
+  // cancels any in-flight read-aloud and clears the busy guard so a half-finished
+  // turn never bleeds into the next one.
+  function wireVoiceMode(){
+    var prev = document.getElementById('jvModePreview');
+    var conv = document.getElementById('jvModeConversation');
+    var hint = document.getElementById('jvModeHint');
+    if(!prev || !conv) return;
+    function apply(mode){
+      jvVoiceMode = (mode === 'conversation') ? 'conversation' : 'preview';
+      var isConv = (jvVoiceMode === 'conversation');
+      conv.classList.toggle('is-active', isConv);
+      prev.classList.toggle('is-active', !isConv);
+      conv.setAttribute('aria-checked', isConv ? 'true' : 'false');
+      prev.setAttribute('aria-checked', isConv ? 'false' : 'true');
+      if(hint){
+        hint.textContent = isConv
+          ? 'Conversation: click the mic, speak, and JARVIS auto-asks read-only then reads the answer aloud. Still read-only — every question is classifier-gated; nothing is executed, traded, or stored.'
+          : 'Preview: transcript fills the question box; you click Ask read-only. Nothing is sent automatically.';
+      }
+      try { window.speechSynthesis.cancel(); } catch(e){ /* nothing queued */ }
+      jvVoiceBusy = false;
+    }
+    prev.addEventListener('click', function(){ apply('preview'); });
+    conv.addEventListener('click', function(){ apply('conversation'); });
+    prev.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); apply('preview'); }
+    });
+    conv.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); apply('conversation'); }
+    });
+  }
+
   // Step 31: strictly read-only ask wiring. Posts ONLY the question field to
   // the answer-only ask endpoint. No execution, refresh, mutation, broker,
   // paper, or live control. No chat persistence, no client storage, no writes.
@@ -1259,12 +1382,7 @@
       var q = (input.value || '').trim();
       if(!q){ out.innerHTML = '<div class="jv-detail">Type a read-only question first.</div>'; return; }
       out.innerHTML = '<div class="jv-detail">Asking&hellip;</div>';
-      fetch('/api/jarvis/ask', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify({question: q})
-      })
-        .then(function(r){ return r.json(); })
+      jvPostQuestion(q)
         .then(function(d){ renderAsk(out, d); })
         .catch(function(e){
           out.innerHTML = '<div class="jv-detail" style="color:var(--jv-bad)">Could not reach the read-only answer endpoint.</div>';
@@ -1333,6 +1451,9 @@
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     var listening = false;
+    // True once a conversation turn has been kicked off from a transcript, so
+    // onend does not clear the busy guard mid-turn (the turn clears it itself).
+    var convStarted = false;
     // Last known mic grant from the Permissions API (null until/if it answers).
     // Lets a "not-allowed" error be explained differently when the SITE
     // permission already reads as allowed — the block is then OS/browser-wide.
@@ -1375,12 +1496,19 @@
     }
 
     function start(){
-      if(listening) return;
+      // Single-flight guard: ignore overlapping requests while a capture, ask,
+      // or read-aloud from a previous turn is still in flight.
+      if(listening || jvVoiceBusy) return;
+      convStarted = false;
+      jvVoiceBusy = true;
+      // Barge-in: stop any answer still being read aloud before capturing again.
+      try { window.speechSynthesis.cancel(); } catch(e){ /* nothing queued */ }
       try {
         rec.start();
       } catch(err){
         // start() throws InvalidStateError if a prior session has not fully
         // ended yet; surface a calm retry hint rather than a raw exception.
+        jvVoiceBusy = false;
         setStatus('Voice is still finishing the previous attempt — wait a moment, ' +
           'click "Speak to fill" again, or type your question.');
       }
@@ -1389,25 +1517,40 @@
     rec.onstart = function(){
       listening = true;
       btn.classList.add('is-listening');
-      setStatus('Listening… speak your read-only question.');
+      setStatus(jvVoiceMode === 'conversation'
+        ? 'Listening… ask your read-only question; I will answer aloud.'
+        : 'Listening… speak your read-only question.');
     };
     rec.onerror = function(e){
       listening = false;
+      convStarted = false;
+      jvVoiceBusy = false;
       btn.classList.remove('is-listening');
       setStatus(explainError(e && e.error));
     };
     rec.onend = function(){
       listening = false;
       btn.classList.remove('is-listening');
+      // In conversation mode the turn continues (ask + read-aloud) after the
+      // mic ends, so the turn clears the busy guard itself. Otherwise clear now.
+      if(!convStarted){ jvVoiceBusy = false; }
     };
     rec.onresult = function(e){
       var transcript = '';
       try { transcript = (e.results[0][0].transcript || '').trim(); } catch(err) { transcript = ''; }
       if(transcript){
-        // Fill the question box ONLY. No submit, no fetch, no storage.
+        // Both modes fill the question box first, so the operator always sees
+        // the captured text. No storage.
         input.value = transcript;
         input.focus();
-        setStatus('Transcript ready — review it, then click "Ask read-only".');
+        if(jvVoiceMode === 'conversation'){
+          // Conversation mode: auto-submit the SAME read-only ask and read the
+          // returned answer aloud. The turn keeps the busy guard until it ends.
+          convStarted = true;
+          jvRunConversation(transcript, setStatus);
+        } else {
+          setStatus('Transcript ready — review it, then click "Ask read-only".');
+        }
       } else {
         setStatus('No speech detected. Try again or type your question.');
       }
@@ -1482,6 +1625,7 @@
   tick(); setInterval(tick, 1000);
   load(); setInterval(load, 15000);
   wireAsk();
+  wireVoiceMode();
   wireVoice();
   wireSpeak();
 })();

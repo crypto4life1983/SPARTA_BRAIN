@@ -1,0 +1,111 @@
+{
+  "bundle": "JARVIS_VOICE_CONVERSATION_MODE",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_VOICE_CONVERSATION_READONLY",
+  "verdict_note": "Optional hands-free conversation mode ships beside the existing preview mode. It grants no new capability: it composes two already-authorized, click-gated actions (read-only Ask + read last answer aloud). Every spoken question is still classifier-gated.",
+  "goal": "Add optional Alexa-style loop: click mic -> capture -> transcript -> auto Ask read-only -> receive answer -> auto read aloud -> ready, while keeping the existing preview mode unchanged.",
+  "safety_model": {
+    "no_new_endpoint": true,
+    "uses_existing_ask_endpoint": "/api/jarvis/ask",
+    "ask_payload_question_only": true,
+    "classifier_gates_every_spoken_question": true,
+    "auto_read_uses_rendered_answer_text_only": "jvLastAnswerText",
+    "composition_of_already_authorized_actions": true,
+    "no_new_capability_added": true
+  },
+  "implementation": {
+    "file": "templates/jarvis.html",
+    "mode_toggle": {
+      "type": "role=radiogroup with two role=radio spans (never real form controls)",
+      "ids": ["jvModePreview", "jvModeConversation", "jvModeHint"],
+      "default": "preview"
+    },
+    "shared_helpers": [
+      "jvPostQuestion(q) - POSTs {question} only to /api/jarvis/ask, returns parsed JSON; reused by typed Ask flow and conversation mode",
+      "jvSpeakAnswer(onEnd) - reads ONLY jvLastAnswerText via SpeechSynthesis; cancels queued speech first; calls onEnd on finish/error/skip",
+      "jvRunConversation(transcript, setStatus) - ask read-only -> renderAsk -> auto read aloud -> ready; releases busy guard only when the whole turn settles",
+      "wireVoiceMode() - toggles spans + aria-checked, swaps hint, cancels in-flight speech, clears jvVoiceBusy on switch"
+    ],
+    "wirevoice_changes": [
+      "jvVoiceMode ('preview'|'conversation') and jvVoiceBusy single-flight guard state",
+      "start(): ignores click if listening||jvVoiceBusy (overlap guard); cancels active read-aloud (barge-in); wraps rec.start() to catch InvalidStateError with a calm retry hint",
+      "onresult: both modes fill input.value first; conversation mode sets convStarted=true and calls jvRunConversation; preview mode shows transcript-ready hint",
+      "onend: clears jvVoiceBusy only when !convStarted",
+      "onerror: resets listening/convStarted/jvVoiceBusy and shows per-code message"
+    ],
+    "renderask_stays_speak_free": true
+  },
+  "interruption_handling": {
+    "overlapping_requests": "if(listening || jvVoiceBusy) return; single-flight guard",
+    "barge_in": "speechSynthesis.cancel() in start() and on mode switch",
+    "no_speech": "distinct status message",
+    "aborted": "distinct status, guards reset, typing still works",
+    "permission_denied": "distinct actionable status (not-allowed / service-not-allowed)",
+    "start_race_invalidstate": "caught; calm retry hint; busy guard released",
+    "endpoint_failure": "catch renders read-only error note, releases guard, returns to ready"
+  },
+  "read_only_guarantees": {
+    "ask_payload_question_only": true,
+    "no_command_execution_added": true,
+    "no_trading_routes_added": true,
+    "no_broker_paper_live_control": true,
+    "no_new_endpoint": true,
+    "no_refresh_endpoint": true,
+    "no_audio_stored": true,
+    "no_transcript_stored": true,
+    "no_capture_apis": ["getUserMedia", "MediaRecorder", "AudioContext", "navigator.mediaDevices"],
+    "no_client_storage": ["localStorage", "sessionStorage", "indexedDB", "document.cookie"],
+    "classifier_still_gates_ask": true,
+    "preview_mode_unchanged": true,
+    "manual_ask_never_auto_speaks": true,
+    "voice_output_reads_answer_only": true
+  },
+  "files_changed": [
+    "templates/jarvis.html",
+    "tests/test_jarvis_route.py"
+  ],
+  "files_added": [
+    "docs/jarvis_voice_conversation_mode/report.md",
+    "docs/jarvis_voice_conversation_mode/report.json"
+  ],
+  "tests_added": [
+    "test_jarvis_convo_page_renders_ok",
+    "test_jarvis_convo_both_mode_toggles_present",
+    "test_jarvis_convo_preview_is_default",
+    "test_jarvis_convo_post_helper_is_question_only_readonly",
+    "test_jarvis_convo_runner_submits_readonly_then_reads_answer",
+    "test_jarvis_convo_speak_helper_reads_answer_not_question",
+    "test_jarvis_convo_overlap_single_flight_guard",
+    "test_jarvis_convo_interruption_codes_handled",
+    "test_jarvis_convo_barge_in_cancels_active_speech",
+    "test_jarvis_convo_gated_on_mode_and_preview_unchanged",
+    "test_jarvis_convo_renderask_still_never_auto_speaks",
+    "test_jarvis_convo_no_capture_or_storage_apis",
+    "test_jarvis_convo_no_real_control_or_refresh",
+    "test_jarvis_convo_ask_payload_remains_question_only",
+    "test_jarvis_convo_spoken_forbidden_phrase_still_refused",
+    "test_jarvis_convo_spoken_safe_phrase_is_answered",
+    "test_jarvis_convo_status_shape_unchanged"
+  ],
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory (on-disk name 'hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_factory_ask_snapshot": "134 passed",
+    "failures": 0
+  },
+  "validation": {
+    "jarvis_route_200": true,
+    "both_mode_toggles_render": true,
+    "preview_is_default": true,
+    "conversation_auto_asks_and_reads_aloud": true,
+    "preview_only_fills_question_box": true,
+    "spoken_forbidden_phrase_refused": true,
+    "spoken_safe_phrase_answered": true,
+    "status_shape_unchanged": true,
+    "no_trading_routes_or_actions_added": true,
+    "existing_jarvis_tests_pass": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

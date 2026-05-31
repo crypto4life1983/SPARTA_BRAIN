@@ -1917,17 +1917,22 @@ def test_jarvis_step_34_status_shape_unchanged():
         assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
 
 
-# --- Step 35: browser speech-to-text fills the question box ONLY -------------
-# Voice is only a new way to PRODUCE the question text. It fills #jvAskInput,
-# never auto-submits, never calls the ask endpoint from voice, and stores
-# nothing. The operator must still click "Ask read-only", so the existing
-# classifier always decides safe vs forbidden — even for spoken questions.
+# --- Step 35: browser speech-to-text fills the question box -------------------
+# In PREVIEW mode (the default) voice is only a new way to PRODUCE the question
+# text: it fills #jvAskInput, the voice handler itself makes no direct
+# network/submit call, and stores nothing — the operator still clicks "Ask
+# read-only". The later voice conversation mode adds an opt-in hands-free path
+# that auto-submits via the shared read-only jvPostQuestion helper and reads the
+# answer aloud; that path is covered by the conversation-mode tests below. In
+# BOTH modes the same classifier gates safe vs forbidden — even for spoken
+# questions — and nothing is executed, traded, or stored.
 
 
 def _jarvis_wirevoice_body():
     """Isolate the wireVoice() function body so we can prove the voice handler
-    itself never submits, fetches, or stores. wireAsk() (which legitimately
-    posts {question}) is defined earlier and is excluded by this slice."""
+    itself contains no direct submit/fetch/storage primitive. The shared
+    jvPostQuestion / jvRunConversation helpers (used by conversation mode and
+    the manual Ask button) are defined earlier and excluded by this slice."""
     html = _jarvis_template_text()
     start = html.index("function wireVoice(){")
     end = html.index("\n  function wireSpeak(){", start)
@@ -1985,9 +1990,13 @@ def test_jarvis_step_35_no_browser_storage_tokens():
 def test_jarvis_step_35_voice_does_not_auto_submit():
     voice = _jarvis_wirevoice_body()
     low = voice.lower()
-    # No auto-submit: the handler must not invoke the ask flow or click submit.
+    # The voice handler itself never contains a raw submit primitive: no direct
+    # ask-flow call, no form submit, no synthetic click. Conversation mode's
+    # auto-submit is delegated to the shared read-only jvRunConversation /
+    # jvPostQuestion helpers (asserted by the conversation-mode tests), so this
+    # body still has none of these tokens.
     for tok in ("askjarvis", "ask(", ".submit(", ".click(", "requestsubmit"):
-        assert tok not in low, f"voice must not auto-submit: {tok}"
+        assert tok not in low, f"voice handler must hold no raw submit primitive: {tok}"
 
 
 def test_jarvis_step_35_voice_fills_input_only():
@@ -2314,3 +2323,186 @@ def test_jarvis_voicefix_v1_no_real_control_or_refresh():
     low = html.lower()
     for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
         assert tok not in low, f"voice fix must add no real control: {tok}"
+
+
+# --- JARVIS voice conversation mode: hands-free read-only Q&A ----------------
+# Conversation mode is an OPT-IN second voice mode (preview stays the default).
+# It composes the two already-authorized click-gated actions — Ask read-only
+# (POST {question} to the classifier-gated endpoint) and Read last answer (TTS
+# of the returned answer/refusal): mic -> transcript -> auto Ask read-only ->
+# auto read the answer aloud -> ready. It grants NO new capability: a spoken
+# question is identical to a typed one and is refused by the same classifier if
+# forbidden. No execution, no broker/paper/live control, no audio or transcript
+# storage. These tests pin that contract.
+
+
+def _jarvis_func_body(name, end_marker):
+    """Slice a single IIFE-scope function body by its declaration and the
+    comment/declaration that immediately follows it."""
+    html = _jarvis_template_text()
+    start = html.index("function " + name)
+    end = html.index(end_marker, start)
+    return html[start:end]
+
+
+def test_jarvis_convo_page_renders_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+
+
+def test_jarvis_convo_both_mode_toggles_present():
+    body = _jarvis_template_text()
+    assert "Voice Preview Mode" in body
+    assert "Voice Conversation Mode" in body
+    assert 'id="jvModePreview"' in body
+    assert 'id="jvModeConversation"' in body
+    assert 'role="radiogroup"' in body
+
+
+def test_jarvis_convo_preview_is_default():
+    body = _jarvis_template_text()
+    # The mode state variable defaults to preview, and the preview control is
+    # the one rendered active/checked while conversation is not.
+    assert "var jvVoiceMode = 'preview'" in body
+    assert 'class="jv-voice-ctl is-active" id="jvModePreview"' in body
+    assert 'class="jv-voice-ctl" id="jvModeConversation"' in body
+    assert 'aria-checked="true" aria-label="Voice preview mode"' in body
+    assert 'aria-checked="false" aria-label="Voice conversation mode"' in body
+
+
+def test_jarvis_convo_post_helper_is_question_only_readonly():
+    post = _jarvis_func_body("jvPostQuestion(", "\n  // Read the LAST")
+    assert "/api/jarvis/ask" in post
+    assert "JSON.stringify({question: q})" in post
+    assert "/api/jarvis/refresh" not in post
+    low = post.lower()
+    for bad in ("command", "action", "execute", "broker", "trade", "order",
+                "transcript", "audio", "localstorage", "sessionstorage"):
+        assert bad not in low, f"read-only post must stay question-only: {bad}"
+
+
+def test_jarvis_convo_runner_submits_readonly_then_reads_answer():
+    convo = _jarvis_func_body("jvRunConversation(", "\n  // Toggle between Preview")
+    # The turn submits via the shared read-only helper, renders, then reads the
+    # ANSWER aloud — never a refresh/execution/trading path.
+    assert "jvPostQuestion(transcript)" in convo
+    assert "renderAsk(askOut, d)" in convo
+    assert "jvSpeakAnswer(" in convo
+    low = convo.lower()
+    for bad in ("/api/jarvis/refresh", "execute", "broker", "trade", "order",
+                "localstorage", "sessionstorage", "indexeddb", "document.cookie"):
+        assert bad not in low, f"conversation turn must stay read-only: {bad}"
+
+
+def test_jarvis_convo_speak_helper_reads_answer_not_question():
+    speak = _jarvis_func_body("jvSpeakAnswer(", "\n  // Voice Conversation Mode turn")
+    assert "jvLastAnswerText" in speak
+    for bad in ("input.value", "jvAskInput", "d.command", "d.action",
+                "d.execute", "transcript"):
+        assert bad not in speak, f"read-aloud must source only the answer: {bad}"
+
+
+def test_jarvis_convo_overlap_single_flight_guard():
+    voice = _jarvis_wirevoice_body()
+    assert "jvVoiceBusy" in voice
+    # A new mic start is ignored while a capture/ask/read-aloud is in flight.
+    assert "if(listening || jvVoiceBusy) return;" in voice
+
+
+def test_jarvis_convo_interruption_codes_handled():
+    voice = _jarvis_wirevoice_body()
+    # no-speech / aborted / permission-denied are each handled, and a failed
+    # turn always clears the busy guard so the mic can never wedge.
+    for code in ("no-speech", "aborted", "not-allowed"):
+        assert code in voice, f"interruption code must be handled: {code}"
+    assert "jvVoiceBusy = false" in voice
+
+
+def test_jarvis_convo_barge_in_cancels_active_speech():
+    voice = _jarvis_wirevoice_body()
+    # Starting a new turn stops any answer still being read aloud.
+    assert "window.speechSynthesis.cancel()" in voice
+
+
+def test_jarvis_convo_gated_on_mode_and_preview_unchanged():
+    voice = _jarvis_wirevoice_body()
+    # Conversation behaviour is gated behind the explicit mode; preview still
+    # just fills the question box.
+    assert "jvVoiceMode === 'conversation'" in voice
+    assert "input.value = transcript" in voice
+    assert "jvRunConversation(transcript, setStatus)" in voice
+
+
+def test_jarvis_convo_renderask_still_never_auto_speaks():
+    # The render function must remain speak-free, so a MANUAL ask never speaks;
+    # only the conversation runner speaks, and only after rendering.
+    render = _jarvis_renderask_body()
+    low = render.lower()
+    # "jvspeakanswer(" guards against CALLING the speak helper; the bare
+    # element id jvSpeakAnswerBtn is legitimately referenced to disable it.
+    for tok in (".speak(", "synth.speak", "speechsynthesisutterance", "jvspeakanswer("):
+        assert tok not in low, f"renderAsk must not auto-speak: {tok}"
+
+
+def test_jarvis_convo_no_capture_or_storage_apis():
+    low = _jarvis_template_text().lower()
+    for tok in ("getusermedia", "mediarecorder", "audiocontext",
+                "navigator.mediadevices", "localstorage", "sessionstorage",
+                "indexeddb", "document.cookie"):
+        assert tok not in low, f"conversation mode must not add: {tok}"
+
+
+def test_jarvis_convo_no_real_control_or_refresh():
+    html = _jarvis_template_text()
+    assert "/api/jarvis/refresh" not in html
+    low = html.lower()
+    for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
+        assert tok not in low, f"conversation mode must add no real control: {tok}"
+
+
+def test_jarvis_convo_ask_payload_remains_question_only():
+    html = _jarvis_template_text()
+    assert "JSON.stringify({question: q})" in html
+    low = html.lower()
+    for bad in ("stringify({command", "stringify({action", "stringify({execute",
+                "stringify({transcript", "stringify({audio", "stringify({answer"):
+        assert bad not in low, f"ask payload must stay question-only: {bad}"
+
+
+def test_jarvis_convo_spoken_forbidden_phrase_still_refused():
+    # Conversation mode posts the spoken question to the SAME endpoint, so a
+    # forbidden phrase is still refused by the classifier — voice never bypasses
+    # the safety layer, hands-free or not.
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.post("/api/jarvis/ask", json={"question": "enable live trading now"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["refused"] is True
+    assert d["safety_class"].startswith("FORBIDDEN")
+
+
+def test_jarvis_convo_spoken_safe_phrase_is_answered():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    r = client.post("/api/jarvis/ask", json={"question": "What is the current system status?"})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["refused"] is False
+    assert d["safety_class"].startswith("SAFE_")
+
+
+def test_jarvis_convo_status_shape_unchanged():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert d["online"] is True
+    assert d["read_only"] is True
+    for forbidden_key in ("conversation", "ask", "chat", "answer", "voice",
+                          "audio", "transcript", "tts", "speech", "mode"):
+        assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
