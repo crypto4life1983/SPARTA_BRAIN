@@ -63,6 +63,21 @@ def test_jarvis_nav_link_present():
     assert 'href="/jarvis"' in body
 
 
+def test_jarvis_posture_legend_renders_with_lowered_spacing():
+    # Step 46 UI polish: the posture legend under the orb still renders with all
+    # four read-only badges and uses the slightly lowered spacing (display-only;
+    # no wording/behavior change).
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    body = client.get("/jarvis").text
+    assert "jv-legend" in body
+    assert "Posture legend:" in body
+    for label in ("READ ONLY", "CACHED", "DISPLAY ONLY", "MANUAL SCRIPT ONLY"):
+        assert label in body, f"missing posture label: {label}"
+    assert "margin:10px 2px 6px" in body  # legend lowered slightly under the orb
+
+
 # --- status API -----------------------------------------------------------
 
 def test_jarvis_status_api_shape():

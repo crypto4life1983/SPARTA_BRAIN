@@ -1,0 +1,43 @@
+{
+  "title": "JARVIS Step 46 — Posture-Legend Alignment Tweak (CSS only)",
+  "generated_at": "2026-05-30T20:55:00",
+  "type": "ui_polish_css_spacing_only",
+  "read_only": true,
+  "purpose": "Lower the posture-legend row under the central orb slightly so it sits more centered vertically and reads cleaner. CSS-only spacing refinement on the .jv-legend container in templates/jarvis.html. No wording change, no functionality change, no JARVIS logic/safety change, no endpoint, no control.",
+  "change": {
+    "file": "templates/jarvis.html",
+    "selector": ".jv-legend",
+    "before": "align-items:center;margin:0 2px 2px; ... letter-spacing:.04em;",
+    "after": "align-items:center;margin:10px 2px 6px; ... letter-spacing:.04em;line-height:1.5;",
+    "effects": [
+      "margin-top 0 -> 10px: drops the legend row slightly lower under the orb.",
+      "margin-bottom 2px -> 6px: balances the added top space.",
+      "line-height:1.5: cleaner vertical rhythm/centering for the wrapped badge/text items."
+    ]
+  },
+  "row_contents_unchanged": [
+    "READ ONLY — live status, no writes",
+    "CACHED — offline report, read only",
+    "DISPLAY ONLY — tracked docs, no execution",
+    "MANUAL SCRIPT ONLY — never run from the browser"
+  ],
+  "explicitly_not_changed": [
+    "No wording change — all four badge labels and explanatory text are byte-for-byte identical.",
+    "No functionality change — no JS, handler, fetch, endpoint, or control.",
+    "No JARVIS logic or safety behavior change.",
+    "app.py, jarvis_conversation_safety.py, tools, base.html, trading/Factory/S26-S28/Donchian/Hydra/storage untouched.",
+    "No control, button, form, or endpoint added."
+  ],
+  "files_touched": [
+    "templates/jarvis.html — one-rule CSS spacing tweak.",
+    "tests/test_jarvis_route.py — one lightweight assertion that the legend renders with all four labels and uses the lowered spacing.",
+    "docs/jarvis_step_46_posture_legend_alignment_tweak/report.md and report.json — this memo."
+  ],
+  "validation": [
+    {"cmd": "GET /jarvis", "result": "HTTP 200; posture legend renders with 'Posture legend:' and all four badges (READ ONLY, CACHED, DISPLAY ONLY, MANUAL SCRIPT ONLY)."},
+    {"cmd": "git diff templates/jarvis.html", "result": "only the two CSS lines changed — no markup, wording, or script change."},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py tests/test_jarvis_snapshot_report.py --rootdir=tests -q", "result": "379 passed, 0 failed, 0 skipped (+1 legend test)."}
+  ],
+  "conclusion": "The posture legend row now sits slightly lower under the orb with cleaner vertical alignment, via a CSS-only margin/line-height refinement on .jv-legend. No wording, functionality, logic, safety, endpoint, or control change. /jarvis renders 200 and 379 tests pass. Nothing staged or committed.",
+  "verdict": "JARVIS_POSTURE_LEGEND_ALIGNMENT_TWEAKED"
+}
