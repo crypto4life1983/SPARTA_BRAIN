@@ -1288,10 +1288,25 @@
     var done = false;
     function finish(){ if(done){ return; } done = true; if(onEnd){ onEnd(); } }
     function enqueue(){
+      // Chrome/Edge cold-start quirk: when the engine has been idle, the FIRST
+      // audible utterance ramps up from near-silence, so the opening words are
+      // too quiet to hear; later chunks play fine. A volume-0 warm-up does NOT
+      // help because Chromium drops zero-volume utterances without opening the
+      // sound device. So prime with a SHORT, near-inaudible (but non-zero)
+      // utterance that has real phonemes: it opens the sound pipeline and the
+      // volume ramp is spent on it, so the first real chunk starts at full
+      // level. Volume/pitch are set explicitly on every chunk too.
+      var warm = new SpeechSynthesisUtterance('uh uh');
+      warm.lang = 'en-US';
+      warm.volume = 0.04;
+      warm.rate = 0.6;
+      synth.speak(warm);
       chunks.forEach(function(c, idx){
         var u = new SpeechSynthesisUtterance(c);
         u.lang = 'en-US';
         u.rate = 1;
+        u.pitch = 1;
+        u.volume = 1;
         if(idx === chunks.length - 1){ u.onend = finish; u.onerror = finish; }
         synth.speak(u);
       });
