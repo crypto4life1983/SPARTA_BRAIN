@@ -1248,46 +1248,60 @@
     }).then(function(r){ return r.json(); });
   }
 
-  // Split text into short, sentence-sized chunks. Chrome/Edge silently cut a
-  // single SpeechSynthesisUtterance off after ~15s (~300 chars); speaking one
-  // short chunk at a time is the standard workaround so long answers finish.
-  function jvChunkText(text){
+  // Read text aloud across one or more queued utterances. Two browser quirks
+  // shape this:
+  //  - Chrome/Edge silently cancel a single utterance after ~15s, so long
+  //    answers must be split.
+  //  - The pause()/resume() keepalive that would keep one long utterance alive
+  //    audibly breaks the voice mid-sentence, so we do NOT use it.
+  // Compromise: pack sentences into pieces that each stay well under the ~15s
+  // limit, then queue them ALL up front so the engine plays them back-to-back
+  // without the gap you get from re-issuing speak() inside each onend handler.
+  // cancel() immediately before speak() clips the first word in Chrome, so we
+  // only cancel when something is queued and let it settle first. onEnd fires
+  // once after the final piece (or on skip / error).
+  function jvSpeakChunks(synth, text, onEnd){
     var clean = (text || '').replace(/\s+/g, ' ').trim();
-    if(!clean){ return []; }
-    var raw = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
-    var chunks = [];
-    raw.forEach(function(s){
+    if(!clean){ if(onEnd){ onEnd(); } return false; }
+    var sentences = clean.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) || [clean];
+    var chunks = [], buf = '';
+    sentences.forEach(function(s){
       s = s.trim();
-      while(s.length > 200){
-        var cut = s.lastIndexOf(' ', 200);
-        if(cut <= 0){ cut = 200; }
+      if(!s){ return; }
+      while(s.length > 160){
+        var cut = s.lastIndexOf(' ', 160);
+        if(cut <= 0){ cut = 160; }
+        if(buf){ chunks.push(buf); buf = ''; }
         chunks.push(s.slice(0, cut).trim());
         s = s.slice(cut).trim();
       }
-      if(s){ chunks.push(s); }
+      if((buf ? buf + ' ' + s : s).length > 160){
+        if(buf){ chunks.push(buf); }
+        buf = s;
+      } else {
+        buf = (buf ? buf + ' ' + s : s);
+      }
     });
-    return chunks;
-  }
-
-  // Speak text as a sequence of short utterances (see jvChunkText). Each chunk
-  // is queued only after the previous one ends, so the engine never hits the
-  // long-utterance cutoff. onEnd fires once after the last chunk (or on skip).
-  function jvSpeakChunks(synth, text, onEnd){
-    var chunks = jvChunkText(text);
+    if(buf){ chunks.push(buf); }
     if(!chunks.length){ if(onEnd){ onEnd(); } return false; }
-    try { synth.cancel(); } catch(e){ /* nothing queued */ }
-    var i = 0, done = false;
+
+    var done = false;
     function finish(){ if(done){ return; } done = true; if(onEnd){ onEnd(); } }
-    function next(){
-      if(i >= chunks.length){ finish(); return; }
-      var u = new SpeechSynthesisUtterance(chunks[i]);
-      u.lang = 'en-US';
-      u.rate = 1;
-      u.onend = function(){ i += 1; next(); };
-      u.onerror = function(){ i += 1; next(); };
-      synth.speak(u);
+    function enqueue(){
+      chunks.forEach(function(c, idx){
+        var u = new SpeechSynthesisUtterance(c);
+        u.lang = 'en-US';
+        u.rate = 1;
+        if(idx === chunks.length - 1){ u.onend = finish; u.onerror = finish; }
+        synth.speak(u);
+      });
     }
-    next();
+    if(synth.speaking || synth.pending){
+      try { synth.cancel(); } catch(e){ /* nothing queued */ }
+      setTimeout(enqueue, 120);
+    } else {
+      enqueue();
+    }
     return true;
   }
 
