@@ -1,0 +1,97 @@
+{
+  "title": "JARVIS Step 45 — Offline Manual Snapshot Script + Tests",
+  "generated_at": "2026-05-30T20:50:00",
+  "type": "offline_operator_script_plus_tests_plus_docs",
+  "read_only": true,
+  "run_by_hand": "python tools/jarvis_snapshot_report.py",
+  "purpose": "Implement the Step 44 plan (Option C): an offline, operator-run script that captures the existing read-only JARVIS status into a gitignored storage/jarvis/snapshots/ JSON file so a future, separately approved step can answer 'what changed?' with a real diff. Nothing is wired to the browser; the web surface neither imports nor invokes the script and exposes no snapshot or refresh endpoint.",
+  "relation_to_step_44": "Step 44 (5d0bdf3, JARVIS_OFFLINE_SNAPSHOT_PLAN_READY) planned the offline manual snapshot mechanism and recommended Step 45 = implement the script + tests only, not wired to the web. Step 45 implements exactly that. Step 46 (ask reads latest snapshot to compute a diff) remains deferred until separate approval.",
+  "files_created_or_changed": [
+    "tools/jarvis_snapshot_report.py (new) — offline operator-run snapshot script.",
+    "tests/test_jarvis_snapshot_report.py (new) — 16 tests pinning write-location, content, exclusion, status-shape, and no-UI-control guarantees.",
+    "docs/jarvis_step_45_offline_snapshot_script/report.md and report.json (new) — this memo."
+  ],
+  "explicitly_not_done": [
+    "No app.py change (the existing read-only api_jarvis_status() aggregate is imported as-is; no refactor needed).",
+    "No jarvis_conversation_safety.py change.",
+    "No templates/jarvis.html or base.html change.",
+    "No new endpoint (no /api/jarvis/snapshot, no /api/jarvis/refresh).",
+    "No browser control, button, form, onclick, fetch, or scheduler.",
+    "No .gitkeep added — storage/ is already gitignored, so snapshots are never tracked and no tracked runtime file is needed.",
+    "No refresh / execution / broker / paper / live control; no data fetched; no trade run or simulated.",
+    "No trading / Factory / S26-S28 / Donchian / Hydra / storage file touched outside the gitignored storage/jarvis/snapshots/ runtime output.",
+    "Nothing staged or committed."
+  ],
+  "script_behavior": [
+    "Manual/offline only: operator runs python tools/jarvis_snapshot_report.py; the browser cannot trigger it.",
+    "Reads the existing read-only status aggregate: imports app and calls app.api_jarvis_status() (adds repo root to sys.path so direct invocation finds the module); runs no extra git/subprocess/shell, fetches nothing, calls no broker, places no trade, refreshes nothing.",
+    "Writes exactly two files, only inside storage/jarvis/snapshots/: a timestamped snapshot_<ISO-no-colons>_<microseconds>.json plus a latest_snapshot.json pointer; never stages, commits, cleans, deletes, or writes elsewhere.",
+    "Whitelist capture: only whitelisted scalar display fields are copied out of each status section; anything not whitelisted is dropped, so the snapshot is a strict subset of the already read-only status.",
+    "Fail-closed: assert_snapshot_safe() re-scans the serialized snapshot for forbidden whole-word tokens and raises if any appear; main() returns nonzero on any failure."
+  ],
+  "snapshot_contents": {
+    "kind": "jarvis_status_snapshot",
+    "read_only": true,
+    "fields": [
+      "generated_at",
+      "status_key_count (24)",
+      "status_key_hash (sha256 of sorted top-level keys)",
+      "git: branch, head, clean, dirty, modified_count, untracked_count",
+      "recent_commits: [{short_hash, subject}] max 5",
+      "commander_snapshot: overall_state, headline, warnings, trading_posture, cache_status, staged_count, untracked_count",
+      "trading_detail: state, read_only(true), paper_ready(false), live_ready(false), broker_control(false), candidate_status",
+      "trading_latest_reports: [{name, path, modified_at, has_md}] max 5",
+      "cache_freshness: state, overall, generated_at",
+      "file_hygiene: state, total_untracked_count, tracked_modified_count, staged_count"
+    ],
+    "real_run_example": {
+      "status_key_count": 24,
+      "status_key_hash_prefix": "32665ba5e92a",
+      "head": "5d0bdf3",
+      "branch": "master",
+      "trading_posture": "research_only",
+      "trading_flags": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false}
+    }
+  },
+  "forbidden_tokens_excluded": [
+    "secret", "secrets", "api_key", "apikey", "broker_password", "password",
+    "credential", "credentials", "token", "tokens", "command", "action",
+    "execute", "order", "orders", "trade_ticket", "audio", "transcript",
+    "transcripts", "chat_log", "environment"
+  ],
+  "false_positive_handling": "Word-boundary (\\b) matching means legitimate compounds never trip the guard (commander_snapshot is not 'command'; an _audit report name is not 'audio'; recommended_next_actions is deliberately NOT embedded as a verbatim key list, so 'action' never appears).",
+  "tests": [
+    "write_snapshot writes only the timestamped file + latest_snapshot.json, only inside the given dir, and never escapes it.",
+    "latest_snapshot.json is valid JSON and marked read_only.",
+    "snapshot includes every required read-only field (generated_at, key count/hash, git, commander, trading, cache, file_hygiene).",
+    "snapshot excludes all forbidden tokens (secret, api_key, broker_password, command, action, execute, order, trade_ticket, audio, transcript) via word-boundary check.",
+    "build_snapshot drops non-whitelisted fields (injected secret/order_ticket/api_key/command/password are stripped).",
+    "assert_snapshot_safe accepts a real snapshot and rejects a planted token.",
+    "timestamped filename has no colons (Windows-safe).",
+    "/api/jarvis/status shape unchanged (24 keys; trading flags locked false).",
+    "template has no snapshot/refresh control; no /api/jarvis/snapshot or /api/jarvis/refresh route exists (404); app.py references neither.",
+    "All temp writes use tmp_path, so the real storage tree is never touched."
+  ],
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py tools/jarvis_snapshot_report.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py tests/test_jarvis_snapshot_report.py --rootdir=tests -q", "result": "378 passed, 0 failed, 0 skipped (was 362; +16)"},
+    {"cmd": "python -m json.tool docs/jarvis_step_45_offline_snapshot_script/report.json", "result": "JSON_OK"},
+    {"cmd": "python tools/jarvis_snapshot_report.py", "result": "exit 0; wrote a 24-key snapshot + latest_snapshot.json"},
+    {"cmd": "git status --short storage/jarvis/snapshots/", "result": "empty (gitignored, never tracked)"}
+  ],
+  "status_shape_confirmation": {
+    "top_level_key_count": 24,
+    "online": true,
+    "read_only": true,
+    "trading_detail_flags": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false}
+  },
+  "runtime_files_and_gitignore": {
+    "snapshot_dir": "storage/jarvis/snapshots/",
+    "gitignored": true,
+    "tracked": false,
+    "staged": false,
+    "note": "storage/ is gitignored (.gitignore), so snapshot artifacts are runtime-only and never enter version control."
+  },
+  "conclusion": "JARVIS now has an offline, operator-run snapshot script that captures the existing read-only status aggregate into a gitignored storage/jarvis/snapshots/ JSON file (timestamped + latest_snapshot.json pointer), using a strict whitelist plus a fail-closed forbidden-token guard. It is not wired to the browser, adds no endpoint/UI/scheduler/refresh, performs no execution and no trading control, and writes only inside the snapshots dir. 378 tests pass (+16). A real run produced a clean 24-key snapshot that git ignores. Nothing staged or committed.",
+  "verdict": "JARVIS_OFFLINE_SNAPSHOT_SCRIPT_READY"
+}
