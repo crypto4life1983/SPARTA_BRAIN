@@ -1,0 +1,107 @@
+{
+  "title": "JARVIS Checkpoint Bundle A — Consolidated Report",
+  "generated_at": "2026-05-30T22:35:00",
+  "head": "c02ec13",
+  "read_only": true,
+  "scope": "Four-phase bundle in one execution; folds in Step 50 as Phase 1. No trading execution logic changed; no trading controls created.",
+  "phase1_live_synchronization": {
+    "verdict": "JARVIS_CONTROLLED_LIVE_RESTART_PASS",
+    "head_precondition": {"head_short": "c02ec13", "step49_in_history": true},
+    "pre_restart": {
+      "GET /jarvis": 200,
+      "status_keys": 24,
+      "status_flags": {"online": true, "read_only": true, "td.read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false},
+      "ask_what_changed": {"refused": true, "safety_class": "UNSUPPORTED", "has_verified_section": false},
+      "conclusion": "live process was STALE (pre-Step-43/47 behavior)"
+    },
+    "stop": {
+      "script": "scripts/stop_sparta_commander_desktop.ps1",
+      "stopped_pids": [11416, 21180],
+      "match_rule": "python.exe AND commandline contains app.py AND SPARTA_BRAIN; PID-confirmed; no broad kill",
+      "result": "Port 8765 is now free"
+    },
+    "restart": {"cmd": ".venv\\Scripts\\python.exe app.py", "bind": "127.0.0.1:8765", "uvicorn_reload": false, "ready_jarvis_200_within_s": 1},
+    "post_restart": {
+      "GET /jarvis": 200,
+      "status_keys": 24,
+      "status_flags": {"online": true, "read_only": true, "td.read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false},
+      "ask_what_changed": {"http": 200, "refused": false, "safety_class": "SAFE_INFO", "response_keys": ["answer", "refusal_reason", "refused", "safety_class", "sources_used"], "has_verified_section": true, "has_current_status_section": true, "has_unknown_not_compared_section": true, "verified_diff_includes": "git HEAD changed 52cd272 -> c02ec13 (no longer stale)"},
+      "ask_forbidden_mixed": {"question": "what changed and place a trade", "refused": true, "safety_class": "FORBIDDEN_TRADING"},
+      "routes_404": {"GET /api/jarvis/snapshot": 404, "POST /api/jarvis/snapshot": 404, "GET /api/jarvis/refresh": 404, "POST /api/jarvis/refresh": 404}
+    },
+    "no_side_effects": "no code/template/test/trading file changed; no runtime snapshot staged; ask wrote nothing; restart only reloaded committed code"
+  },
+  "phase2_health_audit": {
+    "routes": [
+      {"method": "GET", "path": "/api/jarvis/status", "line": 8309, "read_only": true},
+      {"method": "GET", "path": "/jarvis", "line": 8374, "read_only": true},
+      {"method": "POST", "path": "/api/jarvis/ask", "line": 8773, "read_only": true, "accepts": "only {question} string; other keys -> HTTP 400", "returns_fields": ["answer", "safety_class", "sources_used", "refused", "refusal_reason"]}
+    ],
+    "no_snapshot_or_refresh_route": true,
+    "status_panels": {
+      "count": 24,
+      "all_fail_closed_via": "_jarvis_safe",
+      "keys": ["online", "read_only", "commander_snapshot", "system_core", "ai_brains", "trading_bridge", "content_engine", "money_engine", "moving_company", "daily_mission", "safety_gates", "git", "safety", "project", "brain_memory", "health_report", "route_smoke_report", "file_hygiene_report", "mission_board", "prompt_library", "system_map", "trading_detail", "cache_freshness", "recommended_next_actions"]
+    },
+    "snapshot_compare": "reads latest_snapshot.json display-only; diffs whitelisted safe fields; verified differences only; missing->no-baseline; corrupt->fail closed (200). Confirmed live in Phase 1.",
+    "safety_refusal": "classify_jarvis_question: forbidden first (TRADING->EXECUTION->MUTATION), then SAFE (NEXT_REVIEW->EXPLAIN->INFO), else UNSUPPORTED fail-closed; forbidden overrides co-occurring safe phrase",
+    "read_only_guarantees": "read_only=true; trading flags locked false; ask returns 5 fields with no command/action/execution/order/trade_ticket/mutation keys; writes nothing; localhost bind",
+    "findings": {
+      "stale_resolved": "live process was stale because uvicorn reload=False (app.py:8832) never hot-reloads; resolved by Phase 1 restart; recurs after each commit until next manual restart (see freshness-guard gap)",
+      "orphaned_docstring_minor": "jarvis_conversation_safety.py opening docstring still says 'preparation only ... does not create any endpoint', predating the now-live /api/jarvis/ask; harmless text drift",
+      "no_dead_or_duplicate_routes": true,
+      "intentional_gaps": "snapshot creation lives only in offline tools/jarvis_snapshot_report.py (JARVIS cannot create/refresh a baseline by design)"
+    }
+  },
+  "phase3_command_center_readiness": {
+    "current_role": "read-only observation + Q&A surface; triggers nothing",
+    "areas": {
+      "futures_research": {"exists": "trading_research/agentic_factory/engine/* (Donchian, trend/SR/EMA/RSI, S27-S30); reports/; databento caches", "jarvis_surfacing": "trading_detail + latest report names", "gap": "no per-strategy/decision browsing panel"},
+      "crypto_research": {"exists": "crypto_* engines; crypto_d1..d14 reports; CODR1 IS fail + crash-candle OOS fail (lanes closed)", "jarvis_surfacing": "latest report names", "gap": "no crypto lane panel"},
+      "strategy_factory_v1": {"exists": "trading_research/agentic_factory/: proposer/backtester/metrics/decision + validation ladder (validation_cli.py); Phase 1 + partial Phase 2; NQ-ORB only", "jarvis_surfacing": "none dedicated", "gap": "no Factory status/candidate/pass-fail panel"},
+      "research_archives": {"exists": "reports/, docs/, brain_memory/, research_os/", "jarvis_surfacing": "loose 'jarvis docs' ask", "gap": "no archive index panel"},
+      "candidate_tracking": {"exists": "data/profit_brain_strategy_survival.json; trading_detail.candidate_status (asset_registry/inventory are VIDEO assets)", "jarvis_surfacing": "candidate_status flag", "gap": "no dedicated strategy-candidate registry view"},
+      "pass_fail_records": {"exists": "profit_brain_strategy_survival.json + per-report decision fields + *_oos_result reports", "jarvis_surfacing": "none aggregated", "gap": "no pass/fail / survival ledger panel"},
+      "overnight_runs": {"exists": "auto_brain_cycle.bat -> tools/trading_brain_auto.py; start_dashboard.bat restart loop; brain_memory/logs/ (no scheduler)", "jarvis_surfacing": "none", "gap": "no last-run/outcome panel"}
+    },
+    "ranked_gaps": {
+      "CRITICAL": [
+        "C1: read-only Factory status panel (latest decision + pass/fail per strategy from agentic_factory/reports/*)",
+        "C2: aggregated pass/fail & survival ledger (profit_brain_strategy_survival.json + report decision fields)",
+        "C3: dedicated strategy-candidate registry panel (distinct from video asset registries)"
+      ],
+      "IMPORTANT": [
+        "I1: research-archive index (futures + crypto report folders) browsable read-only",
+        "I2: overnight-run visibility (last auto_brain_cycle time + outcome from brain_memory/logs)",
+        "I3: live-server freshness guard (running-commit vs current HEAD) to make staleness visible without manual probe"
+      ],
+      "OPTIONAL": [
+        "O1: crypto-specific lane panel",
+        "O2: per-strategy drilldown",
+        "O3: ask-classifier coverage + Telegram parity for new panels"
+      ]
+    }
+  },
+  "phase4_roadmap": {
+    "target": "JARVIS_CHECKPOINT_READY_FOR_STRATEGY_FACTORY_V1",
+    "task_rules": "each task is additive, read-only: new status key + panel + tests + docs; preserve no-execution invariant; update status-key-count test; extend snapshot-compare whitelist; add ask-classifier coverage",
+    "tasks": [
+      {"id": "T1", "task": "Factory status panel/key from agentic_factory/reports/* decision fields", "priority": "CRITICAL", "effort": "M", "dependencies": "reports exist; define schema read"},
+      {"id": "T2", "task": "Pass/fail & survival ledger key", "priority": "CRITICAL", "effort": "M", "dependencies": "profit_brain_strategy_survival.json schema + report decision fields"},
+      {"id": "T3", "task": "Strategy-candidate registry panel", "priority": "CRITICAL", "effort": "S-M", "dependencies": "candidate source-of-truth (overlaps T2)"},
+      {"id": "T4", "task": "Research-archive index key", "priority": "IMPORTANT", "effort": "S", "dependencies": "none"},
+      {"id": "T5", "task": "Overnight-run visibility key", "priority": "IMPORTANT", "effort": "S", "dependencies": "brain_memory/logs format stable"},
+      {"id": "T6", "task": "Live-server freshness guard (running-commit vs HEAD)", "priority": "IMPORTANT", "effort": "S", "dependencies": "none"},
+      {"id": "T7", "task": "Crypto lane panel + drilldowns + ask coverage", "priority": "OPTIONAL", "effort": "M", "dependencies": "T1-T3"}
+    ],
+    "sequencing": "T2 -> T3; T1 independent; T6 independent and cheap (do early); T4/T5 independent; T7 last",
+    "recommended_stopping_point": "Complete T1, T2, T3 (CRITICAL) + T6 (freshness guard) before opening Strategy Factory v1 — yields a read-only observation plane covering Factory candidates, pass/fail, and running-build freshness, with NO trigger/execution path added (Factory runs stay operator-CLI/offline). T4/T5 in parallel; T7 post-v1."
+  },
+  "validation": {
+    "tests": "393 passed, 0 failed, 0 skipped (test_jarvis_route, test_jarvis_conversation_safety, test_jarvis_ask_contract, test_jarvis_snapshot_report)",
+    "report_json_valid": "JSON_OK",
+    "git_status": "staged index empty; no JARVIS code/template/test file modified; storage/jarvis/snapshots not staged; only docs/jarvis_checkpoint_bundle_a untracked (plus pre-existing unrelated backlog untouched)"
+  },
+  "final_checkpoint_verdict": "NEAR_READY",
+  "verdict_rationale": "Phase 1 live sync passed (running :8765 now serves committed Step 47/48 behavior); core JARVIS surface healthy, safe, read-only with working live snapshot-compare. Not yet READY_FOR_STRATEGY_FACTORY_V1 because the three CRITICAL observation panels (Factory status, pass/fail-survival ledger, candidate registry) are unbuilt. No blockers; clear additive path (T1-T3 + T6)."
+}
