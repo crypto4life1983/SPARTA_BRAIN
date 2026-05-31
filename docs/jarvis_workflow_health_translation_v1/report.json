@@ -1,0 +1,121 @@
+{
+  "bundle": "JARVIS_WORKFLOW_HEALTH_TRANSLATION_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_WORKFLOW_HEALTH_READY",
+  "goal": "Fix natural workflow/pipeline-health questions so JARVIS answers like a Chief of Staff (overall status, what is working, what needs attention, blocker level, recommended next step) instead of refusing fail-closed. Executive mode (default) is customer-friendly and hides raw posture flags/counts; operator mode (on request) exposes them. All read-only; no execution; no broker/paper/live control; no fake success or performance; no Strategy Factory mutation; forbidden commands still refuse; unknown state is reported as unknown.",
+  "problem": "The compound phrase 'what about our pipeline the workflow like is it working there is no problem everything is good' (and simpler forms like 'pipeline status', 'workflow status', 'is everything working', 'any blockers', 'are we on track', 'how is the project doing', 'is the system working') matched no SAFE_INFO pattern, so the fail-closed classifier refused them as UNSUPPORTED.",
+  "desired_behavior": {
+    "executive_default": "Workflow health (read-only). Overall: SPARTA Brain is online and the workflow is operating. [health phrase]. What's working: the dashboard, the read-only status pipeline, and Strategy Factory research are all running. [research phrase]. What needs attention: [attention phrase]. Blocker level: [none/low/elevated/unknown]. All trading remains observation-only — no live or paper trades were executed, so there is no performance to report. Recommended next step: [first action]. Ask for operator mode or technical details for the exact figures.",
+    "operator_mode": "Workflow health (read-only, operator detail). System core + server, commander snapshot + warnings, Strategy Factory phrase, exact research candidate count, the four locked posture flags, attention items, open-warning blocker count, and recommended next action."
+  },
+  "files_changed": [
+    "jarvis_conversation_safety.py",
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_workflow_health_translation_v1/report.md",
+    "docs/jarvis_workflow_health_translation_v1/report.json"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "related_change_outside_bundle": {
+    "files": ["templates/jarvis.html", "tests/test_jarvis_route.py"],
+    "note": "Separate, already-approved voice read-aloud fix (sentence chunking via jvChunkText/jvSpeakChunks to defeat the browser's ~15s long-utterance cutoff). Running this bundle's required route suite surfaced one Step-36 assertion that checked the now-relocated 'synth.speak(u)' call site; it was reconciled to assert the delegation 'jvSpeakChunks(synth, text)'. Read-aloud behavior (explicit click-gated, answer-text only, no network/storage) is unchanged. Listed here for transparency; it is NOT part of the workflow-health 5-file bundle."
+  },
+  "implementation": {
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "change": "Appended 10 SAFE_INFO regex patterns for natural workflow/pipeline-health phrasing. Forbidden patterns still match FIRST and unchanged, so 'run the pipeline' stays FORBIDDEN_EXECUTION and '...then place a trade / buy NQ / sell ES / approve the strategy' stay FORBIDDEN_TRADING.",
+      "new_safe_info_patterns": [
+        "\\bpipeline\\b",
+        "\\bworkflow\\b",
+        "\\beverything\\s+(?:is\\s+)?(?:working|good|ok|okay|fine|running|alright|all\\s+right)\\b",
+        "\\bany\\s+(?:problems?|issues?|blockers?)\\b",
+        "\\bon\\s+track\\b",
+        "\\bhow\\s+(?:is|are|'?s)\\s+(?:the\\s+|our\\s+|my\\s+)?project\\b",
+        "\\bproject\\s+(?:doing|going|status|progress|update)\\b",
+        "\\b(?:is\\s+)?(?:the\\s+)?system\\s+working\\b",
+        "\\bis\\s+it\\s+working\\b",
+        "\\bworking\\s+(?:fine|well|ok|okay|good)\\b"
+      ]
+    },
+    "answer_layer": {
+      "file": "app.py",
+      "function_changed": "_jarvis_conversational_answer(q)",
+      "helper_added": "_exec_blocker_phrase(state, warns) — fact-driven blocker level: 'elevated' (red/critical state), 'low' (warnings but not red), 'none ... on track' (green/no warnings), 'unknown' (state not confirmed).",
+      "new_branch": "Added a mode-aware 'Workflow Health Translation' branch BEFORE the generic system/overall-status catch-all. Detects workflow/pipeline-health intent. Executive (default) returns the Chief-of-Staff spine (overall -> what's working -> what needs attention -> blocker level -> recommended next step) with NO posture flags/counts; operator (on request, via the existing _operator flag) returns system core/server, commander snapshot + warnings, factory phrase, exact candidate count, the four posture flags, and open-warning blocker count.",
+      "reads_only": ["api_jarvis_status aggregate (system_core, commander_snapshot, factory_status, candidate_registry, trading_detail)"],
+      "unknown_handling": "Reuses existing fact-driven helpers; _exec_blocker_phrase explicitly says 'unknown' when state is not confirmable, and factory/candidate helpers say 'not available'/0 rather than inventing."
+    },
+    "template_change": false,
+    "template_note": "Voice + conversation mode already POST to /api/jarvis/ask, so they inherit the workflow-health translation with no template edit."
+  },
+  "ordering_safety": {
+    "placed_before": "generic system/overall-status branch (so workflow phrasing routes to the workflow read, not the bare status line)",
+    "placed_after": "chief-of-staff, briefing, factory, sparta-brain, trading-status, 24h-recap, attention, focus, how-are-you, greeting branches (more specific intents keep priority)",
+    "no_intent_hijack": "Workflow intent requires explicit workflow/pipeline/health phrasing; generic 'what is the status' / 'how is everything' still route to the existing status branch unchanged. Trading/strategy phrasings still route to the Trading Executive Translation branch (checked earlier)."
+  },
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added_section": "JARVIS Workflow Health Translation v1",
+  "tests_added": [
+    "test_wh_workflow_health_is_executive_by_default (x9)",
+    "test_wh_exact_failed_phrase_is_answered (x1)",
+    "test_wh_invents_no_performance (x9)",
+    "test_wh_operator_mode_shows_technical (x4)",
+    "test_wh_forbidden_command_still_refuses (x6)",
+    "test_wh_workflow_phrases_classify_safe (x1)",
+    "test_wh_keeps_trading_flags_locked_and_shape (x1)",
+    "test_wh_adds_no_routes_and_writes_nothing (x1)"
+  ],
+  "new_test_count": 32,
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_refresh_route": true,
+    "no_snapshot_route": true,
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_chat_audio_transcript_storage": true,
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true,
+    "no_invented_pnl_or_performance": true,
+    "no_invented_trades": true,
+    "no_fabricated_strategy_success": true,
+    "executive_hides_posture_by_default": true,
+    "operator_exposes_posture_on_request": true,
+    "safety_phrasing_kept_in_both_modes": true,
+    "classifier_still_gates_every_question": true,
+    "forbidden_first_unchanged": true,
+    "sell_still_forbidden_trading": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"],
+    "unknown_reported_as_unknown": true
+  },
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "workflow_health_new_tests": "32 passed",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_ask_contract_full": "282 passed",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "failed_phrase_now_answered": true,
+    "executive_default_hides_posture": true,
+    "operator_mode_exposes_posture": true,
+    "no_invented_performance": true,
+    "no_invented_trades": true,
+    "forbidden_still_refused": true,
+    "workflow_phrases_classify_safe": true,
+    "no_new_routes": true,
+    "no_storage": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

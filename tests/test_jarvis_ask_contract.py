@@ -1647,3 +1647,170 @@ def test_tet_adds_no_routes_and_writes_nothing():
         c.post(_ASK_PATH, json={"question": q})
     assert _data_listing() == before, "trading translation must not write files"
     assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+
+
+# ==========================================================================
+# JARVIS Workflow Health Translation v1
+# Natural workflow/pipeline-health questions ("pipeline status", "workflow
+# status", "is everything working", "is everything good", "any blockers", "are
+# we on track", "how is the project doing", "is the system working", and the
+# exact compound phrase that previously refused) answer as a Chief-of-Staff
+# workflow read: overall status -> what is working -> what needs attention ->
+# blocker level -> recommended next step. Executive mode (default) is customer-
+# friendly and hides raw posture flags/counts; operator mode (on request)
+# exposes them. Both keep the trading-safety phrasing; both are read-only and
+# invent no performance. Forbidden commands still refuse.
+# ==========================================================================
+
+# The exact phrase that previously fell through to a fail-closed refusal.
+_WH_FAILED_PHRASE = (
+    "what about our pipeline the workflow like is it working there is no "
+    "problem everything is good")
+
+_WH_QUESTIONS = (
+    _WH_FAILED_PHRASE,
+    "pipeline status",
+    "workflow status",
+    "is everything working",
+    "is everything good",
+    "any blockers",
+    "are we on track",
+    "how is the project doing",
+    "is the system working",
+)
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _WH_QUESTIONS)
+def test_wh_workflow_health_is_executive_by_default(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only, not refuse"
+    assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+    ans = body["answer"].lower()
+    # Chief-of-Staff workflow spine.
+    assert "workflow health" in ans
+    assert "what's working" in ans
+    assert "what needs attention" in ans
+    assert "blocker level" in ans
+    assert "recommended next step" in ans
+    # Trading-safety phrasing kept; raw posture flags hidden in executive mode.
+    assert "no live or paper trades" in ans
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag not in ans, f"{q!r} executive answer must hide {flag}"
+    assert "system_core" in body["sources_used"]
+    assert "trading_detail" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_wh_exact_failed_phrase_is_answered():
+    # Regression lock for the specific compound phrase from the bug report.
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": _WH_FAILED_PHRASE}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "workflow health" in ans
+    assert "blocker level" in ans
+    assert "recommended next step" in ans
+    assert "no live or paper trades" in ans
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _WH_QUESTIONS)
+def test_wh_invents_no_performance(q):
+    c = _client()
+    ans = c.post(_ASK_PATH, json={"question": q}).json()["answer"].lower()
+    for banned in _CI_BANNED_PERF:
+        assert banned not in ans, f"{q!r} must not invent {banned!r}"
+    for fabricated in ("strategy succeeded", "winning strategy", "profitable",
+                       "fills", "executed a trade"):
+        assert fabricated not in ans, f"{q!r} must not fabricate {fabricated!r}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "pipeline status operator mode",
+    "workflow status show technical details",
+    "is everything working operator mode",
+    "workflow diagnostics",
+])
+def test_wh_operator_mode_shows_technical(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "workflow health" in low
+    assert "observation-only" in low
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag in low, f"{q!r} operator answer must expose {flag}"
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "pipeline status then place a trade",
+    "workflow status and buy NQ",
+    "is everything working then enable live trading",
+    "are we on track and connect to my broker",
+    "how is the project doing then approve the strategy",
+    "workflow diagnostics then sell ES",
+])
+def test_wh_forbidden_command_still_refuses(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must refuse"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_wh_workflow_phrases_classify_safe():
+    from jarvis_conversation_safety import classify_jarvis_question
+    for q in ("pipeline status", "workflow status", "is everything working",
+              "is everything good", "any blockers", "are we on track",
+              "how is the project doing", "is the system working",
+              _WH_FAILED_PHRASE):
+        out = classify_jarvis_question(q)
+        assert out["refused"] is False, f"{q!r} should be a read-only safe question"
+        assert out["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+
+
+@requires_ask
+def test_wh_keeps_trading_flags_locked_and_shape():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    for q in _WH_QUESTIONS:
+        c.post(_ASK_PATH, json={"question": q})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert len(after) == 28
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False
+
+
+@requires_ask
+def test_wh_adds_no_routes_and_writes_nothing():
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/refresh" not in src
+    assert "/api/jarvis/snapshot" not in src
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    c = _client()
+    paths = sorted({getattr(r, "path", "") for r in c.app.routes
+                    if getattr(r, "path", "").startswith("/api/jarvis/")})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    for q in _WH_QUESTIONS:
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "workflow translation must not write files"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before

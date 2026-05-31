@@ -9205,6 +9205,19 @@ def _jarvis_conversational_answer(q: str):
                     "project housekeeping tasks that should be reviewed.")
         return "Nothing needs your attention right now."
 
+    def _exec_blocker_phrase(state: str, warns: list) -> str:
+        st = (state or "unknown").lower()
+        if st in ("red", "error", "critical", "down", "alert"):
+            return ("Blocker level: elevated — some items currently need attention "
+                    "before work continues smoothly.")
+        if warns:
+            return ("Blocker level: low — a few maintenance items are under review, "
+                    "but nothing is blocking progress.")
+        if st in ("green", "ok", "okay", "healthy", "ready", "good"):
+            return "Blocker level: none — there are no blockers and work is on track."
+        return ("Blocker level: unknown — current state could not be confirmed from "
+                "read-only data.")
+
     def _exec_trading_phrase(cand_n) -> str:
         # Executive (default) trading status: research-framed, customer/investor
         # friendly. NO raw posture flags or counts; the trading-safety phrasing
@@ -9470,6 +9483,71 @@ def _jarvis_conversational_answer(q: str):
             "briefing, the trading status, the Strategy Factory status, the SPARTA "
             "Brain status, or tell you what needs attention — just ask.",
             ["commander_snapshot", "trading_detail"])
+
+    # --- Workflow Health Translation v1 — pipeline / workflow / "is it working" --
+    # Natural workflow-health questions ("pipeline status", "workflow status",
+    # "is everything working", "is everything good", "any problem", "any
+    # blocker", "are we on track", "how is the project doing", "is the system
+    # working"). Answered as a Chief-of-Staff workflow read: overall status ->
+    # what is working -> what needs attention -> blocker level -> recommended
+    # next step. Executive mode (default) is customer-friendly and hides raw
+    # posture flags/counts; operator mode (on request) exposes them. Both keep
+    # the trading-safety phrasing; both are equally read-only and invent nothing.
+    # Placed before the generic status catch-all so workflow phrasing routes here.
+    _workflow_intent = (
+        "pipeline" in q or "workflow" in q
+        or "is everything working" in q or "everything working" in q
+        or "is everything good" in q or "everything good" in q
+        or "everything ok" in q or "everything okay" in q or "everything fine" in q
+        or "everything running" in q or "everything alright" in q
+        or "any problem" in q or "any problems" in q
+        or "any issue" in q or "any issues" in q
+        or "any blocker" in q or "any blockers" in q
+        or "on track" in q
+        or "how is the project" in q or "how's the project" in q
+        or "hows the project" in q or "how are the project" in q
+        or "project doing" in q or "project going" in q or "project status" in q
+        or "is the system working" in q or "system working" in q
+        or "is it working" in q
+    )
+    if _workflow_intent:
+        status = _agg()
+        sc = _sub(status, "system_core")
+        cr = _sub(status, "candidate_registry")
+        fs = _sub(status, "factory_status")
+        state, headline, warns = _snapshot_line(status)
+        cand_n = (cr.get("candidate_count")
+                  if isinstance(cr.get("candidate_count"), int)
+                  else len(cr.get("candidates") or []))
+        _wf_sources = ["system_core", "commander_snapshot", "factory_status",
+                       "candidate_registry", "trading_detail"]
+        if _operator:
+            return (
+                "Workflow health (read-only, operator detail). System core is "
+                f"{sc.get('state', 'unknown')}, server "
+                f"{sc.get('server', 'unknown')}. Commander snapshot is {state} — "
+                f"{headline} ({len(warns)} warning(s)). " + _factory_phrase(fs) + " "
+                f"Trading research status: {cand_n} research candidate(s) tracked. "
+                "No live or paper trades were executed — trading is observation-only "
+                f"({_LOCKED_POSTURE}), so there is no realized performance to report. "
+                + _attn_phrase(warns) + " Blocker level: "
+                f"{len(warns)} open warning(s). Recommended next action: "
+                f"{_first_action(status)} This reports observed state only and "
+                "authorizes no action.",
+                _wf_sources)
+        return (
+            "Workflow health (read-only). Overall: SPARTA Brain is online and the "
+            "workflow is operating. " + _exec_health_phrase(state) + " "
+            "What's working: the dashboard, the read-only status pipeline, and "
+            "Strategy Factory research are all running. "
+            + _exec_research_phrase(fs) + " What needs attention: "
+            + _exec_attention_phrase(warns) + " " + _exec_blocker_phrase(state, warns)
+            + " All trading remains observation-only — no live or paper trades were "
+            "executed, so there is no performance to report. Recommended next step: "
+            f"{_first_action(status)} This reports observed state only and authorizes "
+            "no action. Ask for operator mode or technical details for the exact "
+            "figures.",
+            _wf_sources)
 
     # --- general system / overall status (not trading/factory/change paths) ---
     if (("status" in q or "how is everything" in q or "overall" in q)

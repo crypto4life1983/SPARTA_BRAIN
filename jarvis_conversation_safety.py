@@ -261,6 +261,23 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bdescribe\b",
     r"\bwhat\s+(?:is|are)\s+jarvis\b",
     r"\bwho\s+is\s+jarvis\b",
+    # JARVIS Workflow Health Translation v1 — natural workflow/pipeline-health
+    # phrasing ("pipeline status", "workflow status", "is everything working",
+    # "is everything good", "any problem", "any blocker", "are we on track",
+    # "how is the project doing", "is the system working"). Read-only health
+    # questions, answered as a Chief-of-Staff workflow read. Forbidden patterns
+    # (e.g. "run the pipeline", "...then place a trade") are matched FIRST, so
+    # action-mixed phrases still refuse.
+    r"\bpipeline\b",
+    r"\bworkflow\b",
+    r"\beverything\s+(?:is\s+)?(?:working|good|ok|okay|fine|running|alright|all\s+right)\b",
+    r"\bany\s+(?:problems?|issues?|blockers?)\b",
+    r"\bon\s+track\b",
+    r"\bhow\s+(?:is|are|'?s)\s+(?:the\s+|our\s+|my\s+)?project\b",
+    r"\bproject\s+(?:doing|going|status|progress|update)\b",
+    r"\b(?:is\s+)?(?:the\s+)?system\s+working\b",
+    r"\bis\s+it\s+working\b",
+    r"\bworking\s+(?:fine|well|ok|okay|good)\b",
 ))
 
 _SAFE_GROUPS = (
