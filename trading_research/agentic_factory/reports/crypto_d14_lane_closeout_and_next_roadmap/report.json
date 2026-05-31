@@ -1,0 +1,124 @@
+{
+  "step": "Crypto-D14",
+  "title": "Crypto Lane Closeout + Next-Roadmap Memo (memo only)",
+  "created": "2026-05-30",
+  "memo_only": true,
+  "no_code": true,
+  "no_backtest": true,
+  "no_is_oos_run": true,
+  "no_data_fetch": true,
+  "no_exchange_api": true,
+  "no_paper_or_live": true,
+  "no_new_strategy_started": true,
+  "head_ref_note": "HEAD 52cd272 (descendant of D13 b9180ea; only intervening commit is unrelated automation 'JARVIS Step 47 snapshot'). Factory tree clean; nothing staged; no active crypto strategy.",
+  "final_recommendation": "REPO_HYGIENE_FIRST",
+  "recommended_research_direction_after_hygiene": "CRYPTO_4H_PROTOCOL_NEXT",
+  "commit_ledger": {
+    "crypto_d3a_provenance_pin": "ce62a71",
+    "crypto_d3b_data_freeze": "5b3d94c",
+    "crypto_d3c_ratified": "fe5594f",
+    "codr1_d4_spec": "5552356",
+    "codr1_d5_engine_tests": "4614190",
+    "codr1_d6_is_baseline": "27b0620",
+    "crypto_d7_codr1_closeout": "344a7e7",
+    "crypto_d8_signal_density_audit": "ca4d9eb",
+    "ccr1_d9_frozen_spec": "6e0c85b",
+    "ccr1_d10_engine_tests": "ce499c6",
+    "ccr1_d11_is_baseline": "923e786",
+    "ccr1_d12_oos_protocol": "8b14308",
+    "ccr1_d13_oos_result": "b9180ea"
+  },
+  "1_crypto_lane_summary": {
+    "d1_protocol": "Separate crypto research lane established under the completed validation factory. Standing rules: BTC primary + ETH/SOL corroboration; spot-first (perps blocked until funding sourced+frozen); daily-first (4H deferred); UTC daily boundary; same 11-rung factory ladder as futures; IS 2020-2023 / OOS 2024-2025 / 2026 sealed; one-shot OOS vs committed protocol hash; old crypto work is historical context only, never evidence.",
+    "d2_old_test_inventory": "Old BTC/ETH/SOL/XRP bots, regime/momentum/breakout/Donchian/trend-pullback ideas inventoried and classified HISTORICAL-ONLY; no old curve/parameter set may be cited as proof; any old idea must be re-frozen as a new spec.",
+    "d3_d3a_d3b_d3c_data": "D3/D3a pinned Binance public spot daily USDT provenance (9/10 fields). D3b created the factory-internal immutable snapshot data_crypto/spot_binance_usdt_1d_2020_2025/ (BTC/ETH 2192 rows, SOL 1969 partial from 2020-08-11), 2026 sealed out (149 rows/symbol excluded), SHA256-pinned (BTC d87742b8, ETH 4a4d7b08, SOL bd8b28f1), QA CLEAN. D3c ratified the freeze. Verdict DATA_READY_FOR_CRYPTO_D4_SPEC. Read-only proof: source mtimes/sizes unchanged.",
+    "d4_d5_d6_codr1_path": "CODR-1 v1 (Crypto Oversold-Dip Reversion in Uptrend): close>SMA200 AND ret<=-7% -> enter open_{t+1}; -10% stop else time-stop at 5th bar; no target. D4 froze spec (5552356), D5 implemented engine+tests (4614190), D6 ran IS-only (27b0620) -> IS_FAIL.",
+    "d7_d8_d9_d10_d11_d12_d13_ccr1_path": "D7 (344a7e7) closed out CODR-1 PARKED after IS_FAIL, recommended a signal-density audit. D8 (ca4d9eb) counted candidate events: only the UNFILTERED daily crash candle (ret<=-5%: BTC 81 IS events / -7%: 33) was both >=30 on BTC and regime-diverse (maxYr<=0.43); every confirmation filter starved BTC below power (CODR-1's SMA200 gate -> BTC 9 events). D8 selected the unfiltered crash family for a strict spec attempt, with a NEEDS_4H_DATA fallback. D9 (6e0c85b) froze CCR1 v1 (ret_1d<=-5% unfiltered -> open_{t+1}; exit close of 3rd bar; no stop/target/filter). D10 (ce499c6) engine+18 tests. D11 (923e786) IS baseline -> IS_WATCH (strong BTC profile, top-3 PASS, but single-year-dominance hard gate FAILED). D12 (8b14308) pre-registered OOS protocol+gates. D13 (b9180ea) ran OOS 2024-2025 once -> FAIL."
+  },
+  "2_final_strategy_statuses": {
+    "CODR1": "PARKED after IS_FAIL (D6 27b0620; closeout D7 344a7e7). BTC primary lost after costs (9 trades, net -4.93%), below trade-count gate, net PF<1.3, top-3 removal failed all symbols. Bull-only dip-buyer.",
+    "CCR1": "PARKED after OOS_FAIL (D13 b9180ea). IS_WATCH then OOS FAIL: top-3-winner removal flipped BTC (-12.21%) and combined (-13.60%) negative; ETH net-negative both OOS years. Edge was three trades wide.",
+    "validated_crypto_strategy": "NONE. No crypto strategy is validated, paper-ready, or live-ready."
+  },
+  "3_what_worked": [
+    "Separate crypto research lane created and kept strictly isolated from futures validation claims.",
+    "Immutable, SHA256-pinned, 2026-sealed BTC/ETH/SOL spot daily snapshot created read-only (no fetch), QA CLEAN.",
+    "Provenance pinned (vendor/endpoint-family/market/quote/interval/timezone/retrieval) with machine + human sidecars.",
+    "Factory discipline enforced end-to-end: preflight ancestry checks, explicit-pathspec commits, no git add . , scoped tests, STOP-and-report.",
+    "OOS 2024-2025 protected behind a committed pre-registration protocol (D12) before any 2024-2025 bar was read.",
+    "OOS was run exactly once (D13), no reruns, no variants, no post-OOS tuning.",
+    "The top-3-winner-removal gate did its job: it caught CCR1's hidden winner-concentration OOS that the headline +45.29% combined net hid - exactly the gate that parked every futures branch."
+  ],
+  "4_what_failed": {
+    "CODR1": "BTC primary too weak and too sparse: the close>SMA200 confirmation starved BTC to 9 IS events (zero in the 2022 bear), produced a negative after-cost BTC primary, and made the strategy a bull-regime-dependent dip-buyer. Multi-asset pooling could not rescue the primary-symbol failure.",
+    "CCR1": "Passed IS top-3 robustly but FAILED OOS: removing the top 3 winners flipped BTC (-12.21%) and combined (-13.60%) net-negative; ETH was net-negative in both 2024 and 2025. The unfiltered crash signal had the trade count D8 promised (BTC 18 OOS) but the edge was carried by a handful of winners.",
+    "structural_lesson": "Daily-spot crash/reversion edges on BTC/ETH/SOL appear too top-winner-dependent: filtered -> too sparse on BTC (CODR-1); unfiltered -> enough count but winner-concentrated and not OOS-robust (CCR1). The daily-spot crash/reversion family is now effectively exhausted at v1."
+  },
+  "5_lessons": [
+    "BTC primary must carry its own positive, friction-survivable, winner-robust evidence; it is the designated primary and cannot be a passenger.",
+    "ETH/SOL pooling cannot rescue a BTC-primary failure - read gates per-symbol first, pooled second (held across both CODR-1 IS and CCR1 OOS).",
+    "Top-3-winner dependence is still the killer gate - it parked every futures branch, 2/3 of CODR-1's symbols, and now CCR1 OOS.",
+    "Daily crypto faces a density/edge squeeze: a confirmation filter strong enough to give a defensible edge starves BTC below the >=30 gate, while the unfiltered signal has count but weak/non-robust edge.",
+    "Confirmation filters reduce event count (SMA200 cut BTC -7% events from 30 to 9, zero in 2022).",
+    "Unfiltered signals have count but weak edge proof (CCR1: 18 BTC OOS trades, but ex-top-3 negative).",
+    "A pre-registered OOS gate set is worth the cost: the dominance + top-3 gates fixed the failure criteria before the OOS so the FAIL could not be rationalised after the fact.",
+    "Perps remain blocked until funding-rate data is sourced and funding rules frozen - ignoring funding would manufacture an optimistic, wrong edge."
+  ],
+  "6_next_roadmap_options": {
+    "A_crypto_4h_protocol": {
+      "why_it_helps": "Directly addresses the root cause: more bars per day -> enough event density to AFFORD a real confirmation filter without starving BTC below the >=30 gate. This is exactly the D8 NEEDS_4H_DATA fallback, now triggered because the unfiltered daily family failed OOS.",
+      "risk": "More bars add path-dependency and microstructure noise; a new immutable 4H freeze + full new ladder is heavyweight; 4H winners may still be top-winner-dependent; no guarantee 4H produces a robust edge.",
+      "data_needed": "A new offline, immutable, SHA256-pinned BTC/ETH/SOL 4H spot snapshot governed exactly like the D3b daily freeze (provenance + QA + 2026 seal). No fetch in the protocol step.",
+      "verdict": "RECOMMENDED as the next RESEARCH direction (after hygiene)."
+    },
+    "B_new_daily_crypto_hypothesis": {
+      "why_it_helps": "Stays on existing, already-frozen daily data - cheapest path, no new freeze.",
+      "risk": "D7/D8 already enumerated the daily families (crash, multi-day liquidation, vol-compression, trend-continuation, cross-asset, calendar) and found each structurally defective (parameter freedom / top-winner dependence / too-low BTC power / friction domination). A new daily idea most likely reproduces a known defect.",
+      "data_needed": "None new (existing daily snapshot).",
+      "verdict": "NOT RECOMMENDED - the daily-spot idea space is largely picked over."
+    },
+    "C_perp_protocol_with_funding": {
+      "why_it_helps": "Perps add funding/basis mechanics and far more liquidity; funding itself can be a signal.",
+      "risk": "Requires sourcing and freezing complete funding-rate data first; ignoring funding manufactures a wrong edge; materially more complex accounting; perps are explicitly BLOCKED until funding rules are frozen (D1 sec 4/9).",
+      "data_needed": "Complete, provenance-pinned funding-rate history per symbol/period, frozen, before any perp test.",
+      "verdict": "NOT RECOMMENDED YET - gated behind funding data + frozen funding rules; premature now."
+    },
+    "D_return_to_futures_research": {
+      "why_it_helps": "Mature lane with a complete validation ladder; could revisit S30 or a new futures hypothesis where infrastructure is most proven.",
+      "risk": "All prior futures branches and S30 are PARKED on the same top-winner gate; no fresh futures hypothesis is queued; switching lanes abandons the crypto data investment without resolving the crypto question.",
+      "data_needed": "None new for revisits; a new futures hypothesis would need its own spec.",
+      "verdict": "NOT RECOMMENDED NOW - no queued futures edge; does not advance the open crypto question."
+    },
+    "E_repo_hygiene_first": {
+      "why_it_helps": "A standing red test (test_config_wiring session_start 09:30 vs expected 14:30) has caused a '1 failed' caveat in EVERY crypto report since D3b - it trains readers to ignore failures, exactly how a real regression slips through. Background JARVIS/automation repeatedly races HEAD (advanced HEAD between D13 and D14; previously committed a D9 deliverable before approval; staged JARVIS files outside the factory during D11 preflight). Stabilising the test signal and the commit/HEAD-race surface de-risks ALL future research before a heavyweight new lane is opened.",
+      "risk": "Low. Touching config/test wiring must stay surgical and out of the crypto data/engine; must not be used as cover to change strategy logic. Pure overhead if the failures were truly cosmetic - but a perpetually-red suite is itself a governance defect for a factory whose entire value is commit + test discipline.",
+      "data_needed": "None.",
+      "verdict": "RECOMMENDED FIRST - cheap, high-leverage, and a precondition for trustworthy future validation."
+    }
+  },
+  "7_final_recommendation": {
+    "choice": "REPO_HYGIENE_FIRST",
+    "reason": "The crypto research question is well-posed and will not go stale: the frozen daily data and all lessons are committed, and the next research direction (4H) is already identified by the D8 NEEDS_4H_DATA fallback now that the unfiltered daily crash family failed OOS. There is therefore no urgency cost to fixing hygiene first. Two standing defects argue for doing so before opening a heavyweight new 4H lane: (1) a persistently-red config test that has forced a '1 failed' caveat in every report since D3b and erodes trust in the test signal; (2) recurring background-automation/JARVIS HEAD-racing that has already caused a commit collision and complicates every preflight. Opening a fresh multi-step 4H data+ladder lane on top of an unstable base compounds risk. Fix the test signal and stabilise the commit/HEAD-race surface first, THEN proceed to CRYPTO_4H_PROTOCOL_NEXT as the recommended research direction.",
+    "research_direction_after_hygiene": "CRYPTO_4H_PROTOCOL_NEXT",
+    "not_authorized_here": "This memo authorizes NOTHING operational. Neither the hygiene work nor the 4H protocol is started or authorized by this memo; each needs a separate explicit instruction. No new crypto strategy is started."
+  },
+  "8_forbidden_actions": [
+    "no_live_trading",
+    "no_paper_trading",
+    "no_exchange_api_execution",
+    "no_perps_until_funding_frozen",
+    "no_oos_reruns",
+    "no_tuning_of_failed_specs",
+    "no_mixing_crypto_with_futures_validation_claims",
+    "no_data_fetch",
+    "no_network",
+    "no_broker",
+    "no_optimization",
+    "no_modification_of_frozen_data",
+    "do_not_touch_s30_or_futures",
+    "jarvis_templates_base_hydra_untouched",
+    "no_staging",
+    "no_commit"
+  ],
+  "9_final_line": "Crypto-D14 is a closeout and roadmap memo only; no crypto strategy is validated, paper-ready, live-ready, or authorized for execution."
+}
