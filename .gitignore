@@ -44,3 +44,9 @@ node_modules/
 local_secrets/
 config/
 manual_inputs/
+
+# Strategy Factory routine layer — generated runtime outputs (regenerable;
+# README is kept trackable)
+reports/strategy_factory_routines/daily_state/
+reports/strategy_factory_routines/strategy_queue/
+reports/strategy_factory_routines/weekly_review/
