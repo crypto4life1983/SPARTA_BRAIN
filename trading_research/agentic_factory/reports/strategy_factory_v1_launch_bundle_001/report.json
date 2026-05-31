@@ -1,0 +1,189 @@
+{
+  "bundle": "strategy_factory_v1_launch_bundle_001",
+  "title": "SPARTA Strategy Factory v1 - Launch Bundle 001 (Inventory + Map + Build Plan)",
+  "document_type": "DOC_ONLY_INVENTORY_MAP_PLAN_NOT_A_SEAL",
+  "created": "2026-05-30",
+  "baseline_jarvis_bundle_b_commit": "e398f5afaf85d47d0c04fc8d6be24a5b9fbdbc14",
+  "head_at_bundle": "06cfad7",
+  "scope": "Launch Strategy Factory v1 as a separate additive research lane after JARVIS Bundle B reached READY_FOR_STRATEGY_FACTORY_V1.",
+  "verdict": "FACTORY_V1_NEEDS_HYGIENE_FIRST",
+  "trading_recommendation": "NONE",
+  "executive_summary": "The Strategy Factory exists as a proven, manual, offline validation ladder. 8 strategies tested across futures+crypto lanes, all PARKED, 0 promoted, OOS protected. Reusable validation core (D1-D11) is built; test suite green (329/0); the red config test was fixed at 102202a. The named 'automated overnight discovery system' does NOT exist: no orchestrator, no canonical candidate registry file, no hypothesis queue, and no process isolation. Build hygiene (worktree + commit guard) first, then the orchestration layer.",
+  "test_status": {
+    "suite": "trading_research/agentic_factory/tests",
+    "passed": 329,
+    "failed": 0,
+    "run_date": "2026-05-30",
+    "previously_red_config_test_fixed_at": "102202a"
+  },
+  "inventory": {
+    "validation_core_built": [
+      {"file": "engine/validation_reports.py", "role": "report schema + refuse-before-write writer", "origin": "D2"},
+      {"file": "engine/validation_is_runner.py", "role": "IS-only runner with hard OOS seal (path + bar-date)", "origin": "D3"},
+      {"file": "engine/validation_oos_runner.py", "role": "OOS enforcement; committed-protocol-hash gate; one-shot", "origin": "D4"},
+      {"file": "engine/validation_entry_significance.py", "role": "random-entry permutation over fixed horizons", "origin": "D5"},
+      {"file": "engine/validation_sequence_risk.py", "role": "trade-order MC + bootstrap + top-winner dependence", "origin": "D6"},
+      {"file": "engine/validation_regime.py", "role": "vol/trend/year regime + concentration", "origin": "D7"},
+      {"file": "engine/validation_walk_forward.py", "role": "rolling-window stability", "origin": "D7"},
+      {"file": "engine/validation_friction.py", "role": "friction ladder; IS and OOS at each level", "origin": "D7"},
+      {"file": "engine/validation_decision.py", "role": "per-module verdicts -> research decision + readiness tier", "origin": "D8"},
+      {"file": "engine/validation_cli.py", "role": "safe discovery CLI (list-modules/describe/synthetic-smoke/synthetic-e2e/version); no dynamic import", "origin": "D9"},
+      {"file": "engine/validation_synthetic_smoke.py", "role": "synthetic end-to-end ladder smoke", "origin": "D10"}
+    ],
+    "strategy_engines": {
+      "futures": ["engine/donchian_daily.py", "engine/trend_sr_ema_rsi_daily.py", "engine/s27_mean_reversion_bull.py", "engine/s28_breakout_retest.py", "engine/s29_failed_breakout_reversal.py", "engine/s30_overnight_drift.py"],
+      "crypto": ["engine/crypto_codr1.py", "engine/crypto_crash_candle_reversion.py"],
+      "nq_orb_primitives": ["engine/backtester.py", "engine/metrics.py", "engine/decision.py", "engine/proposer.py", "engine/data_quality.py", "engine/signal_significance.py"]
+    },
+    "legacy_orchestration": {
+      "file": "loop/factory_loop.py",
+      "note": "First-gen single-pass NQ ORB loop (proposer->backtester->metrics->report->decision); NOT wired to the validation ladder, candidate registry, or per-branch engines."
+    },
+    "config": "config/factory_config.yaml",
+    "data": {
+      "futures_offline": {
+        "NQ_daily": "2013-2025 (full IS+OOS)",
+        "ES_daily": "2013-2025",
+        "MNQ_daily": "2019-2025 (micro, proxy-only)",
+        "MES_daily": "2019-2025 (micro, proxy-only)",
+        "NQ_1m": "2013 + Christmas-week slice",
+        "samples": ["nq_orb_sample.csv"]
+      },
+      "crypto_offline": {
+        "path": "data_crypto/spot_binance_usdt_1d_2020_2025/",
+        "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+        "interval": "1d spot USDT",
+        "window": "2020-2025",
+        "provenance": "SHA256-pinned, provenance.json + MANIFEST.md, 2026 sealed out, QA CLEAN"
+      }
+    },
+    "observation_layer": {
+      "source": "JARVIS Bundle B (e398f5a)",
+      "panels": ["factory_status", "survival_ledger", "candidate_registry", "freshness_guard"],
+      "read_only": true,
+      "flags_pinned_false": ["paper_ready", "live_ready", "broker_control"],
+      "note": "Read-only; opens only report.json; runs no factory job; did NOT open Factory v1."
+    }
+  },
+  "factory_v1_map": {
+    "lanes": {
+      "futures": {
+        "data": "data_offline/ NQ/ES/MNQ/MES daily",
+        "windows": "IS 2013-2022 / OOS 2023-2025 / 2026 sealed",
+        "rules": "NQ primary; ES independent; micros proxy-only"
+      },
+      "crypto": {
+        "data": "data_crypto/ BTC/ETH/SOL daily spot",
+        "windows": "IS 2020-2023 / OOS 2024-2025 / 2026 sealed",
+        "rules": "BTC primary; ETH/SOL corroboration; spot-only; perps BLOCKED until funding frozen"
+      },
+      "separation_rule": "Futures and crypto validation claims must never be mixed."
+    },
+    "ladder": [
+      {"id": "A", "module": "spec_check", "hard_rule": "frozen spec + locked params + branch/commit recorded; blocks later modules if not frozen"},
+      {"id": "B", "module": "is_baseline", "hard_rule": "IS window only; OOS files refused at path + bar-date layers"},
+      {"id": "C", "module": "oos_protocol", "hard_rule": "pre-register pass/watch/fail AND commit before OOS"},
+      {"id": "D", "module": "oos_run", "hard_rule": "run OOS once; protocol hash must match a commit"},
+      {"id": "E", "module": "entry_significance", "hard_rule": "same-count random-in-regime; fixed horizons"},
+      {"id": "F", "module": "sequence_risk", "hard_rule": "trade-order MC + bootstrap + top-winner dependence"},
+      {"id": "G", "module": "regime_breakdown", "hard_rule": "flag single-year/single-regime dominance"},
+      {"id": "H", "module": "multimarket", "hard_rule": "NQ primary, ES independent, micros never independent"},
+      {"id": "I", "module": "walk_forward", "hard_rule": "surface shared weak windows"},
+      {"id": "J", "module": "friction_stress", "hard_rule": "low->severe R-cost; IS and OOS at each level"},
+      {"id": "K", "module": "readiness_gate", "hard_rule": "map evidence to readiness tier"},
+      {"id": "L", "module": "final_decision", "hard_rule": "final disposition"}
+    ],
+    "pass_fail_watch_rules": [
+      "IS_FAIL => full STOP/PARK; never advance to OOS; never tune in place (new branch + fresh spec)",
+      "top-3 / top-1% winner-removal gate rejects fat-tail-carried records even if headline net positive",
+      "trade-count floor >=30; PF gates continue >=1.30 / park >=1.00 / else kill",
+      "OOS one-shot vs committed protocol hash; no reruns; no post-OOS tuning",
+      "primary instrument (NQ/BTC) must carry its own evidence; corroborators cannot rescue it"
+    ],
+    "readiness_tiers": ["BLOCKED", "RESEARCH_CANDIDATE", "VALIDATION_CANDIDATE", "PAPER_REVIEW_CANDIDATE", "PAPER_READY", "LIVE_READY"],
+    "readiness_note": "PAPER_READY / LIVE_READY unreachable on default path; require a separate readiness memo with explicit override fields.",
+    "final_verdicts": ["CONTINUE", "PARK", "FAIL", "REDESIGN_REQUIRED"]
+  },
+  "candidate_registry": {
+    "totals": {"tested": 8, "promoted": 0, "paper_ready": 0, "live_ready": 0, "oos_protected": "all"},
+    "canonical_registry_file_exists": false,
+    "note": "Registry reconstructed from per-branch reports; JARVIS reconstructs a read-only view from data/profit_brain_strategy_survival.json.",
+    "branches": [
+      {"lane": "futures", "branch": "Donchian", "strategy": "Donchian System-1 daily", "verdict": "reference baseline only; ENTRY_EDGE_NOT_SUPPORTED + sequence-fragile", "status": "PARKED"},
+      {"lane": "futures", "branch": "S26", "strategy": "Trend + S/R + EMA/RSI", "verdict": "PARK_CANDIDATE (OOS passed but thin/FRICTION_SENSITIVE, single-year-dominated)", "status": "PARKED"},
+      {"lane": "futures", "branch": "S27", "strategy": "Mean-reversion in bull trend", "verdict": "IS_FAIL", "status": "PARKED"},
+      {"lane": "futures", "branch": "S28", "strategy": "Breakout-retest + vol expansion", "verdict": "IS_FAIL", "status": "PARKED"},
+      {"lane": "futures", "branch": "S29", "strategy": "Failed-breakout reversal", "verdict": "IS_FAIL", "status": "PARKED"},
+      {"lane": "futures", "branch": "S30", "strategy": "Overnight drift (long)", "verdict": "IS_FAIL (data-representativeness caveat)", "status": "PARKED"},
+      {"lane": "crypto", "branch": "CODR-1", "strategy": "Dip-in-uptrend (close>SMA200 & ret<=-7%)", "verdict": "IS_FAIL (BTC starved to 9 events)", "status": "PARKED"},
+      {"lane": "crypto", "branch": "CCR1", "strategy": "Unfiltered crash-candle reversion", "verdict": "OOS_FAIL (top-3 removal flips negative)", "status": "PARKED"}
+    ]
+  },
+  "gap_analysis": {
+    "exists": [
+      "reusable validation ladder modules A-L equivalents (D2-D8)",
+      "hard OOS seals (path + bar-date), one-shot OOS, committed-protocol gate",
+      "anti-overfit gates (top-3/top-1% removal, per-symbol-first, IS-fail-stops)",
+      "standard report schema + refuse-before-write writer",
+      "safe discovery CLI + synthetic end-to-end smoke",
+      "frozen QA-clean provenance-pinned data for both lanes",
+      "green test suite (329/0), config-test regression fixed",
+      "read-only observation layer (JARVIS Bundle B)"
+    ],
+    "missing_for_overnight_automation": [
+      "orchestrator: engine/validation_runner.py + engine/validation_gates.py proposed in Factory-D1 but NOT built; nothing chains A->L with gating; factory_loop.py is legacy NQ-ORB single-pass",
+      "canonical factory-owned candidate registry file (currently reconstructed ad hoc)",
+      "hypothesis queue / structural-idea backlog (proposer.py only does NQ ORB param search)",
+      "process isolation: dedicated factory-research worktree planned (D4) but NOT created",
+      "automation commit-guard: Repo-Hygiene-D3 is plan-only; pathspec discipline still manual",
+      "safe dynamic strategy registration (CLI forbids dynamic import; need vetted allow-list)"
+    ],
+    "hygiene_status": {
+      "D2_config_test": "FIXED at 102202a (suite green)",
+      "D3_commit_guard": "PLAN only; not built",
+      "D4_worktree_isolation": "PLAN only; worktree NOT created (dirty shared tree; single worktree cannot isolate two sessions)",
+      "P2_hydra_junk_path": "cosmetic git-status warning at repo root; outside factory; cleanup deferred & unauthorized"
+    }
+  },
+  "minimum_build_plan": {
+    "block_H_hygiene_first": [
+      {"step": "H1", "scope": "Create isolated worktree per Repo-Hygiene-D4 (git worktree add ../sparta-factory-research -b factory-research/...) so the overnight loop has its own index/tree and cannot race JARVIS HEAD"},
+      {"step": "H2", "scope": "Land Repo-Hygiene-D3 commit-guard (explicit-pathspec wrapper / advisory lock) so automated commits are race-proof by construction"}
+    ],
+    "block_O_orchestration_after_H": [
+      {"step": "O1", "scope": "engine/validation_runner.py - chain A->L for one frozen engine with gating; uniform reports; no optimization; no auto-promote; STOP at PARK/PROMOTE"},
+      {"step": "O2", "scope": "engine/validation_gates.py - encode pass/watch/fail floors as reusable assertions; floors pre-registered before results"},
+      {"step": "O3", "scope": "candidate_registry.json + writer - append-only branch/spec/verdict/commit ledger; never edits a sealed verdict"},
+      {"step": "O4", "scope": "hypothesis_queue - queued frozen-spec backlog; structural ideas only; no parameter sweeps"},
+      {"step": "O5", "scope": "safe strategy-registration allow-list (no dynamic import of arbitrary code)"},
+      {"step": "O6", "scope": "manual-start offline overnight batch entrypoint: walk queue -> runner -> registry, writing into isolated worktree; no network/broker/scheduler-daemon; human review gate at each PARK/PROMOTE"},
+      {"step": "O7", "scope": "tests for runner/gates/registry/queue + synthetic overnight dry-run; suite stays green"}
+    ],
+    "standing_constraints": [
+      "offline-only", "no network", "no broker/exchange API", "no paper/live", "no order placement",
+      "no secret access", "no strategy mutation without protocol", "futures and crypto stay separate",
+      "OOS one-shot vs committed hash", "paper/live tiers require separate readiness memo", "explicit-pathspec commits only"
+    ]
+  },
+  "verdict_rationale": {
+    "not_blocked": "validation core built and proven; tests green; data frozen/QA-clean both lanes; OOS discipline held across 8 branches; config-test regression fixed",
+    "not_ready_to_build_yet": "an automated overnight system is unattended and commit-writing - the worst exposure to the documented JARVIS HEAD-race; process isolation (D4 worktree) and commit-guard (D3) are planned but not built",
+    "therefore": "finish Block H (H1 worktree + H2 commit-guard), then Block O orchestration; matches standing Crypto-D14 REPO_HYGIENE_FIRST and Repo-Hygiene-D4 worktree-first plan"
+  },
+  "safety_attestations": [
+    "doc_only", "no_code", "no_engine_or_test_change", "no_backtest", "no_is_oos_run",
+    "no_optimization", "no_parameter_change", "no_data_fetch", "no_network",
+    "no_broker_or_exchange_api", "no_paper_or_live", "no_strategy_mutation",
+    "futures_crypto_lanes_kept_separate", "existing_reports_used_first",
+    "jarvis_observation_only_untouched", "frozen_data_untouched",
+    "s30_and_all_parked_branches_read_only", "no_staging", "no_commit"
+  ],
+  "forbidden_actions": [
+    "no_live_trading", "no_broker", "no_paper_trading_execution", "no_exchange_api",
+    "no_strategy_mutation_without_protocol", "no_oos_reruns", "no_tuning_of_parked_specs",
+    "no_auto_promotion", "no_dynamic_arbitrary_import",
+    "no_mixing_futures_and_crypto_validation_claims", "no_perps_until_funding_frozen",
+    "no_git_add_dot", "explicit_pathspec_commits_only"
+  ],
+  "final_line": "Strategy-Factory-v1 Launch Bundle 001 is an inventory/map/plan bundle only. The validation core is built, proven, and test-green, but the automated overnight discovery system does not exist and its prerequisites (D4 worktree isolation, D3 commit-guard) are plan-only. Verdict: FACTORY_V1_NEEDS_HYGIENE_FIRST. All 8 branches remain PARKED; no active strategy; no paper/live; OOS sealed."
+}
