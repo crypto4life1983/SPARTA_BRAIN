@@ -1,0 +1,108 @@
+{
+  "step": "Repo-Hygiene-D1",
+  "title": "Factory Stability Diagnosis - config test failure + automation-race (DIAGNOSIS/MEMO ONLY)",
+  "created": "2026-05-30",
+  "memo_only": true,
+  "no_edits_made": true,
+  "no_strategy_work": true,
+  "no_backtest_oos_datafetch_paper_live": true,
+  "head_at_diagnosis": "c02ec138d8e26e5ec7be33c420cdccf6b7329954",
+  "1_current_repo_state": {
+    "head": "c02ec13 (Add JARVIS Step 49 live server restart protocol)",
+    "staged_files": "none (git diff --cached empty)",
+    "factory_tree": "clean (no modified/untracked inside trading_research/agentic_factory/)",
+    "jarvis_files_modified_or_staged": "none currently",
+    "repo_wide_untracked": "large set of pre-existing untracked files across repo root/data/ (unrelated to factory; not part of this step)",
+    "corrupt_path_observed": "git status emits: warning: could not open directory 'hydra /': No such file or directory. Filesystem listing shows a junk directory entry repr '\\uf022hydra ' (leading U+F022 private-use char + trailing space) at repo root. This is the P2 hydra path issue. It is untracked, at repo root, outside the factory."
+  },
+  "2_config_test_failure_diagnosis": {
+    "test": "trading_research/agentic_factory/tests/test_config_wiring.py::test_load_config_includes_strategy_block",
+    "test_body": "cfg = factory_loop._load_config(\"config/factory_config.yaml\"); assert cfg[\"strategy\"][\"session_start\"] == \"14:30\"",
+    "committed_config_value": "trading_research/agentic_factory/config/factory_config.yaml line 23: session_start: \"14:30\" (CORRECT; committed at 81a272a; working copy unmodified vs HEAD; only ONE factory_config.yaml exists in repo)",
+    "observed_test_value": "09:30",
+    "root_cause": "CWD-brittle test, NOT a config mismatch. The test passes a RELATIVE path 'config/factory_config.yaml' to _load_config(). _load_config (loop/factory_loop.py line 40) checks os.path.exists(config_path) WITHOUT resolving it (it does not call _resolve()). pytest runs with CWD = repo root C:/SPARTA_BRAIN, so the relative path resolves to C:/SPARTA_BRAIN/config/factory_config.yaml which does NOT exist. _load_config therefore returns the hard-coded `defaults`, whose strategy block = proposer.base_params(), and proposer.base_params() (engine/proposer.py line 23) sets session_start = '09:30'. Hence the test reads 09:30 and fails.",
+    "why_production_is_unaffected": "run_once() (line 67) builds an ABSOLUTE path os.path.join(_MODULE_ROOT, 'config', 'factory_config.yaml') before calling _load_config, so the real run always loads the correct 14:30 config. The sibling test test_run_once_uses_config_strategy writes a tmp config and passes its own path, so it also passes. Only test_load_config_includes_strategy_block hard-codes a bare relative string and is thus CWD-dependent.",
+    "classification": "Test brittleness (path-resolution / CWD dependency). NOT a committed config mismatch, NOT a runtime override, NOT an environment secret, NOT an automation flap.",
+    "expected_value_is_correct": "14:30 is correct (09:30 ET == 14:30 UTC; the CSV ts_event is UTC). The config and the test's expectation both agree on 14:30; the bug is purely that the loader falls back to defaults when the path is unresolved.",
+    "minimal_deterministic_fix_options": [
+      "OPTION A (fix the test - lowest blast radius, recommended): in test_load_config_includes_strategy_block, resolve the path via the module the same way production does, e.g. factory_loop._load_config(factory_loop._resolve('config/factory_config.yaml')). Makes the test deterministic regardless of CWD; touches only the test file.",
+      "OPTION B (fix the loader - also safe): make _load_config resolve a relative config_path against _MODULE_ROOT before os.path.exists (mirror _resolve). Safe because the only other caller, run_once, already passes an absolute path (absolute passes through _resolve unchanged). Slightly larger blast radius (production module)."
+    ],
+    "recommended_fix": "OPTION A (edit only the test) for P0 - surgical, no production-code change, makes the suite deterministic. OPTION B is a reasonable follow-up consistency improvement but is not required to make the test pass."
+  },
+  "3_automation_race_diagnosis": {
+    "symptom": "Background 'automation/JARVIS' repeatedly advances HEAD and sometimes commits artifacts between explicit approval turns (observed: HEAD moved 52cd272 -> 8133af3 -> c02ec13 across the D14 turns).",
+    "investigation": {
+      "git_hooks": "Only *.sample hooks present in .git/hooks (none active).",
+      "scheduled_tasks": "No Windows scheduled task references sparta/jarvis/brain/agentic/commit.",
+      "auto_commit_tool": "auto_brain_cycle.bat line 16 runs `python tools/trading_brain_auto.py --commit`, BUT that tool's commit() (tools/trading_brain_auto.py line 406) only appends to brain_memory text files (append_decision/lesson/next_action/system_change). It does NOT run git add or git commit. So it is NOT the source of the JARVIS git commits.",
+      "real_git_committer_in_repo": "The only programmatic real `git add`/`git commit` is sparta_commander/research_orchestrator/safe_executor.py (lines 243/276) - a gated executor in the Commander lane, not the JARVIS step builder.",
+      "commit_metadata": "JARVIS step commits are authored AND committed by ryahai <support@ryah.ai> - the same identity as the factory commits."
+    },
+    "interleave_evidence": "On master: 21:41 D11, 21:46 D12, 21:59 D13, 22:02 JARVIS Step 47, 22:12 JARVIS Step 48, 22:14 D14, 22:15 JARVIS Step 49. Factory-research commits and JARVIS-step commits are interleaved in time on the SAME branch.",
+    "root_cause": "Not an unattended cron/hook/auto-git script inside this repo. The race is TWO CONCURRENT WORKSTREAMS committing to the same `master` branch: (1) these factory-research approval turns, and (2) a separate JARVIS step-builder workstream (another interactive Claude/agent session or operator terminal) that commits docs/jarvis_step_NN_* between turns. HEAD advances between approvals because the JARVIS workstream commits in the gap.",
+    "why_it_is_a_risk": "Shared-branch concurrency means: (a) preflight HEAD can differ from the last factory commit even when nothing factory-related changed; (b) a `git add .`/`git add <dir>` would sweep the other workstream's files (already avoided here via explicit pathspec); (c) a near-miss already occurred earlier (a D9 deliverable was committed by the other workstream before approval). The mitigation is process isolation, not disabling a scheduler."
+  },
+  "4_risk_assessment": {
+    "config_test": {
+      "severity": "LOW-MEDIUM",
+      "impact": "A permanently-red test trains readers to ignore '1 failed', masking a future real regression; pollutes every report's test caveat. No production impact (run_once loads 14:30 correctly).",
+      "likelihood_of_masking_real_bug": "MEDIUM over time"
+    },
+    "automation_race": {
+      "severity": "MEDIUM",
+      "impact": "Shared-branch interleaving complicates every preflight and risks a wrong-files commit if pathspec discipline ever lapses; already caused one pre-approval-commit near-miss.",
+      "current_containment": "Held so far ONLY by strict explicit-pathspec commits + per-turn preflight. This is manual discipline, not an enforced guard."
+    },
+    "hydra_corrupt_path": {
+      "severity": "LOW",
+      "impact": "git status emits a warning each run on directory 'hydra /' (junk name with U+F022 + trailing space). Cosmetic noise + could confuse tooling that walks the tree; outside the factory.",
+      "note": "Do not auto-delete - confirm it is genuinely junk (likely a corrupt MoviePy temp artifact) before any removal, and only under separate authorization (P2/D4)."
+    }
+  },
+  "5_recommended_fixes": {
+    "config_test": "Apply OPTION A (resolve the path in the test via factory_loop._resolve) as a P0 deterministic fix. Do NOT change the config (it is already correct at 14:30). Do NOT change proposer base default 09:30 (it is the intended ET base default and is correct; only the test's path was wrong).",
+    "automation_race": "P1 - introduce a commit guard / process isolation so factory-research commits are not interleaved with the JARVIS workstream. Preferred: run factory-research work on a dedicated branch (e.g. factory-research) and merge deliberately, OR pause the JARVIS step-builder during factory commit windows, OR add a lightweight advisory lock file the factory turns check in preflight. Decide in D3; do not change auto-commit behavior without approval.",
+    "hydra_path": "P2 - separately authorized cleanup (D4). Verify the entry is a corrupt temp artifact, then remove with a Windows-safe path method. Not in scope here."
+  },
+  "6_fix_priority": {
+    "P0": "test_config_wiring deterministic fix (edit the test path resolution only).",
+    "P1": "automation commit guard / branch isolation during research (pause or isolate the JARVIS workstream so it stops racing HEAD).",
+    "P2": "hydra corrupt-path ('\\uf022hydra ') repair, only if still present, separately authorized."
+  },
+  "7_exact_files_that_would_need_editing_later": {
+    "P0_config_test": [
+      "trading_research/agentic_factory/tests/test_config_wiring.py (test_load_config_includes_strategy_block: resolve the config path via factory_loop._resolve before loading) - ONLY this file under OPTION A.",
+      "(OPTION B alternative, NOT recommended for P0) trading_research/agentic_factory/loop/factory_loop.py _load_config - resolve relative config_path against _MODULE_ROOT before os.path.exists."
+    ],
+    "P1_automation_guard": [
+      "Process/governance change, not necessarily a factory file. Candidate touch points: a new factory branch (no file edit), OR a small preflight lock-file convention (doc + check), OR pausing auto_brain_cycle.bat / the JARVIS builder during research. trading_brain_auto.py is NOT the git committer and should not be edited for this."
+    ],
+    "P2_hydra": [
+      "No source file - a filesystem cleanup of the junk directory entry at repo root (outside the factory)."
+    ]
+  },
+  "8_safe_next_steps": {
+    "repo_hygiene_d2": "Apply the deterministic config-test fix ONLY (OPTION A: edit test_config_wiring.py path resolution). Run scoped suite; expect 329 passed / 0 failed. Separately authorized.",
+    "repo_hygiene_d3": "Automation commit guard / branch isolation for research. Separately authorized.",
+    "repo_hygiene_d4": "Hydra corrupt-path repair. Separately authorized."
+  },
+  "9_forbidden_actions": [
+    "no_trading_strategy_work",
+    "no_data_fetch",
+    "no_backtest",
+    "no_oos_use",
+    "no_paper_or_live",
+    "no_exchange_api",
+    "no_broker",
+    "no_optimization",
+    "no_auto_commit_changes_without_approval",
+    "no_edit_until_separately_authorized",
+    "no_modification_of_frozen_crypto_data",
+    "do_not_touch_s30_or_futures",
+    "do_not_touch_hydra_yet",
+    "no_staging",
+    "no_commit"
+  ],
+  "final_line": "Repo-Hygiene-D1 is a diagnosis memo only; no code/config was edited, no strategy/data/paper/live work occurred. Config failure root cause = CWD-brittle test path (config is correct at 14:30); automation race root cause = concurrent JARVIS workstream committing to the same master branch (no hook/scheduler/auto-git-script). Recommended next: Repo-Hygiene-D2 deterministic config-test fix only."
+}
