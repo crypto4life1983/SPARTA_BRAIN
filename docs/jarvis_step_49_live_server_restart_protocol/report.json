@@ -1,0 +1,65 @@
+{
+  "title": "JARVIS Step 49 — Live-Server Restart Protocol (Documentation Only)",
+  "generated_at": "2026-05-30T22:20:00",
+  "type": "documentation_only",
+  "read_only": true,
+  "restart_performed": false,
+  "head_at_writing": "8133af3",
+  "purpose": "Provide a safe, manual operator protocol to restart the local JARVIS/SPARTA dashboard server on 127.0.0.1:8765 so it serves the current committed code, because Step 48 proved the background :8765 process was stale and did not serve the Step 47 ask behavior. This document restarts nothing itself.",
+  "step48_evidence": {
+    "in_process_testclient_served_step47": true,
+    "in_process_change_summary": {"refused": false, "safety_class": "SAFE_INFO", "three_sections_present": true},
+    "live_8765_stale": true,
+    "live_change_summary": {"refused": true, "safety_class": "UNSUPPORTED"},
+    "root_cause": "Server launched as 'python app.py' -> uvicorn.run('app:app', host='127.0.0.1', port=8765, reload=False) at app.py:8831-8832; reload=False means the running process keeps its original code until a manual restart.",
+    "no_restart_because": "Stopping/replacing a running background process is a shared-state change that was not authorized and could disrupt other work; Step 48 validated in-process instead."
+  },
+  "restart_steps_powershell": [
+    "Optional identify listener: Get-NetTCPConnection -LocalPort 8765 -State Listen | ForEach-Object { (Get-CimInstance Win32_Process -Filter \"ProcessId=$($_.OwningProcess)\").CommandLine }",
+    "Stop only confirmed SPARTA app.py: pwsh -File scripts\\stop_sparta_commander_desktop.ps1",
+    "Start current build: Set-Location C:\\SPARTA_BRAIN ; Start-Process -FilePath .\\.venv\\Scripts\\python.exe -ArgumentList 'app.py' -WorkingDirectory C:\\SPARTA_BRAIN -WindowStyle Minimized  (or pwsh -File scripts\\start_sparta_commander_desktop.ps1)",
+    "Wait for readiness: poll http://127.0.0.1:8765/jarvis until StatusCode 200"
+  ],
+  "post_restart_verification": [
+    {"check": "/jarvis returns 200", "cmd": "(Invoke-WebRequest http://127.0.0.1:8765/jarvis -UseBasicParsing).StatusCode", "expected": "200"},
+    {"check": "/api/jarvis/status returns 200 and shape", "expected": {"keys": 24, "online": true, "read_only": true, "trading_detail.read_only": true, "trading_detail.paper_ready": false, "trading_detail.live_ready": false, "trading_detail.broker_control": false}},
+    {"check": "/api/jarvis/ask 'what changed since last check?'", "expected": {"refused": false, "safety_class": "SAFE_INFO", "has_verified_changes_section": true, "has_current_status_section": true, "has_unknown_not_compared_section": true}, "stale_indicator": "UNSUPPORTED/refused=true means the process is still stale; stop, confirm port free, start again"},
+    {"check": "forbidden mixed 'what changed and place a trade'", "expected": {"refused": true, "safety_class": "FORBIDDEN_TRADING"}},
+    {"check": "no snapshot/refresh routes", "expected": {"GET /api/jarvis/snapshot": 404, "POST /api/jarvis/snapshot": 404, "GET /api/jarvis/refresh": 404, "POST /api/jarvis/refresh": 404}},
+    {"check": "optional read-only route smoke", "cmd": "python tools/jarvis_route_smoke_report.py --base-url http://127.0.0.1:8765 --timeout 5"}
+  ],
+  "rollback_stop": [
+    "Stop server: pwsh -File scripts\\stop_sparta_commander_desktop.ps1 (stops only confirmed SPARTA app.py; reports whether port is free)",
+    "Revert code: check out the previous good commit in a separate explicitly-authorized session, then restart per restart_steps; this protocol performs no git operation",
+    "No persistence to undo: launch is a plain process (no service/scheduled task/autostart), so stopping the process fully rolls back the restart"
+  ],
+  "read_only_no_trading_guarantees": [
+    "Restart reloads already-committed code into a fresh process; changes no code.",
+    "JARVIS stays read-only: status read_only=true, trading_detail.read_only=true, paper_ready/live_ready/broker_control locked false.",
+    "Server binds localhost only (127.0.0.1:8765).",
+    "/api/jarvis/ask executes nothing, places/enables/approves no trade, writes no snapshot, exposes only answer/safety_class/sources_used/refused/refusal_reason.",
+    "No /api/jarvis/snapshot and no /api/jarvis/refresh endpoint; template has no snapshot/refresh/execution controls.",
+    "Stop script never does broad/name-based termination and never touches a non-SPARTA process."
+  ],
+  "explicitly_not_done": [
+    "No server restart performed.",
+    "No app.py change.",
+    "No template change.",
+    "No test change.",
+    "No trading/Factory/S26-S28/Donchian/Hydra/base.html change.",
+    "No storage/jarvis/snapshots change.",
+    "No endpoint, UI control, refresh, execution, or broker/paper/live control added.",
+    "Nothing staged or committed."
+  ],
+  "validation": {
+    "report_json_valid": "JSON_OK (python -m json.tool)",
+    "tests_rerun": false,
+    "no_code_rationale": "No app.py/template/classifier/tool/test file changed (only the two docs/jarvis_step_49_live_server_restart_protocol files created); the scoped JARVIS suite would exercise identical code, so its Step 48 result of 393 passed, 0 failed, 0 skipped is unchanged and a re-run is not required."
+  },
+  "files_created": [
+    "docs/jarvis_step_49_live_server_restart_protocol/report.md",
+    "docs/jarvis_step_49_live_server_restart_protocol/report.json"
+  ],
+  "conclusion": "A safe, manual, operator-run restart protocol is documented: stop only the confirmed SPARTA app.py process, relaunch python app.py (uvicorn, reload=False), then verify /jarvis 200, /api/jarvis/status 24-key locked read-only shape, the Step 47 change-summary ask (SAFE_INFO with verified sections), the FORBIDDEN_TRADING refusal, and the absence of snapshot/refresh routes. Nothing was restarted; no code/test/template/trading/storage file was touched; nothing is staged or committed.",
+  "verdict": "JARVIS_LIVE_SERVER_RESTART_PROTOCOL_READY"
+}
