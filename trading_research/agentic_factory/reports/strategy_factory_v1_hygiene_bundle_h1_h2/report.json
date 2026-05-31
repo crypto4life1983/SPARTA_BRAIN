@@ -1,0 +1,93 @@
+{
+  "bundle": "strategy_factory_v1_hygiene_bundle_h1_h2",
+  "title": "SPARTA Strategy Factory v1 - Hygiene Bundle H1-H2",
+  "created": "2026-05-30",
+  "scope": "Hygiene foundation only: H1 (isolated factory-research worktree) and H2 (commit-guard). No strategy research execution, no backtest, no IS/OOS, no data fetch, no broker/live/paper, no exchange API, no strategy-logic mutation. Safety tooling + tests + docs only.",
+  "baseline_bundle_001": "9b9b7912c0ff62d09372da4b57222364e735b39f",
+  "head_short_at_bundle": "9b9b791",
+  "verdict": "HYGIENE_READY",
+  "h1_isolated_worktree": {
+    "status": "ALREADY_DONE_AND_VERIFIED",
+    "created_by": "Repo-Hygiene-D5",
+    "path": "C:/sparta-factory-research",
+    "branch": "factory-research/crypto-4h-protocol",
+    "base_commit": "06cfad79d3a70807eed9757ca503fa9231ee7f59",
+    "base_commit_short": "06cfad7",
+    "independent_index_and_working_tree": true,
+    "shares_only_git_object_store": true,
+    "admin_record": ".git/worktrees/sparta-factory-research",
+    "checkout": "complete",
+    "factory_tests_inside_worktree": {"passed": 329, "failed": 0},
+    "loose_end": {
+      "files": [
+        "C:/sparta-factory-research/.../reports/repo_hygiene_d5_worktree_setup/report.md",
+        "C:/sparta-factory-research/.../reports/repo_hygiene_d5_worktree_setup/report.json"
+      ],
+      "state": "untracked on factory-research/crypto-4h-protocol working tree",
+      "action": "left untouched - committing them is a separate, separately-authorized action on that branch, out of scope here"
+    },
+    "standing_worktree_rules": [
+      "Future factory/crypto research runs in C:/sparta-factory-research",
+      "master / JARVIS continue independently in C:/SPARTA_BRAIN",
+      "Explicit-pathspec commits only; never git add . / git add <dir>",
+      "No merge / rebase / push without explicit approval",
+      "Preflight each turn on the worktree's own HEAD"
+    ]
+  },
+  "h2_commit_guard": {
+    "status": "BUILT_AND_VALIDATED",
+    "tool": "trading_research/agentic_factory/tools/commit_guard.py",
+    "rules": "trading_research/agentic_factory/tools/commit_guard_rules.json",
+    "offline": true,
+    "stdlib_only": true,
+    "no_network": true,
+    "no_auto_install": true,
+    "deny_categories": [
+      {"name": "data_file", "severity": "hard", "overridable": false},
+      {"name": "broker_live_paper", "severity": "hard", "overridable": false},
+      {"name": "jarvis", "severity": "hard", "overridable": false},
+      {"name": "runtime_snapshot", "severity": "hard", "overridable": false},
+      {"name": "strategy_mutation", "severity": "overridable", "overridable": true, "override_flag": "--allow-strategy"}
+    ],
+    "evaluation_order": "array order, first match wins",
+    "why_json_rules_file": "The factory safety-guard source scanner (tests/test_safety_guards.py) scans every .py except tests/ for forbidden vendor/credential substrings. Storing deny-patterns in commit_guard_rules.json (not a .py, not scanned) keeps commit_guard.py token-clean and compatible with the offline/inert safety contract.",
+    "why_cli_not_hook": "Git hooks live in the shared common .git dir and would apply to BOTH worktrees, imposing factory rules on the concurrent JARVIS/master workstream. An opt-in CLI check (optionally wired as a hook inside the factory worktree only) gives protection without that blast radius.",
+    "validation": {
+      "py_compile": "PYCOMPILE_OK",
+      "new_tests": 17,
+      "full_factory_suite": {"passed": 346, "failed": 0, "prior": 329, "new": 17},
+      "safety_token_scanner": "passes - guard .py is token-clean",
+      "rules_json_valid": true,
+      "self_check_bundle_files": {"verdict": "PASS", "allowed": 6, "blocked": 0},
+      "cross_lane_check": {"inputs": ["app.py", "data/foo.csv", "broker/x.py", "reports/x/report.md"], "verdict": "BLOCKED", "blocked": 3, "allowed": 1}
+    }
+  },
+  "files_added": [
+    "trading_research/agentic_factory/tools/commit_guard.py",
+    "trading_research/agentic_factory/tools/commit_guard_rules.json",
+    "trading_research/agentic_factory/tools/__init__.py",
+    "trading_research/agentic_factory/tests/test_commit_guard.py",
+    "trading_research/agentic_factory/reports/strategy_factory_v1_hygiene_bundle_h1_h2/report.md",
+    "trading_research/agentic_factory/reports/strategy_factory_v1_hygiene_bundle_h1_h2/report.json"
+  ],
+  "no_files_touched": "No engine, strategy, config, data, JARVIS, broker, or live/paper file was created or modified. No worktree was created or destroyed.",
+  "safety_attestations": [
+    "safety_tooling_and_docs_only",
+    "no_strategy_research_execution",
+    "no_backtest",
+    "no_is_oos_run",
+    "no_data_fetch",
+    "no_network",
+    "no_broker_or_exchange_api",
+    "no_paper_or_live",
+    "no_strategy_logic_mutation",
+    "no_worktree_created_or_removed",
+    "jarvis_untouched",
+    "frozen_data_untouched",
+    "s30_and_parked_branches_read_only",
+    "guard_is_opt_in_not_auto_installed",
+    "no_shared_git_hooks_modified"
+  ],
+  "next_allowed_step": "Begin the Orchestration block (Bundle 001 Block O: validation_runner + validation_gates + candidate registry + hypothesis queue + safe registration + manual-start overnight batch), performed in the isolated worktree, with the commit-guard wired in. Separately authorized.",
+  "trading_recommendation": "NONE. Hygiene/tooling bundle only. All 8 strategy branches remain PARKED; no active strategy; no paper/live system exists or is authorized; OOS remains sealed; no strategy logic was touched."
+}

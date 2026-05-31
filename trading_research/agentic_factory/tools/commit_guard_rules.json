@@ -1,0 +1,79 @@
+{
+  "_comment": "Deny-pattern rules for the Strategy Factory commit guard. Loaded by commit_guard.py at runtime. Kept as JSON (not .py) so the factory safety-guard source scanner (tests/test_safety_guards.py) does not flag the sensitive vendor/credential substrings used as match patterns here. Patterns are Python regex, matched case-insensitively against forward-slash-normalized repo-relative paths. Categories are evaluated in array order; first match wins. All 'hard' categories block unconditionally and can never be overridden; the single 'overridable' category (strategy_mutation) passes only when --allow-strategy is set. Because data_file and broker_live_paper are BOTH hard, their relative order only affects the displayed label, never the block decision; data_file is placed first so exchange-named frozen datasets read as data rather than broker.",
+  "categories": [
+    {
+      "name": "data_file",
+      "severity": "hard",
+      "reason": "market data / frozen dataset must stay offline and immutable; never (re)commit data from the factory lane",
+      "patterns": [
+        "\\.csv$",
+        "(^|/)data/",
+        "(^|/)data_offline/",
+        "(^|/)data_crypto/",
+        "(^|/)databento",
+        "frozen_regime_inputs",
+        "\\.parquet$"
+      ]
+    },
+    {
+      "name": "broker_live_paper",
+      "severity": "hard",
+      "reason": "broker / live / paper-trading / credential / exchange-API artifact must never be committed from the factory lane",
+      "patterns": [
+        "broker",
+        "paper_trading",
+        "live_trading",
+        "(^|/)live/",
+        "execution",
+        "safe_executor",
+        "tradingview_bridge",
+        "exchange",
+        "local_secrets",
+        "\\.env(\\.|$|/)",
+        "api_key",
+        "apikey",
+        "credential",
+        "wallet",
+        "binance",
+        "bybit",
+        "kraken",
+        "ccxt",
+        "alpaca",
+        "ib_insync"
+      ]
+    },
+    {
+      "name": "jarvis",
+      "severity": "hard",
+      "reason": "JARVIS workstream file is owned by a separate lane and must not be staged during Strategy Factory work",
+      "patterns": [
+        "jarvis",
+        "(^|/)app\\.py$",
+        "templates/base\\.html$"
+      ]
+    },
+    {
+      "name": "runtime_snapshot",
+      "severity": "hard",
+      "reason": "runtime snapshot / generated live-state artifact is not a research deliverable and must not be committed",
+      "patterns": [
+        "snapshot",
+        "_snapshots?\\.jsonl$",
+        "(^|/)data/profit_brain_",
+        "media_os_",
+        "_status\\.json$"
+      ]
+    },
+    {
+      "name": "strategy_mutation",
+      "severity": "overridable",
+      "reason": "strategy engine / config / spec change mutates trading logic and requires explicit authorization (--allow-strategy)",
+      "patterns": [
+        "agentic_factory/engine/",
+        "agentic_factory/config/",
+        "agentic_factory/strategies/",
+        "agentic_factory/loop/"
+      ]
+    }
+  ]
+}
