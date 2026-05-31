@@ -1298,12 +1298,33 @@
     if(!btn || !status || !input) return;
 
     function setStatus(msg){ status.textContent = msg; }
+    function disable(msg){
+      btn.classList.add('is-disabled');
+      btn.setAttribute('aria-disabled', 'true');
+      setStatus(msg);
+    }
+
+    // Secure-context diagnostic. Chrome only allows Web Speech recognition on a
+    // secure origin: HTTPS, or the loopback hosts localhost / 127.0.0.1. Served
+    // over plain HTTP on a LAN name or IP, Chrome rejects start() with a
+    // "not-allowed" error EVEN WHEN the site's microphone permission shows as
+    // allowed. This is the most common cause of the reported error, so name it
+    // precisely instead of showing a bare code.
+    var host = (location.hostname || '').toLowerCase();
+    var loopback = (host === 'localhost' || host === '127.0.0.1' ||
+                    host === '::1' || host === '[::1]');
+    var secure = (window.isSecureContext === true) || loopback;
+    if(!secure){
+      disable('Voice needs a secure origin. This page is on "' + esc(host || 'this host') +
+        '", so the browser blocks the microphone (not-allowed). Open the dashboard ' +
+        'on localhost or 127.0.0.1 (or a secure origin), or just type your question.');
+      return;
+    }
 
     var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if(!Recognition){
-      btn.classList.add('is-disabled');
-      btn.setAttribute('aria-disabled', 'true');
-      setStatus('Speech recognition unavailable in this browser.');
+      disable('Speech recognition unavailable in this browser. You can still type ' +
+        'your question, or try Chrome/Edge on localhost.');
       return;
     }
 
@@ -1312,10 +1333,57 @@
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     var listening = false;
+    // Last known mic grant from the Permissions API (null until/if it answers).
+    // Lets a "not-allowed" error be explained differently when the SITE
+    // permission already reads as allowed — the block is then OS/browser-wide.
+    var permState = null;
+
+    // Separate the common Web Speech error codes into clear, distinct guidance
+    // so "permission blocked" is never confused with "no speech" or "aborted".
+    function explainError(code){
+      if(code === 'not-allowed' || code === 'service-not-allowed'){
+        if(permState === 'granted'){
+          // Site permission is already Allow, yet Chrome still refused: the
+          // block is above the site level. Point at the real culprits instead
+          // of telling the operator to allow what is already allowed.
+          return 'Microphone is already allowed for this site, but the browser ' +
+            'still blocked it (' + esc(code) + '). That points to a system or ' +
+            'browser-wide block, not this page: check Windows Settings > Privacy ' +
+            '& security > Microphone (let desktop apps / your browser use the mic), ' +
+            'close any other app holding the mic, confirm the page is on ' +
+            'localhost or 127.0.0.1 (not a LAN IP), then reload — or just type your question.';
+        }
+        return 'Microphone blocked by the browser (' + esc(code) + '). Click the ' +
+          'tune/lock icon at the left of the address bar, set Microphone to Allow, ' +
+          'then reload. Also confirm no other app holds the mic and that the ' +
+          'browser-wide microphone setting is not blocking this site.';
+      }
+      if(code === 'no-speech'){
+        return 'No speech detected. Click "Speak to fill" again and talk, or type your question.';
+      }
+      if(code === 'aborted'){
+        return 'Voice input was stopped. Click "Speak to fill" to try again, or type your question.';
+      }
+      if(code === 'audio-capture'){
+        return 'No working microphone was found. Check the mic is connected and enabled, then try again.';
+      }
+      if(code === 'network'){
+        return 'The speech service could not be reached (network). Check your connection, or type your question.';
+      }
+      return 'Voice input error: ' + esc(String(code || 'unknown')) +
+        '. You can still type your question.';
+    }
 
     function start(){
       if(listening) return;
-      try { rec.start(); } catch(e){ /* already starting */ }
+      try {
+        rec.start();
+      } catch(err){
+        // start() throws InvalidStateError if a prior session has not fully
+        // ended yet; surface a calm retry hint rather than a raw exception.
+        setStatus('Voice is still finishing the previous attempt — wait a moment, ' +
+          'click "Speak to fill" again, or type your question.');
+      }
     }
 
     rec.onstart = function(){
@@ -1324,8 +1392,9 @@
       setStatus('Listening… speak your read-only question.');
     };
     rec.onerror = function(e){
-      setStatus('Voice input error: ' + esc(String((e && e.error) || 'unknown')) +
-        '. You can still type your question.');
+      listening = false;
+      btn.classList.remove('is-listening');
+      setStatus(explainError(e && e.error));
     };
     rec.onend = function(){
       listening = false;
@@ -1343,6 +1412,28 @@
         setStatus('No speech detected. Try again or type your question.');
       }
     };
+
+    // Best-effort, non-blocking permission hint. The Permissions API (NOT the
+    // media-devices capture API) lets us read the mic grant state up front, so a
+    // denied permission is explained before the user even clicks. Browsers that
+    // do not support the "microphone" permission name simply skip this.
+    if(navigator.permissions && navigator.permissions.query){
+      try {
+        navigator.permissions.query({ name: 'microphone' }).then(function(p){
+          function reflect(){
+            permState = p.state;
+            if(p.state === 'denied'){
+              disable('Microphone permission is denied for this site. Click the ' +
+                'tune/lock icon by the address bar, set Microphone to Allow, then reload.');
+            } else if(p.state === 'granted'){
+              setStatus('Microphone allowed. Click "Speak to fill" and speak your read-only question.');
+            }
+          }
+          reflect();
+          p.onchange = reflect;
+        }).catch(function(){ /* permission name unsupported — ignore */ });
+      } catch(err){ /* older browser — ignore */ }
+    }
 
     btn.addEventListener('click', start);
     btn.addEventListener('keydown', function(e){

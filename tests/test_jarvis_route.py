@@ -2211,3 +2211,106 @@ def test_jarvis_step_36_status_shape_unchanged():
     for forbidden_key in ("conversation", "ask", "chat", "answer", "voice",
                           "audio", "transcript", "tts", "speech"):
         assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
+
+
+# --- JARVIS voice fix v1: diagnose Chrome "not-allowed" --------------------
+# The voice handler gained browser diagnostics so a "not-allowed" error is
+# explained precisely (insecure origin / denied permission) instead of shown
+# raw. The fix must NOT introduce raw audio capture (getUserMedia / recorder /
+# media-devices) — speech recognition needs none of that, and those APIs stay
+# forbidden for the read-only console. Voice still fills the question box only.
+
+
+def test_jarvis_voicefix_v1_page_renders_ok():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    assert client.get("/jarvis").status_code == 200
+
+
+def test_jarvis_voicefix_v1_checks_secure_context():
+    voice = _jarvis_wirevoice_body()
+    # The insecure-origin case is the most common cause of "not-allowed" with a
+    # permission that already reads as allowed; the handler must detect it.
+    assert "isSecureContext" in voice
+    assert "location.hostname" in voice
+    assert "127.0.0.1" in voice
+    assert "localhost" in voice
+
+
+def test_jarvis_voicefix_v1_separates_error_codes():
+    voice = _jarvis_wirevoice_body()
+    # Permission-blocked must be distinct from no-speech / aborted / capture.
+    assert "not-allowed" in voice
+    assert "service-not-allowed" in voice
+    assert "no-speech" in voice
+    assert "aborted" in voice
+    assert "audio-capture" in voice
+
+
+def test_jarvis_voicefix_v1_uses_permissions_api_not_capture():
+    voice = _jarvis_wirevoice_body()
+    # The Permissions API reports mic grant state without capturing audio.
+    assert "navigator.permissions" in voice
+    assert "microphone" in voice
+    low = voice.lower()
+    # The capture / recorder / media-devices APIs must remain absent.
+    for tok in ("getusermedia", "mediarecorder", "audiocontext",
+                "navigator.mediadevices"):
+        assert tok not in low, f"voice fix must not add capture API: {tok}"
+
+
+def test_jarvis_voicefix_v1_granted_yet_blocked_points_to_os_level():
+    # The reported symptom: site permission already ALLOWED, yet Chrome still
+    # returns not-allowed. The handler must track the grant state and, when it
+    # is 'granted', explain the OS/browser-wide block instead of telling the
+    # operator to allow what is already allowed.
+    voice = _jarvis_wirevoice_body()
+    assert "permState" in voice
+    assert "permState = p.state" in voice
+    assert "permState === 'granted'" in voice
+    low = voice.lower()
+    assert "already allowed" in low
+    assert "privacy" in low  # Windows Privacy & security > Microphone hint
+
+
+def test_jarvis_voicefix_v1_no_capture_apis_in_template():
+    low = _jarvis_template_text().lower()
+    for tok in ("getusermedia", "mediarecorder", "audiocontext",
+                "navigator.mediadevices"):
+        assert tok not in low, f"template must not use capture API: {tok}"
+
+
+def test_jarvis_voicefix_v1_still_fills_input_only_no_network():
+    voice = _jarvis_wirevoice_body()
+    assert "input.value = transcript" in voice
+    low = voice.lower()
+    for tok in ("fetch(", "xmlhttprequest", "/api/jarvis/ask",
+                "/api/jarvis/refresh", "http://", "https://",
+                "askjarvis", ".submit(", ".click(", "requestsubmit"):
+        assert tok not in low, f"voice must stay input-fill only / no network: {tok}"
+
+
+def test_jarvis_voicefix_v1_graceful_fallback_present():
+    voice = _jarvis_wirevoice_body()
+    # The unsupported-browser fallback message is preserved, and every error
+    # path keeps pointing the operator back to typing.
+    assert "Speech recognition unavailable in this browser." in voice
+    assert "type your question" in voice
+
+
+def test_jarvis_voicefix_v1_output_reads_answer_not_question():
+    # Task 7: voice output must still read only the captured answer/refusal,
+    # never the question/input or any command field.
+    speak = _jarvis_wirespeak_body()
+    assert "jvLastAnswerText" in speak
+    for bad in ("input.value", "jvAskInput", "d.command", "d.action", "d.execute"):
+        assert bad not in speak, f"read-aloud must not read: {bad}"
+
+
+def test_jarvis_voicefix_v1_no_real_control_or_refresh():
+    html = _jarvis_template_text()
+    assert "/api/jarvis/refresh" not in html
+    low = html.lower()
+    for tok in ("<button", "<form", "onclick", 'type="submit"', 'method="post"'):
+        assert tok not in low, f"voice fix must add no real control: {tok}"

@@ -1,0 +1,70 @@
+{
+  "bundle": "JARVIS_VOICE_FIX_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_VOICE_FIXED",
+  "verdict_note": "Fixed for the reported Chrome+permission-allowed case (dominant cause: insecure origin). Degrades to JARVIS_VOICE_PARTIAL_BROWSER_LIMIT on genuinely unsupported browsers or OS/browser-level mic blocks outside page control.",
+  "symptom": "Chrome shows 'Voice input error: not-allowed' on SpeechRecognition.start() even though site microphone permission is Allow.",
+  "root_causes": [
+    "Insecure origin: Web Speech recognition only runs on a secure context (HTTPS or localhost/127.0.0.1); served over plain HTTP on a LAN name/IP Chrome blocks with not-allowed regardless of site permission.",
+    "Browser-wide or OS microphone block / device held by another app, surfacing as not-allowed or service-not-allowed.",
+    "start() race: calling start() before the prior session ended threw InvalidStateError, previously swallowed silently."
+  ],
+  "fix": {
+    "file": "templates/jarvis.html",
+    "function": "wireVoice()",
+    "changes": [
+      "Secure-context guard using window.isSecureContext + loopback host detection, with precise insecure-origin explanation.",
+      "Permissions API hint via navigator.permissions.query({name:'microphone'}) (state read only, NO audio capture), with live onchange updates.",
+      "Separated error mapping for not-allowed/service-not-allowed, no-speech, aborted, audio-capture, network.",
+      "start() race guard surfacing a calm retry hint instead of swallowing InvalidStateError.",
+      "Graceful fallback to typing on every failure path."
+    ],
+    "no_getusermedia": true,
+    "reason_no_getusermedia": "SpeechRecognition does not need getUserMedia; the read-only console test suite forbids raw-capture APIs (getUserMedia, MediaRecorder, AudioContext, navigator.mediaDevices) so audio can never be recorded/stored."
+  },
+  "read_only_guarantees": {
+    "transcript_fills_input_only": true,
+    "no_auto_submit": true,
+    "no_network_call_from_voice": true,
+    "no_audio_stored": true,
+    "no_transcript_stored": true,
+    "classifier_still_gates_ask": true,
+    "voice_output_reads_answer_only": true,
+    "no_command_execution_added": true,
+    "no_trading_routes_added": true
+  },
+  "files_changed": [
+    "templates/jarvis.html",
+    "tests/test_jarvis_route.py"
+  ],
+  "files_added": [
+    "docs/jarvis_voice_fix_v1/report.md",
+    "docs/jarvis_voice_fix_v1/report.json"
+  ],
+  "tests_added": [
+    "test_jarvis_voicefix_v1_page_renders_ok",
+    "test_jarvis_voicefix_v1_checks_secure_context",
+    "test_jarvis_voicefix_v1_separates_error_codes",
+    "test_jarvis_voicefix_v1_uses_permissions_api_not_capture",
+    "test_jarvis_voicefix_v1_no_capture_apis_in_template",
+    "test_jarvis_voicefix_v1_still_fills_input_only_no_network",
+    "test_jarvis_voicefix_v1_graceful_fallback_present",
+    "test_jarvis_voicefix_v1_output_reads_answer_not_question",
+    "test_jarvis_voicefix_v1_no_real_control_or_refresh"
+  ],
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory (on-disk name 'hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "jarvis_route_and_safety": "283 passed",
+    "jarvis_factory_ask_snapshot": "134 passed",
+    "failures": 0
+  },
+  "validation": {
+    "jarvis_route_200": true,
+    "voice_ui_renders": true,
+    "no_trading_routes_or_actions_added": true,
+    "existing_jarvis_tests_pass": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}
