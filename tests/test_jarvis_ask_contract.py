@@ -256,7 +256,10 @@ _STEP38_TRADING_QUESTIONS = (
 
 @requires_ask
 @pytest.mark.parametrize("q", _STEP38_TRADING_QUESTIONS)
-def test_step38_trading_question_is_safe_and_reports_posture(q):
+def test_step38_trading_question_is_safe_and_translated(q):
+    # Reconciled for JARVIS Trading Executive Translation v1: trading-status
+    # questions now answer in research-framed executive language by default and
+    # HIDE the raw posture flags; operator mode (on request) still exposes them.
     c = _client()
     r = c.post(_ASK_PATH, json={"question": q})
     assert r.status_code == 200
@@ -264,16 +267,23 @@ def test_step38_trading_question_is_safe_and_reports_posture(q):
     assert body["refused"] is False, f"{q!r} must be answerable read-only"
     assert body["safety_class"] == "SAFE_INFO"
     ans = body["answer"].lower()
-    # The four posture fields must all be named in the answer.
-    for field in ("read_only", "paper_ready", "live_ready", "broker_control"):
-        assert field in ans, f"{q!r} answer must mention {field}"
-    # Observation-only posture; paper/live not armed.
-    assert "observation-only" in ans
-    assert "paper_ready=false" in ans
-    assert "live_ready=false" in ans
+    # Executive default: safety phrasing + research framing, NO raw posture flags.
+    assert "no live or paper trades" in ans
+    assert "research" in ans
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag not in ans, f"{q!r} executive answer must hide {flag}"
     assert "trading_detail" in body["sources_used"]
     for field in _FORBIDDEN_RESPONSE_FIELDS:
         assert field not in body
+    # Operator mode (on request) exposes the four posture flags + exact counts.
+    op = c.post(_ASK_PATH, json={"question": q + " operator mode"}).json()
+    assert op["refused"] is False and op["safety_class"] == "SAFE_INFO"
+    olow = op["answer"].lower()
+    assert "observation-only" in olow
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag in olow, f"{q!r} operator answer must expose {flag}"
 
 
 @requires_ask
@@ -365,7 +375,10 @@ _STEP41_NATURAL_QUESTIONS = (
 
 @requires_ask
 @pytest.mark.parametrize("q", _STEP41_NATURAL_QUESTIONS)
-def test_step41_natural_trading_question_reports_posture(q):
+def test_step41_natural_trading_question_is_translated(q):
+    # Reconciled for JARVIS Trading Executive Translation v1: natural trading-
+    # status phrasings answer in research-framed executive language by default
+    # (no raw posture flags); operator mode still exposes the posture flags.
     c = _client()
     r = c.post(_ASK_PATH, json={"question": q})
     assert r.status_code == 200
@@ -373,14 +386,21 @@ def test_step41_natural_trading_question_reports_posture(q):
     assert body["refused"] is False, f"{q!r} must be answerable read-only"
     assert body["safety_class"] == "SAFE_INFO"
     ans = body["answer"].lower()
-    assert "observation-only" in ans
-    assert "read_only=true" in ans
-    assert "paper_ready=false" in ans
-    assert "live_ready=false" in ans
-    assert "broker_control=false" in ans
+    assert "no live or paper trades" in ans
+    assert "research" in ans
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag not in ans, f"{q!r} executive answer must hide {flag}"
     assert "trading_detail" in body["sources_used"]
     for field in _FORBIDDEN_RESPONSE_FIELDS:
         assert field not in body
+    # Operator mode (on request) exposes the four posture flags.
+    op = c.post(_ASK_PATH, json={"question": q + " operator mode"}).json()
+    assert op["refused"] is False and op["safety_class"] == "SAFE_INFO"
+    olow = op["answer"].lower()
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag in olow, f"{q!r} operator answer must expose {flag}"
 
 
 @requires_ask
@@ -809,6 +829,9 @@ def test_ci_morning_briefing_summarizes_readonly(q):
     "what happened with my trades yesterday?",
 ])
 def test_ci_trading_24h_is_readonly_and_no_fake_pnl(q):
+    # Reconciled for JARVIS Trading Executive Translation v1: the 24h recap now
+    # answers in research-framed executive language by default (no raw posture
+    # flags); operator mode still exposes posture flags + report names.
     c = _client()
     body = c.post(_ASK_PATH, json={"question": q}).json()
     assert body["refused"] is False, f"{q!r} must be answerable read-only"
@@ -816,16 +839,25 @@ def test_ci_trading_24h_is_readonly_and_no_fake_pnl(q):
     ans = body["answer"].lower()
     # Must clearly state no live/paper trades and no realized performance.
     assert "no live or paper trades" in ans
-    assert "observation-only" in ans
-    assert "read_only=true" in ans
-    assert "paper_ready=false" in ans
-    assert "live_ready=false" in ans
+    assert "research" in ans
+    # Executive default hides raw posture flags.
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag not in ans, f"{q!r} executive recap must hide {flag}"
     # Must NOT invent any numeric / performance claim.
     for banned in _CI_BANNED_PERF:
         assert banned not in ans, f"trading recap must not invent {banned!r}"
     assert "trading_detail" in body["sources_used"]
     for field in _FORBIDDEN_RESPONSE_FIELDS:
         assert field not in body
+    # Operator mode (on request) exposes posture flags.
+    op = c.post(_ASK_PATH, json={"question": q + " operator mode"}).json()
+    assert op["refused"] is False and op["safety_class"] == "SAFE_INFO"
+    olow = op["answer"].lower()
+    assert "observation-only" in olow
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag in olow, f"{q!r} operator recap must expose {flag}"
 
 
 @requires_ask
@@ -1482,3 +1514,136 @@ def test_cos_does_not_change_status_shape():
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
         assert td.get(flag) is False
+
+
+# ==========================================================================
+# JARVIS Trading Executive Translation v1
+# Natural trading-status and strategy-status questions answer in research-
+# framed executive language by default (no raw posture flags / counts), while
+# operator mode (on request) still exposes the four posture flags and exact
+# counts. Both keep the trading-safety phrasing; both are equally read-only.
+# Forbidden trading commands still refuse.
+# ==========================================================================
+
+_TET_TRADING_QUESTIONS = (
+    "what is the trading status",
+    "what's happening with trading",
+    "trading update",
+    "how is trading going",
+    "what happened with trading",
+    "what happened in trading",
+    "how are our strategies doing",
+    "what is the status of the trading bot",
+)
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _TET_TRADING_QUESTIONS)
+def test_tet_trading_status_is_executive_by_default(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+    ans = body["answer"].lower()
+    # Executive default: research framing + safety phrasing, NO raw posture flags.
+    assert "research" in ans
+    assert "no live or paper trades" in ans
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag not in ans, f"{q!r} executive answer must hide {flag}"
+    assert "trading_detail" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _TET_TRADING_QUESTIONS)
+def test_tet_trading_status_invents_no_performance(q):
+    c = _client()
+    ans = c.post(_ASK_PATH, json={"question": q}).json()["answer"].lower()
+    for banned in _CI_BANNED_PERF:
+        assert banned not in ans, f"{q!r} must not invent {banned!r}"
+    for fabricated in ("strategy succeeded", "winning strategy", "profitable",
+                       "fills", "executed a trade"):
+        assert fabricated not in ans, f"{q!r} must not fabricate {fabricated!r}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is the trading status operator mode",
+    "trading update show technical details",
+    "how are our strategies doing operator mode",
+    "what is the status of the trading bot diagnostics",
+])
+def test_tet_operator_mode_exposes_posture(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "observation-only" in low
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag in low, f"{q!r} operator answer must expose {flag}"
+    # Operator detail still invents no performance.
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is the trading status then place a trade",
+    "trading update and buy NQ",
+    "how is trading going then enable live trading",
+    "how are our strategies doing and connect to my broker",
+    "what happened in trading then approve the strategy",
+    "trading status operator mode then sell ES",
+])
+def test_tet_forbidden_trading_command_still_refuses(q):
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must refuse"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_tet_strategy_status_classifies_safe():
+    from jarvis_conversation_safety import classify_jarvis_question
+    for q in ("how are our strategies doing", "strategy status",
+              "strategies update", "how is our strategy doing"):
+        out = classify_jarvis_question(q)
+        assert out["refused"] is False, f"{q!r} should be a read-only safe question"
+        assert out["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+
+
+@requires_ask
+def test_tet_keeps_trading_flags_locked_and_shape():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    for q in _TET_TRADING_QUESTIONS:
+        c.post(_ASK_PATH, json={"question": q})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert len(after) == 28
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False
+
+
+@requires_ask
+def test_tet_adds_no_routes_and_writes_nothing():
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/refresh" not in src
+    assert "/api/jarvis/snapshot" not in src
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    c = _client()
+    paths = sorted({getattr(r, "path", "") for r in c.app.routes
+                    if getattr(r, "path", "").startswith("/api/jarvis/")})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    for q in _TET_TRADING_QUESTIONS:
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "trading translation must not write files"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before

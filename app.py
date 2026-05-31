@@ -9205,6 +9205,24 @@ def _jarvis_conversational_answer(q: str):
                     "project housekeeping tasks that should be reviewed.")
         return "Nothing needs your attention right now."
 
+    def _exec_trading_phrase(cand_n) -> str:
+        # Executive (default) trading status: research-framed, customer/investor
+        # friendly. NO raw posture flags or counts; the trading-safety phrasing
+        # is preserved verbatim. Candidate phrasing is fact-driven (no invented
+        # "several" when none exist).
+        return ("Trading remains in research mode. No live or paper trades have "
+                "been executed. " + _exec_candidate_phrase(cand_n) + " The focus "
+                "remains validation and research rather than deployment.")
+
+    def _operator_trading_phrase(cand_n) -> str:
+        # Operator (on request) trading status: full technical detail with exact
+        # candidate count and the locked posture flags.
+        n = cand_n if isinstance(cand_n, int) else 0
+        return (f"Trading research status (operator detail): {n} research "
+                "candidate(s) tracked. No live or paper trades were executed — "
+                f"trading is observation-only ({_LOCKED_POSTURE}), so there is no "
+                "realized performance to report.")
+
     # --- Chief of Staff Mode v1 — strategic guidance / product demo --------
     # Checked FIRST so strategic phrasings ("priority", "big picture", "where
     # are we", "smartest next move", "what is SPARTA Brain") win before the
@@ -9311,6 +9329,52 @@ def _jarvis_conversational_answer(q: str):
             "stored.",
             ["system_core", "ai_brains", "commander_snapshot"])
 
+    # --- Trading Executive Translation v1 — trading / strategy status ------
+    # Natural trading-status and strategy-status phrasings ("what is the trading
+    # status", "trading update", "how is trading going", "how are our strategies
+    # doing", "status of the trading bot"). Executive mode (default) translates
+    # to research-framed business language and hides raw posture flags/counts;
+    # operator mode (on request) exposes the four posture flags and exact counts.
+    # Both keep the trading-safety phrasing; both are equally read-only. Checked
+    # BEFORE the last-24h recap so these route to translation, not the legacy
+    # posture answer.
+    _strat = "strateg" in q
+    _status_kw = ("status" in q or "update" in q or "overview" in q
+                  or "going" in q or "doing" in q or "happening" in q
+                  or "happened" in q or "progress" in q or "how are" in q
+                  or "how is" in q or "how's" in q or "hows" in q)
+    _trading_status_intent = (
+        "trading status" in q or "trading update" in q or "trading overview" in q
+        or "trading posture" in q or "trading bot" in q or "trading system" in q
+        or "with trading" in q or "with trades" in q
+        or "our trades" in q or "my trades" in q
+        or "how are we doing" in q
+        or "ready for paper" in q or "ready for live" in q
+        or "paper_ready" in q or "paper ready" in q
+        or "live_ready" in q or "live ready" in q
+        or "broker_control" in q or "broker control" in q
+        or ("trad" in q and _status_kw)
+        or (_strat and _status_kw)
+    )
+    if _trading_status_intent:
+        status = _agg()
+        cr = _sub(status, "candidate_registry")
+        cand_n = (cr.get("candidate_count")
+                  if isinstance(cr.get("candidate_count"), int)
+                  else len(cr.get("candidates") or []))
+        if _operator:
+            return (
+                "Trading status (read-only, operator detail). "
+                + _operator_trading_phrase(cand_n) + " This reports observed "
+                "state only and authorizes no action.",
+                ["trading_detail", "candidate_registry"])
+        return (
+            "Trading status (read-only). " + _exec_trading_phrase(cand_n) + " "
+            "This reports observed state only and authorizes no action. "
+            "Ask for operator mode or technical details for the exact posture "
+            "and counts.",
+            ["trading_detail", "candidate_registry"])
+
     # --- last-24h trading recap / "what happened with our trades" ---------
     _has_trade = ("trad" in q or "trade" in q or "trades" in q)
     _time_words = ("24 hour", "24 hours", "24h", "last 24", "past 24", "last day",
@@ -9324,16 +9388,25 @@ def _jarvis_conversational_answer(q: str):
         reports = td.get("latest_reports") if isinstance(td.get("latest_reports"), list) else []
         names = ", ".join(r.get("name", "?") for r in reports[:3]
                           if isinstance(r, dict))
-        recent = (f"The most recent committed research reports on disk are: "
-                  f"{names}. " if names
-                  else "No trading research reports were found on disk. ")
+        if _operator:
+            recent = (f"The most recent committed research reports on disk are: "
+                      f"{names}. " if names
+                      else "No trading research reports were found on disk. ")
+            return (
+                "Read-only trading update: no live or paper trades have been placed "
+                "in the last 24 hours, or at any time — trading is observation-only "
+                f"({_LOCKED_POSTURE}), so there are no fills and no realized "
+                "performance to report. " + recent + "JARVIS only reads committed "
+                "research artifacts; it runs no backtest, places no orders, and "
+                "authorizes nothing.",
+                ["trading_detail"])
         return (
             "Read-only trading update: no live or paper trades have been placed in "
-            "the last 24 hours, or at any time — trading is observation-only "
-            f"({_LOCKED_POSTURE}), so there are no fills and no realized "
-            "performance to report. " + recent + "JARVIS only reads committed "
+            "the last 24 hours, or at any time — trading remains in research mode, "
+            "so there is no performance to report. JARVIS only reads committed "
             "research artifacts; it runs no backtest, places no orders, and "
-            "authorizes nothing.",
+            "authorizes nothing. Ask for operator mode or technical details for the "
+            "exact posture and report names.",
             ["trading_detail"])
 
     # --- warnings / what-needs-attention ----------------------------------

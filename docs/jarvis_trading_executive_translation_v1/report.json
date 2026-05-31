@@ -1,0 +1,114 @@
+{
+  "bundle": "JARVIS_TRADING_EXECUTIVE_TRANSLATION_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_TRADING_EXECUTIVE_READY",
+  "goal": "Fix the remaining trading-status phrases so they route into Executive Translation by default (research-framed, customer/investor-friendly, no raw posture flags) instead of legacy technical posture responses, while operator mode (on request) still exposes the four posture flags and exact counts. All read-only; no fake trades, PnL, or performance; forbidden trading commands still refuse.",
+  "problem": "Questions like 'what is the trading status', 'trading update', 'how is trading going', 'what happened with/in trading', 'how are our strategies doing', and 'what is the status of the trading bot' returned the legacy posture answer (read_only=true, paper_ready=false, live_ready=false, broker_control=false) by default, which read as a step backward from the executive translation work.",
+  "desired_behavior": {
+    "executive_default": "Trading remains in research mode. No live or paper trades have been executed. Several strategy candidates are currently under evaluation. The focus remains validation and research rather than deployment.",
+    "operator_mode": "Still exposes read_only=true, paper_ready=false, live_ready=false, broker_control=false, candidate counts, and exact detail on request."
+  },
+  "files_changed": [
+    "jarvis_conversation_safety.py",
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_trading_executive_translation_v1/report.md",
+    "docs/jarvis_trading_executive_translation_v1/report.json"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "implementation": {
+    "audit": {
+      "classifier": "Trading-status phrases already classified SAFE_INFO. Missing: strategy-status phrasings ('how are our strategies doing', 'strategy status', 'strategies update').",
+      "answer_layer": "_jarvis_conversational_answer had no executive trading-status branch; trading phrases fell through to _jarvis_ask_answer SAFE_INFO -> _jarvis_trading_posture_answer() (legacy posture text). 'what happened ... trad' hit the last-24h recap branch, which also embedded _LOCKED_POSTURE.",
+      "tests_asserting_default_posture": ["test_step38_trading_question_is_safe_and_reports_posture", "test_step41_natural_trading_question_reports_posture", "test_ci_trading_24h_is_readonly_and_no_fake_pnl"]
+    },
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "change": "Appended three SAFE_INFO regex patterns for natural strategy-status phrasing. Forbidden patterns still matched FIRST and unchanged.",
+      "new_safe_info_patterns": [
+        "strateg(y|ies) (status|update|overview|doing|going|progress)",
+        "(status|update|overview|doing|going|progress) (of) (our/the/my) strateg(y|ies)",
+        "how (are|is) (our/the/my) strateg(y|ies)"
+      ]
+    },
+    "answer_layer": {
+      "file": "app.py",
+      "function_changed": "_jarvis_conversational_answer(q)",
+      "helpers_added": ["_exec_trading_phrase(cand_n)", "_operator_trading_phrase(cand_n)"],
+      "new_branch": "Added a 'Trading Executive Translation' branch BEFORE the last-24h recap branch. It detects trading-status and strategy-status intent and is mode-aware: executive (default) returns the research-framed phrasing with NO posture flags/counts; operator (on request, via the existing _operator flag) returns the four posture flags + exact candidate count.",
+      "recap_made_mode_aware": "The existing last-24h recap branch is now mode-aware too: executive hides posture flags (research framing); operator still exposes _LOCKED_POSTURE + committed report names.",
+      "candidate_phrasing": "Executive candidate sentence is fact-driven via _exec_candidate_phrase (says 'No strategy candidates...' when count is 0), so nothing is invented.",
+      "reads_only": ["api_jarvis_status aggregate (candidate_registry, trading_detail)"]
+    },
+    "template_change": false,
+    "template_note": "Voice + conversation mode already POST to /api/jarvis/ask, so they inherit the translation with no template edit."
+  },
+  "tests_reconciled": [
+    "test_step38_trading_question_is_safe_and_reports_posture -> test_step38_trading_question_is_safe_and_translated",
+    "test_step41_natural_trading_question_reports_posture -> test_step41_natural_trading_question_is_translated",
+    "test_ci_trading_24h_is_readonly_and_no_fake_pnl (assertions updated)"
+  ],
+  "tests_reconciled_note": "These three tests previously asserted the four posture flags appear in the DEFAULT answer. Per the new spec, executive default now HIDES posture flags and OPERATOR mode exposes them. Each reconciled test now asserts: executive default = research framing + 'no live or paper trades' + NO raw posture flags; operator companion (same question + ' operator mode') = posture flags present. The plain-English safety phrasing ('no live or paper trades') is still asserted in the default answer. Same reconciliation pattern accepted in JARVIS Executive Translation Mode v1.",
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added_section": "JARVIS Trading Executive Translation v1",
+  "tests_added": [
+    "test_tet_trading_status_is_executive_by_default (x8)",
+    "test_tet_trading_status_invents_no_performance (x8)",
+    "test_tet_operator_mode_exposes_posture (x4)",
+    "test_tet_forbidden_trading_command_still_refuses (x6)",
+    "test_tet_strategy_status_classifies_safe",
+    "test_tet_keeps_trading_flags_locked_and_shape",
+    "test_tet_adds_no_routes_and_writes_nothing"
+  ],
+  "new_test_count": 29,
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_refresh_route": true,
+    "no_snapshot_route": true,
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_chat_audio_transcript_storage": true,
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true,
+    "no_invented_pnl_or_performance": true,
+    "no_invented_trades": true,
+    "no_fabricated_strategy_success": true,
+    "executive_hides_posture_by_default": true,
+    "operator_exposes_posture_on_request": true,
+    "safety_phrasing_kept_in_both_modes": true,
+    "classifier_still_gates_every_question": true,
+    "forbidden_first_unchanged": true,
+    "sell_still_forbidden_trading": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"]
+  },
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_ask_contract_full": "250 passed",
+    "jarvis_factory_and_snapshot": "31 passed",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "executive_default_hides_posture": true,
+    "operator_mode_exposes_posture": true,
+    "no_invented_performance": true,
+    "no_invented_trades": true,
+    "forbidden_trading_still_refused": true,
+    "strategy_status_classifies_safe": true,
+    "no_new_routes": true,
+    "no_storage": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

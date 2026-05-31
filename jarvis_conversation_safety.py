@@ -162,6 +162,13 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\btrad(?:e|es|ing)\b.*\b(?:status|update|overview|doing|going)\b",
     r"\b(?:status|update|overview|doing|going)\b.*\btrad(?:e|es|ing)\b",
     r"\bwith\s+trad(?:e|es|ing)\b",
+    # JARVIS Trading Executive Translation v1 — natural strategy-status phrasing
+    # ("how are our strategies doing", "strategy status", "strategies update").
+    # Read-only; forbidden ("approve/promote strategy", "...buy NQ") is matched
+    # FIRST, so action-mixed phrases still refuse.
+    r"\bstrateg(?:y|ies)\s+(?:status|update|overview|doing|going|progress)\b",
+    r"\b(?:status|update|overview|doing|going|progress)\s+(?:of\s+)?(?:our\s+|the\s+|my\s+)?strateg(?:y|ies)\b",
+    r"\bhow\s+(?:are|is)\s+(?:our|the|my)?\s*strateg(?:y|ies)\b",
     # Read-only "what changed?" change-summary questions (Step 43). Answered
     # conservatively from current status only: JARVIS keeps no baseline, so it
     # never claims a verified change without a provided snapshot. Forbidden
