@@ -1,0 +1,76 @@
+{
+  "title": "JARVIS Step 47 — Read-Only Latest-Snapshot Comparison for /api/jarvis/ask",
+  "generated_at": "2026-05-30T21:50:00",
+  "type": "ask_answer_logic_plus_tests_plus_docs",
+  "read_only": true,
+  "ask_url": "http://127.0.0.1:8765/api/jarvis/ask",
+  "purpose": "Let JARVIS answer 'what changed since last snapshot?' by reading the offline-generated storage/jarvis/snapshots/latest_snapshot.json display-only and comparing it to the current read-only /api/jarvis/status state. Display/read-only only: no snapshot creation, no browser writes, no refresh endpoint, no execution, no trading control.",
+  "relation_to_prior_steps": "Step 44 (5d0bdf3) planned the offline snapshot + a future ask-side diff. Step 45 (b737e4a) implemented the offline operator-run snapshot script. Step 47 implements the Step 46-plan recommendation: the read-only ask path READS latest_snapshot.json to compute a verified diff vs current status. Reading only; still no browser write, no refresh, no execution, no trading authorization.",
+  "files_changed_or_created": [
+    "app.py — added _JARVIS_LATEST_SNAPSHOT path constant; _jarvis_read_latest_snapshot() (read-only, returns missing/invalid/ok, fails closed); _jarvis_current_comparable() (builds in-memory snapshot-shaped current view via the offline tool's pure build_snapshot, writes nothing); _jarvis_compare_snapshot(prev, curr) (pure read-only diff over whitelisted safe fields); rewrote _jarvis_what_changed_answer() to branch on snapshot availability (missing/invalid/ok), preserving Step 43 behavior when no baseline exists.",
+    "tests/test_jarvis_ask_contract.py — 14 Step 47 tests; the two Step 43 content tests now monkeypatch the snapshot path to a missing file so they keep validating the no-baseline path deterministically even though an offline runtime snapshot exists on disk.",
+    "docs/jarvis_step_47_latest_snapshot_compare/report.md and report.json — this memo."
+  ],
+  "explicitly_not_done": [
+    "No jarvis_conversation_safety.py change — existing 'changed'/'what is new'/'change summary' SAFE_INFO patterns already route every listed question; no classifier change needed.",
+    "No templates/jarvis.html change (no UI/browser control).",
+    "No tools/jarvis_snapshot_report.py change (imported read-only, not modified).",
+    "No tests/test_jarvis_conversation_safety.py or tests/test_jarvis_snapshot_report.py change.",
+    "No new endpoint; no /api/jarvis/snapshot; no /api/jarvis/refresh.",
+    "No snapshot created/repaired/deleted/refreshed/regenerated; /api/jarvis/ask writes no files.",
+    "No logs added; no data fetched; no broker/paper/live control; no trade run or simulated.",
+    "No trading/Factory/S26-S28/Donchian/Hydra/base.html/storage touched except READING storage/jarvis/snapshots/latest_snapshot.json.",
+    "No new response fields; response keeps exactly answer/safety_class/sources_used/refused/refusal_reason.",
+    "Nothing staged or committed."
+  ],
+  "compared_fields": [
+    "git head and branch",
+    "latest commit subject (recent_commits[0].subject)",
+    "commander_snapshot overall_state and warning count",
+    "trading_detail posture flags: read_only, paper_ready, live_ready, broker_control, state, candidate_status",
+    "trading_latest_reports names (added/removed)",
+    "cache_freshness overall",
+    "file_hygiene counts: total_untracked_count, tracked_modified_count, staged_count",
+    "status_key_count and status_key_hash"
+  ],
+  "never_compared_or_exposed": [
+    "secrets", "api keys", "broker credentials", "env vars", "chat logs",
+    "audio", "transcripts", "trade orders", "command/action/execute fields"
+  ],
+  "answer_sections": [
+    "Verified changes since latest snapshot (captured <generated_at>) — the diff, or 'none — every compared read-only field matches the latest snapshot'.",
+    "Current status — the same read-only current-state summary as Step 43.",
+    "Unknown / not compared — which fields are compared; sensitive data never compared/exposed; no trading authorized."
+  ],
+  "missing_snapshot_behavior": "Keeps Step 43 behavior: says no stored baseline exists, summarizes current read-only status only, explicitly claims no changes, says it cannot compare against a previous snapshot yet.",
+  "valid_snapshot_behavior": "Reads the snapshot display-only, builds the current comparable, and reports verified differences only (e.g. 'git HEAD changed X -> Y', 'commander state changed A -> B', 'warning count changed N -> M', 'trading posture paper_ready changed True -> False (reporting only; no trading authorized)', 'latest trading reports changed: added X; removed Y', 'cache freshness overall changed A -> B', count and status key count/hash changes). Never asserts a change not backed by both values.",
+  "corrupt_snapshot_behavior": "Fails closed: says the latest snapshot is unavailable/invalid, summarizes current status only, does not crash (HTTP 200), and shows no 'Verified changes' section.",
+  "safety_no_write_confirmation": {
+    "ask_writes_no_files": true,
+    "no_snapshot_created_or_modified": true,
+    "snapshot_bytes_and_mtime_unchanged_after_two_asks": true,
+    "response_keys": ["answer", "safety_class", "sources_used", "refused", "refusal_reason"],
+    "response_has_no_forbidden_fields": true,
+    "forbidden_mixed_still_refused": [
+      "what changed since last snapshot and refresh status -> FORBIDDEN",
+      "what changed since last snapshot and write a snapshot -> FORBIDDEN",
+      "what changed since last snapshot and start trading -> FORBIDDEN"
+    ],
+    "no_snapshot_endpoint": true,
+    "no_refresh_endpoint": true,
+    "template_has_no_snapshot_or_refresh_control": true
+  },
+  "status_shape_confirmation": {
+    "top_level_key_count": 24,
+    "online": true,
+    "read_only": true,
+    "trading_detail_flags": {"read_only": true, "paper_ready": false, "live_ready": false, "broker_control": false}
+  },
+  "validation": [
+    {"cmd": "python -m py_compile app.py jarvis_conversation_safety.py tools/jarvis_snapshot_report.py", "result": "PYCOMPILE_OK"},
+    {"cmd": "pytest tests/test_jarvis_route.py tests/test_jarvis_conversation_safety.py tests/test_jarvis_ask_contract.py tests/test_jarvis_snapshot_report.py --rootdir=tests -q", "result": "393 passed, 0 failed, 0 skipped (was 379; +14)"},
+    {"cmd": "python -m json.tool docs/jarvis_step_47_latest_snapshot_compare/report.json", "result": "JSON_OK"}
+  ],
+  "conclusion": "JARVIS now answers 'what changed since last snapshot?' by reading the offline-generated latest_snapshot.json display-only and comparing it field-by-field to the current read-only status, reporting verified differences only and separating 'Verified changes since latest snapshot' / 'Current status' / 'Unknown / not compared'. Missing snapshot keeps the Step 43 no-baseline answer; corrupt snapshot fails closed without crashing. The ask path writes nothing, creates/repairs/refreshes no snapshot, adds no endpoint/UI/refresh/execution, and authorizes no trading. Response keeps its five fields with no command/action/order keys; /api/jarvis/status stays at 24 keys with trading flags locked false. 393 tests pass (+14). Nothing staged or committed.",
+  "verdict": "JARVIS_LATEST_SNAPSHOT_COMPARE_READY"
+}

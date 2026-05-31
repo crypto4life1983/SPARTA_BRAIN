@@ -449,7 +449,11 @@ _STEP43_WHAT_CHANGED_QUESTIONS = (
 
 @requires_ask
 @pytest.mark.parametrize("q", _STEP43_WHAT_CHANGED_QUESTIONS)
-def test_step43_what_changed_question_is_safe_and_summarizes_current(q):
+def test_step43_what_changed_question_is_safe_and_summarizes_current(q, monkeypatch, tmp_path):
+    # Force the no-snapshot path so this keeps validating the Step 43 baseline
+    # behavior even when an offline runtime snapshot happens to exist on disk.
+    import app as app_module
+    monkeypatch.setattr(app_module, "_JARVIS_LATEST_SNAPSHOT", tmp_path / "missing.json")
     c = _client()
     r = c.post(_ASK_PATH, json={"question": q})
     assert r.status_code == 200
@@ -470,7 +474,9 @@ def test_step43_what_changed_question_is_safe_and_summarizes_current(q):
 
 
 @requires_ask
-def test_step43_what_changed_does_not_claim_verified_changes():
+def test_step43_what_changed_does_not_claim_verified_changes(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "_JARVIS_LATEST_SNAPSHOT", tmp_path / "missing.json")
     c = _client()
     body = c.post(_ASK_PATH, json={"question": "what changed since last check?"}).json()
     ans = body["answer"].lower()
@@ -517,3 +523,202 @@ def test_step43_status_shape_unchanged_after_what_changed_ask():
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
         assert td.get(flag) is False
+
+
+# ==========================================================================
+# Step 47 — read-only comparison against the offline-generated latest snapshot.
+# JARVIS may READ storage/jarvis/snapshots/latest_snapshot.json display-only and
+# report verified differences vs current read-only status. It writes nothing,
+# never authorizes trading, and fails closed on a missing/corrupt snapshot.
+# All tests install a temp snapshot path via monkeypatch so they never depend on
+# or mutate the real runtime snapshot.
+# ==========================================================================
+
+def _build_current_snapshot():
+    """Build the current snapshot-shaped view the same way the app does."""
+    import app as app_module
+    from tools.jarvis_snapshot_report import build_snapshot
+    return build_snapshot(app_module.api_jarvis_status())
+
+
+def _install_snapshot(monkeypatch, tmp_path, data):
+    """Write a snapshot (dict -> json, or raw str for corrupt) and point the
+    app's latest-snapshot path at it. Returns the temp path."""
+    import json as _json
+    import app as app_module
+    p = tmp_path / "latest_snapshot.json"
+    p.write_text(data if isinstance(data, str) else _json.dumps(data), encoding="utf-8")
+    monkeypatch.setattr(app_module, "_JARVIS_LATEST_SNAPSHOT", p)
+    return p
+
+
+@requires_ask
+def test_step47_missing_snapshot_keeps_no_baseline_answer(monkeypatch, tmp_path):
+    import app as app_module
+    monkeypatch.setattr(app_module, "_JARVIS_LATEST_SNAPSHOT", tmp_path / "absent.json")
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "no stored baseline" in ans or "no previous" in ans
+    assert "cannot compare" in ans
+    assert "current status:" in ans
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step47_valid_snapshot_shows_comparison_section(monkeypatch, tmp_path):
+    _install_snapshot(monkeypatch, tmp_path, _build_current_snapshot())
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"]
+    assert "Verified changes since latest snapshot" in ans
+    assert "Current status:" in ans
+    assert "Unknown / not compared" in ans
+    assert "latest_snapshot" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step47_changed_git_head_reported_as_verified_change(monkeypatch, tmp_path):
+    import copy
+    prev = copy.deepcopy(_build_current_snapshot())
+    prev.setdefault("git", {})["head"] = "deadbee"
+    _install_snapshot(monkeypatch, tmp_path, prev)
+    c = _client()
+    ans = c.post(_ASK_PATH, json={"question": "what new commits happened?"}).json()["answer"]
+    assert "git HEAD changed deadbee" in ans
+
+
+@requires_ask
+def test_step47_changed_commander_state_and_warnings_reported(monkeypatch, tmp_path):
+    import copy
+    prev = copy.deepcopy(_build_current_snapshot())
+    cs = prev.setdefault("commander_snapshot", {})
+    cs["overall_state"] = "__prev_state__"
+    cs["warnings"] = []  # force a different warning count
+    _install_snapshot(monkeypatch, tmp_path, prev)
+    c = _client()
+    ans = c.post(_ASK_PATH, json={"question": "what warnings changed?"}).json()["answer"]
+    assert "commander state changed __prev_state__" in ans
+    assert "warning count changed" in ans
+
+
+@requires_ask
+def test_step47_changed_trading_posture_reported_without_authorizing(monkeypatch, tmp_path):
+    import copy
+    prev = copy.deepcopy(_build_current_snapshot())
+    # Pretend the previous snapshot had paper_ready True; current is locked False.
+    prev.setdefault("trading_detail", {})["paper_ready"] = True
+    _install_snapshot(monkeypatch, tmp_path, prev)
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"}).json()
+    ans = body["answer"]
+    assert "trading posture paper_ready changed True -> False" in ans
+    assert "no trading authorized" in ans.lower()
+    # The answer reports a flag change but authorizes nothing and adds no
+    # command/order fields, and live status flags stay locked.
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+    td = c.get("/api/jarvis/status").json()["trading_detail"]
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False
+
+
+@requires_ask
+def test_step47_changed_latest_report_list_reported(monkeypatch, tmp_path):
+    import copy
+    prev = copy.deepcopy(_build_current_snapshot())
+    prev["trading_latest_reports"] = [
+        {"name": "__old_report__", "path": "x", "modified_at": "t", "has_md": True}
+    ]
+    _install_snapshot(monkeypatch, tmp_path, prev)
+    c = _client()
+    ans = c.post(_ASK_PATH, json={"question": "what new trading reports appeared?"}).json()["answer"]
+    assert "latest trading reports changed" in ans
+    assert "removed __old_report__" in ans
+
+
+@requires_ask
+def test_step47_corrupt_snapshot_fails_closed(monkeypatch, tmp_path):
+    _install_snapshot(monkeypatch, tmp_path, "{ this is not valid json ")
+    c = _client()
+    r = c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"})
+    assert r.status_code == 200  # did not crash
+    body = r.json()
+    assert body["refused"] is False
+    ans = body["answer"].lower()
+    assert "unavailable or invalid" in ans
+    assert "current status:" in ans
+    assert "verified changes since latest snapshot" not in ans
+
+
+@requires_ask
+def test_step47_ask_does_not_write_or_modify_snapshot(monkeypatch, tmp_path):
+    import app as app_module
+    # Dedicated sandbox so the global conftest isolation dir (created directly
+    # under tmp_path) does not register as a stray write.
+    sandbox = tmp_path / "snap_dir"
+    sandbox.mkdir()
+    p = _install_snapshot(monkeypatch, sandbox, _build_current_snapshot())
+    before_bytes = p.read_bytes()
+    before_mtime = p.stat().st_mtime_ns
+    c = _client()
+    c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"})
+    c.post(_ASK_PATH, json={"question": "summarize current changes"})
+    assert p.read_bytes() == before_bytes, "ask must not modify the snapshot file"
+    assert p.stat().st_mtime_ns == before_mtime, "ask must not rewrite the snapshot file"
+    # The ask path created no new files in the snapshot's directory.
+    assert [x.name for x in sandbox.iterdir()] == [p.name]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what changed since last snapshot and refresh status",
+    "what changed since last snapshot and write a snapshot",
+    "what changed since last snapshot and start trading",
+])
+def test_step47_forbidden_mixed_with_snapshot_phrasing_refused(q, monkeypatch, tmp_path):
+    _install_snapshot(monkeypatch, tmp_path, _build_current_snapshot())
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True
+    assert body["safety_class"].startswith("FORBIDDEN")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_step47_status_shape_unchanged_after_compare_ask(monkeypatch, tmp_path):
+    _install_snapshot(monkeypatch, tmp_path, _build_current_snapshot())
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert len(after) == 24
+    assert after["read_only"] is True
+
+
+def test_step47_template_has_no_snapshot_or_refresh_control():
+    low = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8").lower()
+    assert "/api/jarvis/snapshot" not in low
+    assert "/api/jarvis/refresh" not in low
+    for tok in ("<button", "<form", "onclick", 'method="post"'):
+        assert tok not in low
+
+
+def test_step47_no_snapshot_or_refresh_endpoint():
+    c = _client()
+    assert c.post("/api/jarvis/snapshot").status_code == 404
+    assert c.get("/api/jarvis/snapshot").status_code == 404
+    assert c.post("/api/jarvis/refresh").status_code == 404
+    assert c.get("/api/jarvis/refresh").status_code == 404
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/snapshot" not in src
+    assert "/api/jarvis/refresh" not in src

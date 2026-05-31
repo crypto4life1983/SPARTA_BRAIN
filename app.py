@@ -8426,14 +8426,142 @@ def _jarvis_trading_posture_answer():
     )
 
 
+# Step 47 — read-only comparison against the offline-generated latest snapshot.
+# The path points at the SAME gitignored runtime file the offline snapshot tool
+# writes. The ask path only ever READS it (never writes/repairs/regenerates).
+_JARVIS_LATEST_SNAPSHOT = BASE / "storage" / "jarvis" / "snapshots" / "latest_snapshot.json"
+
+
+def _jarvis_read_latest_snapshot(path=None):
+    """READ-ONLY. Read the offline-generated latest snapshot display-only.
+
+    Returns ``(status, data)`` where ``status`` is one of ``"missing"`` (file
+    absent), ``"invalid"`` (unreadable / corrupt / not a dict), or ``"ok"``
+    (parsed dict in ``data``). It opens the file for reading only — it never
+    writes, repairs, deletes, refreshes, or regenerates the snapshot, and fails
+    closed (``"invalid"``) on any error rather than raising."""
+    import json as _json
+    p = Path(path) if path is not None else _JARVIS_LATEST_SNAPSHOT
+    try:
+        if not p.is_file():
+            return ("missing", None)
+        data = _json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return ("invalid", None)
+        return ("ok", data)
+    except Exception:  # noqa: BLE001 — fail closed on any read/parse error
+        return ("invalid", None)
+
+
+def _jarvis_current_comparable():
+    """READ-ONLY. Build an in-memory snapshot-shaped view of the CURRENT status
+    using the SAME builder the offline snapshot tool uses, so it lines up
+    field-by-field with a stored snapshot (including status_key_count/hash).
+    Pure read-only: builds in memory and writes NOTHING / creates no file."""
+    from tools.jarvis_snapshot_report import build_snapshot
+    return build_snapshot(api_jarvis_status())
+
+
+def _jarvis_compare_snapshot(prev, curr) -> list:
+    """READ-ONLY pure diff of two snapshot-shaped dicts. Compares ONLY the
+    whitelisted safe display fields and returns human-readable verified
+    differences. It never compares or exposes secrets, credentials, env vars,
+    chat logs, audio, transcripts, trade orders, or command/action fields —
+    those are not present in a snapshot and are never inspected here. Reporting
+    a posture/flag change is descriptive only and authorizes no trading."""
+    changes: list = []
+    if not isinstance(prev, dict) or not isinstance(curr, dict):
+        return changes
+    pg = prev.get("git") if isinstance(prev.get("git"), dict) else {}
+    cg = curr.get("git") if isinstance(curr.get("git"), dict) else {}
+    if pg.get("head") != cg.get("head"):
+        changes.append(f"git HEAD changed {pg.get('head', '?')} -> {cg.get('head', '?')}")
+    if pg.get("branch") != cg.get("branch"):
+        changes.append(f"git branch changed {pg.get('branch', '?')} -> {cg.get('branch', '?')}")
+
+    def _subj(s):
+        rc = s.get("recent_commits")
+        if isinstance(rc, list) and rc and isinstance(rc[0], dict):
+            return rc[0].get("subject")
+        return None
+    if _subj(prev) != _subj(curr):
+        changes.append(f'latest commit subject changed "{_subj(prev)}" -> "{_subj(curr)}"')
+
+    pc = prev.get("commander_snapshot") if isinstance(prev.get("commander_snapshot"), dict) else {}
+    cc = curr.get("commander_snapshot") if isinstance(curr.get("commander_snapshot"), dict) else {}
+    if pc.get("overall_state") != cc.get("overall_state"):
+        changes.append(
+            f"commander state changed {pc.get('overall_state', '?')} -> {cc.get('overall_state', '?')}")
+    pw = pc.get("warnings"); cw = cc.get("warnings")
+    pwn = len(pw) if isinstance(pw, list) else None
+    cwn = len(cw) if isinstance(cw, list) else None
+    if pwn != cwn:
+        changes.append(f"warning count changed {pwn} -> {cwn}")
+
+    pt = prev.get("trading_detail") if isinstance(prev.get("trading_detail"), dict) else {}
+    ct = curr.get("trading_detail") if isinstance(curr.get("trading_detail"), dict) else {}
+    for flag in ("read_only", "paper_ready", "live_ready", "broker_control",
+                 "state", "candidate_status"):
+        if pt.get(flag) != ct.get(flag):
+            changes.append(
+                f"trading posture {flag} changed {pt.get(flag)} -> {ct.get(flag)} "
+                "(reporting only; no trading authorized)")
+
+    def _names(s):
+        rl = s.get("trading_latest_reports")
+        if isinstance(rl, list):
+            return [r.get("name") for r in rl if isinstance(r, dict)]
+        return []
+    pn = _names(prev); cn = _names(curr)
+    if pn != cn:
+        added = [n for n in cn if n and n not in pn]
+        removed = [n for n in pn if n and n not in cn]
+        parts = []
+        if added:
+            parts.append("added " + ", ".join(added))
+        if removed:
+            parts.append("removed " + ", ".join(removed))
+        changes.append(
+            "latest trading reports changed" + (": " + "; ".join(parts) if parts else ""))
+
+    pcf = (prev.get("cache_freshness") or {}).get("overall") if isinstance(prev.get("cache_freshness"), dict) else None
+    ccf = (curr.get("cache_freshness") or {}).get("overall") if isinstance(curr.get("cache_freshness"), dict) else None
+    if pcf != ccf:
+        changes.append(f"cache freshness overall changed {pcf} -> {ccf}")
+
+    pfh = prev.get("file_hygiene") if isinstance(prev.get("file_hygiene"), dict) else {}
+    cfh = curr.get("file_hygiene") if isinstance(curr.get("file_hygiene"), dict) else {}
+    for fld, label in (("total_untracked_count", "untracked"),
+                       ("tracked_modified_count", "modified"),
+                       ("staged_count", "staged")):
+        if pfh.get(fld) != cfh.get(fld):
+            changes.append(f"{label} file count changed {pfh.get(fld)} -> {cfh.get(fld)}")
+
+    if prev.get("status_key_count") != curr.get("status_key_count"):
+        changes.append(
+            f"status key count changed {prev.get('status_key_count')} -> {curr.get('status_key_count')}")
+    if prev.get("status_key_hash") != curr.get("status_key_hash"):
+        changes.append("status key hash changed (top-level status keys differ)")
+    return changes
+
+
 def _jarvis_what_changed_answer():
-    """READ-ONLY. Answer a "what changed?" question conservatively. JARVIS keeps
-    NO stored snapshot/baseline, so it cannot compute a diff: it says so
-    explicitly, then summarizes only the CURRENT read-only status drawn from the
-    same helpers the status endpoint already uses (git, trading_detail,
-    cache_freshness, commander_snapshot). It runs no git/refresh/execution,
-    fetches nothing, writes nothing, and never claims a verified change without a
-    provided baseline. Returns (answer_text, sources_used)."""
+    """READ-ONLY. Answer a "what changed?" question conservatively.
+
+    If the offline-generated latest snapshot
+    (``storage/jarvis/snapshots/latest_snapshot.json``) is missing, this keeps
+    the Step 43 behavior: it says no baseline exists, summarizes only the
+    CURRENT read-only status, and claims no verified changes. If the snapshot is
+    present and valid, it reads it DISPLAY-ONLY and reports the verified
+    differences between it and the current read-only status, separating
+    "Verified changes since latest snapshot" / "Current status" / "Unknown /
+    not compared". If the snapshot is corrupt/invalid it fails closed: it says
+    the snapshot is unavailable/invalid and summarizes current status only.
+
+    It runs no git/refresh/execution, fetches nothing, and writes/repairs/
+    regenerates NOTHING (it only reads the snapshot file). It never authorizes
+    trading and never invents a change not backed by both values. Returns
+    (answer_text, sources_used)."""
     git = _jarvis_safe(_jarvis_git)
     if not isinstance(git, dict):
         git = {}
@@ -8444,22 +8572,22 @@ def _jarvis_what_changed_answer():
     if not isinstance(cache, dict):
         cache = {}
 
-    verified: list = []
+    current_lines: list = []
     # current HEAD / recent commit subject
     head = git.get("head")
     if isinstance(head, str) and head:
-        verified.append(f"current HEAD is {head} on branch {git.get('branch', '?')}")
+        current_lines.append(f"current HEAD is {head} on branch {git.get('branch', '?')}")
     commits = git.get("commits")
     if isinstance(commits, list) and commits and isinstance(commits[0], dict):
         subj = commits[0].get("subject")
         if isinstance(subj, str) and subj:
-            verified.append(f'latest commit subject: "{subj}"')
+            current_lines.append(f'latest commit subject: "{subj}"')
     # git clean/dirty posture
     if isinstance(git.get("clean"), bool):
         if git["clean"]:
-            verified.append("working tree is clean")
+            current_lines.append("working tree is clean")
         else:
-            verified.append(
+            current_lines.append(
                 f"working tree is dirty ({git.get('modified_count', '?')} modified, "
                 f"{git.get('untracked_count', '?')} untracked)")
     # most-recent trading report names already exposed by status
@@ -8468,11 +8596,11 @@ def _jarvis_what_changed_answer():
         names = ", ".join(
             r.get("name", "?") for r in reports[:3] if isinstance(r, dict))
         if names:
-            verified.append(f"most recent trading reports on disk: {names}")
+            current_lines.append(f"most recent trading reports on disk: {names}")
     # cache freshness already exposed by status
     overall = cache.get("overall")
     if isinstance(overall, str) and overall:
-        verified.append(f"cache freshness overall: {overall}")
+        current_lines.append(f"cache freshness overall: {overall}")
 
     # commander snapshot state + current warning count (derived from the same
     # read-only helpers the status endpoint hands to _jarvis_commander_snapshot)
@@ -8490,25 +8618,77 @@ def _jarvis_what_changed_answer():
     if isinstance(snapshot, dict):
         state = snapshot.get("overall_state")
         if isinstance(state, str) and state:
-            verified.append(f"commander snapshot state: {state}")
+            current_lines.append(f"commander snapshot state: {state}")
         warns = snapshot.get("warnings")
         if isinstance(warns, list):
-            verified.append(f"current warning count: {len(warns)}")
+            current_lines.append(f"current warning count: {len(warns)}")
         sources.append("commander_snapshot")
 
-    verified_text = (
-        "Verified current status: " + "; ".join(verified) + "."
-        if verified else
-        "Verified current status: I could not read any current status fields.")
+    current_text = (
+        "Current status: " + "; ".join(current_lines) + "."
+        if current_lines else
+        "Current status: I could not read any current status fields.")
+
+    # Step 47 — read the offline-generated latest snapshot DISPLAY-ONLY and, if
+    # present and valid, compare it field-by-field to the current status.
+    snap_status, prev = _jarvis_read_latest_snapshot()
+
+    if snap_status == "missing":
+        unknown_text = (
+            " Unknown / not compared: no previous snapshot/baseline is available "
+            "(no latest snapshot found), so I cannot say what changed since a "
+            "previous check, what is new, or which warnings changed compared to "
+            "before. Treat the above as current state only.")
+        answer = (
+            "I cannot compare against a previous snapshot yet — no stored baseline "
+            "exists, so I am reporting current read-only status only and claiming "
+            "no changes. " + current_text + unknown_text)
+        return (answer, sources)
+
+    sources = sources + ["latest_snapshot"]
+
+    if snap_status != "ok" or not isinstance(prev, dict):
+        unknown_text = (
+            " Unknown / not compared: the latest snapshot is unavailable or "
+            "invalid, so I cannot compute a comparison; treat the above as "
+            "current state only.")
+        answer = (
+            "The latest snapshot is unavailable or invalid (it could not be read), "
+            "so I cannot compare against it — reporting current read-only status "
+            "only and claiming no changes. " + current_text + unknown_text)
+        return (answer, sources)
+
+    curr = _jarvis_safe(_jarvis_current_comparable)
+    if not isinstance(curr, dict):
+        unknown_text = (
+            " Unknown / not compared: I could not build a comparable current view, "
+            "so I cannot compute a verified comparison; treat the above as current "
+            "state only.")
+        answer = (
+            "I could not build a current comparison view, so I am reporting current "
+            "read-only status only and claiming no changes. "
+            + current_text + unknown_text)
+        return (answer, sources)
+
+    changes = _jarvis_compare_snapshot(prev, curr)
+    snap_time = prev.get("generated_at")
+    snap_ref = f" (captured {snap_time})" if isinstance(snap_time, str) and snap_time else ""
+    if changes:
+        changes_text = (
+            "Verified changes since latest snapshot" + snap_ref + ": "
+            + "; ".join(changes) + ".")
+    else:
+        changes_text = (
+            "Verified changes since latest snapshot" + snap_ref
+            + ": none — every compared read-only field matches the latest snapshot.")
     unknown_text = (
-        " Unknown because no previous baseline is available: I keep no stored "
-        "snapshot, so I cannot say what changed since a previous check, what is "
-        "new, or which warnings changed compared to before. Provide a previous "
-        "snapshot to compare against, or treat the above as current state only.")
-    answer = (
-        "I cannot compare against a previous snapshot yet — JARVIS stores no "
-        "baseline, so I am reporting current read-only status only and claiming "
-        "no changes. " + verified_text + unknown_text)
+        " Unknown / not compared: only whitelisted read-only display fields are "
+        "compared (git head/branch, latest commit subject, commander state and "
+        "warning count, trading posture flags, latest report names, cache "
+        "freshness, file-hygiene counts, status key count/hash). Sensitive data "
+        "(secrets, credentials, broker details, trade instructions, transcripts) "
+        "is never compared or exposed, and this authorizes no trading.")
+    answer = changes_text + " " + current_text + unknown_text
     return (answer, sources)
 
 
