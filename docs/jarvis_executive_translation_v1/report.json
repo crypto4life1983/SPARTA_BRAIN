@@ -1,0 +1,116 @@
+{
+  "bundle": "JARVIS_EXECUTIVE_TRANSLATION_MODE_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_EXECUTIVE_TRANSLATION_READY",
+  "goal": "Give JARVIS read-only /api/jarvis/ask two ways to report the same true state: Executive Mode (default) translates internal facts into customer/investor/demo-friendly business language and hides raw implementation detail (exact counts, report names, raw warning text, posture flags); Operator Mode (on request) exposes the full technical briefing. Both modes keep the trading-safety phrasing and every read-only rule.",
+  "files_changed": [
+    "jarvis_conversation_safety.py",
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_executive_translation_v1/report.md",
+    "docs/jarvis_executive_translation_v1/report.json"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "implementation": {
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "change": "Added SAFE_INFO regex patterns for operator-mode triggers. Forbidden patterns still matched FIRST and unchanged.",
+      "new_safe_info_patterns": [
+        "operator mode",
+        "show (me/the/technical) details",
+        "technical details",
+        "diagnostics",
+        "exact counts"
+      ]
+    },
+    "answer_layer": {
+      "file": "app.py",
+      "function_changed": "_jarvis_conversational_answer(q)",
+      "translation_layer": "Added _exec_health_phrase (commander state -> business health), _exec_research_phrase (factory state -> 'Research activity is progressing normally'), _exec_candidate_phrase (candidate count -> 'Several strategy candidates are currently under evaluation'), _exec_attention_phrase (warnings -> 'Some maintenance items require attention, and there are a few project housekeeping tasks that should be reviewed').",
+      "mode_flag": "_operator = 'operator mode' | 'technical detail' | 'show technical' | ('show' and 'detail') | 'diagnostic' | 'exact count' | 'exact status'.",
+      "mode_aware_branches": ["executive briefing", "warnings/attention", "general system status"],
+      "bare_operator_fallback": "A bare operator request (operator mode / diagnostics / show technical details) with no other recognised intent returns the full technical operator briefing.",
+      "executive_structure": "Greeting -> business status (SPARTA Brain is online + translated commander health) -> research status (translated, no counts/report names) -> trading status (observation-only, no live or paper trades, no performance) -> attention items (translated, no raw warning text/counts) -> recommended next action.",
+      "reads_only": ["api_jarvis_status aggregate (commander_snapshot, system_core, factory_status, candidate_registry, trading_detail, recommended_next_actions)"]
+    },
+    "template_change": false,
+    "template_note": "Voice + conversation mode already post to /api/jarvis/ask, so they inherit both modes with no template edit."
+  },
+  "translation_examples": {
+    "62 committed reports on disk": "Research activity is progressing normally.",
+    "7 research candidates tracked": "Several strategy candidates are currently under evaluation.",
+    "Git working tree is dirty": "Some maintenance items require attention.",
+    "Large untracked backlog": "There are project housekeeping tasks that should be reviewed."
+  },
+  "triggers": {
+    "executive_default": ["good morning", "executive briefing", "morning briefing", "summarize the system", "what is the status"],
+    "operator": ["operator mode", "show details", "show technical details", "technical details", "diagnostics", "exact counts", "exact status"]
+  },
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_refresh_route": true,
+    "no_snapshot_route": true,
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_chat_audio_transcript_storage": true,
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true,
+    "no_invented_pnl_or_performance": true,
+    "no_invented_trades": true,
+    "no_fabricated_strategy_success": true,
+    "technical_detail_available_on_request": true,
+    "executive_mode_hides_raw_detail": true,
+    "operator_mode_exposes_raw_detail": true,
+    "safety_phrasing_kept_in_both_modes": true,
+    "classifier_still_gates_every_question": true,
+    "forbidden_first_unchanged": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"]
+  },
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added_section": "JARVIS Executive Translation Mode v1",
+  "tests_added": [
+    "test_et_executive_mode_hides_raw_details (x5)",
+    "test_et_operator_mode_exposes_raw_details (x5)",
+    "test_et_operator_mode_invents_no_trades_or_performance (x2)",
+    "test_et_executive_status_is_translated",
+    "test_et_operator_status_exposes_posture",
+    "test_et_operator_triggers_classify_safe (x5)",
+    "test_et_forbidden_intent_in_operator_mode_still_refused (x5)",
+    "test_et_modes_add_no_routes_and_write_nothing"
+  ],
+  "new_test_count": 25,
+  "tests_reconciled": [
+    "test_ci_morning_briefing_summarizes_readonly",
+    "test_eb_briefing_is_executive_structure",
+    "test_eb_overnight_update_is_readonly_no_fake_trades"
+  ],
+  "tests_reconciled_note": "Briefings are now executive (translated) by default, so raw posture/factory tokens (read_only=true, strategy factory, paper_ready=false) were moved from the default-briefing assertions into the new operator-mode tests. The plain-English safety phrasing (observation-only, no live or paper trades were executed) is still asserted in the default briefing.",
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_factory_ask_snapshot": "226 passed",
+    "factory_ask_snapshot_prev": "201 passed (before this bundle)",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "executive_mode_hides_raw_details": true,
+    "operator_mode_exposes_raw_details": true,
+    "no_invented_performance": true,
+    "no_invented_trades": true,
+    "forbidden_in_either_mode_still_refused": true,
+    "no_new_routes": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

@@ -220,6 +220,16 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bwhat\s+should\s+we\s+focus\b",
     r"\bwhat\s+to\s+focus\b",
     r"\bfocus\s+on\s+(?:today|now|next)\b",
+    # JARVIS Executive Translation Mode v1 — operator-mode triggers that switch
+    # a briefing/status answer from the customer-friendly executive default into
+    # full technical detail (exact counts, report names, raw warnings, posture
+    # flags). All read-only; forbidden patterns are still matched FIRST, so
+    # "operator mode then buy NQ" / "show technical details and commit" refuse.
+    r"\boperator\s+mode\b",
+    r"\bshow\s+(?:me\s+)?(?:the\s+)?(?:technical\s+)?details?\b",
+    r"\btechnical\s+details?\b",
+    r"\bdiagnostics?\b",
+    r"\bexact\s+counts?\b",
 ))
 
 _SAFE_GROUPS = (

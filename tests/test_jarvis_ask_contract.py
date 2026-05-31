@@ -790,10 +790,11 @@ def test_ci_morning_briefing_summarizes_readonly(q):
     assert body["safety_class"] == "SAFE_INFO"
     ans = body["answer"].lower()
     assert "briefing" in ans
-    # Names the read-only trading posture and the factory, offers a next step.
+    # Executive default: read-only trading posture in plain words, research
+    # framing, and a next step — without raw posture flags or counts.
     assert "observation-only" in ans
-    assert "read_only=true" in ans
-    assert "factory" in ans
+    assert "no live or paper trades were executed" in ans
+    assert "research" in ans
     # No invented performance.
     for banned in _CI_BANNED_PERF:
         assert banned not in ans, f"briefing must not invent {banned!r}"
@@ -993,11 +994,11 @@ def test_eb_briefing_is_executive_structure(q):
     assert "good morning mahmoud" in low
     assert "briefing" in low
     assert "sparta brain is online" in low
-    assert "strategy factory" in low
+    # Executive default: research framing (the raw "strategy factory" name and
+    # posture flags are operator-mode only — see test_et_* below).
     assert "research" in low
     assert "no live or paper trades were executed" in low
     assert "observation-only" in low
-    assert "read_only=true" in low
     assert "recommended next action" in low
     # No invented performance / activity.
     for banned in _CI_BANNED_PERF:
@@ -1025,7 +1026,8 @@ def test_eb_overnight_update_is_readonly_no_fake_trades(q):
     low = body["answer"].lower()
     assert "no live or paper trades were executed" in low
     assert "observation-only" in low
-    assert "paper_ready=false" in low and "live_ready=false" in low
+    # Executive default: no raw posture flags (those are operator-mode only).
+    assert "paper_ready=false" not in low and "read_only=true" not in low
     for banned in _CI_BANNED_PERF:
         assert banned not in low, f"overnight update must not invent {banned!r}"
 
@@ -1151,3 +1153,156 @@ def test_eb_briefing_does_not_change_status_shape():
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
         assert td.get(flag) is False
+
+
+# ==========================================================================
+# JARVIS Executive Translation Mode v1 — the briefing/status answer has two
+# read-only modes. Executive mode (default) translates internal facts into
+# customer/investor-friendly business language and HIDES raw implementation
+# detail (exact counts, report names, raw warning text, posture flags).
+# Operator mode (triggered by "operator mode" / "show technical details" /
+# "diagnostics" / "exact counts") still EXPOSES the full technical detail.
+# Neither mode invents trades or performance, and forbidden phrasing always
+# still refuses.
+# ==========================================================================
+
+# Raw tokens that must appear ONLY in operator mode, never in executive mode.
+_ET_RAW_TOKENS = (
+    "read_only=true",
+    "paper_ready=false",
+    "live_ready=false",
+    "broker_control=false",
+    "committed reports",
+    "candidate(s)",
+    "warning(s)",
+)
+
+_ET_EXECUTIVE_TRIGGERS = [
+    "good morning",
+    "executive briefing",
+    "morning briefing",
+    "summarize the system",
+    "what is the status",
+]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _ET_EXECUTIVE_TRIGGERS)
+def test_et_executive_mode_hides_raw_details(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    # Customer/investor-friendly framing, no raw implementation detail.
+    for tok in _ET_RAW_TOKENS:
+        assert tok not in low, f"executive mode must hide raw token {tok!r}"
+    assert "sparta brain is online" in low
+    # Safety phrasing is preserved in plain words.
+    assert "observation-only" in low
+    assert "no live or paper trades were executed" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"executive mode must not invent {banned!r}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "operator mode",
+    "morning briefing, show technical details",
+    "good morning, operator mode",
+    "diagnostics",
+    "give me the exact counts",
+])
+def test_et_operator_mode_exposes_raw_details(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "operator briefing" in low
+    # Full technical detail is exposed: posture flags, raw counts, raw factory.
+    assert "read_only=true" in low
+    assert "paper_ready=false" in low and "live_ready=false" in low
+    assert "research candidate(s)" in low
+    assert "warning(s)" in low
+    assert "strategy factory" in low
+
+
+@requires_ask
+@pytest.mark.parametrize("q", ["operator mode", "good morning, operator mode"])
+def test_et_operator_mode_invents_no_trades_or_performance(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    low = body["answer"].lower()
+    assert "no live or paper trades were executed" in low
+    assert "observation-only" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"operator mode must not invent {banned!r}"
+
+
+@requires_ask
+def test_et_executive_status_is_translated():
+    body = _client().post(_ASK_PATH, json={"question": "what is the status"}).json()
+    assert body["refused"] is False and body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    for tok in _ET_RAW_TOKENS:
+        assert tok not in low, f"executive status must hide {tok!r}"
+    assert "observation-only" in low
+
+
+@requires_ask
+def test_et_operator_status_exposes_posture():
+    body = _client().post(
+        _ASK_PATH, json={"question": "what is the status, operator mode"}).json()
+    assert body["refused"] is False and body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "operator detail" in low
+    assert "read_only=true" in low and "broker_control=false" in low
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "operator mode",
+    "show technical details",
+    "show me the details",
+    "diagnostics",
+    "give me the exact counts",
+])
+def test_et_operator_triggers_classify_safe(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} operator trigger must be read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "operator mode then buy NQ",
+    "show technical details and commit the changes",
+    "diagnostics then place a trade",
+    "exact counts then enable live trading",
+    "good morning, operator mode, then connect to my broker",
+])
+def test_et_forbidden_intent_in_operator_mode_still_refused(q):
+    # Operator-mode phrasing must never smuggle a forbidden action: forbidden is
+    # matched FIRST, so these stay refused.
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must stay refused"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_et_modes_add_no_routes_and_write_nothing():
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/refresh" not in src
+    assert "/api/jarvis/snapshot" not in src
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    c = _client()
+    paths = sorted({getattr(r, "path", "") for r in c.app.routes
+                    if getattr(r, "path", "").startswith("/api/jarvis/")})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    for q in ("good morning", "operator mode", "what is the status",
+              "morning briefing, show technical details", "diagnostics"):
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "translation modes must not write files"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before

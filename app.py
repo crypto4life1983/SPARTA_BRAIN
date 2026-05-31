@@ -9042,6 +9042,51 @@ def _jarvis_conversational_answer(q: str):
                     "only and JARVIS runs no Factory job.")
         return "Strategy Factory status is not available right now (read-only)."
 
+    # --- Executive Translation Mode v1 -----------------------------------
+    # Operator mode (technical, exact counts/names/raw warnings/posture flags)
+    # vs Executive mode (default: translated, customer/investor-friendly). The
+    # operator flag only changes wording; both modes are equally read-only and
+    # both keep the trading-safety phrasing. Technical detail stays available on
+    # request via these triggers.
+    _operator = (
+        "operator mode" in q
+        or "technical detail" in q
+        or "show technical" in q
+        or ("show" in q and "detail" in q)
+        or "diagnostic" in q
+        or "exact count" in q
+        or "exact status" in q
+    )
+
+    def _exec_health_phrase(state: str) -> str:
+        st = (state or "unknown").lower()
+        if st in ("green", "ok", "okay", "healthy", "ready", "good"):
+            return "All systems are operating normally."
+        if st in ("yellow", "warn", "warning", "degraded", "caution"):
+            return ("The platform is online and stable, with a few maintenance "
+                    "items under review.")
+        if st in ("red", "error", "critical", "down", "alert"):
+            return ("The platform is online, with several items currently needing "
+                    "attention.")
+        return "The platform is online and being monitored."
+
+    def _exec_research_phrase(fs: dict) -> str:
+        if fs.get("state") == "ready":
+            return ("Research activity is progressing normally, and all of it "
+                    "stays in dry-run research mode.")
+        return "Research activity status is not available right now."
+
+    def _exec_candidate_phrase(cand_n: int) -> str:
+        if isinstance(cand_n, int) and cand_n > 0:
+            return "Several strategy candidates are currently under evaluation."
+        return "No strategy candidates are currently under evaluation."
+
+    def _exec_attention_phrase(warns: list) -> str:
+        if warns:
+            return ("Some maintenance items require attention, and there are a few "
+                    "project housekeeping tasks that should be reviewed.")
+        return "Nothing needs your attention right now."
+
     # --- Executive Briefing Mode v1 — good morning / overnight / exec summary --
     # Greeting "good morning", briefing requests, an overnight update, an
     # executive summary, and "tell me more" all produce the structured
@@ -9067,20 +9112,38 @@ def _jarvis_conversational_answer(q: str):
         cand_n = (cr.get("candidate_count")
                   if isinstance(cr.get("candidate_count"), int)
                   else len(cr.get("candidates") or []))
+        _briefing_sources = ["commander_snapshot", "system_core", "factory_status",
+                             "candidate_registry", "trading_detail", "daily_mission"]
+        if _operator:
+            answer = (
+                "Operator briefing (full technical detail). "
+                f"SPARTA Brain is online (system core {sc.get('state', 'unknown')}, "
+                f"server {sc.get('server', 'unknown')}). Commander status is {state} "
+                f"— {headline} ({len(warns)} warning(s)). "
+                + _factory_phrase(fs) + " "
+                f"Trading research status: {cand_n} research candidate(s) tracked. "
+                "No live or paper trades were executed — trading is observation-only "
+                f"({_LOCKED_POSTURE}), so there is no realized performance to report. "
+                + _attn_phrase(warns) + " "
+                f"Recommended next action: {_first_action(status)} "
+                "This is a read-only briefing and authorizes no action.")
+            return (answer, _briefing_sources)
+        # Executive mode (default): translated, customer/investor-friendly.
+        # Greeting -> business status -> research status -> trading status ->
+        # attention items -> recommendation. Raw counts, report names, raw
+        # warning text, and posture flags are translated away; the trading-
+        # safety phrasing is kept verbatim.
         answer = (
             "Good morning Mahmoud. Here is your executive briefing. "
-            f"SPARTA Brain is online (system core {sc.get('state', 'unknown')}, "
-            f"server {sc.get('server', 'unknown')}). Commander status is {state} "
-            f"— {headline} ({len(warns)} warning(s)). "
-            + _factory_phrase(fs) + " "
-            f"Trading research status: {cand_n} research candidate(s) tracked. "
-            "No live or paper trades were executed — trading is observation-only "
-            f"({_LOCKED_POSTURE}), so there is no realized performance to report. "
-            + _attn_phrase(warns) + " "
+            "SPARTA Brain is online. " + _exec_health_phrase(state) + " "
+            + _exec_research_phrase(fs) + " " + _exec_candidate_phrase(cand_n) + " "
+            "All trading remains observation-only — no live or paper trades were "
+            "executed, so there is no performance to report. "
+            + _exec_attention_phrase(warns) + " "
             f"Recommended next action: {_first_action(status)} "
-            "This is a read-only briefing and authorizes no action.")
-        return (answer, ["commander_snapshot", "system_core", "factory_status",
-                         "candidate_registry", "trading_detail", "daily_mission"])
+            "This is a read-only briefing and authorizes no action. "
+            "Ask for operator mode or technical details for the exact figures.")
+        return (answer, _briefing_sources)
 
     # --- Strategy Factory status -----------------------------------------
     if "factory" in q:
@@ -9151,15 +9214,22 @@ def _jarvis_conversational_answer(q: str):
     if "needs attention" in q or "what needs" in q or "attention" in q:
         status = _agg()
         state, headline, warns = _snapshot_line(status)
-        if warns:
-            items = "; ".join(str(w) for w in warns[:5])
-            body = (f"{len(warns)} item(s) currently need review: {items}.")
-        else:
-            body = "Nothing is currently flagged for attention."
+        if _operator:
+            if warns:
+                items = "; ".join(str(w) for w in warns[:5])
+                body = (f"{len(warns)} item(s) currently need review: {items}.")
+            else:
+                body = "Nothing is currently flagged for attention."
+            return (
+                f"Attention items (read-only, operator detail). Commander status is "
+                f"{state} — {headline} {body} Recommended next action: "
+                f"{_first_action(status)} This reports observed state only and "
+                "authorizes no action.",
+                ["commander_snapshot", "trading_detail"])
         return (
-            f"Attention items (read-only). Commander status is {state} — "
-            f"{headline} {body} Recommended next action: {_first_action(status)} "
-            "This reports observed state only and authorizes no action.",
+            "Attention items (read-only). " + _exec_attention_phrase(warns) + " "
+            f"Recommended next action: {_first_action(status)} This reports "
+            "observed state only and authorizes no action.",
             ["commander_snapshot", "trading_detail"])
 
     # --- conversational follow-ups: next step / what to focus on ----------
@@ -9210,13 +9280,50 @@ def _jarvis_conversational_answer(q: str):
         status = _agg()
         sc = _sub(status, "system_core")
         state, headline, warns = _snapshot_line(status)
+        if _operator:
+            return (
+                f"System status (read-only, operator detail): core is "
+                f"{sc.get('state', 'unknown')}, server {sc.get('server', 'unknown')}; "
+                f"commander snapshot is {state} — {headline} ({len(warns)} "
+                f"warning(s)). Trading is observation-only ({_LOCKED_POSTURE}). This "
+                "reports observed state only and authorizes no action.",
+                ["system_core", "commander_snapshot", "trading_detail"])
         return (
-            f"System status (read-only): core is {sc.get('state', 'unknown')}, "
-            f"server {sc.get('server', 'unknown')}; commander snapshot is {state} — "
-            f"{headline} ({len(warns)} warning(s)). Trading is observation-only "
-            f"({_LOCKED_POSTURE}). This reports observed state only and authorizes "
-            "no action.",
+            "System status (read-only). SPARTA Brain is online. "
+            + _exec_health_phrase(state) + " "
+            "All trading remains observation-only — no live or paper trades were "
+            "executed, so there is no performance to report. "
+            + _exec_attention_phrase(warns) + " This reports observed state only "
+            "and authorizes no action.",
             ["system_core", "commander_snapshot", "trading_detail"])
+
+    # --- bare operator-mode request -> full technical briefing ------------
+    # "operator mode" / "diagnostics" / "show technical details" with no other
+    # recognised intent still returns the full technical briefing rather than
+    # falling through to the generic structured answer.
+    if _operator:
+        status = _agg()
+        sc = _sub(status, "system_core")
+        cr = _sub(status, "candidate_registry")
+        fs = _sub(status, "factory_status")
+        state, headline, warns = _snapshot_line(status)
+        cand_n = (cr.get("candidate_count")
+                  if isinstance(cr.get("candidate_count"), int)
+                  else len(cr.get("candidates") or []))
+        answer = (
+            "Operator briefing (full technical detail). "
+            f"SPARTA Brain is online (system core {sc.get('state', 'unknown')}, "
+            f"server {sc.get('server', 'unknown')}). Commander status is {state} "
+            f"— {headline} ({len(warns)} warning(s)). "
+            + _factory_phrase(fs) + " "
+            f"Trading research status: {cand_n} research candidate(s) tracked. "
+            "No live or paper trades were executed — trading is observation-only "
+            f"({_LOCKED_POSTURE}), so there is no realized performance to report. "
+            + _attn_phrase(warns) + " "
+            f"Recommended next action: {_first_action(status)} "
+            "This is a read-only briefing and authorizes no action.")
+        return (answer, ["commander_snapshot", "system_core", "factory_status",
+                         "candidate_registry", "trading_detail", "daily_mission"])
 
     return None
 
