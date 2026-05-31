@@ -1,0 +1,88 @@
+{
+  "bundle": "JARVIS_OPERATOR_PHRASE_POLISH_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_OPERATOR_PHRASE_READY",
+  "goal": "Make front-loaded 'operator trading status' and 'operator workflow status' trigger operator/technical mode (exposing the four posture flags) instead of executive mode, while preserving the executive default for normal questions. Read-only; no execution; no broker/paper/live control; no fake trades/PnL/performance; no new routes/storage; classifier unchanged; forbidden commands still refuse.",
+  "problem": "Operator/technical mode was only reachable when the trigger appeared after the intent (e.g. 'trading status operator mode', 'workflow status operator mode', 'show technical details', 'diagnostics'). The bare front-loaded phrase 'operator trading status' / 'operator workflow status' returned executive wording because the _operator flag matched 'operator mode' but not the standalone word 'operator'.",
+  "files_changed": [
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_operator_phrase_polish_v1/report.md",
+    "docs/jarvis_operator_phrase_polish_v1/report.json"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "classifier_changed": false,
+  "template_changed": false,
+  "implementation": {
+    "file": "app.py",
+    "function_changed": "_jarvis_conversational_answer(q)",
+    "change": "Added one OR clause to the _operator detection: ('operator' in q and ('trading' in q or 'workflow' in q or 'pipeline' in q or 'status' in q)). This promotes front-loaded 'operator ...' phrasing to operator/technical mode. Normal executive questions never contain the word 'operator', so the executive default is preserved. No other lines touched.",
+    "operator_triggers_after_change": [
+      "operator mode",
+      "technical detail",
+      "show technical",
+      "show + detail",
+      "diagnostic",
+      "exact count",
+      "exact status",
+      "operator + (trading|workflow|pipeline|status)"
+    ],
+    "reads_only": ["api_jarvis_status aggregate (system_core, commander_snapshot, factory_status, candidate_registry, trading_detail)"]
+  },
+  "behavior_after": {
+    "operator_trading_status": "operator trading read: 'observation-only' + read_only=true, paper_ready=false, live_ready=false, broker_control=false; no invented performance",
+    "operator_workflow_status": "operator workflow read: 'Workflow health (read-only, operator detail)' + the four posture flags + commander warnings/counts",
+    "normal_trading_status": "still executive (no posture flags, no 'operator detail')",
+    "workflow_health_phrase": "still executive",
+    "forbidden_commands": "still FORBIDDEN and refused (classifier unchanged)"
+  },
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added_section": "JARVIS Operator Phrase Polish v1",
+  "tests_added": [
+    "test_op_operator_trading_status_exposes_posture (x2)",
+    "test_op_operator_workflow_status_exposes_technical (x2)",
+    "test_op_normal_questions_stay_executive (x3)",
+    "test_op_forbidden_command_still_refuses (x3)"
+  ],
+  "new_test_count": 10,
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_storage": true,
+    "classifier_unchanged": true,
+    "forbidden_first_unchanged": true,
+    "no_invented_pnl_or_performance": true,
+    "no_invented_trades": true,
+    "executive_default_preserved": true,
+    "operator_exposes_posture_on_request": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"],
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true
+  },
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "operator_phrase_new_tests": "10 passed",
+    "operator_executive_regression_subset": "108 passed (selector: operator or executive or _et_ or _tet_ or _wh_ or _op_)",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "operator_trading_status_exposes_posture": true,
+    "operator_workflow_status_exposes_technical": true,
+    "normal_questions_stay_executive": true,
+    "forbidden_still_refused": true,
+    "no_new_routes": true,
+    "no_storage": true,
+    "classifier_unchanged": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

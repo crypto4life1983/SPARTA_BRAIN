@@ -1814,3 +1814,86 @@ def test_wh_adds_no_routes_and_writes_nothing():
         c.post(_ASK_PATH, json={"question": q})
     assert _data_listing() == before, "workflow translation must not write files"
     assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+
+
+# ==========================================================================
+# JARVIS Operator Phrase Polish v1
+# Front-loaded "operator ..." phrasing ("operator trading status", "operator
+# workflow status") must trigger operator/technical mode, exposing the four
+# posture flags. Normal executive questions (no "operator" word) stay
+# executive. All read-only; forbidden commands still refuse.
+# ==========================================================================
+
+_OP_POSTURE_FLAGS = (
+    "read_only=true",
+    "paper_ready=false",
+    "live_ready=false",
+    "broker_control=false",
+)
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "operator trading status",
+    "operator trading update",
+])
+def test_op_operator_trading_status_exposes_posture(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "observation-only" in low
+    for flag in _OP_POSTURE_FLAGS:
+        assert flag in low, f"{q!r} operator answer must expose {flag}"
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"{q!r} must not invent {banned!r}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "operator workflow status",
+    "operator pipeline status",
+])
+def test_op_operator_workflow_status_exposes_technical(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "workflow health" in low
+    assert "operator detail" in low
+    for flag in _OP_POSTURE_FLAGS:
+        assert flag in low, f"{q!r} operator answer must expose {flag}"
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"{q!r} must not invent {banned!r}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is the trading status",
+    "trading update",
+    "what about our pipeline the workflow like is it working "
+    "there is no problem everything is good",
+])
+def test_op_normal_questions_stay_executive(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
+    low = body["answer"].lower()
+    assert "operator detail" not in low
+    for flag in _OP_POSTURE_FLAGS:
+        assert flag not in low, f"{q!r} executive answer must hide {flag}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "place a trade",
+    "operator trading status then place a trade",
+    "operator workflow status and buy NQ",
+])
+def test_op_forbidden_command_still_refuses(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must refuse"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body

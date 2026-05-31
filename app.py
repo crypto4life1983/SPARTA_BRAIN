@@ -9174,6 +9174,19 @@ def _jarvis_conversational_answer(q: str):
         or "diagnostic" in q
         or "exact count" in q
         or "exact status" in q
+        # Front-loaded "operator ..." (e.g. "operator trading status",
+        # "operator workflow status") also requests operator/technical wording.
+        # Normal executive questions never contain "operator", so the executive
+        # default is preserved.
+        or (
+            "operator" in q
+            and (
+                "trading" in q
+                or "workflow" in q
+                or "pipeline" in q
+                or "status" in q
+            )
+        )
     )
 
     def _exec_health_phrase(state: str) -> str:
