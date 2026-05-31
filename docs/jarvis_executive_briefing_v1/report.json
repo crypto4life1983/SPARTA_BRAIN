@@ -1,0 +1,102 @@
+{
+  "bundle": "JARVIS_EXECUTIVE_BRIEFING_MODE_V1",
+  "date": "2026-05-31",
+  "verdict": "JARVIS_EXECUTIVE_BRIEFING_READY",
+  "goal": "Transform JARVIS read-only /api/jarvis/ask from terse status responses into an executive assistant that gives a structured morning/overnight briefing (greeting, system health, Strategy Factory status, trading research status, warnings/attention, recommended next action) plus conversational follow-ups, while preserving every read-only and trading-safety rule.",
+  "files_changed": [
+    "jarvis_conversation_safety.py",
+    "app.py"
+  ],
+  "files_added": [
+    "docs/jarvis_executive_briefing_v1/report.md",
+    "docs/jarvis_executive_briefing_v1/report.json"
+  ],
+  "tests_changed": [
+    "tests/test_jarvis_ask_contract.py"
+  ],
+  "implementation": {
+    "classifier": {
+      "file": "jarvis_conversation_safety.py",
+      "change": "Added SAFE_INFO regex patterns for executive-briefing intents and follow-ups. Forbidden patterns still matched FIRST and unchanged.",
+      "new_safe_info_patterns": [
+        "overnight",
+        "executive summary",
+        "summarize/summarise the system",
+        "summarize/summarise ... system",
+        "tell me more",
+        "next step",
+        "what should we focus",
+        "what to focus",
+        "focus on today/now/next"
+      ]
+    },
+    "answer_layer": {
+      "file": "app.py",
+      "function_changed": "_jarvis_conversational_answer(q)",
+      "executive_briefing": "Replaced the prior one-line morning-briefing branch with a structured executive briefing: greeting (Good morning Mahmoud) -> system health (system_core + commander_snapshot) -> Strategy Factory status (factory_status report_count + latest decision, framed dry-run/research-only) -> trading research status (candidate_registry candidate_count + 'No live or paper trades were executed') -> warnings/attention (commander_snapshot.warnings) -> recommended next action (recommended_next_actions[0]).",
+      "briefing_triggers": ["good morning", "morning briefing", "briefing", "brief me", "brief", "overnight", "executive summary", "summarize/summarise + system", "tell me more"],
+      "followups_added": ["what needs attention / attention (lists warnings + next action)", "what is the next step / focus on / what should we focus / what to focus (recommended focus)"],
+      "explain_warning": "SAFE_EXPLAIN branch now answers 'explain the warning' with a read-only explanation listing the actual open commander warnings.",
+      "reads_only": ["api_jarvis_status aggregate (commander_snapshot, system_core, factory_status, candidate_registry, trading_detail, recommended_next_actions)"]
+    },
+    "template_change": false,
+    "template_note": "Voice + conversation mode already post to /api/jarvis/ask, so they inherit the improved briefing with no template edit."
+  },
+  "read_only_guarantees": {
+    "no_new_endpoint": true,
+    "endpoints_under_api_jarvis": ["/api/jarvis/ask", "/api/jarvis/status"],
+    "no_refresh_route": true,
+    "no_snapshot_route": true,
+    "no_command_execution": true,
+    "no_broker_paper_live_control": true,
+    "no_order_placement": true,
+    "no_mutation": true,
+    "no_chat_audio_transcript_storage": true,
+    "no_strategy_factory_worktree_mutation": true,
+    "no_trading_file_mutation": true,
+    "no_invented_pnl_or_performance": true,
+    "no_invented_trades": true,
+    "missing_data_says_unknown": true,
+    "classifier_still_gates_every_question": true,
+    "forbidden_first_unchanged": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": ["paper_ready", "live_ready", "broker_control"]
+  },
+  "tests_added_file": "tests/test_jarvis_ask_contract.py",
+  "tests_added_section": "JARVIS Executive Briefing Mode v1",
+  "tests_added": [
+    "test_eb_briefing_is_executive_structure (x10)",
+    "test_eb_greeting_good_morning_becomes_briefing",
+    "test_eb_overnight_update_is_readonly_no_fake_trades (x2)",
+    "test_eb_briefing_keeps_trading_flags_locked",
+    "test_eb_attention_lists_warnings_readonly (x3)",
+    "test_eb_followups_recommend_next_action (x3)",
+    "test_eb_explain_warning_is_readonly_explanation",
+    "test_eb_forbidden_intent_in_briefing_still_refused (x9)",
+    "test_eb_no_new_routes_or_execution_added",
+    "test_eb_briefing_writes_no_files_or_chat_logs",
+    "test_eb_briefing_does_not_change_status_shape"
+  ],
+  "new_test_count": 33,
+  "test_results": {
+    "interpreter": ".venv/Scripts/python.exe",
+    "invocation_note": "Run from tests/ with PYTHONPATH=.. and --noconftest to avoid a pre-existing corrupt repo-root directory ('hydra ' = private-use char + trailing space) that breaks pytest root enumeration; unrelated to this change.",
+    "jarvis_route_and_safety": "301 passed",
+    "jarvis_factory_ask_snapshot": "201 passed",
+    "factory_ask_snapshot_prev": "168 passed (before this bundle)",
+    "failures": 0
+  },
+  "validation": {
+    "json_ok": true,
+    "briefing_is_executive_structure": true,
+    "good_morning_becomes_briefing": true,
+    "overnight_update_readonly_no_fake_trades": true,
+    "no_invented_performance": true,
+    "forbidden_in_briefing_still_refused": true,
+    "no_new_routes": true,
+    "status_shape_unchanged_28_keys": true,
+    "trading_flags_locked_false": true
+  },
+  "committed": false,
+  "commit_note": "Awaiting approval per bundle commit policy."
+}

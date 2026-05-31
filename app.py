@@ -9016,29 +9016,71 @@ def _jarvis_conversational_answer(q: str):
     _LOCKED_POSTURE = (
         "read_only=true, paper_ready=false, live_ready=false, broker_control=false")
 
-    # --- morning briefing -------------------------------------------------
-    if "brief" in q:
-        status = _agg()
-        state, headline, warns = _snapshot_line(status)
-        fs = _sub(status, "factory_status")
+    def _first_action(status: dict) -> str:
         actions = status.get("recommended_next_actions")
-        first_action = (actions[0] if isinstance(actions, list) and actions
-                        else "Review the read-only status panels.")
-        attn = (f"{len(warns)} item(s) need attention: " + "; ".join(warns[:3])
-                if warns else "Nothing is currently flagged for attention.")
-        factory_bit = (
-            f"Strategy Factory: {fs.get('report_count', 0)} committed research "
-            "reports (dry-run / research-candidate only; JARVIS runs no Factory "
-            "job)." if fs.get("state") == "ready"
-            else "Strategy Factory: status not available right now.")
+        if isinstance(actions, list) and actions and isinstance(actions[0], str):
+            return actions[0]
+        return ("Continue read-only validation of the existing research queue "
+                "before adding new strategy ideas.")
+
+    def _attn_phrase(warns: list) -> str:
+        if warns:
+            return (f"{len(warns)} warning(s) need review: "
+                    + "; ".join(str(w) for w in warns[:3]) + ".")
+        return "No warnings currently need review."
+
+    def _factory_phrase(fs: dict) -> str:
+        if fs.get("state") == "ready":
+            decs = (fs.get("latest_decisions")
+                    if isinstance(fs.get("latest_decisions"), list) else [])
+            top = next((d for d in decs if isinstance(d, dict)), None)
+            latest = (f" The most recent is {top.get('name', '?')} -> "
+                      f"{top.get('decision', 'UNKNOWN')}." if top else "")
+            return ("Strategy Factory remains in research mode: "
+                    f"{fs.get('report_count', 0)} committed research reports on "
+                    "disk." + latest + " All work is dry-run / research-candidate "
+                    "only and JARVIS runs no Factory job.")
+        return "Strategy Factory status is not available right now (read-only)."
+
+    # --- Executive Briefing Mode v1 — good morning / overnight / exec summary --
+    # Greeting "good morning", briefing requests, an overnight update, an
+    # executive summary, and "tell me more" all produce the structured
+    # read-only briefing: greeting -> system health -> Strategy Factory ->
+    # trading research -> warnings -> recommended next action.
+    _is_briefing = (
+        "good morning" in q
+        or "morning briefing" in q
+        or "briefing" in q
+        or "brief me" in q
+        or "brief" in q
+        or "overnight" in q
+        or "executive summary" in q
+        or ("summar" in q and "system" in q)
+        or "tell me more" in q
+    )
+    if _is_briefing:
+        status = _agg()
+        sc = _sub(status, "system_core")
+        cr = _sub(status, "candidate_registry")
+        fs = _sub(status, "factory_status")
+        state, headline, warns = _snapshot_line(status)
+        cand_n = (cr.get("candidate_count")
+                  if isinstance(cr.get("candidate_count"), int)
+                  else len(cr.get("candidates") or []))
         answer = (
-            f"Good morning. Here is your read-only briefing. Commander status is "
-            f"{state} — {headline} Trading is observation-only ({_LOCKED_POSTURE}); "
-            "no live or paper trades have run, so there is no realized performance "
-            f"to report. {factory_bit} {attn} Safest next step: {first_action} "
-            "This is a read-only summary and authorizes no action.")
-        return (answer, ["commander_snapshot", "trading_detail", "factory_status",
-                         "daily_mission"])
+            "Good morning Mahmoud. Here is your executive briefing. "
+            f"SPARTA Brain is online (system core {sc.get('state', 'unknown')}, "
+            f"server {sc.get('server', 'unknown')}). Commander status is {state} "
+            f"— {headline} ({len(warns)} warning(s)). "
+            + _factory_phrase(fs) + " "
+            f"Trading research status: {cand_n} research candidate(s) tracked. "
+            "No live or paper trades were executed — trading is observation-only "
+            f"({_LOCKED_POSTURE}), so there is no realized performance to report. "
+            + _attn_phrase(warns) + " "
+            f"Recommended next action: {_first_action(status)} "
+            "This is a read-only briefing and authorizes no action.")
+        return (answer, ["commander_snapshot", "system_core", "factory_status",
+                         "candidate_registry", "trading_detail", "daily_mission"])
 
     # --- Strategy Factory status -----------------------------------------
     if "factory" in q:
@@ -9105,6 +9147,35 @@ def _jarvis_conversational_answer(q: str):
             "authorizes nothing.",
             ["trading_detail"])
 
+    # --- warnings / what-needs-attention ----------------------------------
+    if "needs attention" in q or "what needs" in q or "attention" in q:
+        status = _agg()
+        state, headline, warns = _snapshot_line(status)
+        if warns:
+            items = "; ".join(str(w) for w in warns[:5])
+            body = (f"{len(warns)} item(s) currently need review: {items}.")
+        else:
+            body = "Nothing is currently flagged for attention."
+        return (
+            f"Attention items (read-only). Commander status is {state} — "
+            f"{headline} {body} Recommended next action: {_first_action(status)} "
+            "This reports observed state only and authorizes no action.",
+            ["commander_snapshot", "trading_detail"])
+
+    # --- conversational follow-ups: next step / what to focus on ----------
+    if ("next step" in q or "focus on" in q or "what should we focus" in q
+            or "what to focus" in q):
+        status = _agg()
+        state, _headline, warns = _snapshot_line(status)
+        attn = (f"{len(warns)} warning(s) are open" if warns
+                else "no warnings are open")
+        return (
+            f"Recommended focus (read-only): {_first_action(status)} "
+            f"Right now commander status is {state} and {attn}. Trading stays "
+            f"observation-only ({_LOCKED_POSTURE}); this is guidance only and "
+            "authorizes no action.",
+            ["commander_snapshot", "trading_detail"])
+
     # --- "how are you" ----------------------------------------------------
     if (_re.search(r"\bhow\s+are\s+you\b", q) or _re.search(r"\bhow\s+are\s+u\b", q)
             or "how's it going" in q or "hows it going" in q
@@ -9156,6 +9227,23 @@ def _jarvis_ask_answer(safety_class: str, q: str):
     JARVIS concepts plus the read-only trading-posture status scan and
     NEVER authorizes any action."""
     if safety_class == "SAFE_EXPLAIN":
+        if "warning" in q:
+            agg = _jarvis_safe(api_jarvis_status)
+            cs = agg.get("commander_snapshot") if isinstance(agg, dict) else {}
+            cs = cs if isinstance(cs, dict) else {}
+            warns = cs.get("warnings") if isinstance(cs.get("warnings"), list) else []
+            if warns:
+                items = "; ".join(str(w) for w in warns[:5])
+                detail = (f"There are {len(warns)} open warning(s): {items}.")
+            else:
+                detail = "There are no open warnings right now."
+            return (
+                "A commander warning is a read-only caution flag (for example a "
+                "dirty or untracked git tree, an unconfirmed report, or a stale "
+                f"cache) — it signals attention is needed, not approval. {detail} "
+                "Reviewing them authorizes no action.",
+                ["commander_snapshot"],
+            )
         if "read_only" in q or "read only" in q:
             return (
                 "read_only means JARVIS is observe-only: it mirrors aggregated "

@@ -954,3 +954,200 @@ def test_ci_voice_conversation_mode_uses_same_ask_endpoint():
     assert bad["refused"] is True and bad["safety_class"].startswith("FORBIDDEN")
     html = (_REPO_ROOT / "templates" / "jarvis.html").read_text(encoding="utf-8")
     assert "/api/jarvis/ask" in html
+
+
+# ==========================================================================
+# JARVIS Executive Briefing Mode v1 — read-only morning/overnight briefings.
+# "good morning" / "morning briefing" / "overnight update" / "executive
+# summary" / "summarize the system" / "tell me more" must answer as a
+# structured read-only executive briefing (greeting -> system health ->
+# Strategy Factory -> trading research -> warnings -> recommended next action)
+# WITHOUT inventing any trade activity or performance, and WITHOUT loosening
+# any refusal, route, or storage guard. Follow-ups ("what needs attention",
+# "what is the next step", "what should we focus on today", "explain the
+# warning") answer read-only too. Forbidden phrasing always still refuses.
+# ==========================================================================
+
+_EB_BRIEFING_QUESTIONS = [
+    "good morning",
+    "good morning jarvis",
+    "give me a morning briefing",
+    "morning briefing please",
+    "daily briefing",
+    "what happened overnight",
+    "overnight update",
+    "executive summary",
+    "summarize the system",
+    "tell me more",
+]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", _EB_BRIEFING_QUESTIONS)
+def test_eb_briefing_is_executive_structure(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    # The full executive spine, not a one-line status flag.
+    assert "good morning mahmoud" in low
+    assert "briefing" in low
+    assert "sparta brain is online" in low
+    assert "strategy factory" in low
+    assert "research" in low
+    assert "no live or paper trades were executed" in low
+    assert "observation-only" in low
+    assert "read_only=true" in low
+    assert "recommended next action" in low
+    # No invented performance / activity.
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"{q!r} briefing must not invent {banned!r}"
+    assert "commander_snapshot" in body["sources_used"]
+    assert "factory_status" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_eb_greeting_good_morning_becomes_briefing():
+    # "good morning" is upgraded from a robotic status line into a full briefing.
+    body = _client().post(_ASK_PATH, json={"question": "good morning"}).json()
+    assert body["refused"] is False and body["safety_class"] == "SAFE_INFO"
+    assert "executive briefing" in body["answer"].lower()
+    assert len(body["answer"]) > 200
+
+
+@requires_ask
+@pytest.mark.parametrize("q", ["what happened overnight", "overnight update"])
+def test_eb_overnight_update_is_readonly_no_fake_trades(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False and body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "no live or paper trades were executed" in low
+    assert "observation-only" in low
+    assert "paper_ready=false" in low and "live_ready=false" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low, f"overnight update must not invent {banned!r}"
+
+
+@requires_ask
+def test_eb_briefing_keeps_trading_flags_locked():
+    c = _client()
+    c.post(_ASK_PATH, json={"question": "good morning"})
+    td = c.get("/api/jarvis/status").json().get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False, f"briefing must not arm {flag}"
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what needs attention",
+    "what needs attention now",
+    "anything that needs attention?",
+])
+def test_eb_attention_lists_warnings_readonly(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "attention" in low
+    assert "recommended next action" in low
+    assert "authorizes no action" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+    assert "commander_snapshot" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "what is the next step",
+    "what should we focus on today",
+    "what to focus on next",
+])
+def test_eb_followups_recommend_next_action(q):
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must answer read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    low = body["answer"].lower()
+    assert "recommended focus" in low
+    assert "observation-only" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+
+
+@requires_ask
+def test_eb_explain_warning_is_readonly_explanation():
+    body = _client().post(_ASK_PATH, json={"question": "explain the warning"}).json()
+    assert body["refused"] is False
+    assert body["safety_class"] == "SAFE_EXPLAIN"
+    low = body["answer"].lower()
+    assert "warning" in low
+    assert "authorizes no action" in low
+    for banned in _CI_BANNED_PERF:
+        assert banned not in low
+    assert "commander_snapshot" in body["sources_used"]
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
+    "good morning then buy NQ",
+    "morning briefing then place a trade",
+    "what happened overnight then enable live trading",
+    "executive summary then run the smoke script",
+    "summarize the system and commit the changes",
+    "what is the next step, then approve the strategy",
+    "what should we focus on today and connect to my broker",
+    "tell me more then refresh status",
+    "what needs attention then go long",
+])
+def test_eb_forbidden_intent_in_briefing_still_refused(q):
+    # Executive-briefing phrasing must never smuggle a forbidden action past the
+    # classifier; forbidden is matched FIRST, so these stay refused.
+    body = _client().post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is True, f"{q!r} must stay refused"
+    assert body["safety_class"].startswith("FORBIDDEN")
+    assert body.get("refusal_reason")
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+def test_eb_no_new_routes_or_execution_added():
+    src = (_REPO_ROOT / "app.py").read_text(encoding="utf-8")
+    assert "/api/jarvis/refresh" not in src
+    assert "/api/jarvis/snapshot" not in src
+    c = _client()
+    paths = sorted({getattr(r, "path", "") for r in c.app.routes
+                    if getattr(r, "path", "").startswith("/api/jarvis/")})
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+
+
+@requires_ask
+def test_eb_briefing_writes_no_files_or_chat_logs():
+    before = _data_listing()
+    top_before = {p.name for p in _REPO_ROOT.iterdir()}
+    c = _client()
+    for q in ("good morning", "what happened overnight", "executive summary",
+              "what needs attention", "what is the next step",
+              "explain the warning"):
+        c.post(_ASK_PATH, json={"question": q})
+    assert _data_listing() == before, "briefing must not write data/chat logs"
+    assert {p.name for p in _REPO_ROOT.iterdir()} == top_before
+    for name in _data_listing() - before:
+        assert "chat" not in name.lower() and "log" not in name.lower()
+
+
+@requires_ask
+def test_eb_briefing_does_not_change_status_shape():
+    c = _client()
+    before = c.get("/api/jarvis/status").json()
+    for q in ("good morning", "executive summary", "what needs attention",
+              "what is the next step"):
+        c.post(_ASK_PATH, json={"question": q})
+    after = c.get("/api/jarvis/status").json()
+    assert set(before) == set(after)
+    assert len(after) == 28
+    assert after["read_only"] is True
+    td = after.get("trading_detail", {})
+    for flag in ("paper_ready", "live_ready", "broker_control"):
+        assert td.get(flag) is False

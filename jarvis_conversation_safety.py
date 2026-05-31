@@ -206,6 +206,20 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\blast\s+day\b",
     r"\bour\s+trades?\b",
     r"\bmy\s+trades?\b",
+    # JARVIS Executive Briefing Mode v1 — read-only overnight/executive
+    # briefing intents and conversational follow-ups. All answerable from the
+    # existing status aggregate / committed report summaries. Forbidden
+    # patterns are still matched FIRST, so "what happened overnight then buy
+    # NQ" or "executive summary then run the script" stay refused.
+    r"\bovernight\b",
+    r"\bexecutive\s+summary\b",
+    r"\bsummar(?:ize|ise)\s+the\s+system\b",
+    r"\bsummar(?:ize|ise)\b.*\bsystem\b",
+    r"\btell\s+me\s+more\b",
+    r"\bnext\s+step\b",
+    r"\bwhat\s+should\s+we\s+focus\b",
+    r"\bwhat\s+to\s+focus\b",
+    r"\bfocus\s+on\s+(?:today|now|next)\b",
 ))
 
 _SAFE_GROUPS = (
