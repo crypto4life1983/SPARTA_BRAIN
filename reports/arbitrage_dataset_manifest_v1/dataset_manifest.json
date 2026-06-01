@@ -1,0 +1,383 @@
+{
+  "dataset_manifest_id": "arbitrage_dataset_manifest_v1",
+  "title": "SPARTA Arbitrage Dataset Manifest v1",
+  "version": "1.0",
+  "kind": "dataset_manifest_spec",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "companion_documents": {
+    "arbitrage_research_protocol_v1": "reports/arbitrage_research_protocol_v1/protocol.json",
+    "arbitrage_data_contract_v1": "reports/arbitrage_data_contract_v1/data_contract.json"
+  },
+
+  "research_objective": "Define exactly how any FUTURE arbitrage dataset must be declared, frozen, validated, versioned, and audited BEFORE any research test is allowed to use it. This document does not fetch data, does not connect to any exchange, does not run a backtest, and does not authorize trading. It is the written input spec that any future, separately-authorized data-acquisition bundle MUST produce a manifest under.",
+
+  "supported_arbitrage_categories": [
+    {
+      "id": "cross_exchange_spot",
+      "label": "A. Cross-exchange spot arbitrage",
+      "category_specific_manifest_requirements": [
+        "venue_pair_synchronization: documented per-venue clock skew + shared UTC alignment timestamp.",
+        "quote_depth: L1 mandatory; L2 (>=5 levels) required for any depth-at-size test.",
+        "transfer_or_withdrawal_assumption_references: explicit cite to the withdrawal-latency assumption row in the data contract; per-asset and per-network.",
+        "fee_schedule_references: explicit cite to fee tier per venue, dated."
+      ]
+    },
+    {
+      "id": "spot_perp_basis_funding",
+      "label": "B. Spot-perp basis / funding arbitrage",
+      "category_specific_manifest_requirements": [
+        "funding_timestamps: per-row settlement timestamp aligned to the venue's exact UTC cutoff.",
+        "funding_rates: rate value, settlement period, predicted vs. realized when distinguishable.",
+        "perp_contract_specs: mark/index composition, tick size, lot size, contract multiplier.",
+        "liquidation_risk_notes: maintenance margin, liquidation-engine model, partial-vs-full liquidation behaviour."
+      ]
+    },
+    {
+      "id": "triangular",
+      "label": "C. Triangular arbitrage",
+      "category_specific_manifest_requirements": [
+        "three_leg_pair_mapping: explicit ordered list (leg_1, leg_2, leg_3) with venue + symbol.",
+        "precision_or_rounding_rules: tick size and lot size per pair.",
+        "leg_order_assumptions: documented send order + assumed time-to-fill per leg.",
+        "depth_per_leg: L1 (preferably L2) at the test size for each of the three legs."
+      ]
+    },
+    {
+      "id": "futures_calendar",
+      "label": "D. Futures calendar / basis arbitrage",
+      "category_specific_manifest_requirements": [
+        "contract_expiries: per-contract last trading day + settlement date.",
+        "multipliers: contract multiplier per contract.",
+        "roll_calendar: which days the operator's protocol would have rolled (open-interest / volume / calendar method).",
+        "margin_and_carry_assumptions: initial + maintenance margin per contract per venue; cost-of-carry / funding assumption used to compute fair basis."
+      ]
+    },
+    {
+      "id": "statistical_relative_value",
+      "label": "E. Statistical / relative-value mispricing (NOT pure arbitrage)",
+      "category_specific_manifest_requirements": [
+        "aligned_price_history: both legs aligned to the same bar timestamp.",
+        "spread_definition: log-ratio, beta-adjusted spread, distance-from-rolling-mean, etc.",
+        "zscore_or_correlation_prerequisites: cointegration / stationarity diagnostics over the IS window only.",
+        "explicit_not_pure_arbitrage_label: every downstream artifact must label this category as RELATIVE_VALUE, not ARBITRAGE."
+      ]
+    }
+  ],
+
+  "manifest_schema": {
+    "description": "The schema that every FUTURE per-dataset manifest file must satisfy. The dataset manifest itself is a separate JSON file produced by a future data-acquisition bundle and lives alongside the dataset on disk. Validating it against this schema is mandatory before research can use the dataset.",
+    "required_future_manifest_fields": [
+      "dataset_id",
+      "dataset_version",
+      "created_at",
+      "created_by",
+      "research_lane",
+      "arbitrage_category",
+      "venues",
+      "symbols",
+      "instruments",
+      "time_start",
+      "time_end",
+      "timezone",
+      "data_frequency",
+      "quote_type",
+      "order_book_depth",
+      "fee_schedule_reference",
+      "funding_schedule_reference",
+      "source_type",
+      "source_location",
+      "checksum_policy",
+      "row_count_expected",
+      "row_count_actual",
+      "missing_data_policy",
+      "duplicate_policy",
+      "stale_quote_policy",
+      "clock_skew_policy",
+      "normalization_policy",
+      "freeze_status",
+      "qa_status",
+      "allowed_use",
+      "forbidden_use",
+      "notes"
+    ],
+    "field_descriptions": {
+      "dataset_id": "Immutable canonical identifier. Stable across re-imports. Never reused for a different dataset.",
+      "dataset_version": "Monotonically increasing integer. Any change to raw rows, normalization, or schema -> a NEW version. Manifests are append-only across versions; an older version is never silently overwritten.",
+      "created_at": "ISO-8601 UTC timestamp when the manifest was authored.",
+      "created_by": "Identity of the human or tool that authored the manifest. Required; anonymous manifests are invalid.",
+      "research_lane": "One of the lanes registered in SPARTA's Strategy Candidate Registry.",
+      "arbitrage_category": "One of the five supported_arbitrage_categories ids.",
+      "venues": "List of named venues used in this dataset. Each entry MUST reference a venue record from the data contract.",
+      "symbols": "List of per-venue symbols PLUS the SPARTA canonical name. Aliases must be versioned.",
+      "instruments": "Per-symbol metadata: instrument_class, quote_currency, tick_size, lot_size_or_min_notional, contract_multiplier (futures/perps), delivery_or_cash_settled (futures).",
+      "time_start": "UTC start of the dataset window.",
+      "time_end": "UTC end of the dataset window. time_end must be >= time_start.",
+      "timezone": "Always UTC for storage. If a source was in a local timezone, the conversion is documented + the original timezone preserved as metadata.",
+      "data_frequency": "tick / sub_second / 1s / 1m / 1h / 1d / event_driven.",
+      "quote_type": "trades_only / quotes_only / book_l1 / book_l2 / mixed.",
+      "order_book_depth": "Integer levels per side (0 if quotes_only / trades_only).",
+      "fee_schedule_reference": "Path or id into the data-contract fee schedule snapshot in force for this dataset.",
+      "funding_schedule_reference": "For spot_perp_basis_funding lanes only; path or id into the funding schedule snapshot.",
+      "source_type": "frozen_local_file / vendor_export_offline / replay_of_existing_research_set / synthetic_diagnostic_only_NOT_FOR_BACKTEST.",
+      "source_location": "Absolute or repo-relative path to the on-disk frozen data. Manifests pointing to a network URL are INVALID.",
+      "checksum_policy": "Algorithm + per-file checksums (e.g., sha256). Required for FROZEN datasets.",
+      "row_count_expected": "Pre-computed expected row count for the declared window and frequency.",
+      "row_count_actual": "Actual row count produced. Must equal expected unless an explicit gap is documented.",
+      "missing_data_policy": "Documented behavior: never silently forward-filled; gaps preserved with explicit gap flags.",
+      "duplicate_policy": "Removed on (instrument_id, primary_ts, sequence_no_if_present); duplicates without sequence number are INVALID.",
+      "stale_quote_policy": "Quotes older than max_skew_allowed at decision time are excluded; default max_skew_allowed = 250 ms.",
+      "clock_skew_policy": "Per-venue exchange-vs-local skew distribution stored; default max_skew_allowed = 250 ms.",
+      "normalization_policy": "Documented currency conversion, symbol canonicalization, tick/lot rounding, continuous-contract stitching, split/dividend adjustment.",
+      "freeze_status": "DRAFT / FROZEN / RETIRED / BLOCKED. Only FROZEN datasets may be used for any research test.",
+      "qa_status": "DRAFT / QA_PASS / QA_WARN / QA_FAIL / RETIRED / BLOCKED. Only QA_PASS (or explicitly accepted QA_WARN) datasets may be used for any research test.",
+      "allowed_use": "List of allowed lanes / phases. At minimum: research_only.",
+      "forbidden_use": "Always includes: live_trading, paper_order_execution, broker_control, exchange_connection. May be extended.",
+      "notes": "Free-text. Empty allowed."
+    }
+  },
+
+  "dataset_identity_fields": {
+    "immutable_dataset_id": "Canonical, stable, never reused.",
+    "version_rules": "Monotonically increasing integer per dataset_id. Bump version on any change to raw rows, normalization, or schema.",
+    "source_provenance": "Every dataset row carries a source identifier + contract version + dataset_version; never anonymous.",
+    "checksums_or_hashes": "sha256 per file (or per shard); manifest stores per-file checksums for FROZEN status.",
+    "row_counts": "expected vs. actual; mismatch without an explicit gap row is invalid.",
+    "created_at_timestamp": "ISO-8601 UTC.",
+    "freeze_timestamp": "ISO-8601 UTC; required when freeze_status transitions to FROZEN.",
+    "manifest_author": "Human or tool identity that produced the manifest.",
+    "what_makes_a_dataset_invalid": [
+      "Manifest is missing or fails dataset_manifest_check.",
+      "Any required future manifest field is absent.",
+      "source_location is a network URL.",
+      "Row count mismatch without a documented gap.",
+      "Any safety flag in the manifest is True.",
+      "freeze_status is DRAFT but the dataset is referenced in a research run.",
+      "qa_status is QA_FAIL or BLOCKED."
+    ],
+    "what_makes_a_dataset_frozen": [
+      "freeze_status == FROZEN.",
+      "freeze_timestamp present and not in the future.",
+      "All per-file checksums stored and verifiable.",
+      "row_count_expected == row_count_actual (or a documented gap explains the difference).",
+      "Manifest validates against this spec without warnings."
+    ],
+    "what_makes_a_dataset_untrusted": [
+      "Manually edited rows without explicit documentation + re-validation.",
+      "Source provenance missing or partially attributable.",
+      "Checksums missing or invalid.",
+      "OOS window was peeked before sealing.",
+      "Manifest validates only with WARN-level issues that have not been triaged."
+    ]
+  },
+
+  "data_freeze_rules": [
+    "No research test may use mutable or unfrozen data. freeze_status MUST be FROZEN before any test reads the rows.",
+    "Every dataset MUST have a manifest. Datasets without manifests are invalid by definition.",
+    "Every manifest MUST pass validation (this spec) before the dataset is used.",
+    "Every dataset MUST carry a qa_status. Only QA_PASS or explicitly-accepted QA_WARN datasets may be used.",
+    "Every dataset MUST be tied to a specific Arbitrage Data Contract version. The dataset and its contract version are paired forever.",
+    "Every future research test MUST cite dataset_id AND dataset_version in its run record.",
+    "Any change to raw rows, normalization, or schema produces a NEW dataset version. Old versions are never silently overwritten.",
+    "Manually edited data is INVALID unless explicitly documented + re-validated under a new dataset_version."
+  ],
+
+  "qa_status_model": {
+    "DRAFT": "Dataset is being assembled. Not usable for any research test. freeze_status is also DRAFT.",
+    "FROZEN": "Dataset is frozen at the file level (checksums fixed). QA may not have run yet. Cannot be used for tests until qa_status is QA_PASS.",
+    "QA_PASS": "QA harness reports zero unresolved flags; row counts match; provenance intact; contract version pinned. Dataset is research-usable.",
+    "QA_WARN": "QA harness reports at least one non-blocking warning (e.g., borderline coverage / liquidity / latency). Usable only after an explicit operator acceptance memo per dataset_version.",
+    "QA_FAIL": "QA harness reports at least one blocking failure (missing required field, broken checksum, peeked OOS, etc.). Dataset is NOT research-usable.",
+    "RETIRED": "Dataset is no longer used. Kept for historical traceability; cannot be re-promoted to QA_PASS.",
+    "BLOCKED": "Externally blocked (e.g., legal / TOS / vendor restriction). Cannot be used; explicit unblock action required."
+  },
+
+  "venue_fields": {
+    "venue_id_canonical": "Stable SPARTA-side identifier.",
+    "venue_id_per_source": "Source-side identifier(s) (vendor-named).",
+    "jurisdiction": "Regulatory jurisdiction (no live connection from here).",
+    "fee_schedule_reference": "Pointer to the data contract's fee schedule snapshot.",
+    "withdrawal_latency_assumption": "Pointer to the data contract's slow-day latency assumption.",
+    "counterparty_haircut": "Pointer to the haircut row in the data contract."
+  },
+
+  "instrument_fields": {
+    "instrument_class": "spot / perp / futures_dated / option_calendar / etf / other.",
+    "quote_currency": "USDT / USDC / USD / etc.",
+    "tick_size": "Required.",
+    "lot_size_or_min_notional": "Required.",
+    "contract_multiplier": "Required for futures/perps.",
+    "delivery_or_cash_settled": "Required for futures."
+  },
+
+  "time_range_fields": {
+    "time_start_utc": "ISO-8601.",
+    "time_end_utc": "ISO-8601. >= time_start.",
+    "is_window_disclosed_before_run": "Must be True before any research test cites the dataset.",
+    "oos_window_sealed_before_run": "Must be True before any OOS test cites the dataset."
+  },
+
+  "timestamp_fields": {
+    "primary_clock": "UTC, monotonic, ISO-8601 in storage.",
+    "accepted_timestamp_fields_per_row": [
+      "exchange_send_ts (preferred when available)",
+      "exchange_recv_ts",
+      "venue_match_ts (trade prints)",
+      "local_recv_ts (always recorded; never the sole timestamp)"
+    ],
+    "max_skew_allowed_default_ms": 250,
+    "stale_quote_rule": "A quote is stale if its exchange timestamp is older than max_skew_allowed + venue_publish_interval.",
+    "row_invalidity_criteria": [
+      "missing primary timestamp",
+      "exchange timestamp older than publish_interval + max_skew_allowed",
+      "exchange timestamp ahead of UTC wall clock",
+      "duplicate primary timestamp without sequence_no",
+      "row spans an outage without an outage flag"
+    ]
+  },
+
+  "quote_fields": ["best_bid", "best_ask", "bid_size", "ask_size", "mid", "microprice_if_available"],
+  "order_book_fields": ["level_index", "price", "size", "side"],
+  "trade_print_fields": ["price", "size", "side_if_signed", "venue_match_ts", "block_or_otc_flag"],
+
+  "fee_fields": {
+    "maker_fee_bps": "Required per venue per instrument-class.",
+    "taker_fee_bps": "Required; default sizing assumption.",
+    "fee_tier_assumption": "Lowest realistic tier (not best-case).",
+    "withdrawal_fees": "Per asset per network.",
+    "deposit_fees": "Per asset per network.",
+    "network_fees": "Crypto on-chain gas distribution.",
+    "fee_as_pnl_line": "Every future backtest must carry fees as a distinct PnL line, never netted silently."
+  },
+
+  "funding_fields": {
+    "applies_to_categories": ["spot_perp_basis_funding"],
+    "funding_rate": "Required.",
+    "funding_interval_seconds": "Required.",
+    "settlement_ts": "Required (per-row).",
+    "predicted_vs_realized_if_distinguishable": "Optional but preferred.",
+    "history_horizon": "At least one full funding cycle warmup before any test bar."
+  },
+
+  "liquidity_fields": {
+    "minimum_notional_depth_at_touch": "Documented per category per venue per pair.",
+    "depth_at_size_calculation": "Cumulative size from best bid/ask up to the test size.",
+    "volume_filter_per_pair": "Per-category minimum 24h volume threshold.",
+    "stale_order_book_filter": "L2 snapshot older than max_skew_allowed at decision time is excluded.",
+    "outage_flag_column": "First-class boolean column.",
+    "suspicious_data_flags_column": "Documented categorical column."
+  },
+
+  "latency_fields": {
+    "publish_to_recv_latency_estimate_per_venue": "Required per venue.",
+    "decision_to_fill_latency": "Required for multi-leg MVTs.",
+    "leg_sequence_risk_window": "Slowest leg defines the window in cross-venue or triangular tests.",
+    "no_zero_latency_assumption": true
+  },
+
+  "provenance_fields": {
+    "source_id_per_row": "Required.",
+    "data_contract_version_pin": "Required per row OR per shard.",
+    "dataset_version_pin": "Required per row OR per shard.",
+    "ingest_pipeline_version": "Required.",
+    "manifest_path": "Path to this dataset's manifest file.",
+    "checksum_per_file": "sha256 (or stronger). Required for FROZEN."
+  },
+
+  "normalization_fields": {
+    "currency_conversion": "Documented; FX series cited if applied.",
+    "symbol_canonicalization": "Per-venue -> canonical mapping; versioned.",
+    "tick_lot_rounding": "Documented per instrument; never silently rounded.",
+    "continuous_contract_stitching": "Documented roll method.",
+    "split_or_dividend_adjustment": "For equities: raw + adjusted both stored."
+  },
+
+  "data_quality_fields": {
+    "duplicate_removal_rule": "(instrument_id, primary_ts, sequence_no_if_present); duplicates without sequence number are INVALID.",
+    "missing_value_rule": "Never silently forward-filled; gaps preserved with explicit flags.",
+    "out_of_order_rule": "Strictly monotonic by primary_ts; OOO flagged.",
+    "outlier_rule": "Identified by venue/asset-specific rules; FLAGGED not dropped.",
+    "reproducibility_rule": "Same raw inputs + same code + same contract version + same dataset_version => bit-for-bit identical processed dataset.",
+    "provenance_rule": "Every row carries a source identifier + contract version + dataset_version."
+  },
+
+  "freeze_fields": {
+    "freeze_status": "DRAFT / FROZEN / RETIRED / BLOCKED.",
+    "freeze_timestamp_utc": "Required when freeze_status == FROZEN.",
+    "checksum_per_file": "Required when freeze_status == FROZEN.",
+    "qa_status": "DRAFT / QA_PASS / QA_WARN / QA_FAIL / RETIRED / BLOCKED.",
+    "qa_report_path": "Pointer to the QA harness report for this dataset_version.",
+    "operator_acceptance_required_for": ["QA_WARN -> usable"]
+  },
+
+  "validation_fields": {
+    "validator_tool": "tools/arbitrage_dataset_manifest_check.py",
+    "validator_outputs": ["pass", "fail_with_reasons"],
+    "must_be_run_before_research_use": true,
+    "must_be_re_run_on_any_manifest_change": true
+  },
+
+  "allowed_file_formats": [
+    "parquet (preferred; columnar, schema-pinned)",
+    "csv (allowed; schema declared in manifest; type pinned)",
+    "json / jsonl (allowed for event streams; schema declared)",
+    "feather / arrow (allowed)",
+    "sqlite (allowed for small offline datasets)"
+  ],
+
+  "forbidden_inputs": [
+    "Live exchange APIs at dataset-build time (from this manifest's runtime).",
+    "Scraping any venue HTML / WebSocket / undocumented endpoint.",
+    "Any source requiring an embedded API key, OAuth token, or .env credential at this manifest's runtime.",
+    "Synthetic / mock-priced data presented as historical (the source_type 'synthetic_diagnostic_only_NOT_FOR_BACKTEST' is allowed for diagnostics only and never as a backtest dataset).",
+    "Datasets whose provenance cannot be cited line-by-line.",
+    "Datasets whose OOS window was peeked before sealing.",
+    "Datasets whose terms of service forbid research use.",
+    "source_location pointing to a network URL instead of an on-disk path."
+  ],
+
+  "required_future_artifacts": [
+    "Per-dataset 'manifest file' that satisfies manifest_schema.required_future_manifest_fields.",
+    "Per-dataset 'integrity report' (row counts, gap stats, outage overlap, contract version pinned, checksums verified).",
+    "Per-dataset 'QA harness report' (status: QA_PASS / QA_WARN / QA_FAIL).",
+    "Per-dataset 'freeze record' (freeze_timestamp + per-file checksums) when freeze_status transitions to FROZEN.",
+    "Per-dataset 'retirement memo' when freeze_status transitions to RETIRED."
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "All required top-level sections of this spec are present; manifest_schema's required_future_manifest_fields are listed; all 5 categories carry category-specific requirements; QA status model contains all 7 statuses; freeze rules documented; no safety flag is True; no forbidden phrase appears.",
+    "WATCH": "Spec is satisfied but at least one section is borderline (e.g., a liquidity or latency convention is loose); documented and re-checked before any reliance.",
+    "FAIL": "Any required section is missing; any safety flag is True; any QA status is missing; any required future manifest field is absent; any forbidden phrase appears."
+  },
+
+  "safety_boundaries": [
+    "Research-only. Dataset manifest / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this manifest's runtime.",
+    "No data fetch in this bundle. No backtest in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this manifest alone.",
+    "A price gap is not profit. QA_PASS does not imply profitability. Manifest approval does not imply edge."
+  ],
+
+  "no_profit_claim_policy": [
+    "Dataset manifest approval does not imply edge.",
+    "QA_PASS does not imply profitability.",
+    "A price gap is not profit.",
+    "A dataset cannot authorize trading.",
+    "A manifest cannot authorize live or paper-order execution.",
+    "No manifest, regardless of QA status, promotes any lane to ACTIVE or STRONG."
+  ]
+}

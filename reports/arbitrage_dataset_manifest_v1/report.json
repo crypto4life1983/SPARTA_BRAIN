@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "layer": "arbitrage_dataset_manifest_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/arbitrage_dataset_manifest_v1/dataset_manifest.json (machine-readable spec)",
+    "reports/arbitrage_dataset_manifest_v1/dataset_manifest.md (human-readable: 5 per-category requirements + 32-field manifest_schema + 7-status QA model + freeze rules + identity/provenance + all field specs + allowed formats + forbidden inputs + future artifacts + PASS/WATCH/FAIL + safety boundaries + no-profit-claim policy)",
+    "reports/arbitrage_dataset_manifest_v1/report.md (build report)",
+    "reports/arbitrage_dataset_manifest_v1/report.json (build report)",
+    "tools/arbitrage_dataset_manifest_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_arbitrage_dataset_manifest.py (19 tests covering schema + safety + integration)",
+    "tools/strategy_candidate_registry.py: extra_files extended with the new manifest docs for the arbitrage seed (lane stays IDEA)"
+  ],
+  "files_changed": [
+    "reports/arbitrage_dataset_manifest_v1/dataset_manifest.json",
+    "reports/arbitrage_dataset_manifest_v1/dataset_manifest.md",
+    "reports/arbitrage_dataset_manifest_v1/report.md",
+    "reports/arbitrage_dataset_manifest_v1/report.json",
+    "tools/arbitrage_dataset_manifest_check.py",
+    "tests/test_arbitrage_dataset_manifest.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "what_the_dataset_manifest_defines": [
+    "Manifest schema with 32 required future fields every per-dataset manifest must satisfy (dataset_id, dataset_version, created_at, created_by, research_lane, arbitrage_category, venues, symbols, instruments, time_start, time_end, timezone, data_frequency, quote_type, order_book_depth, fee_schedule_reference, funding_schedule_reference, source_type, source_location, checksum_policy, row_count_expected, row_count_actual, missing_data_policy, duplicate_policy, stale_quote_policy, clock_skew_policy, normalization_policy, freeze_status, qa_status, allowed_use, forbidden_use, notes)",
+    "Per-category manifest requirements for all 5 Arbitrage Research Protocol v1 categories",
+    "Dataset identity + provenance (immutable IDs, versioning rules, source provenance, sha256 checksums, expected/actual row counts, freeze timestamps)",
+    "Data freeze rules (no mutable/unfrozen data in research; every dataset has a manifest; every manifest must validate; every dataset has a qa_status; every dataset tied to a contract version; every test cites dataset_id + dataset_version; any change -> new dataset_version; manual edits invalid unless documented + re-validated)",
+    "QA status model with 7 statuses: DRAFT, FROZEN, QA_PASS, QA_WARN, QA_FAIL, RETIRED, BLOCKED, each with exact transition semantics",
+    "Field specs: venue / instrument / time-range / timestamp / quote / order-book / trade-print / fee / funding / liquidity / latency / provenance / normalization / data-quality / freeze / validation",
+    "Allowed file formats + forbidden inputs + required future artifacts + PASS/WATCH/FAIL rules + safety boundaries + no-profit-claim policy"
+  ],
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "execution_fetch_connection_backtest_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_enabled"
+    ],
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "NOT pure arbitrage",
+      "RELATIVE_VALUE",
+      "price gap is not profit",
+      "QA_PASS does not imply profitability"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_arbitrage_dataset_manifest.py tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "98 passed in 0.98s"
+    }
+  ],
+  "json_validity": {
+    "arbitrage_dataset_manifest_check_validate": "validate: OK",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_arbitrage_after_build": {
+    "status": "IDEA",
+    "evidence_level": "MIXED",
+    "source_reports": [
+      "data_contract.json", "data_contract.md",
+      "dataset_manifest.json", "dataset_manifest.md",
+      "protocol.json", "protocol.md"
+    ],
+    "guardrails_held": [
+      "lane is not promoted to ACTIVE just because additional docs exist",
+      "lane never reaches STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest/credentials reference"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Deterministic logic NOT artificially modified. The queue at HEAD does not yet include a QA Harness Spec or Data Source Evaluation Memo item; existing protocol/data-first scoring axes still rank arbitrage at the top. Operator should consult report.md `recommended_next_bundle` for the actual Bundle 7 choice."
+  },
+  "how_it_fits_after_arbitrage_data_contract_v1": [
+    "Arbitrage Research Protocol v1 (30dabc4) -> Arbitrage Data Contract v1 (c4d4c8b) -> Arbitrage Dataset Manifest v1 (this bundle).",
+    "Together these three documents define WHAT arbitrage is, WHAT data is needed to test it, and HOW each real dataset must be declared/frozen/QA'd. No data has been pulled and no backtest has been run.",
+    "Subsequent bundles (QA Harness Spec, Data Source Evaluation Memo, P2 data acquisition, P3 offline replay, ...) are each separately authorized."
+  ],
+  "recommended_next_bundle": [
+    "Arbitrage QA Harness Spec v1 (defines the harness that will verify any future per-dataset manifest + dataset pair; spec only, no harness run)",
+    "Arbitrage Data Source Evaluation Memo (written assessment of which offline data sources could later satisfy Categories A-E; memo only, no data pull)",
+    "Crypto-D1 Protocol Memo (alternative lane, currently PARKED; would require a new hypothesis, not a re-tune)"
+  ]
+}
