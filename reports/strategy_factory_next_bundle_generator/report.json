@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "layer": "strategy_factory_next_bundle_generator_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "tools/strategy_next_bundle.py (stdlib-only generator: generate / show / validate CLI)",
+    "tests/test_strategy_next_bundle.py (19 tests covering safety + behaviour)",
+    ".gitignore: added reports/strategy_factory_routines/next_bundle/",
+    "reports/strategy_factory_next_bundle_generator/ (trackable docs: report.md + report.json)"
+  ],
+  "files_changed": [
+    "tools/strategy_next_bundle.py",
+    "tests/test_strategy_next_bundle.py",
+    ".gitignore",
+    "reports/strategy_factory_next_bundle_generator/report.md",
+    "reports/strategy_factory_next_bundle_generator/report.json"
+  ],
+  "selection_algorithm": {
+    "filter": [
+      "drop if item.blocked == True",
+      "drop if safety_level not in {research_only, analysis_only, read_only}",
+      "drop if any danger-keyword substring (broker / live trading / paper order / place order / alpaca / ibkr / binance / exchange api / credential / api key / scheduler / cron) matches title/lane/reason/expected_output/next_bundle_suggestion/required_inputs"
+    ],
+    "score_axes": {
+      "priority_weight": "(10 - priority) * 10",
+      "weekly_deep_bundle_match": "+50 when lane matches weekly_review.lane_deserving_next_deep_bundle",
+      "active_lane_bonus": "+20 when lane appears in daily_state.active_lanes",
+      "wasting_time_penalty": "-30 when lane appears in weekly_review.lanes_wasting_time",
+      "reduces_copy_paste": "+25 on summary/registry/checklist/report/snapshot/scaffold/memo/template/automation/panel hint",
+      "improves_validation_quality": "+20 on validation/qa/audit/freeze/data-contract/prereg/decision-gate hint",
+      "closer_to_real_edge": "+15 on evidence/edge/OOS/live-grade/k9 hint",
+      "protocol_first_pref": "+30 on protocol/spec/prereg/specification/memo/data-contract hint",
+      "data_first_pref": "+30 on data-QA/data-freeze/data-contract/data-hygiene/data-integrity hint",
+      "jarvis_automation": "+10 when JARVIS/automation hint and no active lane; +5 otherwise",
+      "crypto_separation_penalty": "-15 when item has crypto hint AND a non-crypto active lane exists",
+      "danger_signal_penalty": "-200 if any DANGER_KEYWORDS_REJECT substring leaked past the filter"
+    },
+    "tiebreak": ["score desc", "lane asc", "title asc"]
+  },
+  "safety_guarantees": {
+    "stdlib_only": true,
+    "no_network_imports": true,
+    "no_broker_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_scheduler_or_daemon": true,
+    "outputs_confined_to_output_folder": true,
+    "pinned_false_flags": {
+      "live_trading_enabled": false,
+      "broker_control_enabled": false,
+      "paper_order_execution_enabled": false
+    }
+  },
+  "tests_run": {
+    "command": "python -m pytest tests/test_strategy_next_bundle.py --rootdir=tests -q",
+    "result": "19 passed in 0.26s",
+    "covers": [
+      "generate with full inputs",
+      "generate with missing inputs (no crash)",
+      "generate with invalid JSON (no crash)",
+      "JSON schema keys present",
+      "prompt contains research-only safety phrases",
+      "prompt includes tests + commit boundary",
+      "blocked / danger-keyword items never selected",
+      "deterministic selection across two runs",
+      "no file written outside output folder",
+      "validate passes after generate",
+      "validate detects missing files",
+      "validate detects unpinned safety flag",
+      "no network/broker imports in source",
+      "only stdlib imports in source",
+      "show after generate",
+      "CLI generate/show/validate exit codes",
+      "runtime output folder gitignored",
+      "danger keyword filter does not match unrelated words",
+      "active lane bonus changes selection"
+    ]
+  },
+  "generated_json_validity": {
+    "validate_command": "python tools/strategy_next_bundle.py validate",
+    "result_on_initial_build": "validate: OK"
+  },
+  "how_to_use": [
+    "Run python tools/strategy_factory_routines.py all (only if runtime inputs are missing or stale)",
+    "Run python tools/strategy_next_bundle.py generate",
+    "Paste reports/strategy_factory_routines/next_bundle/next_claude_prompt.txt into Claude/Codex",
+    "Optional: python tools/strategy_next_bundle.py validate"
+  ],
+  "what_bundle_3_should_likely_be": [
+    "Surface ranked_candidates breakdown in the JARVIS Strategy Factory panel (visibility upgrade)",
+    "Read-only 'what changed since previous bundle' diff line on the JARVIS panel",
+    "Auto-derived research-direction memo combining top-3 ranked + weekly next_action_recommendation"
+  ]
+}
