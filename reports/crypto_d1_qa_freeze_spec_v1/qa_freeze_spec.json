@@ -1,0 +1,300 @@
+{
+  "qa_freeze_spec_id": "crypto_d1_qa_freeze_spec_v1",
+  "title": "SPARTA Crypto-D1 Data QA / Freeze Spec v1",
+  "version": "1.0",
+  "kind": "data_qa_freeze_spec",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+
+  "companion_documents": {
+    "crypto_d1_protocol_v1_json": "reports/crypto_d1_protocol_v1/protocol.json",
+    "crypto_d1_protocol_v1_md": "reports/crypto_d1_protocol_v1/protocol.md",
+    "crypto_d1_data_contract_v1_json": "reports/crypto_d1_data_contract_v1/data_contract.json",
+    "crypto_d1_data_contract_v1_md": "reports/crypto_d1_data_contract_v1/data_contract.md",
+    "crypto_d1_dataset_manifest_v1_json": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json",
+    "crypto_d1_dataset_manifest_v1_md": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.md"
+  },
+
+  "research_objective": "Define exactly how any future BTC/ETH/SOL daily-OHLCV dataset will be VALIDATED, FROZEN, and APPROVED before any Crypto-D1 backtest is allowed. This bundle is a QA / Freeze SPECIFICATION only -- it does not fetch data, does not connect to any exchange, does not produce any real dataset file, does not run any QA harness, and does not authorize trading or backtesting. It is the written input spec that any future, separately-authorized P2 QA harness must satisfy.",
+
+  "target_assets": [
+    {"symbol_canonical": "BTC", "label": "Bitcoin", "required": true,  "rationale": "Highest-liquidity, deepest historical record."},
+    {"symbol_canonical": "ETH", "label": "Ether",   "required": true,  "rationale": "Second-deepest history; cross-asset robustness vs. BTC."},
+    {"symbol_canonical": "SOL", "label": "Solana",  "required": true,  "rationale": "Different vol / drawdown profile; prevents BTC-only overfit."}
+  ],
+
+  "timeframe": {
+    "primary": "1d",
+    "additional_allowed_for_spec_only": ["none"],
+    "intraday_explicitly_out_of_scope": true,
+    "bar_close_convention": "UTC 00:00:00 close; left-closed / right-open documented per dataset manifest."
+  },
+
+  "allowed_market_type": "spot",
+  "forbidden_market_types": [
+    "perp_futures (different funding / liquidation / leverage problem; separate future protocol required)",
+    "dated_futures (out of scope at v1)",
+    "options (out of scope at v1)",
+    "leveraged_tokens (out of scope at v1)",
+    "margin_or_borrow_facilitated_spot (out of scope at v1)",
+    "synthetic_instruments (out of scope at v1)"
+  ],
+
+  "required_inputs": [
+    "A per-dataset manifest.json that already passes crypto_d1_dataset_manifest_check.py and references crypto_d1_protocol_v1 + crypto_d1_data_contract_v1.",
+    "An on-disk daily OHLCV file (CSV or Parquet only) at the location declared by the manifest's source_location.",
+    "A CHECKSUMS.txt with sha256 per file; SHA verified against the file contents before any check runs.",
+    "A FREEZE_RECORD.txt with freeze timestamp, operator, contract+protocol versions pinned.",
+    "A fees.json (or equivalent) pinning per-venue maker/taker fees, slippage assumption, spread proxy."
+  ],
+
+  "forbidden_inputs": [
+    "live exchange API calls from this QA harness's runtime",
+    "scraping HTML / WebSocket / undocumented endpoints",
+    "any input requiring an API key, OAuth token, or .env credential",
+    "any input that requires SPARTA to MAKE a network call from its runtime",
+    "synthetic / mock-priced data",
+    "screenshots",
+    "manually copied prices",
+    "files without provenance",
+    "files without checksums",
+    "files without a manifest",
+    "datasets whose OOS window has been peeked before sealing",
+    "feeds whose terms of service forbid research use"
+  ],
+
+  "QA_check_groups": {
+    "A_manifest_integrity": "Manifest exists, is well-formed, validates, and references protocol + data contract + dataset version explicitly.",
+    "B_timestamp": "UTC daily bar boundary, no weekday-only calendar, missing-day rules, duplicate-timestamp rejection, partial-day exclusion.",
+    "C_OHLCV": "Open / high / low / close positive; high>=max(open,close,low); low<=min(open,close,high); close not missing; impossible candle / outlier flags.",
+    "D_volume": "Volume non-negative; zero-volume policy; quote_volume consistency when present; suspicious volume outlier flags.",
+    "E_symbol_source": "BTC/ETH/SOL canonical mapping; quote_currency consistency; source consistency; duplicate (symbol, source, timestamp) rejection; row-level provenance required.",
+    "F_fee_slippage": "Fee + slippage assumptions present, sourced, dated; cost-sensitivity test required before any PASS.",
+    "G_freeze": "Dataset frozen; CHECKSUMS.txt present and sha256-verified; FREEZE_RECORD.txt present; row counts recorded; new version on any change; manual edits documented + revalidated."
+  },
+
+  "timestamp_QA_checks": {
+    "utc_timestamps_required": true,
+    "iso8601_storage_required": true,
+    "daily_bar_boundary_valid": "Every row's timestamp must align to UTC 00:00:00; bars not on UTC boundaries are invalid.",
+    "no_weekday_only_calendar": "Datasets that drop weekend bars are invalid for spot crypto (24/7 calendar required).",
+    "no_duplicate_timestamps_per_symbol": "Duplicate (symbol, timestamp) rejected.",
+    "missing_day_rules": "Missing daily bars MUST be flagged in the manifest's missing_day_list; never silently forward-filled.",
+    "partial_day_handling": "Partial-day bars excluded from a frozen dataset; only fully-closed UTC bars are valid.",
+    "timezone_normalization": "All stored timestamps are UTC; any source in local time is converted at ingest with original tz preserved as metadata.",
+    "source_timestamp_vs_ingestion_timestamp": "If both available, both stored; source_timestamp is the primary key component; ingestion_timestamp is audit-only."
+  },
+
+  "OHLCV_QA_checks": {
+    "open_close_positive": true,
+    "high_positive": true,
+    "low_positive": true,
+    "high_rule": "high >= max(open, close, low)",
+    "low_rule": "low <= min(open, close, high)",
+    "close_not_missing": true,
+    "suspicious_high_low_range_flag": "Per-asset rolling-vol-aware band; rows beyond N*30d realised vol flagged for review.",
+    "extreme_gap_outlier_flag": "Day-over-day return beyond a per-asset threshold flagged as a suspicious-bar event; flagged not dropped.",
+    "impossible_candle_rules": "open == high == low == close on a non-zero-volume bar is flagged; high < low is FAIL; price drop > X% within a single bar paired with zero volume is flagged.",
+    "self_consistency_check_required_before_freeze": true
+  },
+
+  "volume_QA_checks": {
+    "volume_non_negative": true,
+    "zero_volume_rules": "Zero-volume bars on a 24/7 asset are highly suspicious; flagged for review and never silently kept in a frozen dataset without an explicit outage / illiquidity explanation.",
+    "quote_volume_consistency_if_present": "If both volume and quote_volume are present, the relationship volume * vwap ~= quote_volume is documented and per-row deviations flagged when they exceed a documented threshold.",
+    "suspicious_volume_outlier_flag": "Per-asset rolling-volume-aware band; rows beyond N*30d median volume flagged.",
+    "missing_volume_handling": "Missing volume row is flagged; if a future test treats missing-volume rows as zero, the choice is documented in the dataset manifest's notes."
+  },
+
+  "symbol_QA_checks": {
+    "btc_eth_sol_mapping_required": "Every row's canonical SPARTA symbol is in {BTC, ETH, SOL}; BTC at minimum.",
+    "quote_currency_consistency": "All rows for the same symbol share the same quote_currency; mismatches are FAIL unless an explicit FX series is attached.",
+    "source_consistency": "All rows for the same dataset share the same source unless a documented stitching rule applies.",
+    "duplicate_symbol_source_date_invalid": "Duplicate (symbol, source, timestamp) rows are FAIL.",
+    "rename_handling": "Rename events (LUNA -> LUNC, MATIC -> POL) recorded as first-class manifest events; never silently re-mapped.",
+    "fork_handling": "Forks treated as new assets, not same-symbol continuation."
+  },
+
+  "source_provenance_QA_checks": {
+    "row_level_source_id_required": true,
+    "venue_named_in_manifest_required": true,
+    "file_hash_required_on_freeze": "Every frozen dataset records sha256 of each file at the time of freeze in CHECKSUMS.txt.",
+    "contract_version_pinned_per_dataset": true,
+    "protocol_version_pinned_per_dataset": true,
+    "manifest_version_pinned_per_dataset": true,
+    "vendor_terms_of_service_documented": true,
+    "anonymous_provenance_invalid": true
+  },
+
+  "fee_slippage_QA_checks": {
+    "fee_assumptions_present_required": "fees.json (or equivalent) attached and dated; per-venue maker/taker fees declared.",
+    "slippage_assumption_present_required": "Conservative slow-day slippage haircut (constant-bps + one-tick) declared.",
+    "spread_proxy_when_quote_data_absent_required": "Constant-bps spread proxy documented and applied as an additive haircut when L1/L2 quote data is not present.",
+    "cost_sensitivity_requirement": "No PASS verdict is allowed without a cost-sensitivity test (fees +/- N bps, slippage +/- M bps) showing the result survives.",
+    "no_pass_if_fees_or_slippage_missing": true,
+    "stablecoin_quote_currency_documented": true,
+    "fees_as_distinct_pnl_line_required": true
+  },
+
+  "missing_data_QA_checks": {
+    "no_silent_forward_fill": true,
+    "missing_day_flagged_in_manifest_required": true,
+    "missing_close_invalid": true,
+    "missing_timestamp_invalid": true,
+    "missing_source_id_invalid": true,
+    "partial_day_bar_excluded_from_frozen_dataset": true,
+    "outage_calendar_attached_to_manifest_when_available": true,
+    "data_revision_creates_new_version_required": true
+  },
+
+  "duplicate_data_QA_checks": {
+    "duplicate_symbol_timestamp_rejected": true,
+    "duplicate_row_rejected": true,
+    "out_of_order_rows_flagged": true,
+    "strictly_monotonic_per_symbol_required": true,
+    "duplicate_after_normalization_invalid": "If two rows differ only by aliasing of the same venue symbol they are FAIL; alias mapping must be applied before duplicate check."
+  },
+
+  "outlier_QA_checks": {
+    "per_asset_rolling_vol_band_flag": "Day-over-day return beyond N times 30d realised vol flagged (per asset); rows are flagged not dropped.",
+    "volume_outlier_flag": "Bars with volume beyond N times 30d median volume flagged.",
+    "spread_widening_flag": "If quote / L1 data is attached, abnormal spread widening at bar close flagged.",
+    "post_outage_first_day_flag": "First day after a documented source outage flagged; cost assumptions on that day require review.",
+    "non_blocking_unless_combined": "Single outlier flags are non-blocking; clusters of outliers (>= K within a rolling window) become QA_WARN."
+  },
+
+  "freeze_rules": {
+    "no_mutable_data_in_backtest": "No future Crypto-D1 backtest may use mutable / unfrozen data.",
+    "manifest_required": true,
+    "qa_pass_or_approved_qa_warn_required_before_use": "Every dataset must pass QA (QA_PASS) or carry an explicit operator-approval note for QA_WARN before any backtest plan references it.",
+    "protocol_version_referenced": true,
+    "data_contract_version_referenced": true,
+    "manifest_version_referenced": true,
+    "checksums_required": "CHECKSUMS.txt with sha256 per file, generated at freeze time.",
+    "row_counts_recorded_required": true,
+    "freeze_timestamp_required": true,
+    "future_backtest_must_cite_dataset_id_and_version": true,
+    "data_change_creates_new_dataset_version": true,
+    "manual_edits_invalid_unless_documented_and_revalidated": true,
+    "daily_bars_must_be_utc_normalized": true,
+    "weekday_only_calendars_forbidden": true
+  },
+
+  "QA_status_model": {
+    "QA_DRAFT": "QA harness has not yet been run on this dataset_version; OR the harness was run but a required input was missing. The dataset is NOT eligible for any downstream use.",
+    "QA_PASS": "QA harness completed; ALL blocking checks passed; zero unresolved warnings; per-asset row counts match manifest's expected counts (modulo the missing_day_list); cost-sensitivity test passed; freeze_status == FROZEN; CHECKSUMS.txt sha256-verified per file; FREEZE_RECORD.txt present. Dataset is research-eligible for a pre-registered backtest plan.",
+    "QA_WARN": "QA harness completed; no blocking failures, but at least one non-blocking warning was raised (e.g., borderline outage overlap, marginal asset history, an outlier cluster below the FAIL threshold). The operator MUST attach a written acceptance note to the manifest BEFORE the dataset may be referenced; the lane stays WATCH on downstream usage.",
+    "QA_FAIL": "At least one blocking check failed (e.g., self-consistency violation, OHLCV impossible-candle, sha256 mismatch, missing FREEZE_RECORD.txt, OOS window peeked, manual edit without re-validation). The dataset MUST NOT be referenced by any backtest plan; remediation requires a new dataset_version.",
+    "QA_BLOCKED": "External block exists (vendor TOS dispute, legal / compliance flag, operator hold). The dataset MUST NOT be referenced until the block is cleared, even if all checks would otherwise pass.",
+    "QA_RETIRED": "Dataset was previously usable but has been superseded by a newer version; the retired version is read-only and used only for reproducibility / audit."
+  },
+
+  "qa_status_distinction_statements": [
+    "QA_PASS does not imply profitability.",
+    "QA_PASS does not authorize a backtest by itself.",
+    "QA_PASS does not authorize paper or live trading.",
+    "QA_FAIL blocks all research use.",
+    "QA_WARN requires explicit operator notes and future approval before use."
+  ],
+
+  "QA_report_schema": {
+    "purpose": "Defines the SHAPE of every future Crypto-D1 per-dataset qa_report.json. Every field below MUST be populated by any future P2 QA harness for the dataset to be referenced by a backtest plan.",
+    "required_fields": [
+      "qa_report_id",
+      "dataset_id",
+      "dataset_version",
+      "manifest_version",
+      "data_contract_version",
+      "protocol_version",
+      "generated_at",
+      "qa_status",
+      "checks_run",
+      "checks_passed",
+      "checks_warned",
+      "checks_failed",
+      "blocking_failures",
+      "warnings",
+      "row_count_observed",
+      "missing_day_summary",
+      "duplicate_summary",
+      "timestamp_summary",
+      "OHLCV_summary",
+      "volume_summary",
+      "fee_slippage_summary",
+      "source_provenance_summary",
+      "freeze_summary",
+      "allowed_next_step",
+      "forbidden_next_steps",
+      "safety_flags"
+    ],
+    "field_count": 26
+  },
+
+  "allowed_next_steps": [
+    "Author the Crypto-D1 Baseline Backtest Plan v1 (pre-registration memo for the FIRST candidate strategy family + IS / OOS split; plan only, no backtest run).",
+    "Author the Crypto-D1 Data Source Evaluation Memo v1 (assess which offline data sources could later satisfy this QA / freeze spec; memo only, no fetch).",
+    "Author a Crypto-D1 Data Acquisition Authorization Draft (still spec-only; only if the operator wants to start the path toward an actual P2 acquisition; does not authorize anything by itself).",
+    "Run the future QA harness against an existing on-disk frozen dataset under a SEPARATE, separately-authorized P2 bundle."
+  ],
+
+  "forbidden_next_steps": [
+    "Fetch data from any live exchange API.",
+    "Connect SPARTA's runtime to any exchange or vendor over the network.",
+    "Run any backtest on the basis of QA_PASS alone.",
+    "Run any paper-order or live-trading flow on the basis of QA_PASS alone.",
+    "Modify paper / live execution files.",
+    "Schedule any background daemon or cron job.",
+    "Install or read any API key, OAuth token, or .env credential.",
+    "Use any synthetic / mock-priced data as evidence."
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "Every QA check group A..G has its required checks populated; every per-dataset qa_report.json under this spec carries all 26 required_fields; all 7 safety flags are False; lane == 'crypto_d1_protocol'; market_type == 'spot'; timeframe == '1d'; freeze_rules require CHECKSUMS.txt + FREEZE_RECORD.txt + protocol/data-contract/manifest version pins; QA_status_model includes all 6 declared statuses; QA_report_schema includes all 26 fields; allowed_next_steps and forbidden_next_steps both populated.",
+    "WATCH": "Spec is satisfied but at least one assumption is borderline (e.g., an outlier-cluster threshold is intentionally lenient for an underlying asset with shorter history, or QA_WARN acceptance criteria are loose). Lane stays WATCH on downstream usage.",
+    "FAIL": "Any of the seven QA check groups is missing; any safety flag is True; QA_status_model omits a required status; QA_report_schema omits a required field; freeze_rules omit checksums / freeze-timestamp / version pins; allowed_next_steps or forbidden_next_steps is empty; or any forbidden capability claim appears in MD or JSON."
+  },
+
+  "required_future_artifacts": [
+    "Crypto-D1 Baseline Backtest Plan v1 (P3 / P4) -- pre-registration memo for the FIRST candidate strategy family + IS / OOS split. Plan only, no backtest run.",
+    "Crypto-D1 Data Source Evaluation Memo v1 -- written assessment of which offline data sources could later satisfy this QA / freeze spec. Memo only, no fetch.",
+    "Crypto-D1 Data Acquisition Authorization Draft -- still spec-only; only if the operator wants to start the path toward an actual P2 acquisition.",
+    "Per-dataset qa_report.json (P2 OUTPUT) -- carries every field from QA_report_schema.required_fields; emitted only by a separately-authorized future QA harness, never by this spec.",
+    "Future QA harness implementation (separately-authorized bundle) -- the actual code that emits the per-dataset qa_report.json; NOT built in this bundle."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Data QA / freeze specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this spec's runtime.",
+    "No data fetch in this bundle. No QA harness execution in this bundle. No backtest in this bundle. No dataset processing in this bundle. No real dataset files are created in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this QA / freeze spec alone.",
+    "QA is not strategy validation. QA_PASS does not imply edge. QA_PASS does not imply profitability. Clean daily OHLCV data does not imply profit. A QA report cannot authorize backtesting by itself. A QA report cannot authorize paper or live trading. Crypto trend ideas are not profitable until tested with full costs. A good historical chart does not imply future returns. 24/7 session handling; weekday-only filters forbidden."
+  ],
+
+  "no_profit_claim_policy": [
+    "QA is not strategy validation.",
+    "QA_PASS does not imply edge.",
+    "QA_PASS does not imply profitability.",
+    "Clean daily OHLCV data does not imply profit.",
+    "A QA report cannot authorize paper or live trading.",
+    "A QA report cannot authorize backtesting by itself.",
+    "No data fetch is authorized by this bundle.",
+    "Crypto trend ideas are not profitable until tested.",
+    "A good historical chart does not imply future returns."
+  ]
+}
