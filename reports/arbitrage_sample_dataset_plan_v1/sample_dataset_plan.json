@@ -1,0 +1,307 @@
+{
+  "sample_dataset_plan_id": "arbitrage_sample_dataset_plan_v1",
+  "title": "SPARTA Arbitrage Sample Dataset Plan v1",
+  "version": "1.0",
+  "kind": "sample_dataset_plan",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "companion_documents": {
+    "arbitrage_research_protocol_v1": "reports/arbitrage_research_protocol_v1/protocol.json",
+    "arbitrage_data_contract_v1": "reports/arbitrage_data_contract_v1/data_contract.json",
+    "arbitrage_dataset_manifest_v1": "reports/arbitrage_dataset_manifest_v1/dataset_manifest.json",
+    "arbitrage_qa_harness_spec_v1": "reports/arbitrage_qa_harness_spec_v1/qa_harness_spec.json",
+    "arbitrage_data_source_evaluation_v1": "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.json"
+  },
+
+  "research_objective": "Define the tiny first sample dataset SPARTA might later collect for arbitrage research -- exactly which category, which symbol shape, which time-window shape, which fields, how it would be named and stored, how it would be QA'd, and which approval gates must be cleared first. This plan does not fetch data, does not connect to any exchange, does not run a backtest, and does not authorize trading. It is a planning input only -- the actual collection bundle is a SEPARATE, separately-authorized future bundle.",
+
+  "supported_arbitrage_categories": [
+    {"id": "cross_exchange_spot",          "label": "A. Cross-exchange spot arbitrage (PRIMARY for this sample)"},
+    {"id": "spot_perp_basis_funding",      "label": "B. Spot-perp basis / funding arbitrage (OPTIONAL future extension only)"},
+    {"id": "triangular",                   "label": "C. Triangular arbitrage (out of scope for the first sample)"},
+    {"id": "futures_calendar",             "label": "D. Futures calendar / basis arbitrage (out of scope for the first sample)"},
+    {"id": "statistical_relative_value",   "label": "E. Statistical / relative-value mispricing (NOT pure arbitrage; out of scope for the first sample)"}
+  ],
+
+  "proposed_sample_scope": {
+    "primary_category": "cross_exchange_spot",
+    "secondary_category_optional_future_only": "spot_perp_basis_funding",
+    "scope_intent": "TINY. The first sample exists to exercise the manifest + QA pipeline end-to-end on a small, conservative slice -- not to claim an edge.",
+    "symbols_example_only": [
+      {"canonical": "BTC_USDT", "label": "Bitcoin vs. Tether stablecoin", "rationale": "Highest-liquidity pair; cleanest first sample for cross-venue alignment."},
+      {"canonical": "ETH_USDT", "label": "Ether vs. Tether stablecoin",   "rationale": "Second-most-liquid; useful sanity-check against BTC for shape."}
+    ],
+    "venues_label_only_not_credentials_or_live_connectors": [
+      {"label": "Venue_A", "role": "primary spot venue (to be named at approval time)"},
+      {"label": "Venue_B", "role": "secondary spot venue (to be named at approval time)"}
+    ],
+    "time_window_shape": {
+      "duration_examples_not_authorized_now": ["1_hour", "1_day"],
+      "alignment": "UTC, ISO-8601 boundaries.",
+      "warmup_buffer_required": true,
+      "is_oos_split_required_before_run": true,
+      "actual_dates_set_by_future_authorization": true
+    },
+    "quote_level_required": "bid_ask_top_of_book_L1",
+    "order_book_depth_preferred": "L2_top_5_to_10_levels_if_source_supports",
+    "fees_required": "per_venue_dated_schedule_pinned_in_manifest",
+    "funding_required_only_if_perp_extension_authorized": true,
+
+    "explicit_disclaimers": [
+      "This plan is NOT an authorization to fetch data.",
+      "The venue names listed (Venue_A / Venue_B) are LABELS only; the actual venues must be EXPLICITLY APPROVED in a separate future authorization message.",
+      "The data source must be EXPLICITLY APPROVED later (from Bundle 8's allowed source classes only).",
+      "The storage path must be EXPLICITLY APPROVED later.",
+      "Symbol examples (BTC/USDT, ETH/USDT) are illustrative; the actual symbol set is approved later."
+    ]
+  },
+
+  "candidate_venues": {
+    "policy": "No live venue is named in this plan. Future approval will name 1-2 specific spot venues from the operator-approved class (preferred: paid-vendor offline export covering 2 venues; alternative: each venue's public historical archive).",
+    "must_be_named_at_authorization": true,
+    "must_reference_a_data_source_evaluation_class": true,
+    "examples_as_labels_only": ["Venue_A", "Venue_B"]
+  },
+
+  "candidate_symbols": {
+    "policy": "Symbol list is illustrative only. The actual list is set at approval time.",
+    "examples_as_labels_only": ["BTC_USDT", "ETH_USDT"],
+    "rules": [
+      "Each symbol must exist on BOTH named venues for cross-exchange spot.",
+      "Each symbol carries its per-venue canonical name + SPARTA canonical name.",
+      "Aliases are versioned in the manifest."
+    ]
+  },
+
+  "candidate_time_windows": {
+    "policy": "No actual dates are set here. The window shape is documented; the actual UTC start + end are set at approval time.",
+    "duration_examples_not_authorized_now": ["1_hour", "1_day"],
+    "warmup_buffer_documented": true,
+    "is_oos_split_sealed_before_run": true,
+    "alignment": "UTC, monotonic, ISO-8601 storage."
+  },
+
+  "required_fields": {
+    "per_quote_row": [
+      "venue_id_canonical",
+      "symbol_per_venue",
+      "symbol_canonical",
+      "exchange_send_ts",
+      "local_recv_ts",
+      "best_bid",
+      "bid_size",
+      "best_ask",
+      "ask_size",
+      "sequence_no_if_present"
+    ],
+    "per_order_book_row_optional": [
+      "venue_id_canonical",
+      "symbol_canonical",
+      "exchange_send_ts",
+      "side",
+      "level_index",
+      "price",
+      "size"
+    ],
+    "per_fee_reference": [
+      "venue_id_canonical",
+      "instrument_class",
+      "maker_fee_bps",
+      "taker_fee_bps",
+      "schedule_date",
+      "schedule_url_or_local_pin"
+    ],
+    "per_funding_row_only_if_perp_extension_authorized": [
+      "venue_id_canonical",
+      "symbol_canonical",
+      "settlement_ts",
+      "funding_rate",
+      "funding_interval_seconds"
+    ],
+    "per_row_provenance_required": [
+      "source_id",
+      "data_contract_version_pin",
+      "dataset_version_pin",
+      "ingest_pipeline_version"
+    ]
+  },
+
+  "manifest_requirements": {
+    "must_satisfy": "arbitrage_dataset_manifest_v1.manifest_schema.required_future_manifest_fields (all 32 fields).",
+    "must_pin_versions": [
+      "arbitrage_research_protocol_v1.version",
+      "arbitrage_data_contract_v1.version",
+      "arbitrage_dataset_manifest_v1.version",
+      "arbitrage_qa_harness_spec_v1.version",
+      "arbitrage_data_source_evaluation_v1.version",
+      "arbitrage_sample_dataset_plan_v1.version"
+    ],
+    "freeze_status_target": "FROZEN",
+    "qa_status_target": "QA_PASS or explicitly-accepted QA_WARN"
+  },
+
+  "QA_requirements": {
+    "must_satisfy": "arbitrage_qa_harness_spec_v1 (all 8 QA check groups must pass or generate documented WARN/FAIL).",
+    "must_run_before_any_research_use": true,
+    "must_produce_a_qa_report_file": "satisfying arbitrage_qa_harness_spec_v1.report_schema.required_future_qa_report_fields (23 fields).",
+    "qa_pass_does_not_imply": [
+      "edge", "profitability", "live-readiness", "authorization to backtest", "promotion to ACTIVE / STRONG"
+    ]
+  },
+
+  "storage_plan": {
+    "root_path_pattern": "data/arbitrage_research/<dataset_id>/<dataset_version>/",
+    "frozen_subfolder": "frozen/",
+    "qa_subfolder": "qa/",
+    "no_network_url_allowed": true,
+    "no_write_to_paper_or_live_execution_paths": true,
+    "checksums_per_file": "sha256",
+    "checksum_file_name": "CHECKSUMS.txt",
+    "actual_root_path_set_by_future_authorization": true,
+    "no_real_data_files_created_in_this_bundle": true
+  },
+
+  "naming_convention": {
+    "dataset_id_pattern": "ARB_<CATEGORY_TAG>_<SYMBOL_TAG>_SAMPLE_V<NNN>",
+    "dataset_id_examples_label_only": [
+      "ARB_XSPOT_BTCUSDT_SAMPLE_V001",
+      "ARB_XSPOT_ETHUSDT_SAMPLE_V001"
+    ],
+    "dataset_version_pattern": "monotonically_increasing_integer_starting_at_001",
+    "manifest_filename": "manifest.json",
+    "raw_quote_data_filename": "quotes.csv (or quotes.parquet preferred)",
+    "raw_order_book_filename_optional": "order_book.csv (or order_book.parquet preferred)",
+    "raw_fee_reference_filename": "fees.json",
+    "raw_funding_filename_only_if_perp_extension_authorized": "funding.csv (or funding.parquet preferred)",
+    "qa_report_filename": "qa_report.json",
+    "checksum_filename": "CHECKSUMS.txt",
+    "freeze_record_filename": "FREEZE_RECORD.txt",
+    "files_are_examples_only_no_real_files_in_this_bundle": true
+  },
+
+  "freeze_plan": {
+    "freeze_steps_after_collection_in_a_separate_bundle": [
+      "Compute sha256 per file; write CHECKSUMS.txt.",
+      "Author manifest.json with all 32 required future manifest fields populated.",
+      "Set manifest.freeze_status = FROZEN with freeze_timestamp_utc.",
+      "Re-verify sha256 against CHECKSUMS.txt; mismatch invalidates the freeze.",
+      "Persist a FREEZE_RECORD.txt with operator identity + UTC timestamp + reason."
+    ],
+    "frozen_means": [
+      "freeze_status == FROZEN",
+      "freeze_timestamp present and not in the future",
+      "All per-file checksums stored and verifiable",
+      "row_count_expected == row_count_actual (or a documented gap explains the difference)",
+      "Manifest validates against arbitrage_dataset_manifest_v1 without warnings"
+    ]
+  },
+
+  "approval_gates": {
+    "must_all_be_satisfied_before_any_future_data_collection": [
+      "explicit_operator_authorization: written message naming this plan and what is permitted",
+      "named_source_class_from_bundle_8: one of A_archives / B_apis / C_paid_vendor / D_local_csv (NOT E web-scraped, NOT F manual)",
+      "exact_source_named: vendor product / archive URL / file path",
+      "exact_venue_names: per-source venue list",
+      "exact_symbols_named: per-venue symbol list",
+      "exact_time_window_named: ISO-8601 UTC start + end",
+      "exact_storage_path_named: on-disk path under data/arbitrage_research/...",
+      "protocol_version_referenced: arbitrage_research_protocol_v1.version pin",
+      "data_contract_version_referenced: arbitrage_data_contract_v1.version pin",
+      "dataset_manifest_version_referenced: arbitrage_dataset_manifest_v1.version pin",
+      "qa_harness_spec_version_referenced: arbitrage_qa_harness_spec_v1.version pin",
+      "data_source_evaluation_version_referenced: arbitrage_data_source_evaluation_v1.version pin",
+      "sample_dataset_plan_version_referenced: arbitrage_sample_dataset_plan_v1.version pin",
+      "no_credentials_unless_separately_approved: any credential handling requires its own explicit authorization",
+      "no_private_keys: SPARTA never handles private keys at this stage",
+      "no_trading_permissions: the authorization message must NOT grant order, paper, or live trading permissions",
+      "no_automatic_scheduler: data acquisition is one-shot operator-driven; no cron, no daemon",
+      "no_live_or_paper_execution: acquisition does NOT cross into execution; that is a separately-blocked phase",
+      "tos_or_licensing_review_if_applicable: vendor / venue TOS + license terms attached"
+    ]
+  },
+
+  "rejection_rules": [
+    "Reject this plan as a basis for collection if source class is E_web_scraped_or_unofficial_data or F_manually_copied_prices_or_screenshots.",
+    "Reject if source_location would be a live network URL at use time.",
+    "Reject if the time window is wider than the smallest realistic first slice (avoid overcollecting).",
+    "Reject if the symbol list is broader than the smallest realistic first slice.",
+    "Reject if the manifest cannot be fully populated against arbitrage_dataset_manifest_v1.",
+    "Reject if the QA harness cannot fully cover the planned data shape.",
+    "Reject if any prior arbitrage validator (protocol / data contract / dataset manifest / qa harness / data source evaluation) currently FAILs."
+  ],
+
+  "future_collection_steps": [
+    "source_approval: operator authorizes a specific source class instance from Bundle 8.",
+    "manifest_draft: author a per-dataset manifest satisfying arbitrage_dataset_manifest_v1; freeze_status starts at DRAFT.",
+    "collection_command_proposal: write down the exact offline command the operator would run (no execution from this bundle).",
+    "safety_review: re-verify all approval gates are satisfied in writing before any command runs.",
+    "explicit_operator_authorization: a SEPARATE authorization bundle is the only way the acquisition step can run.",
+    "data_collection_in_separate_bundle: actual collection happens in a SEPARATE, separately-authorized bundle (never in this plan).",
+    "checksum_generation: compute sha256 per file; write CHECKSUMS.txt.",
+    "manifest_freeze: set freeze_status=FROZEN with freeze_timestamp.",
+    "qa_run: run the (future) harness implementation against the frozen dataset + manifest.",
+    "qa_report: persist qa_report.json satisfying arbitrage_qa_harness_spec_v1.report_schema.",
+    "research_use_only_if_QA_PASS_or_QA_WARN_with_explicit_approval: never research-use a QA_FAIL / BLOCKED / RETIRED dataset; never research-use without a written approval if QA_WARN."
+  ],
+
+  "forbidden_actions": [
+    "Do not fetch data in this bundle.",
+    "Do not connect to any exchange in this bundle.",
+    "Do not call any external network endpoint in this bundle.",
+    "Do not place any order anywhere from this bundle.",
+    "Do not run any backtest in this bundle.",
+    "Do not process any dataset in this bundle.",
+    "Do not create any real data files in this bundle.",
+    "Do not create any credential file in this bundle.",
+    "Do not install any scheduler / cron / daemon in this bundle.",
+    "Do not modify paper / live execution files in this bundle.",
+    "Do not promote the arbitrage lane to ACTIVE / STRONG in this bundle.",
+    "Do not claim profitability or edge in this bundle."
+  ],
+
+  "required_future_artifacts": [
+    "Per-sample data-acquisition memo that NAMES the chosen source class + instance + symbols + venues + window + storage path + license / TOS pin + cost cap.",
+    "Per-sample manifest under arbitrage_dataset_manifest_v1 with all 32 required-future-manifest fields populated.",
+    "Per-sample CHECKSUMS.txt with sha256 per file (when freeze_status -> FROZEN).",
+    "Per-sample FREEZE_RECORD.txt with operator identity + UTC freeze_timestamp.",
+    "Per-sample QA report file under arbitrage_qa_harness_spec_v1 reaching QA_PASS or accepted QA_WARN.",
+    "Per-sample retirement memo if the sample is later RETIRED."
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "All required top-level sections of this plan are present; proposed_sample_scope is TINY and conservative (1-2 symbols, narrow window, top-of-book preferred); naming_convention + storage_plan + freeze_plan exist with no real files created; approval_gates include explicit operator authorization AND all five upstream version pins (protocol / contract / manifest / qa / evaluation); future_collection_steps include 'explicit_operator_authorization' and 'data_collection_in_separate_bundle'; no safety flag is True; no forbidden phrase appears.",
+    "WATCH": "Plan is satisfied but at least one section is borderline (e.g., symbol list is at the upper edge of 'tiny'); documented and re-checked before any reliance.",
+    "FAIL": "Any required section is missing; any safety flag is True; storage_plan permits a network URL; proposed scope is wider than 'tiny'; approval_gates omit explicit operator authorization; future_collection_steps omit explicit_operator_authorization or data_collection_in_separate_bundle; any forbidden phrase appears."
+  },
+
+  "no_profit_claim_policy": [
+    "A sample dataset does not imply edge.",
+    "A clean sample does not imply profitability.",
+    "A price gap is not profit.",
+    "Sample data cannot authorize trading.",
+    "Sample data cannot authorize backtesting unless a SEPARATE future backtest bundle is approved."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Planning / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this plan's runtime.",
+    "No data fetch in this bundle. No backtest in this bundle. No dataset processing in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this plan alone.",
+    "A price gap is not profit. A sample does not imply edge."
+  ]
+}

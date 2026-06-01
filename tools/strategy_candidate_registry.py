@@ -161,10 +161,12 @@ SEED_LANES = (
         # Bundle 6: SPARTA-side Arbitrage Dataset Manifest v1 docs.
         # Bundle 7: SPARTA-side Arbitrage QA Harness Spec v1 docs.
         # Bundle 8: SPARTA-side Arbitrage Data Source Evaluation Memo v1 docs.
+        # Bundle 9: SPARTA-side Arbitrage Sample Dataset Plan v1 docs.
         # All filenames contain "protocol" / "data" / "manifest" /
-        # "qa_harness" / "spec" / "evaluation" (no FAILED / RETIRED /
-        # closeout keywords), so the classifier keeps this lane at IDEA
-        # evidence (never ACTIVE, never STRONG) just because docs exist.
+        # "qa_harness" / "spec" / "evaluation" / "plan" (no FAILED /
+        # RETIRED / closeout keywords), so the classifier keeps this lane
+        # at IDEA evidence (never ACTIVE, never STRONG) just because docs
+        # exist.
         "extra_files": (
             "reports/arbitrage_research_protocol_v1/protocol.md",
             "reports/arbitrage_research_protocol_v1/protocol.json",
@@ -176,6 +178,8 @@ SEED_LANES = (
             "reports/arbitrage_qa_harness_spec_v1/qa_harness_spec.json",
             "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.md",
             "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.json",
+            "reports/arbitrage_sample_dataset_plan_v1/sample_dataset_plan.md",
+            "reports/arbitrage_sample_dataset_plan_v1/sample_dataset_plan.json",
         ),
     },
     {
