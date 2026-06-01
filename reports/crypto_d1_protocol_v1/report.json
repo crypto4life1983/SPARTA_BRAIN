@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_protocol_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/crypto_d1_protocol_v1/protocol.json (machine-readable Crypto-D1 protocol)",
+    "reports/crypto_d1_protocol_v1/protocol.md (human-readable: BTC/ETH/SOL spot daily 24/7; 7 strategy families with mean_reversion WATCH-only; 9-phase P0..P8 validation ladder; PASS/WATCH/FAIL rules + kill conditions + no-profit-claim policy)",
+    "reports/crypto_d1_protocol_v1/report.md (build report)",
+    "reports/crypto_d1_protocol_v1/report.json (build report)",
+    "tools/crypto_d1_protocol_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_crypto_d1_protocol.py (21 tests covering schema + safety + integration)",
+    "tools/strategy_candidate_registry.py: extra_files for the v1 memo + new per-seed lane_status_override mechanism; crypto_d1 lane re-opened from PARKED to WATCH when the v1 memo exists on disk"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_protocol_v1/protocol.json",
+    "reports/crypto_d1_protocol_v1/protocol.md",
+    "reports/crypto_d1_protocol_v1/report.md",
+    "reports/crypto_d1_protocol_v1/report.json",
+    "tools/crypto_d1_protocol_check.py",
+    "tests/test_crypto_d1_protocol.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "forbidden_market_types": ["perp_futures", "dated_futures", "options", "leveraged_tokens", "margin_spot"],
+    "timeframe_primary": "1d",
+    "intraday_explicitly_out_of_scope": true,
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "strategy_families_primary": [
+      "daily_trend_following",
+      "donchian_channel_breakout",
+      "moving_average_trend_filter",
+      "volatility_regime_gate",
+      "momentum_continuation",
+      "risk_on_risk_off_filter"
+    ],
+    "strategy_families_watch_only": ["mean_reversion"],
+    "validation_phases": ["P0_protocol", "P1_data_contract", "P2_dataset_manifest_freeze", "P3_baseline_strategy_impl", "P4_is_oos_split", "P5_walk_forward_or_rolling", "P6_robustness_sensitivity", "P7_paper_signal_simulation", "P8_live_trading"]
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_enabled",
+      "dataset_processing_enabled"
+    ],
+    "spot_only_market_type": true,
+    "perp_futures_explicitly_forbidden": true,
+    "intraday_explicitly_out_of_scope": true,
+    "session_model_24_7_with_no_weekday_only_filters": true,
+    "mean_reversion_WATCH_only": true,
+    "all_nine_validation_phases_P0_P8_present": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "Crypto trend ideas are not profitable until tested",
+      "A good historical chart does not imply future returns",
+      "No backtest is authorized by this protocol alone",
+      "24/7"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_protocol.py tests/test_arbitrage_readiness_gate.py tests/test_arbitrage_sample_dataset_plan.py tests/test_arbitrage_data_source_evaluation.py tests/test_arbitrage_qa_harness_spec.py tests/test_arbitrage_dataset_manifest.py tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "232 passed in 2.04s"
+    }
+  ],
+  "json_validity": {
+    "crypto_d1_protocol_check_validate": "validate: OK",
+    "arbitrage_readiness_gate_check_validate": "validate: OK (Bundle 10 unaffected)",
+    "arbitrage_sample_dataset_plan_check_validate": "validate: OK (Bundle 9 unaffected)",
+    "arbitrage_data_source_evaluation_check_validate": "validate: OK (Bundle 8 unaffected)",
+    "arbitrage_qa_harness_spec_check_validate": "validate: OK (Bundle 7 unaffected)",
+    "arbitrage_dataset_manifest_check_validate": "validate: OK (Bundle 6 unaffected)",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "promoted_from_PARKED_via": "lane_status_override='WATCH' (fires because the seed's extra_files include the v1 memo, which now exists on disk)",
+    "source_reports_count": 17,
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest/dataset-processing/credentials reference",
+      "historical CODR-1 closeouts remain authoritative for prior versions (override gated on v1 memo on-disk presence)"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Both arbitrage and crypto_d1 are now WATCH (same +15 bonus). Arbitrage wins via existing protocol-first/data-first scoring hints in its queue item. Deterministic logic NOT artificially modified. Operator should consult both lanes' next-step lists to pick the actual Bundle 12."
+  },
+  "how_this_starts_the_crypto_lane_after_arbitrage_WATCH_closure": [
+    "Arbitrage foundation (Bundles 4-10) closed at WATCH.",
+    "Crypto-D1 lane re-opened at WATCH via Bundle 11 v1 protocol memo.",
+    "Two parallel research lanes, both research-monitorable, neither ACTIVE.",
+    "Next Bundle 12 picks one of: Crypto-D1 Data Contract v1 / Crypto-D1 Dataset Manifest v1 / Crypto-D1 Data QA-Freeze Spec v1 / Crypto-D1 Baseline Backtest Plan v1."
+  ],
+  "recommended_next_bundle": [
+    "Crypto-D1 Data Contract v1 (defines fields/freeze/fees/validity for any future daily crypto dataset; spec only, no data pull)",
+    "Crypto-D1 Dataset Manifest v1 (per-dataset manifest schema for the crypto-D1 lane; spec only)",
+    "Crypto-D1 Data QA / Freeze Spec v1 (QA harness spec for daily-crypto data; spec only, no harness run)",
+    "Crypto-D1 Baseline Backtest Plan v1 (pre-registration memo for the FIRST family + IS/OOS split; plan only, no backtest run)"
+  ]
+}

@@ -109,8 +109,19 @@ SEED_LANES = (
         "lane": "crypto_d1_protocol",
         "market": "CRYPTO",
         "timeframe": "D1",
-        "hypothesis": "Daily-bar crypto strategies (crash-candle reversion, regime gating) under rigorous IS/OOS gates.",
+        "hypothesis": "Daily-bar crypto strategies (trend / Donchian / MA filter / vol regime / momentum / risk-on-off; mean-reversion WATCH-only) under rigorous IS/OOS gates.",
         "report_match_substrings": ("crypto_d",),
+        # Bundle 11: SPARTA-side Crypto-D1 Protocol Memo v1 docs. The new v1
+        # memo OPENS a fresh study; prior closeouts remain authoritative for
+        # prior versions. The lane_status_override below resets the lane to
+        # WATCH (research-monitorable, never ACTIVE, never STRONG) IF the new
+        # memo is actually on disk -- this lets a v1 protocol re-open a lane
+        # that was historically PARKED by closeout-keyword reports.
+        "extra_files": (
+            "reports/crypto_d1_protocol_v1/protocol.md",
+            "reports/crypto_d1_protocol_v1/protocol.json",
+        ),
+        "lane_status_override": "WATCH",
     },
     {
         "candidate_id": "crypto_4h_protocol",
@@ -324,7 +335,7 @@ def _build_queue_index(queue_data) -> dict:
     return out
 
 
-def _build_candidate(seed: dict, matched_reports: list, queue_index: dict) -> dict:
+def _build_candidate(seed: dict, matched_reports: list, queue_index: dict, repo_root: Path = REPO_ROOT) -> dict:
     """Apply classification rules to produce a single candidate dict."""
     # Start with conservative defaults.
     status = "IDEA"
@@ -349,6 +360,20 @@ def _build_candidate(seed: dict, matched_reports: list, queue_index: dict) -> di
     # If there are matched reports but no keyword hit at all, mark IDEA / MIXED.
     if matched_reports and status == "IDEA" and evidence == "NONE":
         evidence = "MIXED"
+
+    # Bundle 11: per-seed `lane_status_override` -- fires ONLY when at least
+    # one of the seed's `extra_files` exists on disk. This lets a fresh v1
+    # protocol memo re-open a lane that was historically PARKED by closeout-
+    # keyword reports (e.g., the crypto_d* CODR-1 closeouts), WITHOUT silencing
+    # those historical signals in tmp/test trees where the v1 memo is absent.
+    override = seed.get("lane_status_override")
+    if override:
+        extras = seed.get("extra_files") or ()
+        extras_present = any((Path(repo_root) / rel).exists() for rel in extras)
+        if extras_present:
+            status = override
+            if evidence == "NONE":
+                evidence = "MIXED"
 
     # Hard guardrail: never STRONG without explicit external support.
     if evidence == "STRONG":
@@ -431,7 +456,7 @@ def build_registry(repo_root: Path = REPO_ROOT) -> dict:
     candidates = []
     for seed in SEED_LANES:
         matched = _match_lane_reports(seed, all_names, repo_root)
-        cand = _build_candidate(seed, matched, queue_index)
+        cand = _build_candidate(seed, matched, queue_index, repo_root)
         candidates.append(cand)
 
     # Deterministic ordering: by candidate_id alphabetic.

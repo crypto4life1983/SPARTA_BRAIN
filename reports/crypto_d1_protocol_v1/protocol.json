@@ -1,0 +1,190 @@
+{
+  "protocol_id": "crypto_d1_protocol_v1",
+  "title": "SPARTA Crypto-D1 Protocol Memo v1",
+  "version": "1.0",
+  "kind": "research_protocol",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+  "lane_history_note": "Earlier crypto_d* lines (CODR-1 crash-candle reversion etc.) were closed under crypto_d7 and crypto_d14 closeout memos. This v1 memo OPENS a NEW daily crypto study under a fresh protocol; it does NOT continue, re-tune, or revive any prior parameter set. Prior closeouts remain authoritative for prior versions.",
+
+  "target_assets": [
+    {"symbol_canonical": "BTC", "label": "Bitcoin",  "rationale": "Highest-liquidity, deepest historical record, primary trend benchmark."},
+    {"symbol_canonical": "ETH", "label": "Ether",    "rationale": "Second-deepest historical record; useful cross-asset robustness check vs. BTC."},
+    {"symbol_canonical": "SOL", "label": "Solana",   "rationale": "Third asset that intentionally has different vol / drawdown profile -- prevents BTC-only overfitting."}
+  ],
+
+  "allowed_market_type": "spot",
+  "forbidden_market_types": [
+    "perp_futures (different funding / liquidation / leverage problem; separate later protocol)",
+    "dated_futures (out of scope)",
+    "options (out of scope)",
+    "leveraged_tokens (out of scope)",
+    "margin_or_borrow_facilitated_spot (out of scope at this stage)"
+  ],
+
+  "timeframe": {
+    "primary": "1d",
+    "additional_allowed_for_protocol_only": ["none"],
+    "intraday_explicitly_out_of_scope": true,
+    "bar_close_convention_required": "UTC close; left-closed / right-open documented in any future dataset manifest."
+  },
+
+  "session_model": {
+    "market_calendar": "24/7 (crypto)",
+    "weekday_only_filters_forbidden": true,
+    "missing_day_policy_documented_in_data_contract": true,
+    "holiday_handling": "N/A for crypto; documented but not applied.",
+    "timezone_normalization": "UTC primary clock; any source in local time converted at ingest with original timezone preserved as metadata."
+  },
+
+  "candidate_strategy_families": [
+    {
+      "id": "daily_trend_following",
+      "label": "Daily trend following",
+      "summary": "Long signal when trailing-window return / EMA slope / regression slope is positive for N daily bars. Exit on opposite signal or trailing stop.",
+      "status": "primary",
+      "minimum_viable_test_shape": "Single rule, single window length per asset, no parameter sweep beyond the pre-registered grid; OOS unread before run."
+    },
+    {
+      "id": "donchian_channel_breakout",
+      "label": "Donchian / channel breakout",
+      "summary": "Enter on N-day high breakout; exit on M-day low breakout or M-day trailing channel.",
+      "status": "primary",
+      "minimum_viable_test_shape": "Pre-registered (N, M) windows per asset; no in-sample optimisation beyond the pre-registered grid."
+    },
+    {
+      "id": "moving_average_trend_filter",
+      "label": "Moving-average trend filter",
+      "summary": "Trade trend-following signal only when price is above a long EMA (uptrend filter); flat otherwise.",
+      "status": "primary",
+      "minimum_viable_test_shape": "Single EMA window length per asset, pre-registered; filter applied to a trend-following base."
+    },
+    {
+      "id": "volatility_regime_gate",
+      "label": "Volatility-regime gate",
+      "summary": "Gate trade entries by realised volatility regime (e.g., enter only when rolling-vol is below / above a threshold).",
+      "status": "primary",
+      "minimum_viable_test_shape": "Single rolling-vol window + single threshold per asset, pre-registered."
+    },
+    {
+      "id": "momentum_continuation",
+      "label": "Momentum continuation",
+      "summary": "Continuation entries on a k-day return signal (skip-month optional); exit on signal flip.",
+      "status": "primary",
+      "minimum_viable_test_shape": "Single k window + optional skip per asset, pre-registered."
+    },
+    {
+      "id": "risk_on_risk_off_filter",
+      "label": "Simple risk-on / risk-off filter",
+      "summary": "Cross-asset regime filter (e.g., BTC trend gates ETH / SOL entries) or external risk proxy gate (DXY / equity index correlation).",
+      "status": "primary",
+      "minimum_viable_test_shape": "One gating series + single threshold; no multi-input fitting."
+    },
+    {
+      "id": "mean_reversion",
+      "label": "Daily mean reversion (WATCH only, not primary)",
+      "summary": "Counter-trend / pullback entries with a tight exit; carries higher risk of regime-dependence and is treated as WATCH-only at this stage.",
+      "status": "WATCH_only",
+      "minimum_viable_test_shape": "Pre-registered single-rule reversion test; never primary; never combined with trend-following without an explicit ensemble protocol."
+    }
+  ],
+
+  "data_requirements": {
+    "ohlcv_daily_required": true,
+    "timezone_normalization": "UTC",
+    "session_handling": "24/7 crypto; weekday-only handling forbidden.",
+    "missing_day_rules": "Missing daily bars MUST be flagged in the manifest; never silently forward-filled.",
+    "exchange_or_source_provenance": "Source venue / vendor explicitly named in any future dataset manifest; row-level source_id required.",
+    "symbol_mapping": "Per-venue symbol -> SPARTA canonical (BTC / ETH / SOL) mapping versioned alongside the dataset.",
+    "split_rename_delisting_handling": "Crypto rarely splits; renames / forks / network-changes documented as first-class events (e.g., LUNA -> LUNC, MATIC -> POL). Future research using affected assets must declare the adjustment method.",
+    "fee_assumptions_required": "Taker-side fee per venue, dated; pre-declared before any future test.",
+    "slippage_assumptions_required": "Conservative (slow-day) slippage haircut on top of fees; depth-aware if order-book data is available.",
+    "stablecoin_quote_currency_handling": "Quote currency (USDT / USDC / USD) declared explicitly per series; conversions across stablecoins require an explicit FX series with a documented method.",
+    "data_freeze_requirement": "Every dataset must be FROZEN with sha256 checksums before any IS/OOS run; manual edits invalid unless documented + re-validated under a new dataset_version.",
+    "no_lookahead_requirement": "Features and signals available at decision time only; IS/OOS windows sealed before any run."
+  },
+
+  "fee_slippage_requirements": {
+    "default_assumption": "TAKER on every leg unless a maker proof is pre-registered.",
+    "minimum_haircut_per_trade": "Documented per venue; never best-case.",
+    "fee_schedule_attached_per_dataset": true,
+    "fees_as_distinct_pnl_line": true,
+    "slippage_model_minimum": "Constant-bps + 1-tick haircut OR depth-aware when L2 available."
+  },
+
+  "risk_assumptions": {
+    "no_leverage_in_first_test": true,
+    "position_sizing": "Equal-weight per asset OR pre-declared fixed-fraction sizing; never adaptive at this stage.",
+    "stop_loss_policy": "Pre-registered if any; never added post-hoc.",
+    "drawdown_kill": "Per-asset and portfolio drawdown limits pre-declared.",
+    "tail_risk_disclosure": "Each future backtest report must include worst-day / worst-week / worst-month drawdown + a single named stress scenario."
+  },
+
+  "validation_phases": [
+    {"phase": "P0_protocol",                  "purpose": "This bundle. Lock language, scope, costs, kill rules. No data, no run."},
+    {"phase": "P1_data_contract",             "purpose": "Author the Crypto-D1 data contract + source selection (venues / vendors). Still no data pull."},
+    {"phase": "P2_dataset_manifest_freeze",   "purpose": "Acquire frozen historical data (separately authorized); produce + freeze a per-dataset manifest under the data contract."},
+    {"phase": "P3_baseline_strategy_impl",    "purpose": "Implement the first candidate strategy family deterministically; no IS run yet."},
+    {"phase": "P4_is_oos_split",              "purpose": "Pre-register the IS window + sealed OOS window before any run."},
+    {"phase": "P5_walk_forward_or_rolling",   "purpose": "Walk-forward / rolling validation under the pre-registered protocol."},
+    {"phase": "P6_robustness_sensitivity",    "purpose": "Sensitivity to parameter perturbations + cost stress + asset coverage check."},
+    {"phase": "P7_paper_signal_simulation",   "purpose": "Paper-signal SIMULATION ONLY (no broker, no order execution) -- and ONLY if a SEPARATE future authorization grants this phase."},
+    {"phase": "P8_live_trading",              "purpose": "EXPLICITLY OUT OF SCOPE for this protocol stack. Live trading requires a SEPARATE far-future protocol + authorizations after evidence exists."}
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "Future tests show: NO lookahead; realistic fees + slippage; enough trades to support a verdict; OOS survives the IS pattern in sign + magnitude within a pre-registered tolerance; result does NOT depend on a single asset; drawdown within pre-declared limits; rules remain simple + explainable; no rule was changed mid-study.",
+    "WATCH": "IS shows positive expectancy after full costs but at least one of: OOS materially weaker than IS; one asset works, others do not; trade count too low; sensitive to small fee/slippage changes; market-regime dependent.",
+    "FAIL": "No OOS edge; excessive drawdown; overfit parameters; only works in one (bubble) regime; edge disappears with realistic costs."
+  },
+
+  "kill_conditions": [
+    "Any stress scenario (vol spike / regime flip / venue outage proxy) eats more than N months of estimated edge.",
+    "Backtest cannot be reproduced bit-for-bit by a second offline run.",
+    "An assumption (no-fee, no-slippage, no-borrow, no-funding for spot) is found to have been silently dropped.",
+    "OOS window is peeked before sealing.",
+    "Parameter sweep extends beyond the pre-registered grid.",
+    "Edge depends on data that has been manually edited without documentation."
+  ],
+
+  "required_future_artifacts": [
+    "Crypto-D1 Data Contract v1 (P1) -- spec only, no data pull.",
+    "Crypto-D1 Dataset Manifest v1 (P2) -- per-dataset manifest schema for this lane.",
+    "Crypto-D1 Data QA / Freeze Spec v1 (P2) -- QA harness spec for the daily-crypto data shape.",
+    "Crypto-D1 Baseline Backtest Plan v1 (P3 / P4) -- pre-registration memo for the FIRST family + IS/OOS split.",
+    "Per-strategy backtest report.json + report.md with PASS / WATCH / FAIL verdict.",
+    "Lane closeout memo if a strategy family PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Protocol / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this protocol's runtime.",
+    "No data fetch in this bundle. No backtest in this bundle. No dataset processing in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this protocol alone.",
+    "Crypto trend ideas are not profitable until tested with full costs. A good historical chart does not imply future returns. No backtest is authorized by this protocol alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This protocol does not imply edge.",
+    "Crypto trend ideas are not profitable until tested.",
+    "A good historical chart does not imply future returns.",
+    "No paper or live trading is authorized.",
+    "No backtest is authorized by this protocol alone (P3+ requires its own separate authorization)."
+  ]
+}
