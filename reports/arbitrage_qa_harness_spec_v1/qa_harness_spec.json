@@ -1,0 +1,327 @@
+{
+  "qa_harness_spec_id": "arbitrage_qa_harness_spec_v1",
+  "title": "SPARTA Arbitrage QA Harness Spec v1",
+  "version": "1.0",
+  "kind": "qa_harness_spec",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "companion_documents": {
+    "arbitrage_research_protocol_v1": "reports/arbitrage_research_protocol_v1/protocol.json",
+    "arbitrage_data_contract_v1": "reports/arbitrage_data_contract_v1/data_contract.json",
+    "arbitrage_dataset_manifest_v1": "reports/arbitrage_dataset_manifest_v1/dataset_manifest.json"
+  },
+
+  "research_objective": "Define exactly how a FUTURE QA harness must check any future arbitrage dataset + per-dataset manifest BEFORE a research test is allowed to use it. This document does not fetch data, does not connect to any exchange, does not process datasets, does not run a backtest, and does not authorize trading. It is the written input spec that any future, separately-authorized QA harness implementation MUST satisfy.",
+
+  "supported_arbitrage_categories": [
+    {
+      "id": "cross_exchange_spot",
+      "label": "A. Cross-exchange spot arbitrage",
+      "category_specific_qa_checks": [
+        "venue_pair_clock_alignment_check: per-venue clock skew within max_skew_allowed",
+        "synchronized_l1_coverage_check: both venues have L1 at the same aligned timestamps",
+        "depth_at_test_size_check: configured test size <= cumulative depth on both sides",
+        "withdrawal_latency_assumption_attached_check: pointer to the data-contract row exists",
+        "fee_schedule_attached_check: per-venue fee tier dated and pinned",
+        "asset_network_compatibility_check: the asset+network pair is transferable across both venues"
+      ]
+    },
+    {
+      "id": "spot_perp_basis_funding",
+      "label": "B. Spot-perp basis / funding arbitrage",
+      "category_specific_qa_checks": [
+        "funding_timestamp_alignment_check: per-row settlement_ts aligned to documented venue UTC cutoff",
+        "funding_rate_completeness_check: rate, interval, settlement_ts non-null on every funding row",
+        "perp_contract_specs_attached_check: mark/index composition, tick, lot, multiplier non-null",
+        "liquidation_risk_notes_attached_check: maintenance margin + engine-model + partial/full behaviour documented",
+        "spot_perp_clock_alignment_check: spot rows aligned to perp mark/index timestamps within max_skew_allowed"
+      ]
+    },
+    {
+      "id": "triangular",
+      "label": "C. Triangular arbitrage",
+      "category_specific_qa_checks": [
+        "three_leg_pair_mapping_check: leg_1 / leg_2 / leg_3 declared with venue + symbol",
+        "snapshot_age_check: every snapshot's oldest leg <= max_snapshot_age_ms (default 250)",
+        "per_leg_taker_fee_attached_check: taker fee bps per leg present",
+        "per_leg_precision_check: tick_size + lot_size present per pair",
+        "per_leg_depth_check: configured test size <= depth per leg at the touch",
+        "leg_sequence_assumption_check: documented send order + per-leg time-to-fill present"
+      ]
+    },
+    {
+      "id": "futures_calendar",
+      "label": "D. Futures calendar / basis arbitrage",
+      "category_specific_qa_checks": [
+        "expiry_calendar_present_check: per-contract last trading day + settlement date populated",
+        "contract_multiplier_present_check: multiplier per contract non-null",
+        "roll_calendar_present_check: which days the protocol would have rolled is explicit",
+        "margin_and_carry_assumptions_present_check: initial + maintenance margin + cost-of-carry per contract per venue documented",
+        "venue_source_pin_check: expiry/roll source citation matches the venue record"
+      ]
+    },
+    {
+      "id": "statistical_relative_value",
+      "label": "E. Statistical / relative-value mispricing (NOT pure arbitrage)",
+      "category_specific_qa_checks": [
+        "aligned_bar_check: both legs share the same bar timestamp on every aligned row",
+        "spread_definition_attached_check: log-ratio / beta-adjusted / distance-from-mean explicitly recorded",
+        "is_only_diagnostics_check: cointegration / stationarity diagnostics were computed on IS window only (OOS unread)",
+        "regime_label_definition_check: if regime gating is used, the label generator is documented",
+        "not_pure_arbitrage_label_check: every downstream artifact carries the RELATIVE_VALUE label, not ARBITRAGE",
+        "corporate_action_adjustment_check: equities/ETFs carry raw + adjusted with a documented method"
+      ]
+    }
+  ],
+
+  "required_inputs": [
+    "Frozen on-disk dataset (no network).",
+    "Per-dataset manifest file satisfying arbitrage_dataset_manifest_v1.manifest_schema.required_future_manifest_fields.",
+    "Pinned Arbitrage Data Contract v1 version reference.",
+    "Pinned Arbitrage Research Protocol v1 version reference.",
+    "QA configuration (max_skew_allowed_ms, max_snapshot_age_ms, depth_at_size, volume_filter, outlier_thresholds) -- all pre-declared, no auto-tuning during a run."
+  ],
+
+  "forbidden_inputs": [
+    "Live exchange APIs at QA-run time.",
+    "Any source requiring an embedded API key, OAuth token, or .env credential at QA-run time.",
+    "Scraping any venue HTML / WebSocket / undocumented endpoint.",
+    "Network URLs in dataset source_location.",
+    "Datasets without a manifest.",
+    "Datasets whose manifest fails arbitrage_dataset_manifest_check.",
+    "Synthetic / mock-priced data presented as historical (source_type 'synthetic_diagnostic_only_NOT_FOR_BACKTEST' is allowed only when QA explicitly logs it; it cannot reach QA_PASS).",
+    "Datasets whose OOS window was peeked before sealing."
+  ],
+
+  "qa_check_groups": {
+    "A_manifest_integrity": {
+      "purpose": "Validate the per-dataset manifest exists, is well-formed, and pins the right versions BEFORE any row is inspected.",
+      "checks": [
+        "required_manifest_fields_present: every field listed in arbitrage_dataset_manifest_v1.manifest_schema.required_future_manifest_fields is present and non-empty (except notes).",
+        "dataset_id_present: non-empty, canonical, never reused.",
+        "dataset_version_present: monotonically-increasing integer.",
+        "data_contract_version_referenced: explicit Arbitrage Data Contract version pin.",
+        "research_protocol_version_referenced: explicit Arbitrage Research Protocol version pin.",
+        "freeze_status_present: must be FROZEN before QA_PASS is possible.",
+        "qa_status_field_present_for_update: harness will populate qa_status; field exists on the manifest.",
+        "allowed_use_present: includes 'research_only'; must NOT include 'live_trading' / 'paper_order_execution' / 'broker_control' / 'exchange_connection'.",
+        "forbidden_use_present: explicitly forbids live_trading / paper_order_execution / broker_control / exchange_connection.",
+        "source_provenance_present: source_type, source_location, ingest_pipeline_version all non-null.",
+        "checksum_policy_present: sha256 (or stronger); per-file checksums verifiable on FROZEN."
+      ]
+    },
+    "B_timestamp_and_synchronization": {
+      "purpose": "Reject rows that violate the data contract's timestamp + synchronization rules.",
+      "checks": [
+        "exchange_timestamp_exists: at least one of exchange_send_ts / exchange_recv_ts / venue_match_ts per row.",
+        "local_recv_ts_present_if_available: always recorded but never the sole timestamp.",
+        "timezone_normalized: stored timestamps are UTC; original timezone preserved as metadata.",
+        "max_skew_policy_enforced: rolling per-venue exchange_send_ts vs. local_recv_ts within max_skew_allowed.",
+        "stale_quote_policy: rows whose quote is older than max_skew_allowed + venue_publish_interval are flagged as stale.",
+        "duplicate_timestamp_policy: duplicates removed by (instrument_id, primary_ts, sequence_no_if_present); duplicates without a sequence number are INVALID.",
+        "monotonic_rule: primary_ts strictly monotonic per (instrument_id); OOO rows flagged.",
+        "cross_venue_alignment_rule: cross-venue / triangular tests share the same aligned timestamp source at sub-second resolution."
+      ]
+    },
+    "C_quote_and_spread": {
+      "purpose": "Reject quote-level anomalies and surface spread issues.",
+      "checks": [
+        "bid_le_ask: best_bid <= best_ask on every L1 row.",
+        "non_negative_spread: best_ask - best_bid >= 0.",
+        "spread_outlier_detection: rows where spread > N * rolling_median_spread are flagged (default N documented in QA config).",
+        "stale_quote_detection: any quote older than max_skew_allowed at decision time is excluded.",
+        "quote_flicker_detection: recurring multi-tick flicker within a sub-second window is flagged.",
+        "missing_side_handling: row missing either bid or ask is INVALID.",
+        "crossed_market_handling: bid >= ask (crossed top-of-book) is flagged; excluded from MVT unless strategy explicitly handles it."
+      ]
+    },
+    "D_order_book_and_depth": {
+      "purpose": "Validate L1/L2 book quality and depth-at-size capability.",
+      "checks": [
+        "depth_levels_present: L1 mandatory; L2 (>=5 levels) required if depth-at-size test is requested.",
+        "depth_at_size_calculation_requirement: cumulative size from best bid/ask up to the configured test size is documented per (venue, pair).",
+        "negative_or_zero_size_rejection: any level with size <= 0 is INVALID.",
+        "book_imbalance_warning: extreme one-sided book is flagged (configurable threshold).",
+        "stale_order_book_detection: L2 snapshot older than max_skew_allowed at decision time is excluded.",
+        "crossed_book_flag: best_bid level >= best_ask level is flagged."
+      ]
+    },
+    "E_trade_print": {
+      "purpose": "Validate trade-print quality.",
+      "checks": [
+        "trade_price_positive: price > 0 on every trade print.",
+        "trade_size_positive: size > 0 on every trade print.",
+        "outlier_print_detection: prints whose price deviates from rolling-mid by > M * spread are flagged.",
+        "quote_trade_alignment: trade venue_match_ts aligned with a contemporaneous quote book snapshot.",
+        "duplicate_trade_id_check: where the venue exposes a trade_id, duplicates are removed.",
+        "block_or_otc_print_flag: block / OTC prints are flagged separately from continuous-book trades."
+      ]
+    },
+    "F_fee_funding_cost": {
+      "purpose": "Make every PnL-shaping assumption explicit before any future test.",
+      "checks": [
+        "maker_taker_schedule_present: maker_fee_bps + taker_fee_bps per (venue, instrument-class) non-null.",
+        "funding_timestamps_present_for_perps: spot_perp_basis_funding rows carry settlement_ts.",
+        "funding_rates_present_for_perps: spot_perp_basis_funding rows carry rate + interval.",
+        "withdrawal_deposit_fee_references_present: per asset per network non-null.",
+        "network_fees_reference_present: crypto on-chain gas distribution documented.",
+        "cost_fields_non_null_before_any_future_edge_claim: no future PnL number is allowed without fees + spread + slippage + funding/borrow lines."
+      ]
+    },
+    "G_liquidity_and_latency": {
+      "purpose": "Reject feeds where liquidity / latency assumptions cannot be honoured.",
+      "checks": [
+        "minimum_notional_depth_check: per category per venue per pair threshold met.",
+        "volume_filter_check: pair-level minimum 24h volume threshold met (per QA config).",
+        "exchange_downtime_outage_flags_present: first-class boolean column exists (not inferred from gaps).",
+        "latency_skew_warning: rolling exchange_send_ts vs. local_recv_ts > max_skew_allowed triggers a WARN.",
+        "suspicious_venue_state_flag: documented categorical column populated when present (depth_collapse / spread_widening_spike / trade_print_without_book_change / post-outage_first_minute)."
+      ]
+    },
+    "H_anomaly_detection": {
+      "purpose": "Detect anomalies whose presence either WARNs or FAILs QA.",
+      "checks": [
+        "depth_collapse_detection: sudden zero-size at touch is flagged.",
+        "spread_widening_spike_detection: spread > K * rolling_median for X consecutive seconds is flagged.",
+        "trade_print_without_book_change_detection: prints lacking a contemporaneous book change are flagged.",
+        "post_outage_first_minute_detection: rows in the first minute after an outage flag are excluded from MVT unless strategy explicitly handles them.",
+        "regime_break_detection: structural breaks (statistical_relative_value only) are flagged for review."
+      ]
+    }
+  },
+
+  "manifest_validation_checks": [
+    "Validate per-dataset manifest against arbitrage_dataset_manifest_v1.manifest_schema.required_future_manifest_fields.",
+    "Reject manifests whose source_location is a network URL.",
+    "Reject manifests with any safety flag True.",
+    "Reject manifests with freeze_status != FROZEN when QA is asked to run a research-grade pass.",
+    "Reject manifests where row_count_expected != row_count_actual without a documented gap."
+  ],
+
+  "timestamp_qa_checks": "See qa_check_groups.B_timestamp_and_synchronization.",
+  "quote_qa_checks": "See qa_check_groups.C_quote_and_spread.",
+  "order_book_qa_checks": "See qa_check_groups.D_order_book_and_depth.",
+  "trade_print_qa_checks": "See qa_check_groups.E_trade_print.",
+  "fee_funding_qa_checks": "See qa_check_groups.F_fee_funding_cost.",
+  "liquidity_qa_checks": "See qa_check_groups.G_liquidity_and_latency.",
+  "latency_qa_checks": "See qa_check_groups.G_liquidity_and_latency (latency-related checks).",
+  "provenance_qa_checks": [
+    "every row carries source_id + data_contract_version + dataset_version",
+    "ingest_pipeline_version present",
+    "checksum_per_file populated when freeze_status == FROZEN",
+    "manifest_path resolves to an on-disk manifest file"
+  ],
+  "normalization_qa_checks": [
+    "currency_conversion documented; FX series cited if applied",
+    "symbol_canonicalization map applied; versioned",
+    "tick/lot rounding documented; never silently rounded",
+    "continuous_contract_stitching method documented",
+    "split/dividend adjustment for equities documented; raw + adjusted both stored"
+  ],
+  "anomaly_detection_checks": "See qa_check_groups.H_anomaly_detection.",
+  "category_specific_qa_checks": "See per-category lists in supported_arbitrage_categories.",
+
+  "qa_status_rules": {
+    "QA_DRAFT": "QA harness has not yet been run on this dataset_version. Dataset is NOT research-usable.",
+    "QA_PASS": "Every blocking check passed. Zero unresolved WARN-level issues OR every WARN has an explicit operator-acceptance note. row_count_expected == row_count_actual (or a documented gap explains it). Manifest is FROZEN with valid per-file checksums. Dataset is research-usable. QA_PASS does NOT imply profitability, does NOT imply edge, and does NOT authorize backtesting, paper trading, or live trading.",
+    "QA_WARN": "Every blocking check passed, but at least one non-blocking warning is unresolved (e.g., borderline coverage / latency / liquidity / spread outliers / quote flicker). The dataset is only research-usable AFTER an explicit operator-acceptance memo per dataset_version. The acceptance memo must name the WARN, why it is acceptable, and the limit it imposes.",
+    "QA_FAIL": "At least one blocking check failed (missing required field, broken checksum, crossed book on every row, manifest invalid, peeked OOS, etc.). Dataset is NOT research-usable until the cause is fixed and a new dataset_version is produced.",
+    "QA_BLOCKED": "Externally blocked (legal / TOS / vendor restriction). Cannot proceed regardless of harness output.",
+    "QA_RETIRED": "Dataset has been retired by the operator. QA history is preserved for traceability; cannot be re-promoted to QA_PASS."
+  },
+
+  "qa_pass_does_not_imply": [
+    "QA_PASS does NOT imply profitability.",
+    "QA_PASS does NOT prove edge.",
+    "QA_PASS does NOT authorize backtesting.",
+    "QA_PASS does NOT authorize paper-order execution.",
+    "QA_PASS does NOT authorize live trading.",
+    "QA_PASS does NOT authorize broker control or exchange connection.",
+    "QA_PASS does NOT promote any lane to ACTIVE or STRONG.",
+    "QA_FAIL BLOCKS research use of the dataset_version.",
+    "QA_WARN requires explicit operator-acceptance memo before any research use."
+  ],
+
+  "report_schema": {
+    "description": "The schema that every future per-run QA report must satisfy. The QA harness writes one report per (dataset_id, dataset_version) it inspects.",
+    "required_future_qa_report_fields": [
+      "qa_report_id",
+      "dataset_id",
+      "dataset_version",
+      "manifest_version",
+      "data_contract_version",
+      "generated_at",
+      "qa_status",
+      "checks_run",
+      "checks_passed",
+      "checks_warned",
+      "checks_failed",
+      "blocking_failures",
+      "warnings",
+      "row_count_observed",
+      "missing_data_summary",
+      "timestamp_summary",
+      "quote_summary",
+      "fee_funding_summary",
+      "liquidity_summary",
+      "category_specific_summary",
+      "allowed_next_step",
+      "forbidden_next_steps",
+      "safety_flags"
+    ],
+    "safety_flags_pinned_false_in_every_report": [
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "exchange_connection_enabled",
+      "data_fetch_enabled",
+      "backtest_enabled"
+    ]
+  },
+
+  "pass_watch_fail_rules": {
+    "PASS": "All required top-level sections of this spec are present; all 8 QA check groups documented; all 5 categories carry category-specific checks; QA status model contains all 6 statuses; report schema lists all required future QA report fields; no safety flag is True; no forbidden phrase appears.",
+    "WATCH": "Spec is satisfied but at least one section is borderline (e.g., an anomaly threshold is loose); documented and re-checked before any reliance.",
+    "FAIL": "Any required section is missing; any safety flag is True; any QA status is missing; any required future QA report field is absent; any forbidden phrase appears."
+  },
+
+  "required_future_artifacts": [
+    "QA harness implementation that satisfies this spec (separately authorized; standard-library or pinned-dependency only; no network at runtime).",
+    "Per-(dataset_id, dataset_version) QA report file satisfying report_schema.required_future_qa_report_fields.",
+    "Per-WARN operator-acceptance memo (when QA_WARN is accepted as research-usable).",
+    "Per-FAIL remediation memo OR new dataset_version that addresses the failure.",
+    "Retirement memo when QA_RETIRED transitions in."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. QA harness specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this spec's runtime.",
+    "No data fetch in this bundle. No backtest in this bundle. No dataset processing in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this spec alone.",
+    "A price gap is not profit. QA is not strategy validation. QA_PASS does not imply edge."
+  ],
+
+  "no_profit_claim_policy": [
+    "QA is not strategy validation.",
+    "QA does not prove edge.",
+    "A clean dataset does not imply profit.",
+    "A price gap is not profit.",
+    "No QA artifact authorizes live trading, paper-order execution, or broker control.",
+    "QA_PASS does not authorize backtesting; that is a separate, separately-authorized phase."
+  ]
+}
