@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "layer": "arbitrage_research_protocol_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/arbitrage_research_protocol_v1/protocol.json (machine-readable spec)",
+    "reports/arbitrage_research_protocol_v1/protocol.md (human-readable spec)",
+    "reports/arbitrage_research_protocol_v1/report.md (build report)",
+    "reports/arbitrage_research_protocol_v1/report.json (build report)",
+    "tools/arbitrage_protocol_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_arbitrage_research_protocol.py (14 tests covering schema + safety + integration)",
+    "tools/strategy_candidate_registry.py: per-seed extra_files extension so the arbitrage lane can include SPARTA-side protocol docs as matched reports (lane stays IDEA)"
+  ],
+  "files_changed": [
+    "reports/arbitrage_research_protocol_v1/protocol.json",
+    "reports/arbitrage_research_protocol_v1/protocol.md",
+    "reports/arbitrage_research_protocol_v1/report.md",
+    "reports/arbitrage_research_protocol_v1/report.json",
+    "tools/arbitrage_protocol_check.py",
+    "tests/test_arbitrage_research_protocol.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "protocol_definitions": [
+    "Pure arbitrage = simultaneous round-trip with positive cash flow after EVERY realistic cost; rare in liquid public markets.",
+    "Apparent edge != profit (fees, spread, slippage, latency, withdrawal latency, counterparty haircut, withdrawal limits).",
+    "Statistical / relative-value is NOT arbitrage (uses its own protocol).",
+    "Five categories: cross_exchange_spot, spot_perp_basis_funding, triangular, futures_calendar, statistical_relative_value.",
+    "Validation phases: P0_protocol (this), P1_data_contract, P2_data_acquisition, P3_offline_replay, P4_holdout_oos, P5_decision_gate, P6_periodic_review.",
+    "Live trading / paper-order execution is P_NONE -- not a phase of this protocol; requires SEPARATE authorization with a different protocol."
+  ],
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "execution_flags_pinned_false": [
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "exchange_connection_enabled",
+      "data_fetch_enabled"
+    ],
+    "forbidden_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange"
+    ],
+    "distinction_phrases_required_in_md": [
+      "Pure arbitrage", "NOT pure arbitrage", "statistical_relative_value", "Apparent edge"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "56 passed in 0.63s"
+    }
+  ],
+  "json_validity": {
+    "arbitrage_protocol_check_validate": "validate: OK",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_arbitrage_after_build": {
+    "status": "IDEA",
+    "evidence_level": "MIXED",
+    "source_reports": ["protocol.json", "protocol.md"],
+    "next_action": "Claude/Codex: arbitrage data-contract bundle",
+    "guardrails_held": [
+      "lane is not promoted to ACTIVE just because protocol docs exist",
+      "lane never reaches STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/credentials reference"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Deterministic re-selection chose the same queue item; no artificial nudge was applied."
+  },
+  "how_it_fits_into_sparta_pipeline": [
+    "Strategy Factory Routine Layer v1 (98f8918) -> JARVIS Strategy Factory Dashboard (5fe3107) -> Next Bundle Generator v1 (a699198) -> Strategy Candidate Registry v1 (191948c) -> Arbitrage Research Protocol v1 (this bundle, P0_protocol phase).",
+    "Subsequent phases (data contract, acquisition, replay, OOS) are SEPARATE, separately-authorized bundles. None of them run live or paper-order execution."
+  ],
+  "recommended_next_bundle": [
+    "P1 — Arbitrage Data Contract v1 (one category at a time; recommended cross_exchange_spot OR spot_perp_basis_funding); spec only, no data pull",
+    "OR Data QA / freeze workflow (cross-cutting; benefits any later P2 acquisition)",
+    "Crypto-D1 lane is PARKED; revisiting requires a NEW hypothesis, not a re-tune"
+  ]
+}

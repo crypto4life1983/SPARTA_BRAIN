@@ -156,6 +156,14 @@ SEED_LANES = (
         "timeframe": "N_A",
         "hypothesis": "Paired-series / cross-venue inefficiency research with its own data contract.",
         "report_match_substrings": ("arbitrage", "stat_arb", "pair"),
+        # Bundle 4: also count the SPARTA-side Arbitrage Research Protocol v1
+        # docs as matched reports for this lane if they exist on disk. These
+        # documents contain "protocol" in the filename -> classifier keeps the
+        # lane at IDEA (NONE evidence), never ACTIVE, never STRONG.
+        "extra_files": (
+            "reports/arbitrage_research_protocol_v1/protocol.md",
+            "reports/arbitrage_research_protocol_v1/protocol.json",
+        ),
     },
     {
         "candidate_id": "data_qa_freeze",
@@ -261,17 +269,25 @@ def _date_from_name(name: str):
         return None
 
 
-def _match_lane_reports(lane_seed: dict, all_names: list) -> list:
-    """Return all report names whose lowercase contains any seed substring."""
+def _match_lane_reports(lane_seed: dict, all_names: list, repo_root: Path = REPO_ROOT) -> list:
+    """Return all report names whose lowercase contains any seed substring, plus
+    the basenames of any seed-specified extra_files that exist on disk."""
     subs = tuple(s.lower() for s in lane_seed.get("report_match_substrings", ()))
-    if not subs:
-        return []
     hits = []
     for n in all_names:
         low = n.lower()
-        if any(s in low for s in subs):
+        if subs and any(s in low for s in subs):
             hits.append(n)
-    return hits
+    # Bundle 4: SPARTA-side protocol/spec docs may live outside the agentic
+    # factory reports tree. A seed can list explicit relative paths under
+    # `extra_files`; if any exist on disk, their basenames are added to the
+    # match list and classified the same way as agentic-factory report names.
+    for rel in lane_seed.get("extra_files", ()):
+        p = Path(repo_root) / rel
+        if p.exists():
+            hits.append(p.name)
+    # Deterministic + de-duplicate (preserve sort order).
+    return sorted(set(hits))
 
 
 def _build_queue_index(queue_data) -> dict:
@@ -394,7 +410,7 @@ def build_registry(repo_root: Path = REPO_ROOT) -> dict:
 
     candidates = []
     for seed in SEED_LANES:
-        matched = _match_lane_reports(seed, all_names)
+        matched = _match_lane_reports(seed, all_names, repo_root)
         cand = _build_candidate(seed, matched, queue_index)
         candidates.append(cand)
 

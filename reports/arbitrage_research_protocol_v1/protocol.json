@@ -1,0 +1,216 @@
+{
+  "protocol_id": "arbitrage_research_protocol_v1",
+  "title": "SPARTA Arbitrage Research Protocol v1",
+  "version": "1.0",
+  "kind": "research_protocol",
+  "read_only": true,
+
+  "research_only": true,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "exchange_connection_enabled": false,
+  "data_fetch_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "research_objective": "Define the exact, conservative protocol SPARTA will follow if/when it studies arbitrage / market-inefficiency opportunities. This document does not build a bot, does not fetch data, does not connect to any exchange, and does not claim profitability. Its only purpose is to lock in language, scope, costs, kill rules, and validation phases BEFORE any data work begins.",
+
+  "definitions": {
+    "pure_arbitrage": "Simultaneous (or near-simultaneous) round-trip trade across two or more instruments / venues that nets a positive cash flow with zero or near-zero directional exposure, AFTER every realistic cost is subtracted. Pure arbitrage in liquid public markets is rare; the default assumption is that apparent edges are an artifact of stale data, ignored costs, or unmeasured execution risk.",
+    "apparent_edge_is_not_profit": "A price difference visible in two data feeds is NOT profit. It only becomes a profit hypothesis after fees, transfer delay, liquidity at the visible price, spreads at execution time, funding, borrow cost, latency to fill, withdrawal limits, exchange counterparty risk, and operational risk have all been deducted. Apparent edges that vanish under any of these subtractions are research-only curiosities.",
+    "not_arbitrage": "Anything that requires direction, persistence, or mean-reversion of a relationship (statistical / relative-value strategies, pairs trading, lead-lag predictors, regime alpha). These belong in their own protocol; we will study them but never call them arbitrage.",
+    "scope_word": "We use the word 'arbitrage' in this protocol strictly for the pure-arbitrage definition above. Anything else is labelled statistical_relative_value."
+  },
+
+  "categories": [
+    {
+      "id": "cross_exchange_spot",
+      "label": "A. Cross-exchange spot arbitrage",
+      "example": "BTC/USDT price difference between two regulated spot venues.",
+      "hypothesis": "Persistent positive expectancy from buying the cheap venue and selling the rich venue, sized so spreads + fees + transfer delay + withdrawal limits + counterparty risk do not erode the gap.",
+      "data_needed": "Tick / L1 order books per venue, withdrawal-and-deposit latency stats, fee schedules per tier, withdrawal limits, historical venue-outage events, custody constraints.",
+      "minimum_viable_test": "Offline replay: align two venues' L1 books on the same clock, subtract MAKER+TAKER fees, subtract a withdrawal-latency penalty, mark a hypothetical fill ONLY when both sides would have been touched. Report the net cash flow distribution; require positive expectancy with non-overlapping confidence intervals across the entire backtest window.",
+      "main_costs": "Maker/taker fees per leg, spread crossed if not patient, withdrawal/deposit fees, network transfer time risk, on-venue rebalance ops cost, FX/stablecoin conversion if needed.",
+      "main_risks": "Stale-quote arbitrage illusion (the visible book has already moved); withdrawal freeze; exchange insolvency / counterparty risk; KYC / regulatory friction; capital lockup; reserve imbalance; thin liquidity at the visible price.",
+      "likely_feasibility": "LOW for a single retail operator; high-frequency professional desks compete this away within milliseconds on liquid pairs.",
+      "why_it_may_fail": "By the time funds rebalance the gap is gone; the visible book is informational not executable; venue outages or freezes turn lock-up into loss; spread quoted is not spread filled.",
+      "first_safe_research_step": "Author the data contract: which venues, which pairs, which sampling clock, which fee tiers, what withdrawal latency assumption, what counterparty haircut, and where the OFFLINE historical data will come from (no live fetch). Do not pull data yet."
+    },
+    {
+      "id": "spot_perp_basis_funding",
+      "label": "B. Spot-perp basis / funding arbitrage",
+      "example": "Long BTC spot + short BTC perp (or vice versa) while funding rate pays the short.",
+      "hypothesis": "After deducting all fees, expected funding flow + carry covers maintenance margin, borrow cost, and adverse spread.",
+      "data_needed": "Funding-rate history (per venue), perp mark/index history, spot price history aligned to the same clock, margin/maintenance/liquidation rules per venue, borrow rates for short legs, custody/stablecoin costs.",
+      "minimum_viable_test": "Offline replay on a SINGLE venue first (avoid cross-venue settlement risk for the first study). Compute hypothetical funding accruals, deduct entry/exit fees on both legs, deduct one funding-flip stress event, deduct one liquidation-stress scenario, report net annualized carry.",
+      "main_costs": "Entry/exit fees on both legs, funding-paid (not received) regime changes, borrow/short cost, margin requirements (capital tied up), settlement / mark-to-market PnL volatility.",
+      "main_risks": "Funding flips against you; perp mark / index dislocations on stress; liquidation cascade in fast markets; oracle / index manipulation; counterparty risk concentrated on one venue.",
+      "likely_feasibility": "MEDIUM-LOW. Real strategy lives behind margin / borrow rules; what looks like a positive funding spread often pays a real but small carry while running large tail risk.",
+      "why_it_may_fail": "Funding can flip persistently negative during stress; tail liquidation wipes the carry; venue API downtime during stress causes inability to close.",
+      "first_safe_research_step": "Author the data contract + cost model + liquidation-stress scenario. No data pull yet. Pre-register the kill condition: any single stress scenario eating > N months of carry kills the lane."
+    },
+    {
+      "id": "triangular",
+      "label": "C. Triangular arbitrage",
+      "example": "BTC/USDT -> ETH/BTC -> ETH/USDT loop on a single venue.",
+      "hypothesis": "Cross-rate inconsistency on a single venue's quote book is large enough, often enough, after fees, to net positive.",
+      "data_needed": "Synchronous L1 (or L2 top-of-book) snapshots for all three pairs at the SAME timestamp; venue fee schedule for each pair; quote vs. fill-price slippage data; pair-by-pair tick rules.",
+      "minimum_viable_test": "Offline replay: for each timestamp, compute the implied cross-rate vs. the quoted cross-rate. Require all three legs to be simultaneously executable at the displayed top of book after maker-or-taker fees, after a one-tick slippage haircut on each leg, and after a minimum dwell time so the snapshot is not stale.",
+      "main_costs": "Three fees instead of one, three slippages instead of one, time-to-fire on three legs (the slowest leg defines the risk window).",
+      "main_risks": "By the time the third leg fires, one of the prior books has moved; partial fills leave you with unhedged exposure; venue rate-limits trip on rapid order bursts; visible top-of-book is not always executable size.",
+      "likely_feasibility": "LOW for retail. This is a co-located HFT problem on liquid venues. For illiquid alt pairs the gap exists but the size cap and slippage usually kill it.",
+      "why_it_may_fail": "The 'gap' is informational latency; once you act, it disappears or partially fills against you.",
+      "first_safe_research_step": "Author a strict definition of synchronous quote-book alignment + an offline test on a single past hour of one liquid venue. Pre-register: net expectancy must be positive after triple-fee + triple-slippage."
+    },
+    {
+      "id": "futures_calendar",
+      "label": "D. Futures calendar / basis arbitrage",
+      "example": "Front-month vs. next-month contract (or fixed-expiry vs. perp) basis trades.",
+      "hypothesis": "The term structure between contracts deviates from a no-arbitrage / cost-of-carry model in a measurable way that survives fees, margin, and rolls.",
+      "data_needed": "Continuous front/next contract series with explicit roll dates and roll method, margin schedule, fee schedule, settlement vs. market-close conventions, cash/carry interest assumption.",
+      "minimum_viable_test": "OFFLINE replay only; specification phase only in this protocol version. NO backtest is run in Bundle 4. Pre-register: which contracts, which roll method, which cost model, which OOS window.",
+      "main_costs": "Two leg fees, exchange margin (significant capital), roll slippage (the dangerous one), market-impact on illiquid back months.",
+      "main_risks": "Liquidity drops at the back month; rolls are crowded; basis can dislocate during expirations or news; capital required is large.",
+      "likely_feasibility": "MEDIUM in theory; MEDIUM-LOW in practice for retail because of margin and roll cost.",
+      "why_it_may_fail": "Roll spreads eat the basis; back-month liquidity vanishes when needed.",
+      "first_safe_research_step": "Spec only. Do not start a backtest from this bundle."
+    },
+    {
+      "id": "statistical_relative_value",
+      "label": "E. Statistical / relative-value mispricing (NOT pure arbitrage)",
+      "example": "Pairs trade on two correlated equities or two correlated crypto majors when the spread widens vs. its historical distribution.",
+      "hypothesis": "A historically mean-reverting spread between two correlated instruments will revert often enough, with bounded adverse drawdown, to produce positive expectancy after fees and borrow.",
+      "data_needed": "Aligned price series for both legs, borrow availability/cost for the short leg, transaction cost model, cointegration / stationarity diagnostics.",
+      "minimum_viable_test": "OFFLINE replay of the spread on frozen data with explicit cointegration test on the IN-SAMPLE window only; OOS verdict held back. Do not call this arbitrage in any report.",
+      "main_costs": "Two-leg fees and slippage, borrow on the short leg, capital tied up, financing.",
+      "main_risks": "Cointegration is not permanent; one half-life can be longer than your willingness to hold; structural break ends the relationship; correlation is not causation.",
+      "likely_feasibility": "MEDIUM as a directional research lane; LOW as a risk-free arbitrage.",
+      "why_it_may_fail": "Regime change; spread does not revert in time; one leg has a corporate / on-chain event.",
+      "first_safe_research_step": "Author the pair-selection rule, the holdout split, and the explicit kill condition. Mark category as RELATIVE_VALUE, not ARBITRAGE, throughout all downstream reports."
+    }
+  ],
+
+  "out_of_scope": [
+    "Cross-jurisdiction tax-arbitrage of regulated products.",
+    "Stablecoin de-peg trading (counterparty + regulatory + tail-risk dominated).",
+    "DeFi flash-loan strategies (smart-contract + MEV + gas + chain-reorg risks dominate).",
+    "OTC / dark-pool arbitrage (requires venue relationships and counterparty status).",
+    "Predictive / directional strategies dressed up as 'arbitrage' (market-making, latency arb, news arb).",
+    "Anything that requires placing a real order anywhere from this protocol's runtime.",
+    "Anything that requires fetching live data from any venue from this protocol's runtime."
+  ],
+
+  "market_data_requirements": {
+    "frozen_data_only": true,
+    "explicit_clock": "All multi-venue / multi-leg studies must align to one explicit timestamp source (UTC) and document the per-venue clock skew.",
+    "synchronous_snapshot_rule": "Cross-venue / triangular tests must use snapshots that share a documented timestamp; never compare last-trade vs. mid-book vs. ticker.",
+    "no_lookahead": "All features and quotes available at decision time only; no future bars.",
+    "out_of_sample_seal": "Each category must declare an IS window and an OOS window before any test."
+  },
+
+  "exchange_venue_requirements": {
+    "venue_must_be_named_in_spec": true,
+    "venue_must_have_fee_schedule_attached": true,
+    "venue_must_have_withdrawal_latency_assumption": true,
+    "venue_must_have_counterparty_haircut": true,
+    "no_live_connection": "Protocol does not establish any live exchange connection; all venue facts are inputs to the data contract."
+  },
+
+  "cost_model_minimums": {
+    "fees_per_leg": "Document MAKER and TAKER tiers; default to TAKER for sizing tests unless a maker proof is provided.",
+    "spread_haircut": "At least 1 tick / 1 bp per leg on top of fees, larger on illiquid pairs.",
+    "withdrawal_latency": "Conservative (slow-day) latency for cross-venue legs; never assume best-case.",
+    "funding_or_borrow": "Spot-perp and short-leg pair trades must carry an explicit funding/borrow line in PnL.",
+    "stress_overlay": "Each category must include at least one adverse stress scenario (venue outage, funding flip, liquidation cascade, roll dislocation) in its expectancy calculation."
+  },
+
+  "liquidity_filters": {
+    "minimum_displayed_size": "Test fills must be capped at a documented fraction of displayed top-of-book size; never assume infinite liquidity at the quote.",
+    "depth_check": "At least one depth-aware sensitivity test per category before any go/no-go.",
+    "withdrawal_caps": "Per-venue withdrawal caps are a hard ceiling on cross-exchange sizing tests."
+  },
+
+  "capital_constraints": {
+    "max_capital_at_risk_pct_per_leg": "Documented per category before any test; default low (<= 10%).",
+    "lockup_disclosure": "Cross-venue strategies must document expected capital lock-up time and ramp constraints.",
+    "no_leverage_in_first_test": true
+  },
+
+  "execution_feasibility_checklist": [
+    "Is the displayed price ACTUALLY executable at the size we want to trade?",
+    "Do BOTH/ALL legs fire close enough in time to make the snapshot meaningful?",
+    "Are fees + spreads + slippage + transfer costs already inside the expectancy number?",
+    "Have we written down the stress scenario AND deducted it from expectancy?",
+    "Is there a clear, written kill condition before any data run?",
+    "Have we declared which venue, which clock, which OOS window, which sizing limit?"
+  ],
+
+  "risk_checklist": [
+    "Stale-quote illusion: visible book has already moved.",
+    "Withdrawal freeze / venue outage during the round-trip.",
+    "Counterparty / custody risk concentrated on one venue.",
+    "Liquidation cascade in spot-perp or pair trades.",
+    "Roll / settlement dislocation in futures-calendar trades.",
+    "Cointegration break / regime change in relative-value trades.",
+    "Regulatory / jurisdiction shock.",
+    "Operational / API risk during the trade window.",
+    "Tail risk concentrated in low-frequency, high-magnitude events not visible in baseline."
+  ],
+
+  "validation_phases": [
+    {"phase": "P0_protocol", "purpose": "This bundle. Lock language, scope, costs, kill rules. No data, no run."},
+    {"phase": "P1_data_contract", "purpose": "For ANY category we want to test next: author its data contract (venues, fields, clock, fee tier, frozen window). Still no data pull."},
+    {"phase": "P2_data_acquisition", "purpose": "Acquire frozen historical data only, behind its own explicit authorization. No live fetch."},
+    {"phase": "P3_offline_replay", "purpose": "Run the minimum viable test offline on the frozen IS window. Compute expectancy under the full cost + stress model."},
+    {"phase": "P4_holdout_oos", "purpose": "Apply the same rule, unchanged, to the sealed OOS window. No re-tuning."},
+    {"phase": "P5_decision_gate", "purpose": "Pass / Watch / Fail / Park / Retire per the rules below."},
+    {"phase": "P6_periodic_review", "purpose": "If WATCH or ACTIVE, schedule a periodic re-test. Still no live."},
+    {"phase": "P_NONE_live_or_paper", "purpose": "Live trading and paper-order execution are NOT phases of this protocol. They require a SEPARATE, independent authorization with a different protocol."}
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "IS shows positive expectancy after the full cost + stress model with non-overlapping confidence intervals; OOS confirms direction and magnitude within a pre-registered tolerance; the kill conditions did not trigger; no rule was changed mid-study.",
+    "WATCH": "IS shows positive expectancy after costs, but stress overlay shrinks it materially OR OOS magnitude is meaningfully smaller than IS. Lane is documented and re-checked, never live-traded.",
+    "FAIL": "IS expectancy is not positive after full cost + stress, OR OOS contradicts IS sign, OR any kill condition triggered.",
+    "PARK": "FAIL but the failure mode is informative (e.g., venue change would address it). Document and move on; do not re-run with tweaks on the same data.",
+    "RETIRE": "Failure mode is structural; the category does not work for SPARTA's constraints."
+  },
+
+  "kill_conditions": [
+    "Any single stress scenario (venue outage, funding flip, liquidation, roll dislocation) eats more than N months of estimated edge under the cost model.",
+    "Backtest cannot be reproduced bit-for-bit by a second offline run.",
+    "Data contract was changed mid-study to make the result pass.",
+    "An assumption (no-spread, no-latency, no-counterparty-haircut, no-withdrawal-fee) is found to have been silently dropped.",
+    "The strategy depends on data the operator cannot legally / technically acquire.",
+    "The expectancy after full costs is statistically indistinguishable from zero."
+  ],
+
+  "required_future_artifacts": [
+    "Per-category data contract memo (no data pulled).",
+    "Cost model spreadsheet / JSON with maker, taker, spread, slippage, funding, borrow, withdrawal latency, counterparty haircut.",
+    "Stress overlay scenarios (at least one per category) with quantified PnL deduction.",
+    "Pre-registered IS / OOS windows and tolerances, sealed before any run.",
+    "Backtest report.json + report.md per category, with PASS / WATCH / FAIL verdict and reasoning.",
+    "Lane closeout memo when a category PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Protocol/specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this protocol's runtime.",
+    "No data fetch in this bundle. Data acquisition is a SEPARATE, explicitly authorized bundle (P2).",
+    "Do not modify paper / live execution files (sealed in earlier bundles).",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this protocol alone.",
+    "Apparent edge != profit. Pure arbitrage is rare. Default assumption is that apparent edges vanish under realistic costs."
+  ],
+
+  "non_profitability_pledges": [
+    "This protocol does not assume any arbitrage category is profitable.",
+    "This protocol does not claim SPARTA has an arbitrage edge.",
+    "This protocol does not authorize a bot, an order, an exchange connection, or a data fetch.",
+    "This protocol does not promote any category to ACTIVE or STRONG by its existence; a category remains IDEA / PARKED / WATCH until evidence justifies otherwise."
+  ]
+}
