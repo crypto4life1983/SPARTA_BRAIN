@@ -156,13 +156,16 @@ SEED_LANES = (
         "timeframe": "N_A",
         "hypothesis": "Paired-series / cross-venue inefficiency research with its own data contract.",
         "report_match_substrings": ("arbitrage", "stat_arb", "pair"),
-        # Bundle 4: also count the SPARTA-side Arbitrage Research Protocol v1
-        # docs as matched reports for this lane if they exist on disk. These
-        # documents contain "protocol" in the filename -> classifier keeps the
-        # lane at IDEA (NONE evidence), never ACTIVE, never STRONG.
+        # Bundle 4: SPARTA-side Arbitrage Research Protocol v1 docs.
+        # Bundle 5: SPARTA-side Arbitrage Data Contract v1 docs.
+        # All of these filenames contain "protocol" or "data" (no FAILED /
+        # RETIRED / closeout keywords), so the classifier keeps this lane at
+        # IDEA evidence (never ACTIVE, never STRONG) just because docs exist.
         "extra_files": (
             "reports/arbitrage_research_protocol_v1/protocol.md",
             "reports/arbitrage_research_protocol_v1/protocol.json",
+            "reports/arbitrage_data_contract_v1/data_contract.md",
+            "reports/arbitrage_data_contract_v1/data_contract.json",
         ),
     },
     {

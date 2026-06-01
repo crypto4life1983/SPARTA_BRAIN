@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "layer": "arbitrage_data_contract_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/arbitrage_data_contract_v1/data_contract.json (machine-readable contract)",
+    "reports/arbitrage_data_contract_v1/data_contract.md (human-readable contract; 5 categories + timestamp + cost + liquidity + data-quality + MVT + future-allowed + forbidden + future-artifacts + PASS/WATCH/FAIL + safety boundaries + no-profit-claim policy)",
+    "reports/arbitrage_data_contract_v1/report.md (build report)",
+    "reports/arbitrage_data_contract_v1/report.json (build report)",
+    "tools/arbitrage_data_contract_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_arbitrage_data_contract.py (16 tests covering schema + safety + integration)",
+    "tools/strategy_candidate_registry.py: extra_files extended to include the data-contract docs (arbitrage lane stays IDEA)"
+  ],
+  "files_changed": [
+    "reports/arbitrage_data_contract_v1/data_contract.json",
+    "reports/arbitrage_data_contract_v1/data_contract.md",
+    "reports/arbitrage_data_contract_v1/report.md",
+    "reports/arbitrage_data_contract_v1/report.json",
+    "tools/arbitrage_data_contract_check.py",
+    "tests/test_arbitrage_data_contract.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "what_the_data_contract_defines": [
+    "Per-category data requirements for all five Arbitrage Research Protocol v1 categories",
+    "Timestamp + synchronization rules (UTC primary clock, 250ms default max skew, stale-quote rule, cross-venue/triangular/spot-perp alignment, row-invalidity criteria)",
+    "Cost model requirements (maker/taker fees, spread cost, depth-aware slippage, funding, borrow, withdrawal/deposit/network fees, transfer-delay risk, capital lockup)",
+    "Liquidity/depth requirements (min notional depth, depth-at-size, volume filter, stale order-book filter, quote-flicker filter, outage flags, suspicious-data flags)",
+    "Order-book / trade-print / quote requirements (L1 minimum, L2 preferred, invalidation rules)",
+    "Data quality + normalization rules (duplicates, missing, OOO, outliers, reproducibility, provenance per row, symbol canonicalization, continuous-contract stitching, split/dividend adjustment)",
+    "Minimum viable dataset (IS/OOS sealed before run, warmup buffer, fee schedule attached, outage calendar attached, provenance per row)",
+    "Future allowed data sources + forbidden data sources / methods",
+    "Required future artifacts (acquisition memo, integrity report, cost-model snapshot, stress overlays, backtest reports, closeout memo)",
+    "PASS/WATCH/FAIL rules + safety boundaries + no-profit-claim policy"
+  ],
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "execution_and_fetch_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled"
+    ],
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "NOT pure arbitrage",
+      "RELATIVE_VALUE",
+      "price gap is not profit",
+      "Apparent edge"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "75 passed in 0.79s"
+    }
+  ],
+  "json_validity": {
+    "arbitrage_data_contract_check_validate": "validate: OK",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_arbitrage_after_build": {
+    "status": "IDEA",
+    "evidence_level": "MIXED",
+    "source_reports": ["data_contract.json", "data_contract.md", "protocol.json", "protocol.md"],
+    "guardrails_held": [
+      "lane is not promoted to ACTIVE just because additional docs exist",
+      "lane never reaches STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/credentials reference"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Deterministic logic was NOT artificially modified. The queue at HEAD does not yet include a 'Dataset Manifest' or 'QA Harness Spec' item, so the existing protocol/data-first scoring axes still rank arbitrage at the top. Operator should consult report.md `recommended_next_bundle` for the actual Bundle 6 choice."
+  },
+  "how_it_fits_after_arbitrage_research_protocol_v1": [
+    "Arbitrage Research Protocol v1 (30dabc4, phase P0_protocol) -> Arbitrage Data Contract v1 (this bundle, phase P1_data_contract).",
+    "Subsequent phases: Dataset Manifest v1 / QA Harness Spec v1 / P2 data acquisition / P3 offline replay / P4 OOS / P5 decision gate. EACH is a separately-authorized bundle. None of them run live or paper-order execution."
+  ],
+  "recommended_next_bundle": [
+    "Arbitrage Dataset Manifest v1 (one category at a time; names venue(s), pairs, fee tier, withdrawal-latency, IS/OOS windows, storage path; spec only, no data pull)",
+    "OR Arbitrage QA Harness Spec v1 (defines the harness that will verify the future acquired dataset against this contract)",
+    "OR Crypto-D1 Protocol Memo (alternative lane, currently PARKED; would require a new hypothesis, not a re-tune)"
+  ]
+}
