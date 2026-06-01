@@ -9165,15 +9165,15 @@ def _jarvis_chief_of_staff_answer(q: str):
                      or "the platform" in q)
     if _demo_frame and _demo_subject and not _status_word:
         return (
-            "Quick product overview (read-only). SPARTA Brain is an AI command "
-            "center — a local dashboard that brings the whole operation into one "
-            "place. JARVIS is its voice interface and chief of staff: you ask in "
-            "plain language and it answers from read-only system state. The "
-            "Strategy Factory is the research engine that produces and reviews "
-            "strategy candidates. Trading stays research-only until validation "
-            "passes — no live or paper trades were executed, and the system "
-            "places no orders. This is a read-only description and authorizes no "
-            "action.",
+            "At your service. SPARTA Brain is your AI command center — one local "
+            "dashboard that brings the whole operation into a single place. I'm "
+            "JARVIS, your voice interface and chief of staff: you speak to me in "
+            "plain language, and I answer from what the system can actually see. "
+            "The Strategy Factory is the research engine behind the trading side; "
+            "it drafts and reviews strategy candidates. On trading itself, I keep "
+            "things strictly research-only until the work proves itself — no live "
+            "or paper trades were executed, and I place no orders. I'm here to "
+            "watch and advise; the call is always yours.",
             ["system_core", "factory_status", "trading_detail"])
 
     # --- strategic chief-of-staff intents ---------------------------------
@@ -9499,13 +9499,21 @@ def _jarvis_conversational_answer(q: str):
         brains = ai.get("brains") if isinstance(ai.get("brains"), dict) else {}
         ready = [n for n, v in brains.items()
                  if isinstance(v, dict) and v.get("state") in ("ready", "installed")]
+        n = len(warns)
+        if n == 0:
+            flag_phrase = "with nothing flagged"
+        elif n == 1:
+            flag_phrase = "with one item worth a glance"
+        else:
+            flag_phrase = f"with {n} items worth a glance"
         return (
-            f"SPARTA Brain status (read-only): system core is "
-            f"{sc.get('state', 'unknown')}, server {sc.get('server', 'unknown')}. "
-            f"Commander snapshot is {state} — {headline} ({len(warns)} warning(s)). "
-            f"AI brains available: {', '.join(ready) if ready else 'none detected'}. "
-            "Everything here is observation-only; nothing is executed, traded, or "
-            "stored.",
+            f"Here's the SPARTA Brain status, read-only as always. The system "
+            f"core is {sc.get('state', 'unknown')} and the server is "
+            f"{sc.get('server', 'unknown')}. The Commander snapshot reads {state} "
+            f"— {headline}, {flag_phrase}. AI brains online: "
+            f"{', '.join(ready) if ready else 'none detected'}. I'm "
+            "observation-only here — I keep watch and report; nothing is executed, "
+            "traded, or stored.",
             ["system_core", "ai_brains", "commander_snapshot"])
 
     # --- Trading Executive Translation v1 — trading / strategy status ------

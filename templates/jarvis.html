@@ -1331,14 +1331,17 @@
   // only cancel when something is queued and let it settle first. onEnd fires
   // once when speech finishes (or on skip / error).
   function jvSpeakChunks(synth, text, onEnd){
-    var clean = (text || '').replace(/\s+/g, ' ').trim();
+    // Normalize for speech only (the on-screen text is unchanged): "warning(s)"
+    // / "item(s)" / "candidate(s)" read aloud as "warning then s", so collapse
+    // the "(s)" plural notation to a plain "s" before speaking.
+    var clean = (text || '').replace(/\(s\)/g, 's').replace(/\s+/g, ' ').trim();
     if(!clean){ if(onEnd){ onEnd(); } return false; }
 
     var done = false, keepAlive = null;
     function stopKeepAlive(){ if(keepAlive){ clearInterval(keepAlive); keepAlive = null; } }
     function finish(){ if(done){ return; } done = true; stopKeepAlive(); if(onEnd){ onEnd(); } }
     function enqueue(){
-      var u = new SpeechSynthesisUtterance(', , , ' + clean);
+      var u = new SpeechSynthesisUtterance('. . . , , , , ' + clean);
       if(jvVoice){ u.voice = jvVoice; u.lang = jvVoice.lang || 'en-US'; }
       else { u.lang = 'en-US'; }
       u.rate = 1;
