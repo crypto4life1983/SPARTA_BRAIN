@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "layer": "arbitrage_data_source_evaluation_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.json (machine-readable evaluation)",
+    "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.md (human-readable: 6 source-class evaluations + 15-field decision matrix with allowed_now=False everywhere + approval gates + rejection rules + required metadata + risks + quality dimensions + future allowed/forbidden plans + required future artifacts + PASS/WATCH/FAIL + no-profit-claim policy + safety boundaries)",
+    "reports/arbitrage_data_source_evaluation_v1/report.md (build report)",
+    "reports/arbitrage_data_source_evaluation_v1/report.json (build report)",
+    "tools/arbitrage_data_source_evaluation_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_arbitrage_data_source_evaluation.py (23 tests covering schema + safety + integration)",
+    "tools/strategy_candidate_registry.py: extra_files extended with the new evaluation docs (lane stays IDEA)"
+  ],
+  "files_changed": [
+    "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.json",
+    "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.md",
+    "reports/arbitrage_data_source_evaluation_v1/report.md",
+    "reports/arbitrage_data_source_evaluation_v1/report.json",
+    "tools/arbitrage_data_source_evaluation_check.py",
+    "tests/test_arbitrage_data_source_evaluation.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "source_class_summary": {
+    "A_exchange_public_historical_archives": {"allowed_now": false, "future_possible": true, "recommended_status": "ACCEPTABLE"},
+    "B_exchange_public_apis": {"allowed_now": false, "future_possible": true, "recommended_status": "WATCH"},
+    "C_paid_market_data_vendors": {"allowed_now": false, "future_possible": true, "recommended_status": "PREFERRED"},
+    "D_existing_local_csv_datasets": {"allowed_now": false, "future_possible": true, "recommended_status": "ACCEPTABLE"},
+    "E_web_scraped_or_unofficial_data": {"allowed_now": false, "future_possible": false, "recommended_status": "REJECTED"},
+    "F_manually_copied_prices_or_screenshots": {"allowed_now": false, "future_possible": false, "recommended_status": "REJECTED"}
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "all_seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_enabled",
+      "dataset_processing_enabled"
+    ],
+    "allowed_now_false_for_every_row": true,
+    "manual_and_scraped_rejected_for_evidence": true,
+    "approval_gates_include_operator_authorization_and_version_pins": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "NOT pure arbitrage",
+      "REJECTED",
+      "A data source does not imply edge",
+      "Clean data does not imply profit",
+      "Source approval does not authorize trading"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_arbitrage_data_source_evaluation.py tests/test_arbitrage_qa_harness_spec.py tests/test_arbitrage_dataset_manifest.py tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "149 passed in 1.47s"
+    }
+  ],
+  "json_validity": {
+    "arbitrage_data_source_evaluation_check_validate": "validate: OK",
+    "arbitrage_qa_harness_spec_check_validate": "validate: OK (Bundle 7 unaffected)",
+    "arbitrage_dataset_manifest_check_validate": "validate: OK (Bundle 6 unaffected)",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_arbitrage_after_build": {
+    "status": "IDEA",
+    "evidence_level": "MIXED",
+    "source_reports_count": 10,
+    "source_reports": [
+      "data_contract.json", "data_contract.md",
+      "data_source_evaluation.json", "data_source_evaluation.md",
+      "dataset_manifest.json", "dataset_manifest.md",
+      "protocol.json", "protocol.md",
+      "qa_harness_spec.json", "qa_harness_spec.md"
+    ],
+    "guardrails_held": [
+      "lane is not promoted to ACTIVE just because additional docs exist",
+      "lane never reaches STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest/dataset-processing/credentials reference"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Deterministic logic NOT artificially modified. Operator should consult report.md `recommended_next_bundle` for the actual Bundle 9 choice."
+  },
+  "how_it_fits_after_qa_harness_spec_v1": [
+    "Arbitrage Research Protocol v1 (30dabc4) -> Arbitrage Data Contract v1 (c4d4c8b) -> Arbitrage Dataset Manifest v1 (492fcc1) -> Arbitrage QA Harness Spec v1 (8073bf3) -> Arbitrage Data Source Evaluation Memo v1 (this bundle).",
+    "Subsequent bundles (Arbitrage Sample Dataset Plan v1, Arbitrage Research Readiness Gate, P2 data acquisition, ...) are each separately authorized."
+  ],
+  "recommended_next_bundle": [
+    "Arbitrage Sample Dataset Plan v1 (pre-acquisition plan for the first concrete dataset; plan only, no fetch)",
+    "Arbitrage Research Readiness Gate (written readiness checklist before authorizing the first P2 acquisition; gate spec only)",
+    "Crypto-D1 Protocol Memo (alternative lane, currently PARKED; would require a new hypothesis, not a re-tune)"
+  ]
+}

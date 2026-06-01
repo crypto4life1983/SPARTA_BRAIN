@@ -1,0 +1,434 @@
+{
+  "evaluation_id": "arbitrage_data_source_evaluation_v1",
+  "title": "SPARTA Arbitrage Data Source Evaluation Memo v1",
+  "version": "1.0",
+  "kind": "data_source_evaluation_memo",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "companion_documents": {
+    "arbitrage_research_protocol_v1": "reports/arbitrage_research_protocol_v1/protocol.json",
+    "arbitrage_data_contract_v1": "reports/arbitrage_data_contract_v1/data_contract.json",
+    "arbitrage_dataset_manifest_v1": "reports/arbitrage_dataset_manifest_v1/dataset_manifest.json",
+    "arbitrage_qa_harness_spec_v1": "reports/arbitrage_qa_harness_spec_v1/qa_harness_spec.json"
+  },
+
+  "research_objective": "Evaluate which data-source CLASSES could be acceptable for future arbitrage research, what risks each carries, and what strict approval gates must be met BEFORE any future data collection is authorized. This memo does not fetch data, does not connect to any exchange, does not process datasets, does not run a backtest, and does not authorize trading. It is a written assessment only -- a planning input for SEPARATELY-AUTHORIZED future data-acquisition bundles.",
+
+  "supported_arbitrage_categories": [
+    {"id": "cross_exchange_spot",          "label": "A. Cross-exchange spot arbitrage"},
+    {"id": "spot_perp_basis_funding",      "label": "B. Spot-perp basis / funding arbitrage"},
+    {"id": "triangular",                   "label": "C. Triangular arbitrage"},
+    {"id": "futures_calendar",             "label": "D. Futures calendar / basis arbitrage"},
+    {"id": "statistical_relative_value",   "label": "E. Statistical / relative-value mispricing (NOT pure arbitrage)"}
+  ],
+
+  "evaluated_source_classes": [
+    {
+      "id": "A_exchange_public_historical_archives",
+      "label": "A. Exchange public historical archives",
+      "examples": "Historical market-data downloads published by exchanges (e.g., per-venue daily zip dumps).",
+      "pros": [
+        "Authoritative venue source (matches the venue's own clock and trade engine).",
+        "No live API connection required at use time -- files are offline once downloaded.",
+        "Generally permitted for research use under venue terms (must be re-checked per venue per period).",
+        "Per-venue fee schedule + tick/lot conventions live next to the data."
+      ],
+      "cons": [
+        "Coverage is venue-specific; cross-venue arbitrage requires combining multiple archives + clock alignment.",
+        "Historical archive cadence is often coarser than live tick (e.g., 1m bars instead of L1 ticks).",
+        "Order-book depth (L2) is rarely included; usually trades or top-of-book only.",
+        "Funding-rate / mark-index series may be missing or in a separate archive."
+      ],
+      "timestamp_quality_risk": "Generally GOOD when the venue publishes exchange_send_ts; degrades to MEDIUM when only minute-bars are exposed (sub-second alignment impossible). Document per-venue clock skew if multi-venue.",
+      "coverage_risk": "MEDIUM -- venue-by-venue cadence, missing periods around launches / outages / instrument renames.",
+      "fee_schedule_mismatch_risk": "MEDIUM -- archived fee schedules may not match the operator's actual tier; pin the dated schedule explicitly.",
+      "order_book_depth_limitations": "L2 depth is typically NOT in the public archive; depth-at-size tests require a separate L2 source OR a documented L1-only haircut.",
+      "survivorship_or_delisting_risk": "MEDIUM -- delisted pairs may be absent from current archive snapshots; pin the snapshot date.",
+      "future_approval_requirements": [
+        "Operator names which venue archive snapshot is in scope (URL or operator-supplied file path).",
+        "Operator confirms TOS permits research use for the window in scope.",
+        "Manifest produced under arbitrage_dataset_manifest_v1; QA produced under arbitrage_qa_harness_spec_v1.",
+        "No live API; archives must be operator-side downloads, not live fetched by SPARTA."
+      ]
+    },
+    {
+      "id": "B_exchange_public_apis",
+      "label": "B. Exchange public APIs (future-only; NOT authorized now)",
+      "examples": "REST or WebSocket endpoints exposed by exchanges (keyless or keyed).",
+      "pros": [
+        "Authoritative live data closest to the venue match engine.",
+        "Sub-second timestamps available on many venues.",
+        "Order-book L2 / depth typically available."
+      ],
+      "cons": [
+        "Requires a network connection at use time -- THIS MEMO does not authorize that.",
+        "Even keyless endpoints carry rate-limit, IP-ban, and ToS risks.",
+        "Most arbitrage-grade endpoints require API keys, which require credential handling -- forbidden here.",
+        "Live-fetch creates a clock-skew exposure SPARTA has not yet measured per venue."
+      ],
+      "strict_no_use_in_this_bundle": true,
+      "keyless_public_endpoint_risks": [
+        "rate-limit / 429 ban can corrupt a session mid-acquisition without warning",
+        "ToS may forbid systematic harvesting even on keyless endpoints",
+        "data freshness vs. consistency tradeoffs vary per venue and are easy to mis-assume"
+      ],
+      "rate_limits": "Per-venue; must be discovered and pinned in any future P2 acquisition bundle BEFORE a single request is issued.",
+      "timestamp_or_latency_issues": "Live ws/tick streams have non-trivial publish-to-recv latency; per-venue distribution must be measured and documented as a haircut.",
+      "legal_tos_concerns": [
+        "Many venue TOS distinguish between casual lookup and systematic data collection.",
+        "Jurisdiction may restrict certain endpoints depending on operator location.",
+        "License grant for derived datasets is not automatic; record per-venue."
+      ],
+      "future_authorization_requirements": [
+        "SEPARATE explicit authorization (a P2 data-acquisition bundle) before any code touches a network endpoint.",
+        "Named venue + named endpoint + named symbols + named time window + named rate-limit assumption.",
+        "No SPARTA-side credential storage unless its own authorization adds local_secrets handling.",
+        "Pre-declared maximum bytes / requests / cost cap.",
+        "TOS / licensing review attached to the request."
+      ]
+    },
+    {
+      "id": "C_paid_market_data_vendors",
+      "label": "C. Paid market data vendors",
+      "examples": "Generic professional crypto / futures market-data vendors; documented offline exports (e.g., Databento, Tiingo, Polygon, Kaiko-class).",
+      "pros": [
+        "Cleaner provenance + symbol canonicalization than ad-hoc public dumps.",
+        "Often offer L2 / depth + trade prints + funding history.",
+        "Licensing is explicit; research use is usually documented.",
+        "Vendor-side outage / re-fill is documented."
+      ],
+      "cons": [
+        "Cost is a real research expense and must be budgeted before any acquisition.",
+        "Vendor coverage gaps still exist (small / new pairs).",
+        "Vendor-side normalization can differ from venue-side -- pin the vendor + version.",
+        "Many vendors still require an API key for high-rate flows; operator-side download flows are SAFER for SPARTA."
+      ],
+      "cost_consideration": "Per-vendor; must be named + budgeted in any future P2 bundle.",
+      "licensing_consideration": "Research-use license terms must be attached to the data contract and the dataset manifest.",
+      "coverage_consideration": "Venue / pair / depth coverage must be verified against the category's required-data list before purchase.",
+      "order_book_availability_consideration": "Confirm L1 vs. L2 coverage; depth-at-size tests need L2.",
+      "timestamp_quality_consideration": "Vendor exposes its own ingestion timestamp distribution; pin it and treat it as additive haircut.",
+      "future_approval_requirements": [
+        "Operator names the vendor + the specific export package + the dated license terms.",
+        "Cost cap stated in the authorization message.",
+        "Offline export path preferred over live API connection from SPARTA runtime.",
+        "Manifest + QA produced as usual."
+      ]
+    },
+    {
+      "id": "D_existing_local_csv_datasets",
+      "label": "D. Existing local CSV datasets",
+      "examples": "CSV / parquet files already on the operator's machine from prior SPARTA work or other research.",
+      "pros": [
+        "No network required.",
+        "Already on disk; clear who has touched them.",
+        "Can satisfy contract + manifest + QA workflow without any acquisition step."
+      ],
+      "cons": [
+        "Provenance can be vague (who downloaded, from where, when).",
+        "Schema may not match the data contract (column names, units, timezones).",
+        "Possibility of manual edits that invalidate the file as an evidence dataset.",
+        "Older timestamps may not satisfy current max_skew / sub-second requirements."
+      ],
+      "provenance_risk": "HIGH unless a written provenance memo and per-file checksums are produced before research use.",
+      "schema_mismatch_risk": "MEDIUM-HIGH -- requires a normalization step pinned in the dataset manifest.",
+      "manual_edit_risk": "PRESENT -- mitigated by per-file sha256 + a written 'no manual edits since' attestation.",
+      "timestamp_risk": "MEDIUM -- depends on the original source; sub-second alignment may be impossible.",
+      "qualification_path": [
+        "Write a provenance memo per file (where the file came from + when + who).",
+        "Compute per-file sha256 and store in the manifest.",
+        "Apply the data contract normalization rules (currency, symbols, tick/lot, stitching, dividend/split if applicable).",
+        "Run the QA harness; reach QA_PASS or explicitly-accepted QA_WARN BEFORE any research use."
+      ]
+    },
+    {
+      "id": "E_web_scraped_or_unofficial_data",
+      "label": "E. Web-scraped or unofficial data",
+      "examples": "Scraping a venue's HTML page; pulling from an undocumented or unofficial mirror.",
+      "pros": [
+        "Free.",
+        "Sometimes the only place to find a particular series."
+      ],
+      "cons": [
+        "Unstable: format / structure can change without notice and silently invalidate a pipeline.",
+        "Almost always violates the venue's TOS for systematic collection.",
+        "Timestamp source is unreliable; what's shown on a page may be cached / delayed.",
+        "Depth / fees / funding rarely present in scraped pages.",
+        "Provenance is hard to attest at the row level."
+      ],
+      "default_recommended_status": "REJECTED for evidence-grade arbitrage research. WATCH-with-warning only for anecdotal exploration that NEVER produces a PASS verdict.",
+      "explicit_reasons_to_reject": [
+        "unstable -- format change can silently corrupt a study",
+        "legal / TOS risk -- systematic scraping is rarely permitted",
+        "timestamp_unreliable -- not aligned to venue match clock",
+        "missing_depth_fees_funding -- arbitrage cost model cannot be built",
+        "not_suitable_for_arbitrage_evidence_by_default"
+      ]
+    },
+    {
+      "id": "F_manually_copied_prices_or_screenshots",
+      "label": "F. Manually copied prices or screenshots",
+      "examples": "Operator-typed price quotes, screenshots of a venue page, hand-written ticker sheets.",
+      "pros": [
+        "Useful for anecdotal flagging of an observed phenomenon."
+      ],
+      "cons": [
+        "Cannot be reproduced byte-for-byte.",
+        "Cannot be tied to a venue clock.",
+        "Cannot carry fees / depth / funding.",
+        "Cannot survive QA: every QA category-level check fails by construction.",
+        "Cannot be used to make a quantitative claim of any kind."
+      ],
+      "rejected_for_quantitative_validation": true,
+      "allowed_only_for_anecdotal_notes": "Operator memos may cite a screenshot as the trigger for a research question. The screenshot itself NEVER counts as evidence and NEVER moves any candidate to ACTIVE / STRONG."
+    }
+  ],
+
+  "approval_gates": {
+    "must_all_be_satisfied_before_any_future_data_collection": [
+      "explicit_operator_authorization: written message in the SPARTA control surface naming this bundle and what is permitted",
+      "exact_source_named: the source class AND the specific instance (venue archive URL, vendor product SKU, file path, etc.)",
+      "exact_symbols_named: per-venue symbol list",
+      "exact_venues_named: per-source venue list",
+      "exact_time_window_named: ISO-8601 UTC start + end",
+      "data_contract_version_referenced: arbitrage_data_contract_v1 version pin",
+      "dataset_manifest_version_referenced: arbitrage_dataset_manifest_v1 version pin",
+      "qa_harness_spec_version_referenced: arbitrage_qa_harness_spec_v1 version pin",
+      "storage_path_named: on-disk path where the offline data will live; never a network URL",
+      "no_credentials_unless_separately_authorized: any credential handling requires its own explicit authorization in the same bundle's message",
+      "no_private_keys: SPARTA does not handle private keys for any reason at this stage",
+      "no_trading_permissions: the authorization message must NOT grant order, paper, or live trading permissions",
+      "no_automatic_scheduler: data acquisition is a one-shot operator-driven run; no cron, no daemon",
+      "no_live_or_paper_execution: data acquisition does NOT cross into execution; that is a separate, separately-blocked phase",
+      "tos_or_licensing_review_required_if_applicable: vendor / venue TOS + license terms attached to the authorization"
+    ]
+  },
+
+  "rejection_rules": [
+    "Any source whose use requires SPARTA to make a network call from this memo's runtime is REJECTED for THIS bundle (no fetch in this bundle).",
+    "Any source whose use requires an API key / OAuth / .env credential is REJECTED unless a SEPARATE authorization adds credential handling AND it lives in the gitignored local_secrets/ tree.",
+    "Manually copied prices / screenshots are REJECTED for any quantitative arbitrage validation; anecdotal-note use only.",
+    "Web-scraping / unofficial mirrors are REJECTED for evidence; WATCH-with-warning only for anecdotal exploration.",
+    "Any source whose TOS forbids research use is REJECTED.",
+    "Any source whose provenance cannot be attested line-by-line / row-by-row is REJECTED for evidence.",
+    "Any source that has been used to peek at the OOS window before sealing is REJECTED."
+  ],
+
+  "required_metadata": [
+    "source_class (one of A / B / C / D / E / F above)",
+    "source_instance_name (e.g., venue, vendor product, file path)",
+    "license_or_tos_pin (text or URL + date)",
+    "expected_coverage (symbols / venues / time window)",
+    "expected_timestamp_quality (per-venue clock + skew)",
+    "expected_depth_availability (L1 / L2 / trades / funding)",
+    "expected_fee_schedule_pin",
+    "expected_cost_in_USD",
+    "expected_storage_path",
+    "operator_provenance_attestation",
+    "approval_message_reference"
+  ],
+
+  "expected_risks": [
+    "ToS / legal risk per venue per jurisdiction",
+    "Coverage gaps that silently bias backtests",
+    "Timestamp / clock-skew that defeats sub-second alignment",
+    "Missing L2 depth that makes depth-at-size tests impossible",
+    "Vendor-side normalization that disagrees with venue-side data",
+    "Manual edits that silently invalidate a dataset",
+    "Cost overruns when vendor flows are not pre-capped",
+    "Survivorship / delisting bias when archives only contain current listings",
+    "OOS leakage if a source is browsed before the OOS window is sealed"
+  ],
+
+  "source_quality_dimensions": [
+    "timestamp_quality: HIGH / MEDIUM / LOW per source",
+    "depth_availability: L2 / L1 / TRADES_ONLY / NONE",
+    "fee_schedule_attached: YES / NO",
+    "funding_attached: YES / NO / N_A",
+    "provenance_attestable_per_row: YES / NO",
+    "license_research_use_permitted: YES / NO / UNKNOWN",
+    "cost_to_operator: LOW / MEDIUM / HIGH",
+    "reproducibility: YES / NO"
+  ],
+
+  "data_source_decision_matrix": {
+    "fields": [
+      "source_class",
+      "allowed_now",
+      "future_possible",
+      "requires_operator_authorization",
+      "requires_manifest",
+      "requires_QA",
+      "supports_order_book",
+      "supports_fees",
+      "supports_funding",
+      "timestamp_quality",
+      "legal_tos_risk",
+      "cost_risk",
+      "evidence_quality",
+      "recommended_status",
+      "notes"
+    ],
+    "rows": [
+      {
+        "source_class": "A_exchange_public_historical_archives",
+        "allowed_now": false,
+        "future_possible": true,
+        "requires_operator_authorization": true,
+        "requires_manifest": true,
+        "requires_QA": true,
+        "supports_order_book": "L1_USUALLY_L2_RARELY",
+        "supports_fees": "WITH_PINNED_SCHEDULE",
+        "supports_funding": "PARTIAL",
+        "timestamp_quality": "MEDIUM_TO_HIGH",
+        "legal_tos_risk": "LOW_TO_MEDIUM",
+        "cost_risk": "LOW",
+        "evidence_quality": "MEDIUM",
+        "recommended_status": "ACCEPTABLE",
+        "notes": "Preferred starting point for the first arbitrage P2 if a venue's archive cleanly fits the category."
+      },
+      {
+        "source_class": "B_exchange_public_apis",
+        "allowed_now": false,
+        "future_possible": true,
+        "requires_operator_authorization": true,
+        "requires_manifest": true,
+        "requires_QA": true,
+        "supports_order_book": "L1_L2_OFTEN",
+        "supports_fees": "REFERENCE_REQUIRED",
+        "supports_funding": "OFTEN",
+        "timestamp_quality": "HIGH",
+        "legal_tos_risk": "MEDIUM_TO_HIGH",
+        "cost_risk": "LOW_KEYLESS_TO_MEDIUM_KEYED",
+        "evidence_quality": "HIGH_IF_PROPERLY_AUTHORIZED",
+        "recommended_status": "WATCH",
+        "notes": "Future-only. Requires SEPARATE authorization with explicit TOS / rate-limit / credential / cap plan."
+      },
+      {
+        "source_class": "C_paid_market_data_vendors",
+        "allowed_now": false,
+        "future_possible": true,
+        "requires_operator_authorization": true,
+        "requires_manifest": true,
+        "requires_QA": true,
+        "supports_order_book": "L1_L2_OFTEN",
+        "supports_fees": "REFERENCE_REQUIRED",
+        "supports_funding": "OFTEN",
+        "timestamp_quality": "HIGH",
+        "legal_tos_risk": "LOW_IF_LICENSED",
+        "cost_risk": "MEDIUM_TO_HIGH",
+        "evidence_quality": "HIGH_IF_LICENSED_AND_PINNED",
+        "recommended_status": "PREFERRED",
+        "notes": "Operator-supplied offline export flow strongly preferred over live API flow from SPARTA runtime."
+      },
+      {
+        "source_class": "D_existing_local_csv_datasets",
+        "allowed_now": false,
+        "future_possible": true,
+        "requires_operator_authorization": true,
+        "requires_manifest": true,
+        "requires_QA": true,
+        "supports_order_book": "VARIES",
+        "supports_fees": "VARIES",
+        "supports_funding": "VARIES",
+        "timestamp_quality": "MEDIUM",
+        "legal_tos_risk": "LOW_TO_MEDIUM",
+        "cost_risk": "LOW",
+        "evidence_quality": "MEDIUM_IF_PROVENANCE_ATTESTED",
+        "recommended_status": "ACCEPTABLE",
+        "notes": "Cheapest path to a first manifest; requires a written provenance memo + sha256 + QA before any research use."
+      },
+      {
+        "source_class": "E_web_scraped_or_unofficial_data",
+        "allowed_now": false,
+        "future_possible": false,
+        "requires_operator_authorization": true,
+        "requires_manifest": true,
+        "requires_QA": true,
+        "supports_order_book": "NONE_OR_FRAGILE",
+        "supports_fees": "RARELY",
+        "supports_funding": "RARELY",
+        "timestamp_quality": "LOW",
+        "legal_tos_risk": "HIGH",
+        "cost_risk": "LOW_TO_MEDIUM",
+        "evidence_quality": "LOW",
+        "recommended_status": "REJECTED",
+        "notes": "Default rejection for evidence; WATCH-with-warning only for anecdotal exploration that NEVER produces a PASS verdict."
+      },
+      {
+        "source_class": "F_manually_copied_prices_or_screenshots",
+        "allowed_now": false,
+        "future_possible": false,
+        "requires_operator_authorization": true,
+        "requires_manifest": false,
+        "requires_QA": false,
+        "supports_order_book": "NO",
+        "supports_fees": "NO",
+        "supports_funding": "NO",
+        "timestamp_quality": "LOW",
+        "legal_tos_risk": "LOW",
+        "cost_risk": "NONE",
+        "evidence_quality": "NONE",
+        "recommended_status": "REJECTED",
+        "notes": "Allowed only for anecdotal operator notes; NEVER counts as quantitative evidence and NEVER moves a candidate to ACTIVE / STRONG."
+      }
+    ]
+  },
+
+  "future_allowed_source_plan": [
+    "Preferred starting path: operator-supplied paid-vendor offline export (Class C) for the chosen first category, ON A NARROW WINDOW (1-3 months), with the smallest realistic symbol set.",
+    "Alternative starting path: a venue's public historical archive (Class A) provided the TOS permits research use for the window AND the archive carries the needed L1 / depth / funding fields for the category.",
+    "Backup path: a qualified existing-local CSV (Class D) if a provenance memo, sha256, contract-pin, and QA_PASS are produced first."
+  ],
+
+  "future_forbidden_source_plan": [
+    "Class B (exchange public APIs) until a SEPARATE explicit authorization adds rate-limit / TOS / credential / cap policy.",
+    "Class E (web-scraped / unofficial) for evidence; only WATCH-with-warning for anecdotal exploration.",
+    "Class F (manually copied / screenshots) for ANY quantitative claim."
+  ],
+
+  "required_future_artifacts": [
+    "Per-acquisition 'data acquisition memo' that NAMES the chosen source class + instance + symbols + venues + window + storage path + license / TOS pin + cost cap.",
+    "Per-acquisition manifest under arbitrage_dataset_manifest_v1 with all 32 future-manifest fields populated.",
+    "Per-acquisition QA report under arbitrage_qa_harness_spec_v1 reaching QA_PASS or explicitly-accepted QA_WARN.",
+    "Per-acquisition cost-model snapshot tied to the chosen source.",
+    "Per-acquisition closeout memo if the source is later RETIRED."
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "All required top-level sections of this memo are present; all 6 source classes are evaluated; decision matrix has all required fields for every row; allowed_now is False for every real data-fetching source class; manually-copied and web-scraped sources are REJECTED for evidence; approval gates include explicit operator authorization; no safety flag is True; no forbidden phrase appears.",
+    "WATCH": "Memo is satisfied but at least one row is borderline (e.g., a vendor's licensing terms need re-verification); documented and re-checked before any reliance.",
+    "FAIL": "Any required section is missing; any safety flag is True; any source class is missing; allowed_now is True for a real data-fetching source; any required decision-matrix field is absent; any forbidden phrase appears."
+  },
+
+  "no_profit_claim_policy": [
+    "A data source does not imply edge.",
+    "Clean data does not imply profit.",
+    "Price differences are not profit.",
+    "Source approval does not authorize trading.",
+    "Source approval does not authorize backtesting unless a SEPARATE bundle approves a test."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Memo / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this memo's runtime.",
+    "No data fetch in this bundle. No backtest in this bundle. No dataset processing in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this memo alone.",
+    "A price gap is not profit. Source approval is not edge. Apparent edge != profit."
+  ]
+}
