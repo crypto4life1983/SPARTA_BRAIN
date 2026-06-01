@@ -95,6 +95,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 QUEUE_REL = "reports/strategy_factory_routines/strategy_queue/queue.json"
 DAILY_REL = "reports/strategy_factory_routines/daily_state/latest_state.json"
 WEEKLY_REL = "reports/strategy_factory_routines/weekly_review/latest_weekly_review.json"
+# Optional input (Bundle 3 — registry). Used to skip FAILED/RETIRED lanes and
+# bonus-score ACTIVE/WATCH lanes. Tool degrades gracefully if absent.
+REGISTRY_REL = "reports/strategy_factory_routines/candidate_registry/candidates.json"
 SNAPSHOT_REL = "storage/jarvis/strategy_factory/latest_strategy_factory_snapshot.json"
 
 # Output (runtime; gitignored).
@@ -206,6 +209,16 @@ def _score_item(item: dict, context: dict) -> tuple[int, dict]:
         non_crypto_active = any(al and not _contains_any(al, CRYPTO_HINTS) for al in active_lanes)
         breakdown["crypto_separation_penalty"] = -15 if non_crypto_active else 0
 
+    # Registry-aware bonus: ACTIVE/WATCH candidates score higher (Bundle 3 integration).
+    # If no registry is loaded, the index is empty and this axis contributes 0.
+    registry = context.get("registry_by_lane") or {}
+    reg = registry.get(lane) or {}
+    status = _lower(reg.get("status")) if reg else ""
+    if status == "active":
+        breakdown["registry_active_bonus"] = 25
+    elif status == "watch":
+        breakdown["registry_watch_bonus"] = 15
+
     # Defense-in-depth: hard penalty if any danger keyword slipped past the filter.
     danger, _ = _has_danger_signals(item)
     breakdown["danger_signal_penalty"] = -200 if danger else 0
@@ -213,7 +226,13 @@ def _score_item(item: dict, context: dict) -> tuple[int, dict]:
     return sum(breakdown.values()), breakdown
 
 
-def _filter_eligible(queue) -> list:
+_REGISTRY_REJECT_STATUSES = {"failed", "retired"}
+
+
+def _filter_eligible(queue, registry_by_lane=None) -> list:
+    """Drop blocked / non-research_only / danger-keyword items, plus any item
+    whose lane is marked FAILED or RETIRED in the optional candidate registry."""
+    reg = registry_by_lane or {}
     out = []
     for item in queue:
         if not isinstance(item, dict):
@@ -225,13 +244,17 @@ def _filter_eligible(queue) -> list:
         danger, _ = _has_danger_signals(item)
         if danger:
             continue
+        lane = _lower(item.get("lane"))
+        reg_item = reg.get(lane) or {}
+        if _lower(reg_item.get("status")) in _REGISTRY_REJECT_STATUSES:
+            continue
         out.append(item)
     return out
 
 
 def select_bundle(queue, context: dict) -> tuple:
     """Return (selected_item_or_None, ranked_breakdown_list). Deterministic."""
-    eligible = _filter_eligible(queue or [])
+    eligible = _filter_eligible(queue or [], context.get("registry_by_lane"))
     scored = []
     for item in eligible:
         score, br = _score_item(item, context)
@@ -261,13 +284,18 @@ def build_bundle_payload(repo_root: Path = REPO_ROOT) -> dict:
     daily_data, d_err = _read_json_safe(repo_root / DAILY_REL)
     weekly_data, w_err = _read_json_safe(repo_root / WEEKLY_REL)
     snapshot_data, s_err = _read_json_safe(repo_root / SNAPSHOT_REL)
+    # Bundle 3 optional input: candidate registry. Missing is normal.
+    registry_data, r_err = _read_json_safe(repo_root / REGISTRY_REL)
 
     warnings = [e for e in (q_err, d_err, w_err, s_err) if e]
+    # r_err is intentionally NOT a warning when missing: the registry is optional.
+    registry_state = "ready" if registry_data is not None else ("missing" if (r_err and r_err.startswith("missing")) else "missing_or_invalid")
     source_files_read = [
         {"name": "strategy_queue/queue.json", "state": "missing_or_invalid" if q_err else "ready", "detail": q_err},
         {"name": "daily_state/latest_state.json", "state": "missing_or_invalid" if d_err else "ready", "detail": d_err},
         {"name": "weekly_review/latest_weekly_review.json", "state": "missing_or_invalid" if w_err else "ready", "detail": w_err},
         {"name": "jarvis/latest_strategy_factory_snapshot.json", "state": "missing_or_invalid" if s_err else "ready", "detail": s_err},
+        {"name": "candidate_registry/candidates.json (optional)", "state": registry_state, "detail": r_err},
     ]
 
     queue_list = []
@@ -276,11 +304,18 @@ def build_bundle_payload(repo_root: Path = REPO_ROOT) -> dict:
         if isinstance(q, list):
             queue_list = [it for it in q if isinstance(it, dict)]
 
+    registry_by_lane: dict = {}
+    if isinstance(registry_data, dict):
+        for c in (registry_data.get("candidates") or []):
+            if isinstance(c, dict) and c.get("lane"):
+                registry_by_lane[_lower(c.get("lane"))] = c
+
     context = {
         "queue": queue_list,
         "daily": daily_data if isinstance(daily_data, dict) else {},
         "weekly": weekly_data if isinstance(weekly_data, dict) else {},
         "snapshot": snapshot_data if isinstance(snapshot_data, dict) else {},
+        "registry_by_lane": registry_by_lane,
     }
 
     selected, ranked = select_bundle(queue_list, context)

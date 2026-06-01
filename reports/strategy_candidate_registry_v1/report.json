@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "layer": "strategy_candidate_registry_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "tools/strategy_candidate_registry.py (stdlib-only registry: build / show / validate CLI)",
+    "tests/test_strategy_candidate_registry.py (16 tests covering safety + behaviour)",
+    "tools/strategy_next_bundle.py: optional registry read; FAILED/RETIRED lanes dropped; ACTIVE/WATCH bonus",
+    "tests/test_strategy_next_bundle.py: +5 registry-integration tests (total 24)",
+    ".gitignore: added reports/strategy_factory_routines/candidate_registry/",
+    "reports/strategy_candidate_registry_v1/ (trackable docs: report.md + report.json)"
+  ],
+  "files_changed": [
+    "tools/strategy_candidate_registry.py",
+    "tests/test_strategy_candidate_registry.py",
+    "tools/strategy_next_bundle.py",
+    "tests/test_strategy_next_bundle.py",
+    ".gitignore",
+    "reports/strategy_candidate_registry_v1/report.md",
+    "reports/strategy_candidate_registry_v1/report.json",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "candidate_schema_fields": [
+    "candidate_id", "title", "lane", "market", "timeframe", "hypothesis",
+    "status", "evidence_level", "last_tested_at", "source_reports",
+    "best_result_summary", "failure_reason", "blockers", "next_action",
+    "priority", "safety_level", "allowed_next_steps", "forbidden_next_steps", "notes"
+  ],
+  "classification_rules": {
+    "status_precedence_high_to_low": ["RETIRED", "FAILED", "BLOCKED", "PARKED", "WATCH", "ACTIVE", "IDEA"],
+    "keywords": {
+      "failed_": {"status": "FAILED", "evidence": "WEAK"},
+      "rejected": {"status": "FAILED", "evidence": "WEAK"},
+      "retire": {"status": "RETIRED", "evidence": "WEAK"},
+      "park": {"status": "PARKED", "evidence": "MIXED"},
+      "closeout": {"status": "PARKED", "evidence": "MIXED"},
+      "block": {"status": "BLOCKED", "evidence": "NONE"},
+      "watch": {"status": "WATCH", "evidence": "MIXED"},
+      "oos_result": {"status": "WATCH", "evidence": "MIXED"},
+      "is_baseline": {"status": "ACTIVE", "evidence": "MIXED"},
+      "baseline": {"status": "ACTIVE", "evidence": "MIXED"},
+      "spec": {"status": "IDEA", "evidence": "NONE"},
+      "protocol": {"status": "IDEA", "evidence": "NONE"},
+      "plan": {"status": "IDEA", "evidence": "NONE"}
+    },
+    "guardrails": [
+      "evidence_level STRONG is never allowed from the auto-build path",
+      "safety_level is always research_only",
+      "the three trading-safety flags are pinned False and asserted by validate"
+    ]
+  },
+  "safety_guarantees": {
+    "stdlib_only": true,
+    "no_network_imports": true,
+    "no_broker_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_scheduler_or_daemon": true,
+    "no_subprocess": true,
+    "outputs_confined_to_output_folder": true,
+    "pinned_false_flags": {
+      "live_trading_enabled": false,
+      "broker_control_enabled": false,
+      "paper_order_execution_enabled": false
+    }
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_strategy_candidate_registry.py --rootdir=tests -q",
+      "result": "16 passed in 0.24s"
+    },
+    {
+      "command": "python -m pytest tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "24 passed in 0.34s (19 pre-existing + 5 new registry-integration tests)"
+    }
+  ],
+  "json_validity": {
+    "registry_validate": "validate: OK",
+    "next_bundle_validate": "validate: OK"
+  },
+  "integration_with_next_bundle_generator": {
+    "input_optional": "reports/strategy_factory_routines/candidate_registry/candidates.json",
+    "filter": "drop queue items whose lane is FAILED or RETIRED in the registry",
+    "score_bonus": {"ACTIVE": 25, "WATCH": 15},
+    "missing_or_invalid_registry": "graceful — Bundle 2 baseline behaviour preserved; no warning emitted",
+    "source_files_read_row": "candidate_registry/candidates.json (optional)"
+  },
+  "what_bundle_4_should_likely_be": [
+    "Registry tile in the JARVIS Strategy Factory panel — read-only summary (status counts, top-3 by priority, last build time)",
+    "Status-diff line — 'what changed since the previous registry build' (IDEA → PARKED etc.)",
+    "Operator manual-override file layered on top of auto-build (lets a human promote to STRONG or RETIRED; auto-build still cannot)"
+  ]
+}

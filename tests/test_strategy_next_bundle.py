@@ -395,3 +395,111 @@ def test_active_lane_bonus_changes_selection(tmp_path):
     _write_json(tmp_path / snb.SNAPSHOT_REL, _sample_snapshot())
     p = snb.generate(tmp_path)
     assert p["title"] == "B"
+
+
+# === Bundle 3 — registry integration ======================================= #
+
+def _sample_registry(by_lane):
+    """Build a minimal registry payload mapping lane → status."""
+    candidates = []
+    for lane, status in by_lane.items():
+        candidates.append({
+            "candidate_id": lane, "title": lane, "lane": lane, "market": "N_A",
+            "timeframe": "N_A", "hypothesis": "synthetic",
+            "status": status, "evidence_level": "MIXED" if status != "IDEA" else "NONE",
+            "last_tested_at": None, "source_reports": [],
+            "best_result_summary": None, "failure_reason": None, "blockers": [],
+            "next_action": "synthetic", "priority": 5, "safety_level": "research_only",
+            "allowed_next_steps": [], "forbidden_next_steps": [], "notes": "",
+        })
+    return {
+        "schema_version": 1, "layer": "strategy_candidate_registry_v1",
+        "kind": "candidate_registry", "read_only": True,
+        "generated_at": "2026-06-01T00:00:00Z",
+        "candidates": candidates, "candidate_count": len(candidates),
+        "status_counts": {}, "evidence_counts": {}, "input_inventory": {},
+        "warnings": [],
+        "safety_flags": {"live_trading_enabled": False, "broker_control_enabled": False,
+                        "paper_order_execution_enabled": False},
+        "safety_notes": [],
+    }
+
+
+def test_registry_failed_lane_is_filtered_out(tmp_path):
+    items = [
+        {"title": "A", "lane": "lane_a", "priority": 1, "blocked": False,
+         "safety_level": "research_only", "reason": "A", "required_inputs": [],
+         "expected_output": "A out", "next_bundle_suggestion": ""},
+        {"title": "B", "lane": "lane_b", "priority": 3, "blocked": False,
+         "safety_level": "research_only", "reason": "B", "required_inputs": [],
+         "expected_output": "B out", "next_bundle_suggestion": ""},
+    ]
+    _write_json(tmp_path / snb.QUEUE_REL, _sample_queue(items))
+    _write_json(tmp_path / snb.DAILY_REL, _sample_daily(active_lanes=()))
+    _write_json(tmp_path / snb.WEEKLY_REL, _sample_weekly(deserving="(none)", wasting=()))
+    _write_json(tmp_path / snb.SNAPSHOT_REL, _sample_snapshot())
+    # Registry marks lane_a FAILED -> must be skipped despite higher priority.
+    _write_json(tmp_path / snb.REGISTRY_REL, _sample_registry({"lane_a": "FAILED"}))
+    p = snb.generate(tmp_path)
+    assert p["title"] == "B"
+    rank_lanes = {r["lane"] for r in p["ranked_candidates"]}
+    assert "lane_a" not in rank_lanes
+
+
+def test_registry_retired_lane_is_filtered_out(tmp_path):
+    items = [
+        {"title": "X", "lane": "lane_x", "priority": 1, "blocked": False,
+         "safety_level": "research_only", "reason": "X", "required_inputs": [],
+         "expected_output": "X out", "next_bundle_suggestion": ""},
+        {"title": "Y", "lane": "lane_y", "priority": 5, "blocked": False,
+         "safety_level": "research_only", "reason": "Y", "required_inputs": [],
+         "expected_output": "Y out", "next_bundle_suggestion": ""},
+    ]
+    _write_json(tmp_path / snb.QUEUE_REL, _sample_queue(items))
+    _write_json(tmp_path / snb.DAILY_REL, _sample_daily(active_lanes=()))
+    _write_json(tmp_path / snb.WEEKLY_REL, _sample_weekly(deserving="(none)", wasting=()))
+    _write_json(tmp_path / snb.SNAPSHOT_REL, _sample_snapshot())
+    _write_json(tmp_path / snb.REGISTRY_REL, _sample_registry({"lane_x": "RETIRED"}))
+    p = snb.generate(tmp_path)
+    assert p["title"] == "Y"
+
+
+def test_registry_active_lane_gets_bonus_when_tied(tmp_path):
+    items = [
+        {"title": "A", "lane": "lane_a", "priority": 3, "blocked": False,
+         "safety_level": "research_only", "reason": "A", "required_inputs": [],
+         "expected_output": "A out", "next_bundle_suggestion": ""},
+        {"title": "B", "lane": "lane_b", "priority": 3, "blocked": False,
+         "safety_level": "research_only", "reason": "B", "required_inputs": [],
+         "expected_output": "B out", "next_bundle_suggestion": ""},
+    ]
+    _write_json(tmp_path / snb.QUEUE_REL, _sample_queue(items))
+    _write_json(tmp_path / snb.DAILY_REL, _sample_daily(active_lanes=()))
+    _write_json(tmp_path / snb.WEEKLY_REL, _sample_weekly(deserving="(none)", wasting=()))
+    _write_json(tmp_path / snb.SNAPSHOT_REL, _sample_snapshot())
+    _write_json(tmp_path / snb.REGISTRY_REL, _sample_registry({"lane_b": "ACTIVE"}))
+    p = snb.generate(tmp_path)
+    assert p["title"] == "B"
+
+
+def test_registry_absent_does_not_change_behaviour(full_inputs):
+    # Sanity: no registry on disk -> same selection as the existing Bundle 2 baseline.
+    payload = snb.generate(full_inputs)
+    assert payload["title"] == "Donchian-S20 protocol pre-registration"
+
+
+def test_registry_invalid_json_is_graceful(tmp_path):
+    # Write the full input set, plus a corrupt registry file.
+    _write_json(tmp_path / snb.QUEUE_REL, _sample_queue())
+    _write_json(tmp_path / snb.DAILY_REL, _sample_daily())
+    _write_json(tmp_path / snb.WEEKLY_REL, _sample_weekly())
+    _write_json(tmp_path / snb.SNAPSHOT_REL, _sample_snapshot())
+    rp = tmp_path / snb.REGISTRY_REL
+    rp.parent.mkdir(parents=True, exist_ok=True)
+    rp.write_text("{not json", encoding="utf-8")
+    # Must not crash.
+    payload = snb.generate(tmp_path)
+    assert payload["title"]  # something was selected
+    # The registry source row should report missing_or_invalid.
+    src_states = {s["name"]: s["state"] for s in payload["source_files_read"]}
+    assert src_states["candidate_registry/candidates.json (optional)"] == "missing_or_invalid"
