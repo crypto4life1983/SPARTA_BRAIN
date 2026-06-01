@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_dataset_manifest_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json (machine-readable Crypto-D1 dataset-manifest specification; 35 future manifest fields; 7-status QA model; allowed/forbidden file formats; freeze rules)",
+    "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.md (human-readable: schema table for every required field; identity + provenance + freeze + QA status rules; allowed/forbidden file formats with placeholder naming examples; no-profit-claim policy)",
+    "reports/crypto_d1_dataset_manifest_v1/report.md (build report)",
+    "reports/crypto_d1_dataset_manifest_v1/report.json (build report)",
+    "tools/crypto_d1_dataset_manifest_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_crypto_d1_dataset_manifest.py (30 tests covering schema + safety + validator failure modes + no-real-data-files + tool stdlib-only + integration with prior bundles)",
+    "tools/strategy_candidate_registry.py: crypto_d1_protocol seed extended via extra_files to include the new dataset_manifest docs (lane stays WATCH; never ACTIVE / never STRONG)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json",
+    "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.md",
+    "reports/crypto_d1_dataset_manifest_v1/report.md",
+    "reports/crypto_d1_dataset_manifest_v1/report.json",
+    "tools/crypto_d1_dataset_manifest_check.py",
+    "tests/test_crypto_d1_dataset_manifest.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "follows_contract_and_protocol": {
+    "protocol_id": "crypto_d1_protocol_v1",
+    "data_contract_id": "crypto_d1_data_contract_v1",
+    "lane": "crypto_d1_protocol",
+    "phase_satisfied": "P2_dataset_manifest_freeze (spec layer only -- the future per-dataset manifest authoring is a separate, separately-authorized P2 bundle)"
+  },
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "forbidden_market_types": ["perp_futures", "dated_futures", "options", "leveraged_tokens", "margin_or_borrow_facilitated_spot", "synthetic_instruments"],
+    "timeframe_primary": "1d",
+    "intraday_explicitly_out_of_scope": true,
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "future_manifest_required_field_count": 35,
+    "qa_statuses": ["DRAFT", "FROZEN", "QA_PASS", "QA_WARN", "QA_FAIL", "RETIRED", "BLOCKED"],
+    "allowed_file_formats": ["CSV", "Parquet", "JSON manifest", "Markdown report"]
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_enabled",
+      "dataset_processing_enabled"
+    ],
+    "spot_only_market_type": true,
+    "perp_futures_explicitly_forbidden": true,
+    "intraday_explicitly_out_of_scope": true,
+    "session_model_24_7_with_no_weekday_only_filters": true,
+    "freeze_required_before_backtest": true,
+    "ohlcv_self_consistency_check_required_before_freeze": true,
+    "no_real_data_files_created": true,
+    "no_profit_claim_policy_present": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "Dataset manifest approval does not imply edge",
+      "QA_PASS does not imply profitability",
+      "Clean daily OHLCV data does not imply profit",
+      "A manifest cannot authorize backtesting by itself",
+      "A manifest cannot authorize paper or live trading",
+      "Crypto trend ideas are not profitable until tested",
+      "24/7"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_dataset_manifest.py --rootdir=tests -q",
+      "result": "30 passed"
+    },
+    {
+      "command": "python -m pytest tests/test_crypto_d1_dataset_manifest.py tests/test_crypto_d1_data_contract.py tests/test_crypto_d1_protocol.py tests/test_arbitrage_readiness_gate.py tests/test_arbitrage_sample_dataset_plan.py tests/test_arbitrage_data_source_evaluation.py tests/test_arbitrage_qa_harness_spec.py tests/test_arbitrage_dataset_manifest.py tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "290 passed across Bundles 2-13"
+    }
+  ],
+  "json_validity": {
+    "crypto_d1_dataset_manifest_check_validate": "validate: OK",
+    "crypto_d1_data_contract_check_validate": "validate: OK (Bundle 12 unaffected)",
+    "crypto_d1_protocol_check_validate": "validate: OK (Bundle 11 unaffected)",
+    "arbitrage_readiness_gate_check_validate": "validate: OK (Bundle 10 unaffected)",
+    "arbitrage_sample_dataset_plan_check_validate": "validate: OK (Bundle 9 unaffected)",
+    "arbitrage_data_source_evaluation_check_validate": "validate: OK (Bundle 8 unaffected)",
+    "arbitrage_qa_harness_spec_check_validate": "validate: OK (Bundle 7 unaffected)",
+    "arbitrage_dataset_manifest_check_validate": "validate: OK (Bundle 6 unaffected)",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH (fires because the seed's extra_files now include 6 docs total: protocol + data_contract + dataset_manifest, all of which exist on disk)",
+    "new_extra_files_added_this_bundle": [
+      "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.md",
+      "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json"
+    ],
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest/dataset-processing/credentials reference",
+      "no real data files created"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Both arbitrage and crypto_d1 are now WATCH (same +15 bonus). Arbitrage still wins via the existing protocol-first / data-first scoring hints in its queue item. Deterministic logic NOT artificially modified. Operator should consult both lanes' next-step lists to pick the actual Bundle 14."
+  },
+  "how_this_follows_contract_and_protocol": [
+    "Crypto-D1 Protocol Memo v1 (Bundle 11) declared P2_dataset_manifest_freeze as a required future artifact.",
+    "Crypto-D1 Data Contract v1 (Bundle 12) declared 'Crypto-D1 Dataset Manifest v1 (P2)' as the next required future artifact and pinned 'data_contract_version' / 'protocol_version' references that every future manifest must carry.",
+    "This bundle authors the dataset-manifest SPECIFICATION -- spec only; no data is fetched, no backtest is run, no dataset is processed, no real data files are created.",
+    "All seven safety flags from the protocol and data contract carry verbatim into the manifest spec.",
+    "Lane scope is identical: BTC / ETH / SOL, spot only, daily only, 24/7; perps and intraday remain separately-future protocols.",
+    "Future manifest required fields include 'data_contract_version' and 'protocol_version', so any per-dataset manifest must pin both Bundle 11 and Bundle 12 (or later) explicitly.",
+    "OHLCV required-columns + quality rules match the data contract one-for-one."
+  ],
+  "recommended_next_bundle": [
+    "Crypto-D1 Data QA / Freeze Spec v1 (P2) -- QA harness spec for daily-crypto data. Spec only, no harness run.",
+    "Crypto-D1 Data Source Evaluation Memo v1 -- written assessment of which offline data sources could later satisfy this manifest. Memo only, no fetch.",
+    "Crypto-D1 Baseline Backtest Plan v1 (P3 / P4) -- pre-registration memo for the FIRST candidate strategy family + IS / OOS split. Plan only, no backtest run.",
+    "Crypto-D1 Data Acquisition Authorization Draft -- still spec-only; only if the operator wants to start the path toward an actual P2 acquisition."
+  ]
+}
