@@ -264,8 +264,8 @@ def test_candidate_registry_builds_after_spec_exists():
     payload = scr.generate(_REPO_ROOT)
     arb = next(c for c in payload["candidates"]
               if c["candidate_id"] == "arbitrage_research_protocol")
-    # Lane still IDEA — never ACTIVE, never STRONG despite richer docs.
-    assert arb["status"] == "IDEA", arb
+    # Lane stays IDEA or (after Bundle 10) WATCH — NEVER ACTIVE / STRONG.
+    assert arb["status"] in ("IDEA", "WATCH"), arb
     assert arb["evidence_level"] in ("NONE", "MIXED"), arb
     assert arb["evidence_level"] != "STRONG"
     # All four doc generations now appear in source_reports.

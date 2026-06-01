@@ -162,11 +162,11 @@ SEED_LANES = (
         # Bundle 7: SPARTA-side Arbitrage QA Harness Spec v1 docs.
         # Bundle 8: SPARTA-side Arbitrage Data Source Evaluation Memo v1 docs.
         # Bundle 9: SPARTA-side Arbitrage Sample Dataset Plan v1 docs.
-        # All filenames contain "protocol" / "data" / "manifest" /
-        # "qa_harness" / "spec" / "evaluation" / "plan" (no FAILED /
-        # RETIRED / closeout keywords), so the classifier keeps this lane
-        # at IDEA evidence (never ACTIVE, never STRONG) just because docs
-        # exist.
+        # Bundle 10: SPARTA-side Arbitrage Research Readiness Gate v1 docs.
+        # Most filenames carry only spec/data/manifest/plan keywords (kept
+        # the lane at IDEA across Bundles 4-9). Bundle 10 introduces the
+        # "readiness_gate" substring, which the classifier maps to WATCH
+        # (foundation complete -> monitorable, never ACTIVE, never STRONG).
         "extra_files": (
             "reports/arbitrage_research_protocol_v1/protocol.md",
             "reports/arbitrage_research_protocol_v1/protocol.json",
@@ -180,6 +180,8 @@ SEED_LANES = (
             "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.json",
             "reports/arbitrage_sample_dataset_plan_v1/sample_dataset_plan.md",
             "reports/arbitrage_sample_dataset_plan_v1/sample_dataset_plan.json",
+            "reports/arbitrage_research_readiness_gate_v1/readiness_gate.md",
+            "reports/arbitrage_research_readiness_gate_v1/readiness_gate.json",
         ),
     },
     {
@@ -223,6 +225,7 @@ STATUS_KEYWORDS = (
     ("park", "PARKED", "MIXED", None),
     ("closeout", "PARKED", "MIXED", None),  # closing out a lane / next-roadmap memo
     ("block", "BLOCKED", "NONE", "report name contains 'block'"),
+    ("readiness_gate", "WATCH", "MIXED", None),  # Bundle 10: foundation complete -> WATCH
     ("watch", "WATCH", "MIXED", None),
     ("oos_result", "WATCH", "MIXED", None),
     ("is_baseline", "ACTIVE", "MIXED", None),

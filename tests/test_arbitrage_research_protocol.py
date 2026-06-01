@@ -187,9 +187,8 @@ def test_candidate_registry_builds_after_protocol_exists():
     payload = scr.generate(_REPO_ROOT)
     by_id = {c["candidate_id"]: c for c in payload["candidates"]}
     arb = by_id["arbitrage_research_protocol"]
-    # Arbitrage stays IDEA (protocol/spec keyword) — never ACTIVE just because
-    # docs exist. Evidence stays NONE; STRONG forbidden by registry.
-    assert arb["status"] == "IDEA", arb
+    # Lane stays IDEA or (after Bundle 10) WATCH — NEVER ACTIVE / STRONG.
+    assert arb["status"] in ("IDEA", "WATCH"), arb
     assert arb["evidence_level"] in ("NONE", "MIXED"), arb
     assert arb["evidence_level"] != "STRONG"
     # The new protocol docs should now appear in source_reports.

@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "layer": "arbitrage_research_readiness_gate_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/arbitrage_research_readiness_gate_v1/readiness_gate.json (machine-readable gate)",
+    "reports/arbitrage_research_readiness_gate_v1/readiness_gate.md (human-readable: 6-artifact audit + required artifact checks + validator checks + safety checks + allowed/forbidden next steps + data-collection/backtest/trading gates + PASS/WATCH/BLOCKED/PARKED rules + lane recommendation + safety boundaries)",
+    "reports/arbitrage_research_readiness_gate_v1/report.md (build report)",
+    "reports/arbitrage_research_readiness_gate_v1/report.json (build report)",
+    "tools/arbitrage_readiness_gate_check.py (stdlib-only validator with path-existence check; validate / show CLI)",
+    "tests/test_arbitrage_readiness_gate.py (22 tests)",
+    "tools/strategy_candidate_registry.py: new STATUS_KEYWORDS rule (readiness_gate -> WATCH/MIXED) + extra_files extended with the gate docs; arbitrage lane now classifies as WATCH (foundation complete)",
+    "6 prior arbitrage test files: tightened invariant from `arb['status']==IDEA` to `arb['status'] in (IDEA, WATCH)` so they keep enforcing 'never ACTIVE / never STRONG' while permitting the legitimate Bundle-10 promotion to WATCH"
+  ],
+  "files_changed": [
+    "reports/arbitrage_research_readiness_gate_v1/readiness_gate.json",
+    "reports/arbitrage_research_readiness_gate_v1/readiness_gate.md",
+    "reports/arbitrage_research_readiness_gate_v1/report.md",
+    "reports/arbitrage_research_readiness_gate_v1/report.json",
+    "tools/arbitrage_readiness_gate_check.py",
+    "tests/test_arbitrage_readiness_gate.py",
+    "tools/strategy_candidate_registry.py",
+    "tests/test_arbitrage_research_protocol.py",
+    "tests/test_arbitrage_data_contract.py",
+    "tests/test_arbitrage_dataset_manifest.py",
+    "tests/test_arbitrage_qa_harness_spec.py",
+    "tests/test_arbitrage_data_source_evaluation.py",
+    "tests/test_arbitrage_sample_dataset_plan.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "what_readiness_gate_decides": {
+    "readiness_status": "WATCH",
+    "rationale": "Foundation specification is COMPLETE. All 6 arbitrage docs exist, all 8 validators pass, all execution / fetch / connection / backtest / dataset-processing flags pinned False. No data, no QA report, no tested edge, no evidence. WATCH is the only honest verdict."
+  },
+  "final_arbitrage_foundation_status": "complete-at-specification-level / research-monitorable / NOT cleared for data collection / NOT cleared for backtest / EXPLICITLY FORBIDDEN for paper or live trading",
+  "audited_artifacts": [
+    {"id": "arbitrage_research_protocol_v1", "exists": true, "validator": "arbitrage_protocol_check.py", "status": "OK"},
+    {"id": "arbitrage_data_contract_v1", "exists": true, "validator": "arbitrage_data_contract_check.py", "status": "OK"},
+    {"id": "arbitrage_dataset_manifest_v1", "exists": true, "validator": "arbitrage_dataset_manifest_check.py", "status": "OK"},
+    {"id": "arbitrage_qa_harness_spec_v1", "exists": true, "validator": "arbitrage_qa_harness_spec_check.py", "status": "OK"},
+    {"id": "arbitrage_data_source_evaluation_v1", "exists": true, "validator": "arbitrage_data_source_evaluation_check.py", "status": "OK"},
+    {"id": "arbitrage_sample_dataset_plan_v1", "exists": true, "validator": "arbitrage_sample_dataset_plan_check.py", "status": "OK"}
+  ],
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_enabled",
+      "dataset_processing_enabled"
+    ],
+    "readiness_status_constrained_to_enum": ["PASS", "WATCH", "BLOCKED", "PARKED"],
+    "trading_gate_explicitly_forbidden": true,
+    "lane_recommendation_forbids_ACTIVE_and_STRONG_promotion": true,
+    "validator_checks_artifact_paths_exist_on_disk": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "NOT pure arbitrage",
+      "RELATIVE_VALUE",
+      "WATCH does not imply edge",
+      "A price gap is not profit"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_arbitrage_readiness_gate.py tests/test_arbitrage_sample_dataset_plan.py tests/test_arbitrage_data_source_evaluation.py tests/test_arbitrage_qa_harness_spec.py tests/test_arbitrage_dataset_manifest.py tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "207 passed in 2.15s"
+    }
+  ],
+  "json_validity": {
+    "arbitrage_readiness_gate_check_validate": "validate: OK",
+    "arbitrage_sample_dataset_plan_check_validate": "validate: OK (Bundle 9 unaffected)",
+    "arbitrage_data_source_evaluation_check_validate": "validate: OK (Bundle 8 unaffected)",
+    "arbitrage_qa_harness_spec_check_validate": "validate: OK (Bundle 7 unaffected)",
+    "arbitrage_dataset_manifest_check_validate": "validate: OK (Bundle 6 unaffected)",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_arbitrage_after_build": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "source_reports_count": 14,
+    "promoted_from_IDEA_to_WATCH_via_keyword_rule": "readiness_gate",
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest/dataset-processing/credentials reference"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Deterministic logic NOT artificially modified. The WATCH bonus (+15) from the Bundle-3 registry-aware scoring actually raises arbitrage's score, so it remains the top deterministic pick. This is honest behaviour, NOT a recommendation. Operator should consult the readiness gate's `lane_recommendation` section -- which forbids ACTIVE promotion and recommends pivoting to a different lane or authoring a data-collection draft -- for the actual next step."
+  },
+  "how_this_closes_the_arbitrage_foundation_lane": [
+    "Seven bundles (Bundle 4 protocol -> Bundle 5 data contract -> Bundle 6 dataset manifest -> Bundle 7 QA harness spec -> Bundle 8 data source evaluation -> Bundle 9 sample dataset plan -> Bundle 10 readiness gate).",
+    "Six specifications + one readiness gate = research-monitorable foundation.",
+    "Zero data pulled, zero backtests run, zero exchange connections, zero credentials, zero JARVIS/dashboard touch, zero paper/live execution touch, zero sealed-artifact touch."
+  ],
+  "recommended_next_non_arbitrage_bundle": [
+    "Crypto-D1 Protocol Memo (alternative lane, currently PARKED; new hypothesis required, not a re-tune)",
+    "Arbitrage Data Collection Authorization Draft (still spec-only; only if operator wants to move the arbitrage lane past WATCH)",
+    "Data QA / Freeze workflow (cross-cutting; benefits multiple research lanes)"
+  ]
+}

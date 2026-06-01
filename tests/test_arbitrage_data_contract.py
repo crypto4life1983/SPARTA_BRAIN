@@ -224,8 +224,8 @@ def test_candidate_registry_builds_after_contract_exists():
     payload = scr.generate(_REPO_ROOT)
     arb = next(c for c in payload["candidates"]
               if c["candidate_id"] == "arbitrage_research_protocol")
-    # Lane stays IDEA — never ACTIVE, never STRONG, despite richer docs.
-    assert arb["status"] == "IDEA", arb
+    # Lane stays IDEA or (after Bundle 10) WATCH — NEVER ACTIVE / STRONG.
+    assert arb["status"] in ("IDEA", "WATCH"), arb
     assert arb["evidence_level"] in ("NONE", "MIXED"), arb
     assert arb["evidence_level"] != "STRONG"
     # The data contract docs should now appear in source_reports too.
