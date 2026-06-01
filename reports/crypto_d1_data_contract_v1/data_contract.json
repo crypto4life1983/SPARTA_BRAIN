@@ -1,0 +1,284 @@
+{
+  "data_contract_id": "crypto_d1_data_contract_v1",
+  "title": "SPARTA Crypto-D1 Data Contract v1",
+  "version": "1.0",
+  "kind": "data_contract",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+
+  "companion_documents": {
+    "crypto_d1_protocol_v1_json": "reports/crypto_d1_protocol_v1/protocol.json",
+    "crypto_d1_protocol_v1_md": "reports/crypto_d1_protocol_v1/protocol.md"
+  },
+
+  "research_objective": "Define exactly what daily OHLCV crypto data WOULD be required to later test the Crypto-D1 Protocol Memo v1 candidate strategy families (BTC / ETH / SOL spot, 24/7, daily). This contract does not fetch data, does not connect to any exchange, does not establish any data feed, and does not authorize trading or backtesting. It is the written input specification that any future, separately-authorized data-acquisition bundle (Protocol P2) must satisfy.",
+
+  "target_assets": [
+    {"symbol_canonical": "BTC", "label": "Bitcoin",  "required": true,  "rationale": "Highest-liquidity, deepest historical record, primary trend benchmark."},
+    {"symbol_canonical": "ETH", "label": "Ether",    "required": true,  "rationale": "Second-deepest historical record; cross-asset robustness check vs. BTC."},
+    {"symbol_canonical": "SOL", "label": "Solana",   "required": true,  "rationale": "Third asset with intentionally different vol / drawdown profile; prevents BTC-only overfit."}
+  ],
+
+  "timeframe": {
+    "primary": "1d",
+    "additional_allowed_for_contract_only": ["none"],
+    "intraday_explicitly_out_of_scope": true,
+    "bar_close_convention": "UTC 00:00:00 close; left-closed / right-open documented per dataset manifest."
+  },
+
+  "allowed_market_type": "spot",
+  "forbidden_market_types": [
+    "perp_futures (different funding / liquidation / leverage problem; separate future protocol required)",
+    "dated_futures (out of scope at v1)",
+    "options (out of scope at v1)",
+    "leveraged_tokens (out of scope at v1)",
+    "margin_or_borrow_facilitated_spot (out of scope at v1)",
+    "synthetic_instruments (out of scope at v1)"
+  ],
+  "perps_require_separate_future_protocol": true,
+  "intraday_requires_separate_future_protocol": true,
+
+  "required_columns": [
+    "timestamp",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "symbol",
+    "source",
+    "quote_currency"
+  ],
+
+  "optional_columns": [
+    "vwap",
+    "trade_count",
+    "quote_volume",
+    "taker_buy_volume",
+    "source_timestamp",
+    "ingestion_timestamp",
+    "adjusted_close"
+  ],
+  "optional_column_notes": {
+    "adjusted_close": "Crypto spot normally has NO equity-style split-adjustments. The adjusted_close column is supported for source compatibility but is expected to equal close in nearly all rows; any divergence MUST be explained by a documented corporate-action-equivalent event (rename / fork / network change).",
+    "vwap": "If the source publishes a VWAP it is stored as-is; SPARTA does not re-compute VWAP at ingest.",
+    "trade_count": "If the source publishes a per-bar trade count, stored as-is; can be used as a liquidity flag.",
+    "quote_volume": "If the source publishes volume in quote-currency units, stored alongside the base-asset volume; consistency check documented in the QA harness.",
+    "taker_buy_volume": "If the source distinguishes taker-buy volume, stored as-is; can be used as an order-flow proxy.",
+    "source_timestamp": "Venue-issued bar timestamp (e.g., open_time).",
+    "ingestion_timestamp": "SPARTA-reader-side timestamp when the row was recorded; never the sole primary clock."
+  },
+
+  "timestamp_requirements": {
+    "primary_clock": "UTC",
+    "iso8601_storage_required": true,
+    "daily_bar_boundary": "UTC 00:00:00 close; left-closed / right-open documented per dataset manifest.",
+    "session_handling": "24/7 crypto calendar; weekday-only handling forbidden.",
+    "missing_day_detection": "Every missing daily bar is flagged in the dataset manifest's missing_day list; never silently forward-filled.",
+    "duplicate_timestamp_rejection": "Duplicate (symbol, timestamp) rows are invalid; the natural primary key at daily resolution is (symbol, timestamp).",
+    "daylight_saving_handling": "Not applicable in UTC storage; any source delivered in local time is converted at ingest with the original timezone preserved as metadata.",
+    "partial_day_bar_handling": "Partial-day bars (e.g., the latest live bar at ingest time) are excluded from frozen datasets; only fully-closed UTC bars are valid.",
+    "source_timestamp_vs_ingestion_timestamp": "If both are available, both are stored; source_timestamp is the venue-issued bar time and is the primary key component, ingestion_timestamp is recorded only as audit metadata."
+  },
+
+  "ohlcv_requirements": {
+    "high_rule": "high >= max(open, close, low)",
+    "low_rule": "low <= min(open, close, high)",
+    "open_close_positive": true,
+    "high_positive": true,
+    "low_positive": true,
+    "volume_non_negative": true,
+    "missing_close_invalid": true,
+    "missing_timestamp_invalid": true,
+    "duplicate_row_invalid": true,
+    "zero_volume_rules": "Zero-volume daily bars on a 24/7 asset are highly suspicious; flagged for review and never silently kept in a frozen dataset without an explicit outage / illiquidity explanation in the dataset manifest.",
+    "extreme_gap_outlier_flag": "Daily move beyond a per-asset rolling-vol band (e.g., greater than N times 30d realised vol) is flagged as a suspicious-bar event; flagged not dropped.",
+    "source_outage_flag": "Documented source outage days carry an outage flag column; gap rows in outage windows are not silent missing-data.",
+    "self_consistency_check_required_before_freeze": true
+  },
+
+  "volume_requirements": {
+    "non_negative": true,
+    "unit_declared_in_manifest": "Volume unit (base-asset units vs. quote-asset units) declared per series in the dataset manifest.",
+    "quote_volume_consistency_check_if_present": "If both volume and quote_volume are present, the relationship volume * vwap ~= quote_volume is documented and per-row deviations flagged when they exceed a documented threshold.",
+    "exchange_aggregation_method_disclosed": "Aggregated venue volume (e.g., total cross-pair volume vs. main-listing-only) is venue-dependent and MUST be disclosed in the dataset manifest."
+  },
+
+  "timezone_requirements": {
+    "storage_timezone": "UTC",
+    "iso8601_required": true,
+    "no_local_time_in_storage": true,
+    "source_timezone_preserved_as_metadata": true,
+    "dst_handling_in_utc_storage": "Daylight saving does not affect UTC storage; conversions from local-time sources are explicit and reversible."
+  },
+
+  "session_requirements": {
+    "calendar": "24/7 (crypto)",
+    "weekday_only_filters_forbidden": true,
+    "holiday_handling": "Not applicable for crypto; calendar holidays are documented in metadata but never applied to daily-bar inclusion.",
+    "missing_day_policy": "Per-asset missing-day list is part of the dataset manifest; missing rows are never silently forward-filled.",
+    "venue_maintenance_window_policy": "Venue maintenance / scheduled-downtime windows are flagged as first-class outage events, not inferred from gaps."
+  },
+
+  "symbol_mapping_requirements": {
+    "canonical_symbol_required": "Every row carries a SPARTA canonical symbol (BTC / ETH / SOL); rows without a canonical mapping are invalid.",
+    "per_venue_alias_recorded": "Per-venue alias (e.g., XBTUSD on Kraken vs. BTCUSDT on Binance) recorded in a versioned mapping table alongside the dataset.",
+    "rename_handling": "Asset renames (e.g., LUNA -> LUNC, MATIC -> POL) recorded as first-class events; not silently mapped.",
+    "split_handling": "Crypto spot rarely splits. If a split-equivalent or network change occurs, treated as a corporate-action-equivalent event with a documented adjustment method; raw and adjusted both stored.",
+    "fork_handling": "Forks (e.g., BCH from BTC) are treated as new assets, not as same-symbol price continuation.",
+    "delisting_handling": "A delisting on a single venue does not invalidate historical rows; the manifest documents the delisting date and any cross-venue stitching rule."
+  },
+
+  "source_provenance_requirements": {
+    "row_level_source_id_required": "Every row carries a source identifier (venue / vendor / file_hash). Anonymous rows are invalid.",
+    "venue_named_in_manifest": "Per-dataset manifest names the data venue(s) and vendor pipeline used to produce the dataset.",
+    "file_hash_required_on_freeze": "Every frozen dataset records a sha256 of each file at the time of freeze; manual edits without re-validation invalidate the dataset.",
+    "contract_version_pin_required": "Every dataset references this data_contract version explicitly; downstream backtests must cite both dataset version and contract version.",
+    "vendor_terms_of_service_documented": "Any external-vendor source documents that the dataset's intended research use is consistent with the vendor's terms of service."
+  },
+
+  "missing_data_rules": {
+    "no_silent_forward_fill": true,
+    "missing_day_flagged_in_manifest": true,
+    "missing_close_invalid": true,
+    "missing_timestamp_invalid": true,
+    "missing_source_id_invalid": true,
+    "partial_day_bar_excluded": true,
+    "outage_calendar_attached_to_manifest": true,
+    "data_revision_creates_new_version": "Any post-freeze data revision is forbidden in place; it MUST create a new dataset version with a documented revision note."
+  },
+
+  "duplicate_data_rules": {
+    "duplicate_symbol_timestamp_rejected": true,
+    "duplicate_row_rejected": true,
+    "sequence_number_not_required_at_daily_resolution": "Sub-second sequence numbers are not required at daily resolution; (symbol, timestamp) is the natural primary key.",
+    "out_of_order_rows_flagged": true,
+    "strictly_monotonic_per_symbol_required": true
+  },
+
+  "data_quality_rules": {
+    "reproducibility_required": "Same raw inputs + same code + same contract version produce a bit-for-bit identical processed dataset; an assertion is required in the QA report.",
+    "provenance_per_row_required": true,
+    "outlier_handling": "Outliers identified by per-asset rules (e.g., extreme single-day return vs. rolling distribution); flagged not dropped.",
+    "ohlcv_self_consistency_check_required": "Every dataset must pass high>=max(o,c,l) and low<=min(o,c,h) per row before being marked frozen.",
+    "venue_outage_overlay_required_if_available": "If source venue outage history is available, an outage-day list is attached and rows flagged.",
+    "non_trading_period_handling": "Not applicable for spot crypto (24/7); for any wrapper that mixes crypto with a non-crypto series, the calendars are explicitly different and documented.",
+    "no_lookahead_required": "Features and signals must be derivable using only rows whose timestamp is at-or-before the decision time; this is checked at the QA layer."
+  },
+
+  "normalization_rules": {
+    "quote_currency_declared": "Every series declares quote currency (USD / USDT / USDC / etc.) explicitly.",
+    "stablecoin_cross_handling": "Conversions across USDT / USDC / USD require an explicit FX series with a documented method; assumed-one-to-one disallowed without explicit disclosure.",
+    "tick_lot_handling": "Tick size and minimum lot recorded per venue per asset; never silently rounded.",
+    "split_dividend_for_equities_n_a_for_spot_crypto": "Equity-style split / dividend adjustments are not applicable to spot crypto; a documented placeholder is required for any future cross-asset dataset that mixes equities.",
+    "rename_alias_mapping_versioned": true,
+    "stitching_rules_for_continuous_series": "Continuous crypto price series across venue changes require documented stitching rules; folklore stitching is invalid."
+  },
+
+  "fee_slippage_requirements": {
+    "spot_taker_fee_required": "Per venue, dated, pre-declared before any future test; the default sizing assumption is TAKER on every leg.",
+    "spot_maker_fee_recorded_if_used": "Maker fee is recorded only when a future test pre-registers maker fills; maker fills are never the default.",
+    "fee_tier_assumption": "Default is the lowest standard tier the operator could realistically maintain; never best-case.",
+    "slippage_assumption": "Conservative slow-day haircut (constant-bps plus one-tick) on top of fees; depth-aware when L2 is available in a future intraday extension.",
+    "spread_assumption_when_quote_data_absent": "When quote / L1 data is not present, a constant-bps spread proxy is documented and used as an additive haircut; the proxy is conservative.",
+    "stablecoin_quote_currency_assumption": "Quote currency declared per series; any cross-stablecoin conversion is documented and explicit.",
+    "cost_sensitivity_checks_required_before_pass": "No PASS verdict is allowed without a cost-sensitivity test (fees plus or minus N bps, slippage plus or minus M bps) showing that the verdict survives.",
+    "no_profitability_claim_if_fees_ignored": "A future result is invalid if it omits fees, slippage, or stablecoin assumptions.",
+    "fees_as_distinct_pnl_line_required": "Every future backtest report must carry fees as a distinct PnL line; never silently netted."
+  },
+
+  "data_freeze_requirements": {
+    "no_mutable_data_in_backtest": "No future backtest can use mutable / unfrozen data; the dataset MUST be frozen with a sha256 manifest before any IS or OOS run.",
+    "every_dataset_has_a_manifest": true,
+    "every_dataset_references_this_contract_version": true,
+    "every_dataset_passes_qa_freeze_checks": "A separately-authored Crypto-D1 Data QA / Freeze Spec defines the checks; QA_PASS is required before backtest use.",
+    "any_data_revision_creates_new_version": true,
+    "no_manual_edits_without_documentation_and_revalidation": true
+  },
+
+  "future_allowed_data_sources": [
+    "Existing on-disk frozen historical files already present in SPARTA's research tree (NO network call from this contract's runtime).",
+    "A future, SEPARATELY authorized data-acquisition bundle (Protocol P2) which itself ships its own data-acquisition memo and explicit operator authorization.",
+    "Operator-supplied paid-vendor exports that DO NOT require a live API connection from SPARTA itself (vendor pushes files; SPARTA reads them offline)."
+  ],
+
+  "forbidden_data_sources_or_methods": [
+    "Live exchange APIs called from this contract's runtime.",
+    "Scraping any venue HTML / WebSocket / undocumented endpoint from this contract's runtime.",
+    "Any data source requiring an embedded API key, OAuth token, or .env credential.",
+    "Any data source that requires SPARTA to MAKE a network call from its runtime.",
+    "Any synthetic / mock-priced data used in place of real historical data for any evidence claim.",
+    "Any dataset whose provenance cannot be cited line-by-line.",
+    "Any dataset that has been peeked at in its OOS window before sealing.",
+    "Any feed whose terms of service forbid research use."
+  ],
+
+  "minimum_viable_dataset": {
+    "per_asset_minimum_history_years": "At least 3 years of daily OHLCV per included asset, to support IS plus sealed OOS windows with a reasonable trade count.",
+    "preferred_history_years": "5 or more years if available (BTC carries roughly 12y, ETH roughly 8y, SOL roughly 5y at v1).",
+    "assets_required": ["BTC"],
+    "assets_recommended": ["ETH", "SOL"],
+    "single_source_per_asset": "Each asset uses one primary source venue / vendor for the full series; cross-venue stitching only with documented stitching rules.",
+    "frozen_sha256_required": true,
+    "manifest_required": true,
+    "contract_version_pinned": true,
+    "qa_report_required_before_use": true,
+    "is_window_sealed_before_run": true,
+    "oos_window_sealed_before_run": true,
+    "provenance_per_row": true,
+    "warmup_buffer_documented": true,
+    "fee_schedule_attached": true,
+    "outage_calendar_attached_if_available": true
+  },
+
+  "required_future_artifacts": [
+    "Crypto-D1 Dataset Manifest v1 (P2) -- per-dataset manifest schema for the crypto-D1 lane (spec only, no fetch).",
+    "Crypto-D1 Data QA / Freeze Spec v1 (P2) -- QA harness spec for daily-crypto datasets (spec only, no harness execution).",
+    "Per-dataset 'data acquisition memo' that names source / venue / time-window / storage path before any data pull.",
+    "Per-dataset 'data integrity report' (P2 OUTPUT) showing row counts, missing-day list, outage overlay, fee schedule attached, contract version pinned.",
+    "Crypto-D1 Baseline Backtest Plan v1 (P3 / P4) -- pre-registration memo for the FIRST strategy family plus IS / OOS split (plan only, no backtest run).",
+    "Backtest report.json + report.md with PASS / WATCH / FAIL verdict per the Crypto-D1 Protocol Memo v1 rules.",
+    "Lane closeout memo if a strategy family PARKs / RETIREs."
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "Every required section of this contract is populated for the dataset; the QA report shows zero unresolved flags; fee + slippage + stablecoin assumptions are non-null and sourced; IS / OOS windows were sealed before any run; OHLCV self-consistency passes per row; missing-day list and outage overlay are attached.",
+    "WATCH": "Contract is satisfied but at least one assumption is borderline (e.g., short history on one asset, marginal QA flags accepted by the operator), or only one asset (BTC) is present; the dataset is documented and re-checked before any further phase.",
+    "FAIL": "Any required section is missing, any forbidden data source was used, any safety flag is True, any OOS window was peeked, the OHLCV self-consistency check fails, or the dataset cannot be reproduced bit-for-bit."
+  },
+
+  "safety_boundaries": [
+    "Research-only. Data contract / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this contract's runtime.",
+    "No data fetch in this bundle. Data acquisition is a SEPARATE, explicitly authorized bundle (Protocol P2).",
+    "No backtest in this bundle. No dataset processing in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this contract alone.",
+    "Crypto trend ideas are not profitable until tested with full costs. A good historical chart does not imply future returns. Clean OHLCV data does not imply profit. No backtest is authorized by this contract alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This contract does not imply edge.",
+    "Clean OHLCV data does not imply profit.",
+    "Crypto trend ideas are not profitable until tested.",
+    "A good historical chart does not imply future returns.",
+    "No data fetch is authorized by this contract.",
+    "No backtest is authorized by this contract.",
+    "No paper or live trading is authorized by this contract."
+  ]
+}

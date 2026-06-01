@@ -117,9 +117,14 @@ SEED_LANES = (
         # WATCH (research-monitorable, never ACTIVE, never STRONG) IF the new
         # memo is actually on disk -- this lets a v1 protocol re-open a lane
         # that was historically PARKED by closeout-keyword reports.
+        # Bundle 12: SPARTA-side Crypto-D1 Data Contract v1 docs added. Still
+        # WATCH (data contract spec only -- no fetch, no backtest, no
+        # dataset processing); never ACTIVE, never STRONG.
         "extra_files": (
             "reports/crypto_d1_protocol_v1/protocol.md",
             "reports/crypto_d1_protocol_v1/protocol.json",
+            "reports/crypto_d1_data_contract_v1/data_contract.md",
+            "reports/crypto_d1_data_contract_v1/data_contract.json",
         ),
         "lane_status_override": "WATCH",
     },
