@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_baseline_backtest_plan_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json (machine-readable Crypto-D1 baseline backtest PLAN; 6 strategy families with one benchmark + four primary + one WATCH-only; pre-registered small parameter grids; required prior artifacts gate; required dataset gate; cost / slippage / position sizing / risk / metrics / 27-field report schema; PASS / WATCH / FAIL rules; kill conditions; forbidden actions; required future artifacts; safety boundaries; no-profit-claim policy)",
+    "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.md (human-readable plan)",
+    "reports/crypto_d1_baseline_backtest_plan_v1/report.md (build report)",
+    "reports/crypto_d1_baseline_backtest_plan_v1/report.json (build report)",
+    "tools/crypto_d1_backtest_plan_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_crypto_d1_backtest_plan.py (35 tests covering schema + safety + validator failure modes + no-real-data-or-backtest-output-files + tool stdlib-only + integration with prior bundles)",
+    "tools/strategy_candidate_registry.py: crypto_d1_protocol seed extended via extra_files to include the new backtest_plan docs (lane stays WATCH; never ACTIVE / never STRONG)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
+    "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.md",
+    "reports/crypto_d1_baseline_backtest_plan_v1/report.md",
+    "reports/crypto_d1_baseline_backtest_plan_v1/report.json",
+    "tools/crypto_d1_backtest_plan_check.py",
+    "tests/test_crypto_d1_backtest_plan.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "follows_protocol_contract_manifest_qa": {
+    "protocol_id": "crypto_d1_protocol_v1",
+    "data_contract_id": "crypto_d1_data_contract_v1",
+    "dataset_manifest_id": "crypto_d1_dataset_manifest_v1",
+    "qa_freeze_spec_id": "crypto_d1_qa_freeze_spec_v1",
+    "lane": "crypto_d1_protocol",
+    "phase_satisfied": "P3_baseline_strategy_impl_PLAN_layer (the runner IMPLEMENTATION is a SEPARATE, separately-authorized future bundle)"
+  },
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "forbidden_market_types": ["perp_futures", "dated_futures", "options", "leveraged_tokens", "margin_or_borrow_facilitated_spot", "synthetic_instruments"],
+    "timeframe_primary": "1d",
+    "intraday_explicitly_out_of_scope": true,
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "baseline_strategy_family_count": 6,
+    "baseline_strategy_family_ids": ["buy_and_hold_benchmark", "donchian_channel_breakout", "moving_average_trend_filter", "momentum_continuation", "volatility_regime_gate", "mean_reversion"],
+    "watch_only_families": ["mean_reversion"],
+    "benchmark_families": ["buy_and_hold_benchmark"],
+    "metrics_required_count": 17,
+    "report_schema_field_count": 27
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_execution_enabled",
+      "dataset_processing_enabled"
+    ],
+    "spot_only_market_type": true,
+    "perp_futures_explicitly_forbidden": true,
+    "intraday_explicitly_out_of_scope": true,
+    "session_model_24_7_with_no_weekday_only_filters": true,
+    "no_leverage": true,
+    "long_only_spot_first": true,
+    "no_shorting": true,
+    "no_post_hoc_stop_loss_addition": true,
+    "no_pass_if_costs_ignored": true,
+    "no_zero_slippage_baseline": true,
+    "parameter_policy_forbids_unlimited_optimization": true,
+    "parameter_policy_forbids_genetic_search": true,
+    "parameter_policy_forbids_ai_picked_best_on_oos": true,
+    "parameter_policy_forbids_repeated_tuning_on_oos": true,
+    "no_real_data_files_or_backtest_outputs_created": true,
+    "no_backtest_execution_in_this_bundle": true,
+    "mean_reversion_is_WATCH_only_never_primary": true,
+    "prior_codr_parameter_sets_explicitly_not_revived": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "This plan does not imply edge",
+      "No backtest is run by this bundle",
+      "No historical result is produced by this bundle",
+      "A future PASS is not trading authorization",
+      "No paper/live trading is authorized",
+      "No data fetch is authorized",
+      "Crypto trend ideas are not profitable until tested",
+      "24/7"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_backtest_plan.py --rootdir=tests -q",
+      "result": "35 passed"
+    },
+    {
+      "command": "python -m pytest tests/test_crypto_d1_backtest_plan.py tests/test_crypto_d1_qa_freeze_spec.py tests/test_crypto_d1_dataset_manifest.py tests/test_crypto_d1_data_contract.py tests/test_crypto_d1_protocol.py tests/test_arbitrage_readiness_gate.py tests/test_arbitrage_sample_dataset_plan.py tests/test_arbitrage_data_source_evaluation.py tests/test_arbitrage_qa_harness_spec.py tests/test_arbitrage_dataset_manifest.py tests/test_arbitrage_data_contract.py tests/test_arbitrage_research_protocol.py tests/test_strategy_candidate_registry.py tests/test_strategy_next_bundle.py --rootdir=tests -q",
+      "result": "358 passed across Bundles 2-15"
+    }
+  ],
+  "json_validity": {
+    "crypto_d1_backtest_plan_check_validate": "validate: OK",
+    "crypto_d1_qa_freeze_spec_check_validate": "validate: OK (Bundle 14 unaffected)",
+    "crypto_d1_dataset_manifest_check_validate": "validate: OK (Bundle 13 unaffected)",
+    "crypto_d1_data_contract_check_validate": "validate: OK (Bundle 12 unaffected)",
+    "crypto_d1_protocol_check_validate": "validate: OK (Bundle 11 unaffected)",
+    "arbitrage_readiness_gate_check_validate": "validate: OK (Bundle 10 unaffected)",
+    "arbitrage_sample_dataset_plan_check_validate": "validate: OK (Bundle 9 unaffected)",
+    "arbitrage_data_source_evaluation_check_validate": "validate: OK (Bundle 8 unaffected)",
+    "arbitrage_qa_harness_spec_check_validate": "validate: OK (Bundle 7 unaffected)",
+    "arbitrage_dataset_manifest_check_validate": "validate: OK (Bundle 6 unaffected)",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH (fires because the seed's extra_files now include 10 docs total: protocol + data_contract + dataset_manifest + qa_freeze_spec + backtest_plan, all on disk)",
+    "new_extra_files_added_this_bundle": [
+      "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.md",
+      "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json"
+    ],
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest-execution/dataset-processing/credentials reference",
+      "no real data files or backtest output files created",
+      "no backtest execution in this bundle"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Both arbitrage and crypto_d1 are still WATCH (same +15 bonus). Arbitrage still wins via the existing protocol-first / data-first scoring hints in its queue item. Deterministic logic NOT artificially modified. Operator should consult both lanes' next-step lists to pick the actual Bundle 16."
+  },
+  "how_this_follows_qa_freeze_spec": [
+    "Crypto-D1 Data QA / Freeze Spec v1 (Bundle 14) declared 'Crypto-D1 Baseline Backtest Plan v1' as an allowed next step and defined the QA_status model + QA_report_schema this plan consumes.",
+    "This bundle authors the PLAN -- pre-registration only; no backtest is executed, no data is fetched, no dataset is processed, no real data files or backtest outputs are created.",
+    "All seven safety flags from the protocol / data contract / dataset manifest / QA spec carry verbatim into this plan; an EIGHTH renamed flag (`backtest_execution_enabled = false`) makes it explicit that execution itself is forbidden.",
+    "Lane scope identical: BTC / ETH / SOL, spot only, daily only, 24/7.",
+    "required_dataset_gate explicitly pins QA_status to QA_PASS or approved QA_WARN; future backtest report must cite dataset_id + dataset_version + data_contract_version + protocol_version + manifest_version + QA_report_id (all 6 references mandated by the report_schema).",
+    "report_schema 27 required_fields include QA_report_id (Bundle 14), manifest_version (Bundle 13), data_contract_version (Bundle 12), and protocol_version (Bundle 11) -- so any future backtest report pins all four spec layers explicitly.",
+    "pass_watch_fail_rules require: no lookahead (Bundle 14 group B/C check), QA_PASS or approved QA_WARN (Bundle 14 model), full costs (Bundle 12+14 fee/slippage), trade-count floors, OOS-survives-IS, multi-asset robustness, drawdown within pre-declared limits, fee/slippage sensitivity, AND meaningful beat over buy-and-hold AFTER costs on a risk-adjusted basis."
+  ],
+  "recommended_next_bundle": [
+    "Crypto-D1 Backtest Runner v1 -- CODE bundle that implements the runner against a FROZEN QA_PASS dataset. Separately authorized. **Recommended to use Codex for that bundle, NOT Claude, because the runner will be code-heavy** (deterministic data loader, per-family strategy implementations, cost/slippage model, IS/OOS split, walk-forward driver, sensitivity sweep, report emitter that fills all 27 report_schema fields).",
+    "Crypto-D1 Data Collection Authorization Draft -- still spec-only; only if the operator wants to start the path toward an actual P2 acquisition. Does not authorize anything by itself.",
+    "Crypto-D1 Data Source Evaluation Memo v1 -- written assessment of which offline data sources could later satisfy the QA / freeze spec. Memo only, no fetch."
+  ],
+  "process_note_to_operator": "Bundle 16 (the runner) should be authored with Codex rather than Claude. The runner is code-heavy: deterministic data loader against a FROZEN dataset, per-family strategy implementations, cost/slippage model, IS/OOS split, walk-forward driver, sensitivity sweep, and a report emitter that fills all 27 report_schema fields. Codex's strengths align with that scope."
+}
