@@ -170,8 +170,9 @@ def test_status_shape_unchanged():
     status = app_module.api_jarvis_status()
     assert isinstance(status, dict)
     # 24 base sections + 4 Bundle B read-only observation panels
-    # (factory_status, survival_ledger, candidate_registry, freshness_guard).
-    assert len(status) == 28
+    # (factory_status, survival_ledger, candidate_registry, freshness_guard)
+    # + 1 Bundle 1 Strategy Factory snapshot panel (strategy_factory).
+    assert len(status) == 29
     assert status["read_only"] is True
     trading = status["trading_detail"]
     assert trading["read_only"] is True

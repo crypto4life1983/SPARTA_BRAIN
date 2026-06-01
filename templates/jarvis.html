@@ -342,6 +342,11 @@
       <div class="jv-loading">Computing readiness&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pStrategyFactory">
+      <h2><span class="ic">&#x2699;</span>Strategy Factory <span class="jv-tag t-read">RESEARCH ONLY</span></h2>
+      <div class="jv-loading">Reading strategy factory snapshot&hellip;</div>
+    </div>
+
     <div class="jv-panel jv-wide" id="pFactoryStatus">
       <h2><span class="ic">&#x2692;</span>Factory Status <span class="jv-tag t-read">READ ONLY</span></h2>
       <div class="jv-loading">Reading factory reports&hellip;</div>
@@ -471,6 +476,11 @@
           <span class="jv-voice-ctl is-disabled" id="jvSpeakAnswerBtn" role="button"
                 tabindex="0" aria-disabled="true"
                 aria-label="Read the last returned answer aloud">Read last answer</span>
+          <label class="jv-detail" for="jvVoicePick" style="margin-left:8px">Voice:</label>
+          <select id="jvVoicePick" class="jv-voice-pick" aria-label="Pick the read-aloud voice"
+                  style="background:transparent;color:inherit;border:1px solid var(--jv-line,#345);border-radius:4px;padding:2px 4px;max-width:240px">
+            <option value="">System default</option>
+          </select>
           <span class="jv-detail" id="jvSpeakStatus" aria-live="polite">Off. Ask a read-only question first.</span>
         </div>
       </div>
@@ -503,6 +513,12 @@
   // stack a second capture / ask / read-aloud on top of an in-flight turn.
   var jvVoiceMode = 'preview';
   var jvVoiceBusy = false;
+
+  // Read-aloud voice selection. Holds the chosen SpeechSynthesisVoice (or null
+  // for system default). Lets the operator A/B different voices, since the
+  // per-utterance volume ramp that makes the first word of each chunk quiet is
+  // voice-specific in Chrome/Edge. Selection lives only in memory; not stored.
+  var jvVoice = null;
 
   function led(state){
     var ok = ['online','ready','installed','connected','armed','locked','compliance_first'];
@@ -1131,6 +1147,60 @@
       setPanel('pFactoryStatus', fsHtml);
     }
 
+    // Strategy Factory snapshot (Bundle 1): research-only routine-layer view.
+    // The three trading-safety flags are pinned False by the backend; an
+    // anomaly forces RED. Read-only — no run/execute/broker affordance.
+    var sfx = d.strategy_factory || {};
+    var sfSafetyLine = '<div class="jv-detail" style="margin-top:8px">Research-only &middot; Live trading: disabled &middot; Broker control: disabled &middot; Paper order execution: disabled.</div>';
+    if(sfx.state === 'missing' || sfx.state === 'invalid'){
+      setPanel('pStrategyFactory',
+        row('Snapshot', 'waiting', (sfx.state||'').toUpperCase(), sfx.detail || 'no snapshot') +
+        row('Research-only', 'locked', 'TRUE') +
+        row('Live trading', 'locked', 'DISABLED') +
+        row('Broker control', 'locked', 'DISABLED') +
+        row('Paper order execution', 'locked', 'DISABLED') +
+        sfSafetyLine);
+    } else {
+      var sfColor = (sfx.commander_color || 'YELLOW');
+      var sfColorCls = (sfColor === 'GREEN') ? 'online' : (sfColor === 'RED') ? 'bad' : 'waiting';
+      var sfPostCls = (sfx.posture === 'GREEN') ? 'online' : (sfx.posture === 'RED') ? 'bad' : 'waiting';
+      var sfHtml =
+        row('Commander color', sfColorCls, esc(sfColor)) +
+        row('Posture', sfPostCls, esc(sfx.posture || 'UNKNOWN')) +
+        row('Active lane', 'online', esc(sfx.active_lane || '—')) +
+        row('Generated at', '', esc(sfx.generated_at || '—')) +
+        row('Live trading', 'locked', sfx.live_trading_enabled ? 'ENABLED' : 'DISABLED') +
+        row('Broker control', 'locked', sfx.broker_control_enabled ? 'ENABLED' : 'DISABLED') +
+        row('Paper order execution', 'locked', sfx.paper_order_execution_enabled ? 'ENABLED' : 'DISABLED');
+      if(sfx.safety_anomaly === true){
+        sfHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-bad)">SAFETY ANOMALY: snapshot claimed a trading/broker flag enabled. Flags pinned disabled; posture forced RED.</div>';
+      }
+      if(sfx.next_best_action){
+        sfHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Next best action</div>';
+        sfHtml += '<div class="jv-detail">'+esc(sfx.next_best_action)+'</div>';
+      }
+      var sfBlk = sfx.blockers || [];
+      if(sfBlk.length){
+        sfHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Blockers</div>';
+        sfBlk.forEach(function(b){
+          sfHtml += '<div class="jv-mcard"><div class="jv-detail">'+esc(b)+'</div></div>';
+        });
+      }
+      var sfRep = sfx.last_reports || [];
+      if(sfRep.length){
+        sfHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Last reports</div>';
+        sfRep.forEach(function(r){
+          sfHtml += '<div class="jv-mcard"><div class="top">'+
+            '<span class="ttl">'+esc(r.name || '?')+'</span>'+
+            '<span class="jv-tag">'+esc(r.outcome || '—')+'</span></div>'+
+            (r.modified_at ? '<div class="jv-detail" style="margin-top:6px">'+esc(r.modified_at)+'</div>' : '')+
+            '</div>';
+        });
+      }
+      sfHtml += sfSafetyLine;
+      setPanel('pStrategyFactory', sfHtml);
+    }
+
     // Pass/Fail & Survival Ledger (T2): aggregate, display-only.
     var sl = d.survival_ledger || {};
     if(sl.state === 'not_found' || sl.state === 'error'){
@@ -1248,68 +1318,39 @@
     }).then(function(r){ return r.json(); });
   }
 
-  // Read text aloud across one or more queued utterances. Two browser quirks
-  // shape this:
-  //  - Chrome/Edge silently cancel a single utterance after ~15s, so long
-  //    answers must be split.
-  //  - The pause()/resume() keepalive that would keep one long utterance alive
-  //    audibly breaks the voice mid-sentence, so we do NOT use it.
-  // Compromise: pack sentences into pieces that each stay well under the ~15s
-  // limit, then queue them ALL up front so the engine plays them back-to-back
-  // without the gap you get from re-issuing speak() inside each onend handler.
+  // Read text aloud as a SINGLE utterance. Root cause of the "quiet first word"
+  // bug: Chrome/Edge fade up the START of every utterance, so splitting an
+  // answer into several utterances made the opening word of each chunk too
+  // quiet to hear — and it happened on every installed voice, so it is the
+  // engine, not the voice. Speaking the whole answer as ONE utterance means a
+  // single onset fade at the very beginning, absorbed by a short lead pause.
+  // The browser cancels a long single utterance after ~15s, so we hold it open
+  // with a periodic resume() keepalive (resume() ALONE — pause()+resume()
+  // breaks the voice mid-sentence). The keepalive is cleared on end/error.
   // cancel() immediately before speak() clips the first word in Chrome, so we
   // only cancel when something is queued and let it settle first. onEnd fires
-  // once after the final piece (or on skip / error).
+  // once when speech finishes (or on skip / error).
   function jvSpeakChunks(synth, text, onEnd){
     var clean = (text || '').replace(/\s+/g, ' ').trim();
     if(!clean){ if(onEnd){ onEnd(); } return false; }
-    var sentences = clean.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) || [clean];
-    var chunks = [], buf = '';
-    sentences.forEach(function(s){
-      s = s.trim();
-      if(!s){ return; }
-      while(s.length > 160){
-        var cut = s.lastIndexOf(' ', 160);
-        if(cut <= 0){ cut = 160; }
-        if(buf){ chunks.push(buf); buf = ''; }
-        chunks.push(s.slice(0, cut).trim());
-        s = s.slice(cut).trim();
-      }
-      if((buf ? buf + ' ' + s : s).length > 160){
-        if(buf){ chunks.push(buf); }
-        buf = s;
-      } else {
-        buf = (buf ? buf + ' ' + s : s);
-      }
-    });
-    if(buf){ chunks.push(buf); }
-    if(!chunks.length){ if(onEnd){ onEnd(); } return false; }
 
-    var done = false;
-    function finish(){ if(done){ return; } done = true; if(onEnd){ onEnd(); } }
+    var done = false, keepAlive = null;
+    function stopKeepAlive(){ if(keepAlive){ clearInterval(keepAlive); keepAlive = null; } }
+    function finish(){ if(done){ return; } done = true; stopKeepAlive(); if(onEnd){ onEnd(); } }
     function enqueue(){
-      // Chrome/Edge cold-start quirk: when the engine has been idle, the FIRST
-      // audible utterance ramps up from near-silence, so the opening words are
-      // too quiet to hear; later chunks play fine. A volume-0 warm-up does NOT
-      // help because Chromium drops zero-volume utterances without opening the
-      // sound device. So prime with a SHORT, near-inaudible (but non-zero)
-      // utterance that has real phonemes: it opens the sound pipeline and the
-      // volume ramp is spent on it, so the first real chunk starts at full
-      // level. Volume/pitch are set explicitly on every chunk too.
-      var warm = new SpeechSynthesisUtterance('uh uh');
-      warm.lang = 'en-US';
-      warm.volume = 0.04;
-      warm.rate = 0.6;
-      synth.speak(warm);
-      chunks.forEach(function(c, idx){
-        var u = new SpeechSynthesisUtterance(c);
-        u.lang = 'en-US';
-        u.rate = 1;
-        u.pitch = 1;
-        u.volume = 1;
-        if(idx === chunks.length - 1){ u.onend = finish; u.onerror = finish; }
-        synth.speak(u);
-      });
+      var u = new SpeechSynthesisUtterance(', , , ' + clean);
+      if(jvVoice){ u.voice = jvVoice; u.lang = jvVoice.lang || 'en-US'; }
+      else { u.lang = 'en-US'; }
+      u.rate = 1;
+      u.pitch = 1;
+      u.volume = 1;
+      u.onend = finish;
+      u.onerror = finish;
+      synth.speak(u);
+      keepAlive = setInterval(function(){
+        if(synth.speaking){ try { synth.resume(); } catch(e){ /* ignore */ } }
+        else { stopKeepAlive(); }
+      }, 10000);
     }
     if(synth.speaking || synth.pending){
       try { synth.cancel(); } catch(e){ /* nothing queued */ }
@@ -1681,6 +1722,38 @@
     btn.addEventListener('keydown', function(e){
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); speak(); }
     });
+
+    // Voice picker: populate from the browser's installed voices so the operator
+    // can A/B which one (the quiet-first-word ramp is voice-specific). getVoices
+    // is async in Chrome — it returns [] until voiceschanged fires, so populate
+    // on both. Read-only: changing the picker only changes which local voice is
+    // used; it sends nothing and stores nothing.
+    var pick = document.getElementById('jvVoicePick');
+    if(pick){
+      function fill(){
+        var voices = synth.getVoices() || [];
+        if(!voices.length){ return; }
+        var prev = pick.value;
+        pick.innerHTML = '<option value="">System default</option>';
+        voices.forEach(function(v, i){
+          var o = document.createElement('option');
+          o.value = String(i);
+          o.textContent = v.name + ' (' + v.lang + ')' + (v.default ? ' — default' : '');
+          pick.appendChild(o);
+        });
+        if(prev){ pick.value = prev; }
+      }
+      fill();
+      synth.addEventListener('voiceschanged', fill);
+      pick.addEventListener('change', function(){
+        var voices = synth.getVoices() || [];
+        var idx = pick.value === '' ? -1 : parseInt(pick.value, 10);
+        jvVoice = (idx >= 0 && voices[idx]) ? voices[idx] : null;
+        setStatus(jvVoice
+          ? 'Voice set to ' + jvVoice.name + '. Click "Read last answer" to hear it.'
+          : 'Using the system default voice.');
+      });
+    }
   }
 
   tick(); setInterval(tick, 1000);

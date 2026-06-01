@@ -7912,6 +7912,19 @@ _JARVIS_TRADING_REPORTS_REL = "trading_research/agentic_factory/reports"
 _JARVIS_S26_D17_DIR = "s26_d17_trend_sr_ema_rsi_friction_stress"
 _JARVIS_S26_D18_DIR = "s26_d18_trend_sr_ema_rsi_decision_gate"
 _JARVIS_SURVIVAL_REL = "data/profit_brain_strategy_survival.json"
+# Bundle 1 — gitignored runtime snapshot written by
+# tools/strategy_factory_routines.py (jarvis-snapshot). Display-only.
+_JARVIS_STRATEGY_FACTORY_SNAPSHOT_REL = \
+    "storage/jarvis/strategy_factory/latest_strategy_factory_snapshot.json"
+# The three trading-safety flags JARVIS must NEVER surface as anything but
+# False. They are pinned in the API response no matter what the on-disk runtime
+# snapshot says; a snapshot claiming otherwise is treated as an anomaly (RED),
+# never trusted.
+_JARVIS_SF_SAFETY_FLAGS = (
+    "live_trading_enabled",
+    "broker_control_enabled",
+    "paper_order_execution_enabled",
+)
 
 
 def _jarvis_safe_report_summary(path) -> str:
@@ -8112,6 +8125,128 @@ def _jarvis_factory_status() -> dict:
         "latest_decisions": latest_decisions,
         "note": "Read-only view of committed factory reports. JARVIS runs no "
                 "Factory job; runs stay operator-CLI/offline.",
+    }
+
+
+def _jarvis_strategy_factory_snapshot() -> dict:
+    """READ-ONLY view of the Strategy Factory Routine Layer v1 snapshot
+    (Bundle 1). Loads, display-only, the gitignored runtime file
+    ``storage/jarvis/strategy_factory/latest_strategy_factory_snapshot.json``
+    written by ``tools/strategy_factory_routines.py jarvis-snapshot``.
+
+    Fail-closed contract:
+      * missing file        -> state="missing", safe defaults,
+      * unreadable/corrupt  -> state="invalid", safe defaults + error note,
+      * not a JSON object   -> state="invalid",
+      * ok                  -> state="ready", whitelisted display fields.
+
+    The three trading-safety booleans are ALWAYS pinned False in the returned
+    payload regardless of file content. If the on-disk snapshot claims any of
+    them True, that is treated as an anomaly (``safety_anomaly=True`` and
+    ``commander_color="RED"``) so the panel shows a warning. This helper never
+    executes, never trades, never fetches the network, never imports a broker
+    module, and never writes/regenerates the snapshot."""
+    import json as _json
+
+    def _default(state: str, **extra) -> dict:
+        base = {
+            "state": state,
+            "read_only": True,
+            "generated_at": None,
+            "posture": "UNKNOWN",
+            "active_lane": None,
+            "next_best_action": None,
+            "blockers": [],
+            "last_reports": [],
+            "safety_notes": [
+                "Research-only Strategy Factory snapshot (display-only).",
+            ],
+            "commander_color": "YELLOW",
+            "safety_anomaly": False,
+            # PINNED FALSE — never surfaced as anything else.
+            "live_trading_enabled": False,
+            "broker_control_enabled": False,
+            "paper_order_execution_enabled": False,
+            "note": "Research-only. JARVIS reads this snapshot display-only; it "
+                    "runs no routine, trades nothing, controls no broker.",
+        }
+        base.update(extra)
+        return base
+
+    path = BASE / _JARVIS_STRATEGY_FACTORY_SNAPSHOT_REL
+    if not path.exists():
+        return _default(
+            "missing",
+            detail=f"{_JARVIS_STRATEGY_FACTORY_SNAPSHOT_REL} not found "
+                   "(NOT_FOUND). Run tools/strategy_factory_routines.py "
+                   "jarvis-snapshot to generate it.",
+        )
+    try:
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — corrupt file fails closed.
+        return _default(
+            "invalid",
+            detail=f"snapshot unreadable/corrupt -> fail closed "
+                   f"({type(exc).__name__}).",
+        )
+    if not isinstance(data, dict):
+        return _default(
+            "invalid", detail="snapshot is not a JSON object -> fail closed.")
+
+    # An on-disk True for any trading flag is an anomaly we surface but NEVER
+    # trust: the displayed booleans stay pinned False and the color forces RED.
+    anomaly = any(data.get(flag) is True for flag in _JARVIS_SF_SAFETY_FLAGS)
+
+    posture = data.get("posture")
+    posture = posture.upper() if isinstance(posture, str) else "UNKNOWN"
+    color = data.get("commander_color")
+    color = color.upper() if isinstance(color, str) else "YELLOW"
+    if color not in ("GREEN", "YELLOW", "RED"):
+        color = "YELLOW"
+    if anomaly:
+        color = "RED"
+
+    blockers = data.get("blockers")
+    blockers = [str(b) for b in blockers] if isinstance(blockers, list) else []
+    if anomaly:
+        blockers = [
+            "SAFETY ANOMALY: snapshot claimed a trading/broker flag True; "
+            "pinned False and forced RED."
+        ] + blockers
+
+    notes = data.get("safety_notes")
+    notes = [str(n) for n in notes] if isinstance(notes, list) else []
+
+    out_reports: list = []
+    reports = data.get("last_reports")
+    if isinstance(reports, list):
+        for r in reports[:8]:
+            if isinstance(r, dict):
+                out_reports.append({
+                    "name": r.get("name"),
+                    "outcome": r.get("outcome"),
+                    "modified_at": r.get("modified_at"),
+                })
+
+    return {
+        "state": "ready",
+        "read_only": True,
+        "generated_at": data.get("generated_at"),
+        "posture": posture,
+        "active_lane": data.get("active_lane"),
+        "next_best_action": data.get("next_best_action"),
+        "blockers": blockers,
+        "last_reports": out_reports,
+        "safety_notes": notes,
+        "commander_color": color,
+        "safety_anomaly": anomaly,
+        # PINNED FALSE — never surfaced as anything else regardless of file.
+        "live_trading_enabled": False,
+        "broker_control_enabled": False,
+        "paper_order_execution_enabled": False,
+        "note": "Research-only Strategy Factory snapshot. JARVIS reads it "
+                "display-only; it runs no routine, trades nothing, controls "
+                "no broker.",
     }
 
 
@@ -8621,6 +8756,7 @@ def api_jarvis_status():
     trading_detail = _jarvis_safe(_jarvis_trading_detail)
     cache_freshness = _jarvis_safe(_jarvis_cache_freshness)
     factory_status = _jarvis_safe(_jarvis_factory_status)
+    strategy_factory = _jarvis_safe(_jarvis_strategy_factory_snapshot)
     survival_ledger = _jarvis_safe(_jarvis_survival_ledger)
     candidate_registry = _jarvis_safe(_jarvis_candidate_registry)
     freshness_guard = _jarvis_safe(_jarvis_freshness_guard)
@@ -8653,6 +8789,7 @@ def api_jarvis_status():
         "trading_detail": trading_detail,
         "cache_freshness": cache_freshness,
         "factory_status": factory_status,
+        "strategy_factory": strategy_factory,
         "survival_ledger": survival_ledger,
         "candidate_registry": candidate_registry,
         "freshness_guard": freshness_guard,

@@ -2969,3 +2969,5 @@ Four strategy branches (Donchian, S26, S27, S28) are now PARKED. The manual vali
 - **Standing commit rule (still binding):** background JARVIS automation can stage unrelated files, so all trading decision-record commits use explicit pathspecs — `git commit -m "MESSAGE" -- path/to/report.json path/to/report.md`. Never rely only on the index when unrelated files may be staged. Never `git add .`. Never `git add trading_research/agentic_factory/`. Verify staged set before AND committed set after.
 
 - 2026-05-31 — Routine Layer v1 is read-only and deterministic; if it becomes useful, consider (a) wiring the JARVIS snapshot into the `/jarvis` panel as a read-only tile, and (b) cleaning the repo-root phantom `hydra ` dir so the full pytest suite collects from root. Both require explicit approval (read-only default for SPARTA).
+
+- 2026-05-31 — JARVIS Strategy Factory tile is now live (read-only). Next optional bundle: a read-only "what changed since last factory snapshot" diff line, mirroring the existing JARVIS snapshot-compare pattern — operator-gated, display-only, no execution path. Requires explicit approval.

@@ -30,7 +30,7 @@ _NEW_KEYS = ("factory_status", "survival_ledger", "candidate_registry",
 
 def test_status_exposes_four_readonly_panels():
     status = app_module.api_jarvis_status()
-    assert len(status) == 28
+    assert len(status) == 29
     for key in _NEW_KEYS:
         assert key in status
         assert isinstance(status[key], dict)
