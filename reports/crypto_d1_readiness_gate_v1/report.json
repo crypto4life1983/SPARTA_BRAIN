@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_readiness_gate_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "bundle": 21,
+  "branch": "bundle21/crypto-d1-readiness-gate",
+  "what_was_built": [
+    "reports/crypto_d1_readiness_gate_v1/readiness_gate.json (the machine-readable readiness gate: 11 safety flags pinned False; research_only + read_only True; lane crypto_d1_protocol; BTC/ETH/SOL spot 1d 24/7; weekday-only filters forbidden; 10 audited Bundle 11-20 artifacts with on-disk path checks; 20 numbered readiness questions; readiness_status default NOT_READY_FOR_REAL_DATA; 5 lifecycle options with per-status rules; 16 missing items; data_intake/qa_run/backtest future-authorization gates; trading_gate explicitly_forbidden=True; lane_recommendation pinned WATCH/MIXED with do_not_promote_to_ACTIVE/STRONG=True; safety_boundaries + no_profit_claim_policy carrying the 8 verbatim distinction phrases)",
+    "reports/crypto_d1_readiness_gate_v1/readiness_gate.md (human-readable readiness gate with disclaimer header and sections 0-10: what this gate is, lane+scope, audited-artifacts table, 20-question checklist, missing items, readiness status options + rules, why NOT_READY_FOR_REAL_DATA is the honest default, what this gate does NOT authorize, allowed next steps, registry status, no-profit-claim policy)",
+    "tools/crypto_d1_readiness_gate_check.py (stdlib-only validator; argparse/json/pathlib only; validate + show subcommands; enforces schema, 11 false safety flags, 5 allowed lifecycle statuses with default NOT_READY_FOR_REAL_DATA, scope pin (lane/assets/market/timeframe/calendar), 10 audited artifact ids with on-disk path-existence checks, exactly 20 readiness questions numbered 1..20 with Q20 == default status, missing_items non-empty, trading_gate forbidden, lane_recommendation WATCH/MIXED + no ACTIVE/STRONG promotion, 8 distinction phrases verbatim in BOTH md and json, no forbidden capability phrase in either doc)",
+    "tests/test_crypto_d1_readiness_gate.py (stdlib + pytest; existence + validation; eleven safety flags False; default-status pin; 5-option list pin; per-status rule presence; scope pin; 10 audited artifacts on disk; bundles 11..20 set; 20 questions numbered 1..20; Q19 paper/live locked YES; Q20 default status; non-empty missing items; blockers is list; trading_gate forbidden; intake/qa/backtest gate requirement lists non-empty; lane WATCH/MIXED + no ACTIVE/STRONG; 8 user-required verbatim phrases in MD; distinction phrases in both docs; no forbidden phrases; no data/crypto_d1_research/ dir; no real-data files in gate dir; validator failure-mode tests (tampered flag, wrong default status, unknown status, missing artifact, dropped question, promotion tamper, empty missing_items, forbidden phrase); validator stdlib-only; no network/broker/subprocess/env tokens; CLI validate+show smoke; 8 prior Crypto-D1 validators still pass; candidate registry validator still passes)",
+    "reports/crypto_d1_readiness_gate_v1/report.md (this build report)",
+    "reports/crypto_d1_readiness_gate_v1/report.json (build report)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_readiness_gate_v1/readiness_gate.json",
+    "reports/crypto_d1_readiness_gate_v1/readiness_gate.md",
+    "reports/crypto_d1_readiness_gate_v1/report.json",
+    "reports/crypto_d1_readiness_gate_v1/report.md",
+    "tools/crypto_d1_readiness_gate_check.py",
+    "tests/test_crypto_d1_readiness_gate.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/crypto_d1_data_qa_runtime_tool.py (NOT modified)",
+    "tools/crypto_d1_backtest_runner.py (NOT modified)",
+    "tools/strategy_next_bundle.py (NOT modified -- no artificial selection nudge)",
+    "app.py and templates/*.html (NOT touched)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched -- no new lesson)",
+    "All prior Crypto-D1 spec docs (Bundles 11-20) + arbitrage validators NOT modified",
+    "data/crypto_d1_research/ NOT created (the gate is documentation; no data path is created)"
+  ],
+  "lane": "crypto_d1_protocol",
+  "scope_summary": {
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe": "1d",
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "pipeline_position": "Capstone audit on top of Bundles 11-20; produces a single conservative readiness verdict (default NOT_READY_FOR_REAL_DATA) and an explicit list of missing items. Adds no automation."
+  },
+  "readiness_status": "NOT_READY_FOR_REAL_DATA",
+  "default_readiness_status_is_honest_default": true,
+  "authorizes_nothing": {
+    "authorizes_nothing_operational": true,
+    "does_not_authorize_data_fetch": true,
+    "does_not_authorize_exchange_connection": true,
+    "does_not_authorize_qa_run_against_real_data": true,
+    "does_not_authorize_backtest_run": true,
+    "does_not_authorize_paper_trading": true,
+    "does_not_authorize_live_trading": true,
+    "does_not_authorize_micro_live_trading": true,
+    "does_not_create_data_crypto_d1_research_directory": true,
+    "qa_pass_does_not_authorize_automatic_backtesting": true,
+    "qa_pass_does_not_authorize_paper_trading": true,
+    "qa_pass_does_not_authorize_live_trading": true
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "validator_modules_used": ["argparse", "json", "pathlib", "__future__"],
+    "no_network_imports": true,
+    "no_broker_exchange_vendor_imports": true,
+    "no_subprocess_import": true,
+    "no_os_environ_or_getenv_access": true,
+    "no_dotenv_or_credentials_reads": true,
+    "eleven_safety_flags_pinned_false_in_gate": [
+      "data_fetch_enabled", "exchange_connection_enabled", "live_trading_enabled",
+      "broker_control_enabled", "paper_order_execution_enabled", "order_placement_enabled",
+      "backtest_execution_enabled", "dataset_processing_enabled", "scheduler_enabled",
+      "network_calls_enabled", "credentials_required"
+    ],
+    "research_only_and_read_only_true": true,
+    "no_real_data_files_created": true,
+    "no_data_crypto_d1_research_directory_created": true,
+    "no_qa_run_against_real_data": true,
+    "no_backtest_run": true,
+    "candidate_registry_stays_WATCH_never_ACTIVE_never_STRONG": true
+  },
+  "candidate_registry_status_after_build": {
+    "status": "WATCH (unchanged disposition)",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH",
+    "note": "The crypto_d1_protocol seed extra_files were extended with readiness_gate.md + readiness_gate.json for traceability only. The lane stays WATCH; evidence does NOT become STRONG; the candidate is NOT marked ACTIVE. Promotion to ACTIVE still requires real operator-supplied data + QA_PASS + a separately authorized backtest."
+  },
+  "tests_run": {
+    "bundle_21_tests_file": "tests/test_crypto_d1_readiness_gate.py",
+    "bundle_21_tests_count": 38,
+    "bundle_21_tests_result": "38 passed",
+    "bundle_21_invocation": "python -m pytest tests/test_crypto_d1_readiness_gate.py --rootdir=tests -q",
+    "regression_bundle_20_tests_count": 43,
+    "regression_bundle_20_tests_result": "43 passed"
+  },
+  "validators_run": {
+    "crypto_d1_readiness_gate_check_validate": "OK",
+    "prior_crypto_d1_validators_invoked_by_pytest": [
+      "crypto_d1_protocol_check",
+      "crypto_d1_data_contract_check",
+      "crypto_d1_dataset_manifest_check",
+      "crypto_d1_qa_freeze_spec_check",
+      "crypto_d1_backtest_plan_check",
+      "crypto_d1_data_acquisition_authorization_check",
+      "crypto_d1_data_source_evaluation_check",
+      "crypto_d1_manual_dataset_intake_runbook_check"
+    ],
+    "all_prior_validators_status": "OK"
+  },
+  "missing_items_count": 16,
+  "what_was_executed_in_this_bundle": "ONLY the new validator (validate + show) and the test suite. NO real dataset was acquired, placed, QA-checked, or backtested. No data directory was created.",
+  "real_local_data_found_on_disk_at_build_time": false,
+  "any_real_qa_or_backtest_run_executed_against_real_data_in_this_bundle": false,
+  "recommended_next_bundle": [
+    "Operator step (NOT a bundle): follow the Bundle 20 runbook to choose a source class (A/B/C/D), acquire BTC/ETH/SOL daily-spot CSV offline, place files under data/crypto_d1_research/<dataset_id>/<dataset_version>/, author manifest.json + CHECKSUMS.txt + FREEZE_RECORD.txt + fees.json, then run `python tools/crypto_d1_data_qa_runtime_tool.py run --dataset-dir <PATH> --out-dir <PATH>` and review qa_report.json. SPARTA does NOT automate any of these steps.",
+    "Crypto-D1 Baseline Results Report v1 (separately authorized; only AFTER operator has supplied data, reached QA_PASS or accepted QA_WARN, and run the backtest runner to produce output; documents the operator-reviewed run + pins verdict + caveats. Spec bundle; Claude works.)",
+    "Crypto-D1 Backtest Runner v2 (future) -- walk-forward + per-family parameter sweep + structured sensitivity sweep + per-strategy report emitter matching the full Bundle 15 report schema. (Code bundle; recommend Codex.)"
+  ],
+  "no_profit_claim_policy": [
+    "A readiness gate is not strategy validation.",
+    "Specification completeness is not data readiness.",
+    "QA_PASS does not authorize automatic backtesting.",
+    "QA_PASS does not authorize paper trading.",
+    "QA_PASS does not authorize live trading.",
+    "No real data has entered SPARTA.",
+    "A good historical chart does not imply future returns.",
+    "Crypto-D1 remains WATCH / MIXED."
+  ]
+}

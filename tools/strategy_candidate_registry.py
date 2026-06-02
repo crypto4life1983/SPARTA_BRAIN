@@ -146,6 +146,12 @@ SEED_LANES = (
         # QA tool; no fetch, no real data, no data directory created, no QA
         # run against real data, no backtest; authorizes nothing; never
         # ACTIVE, never STRONG).
+        # Bundle 21: SPARTA-side Crypto-D1 Readiness Gate / Operator Checklist
+        # v1 docs added. Still WATCH (capstone readiness audit on Bundles
+        # 11-20; default readiness_status NOT_READY_FOR_REAL_DATA; no fetch,
+        # no real data, no data directory created, no QA run against real
+        # data, no backtest; authorizes nothing; never ACTIVE, never STRONG;
+        # specification completeness is not data readiness).
         "extra_files": (
             "reports/crypto_d1_protocol_v1/protocol.md",
             "reports/crypto_d1_protocol_v1/protocol.json",
@@ -165,6 +171,8 @@ SEED_LANES = (
             "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.json",
             "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.md",
             "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json",
+            "reports/crypto_d1_readiness_gate_v1/readiness_gate.md",
+            "reports/crypto_d1_readiness_gate_v1/readiness_gate.json",
         ),
         "lane_status_override": "WATCH",
     },

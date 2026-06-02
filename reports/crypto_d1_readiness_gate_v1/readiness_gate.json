@@ -1,0 +1,362 @@
+{
+  "readiness_gate_id": "crypto_d1_readiness_gate_v1",
+  "title": "SPARTA Crypto-D1 Readiness Gate / Operator Checklist v1",
+  "version": "1.0",
+  "kind": "research_readiness_gate",
+  "read_only": true,
+  "research_only": true,
+
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "order_placement_enabled": false,
+  "backtest_execution_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+  "target_assets": ["BTC", "ETH", "SOL"],
+  "allowed_market_type": "spot",
+  "timeframe": "1d",
+  "session_calendar": "24/7",
+  "weekday_only_filters_forbidden": true,
+
+  "companion_documents": {
+    "crypto_d1_protocol_v1": "reports/crypto_d1_protocol_v1/protocol.json",
+    "crypto_d1_data_contract_v1": "reports/crypto_d1_data_contract_v1/data_contract.json",
+    "crypto_d1_dataset_manifest_v1": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json",
+    "crypto_d1_qa_freeze_spec_v1": "reports/crypto_d1_qa_freeze_spec_v1/qa_freeze_spec.json",
+    "crypto_d1_baseline_backtest_plan_v1": "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
+    "crypto_d1_backtest_runner_v1": "reports/crypto_d1_backtest_runner_v1/report.json",
+    "crypto_d1_data_acquisition_authorization_v1": "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
+    "crypto_d1_data_source_evaluation_v1": "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
+    "crypto_d1_data_qa_runtime_tool_v1": "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.json",
+    "crypto_d1_manual_dataset_intake_runbook_v1": "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json"
+  },
+
+  "research_objective": "Audit the completed Crypto-D1 specification + tooling stack (Bundles 11 through 20) and produce a single conservative readiness verdict for whether SPARTA is ready to accept real operator-supplied Crypto-D1 data. This gate authorizes nothing operational: no data fetch, no exchange connection, no QA against real data, no backtest, no paper/live trading. It only reports the readiness status and the concrete missing items. NOT_READY_FOR_REAL_DATA is the honest default. Specification completeness is not data readiness.",
+
+  "readiness_status": "NOT_READY_FOR_REAL_DATA",
+
+  "readiness_decision": "The Crypto-D1 specification + tooling foundation is COMPLETE: all 10 Bundle 11-20 artifacts exist, all associated validators pass, and every fetch / connection / execution / dataset-processing / scheduler / network / credential flag is pinned False. But No real data has entered SPARTA. No concrete operator data source is selected, no license/TOS is confirmed, no real data has been fetched, data/crypto_d1_research/ does not exist, no manifest.json / CHECKSUMS.txt / FREEZE_RECORD.txt / fees.json exists, no QA run has happened against real data, there is no QA_PASS or accepted QA_WARN, and no baseline backtest output exists. Therefore the only honest verdict is NOT_READY_FOR_REAL_DATA. Specification completeness is not data readiness. Crypto-D1 remains WATCH / MIXED.",
+
+  "audited_artifacts": [
+    {
+      "artifact_id": "crypto_d1_protocol_v1",
+      "bundle": 11,
+      "path": "reports/crypto_d1_protocol_v1/protocol.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_protocol_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "execution / fetch / connection flags pinned False; research_only.",
+      "role_in_pipeline": "Phase P0 -- defines the Crypto-D1 lane (BTC/ETH/SOL spot, 1d, 24/7), strategy families, IS/OOS gates, and PASS/WATCH/FAIL rules.",
+      "remaining_limitations": ["Pure research; no live data; no backtest authorized."]
+    },
+    {
+      "artifact_id": "crypto_d1_data_contract_v1",
+      "bundle": 12,
+      "path": "reports/crypto_d1_data_contract_v1/data_contract.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_data_contract_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "execution / fetch flags pinned False.",
+      "role_in_pipeline": "Defines required data shape (9 CSV columns, provenance, quote currency), allowed/forbidden sources, and the minimum viable dataset.",
+      "remaining_limitations": ["No data acquired; contract is an input spec only."]
+    },
+    {
+      "artifact_id": "crypto_d1_dataset_manifest_v1",
+      "bundle": 13,
+      "path": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_dataset_manifest_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "execution / fetch flags pinned False.",
+      "role_in_pipeline": "Defines the schema every future per-dataset manifest must satisfy plus the freeze model.",
+      "remaining_limitations": ["No real dataset declared; no real manifest authored beyond the spec."]
+    },
+    {
+      "artifact_id": "crypto_d1_qa_freeze_spec_v1",
+      "bundle": 14,
+      "path": "reports/crypto_d1_qa_freeze_spec_v1/qa_freeze_spec.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_qa_freeze_spec_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "execution / fetch / dataset-processing flags pinned False.",
+      "role_in_pipeline": "Defines the QA check groups, the 6-status QA model, the freeze rules, and the 'QA_PASS authorizes nothing' rule.",
+      "remaining_limitations": ["Spec only; no QA has been run against real data."]
+    },
+    {
+      "artifact_id": "crypto_d1_baseline_backtest_plan_v1",
+      "bundle": 15,
+      "path": "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_backtest_plan_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "execution / backtest flags pinned False.",
+      "role_in_pipeline": "Defines the future baseline backtest design (families, IS/OOS split, cost model, report schema). Plan only.",
+      "remaining_limitations": ["No backtest has been run; no baseline output exists."]
+    },
+    {
+      "artifact_id": "crypto_d1_backtest_runner_v1",
+      "bundle": 16,
+      "path": "reports/crypto_d1_backtest_runner_v1/report.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_backtest_runner.py --help",
+      "validation_status": "OK",
+      "safety_flags_status": "runner is offline; no network, no broker; runs only against operator-supplied frozen local data when separately authorized.",
+      "role_in_pipeline": "The offline backtest runner implementation. It has NOT been run against real data; no real dataset exists to run it on.",
+      "remaining_limitations": ["No real dataset present; runner has not been executed against real data; no baseline output exists."]
+    },
+    {
+      "artifact_id": "crypto_d1_data_acquisition_authorization_v1",
+      "bundle": 17,
+      "path": "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_data_acquisition_authorization_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "fetch / connection / credential flags pinned False.",
+      "role_in_pipeline": "The acquisition authorization gate: the named operator gates that must be satisfied before any real data may enter.",
+      "remaining_limitations": ["The operator-side gates are NOT satisfied: no source chosen, no license confirmed, no data acquired."]
+    },
+    {
+      "artifact_id": "crypto_d1_data_source_evaluation_v1",
+      "bundle": 18,
+      "path": "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_data_source_evaluation_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "fetch / connection flags pinned False; classes E + F REJECTED for evidence.",
+      "role_in_pipeline": "Evaluates 6 source classes (A/B/C/D acceptable-or-watch; E/F rejected); class C PREFERRED. PREFERRED is not APPROVED.",
+      "remaining_limitations": ["No concrete source named or operator-approved."]
+    },
+    {
+      "artifact_id": "crypto_d1_data_qa_runtime_tool_v1",
+      "bundle": 19,
+      "path": "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_data_qa_runtime_tool.py validate-spec",
+      "validation_status": "OK",
+      "safety_flags_status": "no network, no broker; reads only an operator-supplied on-disk dataset directory when run.",
+      "role_in_pipeline": "The QA runtime tool that validates an on-disk frozen dataset and emits a QA verdict. It has NOT been run against real data.",
+      "remaining_limitations": ["No real dataset exists; no QA run executed; no QA_PASS / accepted QA_WARN."]
+    },
+    {
+      "artifact_id": "crypto_d1_manual_dataset_intake_runbook_v1",
+      "bundle": 20,
+      "path": "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json",
+      "exists": true,
+      "validator_command": "python tools/crypto_d1_manual_dataset_intake_runbook_check.py validate",
+      "validation_status": "OK",
+      "safety_flags_status": "eleven safety flags pinned False; research_only + read_only.",
+      "role_in_pipeline": "The human operator procedure bridging the Bundle 17 gate to the Bundle 19 QA tool. Documentation only; adds no automation.",
+      "remaining_limitations": ["The operator has not yet executed the runbook; no data has been placed."]
+    }
+  ],
+
+  "readiness_questions": [
+    {"number": 1, "question": "Are all required Crypto-D1 specs/tools/runbooks present?", "answer": "YES", "detail": "All 10 Bundle 11-20 artifacts exist on disk and their validators pass."},
+    {"number": 2, "question": "Are all Bundle 17 authorization gates satisfied?", "answer": "NO", "detail": "The operator-side acquisition gates are not satisfied; no operator acquisition decision has been recorded."},
+    {"number": 3, "question": "Has the operator selected a concrete data source?", "answer": "NO", "detail": "No concrete vendor / venue / archive has been named or approved."},
+    {"number": 4, "question": "Is the source class acceptable under Bundle 18?", "answer": "NOT_YET", "detail": "No source class chosen. Acceptable classes are A/B/C/D (C PREFERRED); E/F are REJECTED for evidence."},
+    {"number": 5, "question": "Is there license/TOS confirmation?", "answer": "NO", "detail": "No license / TOS reference recorded."},
+    {"number": 6, "question": "Are the required assets confirmed (BTC, ETH, SOL)?", "answer": "SPEC_ONLY", "detail": "Scope fixes BTC/ETH/SOL spot, but no concrete dataset declaring them exists."},
+    {"number": 7, "question": "Is market type confirmed as spot only?", "answer": "SPEC_ONLY", "detail": "Spec mandates spot only; no dataset declared to confirm against."},
+    {"number": 8, "question": "Is timeframe confirmed as 1d only?", "answer": "SPEC_ONLY", "detail": "Spec mandates 1d only; intraday out of scope; no dataset declared."},
+    {"number": 9, "question": "Is the date range specified?", "answer": "NO", "detail": "No time_start / time_end specified by any operator dataset."},
+    {"number": 10, "question": "Is dataset_id specified?", "answer": "NO", "detail": "No CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN> dataset_id declared."},
+    {"number": 11, "question": "Is dataset version specified?", "answer": "NO", "detail": "No dataset_version declared."},
+    {"number": 12, "question": "Is storage path specified?", "answer": "SPEC_PATTERN_ONLY", "detail": "Path pattern data/crypto_d1_research/<dataset_id>/<dataset_version>/ is defined; no concrete path exists and the directory has not been created."},
+    {"number": 13, "question": "Is file naming convention specified?", "answer": "YES", "detail": "Convention <asset>_daily.csv is defined in the spec; no real files exist."},
+    {"number": 14, "question": "Are sha256 checksums ready?", "answer": "NO", "detail": "No CHECKSUMS.txt; no dataset files to checksum."},
+    {"number": 15, "question": "Are manifest.json, CHECKSUMS.txt, FREEZE_RECORD.txt, and fees/slippage declaration ready?", "answer": "NO", "detail": "None of these operator files exist; no fees.json with taker fee + slippage."},
+    {"number": 16, "question": "Has the QA Runtime Tool been run?", "answer": "NO", "detail": "No QA run against real data has happened; no qa_report.json exists for a real dataset."},
+    {"number": 17, "question": "Is there a QA_PASS or accepted QA_WARN?", "answer": "NO", "detail": "No QA verdict exists because no QA has been run on real data."},
+    {"number": 18, "question": "Is there any baseline backtest output?", "answer": "NO", "detail": "No baseline backtest has been run; no per-strategy report output exists."},
+    {"number": 19, "question": "Is paper/live/micro-live still locked?", "answer": "YES", "detail": "Paper, live, and micro-live remain locked. This gate authorizes none of them."},
+    {"number": 20, "question": "What is the final readiness status?", "answer": "NOT_READY_FOR_REAL_DATA", "detail": "No operator-supplied dataset exists, no source is concretely authorized, no data has been fetched, no data folder exists, no QA run has happened, and no baseline results exist."}
+  ],
+
+  "required_artifact_checks": [
+    "All 10 audited_artifacts have exists == True.",
+    "All 10 audited_artifacts have validation_status == 'OK'.",
+    "All 10 audited_artifacts have their fetch / connection / execution / dataset-processing safety posture documented.",
+    "Word discipline preserved: NOT_READY_FOR_REAL_DATA is the honest default; specification completeness is not data readiness."
+  ],
+
+  "validator_checks": {
+    "tools_required": [
+      "tools/crypto_d1_protocol_check.py",
+      "tools/crypto_d1_data_contract_check.py",
+      "tools/crypto_d1_dataset_manifest_check.py",
+      "tools/crypto_d1_qa_freeze_spec_check.py",
+      "tools/crypto_d1_backtest_plan_check.py",
+      "tools/crypto_d1_data_acquisition_authorization_check.py",
+      "tools/crypto_d1_data_source_evaluation_check.py",
+      "tools/crypto_d1_manual_dataset_intake_runbook_check.py",
+      "tools/strategy_candidate_registry.py"
+    ],
+    "all_validators_pass": true,
+    "validation_command_example": "python tools/<TOOL>.py validate"
+  },
+
+  "safety_checks": {
+    "all_safety_flags_false_in_this_gate": true,
+    "no_forbidden_capability_phrases_in_any_doc": true,
+    "no_real_data_files_created_by_this_bundle": true,
+    "no_data_crypto_d1_research_directory_created": true,
+    "no_qa_run_against_real_data_in_this_bundle": true,
+    "no_backtest_run_in_this_bundle": true,
+    "no_credentials_required_by_this_gate": true,
+    "no_paper_or_live_execution_files_modified_by_this_bundle": true,
+    "no_jarvis_dashboard_files_modified_by_this_bundle": true,
+    "registry_stays_WATCH_never_ACTIVE_never_STRONG": true
+  },
+
+  "missing_items": [
+    "Operator decision to acquire this cycle (a research decision, not a default).",
+    "Concrete source class (A/B/C/D; never E/F) chosen under Bundle 18.",
+    "Concrete source_name (exact vendor / venue / archive).",
+    "license_or_tos_reference confirming research use.",
+    "Concrete dataset declaring BTC/ETH/SOL spot at 1d.",
+    "Date range (time_start, time_end; ISO-8601 UTC).",
+    "dataset_id (CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>).",
+    "dataset_version.",
+    "Concrete storage path under data/crypto_d1_research/ (created only by operator action).",
+    "fees.json with per-venue taker fee + slippage.",
+    "manifest.json passing tools/crypto_d1_dataset_manifest_check.py.",
+    "CHECKSUMS.txt with sha256 per dataset file.",
+    "FREEZE_RECORD.txt with freeze_timestamp_utc + operator + version pins.",
+    "A QA run via tools/crypto_d1_data_qa_runtime_tool.py producing qa_report.json.",
+    "A QA_PASS or operator-accepted QA_WARN verdict.",
+    "A separately authorized baseline backtest output."
+  ],
+
+  "blockers": [],
+
+  "allowed_next_steps": [
+    "Operator step (NOT a bundle): follow the Bundle 20 runbook to choose a source class (A/B/C/D), acquire BTC/ETH/SOL daily-spot CSV offline, place files under data/crypto_d1_research/<dataset_id>/<dataset_version>/, author manifest.json + CHECKSUMS.txt + FREEZE_RECORD.txt + fees.json, then run the Bundle 19 QA tool and review the qa_report.",
+    "Alternative: keep Crypto-D1 in WATCH and prioritize a different research lane; the specification foundation needs no further spec work to be complete.",
+    "Re-run this readiness gate after any operator action to recompute the readiness status."
+  ],
+
+  "forbidden_next_steps": [
+    "Do NOT fetch data of any kind from this gate.",
+    "Do NOT connect to any exchange from this gate.",
+    "Do NOT run any QA against real data from this gate.",
+    "Do NOT run any backtest from this gate.",
+    "Do NOT create data/crypto_d1_research/ from this gate.",
+    "Do NOT place any order anywhere.",
+    "Do NOT enable paper-order execution.",
+    "Do NOT enable live or micro-live trading.",
+    "Do NOT install any credentials / API keys / .env / private keys.",
+    "Do NOT install any scheduler / cron / daemon.",
+    "Do NOT mark the Crypto-D1 lane ACTIVE or STRONG.",
+    "Do NOT claim profitability, edge, or live-readiness."
+  ],
+
+  "readiness_status_options": [
+    "NOT_READY_FOR_REAL_DATA",
+    "READY_FOR_OPERATOR_DATA_INTAKE",
+    "READY_FOR_QA_RUN",
+    "READY_FOR_BASELINE_BACKTEST_REVIEW",
+    "BLOCKED"
+  ],
+
+  "readiness_status_rules": {
+    "NOT_READY_FOR_REAL_DATA": "The honest default. The specification stack is complete and safe, but no operator data source is concretely authorized, no license/TOS confirmed, no data fetched, no data folder exists, no QA run, and no baseline results. Specification completeness is not data readiness.",
+    "READY_FOR_OPERATOR_DATA_INTAKE": "Reachable only after the operator records a concrete source class (A/B/C/D), source_name, and license/TOS reference, and confirms BTC/ETH/SOL spot 1d scope. Reaching this status authorizes nothing automatically; intake remains a manual operator action under the Bundle 17 gates.",
+    "READY_FOR_QA_RUN": "Reachable only after the operator has placed real frozen data + manifest.json + CHECKSUMS.txt + FREEZE_RECORD.txt + fees.json on disk. The QA run itself remains a separate manual operator action.",
+    "READY_FOR_BASELINE_BACKTEST_REVIEW": "Reachable only after a QA_PASS (or operator-accepted QA_WARN) on real data AND a separately authorized backtest has produced output. QA_PASS does not authorize automatic backtesting by itself.",
+    "BLOCKED": "A required artifact is missing, a validator fails, a safety flag is unsafe, or an external block is declared. No downstream use until cleared."
+  },
+
+  "future_authorization_requirements": {
+    "data_intake_gate": {
+      "name": "Future operator data-intake gate",
+      "all_required": [
+        "explicit_operator_authorization",
+        "exact_source_class_from_bundle_18 (A / B / C / D only -- never E web-scraped, never F manual/screenshots)",
+        "exact_source_name_named",
+        "license_or_tos_reference_recorded",
+        "assets_confirmed_subset_of_BTC_ETH_SOL",
+        "market_type_spot_only_confirmed",
+        "timeframe_1d_only_confirmed",
+        "date_range_named",
+        "dataset_id_and_dataset_version_named",
+        "exact_storage_path_named_under_data_crypto_d1_research",
+        "no_credentials_unless_separately_authorized",
+        "no_trading_permissions",
+        "separate_operator_intake_action_following_bundle_20_runbook"
+      ]
+    },
+    "qa_run_gate": {
+      "name": "Future QA-run gate",
+      "all_required": [
+        "real_data_placed_on_disk_by_operator",
+        "manifest_json_present_and_passing_dataset_manifest_check",
+        "checksums_txt_present_with_sha256_per_file",
+        "freeze_record_txt_present_with_timestamp_operator_and_version_pins",
+        "fees_json_present_with_taker_fee_and_slippage",
+        "qa_runtime_tool_run_producing_qa_report",
+        "separate_manual_operator_action"
+      ]
+    },
+    "backtest_gate": {
+      "name": "Future baseline backtest gate",
+      "all_required": [
+        "qa_status_QA_PASS_or_accepted_QA_WARN_with_operator_memo",
+        "dataset_frozen_immutable_version",
+        "cost_assumptions_documented_fees_and_slippage",
+        "no_lookahead_check",
+        "no_execution_claims",
+        "separate_backtest_bundle_approved"
+      ]
+    },
+    "trading_gate": {
+      "name": "Future paper / live / micro-live trading gate",
+      "explicitly_forbidden_by_this_readiness_gate": true,
+      "requires_separate_far_future_authorization_after_evidence_exists": true,
+      "note": "This gate does NOT authorize trading and never will. A separate future authorization stack would be required, and even then only after multi-bundle evidence exists. QA_PASS does not authorize live trading. QA_PASS does not authorize paper trading."
+    }
+  },
+
+  "data_intake_gate": "See future_authorization_requirements.data_intake_gate. NOT authorized by this readiness gate.",
+  "qa_run_gate": "See future_authorization_requirements.qa_run_gate. NOT authorized by this readiness gate.",
+  "backtest_gate": "See future_authorization_requirements.backtest_gate. NOT authorized by this readiness gate.",
+  "trading_gate": "See future_authorization_requirements.trading_gate. EXPLICITLY FORBIDDEN by this readiness gate.",
+
+  "lane_recommendation": {
+    "current_verdict": "WATCH",
+    "evidence_level": "MIXED",
+    "rationale": "The Crypto-D1 specification + tooling foundation is COMPLETE. No real data has entered SPARTA. No evidence exists. The next move is OPERATOR-DRIVEN: either follow the Bundle 20 runbook to bring in a real dataset, or keep the lane in WATCH.",
+    "do_not_promote_to_ACTIVE": true,
+    "do_not_promote_to_STRONG_evidence": true,
+    "promotion_path_only_via_data_plus_qa_plus_separate_authorization": true
+  },
+
+  "safety_boundaries": [
+    "Research-only. Readiness gate / operator checklist only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this gate's runtime.",
+    "No data fetch in this bundle. No QA run against real data in this bundle. No backtest in this bundle.",
+    "Do not create data/crypto_d1_research/. Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence.",
+    "NOT_READY_FOR_REAL_DATA is the honest default. Specification completeness is not data readiness. Crypto-D1 remains WATCH / MIXED."
+  ],
+
+  "no_profit_claim_policy": [
+    "A readiness gate is not strategy validation.",
+    "Specification completeness is not data readiness.",
+    "QA_PASS does not authorize automatic backtesting.",
+    "QA_PASS does not authorize paper trading.",
+    "QA_PASS does not authorize live trading.",
+    "No real data has entered SPARTA.",
+    "A good historical chart does not imply future returns.",
+    "Crypto-D1 remains WATCH / MIXED."
+  ]
+}
