@@ -180,11 +180,24 @@ traceability only. The lane stays **WATCH**; evidence does **not** become
 STRONG; the candidate is **not** marked ACTIVE. No broker / live / paper /
 backtest authorization is implied.
 
-## 13. No-profit-claim policy
+## 13. No-profit-claim policy and required verbatim statements
 
 A runbook is not strategy validation. Manual intake does not imply edge.
 QA_PASS does not imply profitability. Clean daily OHLCV data does not imply
-profit. A runbook cannot authorize backtesting, paper, or live trading by
-itself. No data fetch is authorized by this runbook. Crypto trend ideas are
-not profitable until tested with full costs.
-A good historical chart does not imply future returns.
+profit.
+
+The following 8 statements MUST appear verbatim in this runbook:
+
+- A runbook is a procedure, not an authorization.
+- No data fetch is authorized by this runbook.
+- Real data may enter only through explicit operator action and Bundle 17 gates.
+- QA_PASS does not authorize live trading.
+- QA_PASS does not authorize paper trading.
+- QA_PASS does not authorize automatic backtesting.
+- Crypto trend ideas are not profitable until tested.
+- A good historical chart does not imply future returns.
+
+Additional context: crypto trend ideas remain unprofitable until tested
+with full costs (fees + slippage + cost-sensitivity), but the verbatim
+claim "Crypto trend ideas are not profitable until tested" holds without
+qualification.

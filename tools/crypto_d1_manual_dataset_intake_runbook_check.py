@@ -170,11 +170,17 @@ FORBIDDEN_LIST_NEEDLES = (
 )
 
 # Distinction phrases that must appear in the markdown for word discipline.
+# The first 8 entries are the verbatim "must clearly state" statements
+# required by the Bundle 20 spec; the trailing "24/7" entry is a separate
+# 24/7-calendar guarantee that this validator has enforced since v1.
 DISTINCTION_PHRASES = (
-    "QA_PASS does not authorize automatic backtesting",
-    "QA_PASS does not authorize paper trading",
+    "A runbook is a procedure, not an authorization",
+    "No data fetch is authorized by this runbook",
+    "Real data may enter only through explicit operator action and Bundle 17 gates",
     "QA_PASS does not authorize live trading",
-    "only through explicit operator action and the Bundle 17 gates",
+    "QA_PASS does not authorize paper trading",
+    "QA_PASS does not authorize automatic backtesting",
+    "Crypto trend ideas are not profitable until tested",
     "A good historical chart does not imply future returns",
     "24/7",
 )

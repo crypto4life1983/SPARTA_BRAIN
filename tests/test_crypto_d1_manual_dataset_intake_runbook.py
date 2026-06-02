@@ -185,6 +185,44 @@ def test_distinction_phrases_present_in_md():
         assert phrase in md, f"distinction phrase missing: {phrase!r}"
 
 
+def test_eight_user_required_phrases_verbatim_in_md():
+    """Pin the 8 user-required verbatim phrases independently of the
+    validator's DISTINCTION_PHRASES list, so a future removal of one from
+    the validator still fails the test suite."""
+    md = RUNBOOK_MD_PATH.read_text(encoding="utf-8")
+    required = (
+        "A runbook is a procedure, not an authorization",
+        "No data fetch is authorized by this runbook",
+        "Real data may enter only through explicit operator action and Bundle 17 gates",
+        "QA_PASS does not authorize live trading",
+        "QA_PASS does not authorize paper trading",
+        "QA_PASS does not authorize automatic backtesting",
+        "Crypto trend ideas are not profitable until tested",
+        "A good historical chart does not imply future returns",
+    )
+    for phrase in required:
+        assert phrase in md, f"required verbatim phrase missing: {phrase!r}"
+
+
+def test_validator_DISTINCTION_PHRASES_enforces_all_eight_user_required():
+    """Pin that the validator's DISTINCTION_PHRASES list itself contains
+    all 8 user-required verbatim phrases (defense in depth: if someone
+    later edits the validator and drops one, this test fails)."""
+    required = (
+        "A runbook is a procedure, not an authorization",
+        "No data fetch is authorized by this runbook",
+        "Real data may enter only through explicit operator action and Bundle 17 gates",
+        "QA_PASS does not authorize live trading",
+        "QA_PASS does not authorize paper trading",
+        "QA_PASS does not authorize automatic backtesting",
+        "Crypto trend ideas are not profitable until tested",
+        "A good historical chart does not imply future returns",
+    )
+    for phrase in required:
+        assert phrase in cmir.DISTINCTION_PHRASES, \
+            f"validator DISTINCTION_PHRASES does not enforce: {phrase!r}"
+
+
 def test_no_profitability_or_fetch_or_backtest_claims():
     md = RUNBOOK_MD_PATH.read_text(encoding="utf-8").lower()
     jsn = json.dumps(_data(), ensure_ascii=False).lower()
