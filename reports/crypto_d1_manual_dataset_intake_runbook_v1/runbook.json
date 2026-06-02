@@ -1,0 +1,202 @@
+{
+  "runbook_id": "crypto_d1_manual_dataset_intake_runbook_v1",
+  "title": "SPARTA Crypto-D1 Manual Dataset Intake Runbook v1",
+  "version": "1.0",
+  "kind": "manual_dataset_intake_runbook",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "order_placement_enabled": false,
+  "backtest_execution_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+
+  "companion_documents": {
+    "crypto_d1_protocol_v1": "reports/crypto_d1_protocol_v1/protocol.{json,md}",
+    "crypto_d1_data_contract_v1": "reports/crypto_d1_data_contract_v1/data_contract.{json,md}",
+    "crypto_d1_dataset_manifest_v1": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.{json,md}",
+    "crypto_d1_qa_freeze_spec_v1": "reports/crypto_d1_qa_freeze_spec_v1/qa_freeze_spec.{json,md}",
+    "crypto_d1_data_acquisition_authorization_v1": "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.{json,md}",
+    "crypto_d1_data_source_evaluation_v1": "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.{json,md}",
+    "crypto_d1_data_qa_runtime_tool_v1": "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.{json,md}",
+    "implements_qa_tool": "tools/crypto_d1_data_qa_runtime_tool.py",
+    "build_report": "reports/crypto_d1_manual_dataset_intake_runbook_v1/report.{json,md}"
+  },
+
+  "runbook_objective": "Give a human operator a single, ordered, research-only procedure for MANUALLY bringing Crypto-D1 daily spot OHLCV data (BTC/ETH/SOL) into SPARTA AFTER the Bundle 17 authorization gate, BEFORE the Bundle 19 QA runtime tool runs, and BEFORE any backtest. This runbook is documentation only. It does NOT fetch data, does NOT connect to any exchange, does NOT create data/crypto_d1_research/, does NOT run QA against real data, and does NOT run a backtest. It authorizes nothing operational. Real data may enter only through explicit operator action under the Bundle 17 gates.",
+
+  "authorization_disclaimer": {
+    "authorizes_nothing_operational": true,
+    "does_not_authorize_fetching": true,
+    "does_not_authorize_qa_on_real_data_by_itself": true,
+    "qa_pass_does_not_authorize_automatic_backtesting": true,
+    "qa_pass_does_not_authorize_paper_trading": true,
+    "qa_pass_does_not_authorize_live_trading": true,
+    "real_data_enters_only_through_explicit_operator_action_and_bundle_17_gates": true,
+    "statement": "This runbook authorizes nothing operational. It does not authorize fetching. It does not authorize QA on real data by itself. QA_PASS does not authorize automatic backtesting. QA_PASS does not authorize paper trading. QA_PASS does not authorize live trading. Real data may enter SPARTA only through explicit operator action and the Bundle 17 gates."
+  },
+
+  "target_assets": ["BTC", "ETH", "SOL"],
+  "allowed_market_type": "spot",
+  "timeframe": "1d",
+  "session_calendar": "24/7",
+  "weekday_only_filters_forbidden": true,
+
+  "required_csv_columns": [
+    "timestamp", "open", "high", "low", "close", "volume",
+    "symbol", "source", "quote_currency"
+  ],
+
+  "operator_decisions_before_data_enters": [
+    "Decide WHETHER to acquire at all this cycle -- a research decision, not a default.",
+    "Decide the source CLASS (one of A/B/C/D from Bundle 18; never E or F).",
+    "Decide the concrete source name (vendor / venue / archive) -- never anonymous provenance.",
+    "Confirm the source's license / Terms of Service permit research use, and record the reference.",
+    "Decide which of BTC / ETH / SOL are in this dataset (subset of the three; spot only).",
+    "Confirm market type is spot only (no perps, no dated futures, no options, no leveraged tokens, no margin-facilitated spot).",
+    "Confirm timeframe is daily (1d) only -- intraday is explicitly out of scope.",
+    "Decide the date range (time_start, time_end; both ISO-8601 UTC).",
+    "Decide the dataset_id (pattern CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>) and dataset_version.",
+    "Decide the storage path (data/crypto_d1_research/<dataset_id>/<dataset_version>/) -- created only when the operator acquires data, never by SPARTA automation.",
+    "Decide and record the fee + slippage assumptions per venue (taker fee + slippage; spread proxy optional).",
+    "Confirm no credentials, API key, OAuth token, private key, or .env will enter the SPARTA repo or runtime at any step."
+  ],
+
+  "source_class_dispositions": {
+    "reference": "Dispositions mirror Bundle 18 (crypto_d1_data_source_evaluation_v1); this runbook does not re-rank or override them.",
+    "preferred": [
+      {"id": "C_paid_market_data_vendors", "disposition": "PREFERRED", "note": "Cleanest provenance + TOS clarity. PREFERRED does NOT mean APPROVED; concrete vendor still requires Bundle 17 gates."}
+    ],
+    "acceptable": [
+      {"id": "A_exchange_public_historical_archives", "disposition": "ACCEPTABLE", "note": "Offline public daily archives; operator downloads; SPARTA runtime never makes a network call."},
+      {"id": "D_existing_local_OHLCV_files", "disposition": "ACCEPTABLE", "note": "Pre-staged local files; require provenance re-attestation, schema normalization, fresh sha256 + manifest, and a NEW dataset_id/version."}
+    ],
+    "watch": [
+      {"id": "B_exchange_public_apis", "disposition": "WATCH_future_only", "note": "Operator-side only, under operator's own credentials, OUTSIDE SPARTA; output lands as a Class D local file. SPARTA runtime MUST NOT call any exchange API."}
+    ],
+    "rejected": [
+      {"id": "E_web_scraped_or_unofficial_tables", "disposition": "REJECTED_for_evidence", "note": "TOS risk + reproducibility loss + provenance opacity. Never a backtest input; anecdotal WATCH-only context at most."},
+      {"id": "F_manually_copied_prices_or_screenshots", "disposition": "REJECTED_for_any_quantitative_claim", "note": "Screenshots / hand-typed prices are forbidden inputs per Bundles 12/13/14/16/17."}
+    ]
+  },
+
+  "required_concrete_inputs": [
+    {"field": "source_name", "requirement": "Exact vendor / venue / archive name; never anonymous."},
+    {"field": "source_class", "requirement": "One of A / B / C / D (never E / F)."},
+    {"field": "license_or_tos_reference", "requirement": "Explicit pointer to the license / TOS permitting research use; recorded in manifest."},
+    {"field": "assets", "requirement": "Subset of {BTC, ETH, SOL}; canonical symbols."},
+    {"field": "market_type", "requirement": "spot only."},
+    {"field": "timeframe", "requirement": "1d only; intraday out of scope."},
+    {"field": "date_range", "requirement": "time_start + time_end, both ISO-8601 UTC."},
+    {"field": "file_naming_convention", "requirement": "<asset>_daily.csv (e.g., BTC_daily.csv, ETH_daily.csv, SOL_daily.csv)."},
+    {"field": "storage_path", "requirement": "data/crypto_d1_research/<dataset_id>/<dataset_version>/ -- created only at operator acquisition time."},
+    {"field": "dataset_id", "requirement": "Pattern CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>."},
+    {"field": "dataset_version", "requirement": "Immutable per freeze; remediation requires a NEW dataset_version."},
+    {"field": "sha256_checksums", "requirement": "sha256 per dataset file, recorded in CHECKSUMS.txt."},
+    {"field": "manifest.json", "requirement": "Passes tools/crypto_d1_dataset_manifest_check.py; pins protocol + data_contract versions; research_lane=crypto_d1_protocol, market_type=spot, timeframe=1d."},
+    {"field": "CHECKSUMS.txt", "requirement": "One '<sha256_hex>  <filename>' line per dataset file."},
+    {"field": "FREEZE_RECORD.txt", "requirement": "key:value lines with freeze_timestamp_utc + operator + version pins."},
+    {"field": "fees_slippage_declaration", "requirement": "fees.json with per-venue taker fee + slippage (spread proxy optional); no QA_PASS without taker fee AND slippage."}
+  ],
+
+  "file_placement_procedure": [
+    "1. Create the dataset directory at data/crypto_d1_research/<dataset_id>/<dataset_version>/ (operator action; SPARTA does NOT create it).",
+    "2. Place each <asset>_daily.csv there with the 9 required columns (timestamp, open, high, low, close, volume, symbol, source, quote_currency) and UTC daily timestamps.",
+    "3. Place fees.json declaring per-venue taker fee + slippage (+ optional spread proxy).",
+    "4. Author manifest.json so it passes tools/crypto_d1_dataset_manifest_check.py (all required fields; version pins; lane/market/timeframe).",
+    "5. Compute sha256 for every dataset file and write CHECKSUMS.txt (one '<sha256_hex>  <filename>' line per file).",
+    "6. Write FREEZE_RECORD.txt with freeze_timestamp_utc, operator name/label, and the version pins.",
+    "7. Do NOT commit the dataset contents to the repo unless explicitly authorized; treat the storage path as gitignored by default.",
+    "8. Keep the QA --out-dir separate from --dataset-dir; never write QA output inside the dataset directory."
+  ],
+
+  "qa_cli_commands": {
+    "validate_spec": "python tools/crypto_d1_data_qa_runtime_tool.py validate-spec",
+    "show_spec": "python tools/crypto_d1_data_qa_runtime_tool.py show-spec",
+    "run": "python tools/crypto_d1_data_qa_runtime_tool.py run --dataset-dir <PATH> --out-dir <PATH>"
+  },
+
+  "qa_status_meanings": {
+    "QA_DRAFT": "No checks could run (e.g., --dataset-dir does not exist). Not eligible for any downstream use.",
+    "QA_PASS": "All 7 check groups passed with zero warnings. Deterministic mechanical outcome. Does NOT imply profitability and does NOT authorize a backtest, paper, or live trading by itself.",
+    "QA_WARN": "No blocking failures but >=1 non-blocking warning. Operator must attach a written acceptance note to the manifest before any backtest plan references the dataset; lane stays WATCH.",
+    "QA_FAIL": ">=1 blocking failure. Dataset MUST NOT be referenced; remediation requires a NEW dataset_version.",
+    "QA_BLOCKED": "External block declared in the manifest. Dataset MUST NOT be referenced until cleared.",
+    "QA_RETIRED": "Superseded by a newer version; read-only for reproducibility / audit."
+  },
+
+  "why_qa_pass_authorizes_nothing": [
+    "QA_PASS is a data-quality precondition, not strategy validation.",
+    "QA_PASS does not imply edge or profitability.",
+    "QA_PASS does not authorize automatic backtesting.",
+    "QA_PASS does not authorize paper trading.",
+    "QA_PASS does not authorize live trading.",
+    "Clean daily OHLCV data does not imply profit.",
+    "A good historical chart does not imply future returns."
+  ],
+
+  "post_qa_before_baseline_results": [
+    "On QA_PASS (or an operator-accepted QA_WARN with a written note on the manifest), the dataset becomes eligible to be REFERENCED by a separately authorized backtest plan -- it is not itself authorized to run.",
+    "A separately authorized Crypto-D1 Baseline Results Report (future bundle) documents the operator-reviewed run only AFTER the operator has supplied data, reached QA_PASS / accepted QA_WARN, and run the backtest runner.",
+    "Each step remains operator-gated; SPARTA does not chain QA into a backtest automatically.",
+    "On QA_FAIL or QA_BLOCKED, no downstream use is permitted until remediated with a NEW dataset_version (FAIL) or the external block is cleared (BLOCKED)."
+  ],
+
+  "forbidden_list": [
+    "no perps",
+    "no leverage",
+    "no intraday",
+    "no scraping / unofficial data as evidence",
+    "no screenshots / manually copied prices",
+    "no broker / live / paper execution",
+    "no credentials / API keys in repo",
+    "no network automation from SPARTA"
+  ],
+
+  "pipeline_safety_repeatable_auditable": [
+    "Every dataset is frozen: immutable dataset_version + sha256 in CHECKSUMS.txt + FREEZE_RECORD.txt with timestamp + operator + version pins.",
+    "Provenance is line-by-line: source_name + source_class + license/TOS + row-level source_id; anonymous provenance is invalid per Bundle 12.",
+    "Re-running the QA tool on the same frozen bytes yields the same verdict (deterministic checker).",
+    "Remediation never edits in place -- a FAIL requires a NEW dataset_version.",
+    "SPARTA's runtime never fetches, never connects to an exchange, never holds credentials; all acquisition is operator-side and offline.",
+    "QA output is written to a separate --out-dir and is not committed unless explicitly authorized."
+  ],
+
+  "candidate_registry_status_after_doc": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "note": "This runbook doc pair is added to the crypto_d1 lane extra_files for traceability only. The lane stays WATCH; evidence does NOT become STRONG; the candidate is NOT marked ACTIVE. No broker / live / paper / backtest authorization is implied."
+  },
+
+  "safety_boundaries": [
+    "Research-only. Operator runbook (documentation) only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls. No network automation from SPARTA.",
+    "No data fetch. No dataset processing. No real data files or data directory created by this bundle.",
+    "Does not create data/crypto_d1_research/. Does not run QA against real data. Does not run a backtest.",
+    "QA_PASS does not imply profitability. QA_PASS does not authorize a backtest, paper, or live trading by itself.",
+    "Real data may enter only through explicit operator action and the Bundle 17 gates."
+  ],
+
+  "no_profit_claim_policy": [
+    "A runbook is not strategy validation.",
+    "Manual intake does not imply edge.",
+    "QA_PASS does not imply profitability.",
+    "Clean daily OHLCV data does not imply profit.",
+    "A runbook cannot authorize backtesting by itself.",
+    "A runbook cannot authorize paper or live trading.",
+    "No data fetch is authorized by this runbook.",
+    "Crypto trend ideas are not profitable until tested with full costs.",
+    "A good historical chart does not imply future returns."
+  ]
+}

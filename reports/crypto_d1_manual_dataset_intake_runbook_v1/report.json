@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_manual_dataset_intake_runbook_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "bundle": 20,
+  "branch": "bundle20/crypto-d1-manual-intake-runbook",
+  "what_was_built": [
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json (the machine-readable operator runbook: documents operator decisions before data enters, the 6 Bundle-18 source-class dispositions with E+F rejected, the 16 required concrete inputs incl. the 9 CSV columns + manifest/CHECKSUMS/FREEZE_RECORD/fees, an 8-step file placement procedure, the 3 Bundle-19 QA CLI commands, all 6 QA statuses, why QA_PASS authorizes nothing, what must happen after QA, the forbidden list, and pipeline safe/repeatable/auditable rules; authorization_disclaimer pins six 'authorizes nothing' booleans True; eleven safety flags pinned False; research_only + read_only True)",
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.md (human-readable runbook with disclaimer header and sections 0-13: pipeline position, lane/scope, operator decisions, source-class disposition table, required-inputs table, file placement, QA CLI, QA status meanings, why QA_PASS authorizes nothing, post-QA-before-baseline, forbidden list, pipeline safety, registry status, no-profit-claim policy)",
+    "tools/crypto_d1_manual_dataset_intake_runbook_check.py (stdlib-only validator; argparse/json/pathlib only; validate + show subcommands; verifies schema, the eleven False safety flags, the six True disclaimer booleans, lane/assets/market/timeframe/calendar, 9 CSV columns, all 6 source classes disposed with E+F rejected, the required concrete inputs, the 3 QA CLI commands, all 6 QA statuses, forbidden-list categories, registry-stays-WATCH, safety-boundary phrases, MD distinction phrases, and absence of forbidden capability phrases)",
+    "tests/test_crypto_d1_manual_dataset_intake_runbook.py (stdlib + pytest; existence + validation, safety-flag + disclaimer pins, scope, CSV columns, source-class dispositions, required inputs, QA CLI, QA statuses, forbidden list, registry-stays-WATCH, no-real-data + no-data-directory invariants, no forbidden phrases, distinction phrases, validator failure-mode tests, validator stdlib-only + no-network/broker/exchange import scan, CLI smoke, and integration that prior Crypto-D1/arbitrage/registry/next-bundle validators still pass and crypto_d1 remains WATCH now listing the runbook docs)",
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/report.md (this build report)",
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/report.json (build report)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.md",
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json",
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/report.md",
+    "reports/crypto_d1_manual_dataset_intake_runbook_v1/report.json",
+    "tools/crypto_d1_manual_dataset_intake_runbook_check.py",
+    "tests/test_crypto_d1_manual_dataset_intake_runbook.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/crypto_d1_data_qa_runtime_tool.py (NOT modified)",
+    "tools/crypto_d1_backtest_runner.py (NOT modified)",
+    "tools/strategy_next_bundle.py (NOT modified -- no artificial selection nudge)",
+    "app.py and templates/*.html (NOT touched)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched -- no new lesson)",
+    "All prior Crypto-D1 spec docs (Bundles 11-19) + arbitrage validators NOT modified",
+    "data/crypto_d1_research/ NOT created (the runbook is documentation; no data path is created)"
+  ],
+  "lane": "crypto_d1_protocol",
+  "scope_summary": {
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe": "1d",
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "pipeline_position": "Bridges Bundle 17 (acquisition authorization gate) to Bundle 19 (QA runtime tool); documentation of the manual operator intake phase; adds no automation."
+  },
+  "authorizes_nothing": {
+    "authorizes_nothing_operational": true,
+    "does_not_authorize_fetching": true,
+    "does_not_authorize_qa_on_real_data_by_itself": true,
+    "qa_pass_does_not_authorize_automatic_backtesting": true,
+    "qa_pass_does_not_authorize_paper_trading": true,
+    "qa_pass_does_not_authorize_live_trading": true,
+    "real_data_enters_only_through_explicit_operator_action_and_bundle_17_gates": true
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "validator_modules_used": ["argparse", "json", "pathlib", "__future__"],
+    "no_network_imports": true,
+    "no_broker_exchange_vendor_imports": true,
+    "no_subprocess_import": true,
+    "no_os_environ_or_getenv_access": true,
+    "no_dotenv_or_credentials_reads": true,
+    "eleven_safety_flags_pinned_false_in_runbook": [
+      "data_fetch_enabled", "exchange_connection_enabled", "live_trading_enabled",
+      "broker_control_enabled", "paper_order_execution_enabled", "order_placement_enabled",
+      "backtest_execution_enabled", "dataset_processing_enabled", "scheduler_enabled",
+      "network_calls_enabled", "credentials_required"
+    ],
+    "research_only_and_read_only_true": true,
+    "no_real_data_files_created": true,
+    "no_data_crypto_d1_research_directory_created": true,
+    "no_qa_run_against_real_data": true,
+    "no_backtest_run": true,
+    "candidate_registry_stays_WATCH_never_ACTIVE_never_STRONG": true
+  },
+  "candidate_registry_status_after_build": {
+    "status": "WATCH (unchanged disposition)",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH",
+    "note": "The crypto_d1_protocol seed extra_files were extended with runbook.md + runbook.json for traceability only. The lane stays WATCH; evidence does NOT become STRONG; the candidate is NOT marked ACTIVE. Promotion to ACTIVE still requires a future per-strategy backtest report PASS verdict on REAL data + explicit operator decision."
+  },
+  "what_was_executed_in_this_bundle": "ONLY the new validator (validate + show) and the test suite. NO real dataset was acquired, placed, QA-checked, or backtested. No data directory was created.",
+  "real_local_data_found_on_disk_at_build_time": false,
+  "any_real_qa_or_backtest_run_executed_against_real_data_in_this_bundle": false,
+  "recommended_next_bundle": [
+    "**Operator step (NOT a bundle):** operator follows this runbook to choose a source class (A/B/C/D), acquire BTC/ETH/SOL daily-spot CSV offline, place files under data/crypto_d1_research/<dataset_id>/<dataset_version>/, author manifest.json + CHECKSUMS.txt + FREEZE_RECORD.txt + fees.json, then run `python tools/crypto_d1_data_qa_runtime_tool.py run --dataset-dir <PATH> --out-dir <PATH>` and review the qa_report. SPARTA does NOT automate any of these steps.",
+    "**Crypto-D1 Baseline Results Report v1** (separately authorized; only AFTER operator has supplied data, reached QA_PASS or accepted QA_WARN, and run the backtest runner to produce output; documents the operator-reviewed run + pins verdict + caveats. Spec bundle; Claude works.)",
+    "**Crypto-D1 Backtest Runner v2 (future)** -- walk-forward + per-family parameter sweep + structured sensitivity sweep + per-strategy report emitter matching the full 27-field Bundle 15 schema. (Code bundle; recommend Codex.)"
+  ],
+  "no_profit_claim_policy": [
+    "A runbook is not strategy validation.",
+    "Manual intake does not imply edge.",
+    "QA_PASS does not imply profitability.",
+    "Clean daily OHLCV data does not imply profit.",
+    "A runbook cannot authorize backtesting by itself.",
+    "A runbook cannot authorize paper or live trading.",
+    "No data fetch is authorized by this runbook.",
+    "A good historical chart does not imply future returns."
+  ]
+}

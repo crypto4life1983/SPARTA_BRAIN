@@ -140,6 +140,12 @@ SEED_LANES = (
         # no concrete vendor named; allowed_now=False everywhere; never
         # ACTIVE, never STRONG; every concrete source still requires Bundle
         # 17 gates).
+        # Bundle 20: SPARTA-side Crypto-D1 Manual Dataset Intake Runbook v1
+        # docs added. Still WATCH (operator runbook only -- documentation of
+        # the manual intake path between the Bundle 17 gate and the Bundle 19
+        # QA tool; no fetch, no real data, no data directory created, no QA
+        # run against real data, no backtest; authorizes nothing; never
+        # ACTIVE, never STRONG).
         "extra_files": (
             "reports/crypto_d1_protocol_v1/protocol.md",
             "reports/crypto_d1_protocol_v1/protocol.json",
@@ -157,6 +163,8 @@ SEED_LANES = (
             "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
             "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.md",
             "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.json",
+            "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.md",
+            "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json",
         ),
         "lane_status_override": "WATCH",
     },
