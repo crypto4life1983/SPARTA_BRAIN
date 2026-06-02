@@ -201,12 +201,41 @@ def test_current_run_reflects_real_crypto_d1_state():
         assert stale not in block, f"stale Current Run token still present: {stale}"
 
 
+def test_current_run_acknowledges_bundle22_checklist():
+    block = _strategy_flow_block(_page())
+    # Bundle 22 sits ALONGSIDE the Bundle 21 readiness gate, never relabelling it.
+    assert "Complete (Bundle 21)" in block  # readiness gate label unchanged
+    for token in (
+        "Missing-items checklist",
+        "Bundle 22",
+        "16 items MISSING / PENDING",
+    ):
+        assert token in block, f"missing Bundle 22 checklist token: {token}"
+    # safety state must not have moved
+    assert "NOT_READY_FOR_REAL_DATA" in block
+    assert "WATCH / MIXED" in block
+
+
+def test_workflow_and_pipeline_acknowledge_bundle22_checklist():
+    block = _strategy_flow_block(_page())
+    # Workflow detail: 16 operator items tracked in the Bundle 22 checklist.
+    assert "Bundle&nbsp;22 Operator Missing-Items Checklist" in block
+    # Pipeline detail: checklist complete, source-agnostic (no source approved).
+    assert "Bundle&nbsp;22 missing-items checklist is complete" in block
+    assert "no source named or approved" in block
+    # source-agnostic guarantee: no concrete venue named on the dashboard
+    assert "Kraken" not in block
+
+
 def test_strategy_board_crypto_d1_reflects_readiness_gate():
     block = _strategy_flow_block(_page())
     # the board card must carry the post-Bundle-21 truth, not the old "QA tooling next"
     assert "readiness gate complete" in block
     assert "16 operator items pending" in block
     assert "authorization complete, QA tooling next" not in block
+    # Bundle 22 checklist acknowledged alongside the Bundle 21 gate
+    assert "checklist (Bundle 22)" in block
+    assert "16 items MISSING / PENDING" in block
 
 
 def test_strategy_board_trued_to_registry_no_fake_pass():
