@@ -70,24 +70,31 @@ item-by-item.
 
 ## 4. The 16 items
 
-| # | Name | Default status | Default approval | Notes |
+Current status as of 2026-06-02 (dataset `CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V001`
+frozen). Items 5–13 are COMPLETE / APPROVED with on-disk evidence. Items 1–4
+remain operator-driven (item 4 License/TOS stays PENDING while
+`FREEZE_RECORD.txt` carries a TOS-evidence placeholder). Items 14–16 stay
+MISSING: no QA run, no QA_PASS, no baseline backtest. The overall verdict stays
+`NOT_READY_FOR_REAL_DATA`.
+
+| # | Name | Status | Approval | Notes |
 |---|---|---|---|---|
 | 1 | Operator acquire-decision | MISSING | PENDING | A research decision, not a default. |
 | 2 | Source class | MISSING | PENDING | A/B/C/D only — never E (web-scraped) or F (manual). |
 | 3 | Source name | MISSING | PENDING | Exact vendor / venue / archive identity. |
-| 4 | License/TOS confirmation | MISSING | PENDING | Recorded URL or vendor reference. |
-| 5 | BTC/ETH/SOL spot 1D dataset | MISSING | PENDING | Spot only; 1d only; perps / leverage / intraday forbidden. |
-| 6 | Date range | MISSING | PENDING | ISO-8601 UTC `time_start` / `time_end`. |
-| 7 | `dataset_id` | MISSING | PENDING | `CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>`. |
-| 8 | `dataset_version` | MISSING | PENDING | Immutable per freeze. |
-| 9 | Storage path | MISSING | PENDING | `data/crypto_d1_research/<dataset_id>/<dataset_version>/`. |
-| 10 | `fees.json` | MISSING | PENDING | Per-venue taker fee + slippage; no QA_PASS without both. |
-| 11 | `manifest.json` | MISSING | PENDING | Passes `tools/crypto_d1_dataset_manifest_check.py`. |
-| 12 | `CHECKSUMS.txt` | MISSING | PENDING | One sha256 per dataset file. |
-| 13 | `FREEZE_RECORD.txt` | MISSING | PENDING | `freeze_timestamp_utc` + operator + version pins. |
-| 14 | QA run / `qa_report.json` | MISSING | PENDING | Via `tools/crypto_d1_data_qa_runtime_tool.py run`. |
-| 15 | QA_PASS or accepted QA_WARN | MISSING | PENDING | QA_FAIL / QA_BLOCKED do NOT satisfy this item. |
-| 16 | Baseline backtest output | MISSING | PENDING | Requires a separately authorized backtest bundle first. |
+| 4 | License/TOS confirmation | MISSING | PENDING | Stays PENDING — `FREEZE_RECORD.txt` TOS-evidence reference is still a placeholder. |
+| 5 | BTC/ETH/SOL spot 1D dataset | COMPLETE | APPROVED | Spot-only daily BTC/ETH/SOL; `daily_ohlcv.csv` frozen. |
+| 6 | Date range | COMPLETE | APPROVED | `time_start` 2021-06-17 → `time_end` 2025-12-31 (UTC) in manifest. |
+| 7 | `dataset_id` | COMPLETE | APPROVED | `CRYPTO_D1_SPOT_BTC_ETH_SOL_V001` matches pattern. |
+| 8 | `dataset_version` | COMPLETE | APPROVED | `V001` — first immutable freeze. |
+| 9 | Storage path | COMPLETE | APPROVED | `data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V001/` exists. |
+| 10 | `fees.json` | COMPLETE | APPROVED | Taker 40bps + slippage 10bps declared (FILLED_PENDING_QA). |
+| 11 | `manifest.json` | COMPLETE | APPROVED | Passes `tools/crypto_d1_dataset_manifest_check.py validate`. |
+| 12 | `CHECKSUMS.txt` | COMPLETE | APPROVED | sha256 per frozen dataset file. |
+| 13 | `FREEZE_RECORD.txt` | COMPLETE | APPROVED | `freeze_timestamp` + operator + 3 version pins. |
+| 14 | QA run / `qa_report.json` | MISSING | PENDING | No QA run yet. Via `tools/crypto_d1_data_qa_runtime_tool.py run`. |
+| 15 | QA_PASS or accepted QA_WARN | MISSING | PENDING | No QA_PASS / accepted QA_WARN. QA_FAIL / QA_BLOCKED do NOT satisfy this item. |
+| 16 | Baseline backtest output | MISSING | PENDING | No baseline backtest. Requires a separately authorized backtest bundle first. |
 
 ## 5. Per-item required fields (every item carries all 9)
 
