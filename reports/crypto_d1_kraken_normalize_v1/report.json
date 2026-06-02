@@ -1,0 +1,95 @@
+{
+  "report_id": "crypto_d1_kraken_normalize_v1",
+  "title": "Crypto-D1 Kraken Normalize v1 -- offline operator tool (implementation report)",
+  "version": "1.0",
+  "kind": "tool_implementation_report",
+  "research_only": true,
+  "read_only_by_default": true,
+  "lane": "crypto_d1_protocol",
+  "tool_path": "tools/crypto_d1_kraken_normalize.py",
+  "test_path": "tests/test_crypto_d1_kraken_normalize.py",
+  "purpose": "Normalize operator-supplied, manually-downloaded Kraken daily OHLCVT exports (BTC/ETH/SOL spot, USD) into the single canonical Crypto-D1 dataset, with offline-only, write-jailed, freeze-capable behavior. This tool does NOT fetch, run QA, run a backtest, or trade.",
+  "safety_flags": {
+    "network_calls_enabled": false,
+    "subprocess_enabled": false,
+    "credentials_required": false,
+    "scheduler_enabled": false,
+    "qa_run_in_this_step": false,
+    "backtest_run_in_this_step": false,
+    "paper_or_live_execution_touched": false,
+    "real_dataset_materialized_in_this_step": false,
+    "data_crypto_d1_research_directory_created_in_this_step": false,
+    "jarvis_dashboard_files_modified_in_this_step": false
+  },
+  "dataset_identity": {
+    "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001",
+    "dataset_version": "V001",
+    "write_jail": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V001/",
+    "range_start": "2021-06-17",
+    "range_end": "2025-12-31",
+    "expected_rows_per_asset": 1659,
+    "expected_rows_total": 4977,
+    "quote_currency": "USD"
+  },
+  "output_schema": [
+    "timestamp", "open", "high", "low", "close", "volume",
+    "symbol", "source", "quote_currency", "trade_count"
+  ],
+  "approved_normalization_decisions": [
+    "Offline only; reads only files passed via --raw-dir; no network/subprocess/credentials.",
+    "Dry-run is the default; --write materializes; --freeze (requires --write) emits CHECKSUMS.txt + FREEZE_RECORD.txt.",
+    "Write-jail: every write path is resolved and confined to the single dataset directory.",
+    "Symbol aliases: XBTUSD/XXBTZUSD->BTC, ETHUSD/XETHZUSD->ETH, SOLUSD->SOL; all USD-quoted.",
+    "Timestamps converted from Kraken unix-seconds bar-open to ISO-8601 UTC (YYYY-MM-DDT00:00:00Z).",
+    "Range filtered to 2021-06-17..2025-12-31 inclusive; out-of-range/partial-day bars excluded.",
+    "One combined daily_ohlcv.csv for all three assets; sorted by asset (BTC,ETH,SOL) then timestamp.",
+    "Prices kept as source strings to avoid precision loss; validated numerically for OHLC self-consistency.",
+    "fees.json ships a PLACEHOLDER_FILL_BEFORE_QA sentinel; manifest QA_status stays QA_DRAFT until filled.",
+    "Manifest freeze_status=FROZEN only under --freeze; operator label 'Mahmoud Cherif — operator manual Kraken intake'; FREEZE_RECORD pins versions + Kraken TOS evidence reference."
+  ],
+  "integrity_rules_enforced": [
+    "high >= max(open, close, low)",
+    "low <= min(open, close, high)",
+    "open/high/low/close strictly positive",
+    "volume >= 0",
+    "trade_count >= 0 when present",
+    "duplicate (symbol, timestamp) rejected as a hard error",
+    "all three required asset files must be present",
+    "single raw source file per asset"
+  ],
+  "files_created": [
+    "tools/crypto_d1_kraken_normalize.py",
+    "tests/test_crypto_d1_kraken_normalize.py",
+    "reports/crypto_d1_kraken_normalize_v1/report.json",
+    "reports/crypto_d1_kraken_normalize_v1/report.md"
+  ],
+  "files_edited_outside_approved_set": [],
+  "tests": {
+    "command": "PYTHONPATH=.. ../.venv/Scripts/python.exe -m pytest test_crypto_d1_kraken_normalize.py --noconftest -q -p no:cacheprovider",
+    "result": "28 passed",
+    "fixtures": "synthetic only; every write test points --repo-root at a pytest tmp_path"
+  },
+  "validators_run": {
+    "crypto_d1_dataset_manifest_check.py validate": "OK",
+    "crypto_d1_readiness_gate_check.py validate": "OK",
+    "crypto_d1_operator_missing_items_checklist_check.py validate": "OK"
+  },
+  "distinctions": [
+    "FROZEN means checksummed and immutable; it does NOT mean QA-passed.",
+    "QA_PASS does not imply profitability.",
+    "Clean daily OHLCV data does not imply profit.",
+    "A good historical chart does not imply future returns.",
+    "This tool does not authorize a backtest, paper trading, or live trading."
+  ],
+  "not_done_in_this_step": [
+    "Did not run --write.",
+    "Did not run --freeze.",
+    "Did not create data/crypto_d1_research/.",
+    "Did not materialize the dataset.",
+    "Did not copy raw Kraken data into SPARTA.",
+    "Did not run QA.",
+    "Did not run a backtest.",
+    "Did not start paper or live trading.",
+    "Did not start Bundle 23."
+  ]
+}
