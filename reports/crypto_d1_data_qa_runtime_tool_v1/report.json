@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_data_qa_runtime_tool_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "tools/crypto_d1_data_qa_runtime_tool.py (stdlib-only QA runtime tool implementing the Bundle 14 QA / Freeze spec; reads an operator-supplied frozen dataset directory and emits a qa_report.json populating all 26 fields declared by Bundle 14's QA_report_schema + a human-readable qa_report.md; CLI: validate-spec / show-spec / run --dataset-dir <PATH> --out-dir <PATH>; 7 check groups A-G; 6-status QA model; conservative classifier (QA_PASS is the natural deterministic outcome of mechanical checks but does NOT autoauthorize backtests))",
+    "tests/test_crypto_d1_data_qa_runtime_tool.py (39 tests using tmp_path synthetic fixtures only; covers stdlib-only AST scan; no-network / no-broker / no-exchange / no-credentials / no-subprocess; no order-placement code; validate-spec / show-spec / run CLI; missing/empty dataset-dir safe-fails; per-check-group failure modes for A through G; 26-field schema all populated; safety flags pinned False; QA_PASS / QA_WARN / QA_FAIL / QA_BLOCKED classification; sha256 tamper detection; missing FREEZE_RECORD detection; missing fees / slippage detection; determinism on same input; report files land at out_dir; no real data files committed under bundle dir; no data/crypto_d1_research/ created; integration with prior validators)",
+    "reports/crypto_d1_data_qa_runtime_tool_v1/report.md (this build report)",
+    "reports/crypto_d1_data_qa_runtime_tool_v1/report.json (build report)"
+  ],
+  "files_changed": [
+    "tools/crypto_d1_data_qa_runtime_tool.py",
+    "tests/test_crypto_d1_data_qa_runtime_tool.py",
+    "reports/crypto_d1_data_qa_runtime_tool_v1/report.md",
+    "reports/crypto_d1_data_qa_runtime_tool_v1/report.json",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/strategy_candidate_registry.py (NOT modified -- the QA tool is code, not evidence; lane stays WATCH unchanged at 29 source_reports)",
+    "tools/strategy_next_bundle.py (NOT modified -- no artificial selection nudge)",
+    "tools/crypto_d1_backtest_runner.py (NOT modified)",
+    "app.py and templates/*.html (NOT touched; clean since 7cecf31)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched)",
+    "All 7 prior Crypto-D1 spec docs + 8 arbitrage validators NOT modified",
+    "data/crypto_d1_research/ NOT created (the tool reads only from --dataset-dir; if absent emits a QA_DRAFT or QA_FAIL report)"
+  ],
+  "follows_qa_freeze_spec": {
+    "qa_freeze_spec_id": "crypto_d1_qa_freeze_spec_v1",
+    "lane": "crypto_d1_protocol",
+    "phase_satisfied": "P2_dataset_manifest_freeze runtime layer -- this is the code Bundle 14 specified; it does NOT acquire data, does NOT run backtests, and does NOT authorize trading. It is a deterministic checker only."
+  },
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe": "1d",
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "qa_check_groups_implemented": [
+      "A_manifest_integrity",
+      "B_timestamp",
+      "C_OHLCV",
+      "D_volume",
+      "E_symbol_source",
+      "F_fee_slippage",
+      "G_freeze"
+    ],
+    "qa_statuses_supported": ["QA_DRAFT", "QA_PASS", "QA_WARN", "QA_FAIL", "QA_BLOCKED", "QA_RETIRED"],
+    "qa_report_required_fields_count": 26,
+    "expected_inputs_at_dataset_dir": [
+      "manifest.json", "CHECKSUMS.txt", "FREEZE_RECORD.txt", "fees.json",
+      "<asset>_daily.csv (>= 1)"
+    ]
+  },
+  "safety_guarantees": {
+    "stdlib_only_tool": true,
+    "stdlib_modules_used": ["argparse", "csv", "dataclasses", "datetime", "hashlib", "json", "math", "pathlib", "sys", "__future__"],
+    "in_repo_imports_only_other_stdlib_validators": ["crypto_d1_qa_freeze_spec_check", "crypto_d1_dataset_manifest_check"],
+    "no_network_imports": true,
+    "no_broker_exchange_vendor_imports_or_attribute_access": true,
+    "no_subprocess_import": true,
+    "no_os_environ_or_getenv_access": true,
+    "no_dotenv_or_credentials_reads": true,
+    "no_order_placement_or_paper_or_live_trading_code_paths": true,
+    "no_data_fetch_from_runtime": true,
+    "read_only_with_respect_to_dataset_dir": true,
+    "writes_only_to_out_dir_supplied_by_operator": true,
+    "no_default_for_dataset_dir_or_out_dir": true,
+    "graceful_failure_on_missing_data": true,
+    "never_fabricates_results": true,
+    "no_data_crypto_d1_research_directory_created": true,
+    "seven_pinned_safety_flags_in_every_report": {
+      "research_only": true,
+      "data_fetch_enabled": false,
+      "exchange_connection_enabled": false,
+      "live_trading_enabled": false,
+      "broker_control_enabled": false,
+      "paper_order_execution_enabled": false,
+      "order_placement_enabled": false
+    },
+    "qa_pass_is_deterministic_but_does_NOT_authorize_backtest_by_itself": true,
+    "qa_pass_does_NOT_imply_profitability": true,
+    "qa_pass_does_NOT_authorize_paper_or_live_trading": true,
+    "qa_blocked_overrides_to_QA_BLOCKED_when_manifest_declares": true,
+    "checksum_verification_at_runtime_against_CHECKSUMS_txt": true,
+    "freeze_record_required": true,
+    "fees_taker_and_slippage_required_no_PASS_without_both": true
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_data_qa_runtime_tool.py --rootdir=tests -q",
+      "result": "39 passed in 0.55s"
+    },
+    {
+      "command": "full integration suite (Bundles 2-18 + 19; 18 test files)",
+      "result": "509 passed in 4.41s"
+    }
+  ],
+  "json_validity_of_prior_bundles_unaffected": {
+    "crypto_d1_data_source_evaluation_check_validate": "validate: OK (Bundle 18 unaffected)",
+    "crypto_d1_data_acquisition_authorization_check_validate": "validate: OK (Bundle 17 unaffected)",
+    "crypto_d1_backtest_plan_check_validate": "validate: OK (Bundle 15 unaffected)",
+    "crypto_d1_qa_freeze_spec_check_validate": "validate: OK (Bundle 14 unaffected)",
+    "crypto_d1_dataset_manifest_check_validate": "validate: OK (Bundle 13 unaffected)",
+    "crypto_d1_data_contract_check_validate": "validate: OK (Bundle 12 unaffected)",
+    "crypto_d1_protocol_check_validate": "validate: OK (Bundle 11 unaffected)",
+    "8_arbitrage_validators": "all validate: OK (Bundles 4-10 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "how_to_run_with_local_dataset": {
+    "step_1_prepare_dataset": "Operator (per Bundle 17 manual steps) places under <DATASET_DIR>: BTC_daily.csv (and optionally ETH_daily.csv, SOL_daily.csv), manifest.json (passes crypto_d1_dataset_manifest_check.py), CHECKSUMS.txt (one '<sha256_hex>  <filename>' line per dataset file), FREEZE_RECORD.txt (key:value lines with freeze_timestamp_utc + operator + 6 version pins), fees.json (declaring per-venue taker fee + slippage_bps + optional spread_proxy_bps).",
+    "step_2_precondition_check": "python tools/crypto_d1_data_qa_runtime_tool.py validate-spec",
+    "step_3_inspect": "python tools/crypto_d1_data_qa_runtime_tool.py show-spec",
+    "step_4_run": "python tools/crypto_d1_data_qa_runtime_tool.py run --dataset-dir <DATASET_DIR> --out-dir <OUT_DIR>",
+    "step_5_inspect_reports": "OUT_DIR contains qa_report.json (26 required fields) and qa_report.md. NEVER commit OUT_DIR contents unless explicitly authorized.",
+    "step_6_iterate_on_failures": "On QA_FAIL, remediation requires a NEW dataset_version (per Bundle 13 freeze rules). On QA_WARN, operator attaches an acceptance note to the manifest before any backtest plan references the dataset."
+  },
+  "what_happens_if_no_data_exists": {
+    "behavior": "If --dataset-dir does not exist, emit QA_DRAFT with empty groups and explicit reason in _audit_context.no_input_reason. If --dataset-dir exists but contains no CSV, emit QA_FAIL with blocking failure 'no .csv files in dataset_dir'. JSON + MD reports are still written for audit.",
+    "tested": "test_missing_dataset_dir_emits_qa_draft + test_empty_dataset_dir_emits_qa_fail",
+    "guarantee": "Never fabricates a qa_report. Never invents check results. Never auto-creates data/crypto_d1_research/."
+  },
+  "real_local_data_found_on_disk_at_build_time": false,
+  "any_real_qa_run_executed_against_real_data_in_this_bundle": false,
+  "what_was_executed_in_this_bundle": "ONLY the test suite, against tmp_path synthetic CSV / manifest / CHECKSUMS / FREEZE_RECORD / fees fixtures generated inside the tests. NO real dataset was loaded or QA-checked.",
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH (unchanged from Bundle 18)",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH",
+    "registry_NOT_modified_by_this_bundle": "Per Bundle 16 precedent, the QA tool is code, not evidence. The candidate_registry seed's extra_files were not extended; lane stays WATCH at 29 source_reports. Promotion to ACTIVE still requires a future per-strategy backtest report PASS verdict on REAL data + explicit operator decision.",
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/credentials reference",
+      "no real data files or QA output files created in this bundle",
+      "no data directory created",
+      "no real QA run executed against real data",
+      "no concrete vendor authorized"
+    ]
+  },
+  "recommended_next_bundle": [
+    "**Operator step (NOT a bundle):** operator MANUALLY executes Bundle 17 steps 1-10 (choose source class A/B/C/D, acquire CSV offline, normalize header to Bundle 12 schema, mint dataset_id + version, place files under data/crypto_d1_research/<dataset_id>/<dataset_version>/, author manifest.json, compute CHECKSUMS.txt, write FREEZE_RECORD.txt), then run `python tools/crypto_d1_data_qa_runtime_tool.py run --dataset-dir <PATH> --out-dir <PATH>` and review the emitted qa_report.json + qa_report.md. SPARTA does NOT automate any of these steps.",
+    "**Crypto-D1 Baseline Results Report v1** (separately authorized; only AFTER operator has supplied data, run the QA tool to QA_PASS or accepted QA_WARN, and run the backtest runner to produce output; documents the operator-reviewed run + pins verdict + caveats. Spec bundle; Claude works.)",
+    "**Crypto-D1 Backtest Runner v2 (future)** -- walk-forward + per-family parameter sweep + structured sensitivity sweep + per-strategy report emitter matching the full 27-field Bundle 15 schema. (Code bundle; recommend Codex.)"
+  ]
+}
