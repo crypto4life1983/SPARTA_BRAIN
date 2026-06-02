@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_data_acquisition_authorization_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json (machine-readable authorization / freeze plan; 12-step operator manual checklist; 9-column required CSV schema + 5 optional columns; placeholder file layout; storage path plan with no real directory created; manifest + QA / freeze + checksum requirements pinning Bundles 11-16; 20 approval gates; forbidden actions; allowed + forbidden next steps; safety boundaries; no-profit-claim policy)",
+    "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.md (human-readable plan)",
+    "reports/crypto_d1_data_acquisition_authorization_v1/report.md (build report)",
+    "reports/crypto_d1_data_acquisition_authorization_v1/report.json (build report)",
+    "tools/crypto_d1_data_acquisition_authorization_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_crypto_d1_data_acquisition_authorization.py (35 tests covering schema + safety + validator failure modes + no-real-data-files + no-data-directory + tool stdlib-only + integration with prior bundles and runner)",
+    "tools/strategy_candidate_registry.py: crypto_d1_protocol seed extended via extra_files to include the new authorization_plan docs (lane stays WATCH; never ACTIVE / never STRONG)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
+    "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.md",
+    "reports/crypto_d1_data_acquisition_authorization_v1/report.md",
+    "reports/crypto_d1_data_acquisition_authorization_v1/report.json",
+    "tools/crypto_d1_data_acquisition_authorization_check.py",
+    "tests/test_crypto_d1_data_acquisition_authorization.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/strategy_next_bundle.py (NOT modified -- no artificial selection nudge)",
+    "tools/crypto_d1_backtest_runner.py (NOT modified)",
+    "app.py and templates/*.html (NOT touched)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched)",
+    "All 5 Crypto-D1 spec docs + 14 prior validators are NOT modified",
+    "data/crypto_d1_research/ is NOT created (per plan, the storage root appears only when the operator manually places a real dataset)"
+  ],
+  "follows_prior_bundles": {
+    "protocol_id": "crypto_d1_protocol_v1",
+    "data_contract_id": "crypto_d1_data_contract_v1",
+    "dataset_manifest_id": "crypto_d1_dataset_manifest_v1",
+    "qa_freeze_spec_id": "crypto_d1_qa_freeze_spec_v1",
+    "baseline_backtest_plan_id": "crypto_d1_baseline_backtest_plan_v1",
+    "backtest_runner_id": "crypto_d1_backtest_runner_v1",
+    "lane": "crypto_d1_protocol",
+    "phase_satisfied": "P2_dataset_manifest_freeze -- operator-acquisition authorization layer. Implementation of the acquisition is an explicit OPERATOR ACTION, not a SPARTA-side automated step."
+  },
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe_primary": "1d",
+    "intraday_explicitly_out_of_scope": true,
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "approved_quote_currencies": ["USDT", "USD"],
+    "approved_source_type": "operator-approved historical OHLCV CSV provider (offline export only)",
+    "perps_dated_options_leveraged_margin_FORBIDDEN": true,
+    "intraday_FORBIDDEN_in_this_bundle": true,
+    "operator_manual_step_count": 12,
+    "required_csv_column_count": 9,
+    "optional_csv_column_count": 5,
+    "expected_filenames_placeholder_only": [
+      "BTC_daily.csv", "ETH_daily.csv", "SOL_daily.csv",
+      "manifest.json", "CHECKSUMS.txt", "FREEZE_RECORD.txt", "qa_report.json"
+    ],
+    "approval_gate_count": 20
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_execution_enabled",
+      "dataset_processing_enabled"
+    ],
+    "spot_only_market_type": true,
+    "perp_futures_explicitly_forbidden": true,
+    "intraday_explicitly_out_of_scope": true,
+    "session_model_24_7_with_no_weekday_only_filters": true,
+    "no_real_data_files_created": true,
+    "no_data_directory_created": true,
+    "operator_acquisition_is_manual_only": true,
+    "no_credentials_anywhere": true,
+    "no_paper_or_live_trading_authorization": true,
+    "qa_pass_or_approved_qa_warn_required_before_runner_use": true,
+    "checksums_must_match_at_runner_startup": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "Data acquisition does not imply edge",
+      "Clean data does not imply profit",
+      "Running the backtest does not authorize trading",
+      "Backtest output will still require separate review",
+      "No paper/live trading is authorized",
+      "No data fetch is authorized",
+      "Crypto trend ideas are not profitable until tested",
+      "24/7"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_data_acquisition_authorization.py --rootdir=tests -q",
+      "result": "35 passed"
+    },
+    {
+      "command": "full integration suite (Bundles 2-16 + 17; 16 test files)",
+      "result": "431 passed across the stack"
+    }
+  ],
+  "json_validity": {
+    "crypto_d1_data_acquisition_authorization_check_validate": "validate: OK",
+    "crypto_d1_backtest_plan_check_validate": "validate: OK (Bundle 15 unaffected)",
+    "crypto_d1_qa_freeze_spec_check_validate": "validate: OK (Bundle 14 unaffected)",
+    "crypto_d1_dataset_manifest_check_validate": "validate: OK (Bundle 13 unaffected)",
+    "crypto_d1_data_contract_check_validate": "validate: OK (Bundle 12 unaffected)",
+    "crypto_d1_protocol_check_validate": "validate: OK (Bundle 11 unaffected)",
+    "8_arbitrage_validators": "all validate: OK (Bundles 4-10 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "real_local_data_exists_on_disk": false,
+  "any_real_data_files_created_in_this_bundle": false,
+  "data_directory_created_in_this_bundle": false,
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH (fires because the seed's extra_files now include 12 docs: protocol + data_contract + dataset_manifest + qa_freeze_spec + backtest_plan + authorization_plan, all on disk)",
+    "new_extra_files_added_this_bundle": [
+      "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.md",
+      "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json"
+    ],
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest-execution/dataset-processing/credentials reference",
+      "no real data files created",
+      "no data directory created",
+      "no QA harness execution",
+      "no backtest execution"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Both arbitrage and crypto_d1 remain WATCH (same +15 bonus). Arbitrage still wins via existing protocol-first / data-first scoring hints. Deterministic logic NOT artificially modified. Operator picks the actual next move."
+  },
+  "next_recommended_step": [
+    "**Operator step (NOT a bundle):** operator MANUALLY executes the 12 operator_manual_steps in the authorization plan -- choose a TOS-compliant CSV provider, export BTC/ETH/SOL daily OHLCV, normalize to Bundle-12 header, place under data/crypto_d1_research/<dataset_id>/<dataset_version>/, author manifest.json (passes Bundle 13 check), write CHECKSUMS.txt + FREEZE_RECORD.txt, run future QA harness, accept QA_PASS or approved QA_WARN, then run the Bundle-16 runner. SPARTA does not automate any of these steps.",
+    "**Crypto-D1 Baseline Results Report v1** (separately authorized; after operator has supplied data and the runner has produced output; documents what the operator-reviewed run looks like and pins the resulting verdict + caveats; spec bundle / Claude works).",
+    "**Crypto-D1 Data QA Runtime Tool v1** (optional; only if operator decides the QA runner MUST exist as code before any further backtest; code bundle; recommend Codex).",
+    "**Crypto-D1 Backtest Runner v2 (future)** -- walk-forward driver + per-family parameter-grid sweep + structured sensitivity sweep + per-strategy report emitter matching the full 27-field Bundle 15 schema. (Code bundle; recommend Codex.)"
+  ]
+}

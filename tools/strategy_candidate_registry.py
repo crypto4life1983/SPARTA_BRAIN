@@ -131,6 +131,10 @@ SEED_LANES = (
         # data files, no backtest output files); never ACTIVE, never STRONG.
         # Promotion to ACTIVE requires a future per-strategy backtest report
         # PASS verdict + explicit operator decision -- not produced here.
+        # Bundle 17: SPARTA-side Crypto-D1 Local Data Acquisition
+        # Authorization / Freeze Plan v1 docs added. Still WATCH
+        # (authorization plan only -- no fetch, no real data files or
+        # directory created, no runner execution); never ACTIVE, never STRONG.
         "extra_files": (
             "reports/crypto_d1_protocol_v1/protocol.md",
             "reports/crypto_d1_protocol_v1/protocol.json",
@@ -142,6 +146,8 @@ SEED_LANES = (
             "reports/crypto_d1_qa_freeze_spec_v1/qa_freeze_spec.json",
             "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.md",
             "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
+            "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.md",
+            "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
         ),
         "lane_status_override": "WATCH",
     },

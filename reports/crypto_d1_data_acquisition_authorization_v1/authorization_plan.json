@@ -1,0 +1,266 @@
+{
+  "authorization_plan_id": "crypto_d1_data_acquisition_authorization_v1",
+  "title": "SPARTA Crypto-D1 Local Data Acquisition Authorization / Freeze Plan v1",
+  "version": "1.0",
+  "kind": "data_acquisition_authorization_plan",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_execution_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+
+  "companion_documents": {
+    "crypto_d1_protocol_v1_json": "reports/crypto_d1_protocol_v1/protocol.json",
+    "crypto_d1_data_contract_v1_json": "reports/crypto_d1_data_contract_v1/data_contract.json",
+    "crypto_d1_dataset_manifest_v1_json": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json",
+    "crypto_d1_qa_freeze_spec_v1_json": "reports/crypto_d1_qa_freeze_spec_v1/qa_freeze_spec.json",
+    "crypto_d1_baseline_backtest_plan_v1_json": "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
+    "crypto_d1_backtest_runner_v1_tool": "tools/crypto_d1_backtest_runner.py"
+  },
+
+  "research_objective": "Define EXACTLY what the operator must MANUALLY provide later, WHERE it should go, and WHICH checks must pass before the Crypto-D1 Backtest Runner v1 is allowed to use it. This bundle is an authorization / freeze PLAN only -- it does not fetch data, does not connect to any exchange, does not produce any real dataset file, does not authorize trading or backtest execution.",
+
+  "target_assets": [
+    {"symbol_canonical": "BTC", "label": "Bitcoin", "required": true,  "rationale": "Highest-liquidity, deepest historical record."},
+    {"symbol_canonical": "ETH", "label": "Ether",   "required": true,  "rationale": "Cross-asset robustness vs. BTC."},
+    {"symbol_canonical": "SOL", "label": "Solana",  "required": true,  "rationale": "Different vol / drawdown profile; prevents BTC-only overfit."}
+  ],
+
+  "timeframe": {
+    "primary": "1d",
+    "additional_allowed_for_plan_only": ["none"],
+    "intraday_explicitly_out_of_scope": true,
+    "bar_close_convention": "UTC 00:00:00 close; left-closed / right-open documented per dataset manifest."
+  },
+
+  "allowed_market_type": "spot",
+  "forbidden_market_types": [
+    "perp_futures (separate future protocol required)",
+    "dated_futures (out of scope at v1)",
+    "options (out of scope at v1)",
+    "leveraged_tokens (out of scope at v1)",
+    "margin_or_borrow_facilitated_spot (out of scope at v1)",
+    "synthetic_instruments (out of scope at v1)"
+  ],
+
+  "approved_data_scope": {
+    "assets": ["BTC", "ETH", "SOL"],
+    "market_type": "spot",
+    "timeframe": "1d",
+    "quote_currency_options": ["USDT", "USD"],
+    "quote_currency_consistency_required": "Within a single dataset_id, every row for the same symbol MUST share the same quote_currency. Cross-stablecoin conversions require an explicit FX series.",
+    "source_type": "operator-approved historical OHLCV CSV provider (offline export only)",
+    "time_range_policy": "Operator-chosen; must be RECORDED EXACTLY in the per-dataset manifest's time_start / time_end fields.",
+    "perps_dated_options_leveraged_margin_FORBIDDEN": true,
+    "intraday_FORBIDDEN_in_this_bundle": true,
+    "no_synthetic_or_mock_data": true,
+    "no_screenshots_or_manually_typed_prices": true
+  },
+
+  "operator_manual_steps": [
+    "Step 1: Operator MANUALLY selects an approved historical OHLCV CSV source whose terms of service explicitly permit research use. NO automated discovery.",
+    "Step 2: Operator MANUALLY exports / downloads daily OHLCV CSV files for BTC, ETH, SOL (whichever subset is in scope) under the operator's own credentials; SPARTA's runtime never sees those credentials.",
+    "Step 3: Operator MANUALLY normalizes the CSV(s) so that the file header matches the Bundle 12 required_csv_schema EXACTLY (column names, casing, UTF-8 encoding).",
+    "Step 4: Operator MANUALLY mints a dataset_id matching the pattern 'CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>' and a dataset_version (V001, V002, ...).",
+    "Step 5: Operator MANUALLY places the CSV file(s) at the declared storage_path_plan ('data/crypto_d1_research/<dataset_id>/<dataset_version>/'). No network call is made by SPARTA.",
+    "Step 6: Operator MANUALLY authors a per-dataset manifest.json that satisfies tools/crypto_d1_dataset_manifest_check.py (extended for per-dataset use) and pins protocol_version, data_contract_version, manifest_version.",
+    "Step 7: Operator MANUALLY computes sha256 of every file in the dataset folder and writes them to CHECKSUMS.txt.",
+    "Step 8: Operator MANUALLY writes FREEZE_RECORD.txt recording freeze timestamp (ISO-8601 UTC), operator name + tool label, and the pinned protocol+data_contract+manifest+qa-spec versions.",
+    "Step 9: Operator MANUALLY runs the future QA harness (Bundle 14 spec) once it is implemented, and reviews qa_report.json.",
+    "Step 10: Operator MANUALLY accepts QA_PASS, or attaches an explicit operator-acceptance note for QA_WARN, before authorizing the runner.",
+    "Step 11: Operator MANUALLY runs the backtest runner against the FROZEN, QA-approved dataset: `python tools/crypto_d1_backtest_runner.py run --data-dir <PATH> --out-dir <PATH>`.",
+    "Step 12: Operator MANUALLY reviews the runner's emitted crypto_d1_backtest_report.json + .md (research-only); the runner NEVER emits PASS in v1, so any acted-upon decision is the operator's explicit judgment AFTER review."
+  ],
+
+  "required_csv_schema": {
+    "required_columns": [
+      "timestamp",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "symbol",
+      "source",
+      "quote_currency"
+    ],
+    "optional_columns": [
+      "vwap",
+      "trade_count",
+      "quote_volume",
+      "source_timestamp",
+      "ingestion_timestamp"
+    ],
+    "header_must_match_exactly": "Column names, casing, and order MUST match the Bundle 12 data contract; the backtest runner rejects files whose header is missing any required column.",
+    "encoding": "UTF-8 (no BOM)",
+    "row_per_symbol_per_utc_daily_timestamp": true,
+    "no_partial_day_bars_allowed_in_frozen_dataset": true,
+    "no_silent_forward_fill": true
+  },
+
+  "expected_file_layout": {
+    "purpose": "Documents the EXPECTED filenames a future operator-supplied dataset folder should contain. NO real files are created in this bundle.",
+    "per_asset_csv_filenames_examples": [
+      "BTC_daily.csv",
+      "ETH_daily.csv",
+      "SOL_daily.csv"
+    ],
+    "manifest_json": "manifest.json -- must pass tools/crypto_d1_dataset_manifest_check.py.",
+    "checksums_txt": "CHECKSUMS.txt -- one 'sha256  <filename>' line per dataset file.",
+    "freeze_record_txt": "FREEZE_RECORD.txt -- freeze timestamp, operator + tool label, pinned versions.",
+    "qa_report_json": "qa_report.json -- emitted by the future QA harness (Bundle 14 spec); MUST populate all 26 fields declared in qa_freeze_spec_v1.QA_report_schema.required_fields.",
+    "no_real_files_created_in_this_bundle": true,
+    "no_data_directory_created_in_this_bundle": true
+  },
+
+  "storage_path_plan": {
+    "root_pattern": "data/crypto_d1_research/<dataset_id>/<dataset_version>/",
+    "no_real_storage_directory_created_in_this_bundle": true,
+    "no_urls_required_local_only": true,
+    "no_remote_paths": "All paths are local repo-relative; no s3://, gs://, http(s)://, ftp://, file://remote-host, or other remote scheme is permitted in any future per-dataset manifest.",
+    "storage_root_created_only_when_operator_acquires_data": "Even the parent directory 'data/crypto_d1_research/' is NOT created by this authorization plan; it appears only when the operator manually places a real dataset.",
+    "gitignore_recommendation_for_future_operator": "If real OHLCV data is later acquired, add 'data/crypto_d1_research/' to .gitignore unless the operator explicitly wants to track frozen datasets in git (typically NOT recommended for size + provenance reasons)."
+  },
+
+  "manifest_requirements": {
+    "must_validate_against": "tools/crypto_d1_dataset_manifest_check.py (Bundle 13)",
+    "must_reference_protocol_version": "crypto_d1_protocol_v1 (or later)",
+    "must_reference_data_contract_version": "crypto_d1_data_contract_v1 (or later)",
+    "must_reference_qa_freeze_spec_version": "crypto_d1_qa_freeze_spec_v1 (or later)",
+    "must_reference_backtest_plan_version": "crypto_d1_baseline_backtest_plan_v1 (or later)",
+    "must_reference_runner_version": "crypto_d1_backtest_runner_v1 (or later)",
+    "dataset_id_naming_pattern": "CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>",
+    "dataset_version_monotonic": true,
+    "no_in_place_edits_in_a_versioned_dataset": true,
+    "every_change_creates_a_new_dataset_version": true,
+    "anonymous_provenance_invalid": true
+  },
+
+  "QA_freeze_requirements": {
+    "must_follow": "reports/crypto_d1_qa_freeze_spec_v1/ (Bundle 14)",
+    "qa_status_must_be": "QA_PASS or QA_WARN with explicit operator-acceptance note",
+    "qa_fail_blocks_runner_use": true,
+    "qa_blocked_blocks_runner_use": true,
+    "checks_required_in_qa_report": [
+      "A_manifest_integrity blocking checks",
+      "B_timestamp blocking checks (UTC, no weekday-only, no duplicate, no silent forward-fill)",
+      "C_OHLCV blocking checks (positive OHLC; high>=max(o,c,l); low<=min(o,c,h); close not missing)",
+      "D_volume blocking checks (non-negative; zero-volume policy applied)",
+      "E_symbol_source blocking checks (BTC/ETH/SOL canonical; quote_currency consistency; row-level source_id)",
+      "F_fee_slippage blocking checks (fee + slippage assumptions present and sourced)",
+      "G_freeze blocking checks (FROZEN; CHECKSUMS.txt sha256-verified; FREEZE_RECORD.txt present)"
+    ],
+    "no_lookahead_check_must_be_in_checks_passed": true,
+    "explicit_operator_acceptance_note_required_for_qa_warn": true
+  },
+
+  "checksum_requirements": {
+    "sha256_per_file_required": true,
+    "checksums_txt_format": "One line per dataset file: '<sha256_hex>  <relative_filename>'",
+    "checksums_must_match_at_runner_startup": "The backtest runner (or its future per-dataset validator) MUST verify that each file's current sha256 equals the recorded CHECKSUMS.txt entry before any backtest result is produced.",
+    "freeze_record_txt_format": "Plain-text key:value lines including: freeze_timestamp_utc, operator, protocol_version, data_contract_version, manifest_version, qa_freeze_spec_version, backtest_plan_version, runner_version.",
+    "file_hash_verification_before_runner_use": true,
+    "any_revision_creates_new_dataset_version": true,
+    "manual_edits_invalid_unless_documented_and_revalidated": true
+  },
+
+  "forbidden_actions": [
+    "Fetch data from any live exchange API.",
+    "Connect SPARTA's runtime to any exchange or vendor over the network.",
+    "Use an embedded API key, OAuth token, or .env credential.",
+    "Use any private key or exchange account credential.",
+    "Scrape any venue HTML / WebSocket / undocumented endpoint.",
+    "Use any cloud fetcher (s3://, gs://, http(s)://, ftp://, file://remote-host) as a source.",
+    "Install or schedule any daemon / cron / background job to perform acquisition.",
+    "Run the backtest runner from this bundle.",
+    "Modify paper / live execution files.",
+    "Promote crypto_d1_protocol to ACTIVE / STRONG by this bundle's existence alone.",
+    "Use any synthetic / mock-priced data as evidence.",
+    "Send a Telegram / email / Slack notification from this bundle's runtime."
+  ],
+
+  "approval_gates": [
+    "Explicit written operator authorization BEFORE any data acquisition step is performed.",
+    "Exact source named (vendor / venue / archive name) in the manifest's source_name field.",
+    "Exact symbols named (subset of {BTC, ETH, SOL}) in the manifest's assets field.",
+    "Exact time window named (time_start, time_end -- both ISO-8601 UTC).",
+    "Exact storage path named (data/crypto_d1_research/<dataset_id>/<dataset_version>/).",
+    "Exact dataset_id named (CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>).",
+    "data_contract_version pinned (crypto_d1_data_contract_v1 or later).",
+    "dataset_manifest_spec_version pinned (crypto_d1_dataset_manifest_v1 or later).",
+    "qa_freeze_spec_version pinned (crypto_d1_qa_freeze_spec_v1 or later).",
+    "protocol_version pinned (crypto_d1_protocol_v1 or later).",
+    "CHECKSUMS.txt created with sha256 per file.",
+    "FREEZE_RECORD.txt created with freeze timestamp + operator + pinned versions.",
+    "manifest.json created and passes tools/crypto_d1_dataset_manifest_check.py.",
+    "QA / freeze qa_report.json created and passes the Bundle 14 spec.",
+    "QA_status is QA_PASS OR ('QA_WARN' with an explicit operator-acceptance note attached).",
+    "No credentials of any kind embedded in the dataset, manifest, or supporting files.",
+    "No trading permissions, exchange-account references, or order-routing identifiers anywhere in the dataset.",
+    "No live trading authorization.",
+    "No paper-order execution authorization.",
+    "No broker connection authorization."
+  ],
+
+  "allowed_next_steps": [
+    "Operator manually executes the 12 operator_manual_steps above; no SPARTA-side automation is invoked.",
+    "Operator runs `python tools/crypto_d1_backtest_runner.py validate-config` to confirm cost bounds.",
+    "Operator runs `python tools/crypto_d1_backtest_runner.py show-plan` to review the pre-registered plan.",
+    "Operator runs `python tools/crypto_d1_backtest_runner.py run --data-dir <PATH> --out-dir <PATH>` against the FROZEN, QA-approved dataset; emitted JSON+MD reports are research-only.",
+    "Author **Crypto-D1 Baseline Results Report v1** AFTER the operator has manually supplied data AND the runner has produced output (separately authorized; documents what the operator-reviewed run looks like).",
+    "Author **Crypto-D1 Data QA Runtime Tool v1** (if the operator decides the QA runner MUST exist before any further backtest; code bundle; recommend Codex)."
+  ],
+
+  "forbidden_next_steps": [
+    "Trade live or paper based on a future runner output.",
+    "Connect SPARTA's runtime to any exchange or vendor over the network.",
+    "Promote crypto_d1_protocol to ACTIVE / STRONG without a separate operator decision.",
+    "Schedule a daemon / cron / background process that touches the runner.",
+    "Modify paper / live execution files.",
+    "Install or read any API key, OAuth token, or .env credential.",
+    "Use any synthetic / mock-priced data as evidence.",
+    "Commit large frozen datasets to git without explicit operator instruction; the storage root is expected to be gitignored by default."
+  ],
+
+  "required_future_artifacts": [
+    "Per-dataset manifest.json conforming to Bundle 13 schema.",
+    "Per-dataset CHECKSUMS.txt with sha256 per file.",
+    "Per-dataset FREEZE_RECORD.txt with freeze timestamp + operator + pinned versions.",
+    "Per-dataset qa_report.json conforming to Bundle 14 QA_report_schema (26 required fields).",
+    "Per-strategy backtest report.json + report.md emitted by tools/crypto_d1_backtest_runner.py after the operator runs the runner against the FROZEN dataset.",
+    "Crypto-D1 Baseline Results Report v1 (separately authorized; only after operator has supplied data and the runner has produced output).",
+    "Optional: Crypto-D1 Data QA Runtime Tool v1 (code bundle; only if the operator decides the QA runner must exist as code before any further backtest; recommend Codex)."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Authorization / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this plan's runtime.",
+    "No data fetch in this bundle. No backtest execution. No dataset processing. No real dataset files or data directory created in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this authorization plan alone.",
+    "Data acquisition does not imply edge. Clean data does not imply profit. Running the backtest does not authorize trading. Backtest output will still require separate review. No paper/live trading is authorized. Crypto trend ideas are not profitable until tested with full costs AND forward-validated under a separately authorized future plan. A good historical chart does not imply future returns. 24/7 crypto session handling; weekday-only filters forbidden."
+  ],
+
+  "no_profit_claim_policy": [
+    "Data acquisition does not imply edge.",
+    "Clean data does not imply profit.",
+    "Running the backtest does not authorize trading.",
+    "Backtest output will still require separate review.",
+    "No paper/live trading is authorized.",
+    "No data fetch is authorized by this bundle.",
+    "Crypto trend ideas are not profitable until tested.",
+    "A good historical chart does not imply future returns."
+  ]
+}
