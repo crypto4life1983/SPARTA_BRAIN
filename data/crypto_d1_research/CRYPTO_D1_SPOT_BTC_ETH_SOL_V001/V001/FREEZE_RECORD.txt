@@ -1,0 +1,59 @@
+{
+  "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001",
+  "dataset_version": "V001",
+  "freeze_timestamp": "2026-06-02T21:39:35.226676+00:00",
+  "operator": "Mahmoud Cherif — operator manual Kraken intake",
+  "source_name": "Kraken",
+  "manifest_version": "crypto_d1_dataset_manifest_v1",
+  "data_contract_version": "crypto_d1_data_contract_v1",
+  "protocol_version": "crypto_d1_protocol_v1",
+  "kraken_tos_evidence_reference": "PLACEHOLDER_FILL_BEFORE_QA: cite the Kraken Terms-of-Service clause permitting research use of downloaded historical OHLCVT exports, plus the download date and the operator who performed the offline download.",
+  "frozen_files": [
+    "daily_ohlcv.csv",
+    "fees.json",
+    "manifest.json"
+  ],
+  "freeze_means": "Files are checksummed and immutable. FROZEN does NOT mean QA-passed; QA_status is QA_DRAFT. No backtest, paper, or live trading is authorized by this freeze.",
+  "post_freeze_amendments": [
+    {
+      "amendment": "fees.json fee/slippage assumptions filled (was PLACEHOLDER_FILL_BEFORE_QA)",
+      "amended_at": "2026-06-02T21:39:35.226676+00:00",
+      "amended_by": "Mahmoud Cherif — operator manual Kraken intake",
+      "approved_assumptions": {
+        "venue": "Kraken Pro spot",
+        "quote_currency": "USD",
+        "maker_fee_bps": 25,
+        "taker_fee_bps": 40,
+        "default_execution_fee_bps": 40,
+        "slippage_bps": 10,
+        "spread_proxy_bps": 10,
+        "source": "Kraken fee schedule, reviewed 2026-06-02",
+        "note": "conservative low-volume baseline assumptions; not a best-case fee tier"
+      },
+      "fees_json_sha256_before": "106b9834e8262d4b0e41acb14619b8608ec5912af7e17b1ee9d1acfecaadd635",
+      "fees_json_sha256_after": "3b9ae2b0efe33d3bbe31eb34a5dab3ed5b12f64a316c24d64827244872a2d086",
+      "checksums_txt_updated": true,
+      "unchanged_files": {
+        "daily_ohlcv.csv": "0c1cef4b151aac99f51e4e80cc4db0ed354f4e19590bc60f37b4ae82c91cf63a",
+        "manifest.json": "a9eab7db31867307f08c309b19de9f28151ad125a368d7f4d9db9e723f2ffccd"
+      },
+      "qa_status_after": "QA_DRAFT — filling fees does not run or pass QA; the separate Crypto-D1 QA harness must still run."
+    },
+    {
+      "amendment": "manifest.json fee_slippage_assumption_reference text corrected to reflect filled fees (removed stale PLACEHOLDER_FILL_BEFORE_QA / 'fees not yet filled' wording)",
+      "amended_at": "2026-06-02T21:39:35.226676+00:00",
+      "amended_by": "Mahmoud Cherif — operator manual Kraken intake",
+      "field_changed": "fee_slippage_assumption_reference",
+      "value_before": "fees.json (PLACEHOLDER_FILL_BEFORE_QA: fees not yet filled — QA_status stays QA_DRAFT until completed)",
+      "value_after": "fees.json (FILLED_PENDING_QA: conservative Kraken Pro spot low-volume assumptions filled; QA_status stays QA_DRAFT until QA harness runs)",
+      "qa_status_unchanged": "QA_DRAFT",
+      "manifest_json_sha256_before": "a9eab7db31867307f08c309b19de9f28151ad125a368d7f4d9db9e723f2ffccd",
+      "manifest_json_sha256_after": "39f0634e1a4a7a8fdf069010db04bbc4f2fce9e5d0b533e1f29c821d88f57e92",
+      "checksums_txt_updated": true,
+      "unchanged_files": {
+        "daily_ohlcv.csv": "0c1cef4b151aac99f51e4e80cc4db0ed354f4e19590bc60f37b4ae82c91cf63a",
+        "fees.json": "3b9ae2b0efe33d3bbe31eb34a5dab3ed5b12f64a316c24d64827244872a2d086"
+      }
+    }
+  ]
+}
