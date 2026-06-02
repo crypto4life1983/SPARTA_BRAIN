@@ -1,0 +1,292 @@
+{
+  "evaluation_id": "crypto_d1_data_source_evaluation_v1",
+  "title": "SPARTA Crypto-D1 Data Source Evaluation Memo v1",
+  "version": "1.0",
+  "kind": "data_source_evaluation_memo",
+  "read_only": true,
+
+  "research_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "backtest_execution_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+
+  "companion_documents": {
+    "crypto_d1_protocol_v1_json": "reports/crypto_d1_protocol_v1/protocol.json",
+    "crypto_d1_data_contract_v1_json": "reports/crypto_d1_data_contract_v1/data_contract.json",
+    "crypto_d1_dataset_manifest_v1_json": "reports/crypto_d1_dataset_manifest_v1/dataset_manifest.json",
+    "crypto_d1_qa_freeze_spec_v1_json": "reports/crypto_d1_qa_freeze_spec_v1/qa_freeze_spec.json",
+    "crypto_d1_baseline_backtest_plan_v1_json": "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
+    "crypto_d1_data_acquisition_authorization_v1_json": "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
+    "arbitrage_data_source_evaluation_v1_pattern_reference": "reports/arbitrage_data_source_evaluation_v1/data_source_evaluation.json"
+  },
+
+  "evaluation_objective": "Provide a written, research-only assessment of which offline data source CLASSES could later satisfy Bundle 17's approved_data_scope and Bundle 14's QA / freeze requirements for BTC/ETH/SOL daily spot OHLCV. This memo evaluates source CLASSES only. It does NOT name a specific vendor, venue, or archive that is authorized now; every concrete data source remains NOT authorized by this bundle alone. Actual data acquisition still requires separate explicit operator authorization through the Bundle 17 gates.",
+
+  "target_assets": [
+    {"symbol_canonical": "BTC", "label": "Bitcoin", "required": true},
+    {"symbol_canonical": "ETH", "label": "Ether",   "required": true},
+    {"symbol_canonical": "SOL", "label": "Solana",  "required": true}
+  ],
+
+  "timeframe": {
+    "primary": "1d",
+    "additional_allowed_for_memo_only": ["none"],
+    "intraday_explicitly_out_of_scope": true,
+    "bar_close_convention": "UTC 00:00:00 close; left-closed / right-open documented per dataset manifest."
+  },
+
+  "allowed_market_type": "spot",
+  "forbidden_market_types": [
+    "perp_futures (separate future protocol required)",
+    "dated_futures (out of scope at v1)",
+    "options (out of scope at v1)",
+    "leveraged_tokens (out of scope at v1)",
+    "margin_or_borrow_facilitated_spot (out of scope at v1)",
+    "synthetic_instruments (out of scope at v1)"
+  ],
+
+  "source_classes": [
+    {
+      "id": "A_exchange_public_historical_archives",
+      "label": "A. Exchange public historical archives (offline CSV / Parquet exports)",
+      "status": "ACCEPTABLE",
+      "summary": "Public daily OHLCV archives published by reputable exchanges (e.g., the operator manually downloads a public daily archive). The CSV is read by SPARTA offline; the runtime never makes a network call.",
+      "data_shape_offered_typical": "Daily OHLCV with timestamp, open, high, low, close, volume (sometimes vwap, trade_count, quote_volume). Quote currency typically USDT for crypto-native venues; USD for fiat-quoting venues.",
+      "btc_eth_sol_coverage_realistic_at_v1": "BTC: many years (often 7+). ETH: many years (often 7+). SOL: typically 5y, sometimes less; venue-dependent.",
+      "TOS_research_use_typically_acceptable": true,
+      "operator_responsibility": "Operator manually downloads under operator's own credentials (when required by the venue); SPARTA's runtime never sees those credentials.",
+      "acquisition_path": "Operator -> venue archive -> local CSV. Offline. No SPARTA-side network call.",
+      "preferred_caveats": [
+        "Single-venue history may break across a venue's listing date for the asset; cross-venue stitching requires documented rules.",
+        "Sometimes ships with non-UTC bar boundaries -- operator must convert at ingest and document the conversion.",
+        "Volume aggregation method (raw venue vs. main-listing vs. cross-pair) must be documented per series."
+      ]
+    },
+    {
+      "id": "B_exchange_public_apis",
+      "label": "B. Exchange public APIs (future-only; operator-side; never called by SPARTA runtime)",
+      "status": "WATCH_future_only",
+      "summary": "Exchange public REST / WebSocket APIs that an OPERATOR may use under the operator's own credentials to produce an offline CSV. SPARTA's runtime never connects to these APIs. The output of the operator's API call is treated as a Class D local file when handed to SPARTA.",
+      "data_shape_offered_typical": "Per-bar OHLCV from the venue's klines endpoint.",
+      "btc_eth_sol_coverage_realistic_at_v1": "Whatever the venue's daily-bar API exposes; usually back to the listing date.",
+      "TOS_research_use_typically_acceptable": "Depends on venue + endpoint + operator's account class. Operator's responsibility to verify TOS BEFORE any call.",
+      "operator_responsibility": "Operator runs the API call OUTSIDE SPARTA, under operator's own credentials, produces an offline CSV, and supplies that CSV to SPARTA as Class D.",
+      "acquisition_path": "Operator -> venue API (outside SPARTA) -> local CSV -> SPARTA reads offline.",
+      "watch_caveats": [
+        "SPARTA's runtime MUST NOT call any exchange API; this class is operator-side only.",
+        "Rate limits, pagination, and reconciliation gaps are the operator's responsibility before handing the resulting CSV to SPARTA.",
+        "If any API key, OAuth token, or .env credential is required, it stays with the operator -- NEVER enters SPARTA's runtime, .env, or local_secrets."
+      ]
+    },
+    {
+      "id": "C_paid_market_data_vendors",
+      "label": "C. Paid market-data vendors (operator-supplied offline export)",
+      "status": "PREFERRED",
+      "summary": "Commercial market-data vendors (offline export flow). The vendor produces a flat CSV / Parquet export and the operator places the file under data/crypto_d1_research/<dataset_id>/<dataset_version>/. Highest provenance + TOS clarity.",
+      "data_shape_offered_typical": "Cleaned daily OHLCV with documented venue selection rules, cross-venue stitching, fee/tier-schedule attachment, and full audit trail. Often includes adjusted / unadjusted forms; for crypto spot adjusted_close typically equals close.",
+      "btc_eth_sol_coverage_realistic_at_v1": "Typically the deepest available; BTC and ETH back to early years; SOL back to listing.",
+      "TOS_research_use_typically_acceptable": "Usually explicit for research use; operator MUST confirm per-license terms (per-seat, per-dataset, per-redistribution) before any use.",
+      "operator_responsibility": "Operator purchases / subscribes; downloads or receives the export; verifies TOS; places the file at the declared storage path; supplies provenance to manifest.",
+      "acquisition_path": "Operator -> vendor offline export -> local CSV / Parquet -> SPARTA reads offline.",
+      "preferred_caveats": [
+        "PREFERRED does NOT mean APPROVED. PREFERRED means: of the 6 classes evaluated here, this class has the cleanest provenance + TOS audit trail for the kind of evidence the Crypto-D1 protocol seeks.",
+        "Concrete vendor selection still requires explicit operator authorization through Bundle 17's 20 approval gates.",
+        "Some vendors require a per-environment license; operator must confirm before adding the CSV to the repo or to a shared analysis."
+      ]
+    },
+    {
+      "id": "D_existing_local_OHLCV_files",
+      "label": "D. Existing local OHLCV files (already on operator's machine, pre-staged)",
+      "status": "ACCEPTABLE",
+      "summary": "OHLCV CSV files that already exist on the operator's machine (e.g., from a previous research project) and can be re-evaluated under Bundle 12 + Bundle 13 + Bundle 14 requirements.",
+      "data_shape_offered_typical": "Existing CSV / Parquet from previous research; provenance varies; may need re-header to match the Bundle-12 required column set.",
+      "btc_eth_sol_coverage_realistic_at_v1": "Whatever the operator already has. Often partial -- e.g., BTC-only or 2-asset coverage.",
+      "TOS_research_use_typically_acceptable": "Depends on the original source of the file; operator must re-confirm before reuse.",
+      "operator_responsibility": "Operator re-attests provenance, re-validates against the Bundle-12 schema, re-confirms TOS, computes sha256, authors a fresh manifest.json, and runs the QA harness once it exists.",
+      "acquisition_path": "Operator -> pre-existing local file -> manifest + checksums + freeze + QA -> SPARTA reads offline.",
+      "acceptable_caveats": [
+        "Existing files may have non-canonical headers; operator must normalize to the Bundle-12 required_columns exactly before SPARTA reads them.",
+        "Existing files may have unclear provenance; if the original source cannot be cited line-by-line, the dataset MUST NOT be referenced by any backtest plan (per Bundle 12).",
+        "Re-using a file from a different research lane requires a NEW dataset_id and a NEW dataset_version; no in-place edits."
+      ]
+    },
+    {
+      "id": "E_web_scraped_or_unofficial_tables",
+      "label": "E. Web-scraped or unofficial tables (HTML scrape, unofficial JSON dumps, community CSVs)",
+      "status": "REJECTED_for_evidence_WATCH_only_for_context",
+      "summary": "Data obtained by scraping a venue's HTML page or pulling from an unofficial / community-maintained dump. REJECTED as a basis for any evidence claim; permitted only as anecdotal context with explicit WATCH-only labeling and never as a backtest input.",
+      "data_shape_offered_typical": "Best-effort daily OHLCV with opaque provenance and unclear stitching across listing changes / forks / renames.",
+      "btc_eth_sol_coverage_realistic_at_v1": "Variable; often inconsistent across venues and across time.",
+      "TOS_research_use_typically_acceptable": "Usually FORBIDDEN by the venue's terms; even when permitted, reproducibility cannot be guaranteed.",
+      "operator_responsibility": "If used at all, the operator MUST explicitly label any downstream artifact as WATCH-only, MUST NOT use the data as a basis for any backtest evidence claim, and MUST NOT promote any candidate above WATCH on the basis of such data.",
+      "acquisition_path": "REJECTED for evidence. Anecdotal context only, explicitly WATCH-labeled.",
+      "rejection_reasons": [
+        "TOS risk: most public venues forbid scraping in their TOS.",
+        "Reproducibility risk: scraped pages change; the same scrape on a later date may not yield bit-identical bytes.",
+        "Provenance opacity: row-level source_id cannot reliably be reconstructed.",
+        "Cross-venue stitching across listings / forks / renames is undocumented.",
+        "Per Bundle 12, any data source whose provenance cannot be cited line-by-line is invalid."
+      ]
+    },
+    {
+      "id": "F_manually_copied_prices_or_screenshots",
+      "label": "F. Manually copied prices or screenshots",
+      "status": "REJECTED_for_any_quantitative_claim",
+      "summary": "Numbers typed by hand into a spreadsheet, screenshots of charts, or hand-transcribed exchange tickers. REJECTED for any quantitative claim. Acceptable ONLY as anecdotal narrative (with no numeric backtest result allowed to depend on the data).",
+      "data_shape_offered_typical": "Hand-typed numbers; no machine-readable provenance; no checksum can be meaningfully computed.",
+      "btc_eth_sol_coverage_realistic_at_v1": "N/A.",
+      "TOS_research_use_typically_acceptable": "N/A.",
+      "operator_responsibility": "Do not use this class as input to any backtest or QA harness. If a screenshot is included anywhere, it MUST be a visual reference only, never converted to numeric input.",
+      "acquisition_path": "REJECTED for any quantitative claim.",
+      "rejection_reasons": [
+        "Per Bundle 12 forbidden_data_sources_or_methods, screenshots and manually copied prices are explicitly disallowed.",
+        "Per Bundle 13 forbidden_inputs, screenshots and manually copied prices are explicitly disallowed.",
+        "Per Bundle 14 forbidden_inputs, screenshots and manually copied prices are explicitly disallowed.",
+        "Per Bundle 16 runner forbidden_data_sources_or_methods, synthetic / mock-priced data and screenshots are disallowed as evidence.",
+        "Per Bundle 17 forbidden_actions, synthetic / mock-priced data, screenshots, and manually copied prices are explicitly forbidden."
+      ]
+    }
+  ],
+
+  "decision_matrix": {
+    "purpose": "Per-class decision attributes. Every row carries allowed_now = false; concrete authorization is reserved for the operator's per-dataset action under Bundle 17's 20 approval gates.",
+    "field_definitions": [
+      "id",
+      "class_name",
+      "status",
+      "allowed_now",
+      "spot_daily_supported",
+      "btc_eth_sol_coverage_expected",
+      "minimum_history_years_realistic",
+      "tos_research_use_acceptable_typical",
+      "export_format_typical",
+      "requires_api_key_at_acquisition_time",
+      "requires_credentials_at_acquisition_time",
+      "network_call_required_from_sparta_runtime",
+      "approval_gate_required",
+      "bundle_17_compatible_when_gates_satisfied",
+      "known_caveats"
+    ],
+    "rows": [
+      {"id": "A_exchange_public_historical_archives", "class_name": "Exchange public historical archives (offline)", "status": "ACCEPTABLE", "allowed_now": false, "spot_daily_supported": true, "btc_eth_sol_coverage_expected": "good (BTC/ETH ~7y+; SOL ~5y depending on venue)", "minimum_history_years_realistic": 3, "tos_research_use_acceptable_typical": true, "export_format_typical": "CSV / ZIP of CSVs", "requires_api_key_at_acquisition_time": false, "requires_credentials_at_acquisition_time": false, "network_call_required_from_sparta_runtime": false, "approval_gate_required": "Bundle 17 (all 20)", "bundle_17_compatible_when_gates_satisfied": true, "known_caveats": "Single-venue history; cross-venue stitching requires documented rules; non-UTC boundaries need ingest-time conversion."},
+      {"id": "B_exchange_public_apis", "class_name": "Exchange public APIs (operator-side only; never called by SPARTA runtime)", "status": "WATCH_future_only", "allowed_now": false, "spot_daily_supported": true, "btc_eth_sol_coverage_expected": "good back to listing", "minimum_history_years_realistic": 3, "tos_research_use_acceptable_typical": "venue-dependent; operator verifies", "export_format_typical": "JSON (operator converts to CSV offline)", "requires_api_key_at_acquisition_time": "venue-dependent; if required, stays with operator and NEVER enters SPARTA", "requires_credentials_at_acquisition_time": "venue-dependent", "network_call_required_from_sparta_runtime": false, "approval_gate_required": "Bundle 17 (all 20) + operator's own credential handling outside SPARTA", "bundle_17_compatible_when_gates_satisfied": true, "known_caveats": "SPARTA runtime never calls; rate limits / pagination / reconciliation are operator's responsibility before handing off."},
+      {"id": "C_paid_market_data_vendors", "class_name": "Paid market-data vendors (offline export)", "status": "PREFERRED", "allowed_now": false, "spot_daily_supported": true, "btc_eth_sol_coverage_expected": "deepest available", "minimum_history_years_realistic": 5, "tos_research_use_acceptable_typical": "usually explicit; operator confirms per-license", "export_format_typical": "CSV / Parquet (vendor-supplied)", "requires_api_key_at_acquisition_time": false, "requires_credentials_at_acquisition_time": false, "network_call_required_from_sparta_runtime": false, "approval_gate_required": "Bundle 17 (all 20) + vendor TOS attached to manifest", "bundle_17_compatible_when_gates_satisfied": true, "known_caveats": "PREFERRED does NOT mean APPROVED; vendor selection still requires explicit operator authorization through Bundle 17 gates."},
+      {"id": "D_existing_local_OHLCV_files", "class_name": "Existing local OHLCV files (pre-staged by operator)", "status": "ACCEPTABLE", "allowed_now": false, "spot_daily_supported": true, "btc_eth_sol_coverage_expected": "whatever operator already has; often partial", "minimum_history_years_realistic": 3, "tos_research_use_acceptable_typical": "depends on original source", "export_format_typical": "CSV (operator may need to re-header)", "requires_api_key_at_acquisition_time": false, "requires_credentials_at_acquisition_time": false, "network_call_required_from_sparta_runtime": false, "approval_gate_required": "Bundle 17 (all 20) + provenance re-attestation + sha256 re-compute + manifest re-authoring", "bundle_17_compatible_when_gates_satisfied": true, "known_caveats": "Existing files often have non-canonical headers; provenance may be unclear; re-using across lanes requires a NEW dataset_id."},
+      {"id": "E_web_scraped_or_unofficial_tables", "class_name": "Web-scraped / unofficial tables", "status": "REJECTED_for_evidence_WATCH_only_for_context", "allowed_now": false, "spot_daily_supported": "uneven", "btc_eth_sol_coverage_expected": "variable", "minimum_history_years_realistic": "N_A", "tos_research_use_acceptable_typical": "usually FORBIDDEN by venue TOS", "export_format_typical": "scraped HTML / unofficial JSON / community CSV", "requires_api_key_at_acquisition_time": false, "requires_credentials_at_acquisition_time": false, "network_call_required_from_sparta_runtime": false, "approval_gate_required": "REJECTED -- no gate clears this class for evidence use; permitted only as anecdotal WATCH-labeled context", "bundle_17_compatible_when_gates_satisfied": false, "known_caveats": "TOS risk; reproducibility risk; provenance opacity; per Bundle 12, datasets without line-by-line provenance are invalid."},
+      {"id": "F_manually_copied_prices_or_screenshots", "class_name": "Manually copied prices or screenshots", "status": "REJECTED_for_any_quantitative_claim", "allowed_now": false, "spot_daily_supported": false, "btc_eth_sol_coverage_expected": "N_A", "minimum_history_years_realistic": "N_A", "tos_research_use_acceptable_typical": "N_A", "export_format_typical": "manual transcription / screenshot", "requires_api_key_at_acquisition_time": false, "requires_credentials_at_acquisition_time": false, "network_call_required_from_sparta_runtime": false, "approval_gate_required": "REJECTED for any quantitative claim", "bundle_17_compatible_when_gates_satisfied": false, "known_caveats": "Per Bundles 12/13/14/16/17 forbidden inputs lists, this class is explicitly disallowed for any quantitative claim."}
+    ]
+  },
+
+  "per_class_status_rationale": {
+    "A_acceptable_rationale": "Public daily archives have clean provenance (named venue) and TOS-permissible research use; the operator's offline export removes the need for any SPARTA network call.",
+    "B_watch_future_only_rationale": "API access can produce the same CSV shape, but it requires operator credentials and explicit TOS confirmation; SPARTA's runtime is strictly disallowed from making the call. Permitted only as an operator-side path that lands as a Class D file.",
+    "C_preferred_rationale": "Paid vendors typically offer the cleanest combination of: documented provenance, TOS clarity, deep history across BTC/ETH/SOL, ready-to-import CSV / Parquet format, and per-venue selection rules. The cost is real money but the audit trail is the cleanest.",
+    "D_acceptable_rationale": "Existing local files are the lowest-friction starting point IF provenance can be re-attested and the file can be brought into compliance with the Bundle-12 schema. If provenance cannot be cited line-by-line, the file is invalid per Bundle 12.",
+    "E_rejected_for_evidence_rationale": "Scraping risks TOS violations + reproducibility loss + provenance opacity. Per Bundle 12, datasets without line-by-line provenance are invalid; per Bundle 13/14/17, scraping is explicitly forbidden.",
+    "F_rejected_rationale": "Per Bundles 12/13/14/16/17 forbidden inputs lists, screenshots and manually copied prices are explicitly disallowed."
+  },
+
+  "approval_gates_before_any_source_use": [
+    "Explicit written operator authorization BEFORE any acquisition step.",
+    "Exact source CLASS named in the manifest's source_type field (one of A/B/C/D; never E/F).",
+    "Exact vendor / venue / archive named in the manifest's source_name field; NO anonymous provenance.",
+    "Exact symbols named (subset of {BTC, ETH, SOL}).",
+    "Exact time window named (time_start, time_end -- both ISO-8601 UTC).",
+    "Exact storage path named (data/crypto_d1_research/<dataset_id>/<dataset_version>/).",
+    "Exact dataset_id named (CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN>).",
+    "protocol_version pinned (crypto_d1_protocol_v1 or later).",
+    "data_contract_version pinned (crypto_d1_data_contract_v1 or later).",
+    "dataset_manifest_spec_version pinned (crypto_d1_dataset_manifest_v1 or later).",
+    "qa_freeze_spec_version pinned (crypto_d1_qa_freeze_spec_v1 or later).",
+    "backtest_plan_version pinned (crypto_d1_baseline_backtest_plan_v1 or later).",
+    "runner_version pinned (crypto_d1_backtest_runner_v1 or later).",
+    "TOS verified for the chosen source class and recorded in the manifest.",
+    "No credentials, no API key, no OAuth token, no private key, no .env file enters SPARTA at any step.",
+    "No network call is made from SPARTA's runtime at any step.",
+    "CHECKSUMS.txt and FREEZE_RECORD.txt produced per Bundle 17's checksum_requirements.",
+    "manifest.json passes tools/crypto_d1_dataset_manifest_check.py.",
+    "qa_report.json passes the Bundle 14 spec (or its future runtime tool when it exists).",
+    "QA_status is QA_PASS OR ('QA_WARN' with an explicit operator-acceptance note)."
+  ],
+
+  "forbidden_data_sources_or_methods": [
+    "Live exchange APIs called from SPARTA's runtime (Class B is operator-side only).",
+    "Scraping any venue HTML / WebSocket / undocumented endpoint from SPARTA's runtime.",
+    "Any source requiring an embedded API key, OAuth token, or .env credential.",
+    "Any source that requires SPARTA to MAKE a network call from its runtime.",
+    "Any synthetic / mock-priced data used in place of real historical data for any evidence claim.",
+    "Any dataset whose provenance cannot be cited line-by-line.",
+    "Any dataset that has been peeked at in its OOS window before sealing.",
+    "Any feed whose terms of service forbid research use.",
+    "Class E (web-scraped / unofficial) as evidence.",
+    "Class F (screenshots / manually copied prices) for any quantitative claim."
+  ],
+
+  "required_provenance_fields": [
+    "source_class (one of A, B, C, D).",
+    "source_name (vendor / venue / archive name).",
+    "source_location (local repo-relative path).",
+    "license_or_tos_reference (explicit pointer to the TOS or license under which the data was acquired).",
+    "row_level_source_id (every row carries a per-row source identifier).",
+    "file_hash_sha256 (recorded in CHECKSUMS.txt at freeze).",
+    "freeze_timestamp_utc (recorded in FREEZE_RECORD.txt at freeze).",
+    "operator_name_and_tool_label (recorded in FREEZE_RECORD.txt; never anonymous).",
+    "data_contract_version, protocol_version, dataset_manifest_version, qa_freeze_spec_version, backtest_plan_version, runner_version (all pinned per dataset)."
+  ],
+
+  "preferred_source_class_for_crypto_d1": {
+    "class_id": "C_paid_market_data_vendors",
+    "rationale": "Of the 6 classes evaluated, Class C offers the cleanest combination of provenance, TOS clarity, deep BTC/ETH/SOL history, ready-to-import CSV / Parquet format, and per-venue selection rules. PREFERRED is a relative ranking among the evaluated classes only; it is NOT an authorization for any specific vendor.",
+    "preferred_does_not_mean_approved": true,
+    "concrete_vendor_selection_requires_bundle_17_gates": true,
+    "fallback_class_if_C_not_feasible": {
+      "class_id": "A_exchange_public_historical_archives",
+      "rationale": "If Class C is not feasible (cost, license terms, vendor availability), Class A is the next-best path because it preserves TOS clarity and single-venue provenance without requiring any SPARTA-side network call."
+    }
+  },
+
+  "required_future_artifacts": [
+    "Per-dataset manifest.json conforming to Bundle 13 schema (operator-authored under Bundle 17 gates).",
+    "Per-dataset CHECKSUMS.txt with sha256 per file (operator-produced at freeze).",
+    "Per-dataset FREEZE_RECORD.txt with freeze timestamp + operator + pinned versions (operator-produced at freeze).",
+    "Per-dataset qa_report.json conforming to Bundle 14 QA_report_schema (26 required fields; emitted by the future QA runtime tool or its v1 implementation).",
+    "Per-strategy backtest report.json + report.md emitted by tools/crypto_d1_backtest_runner.py after the operator runs the runner against the FROZEN dataset.",
+    "Crypto-D1 Baseline Results Report v1 (separately authorized; only after operator has supplied data and the runner has produced output)."
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "A future per-dataset source declaration passes IF: source_class is one of A/B/C/D (never E/F); source_name is explicitly named; source_location is local repo-relative; license / TOS reference is attached; row-level source_id is present; sha256 per file is recorded; freeze record is recorded; all 6 version pins are present; manifest.json passes tools/crypto_d1_dataset_manifest_check.py; qa_report.json passes the Bundle 14 spec; QA_status is QA_PASS or accepted QA_WARN.",
+    "WATCH": "Source declaration passes but at least one borderline condition (e.g., SOL history is < 5y on the chosen source; vendor TOS requires a per-environment license that the operator has not yet attached; per-venue stitching rule is documented but unusual). Lane stays WATCH on downstream usage of any dataset built from this source.",
+    "FAIL": "Any of: source_class is E or F; source_name is anonymous; license / TOS reference is missing; row-level source_id is missing; sha256 not recorded; freeze record missing; any version pin missing; manifest.json fails Bundle 13 check; qa_report.json fails Bundle 14 check; QA_status is QA_FAIL or QA_BLOCKED; any safety flag is True; any forbidden phrase appears in the manifest or evidence chain."
+  },
+
+  "safety_boundaries": [
+    "Research-only. Data source evaluation MEMO only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this memo's runtime.",
+    "No data fetch in this bundle. No dataset processing in this bundle. No real data files or data directory created in this bundle.",
+    "Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this memo alone.",
+    "Source evaluation does not imply edge. Acceptable source class does not authorize acquisition. Preferred does not mean approved. No data fetch is authorized by this bundle. Crypto trend ideas are not profitable until tested with full costs AND forward-validated under a separately authorized future plan. A good historical chart does not imply future returns. 24/7 crypto session handling; weekday-only filters forbidden."
+  ],
+
+  "no_profit_claim_policy": [
+    "Source evaluation does not imply edge.",
+    "Acceptable source class does not authorize acquisition.",
+    "Preferred does not mean approved.",
+    "No data fetch is authorized by this bundle.",
+    "Clean OHLCV data does not imply profit.",
+    "Crypto trend ideas are not profitable until tested.",
+    "A good historical chart does not imply future returns."
+  ]
+}

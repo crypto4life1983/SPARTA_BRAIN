@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_data_source_evaluation_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json (machine-readable memo evaluating 6 source CLASSES for Crypto-D1 daily spot OHLCV; 15-field decision_matrix with allowed_now=false on every row; PREFERRED class C with explicit 'preferred_does_not_mean_approved=True'; 20 approval gates pinning Bundles 11-17; forbidden data sources covering E + F + scraping + live API + credentials + SPARTA-runtime network call; provenance field list; required future artifacts; PASS/WATCH/FAIL rules; safety boundaries; no-profit-claim policy)",
+    "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.md (human-readable memo)",
+    "reports/crypto_d1_data_source_evaluation_v1/report.md (build report)",
+    "reports/crypto_d1_data_source_evaluation_v1/report.json (build report)",
+    "tools/crypto_d1_data_source_evaluation_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_crypto_d1_data_source_evaluation.py (39 tests covering schema + safety + 6-class invariants + decision_matrix all-false + validator failure modes + no-real-data + no-data-directory + tool stdlib-only + integration with all 8 prior Crypto-D1/runner validators)",
+    "tools/strategy_candidate_registry.py: crypto_d1_protocol seed extended via extra_files to include the new data_source_evaluation docs (lane stays WATCH; never ACTIVE / never STRONG)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
+    "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.md",
+    "reports/crypto_d1_data_source_evaluation_v1/report.md",
+    "reports/crypto_d1_data_source_evaluation_v1/report.json",
+    "tools/crypto_d1_data_source_evaluation_check.py",
+    "tests/test_crypto_d1_data_source_evaluation.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/strategy_next_bundle.py (NOT modified -- no artificial selection nudge)",
+    "tools/crypto_d1_backtest_runner.py (NOT modified)",
+    "app.py and templates/*.html (NOT touched)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched)",
+    "All 5 prior Crypto-D1 spec docs + 8 arbitrage validators + the Crypto-D1 runner are NOT modified",
+    "data/crypto_d1_research/ NOT created (per Bundle 17, this directory appears only when the operator manually places a real dataset)"
+  ],
+  "follows_prior_bundles": {
+    "protocol_id": "crypto_d1_protocol_v1",
+    "data_contract_id": "crypto_d1_data_contract_v1",
+    "dataset_manifest_id": "crypto_d1_dataset_manifest_v1",
+    "qa_freeze_spec_id": "crypto_d1_qa_freeze_spec_v1",
+    "baseline_backtest_plan_id": "crypto_d1_baseline_backtest_plan_v1",
+    "backtest_runner_id": "crypto_d1_backtest_runner_v1",
+    "authorization_plan_id": "crypto_d1_data_acquisition_authorization_v1",
+    "pattern_reference": "arbitrage_data_source_evaluation_v1 (Bundle 8)",
+    "lane": "crypto_d1_protocol",
+    "phase_satisfied": "Operator-side acquisition planning layer -- helps operator complete Bundle 17 step 1 (manually select an approved historical OHLCV CSV source whose TOS permits research use)."
+  },
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe_primary": "1d",
+    "intraday_explicitly_out_of_scope": true,
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "source_class_count": 6,
+    "source_class_ids": [
+      "A_exchange_public_historical_archives",
+      "B_exchange_public_apis",
+      "C_paid_market_data_vendors",
+      "D_existing_local_OHLCV_files",
+      "E_web_scraped_or_unofficial_tables",
+      "F_manually_copied_prices_or_screenshots"
+    ],
+    "preferred_class_id": "C_paid_market_data_vendors",
+    "preferred_does_not_mean_approved": true,
+    "rejected_classes": ["E_web_scraped_or_unofficial_tables", "F_manually_copied_prices_or_screenshots"],
+    "decision_matrix_row_count": 6,
+    "decision_matrix_allowed_now_per_row": false,
+    "approval_gate_count": 20
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "seven_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "backtest_execution_enabled",
+      "dataset_processing_enabled"
+    ],
+    "spot_only_market_type": true,
+    "perp_futures_explicitly_forbidden": true,
+    "intraday_explicitly_out_of_scope": true,
+    "session_model_24_7_with_no_weekday_only_filters": true,
+    "no_real_data_files_created": true,
+    "no_data_directory_created": true,
+    "no_concrete_vendor_authorized_by_this_bundle": true,
+    "no_credentials_anywhere": true,
+    "no_paper_or_live_trading_authorization": true,
+    "decision_matrix_allowed_now_false_on_every_row": true,
+    "E_status_REJECTED": true,
+    "F_status_REJECTED": true,
+    "preferred_does_not_mean_approved": true,
+    "concrete_vendor_selection_requires_bundle_17_gates": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data"
+    ],
+    "distinction_phrases_required_in_md": [
+      "Source evaluation does not imply edge",
+      "Acceptable source class does not authorize acquisition",
+      "Preferred does not mean approved",
+      "No data fetch is authorized by this bundle",
+      "Crypto trend ideas are not profitable until tested",
+      "A good historical chart does not imply future returns",
+      "24/7"
+    ]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_data_source_evaluation.py --rootdir=tests -q",
+      "result": "39 passed"
+    },
+    {
+      "command": "full integration suite (Bundles 2-17 + 18; 17 test files)",
+      "result": "470 passed across the stack"
+    }
+  ],
+  "json_validity": {
+    "crypto_d1_data_source_evaluation_check_validate": "validate: OK",
+    "crypto_d1_data_acquisition_authorization_check_validate": "validate: OK (Bundle 17 unaffected)",
+    "crypto_d1_backtest_plan_check_validate": "validate: OK (Bundle 15 unaffected)",
+    "crypto_d1_qa_freeze_spec_check_validate": "validate: OK (Bundle 14 unaffected)",
+    "crypto_d1_dataset_manifest_check_validate": "validate: OK (Bundle 13 unaffected)",
+    "crypto_d1_data_contract_check_validate": "validate: OK (Bundle 12 unaffected)",
+    "crypto_d1_protocol_check_validate": "validate: OK (Bundle 11 unaffected)",
+    "8_arbitrage_validators": "all validate: OK (Bundles 4-10 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "real_local_data_exists_on_disk": false,
+  "any_real_data_files_created_in_this_bundle": false,
+  "data_directory_created_in_this_bundle": false,
+  "any_concrete_vendor_authorized_by_this_bundle": false,
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH (fires because the seed's extra_files now include 14 docs: protocol + data_contract + dataset_manifest + qa_freeze_spec + backtest_plan + authorization_plan + data_source_evaluation, all on disk)",
+    "new_extra_files_added_this_bundle": [
+      "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.md",
+      "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json"
+    ],
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/backtest-execution/dataset-processing/credentials reference",
+      "no real data files created",
+      "no data directory created",
+      "no concrete vendor authorized",
+      "no QA harness execution",
+      "no backtest execution"
+    ]
+  },
+  "next_bundle_generator_selection_after_update": {
+    "title": "Arbitrage research protocol",
+    "lane": "arbitrage_research_protocol",
+    "priority": 3,
+    "note": "Both arbitrage and crypto_d1 remain WATCH (same +15 bonus). Arbitrage still wins via existing protocol-first / data-first scoring hints. Deterministic logic NOT artificially modified. Operator picks the actual next move."
+  },
+  "how_this_helps_operator": "Bundle 17 step 1 says: 'Operator MANUALLY selects an approved historical OHLCV CSV source whose terms of service explicitly permit research use.' Bundle 18 evaluates the 6 candidate CLASSES the operator could choose from and ranks them with explicit caveats. Operator now has a written reference for that choice. The actual vendor selection still requires Bundle 17's 20 approval gates; this memo is the planning input, not the authorization itself.",
+  "next_recommended_step": [
+    "**Operator step (NOT a bundle):** operator MANUALLY chooses a source class (A/B/C/D; never E/F) and a concrete vendor or archive name; documents TOS; then runs the 11 remaining Bundle 17 manual steps.",
+    "**Crypto-D1 Baseline Results Report v1** (separately authorized; only after operator has supplied data AND the runner has produced output; documents the operator-reviewed run + pins verdict + caveats; spec bundle; Claude works).",
+    "**Crypto-D1 Data QA Runtime Tool v1** (optional; only if operator decides the QA runner must exist as code before any further backtest; code bundle; recommend Codex).",
+    "**Crypto-D1 Backtest Runner v2 (future)** -- walk-forward driver + per-family parameter-grid sweep + structured sensitivity sweep + per-strategy report emitter matching the full 27-field Bundle 15 schema (code bundle; recommend Codex)."
+  ]
+}

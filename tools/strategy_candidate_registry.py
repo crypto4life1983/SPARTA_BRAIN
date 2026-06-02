@@ -135,6 +135,11 @@ SEED_LANES = (
         # Authorization / Freeze Plan v1 docs added. Still WATCH
         # (authorization plan only -- no fetch, no real data files or
         # directory created, no runner execution); never ACTIVE, never STRONG.
+        # Bundle 18: SPARTA-side Crypto-D1 Data Source Evaluation Memo v1
+        # docs added. Still WATCH (memo only -- evaluates 6 source CLASSES;
+        # no concrete vendor named; allowed_now=False everywhere; never
+        # ACTIVE, never STRONG; every concrete source still requires Bundle
+        # 17 gates).
         "extra_files": (
             "reports/crypto_d1_protocol_v1/protocol.md",
             "reports/crypto_d1_protocol_v1/protocol.json",
@@ -148,6 +153,8 @@ SEED_LANES = (
             "reports/crypto_d1_baseline_backtest_plan_v1/backtest_plan.json",
             "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.md",
             "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
+            "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.md",
+            "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
         ),
         "lane_status_override": "WATCH",
     },
