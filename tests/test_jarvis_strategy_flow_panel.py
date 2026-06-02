@@ -152,3 +152,48 @@ def test_status_api_unchanged_no_strategy_flow_keys():
     # this UI is static; it must not have added any feed keys
     assert "strategy_flow" not in data
     assert "mission_flow" not in data
+
+
+# --- truthful-state pins (state-accuracy patch) ----------------------------
+# These guard against the panel ever again implying invented progress for the
+# Crypto-D1 research candidate (no data fetched, no baseline, no passed backtest).
+
+def test_no_invented_crypto_d1_backtest_pass():
+    block = _strategy_flow_block(_page())
+    # the old misleading board card claimed a passed Crypto-D1 backtest
+    assert "Crypto-D1 Baseline" not in block
+    assert 'Pipeline: Backtest &middot; <span style="color:var(--jv-ok)">Passed</span>' \
+        not in block
+
+
+def test_pipeline_oos_validation_not_active():
+    block = _strategy_flow_block(_page())
+    # OOS Validation must not be shown as the active stage for Crypto-D1
+    assert ('is-active"><span class="ndot"></span>'
+            '<span class="nlbl">OOS Validation') not in block
+    # the real next step is the Data QA / QA runtime tool
+    assert ('is-active"><span class="ndot"></span>'
+            '<span class="nlbl">Data QA') in block
+
+
+def test_current_run_reflects_real_crypto_d1_state():
+    block = _strategy_flow_block(_page())
+    for token in (
+        "Data-readiness / QA tooling",
+        "Authorization gate complete",
+        "Data fetched",
+        "None yet",
+        "WATCH / MIXED",
+        "data/crypto_d1_research/",
+    ):
+        assert token in block, f"missing truthful Current Run token: {token}"
+
+
+def test_strategy_board_trued_to_registry_no_fake_pass():
+    block = _strategy_flow_block(_page())
+    # real registry candidate names appear; none asserts a passed/live status
+    assert "Crypto-D1 Protocol" in block
+    assert "Arbitrage Research Protocol" in block
+    # board carries WATCH/IDEA/PARKED registry statuses, never a green pass led
+    for status in ("WATCH", "IDEA", "PARKED"):
+        assert status in block, f"missing registry status on board: {status}"
