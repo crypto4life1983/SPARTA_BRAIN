@@ -155,6 +155,8 @@ SEED_LANES = (
             "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
             "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.md",
             "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
+            "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.md",
+            "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.json",
         ),
         "lane_status_override": "WATCH",
     },
