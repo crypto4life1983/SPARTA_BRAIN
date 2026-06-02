@@ -8379,6 +8379,189 @@ def _jarvis_candidate_registry() -> dict:
     }
 
 
+# --- JARVIS Crypto-D1 Mission Flow source (READ-ONLY, Phase A) -------------
+# Summarizes the current Crypto-D1 workflow/pipeline truth from committed
+# source-of-truth files for the Mission Flow panel. Reads ONLY: never writes,
+# never spawns a subprocess, never touches the network, never creates
+# data/crypto_d1_research/, never runs QA, never runs a backtest. Fail-closed:
+# a missing/malformed source degrades to a conservative state and NEVER infers
+# readiness upward. The lane verdict is clamped to a safe allowlist so a
+# tampered/corrupt source can never surface ACTIVE or STRONG on the dashboard.
+_JARVIS_MF_CANDIDATES_REL = \
+    "reports/strategy_factory_routines/candidate_registry/candidates.json"
+_JARVIS_MF_READINESS_REL = \
+    "reports/crypto_d1_readiness_gate_v1/readiness_gate.json"
+_JARVIS_MF_CHECKLIST_REL = \
+    "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.json"
+_JARVIS_MF_DATA_DIR_REL = "data/crypto_d1_research"
+_JARVIS_MF_LANE_ID = "crypto_d1_protocol"
+# Dashboard logic may NEVER surface these verdicts; clamp to the safe default.
+_JARVIS_MF_FORBIDDEN_VERDICTS = frozenset({"ACTIVE", "STRONG"})
+_JARVIS_MF_ALLOWED_LANE_STATUS = frozenset(
+    {"WATCH", "IDEA", "PARKED", "FAILED", "BLOCKED", "RETIRED"})
+_JARVIS_MF_ALLOWED_EVIDENCE = frozenset({"NONE", "WEAK", "MIXED", "UNKNOWN"})
+_JARVIS_MF_CHECKLIST_STATUSES = ("MISSING", "COMPLETE", "BLOCKED",
+                                 "NOT_APPLICABLE")
+
+
+def _jarvis_mf_load_json(rel):
+    """READ-ONLY JSON load. Returns ``(data, state)`` where state is
+    'ok' / 'missing' / 'error'. Never raises; never writes."""
+    path = BASE / rel
+    if not path.exists():
+        return None, "missing"
+    try:
+        import json as _json
+        return _json.loads(path.read_text(encoding="utf-8")), "ok"
+    except Exception:  # noqa: BLE001 — corrupt source fails closed
+        return None, "error"
+
+
+def _jarvis_crypto_d1_mission_flow() -> dict:
+    """READ-ONLY Crypto-D1 Mission Flow summary (Phase A backend source).
+
+    Reads only committed JSON artifacts + static filesystem presence. Performs
+    NO data fetch, NO network call, NO subprocess, NO QA run, NO backtest, and
+    creates NO directory. Always fail-closed and conservative."""
+    warnings = []
+
+    # 1) Lane verdict + evidence from the committed candidate-registry artifact.
+    lane_status = "WATCH"
+    evidence_level = "MIXED"
+    cand_data, cand_state = _jarvis_mf_load_json(_JARVIS_MF_CANDIDATES_REL)
+    if cand_state != "ok" or not isinstance(cand_data, dict):
+        warnings.append(
+            f"candidate registry {cand_state}; lane defaulted to WATCH/MIXED")
+    else:
+        match = None
+        for c in (cand_data.get("candidates") or []):
+            if isinstance(c, dict) and c.get("candidate_id") == \
+                    _JARVIS_MF_LANE_ID:
+                match = c
+                break
+        if match is None:
+            warnings.append(
+                "crypto_d1 lane absent from registry; defaulted to WATCH/MIXED")
+        else:
+            raw_status = str(match.get("status", "") or "").upper()
+            raw_ev = str(match.get("evidence_level", "") or "").upper()
+            if raw_status in _JARVIS_MF_FORBIDDEN_VERDICTS:
+                warnings.append(
+                    f"registry lane_status={raw_status} forbidden on "
+                    "dashboard; clamped to WATCH")
+                lane_status = "WATCH"
+            elif raw_status in _JARVIS_MF_ALLOWED_LANE_STATUS:
+                lane_status = raw_status
+            else:
+                warnings.append(
+                    f"unrecognized lane_status={raw_status!r}; clamped to WATCH")
+                lane_status = "WATCH"
+            if raw_ev in _JARVIS_MF_FORBIDDEN_VERDICTS:
+                warnings.append(
+                    f"registry evidence_level={raw_ev} forbidden on "
+                    "dashboard; clamped to MIXED")
+                evidence_level = "MIXED"
+            elif raw_ev in _JARVIS_MF_ALLOWED_EVIDENCE:
+                evidence_level = raw_ev
+            else:
+                warnings.append(
+                    f"unrecognized evidence_level={raw_ev!r}; clamped to MIXED")
+                evidence_level = "MIXED"
+
+    # 2) readiness_status from the readiness gate (NEVER inferred upward).
+    rg_data, rg_state = _jarvis_mf_load_json(_JARVIS_MF_READINESS_REL)
+    if rg_state != "ok" or not isinstance(rg_data, dict):
+        readiness_status = "NOT_READY_FOR_REAL_DATA"
+        warnings.append(
+            f"readiness gate {rg_state}; readiness defaulted to "
+            "NOT_READY_FOR_REAL_DATA")
+    else:
+        rs = str(rg_data.get("readiness_status", "") or "").upper()
+        readiness_status = rs if rs else "UNKNOWN"
+
+    # 3) Checklist counts/status from the operator missing-items checklist.
+    cl_data, cl_state = _jarvis_mf_load_json(_JARVIS_MF_CHECKLIST_REL)
+    checklist_total = 0
+    checklist_counts = {k: 0 for k in _JARVIS_MF_CHECKLIST_STATUSES}
+    pending_approval_count = 0
+    overall_readiness_status = None
+    checklist_ready = False
+    if cl_state != "ok" or not isinstance(cl_data, dict):
+        warnings.append(f"checklist {cl_state}; checklist_ready=false")
+    else:
+        items = cl_data.get("items")
+        if isinstance(items, list):
+            checklist_total = len(items)
+            for it in items:
+                if not isinstance(it, dict):
+                    continue
+                st = str(it.get("status", "") or "").upper()
+                if st in checklist_counts:
+                    checklist_counts[st] += 1
+                if str(it.get("approval_status", "") or "").upper() == \
+                        "PENDING":
+                    pending_approval_count += 1
+        ovr = str(cl_data.get("overall_readiness_status", "") or "")
+        overall_readiness_status = ovr or None
+        # checklist_ready ONLY when every item is COMPLETE (never inferred up).
+        checklist_ready = (checklist_total > 0
+                           and checklist_counts["COMPLETE"] == checklist_total)
+
+    # 4-6) Filesystem PRESENCE ONLY — never create, never run anything.
+    data_dir = BASE / _JARVIS_MF_DATA_DIR_REL
+    data_present = data_dir.is_dir()
+    qa_present = False
+    qa_status = None
+    baseline_present = False
+    if data_present:
+        try:
+            qa_hits = list(data_dir.rglob("qa_report.json"))
+        except Exception:  # noqa: BLE001 — presence probe fails closed
+            qa_hits = []
+        qa_present = bool(qa_hits)
+        if qa_present:
+            qa_obj, qa_st = _jarvis_mf_load_json(
+                qa_hits[0].relative_to(BASE).as_posix())
+            if qa_st == "ok" and isinstance(qa_obj, dict):
+                qa_status = str(qa_obj.get("qa_status", "") or "") or None
+        try:
+            bt_hits = (list(data_dir.rglob("backtest_report.json"))
+                       + list(data_dir.rglob("baseline_report.json")))
+        except Exception:  # noqa: BLE001 — presence probe fails closed
+            bt_hits = []
+        baseline_present = bool(bt_hits)
+
+    # Aggregate state: 'ready' ONLY if the three core sources all loaded OK.
+    core_states = (cand_state, rg_state, cl_state)
+    if all(s == "ok" for s in core_states):
+        state = "ready"
+    elif any(s == "error" for s in core_states):
+        state = "error"
+    else:
+        state = "missing"
+
+    return {
+        "state": state,
+        "read_only": True,
+        "display_only": True,
+        "no_execution": True,
+        "safety_level": "research_only",
+        "lane_status": lane_status,
+        "evidence_level": evidence_level,
+        "readiness_status": readiness_status,
+        "checklist_total": checklist_total,
+        "checklist_counts": checklist_counts,
+        "pending_approval_count": pending_approval_count,
+        "overall_readiness_status": overall_readiness_status,
+        "checklist_ready": checklist_ready,
+        "data_present": data_present,
+        "qa_present": qa_present,
+        "qa_status": qa_status,
+        "baseline_present": baseline_present,
+        "warnings": warnings,
+    }
+
+
 def _jarvis_mission_board() -> dict:
     """READ-ONLY. Loads the operator mission board from a tracked JSON file
     and returns it for display. JARVIS never executes a mission, never runs
@@ -8759,6 +8942,7 @@ def api_jarvis_status():
     strategy_factory = _jarvis_safe(_jarvis_strategy_factory_snapshot)
     survival_ledger = _jarvis_safe(_jarvis_survival_ledger)
     candidate_registry = _jarvis_safe(_jarvis_candidate_registry)
+    mission_flow = _jarvis_safe(_jarvis_crypto_d1_mission_flow)
     freshness_guard = _jarvis_safe(_jarvis_freshness_guard)
     # Derived ONLY from the dicts already collected above — no new commands.
     commander_snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
@@ -8792,6 +8976,7 @@ def api_jarvis_status():
         "strategy_factory": strategy_factory,
         "survival_ledger": survival_ledger,
         "candidate_registry": candidate_registry,
+        "mission_flow": mission_flow,
         "freshness_guard": freshness_guard,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }

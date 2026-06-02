@@ -2509,3 +2509,41 @@ def test_jarvis_convo_status_shape_unchanged():
     for forbidden_key in ("conversation", "ask", "chat", "answer", "voice",
                           "audio", "transcript", "tts", "speech", "mode"):
         assert forbidden_key not in d, f"status must not gain key: {forbidden_key}"
+
+
+# --- Phase A: read-only Crypto-D1 mission_flow source ----------------------
+
+def test_jarvis_status_includes_mission_flow_section():
+    import app as app_module
+    from fastapi.testclient import TestClient
+    client = TestClient(app_module.app)
+    d = client.get("/api/jarvis/status").json()
+    assert "mission_flow" in d
+    mf = d["mission_flow"]
+    assert isinstance(mf, dict)
+    # fail-closed state vocabulary shared with the other read-only sections
+    assert mf.get("state") in ("ready", "missing", "unavailable", "error")
+    # read-only / no-execution contract surfaced to the UI
+    assert mf.get("read_only") is True
+    assert mf.get("no_execution") is True
+    assert mf.get("safety_level") == "research_only"
+    # the live committed sources never imply progress for Crypto-D1
+    assert mf.get("lane_status") not in ("ACTIVE", "STRONG")
+    assert mf.get("evidence_level") not in ("ACTIVE", "STRONG")
+
+
+def test_jarvis_status_mission_flow_missing_inputs_is_graceful(monkeypatch, tmp_path):
+    import app as app_module
+    from fastapi.testclient import TestClient
+    # Point BASE at an empty dir so all mission-flow sources are absent.
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    client = TestClient(app_module.app)
+    r = client.get("/api/jarvis/status")
+    assert r.status_code == 200
+    mf = r.json()["mission_flow"]
+    # missing inputs must not crash the feed and must fail closed
+    assert mf["state"] in ("missing", "error")
+    assert mf["readiness_status"] == "NOT_READY_FOR_REAL_DATA"
+    assert mf["lane_status"] == "WATCH"
+    assert mf["evidence_level"] == "MIXED"
+    assert mf["checklist_ready"] is False

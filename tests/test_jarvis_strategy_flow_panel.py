@@ -151,7 +151,6 @@ def test_status_api_unchanged_no_strategy_flow_keys():
     data = client.get("/api/jarvis/status").json()
     # this UI is static; it must not have added any feed keys
     assert "strategy_flow" not in data
-    assert "mission_flow" not in data
 
 
 # --- truthful-state pins (state-accuracy patch) ----------------------------
