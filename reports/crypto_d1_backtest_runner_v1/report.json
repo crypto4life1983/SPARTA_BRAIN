@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_backtest_runner_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "what_was_built": [
+    "tools/crypto_d1_backtest_runner.py (stdlib-only Python runner; CLI run / validate-config / show-plan; CSV loader with full row-level validation; 4 primary strategy families + benchmark + 1 additive-filter experiment + WATCH-only mean-reversion skip; cost + slippage model with bounded CLI overrides; IS/OOS split; metrics; PASS/WATCH/FAIL classifier; deterministic JSON+MD report emitter)",
+    "tests/test_crypto_d1_backtest_runner.py (38 tests covering: stdlib-only AST scan; no-network / no-broker / no-exchange / no-credentials / no-subprocess; no order-placement / paper / live trading code; validate-config bounds; show-plan emits required fields; missing/empty data dir fails safely; valid BTC-only and BTC+ETH+SOL runs; OHLC / duplicate / negative-volume / missing-close / missing-header rejections; benchmark presence; MA / momentum skip-with-reason on insufficient history; mean-reversion WATCH-only; cost applied on trades; CLI bounds; IS/OOS fields; safety flags pinned False; report MD says research-only; report files land at out_dir; determinism on same input; no real data files committed under bundle dir or data/crypto_d1_research/)",
+    "reports/crypto_d1_backtest_runner_v1/report.md (this build report)",
+    "reports/crypto_d1_backtest_runner_v1/report.json (build report)"
+  ],
+  "files_changed": [
+    "tools/crypto_d1_backtest_runner.py",
+    "tests/test_crypto_d1_backtest_runner.py",
+    "reports/crypto_d1_backtest_runner_v1/report.md",
+    "reports/crypto_d1_backtest_runner_v1/report.json",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/strategy_candidate_registry.py (NOT modified -- the runner is code, not evidence; promotion to ACTIVE requires a future per-strategy PASS verdict + operator decision)",
+    "tools/strategy_next_bundle.py (NOT modified -- no artificial selection nudge)",
+    "app.py and templates/*.html (NOT touched)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched)",
+    "All 5 Crypto-D1 spec docs (protocol + data contract + dataset manifest + qa_freeze_spec + backtest_plan) are read by the runner but NOT modified",
+    "All 14 prior validator tools are NOT modified"
+  ],
+  "follows_baseline_backtest_plan": {
+    "plan_id": "crypto_d1_baseline_backtest_plan_v1",
+    "lane": "crypto_d1_protocol",
+    "phase_satisfied": "P3_baseline_strategy_impl (runner implementation; backtest EXECUTION against real local data is a SEPARATE, operator-triggered step that uses --data-dir + --out-dir)"
+  },
+  "scope_summary": {
+    "lane": "crypto_d1_protocol",
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe": "1d",
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "strategy_families_implemented": [
+      "buy_and_hold_benchmark (per asset + equal-weight basket)",
+      "donchian_channel_breakout (entry_n=20, exit_m=10)",
+      "moving_average_trend_filter (window=200)",
+      "momentum_continuation (lookback=90)",
+      "volatility_regime_gate (additive filter on Donchian; rolling vol window=30, max_ann_vol=1.50)"
+    ],
+    "strategy_families_skipped_in_v1": [
+      "mean_reversion (always SKIPPED_WATCH_ONLY in v1; must NOT revive any prior CODR-* parameter set)"
+    ],
+    "cost_model_defaults": {
+      "taker_fee_bps": 10.0,
+      "slippage_bps": 5.0,
+      "fee_bps_bounds": [0.0, 100.0],
+      "slippage_bps_bounds": [0.0, 100.0]
+    },
+    "IS_OOS_default_fraction": 0.70,
+    "OOS_min_trades_per_asset_for_pass": 20,
+    "OOS_min_trades_per_family_for_pass": 30,
+    "start_equity_default": 100000.0,
+    "start_equity_is_research_units_not_money": true
+  },
+  "safety_guarantees": {
+    "stdlib_only": true,
+    "stdlib_modules_used": ["argparse", "csv", "dataclasses", "datetime", "hashlib", "json", "math", "pathlib", "sys", "__future__"],
+    "no_network_imports": true,
+    "no_broker_exchange_vendor_imports_or_attribute_access": true,
+    "no_subprocess_import": true,
+    "no_os_environ_or_getenv_access": true,
+    "no_dotenv_or_credentials_reads": true,
+    "no_order_placement_or_paper_or_live_trading_code_paths": true,
+    "no_data_fetch_from_runtime": true,
+    "operator_supplied_local_csv_only": true,
+    "graceful_failure_on_missing_data": true,
+    "never_fabricates_results": true,
+    "PASS_reserved_for_explicit_operator_decision_runner_never_emits_PASS_in_v1": true,
+    "deterministic_output_on_same_input": true,
+    "seven_pinned_safety_flags_in_every_report": {
+      "research_only": true,
+      "data_fetch_enabled": false,
+      "exchange_connection_enabled": false,
+      "live_trading_enabled": false,
+      "broker_control_enabled": false,
+      "paper_order_execution_enabled": false,
+      "order_placement_enabled": false
+    },
+    "fee_bps_bounds_enforced": [0.0, 100.0],
+    "slippage_bps_bounds_enforced": [0.0, 100.0]
+  },
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_crypto_d1_backtest_runner.py --rootdir=tests -q",
+      "result": "38 passed in 0.56s"
+    },
+    {
+      "command": "full integration suite (Bundles 2-15 + 16; 15 test files)",
+      "result": "396 passed in 3.52s"
+    }
+  ],
+  "json_validity_of_prior_bundles_unaffected": {
+    "crypto_d1_backtest_plan_check_validate": "validate: OK (Bundle 15 unaffected)",
+    "crypto_d1_qa_freeze_spec_check_validate": "validate: OK (Bundle 14 unaffected)",
+    "crypto_d1_dataset_manifest_check_validate": "validate: OK (Bundle 13 unaffected)",
+    "crypto_d1_data_contract_check_validate": "validate: OK (Bundle 12 unaffected)",
+    "crypto_d1_protocol_check_validate": "validate: OK (Bundle 11 unaffected)",
+    "arbitrage_readiness_gate_check_validate": "validate: OK (Bundle 10 unaffected)",
+    "arbitrage_sample_dataset_plan_check_validate": "validate: OK (Bundle 9 unaffected)",
+    "arbitrage_data_source_evaluation_check_validate": "validate: OK (Bundle 8 unaffected)",
+    "arbitrage_qa_harness_spec_check_validate": "validate: OK (Bundle 7 unaffected)",
+    "arbitrage_dataset_manifest_check_validate": "validate: OK (Bundle 6 unaffected)",
+    "arbitrage_data_contract_check_validate": "validate: OK (Bundle 5 unaffected)",
+    "arbitrage_protocol_check_validate": "validate: OK (Bundle 4 unaffected)",
+    "strategy_candidate_registry_validate": "validate: OK",
+    "strategy_next_bundle_validate": "validate: OK"
+  },
+  "how_to_run_with_local_csv_data": {
+    "step_1_prepare_data": "Operator places one or more CSV files under a chosen DATA_DIR. CSVs MUST have the Bundle-12 header columns: timestamp, open, high, low, close, volume, symbol, source, quote_currency. One row per (symbol, UTC daily timestamp). Source venue named in the 'source' column. NO network call is made by the runner; operator is responsible for offline acquisition.",
+    "step_2_run": "python tools/crypto_d1_backtest_runner.py run --data-dir <DATA_DIR> --out-dir <OUT_DIR>",
+    "step_3_optional_cost_override": "Append --fee-bps N --slippage-bps M (both bounded to [0, 100]).",
+    "step_4_optional_is_fraction": "Append --is-fraction 0.7 (default).",
+    "step_5_inspect_reports": "OUT_DIR contains: crypto_d1_backtest_report.json and crypto_d1_backtest_report.md. NEVER commit OUT_DIR contents to the repo unless the operator has explicitly authorized that.",
+    "validate_config_first": "python tools/crypto_d1_backtest_runner.py validate-config",
+    "show_plan_first": "python tools/crypto_d1_backtest_runner.py show-plan"
+  },
+  "what_happens_if_no_data_exists": {
+    "behavior": "The runner emits a FAIL report. assets_seen=[], strategy_results=[], pass_watch_fail_status='FAIL', failures=['missing local data: ...']. JSON and MD reports are still written so the operator has a traceable audit trail. NO synthetic / fabricated metrics are emitted.",
+    "tested": "test_missing_data_dir_fails_safely + test_empty_data_dir_fails_safely.",
+    "guarantee": "The runner NEVER fabricates research results. If data is missing, the run is BLOCKED at the verdict layer and the operator must acquire data via a separate, operator-authorized P2 path."
+  },
+  "real_local_data_found_on_disk_at_build_time": false,
+  "backtest_against_real_data_executed_in_this_bundle": false,
+  "what_was_executed_in_this_bundle": "ONLY the test suite, against tmp_path synthetic CSV fixtures generated inside the tests. NO real backtest was run on any real Crypto-D1 dataset. The runner is implemented and tested; running it on real data is the operator's separate step.",
+  "candidate_registry_status_for_crypto_d1_after_build": {
+    "status": "WATCH (unchanged from Bundle 15)",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH",
+    "registry_NOT_modified_by_this_bundle": "The runner is code, not evidence. The candidate_registry seed's extra_files were not extended; lane stays WATCH at 25 source_reports. Promotion to ACTIVE requires a future per-strategy backtest report PASS verdict on REAL data + an explicit operator decision -- not produced by this bundle.",
+    "guardrails_held": [
+      "never ACTIVE",
+      "never STRONG evidence in the auto-build path",
+      "no profitability claim",
+      "no live/broker/exchange/paper-order/order-placement/credentials reference",
+      "no real data files or backtest output files created",
+      "no QA harness execution",
+      "no backtest execution against real data"
+    ]
+  },
+  "recommended_next_bundle": [
+    "Crypto-D1 Data Source Evaluation Memo v1 -- written assessment of which offline data sources could later satisfy the QA / freeze spec. Memo only, no fetch. (Spec bundle; Claude works.)",
+    "Crypto-D1 Data Collection Authorization Draft -- still spec-only; only if the operator wants to start the path toward an actual P2 acquisition. Does not authorize anything by itself. (Spec bundle; Claude works.)",
+    "Operator step (NOT a bundle): operator-supplied offline acquisition of BTC/ETH/SOL daily-spot CSV data into a chosen DATA_DIR; then run the runner per the 'how_to_run_with_local_csv_data' steps above and review the emitted JSON+MD report.",
+    "Crypto-D1 Backtest Runner v2 (future) -- walk-forward driver + per-family parameter-grid sweep + structured sensitivity sweep + emit per-strategy report.json that matches the FULL 27-field schema declared in Bundle 15. (Code bundle; recommend Codex.)"
+  ]
+}
