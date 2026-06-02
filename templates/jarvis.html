@@ -193,8 +193,91 @@
     .jv-voice-ctl.is-active{color:var(--jv-bg,#04121a);font-weight:600;
       border-color:var(--jv-cyan);background:var(--jv-cyan);}
     .jv-voice-mode{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;}
+    /* === Strategy Factory / Mission Flow (additive, display-only, no deps) ===
+       Pure CSS/JS. No backend, no API change, no broker/trading behavior. The
+       main render loop never targets #pStrategyFlow, so this static markup is
+       never overwritten — same pattern as the read-only conversation shell. */
+    .jv-sf{display:grid;grid-template-columns:minmax(150px,184px) 1fr;gap:18px;}
+    @media (max-width:680px){.jv-sf{grid-template-columns:1fr;}}
+    .jv-sf-nav{display:flex;flex-direction:column;gap:6px;border-right:1px solid var(--jv-edge);
+      padding-right:14px;}
+    @media (max-width:680px){.jv-sf-nav{flex-direction:row;flex-wrap:wrap;border-right:0;
+      border-bottom:1px solid var(--jv-edge);padding:0 0 10px;}}
+    .jv-sf-tab{font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:var(--jv-dim);
+      border:1px solid transparent;border-radius:8px;padding:9px 11px;cursor:pointer;
+      user-select:none;background:rgba(63,224,255,.03);text-align:left;
+      transition:color .15s,background .15s,box-shadow .15s;}
+    .jv-sf-tab:hover{color:#cfe9ff;background:rgba(63,224,255,.10);}
+    .jv-sf-tab.is-active{color:#04121a;font-weight:600;background:var(--jv-cyan);
+      border-color:var(--jv-cyan);box-shadow:0 0 16px rgba(63,224,255,.35);}
+    .jv-sf-view{display:none;}
+    .jv-sf-view.is-active{display:block;animation:jvfade .35s ease;}
+    @keyframes jvfade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+    .jv-sf-view h3{margin:0 0 6px;font-size:13px;letter-spacing:.10em;color:#eaf6ff;
+      text-transform:uppercase;}
+    .jv-sf-sub{font-size:11px;color:var(--jv-dim);line-height:1.55;margin:0 0 14px;}
+    .jv-sf-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:10px;color:var(--jv-dim);
+      margin:4px 0 16px;letter-spacing:.04em;}
+    .jv-sf-legend .lg{display:inline-flex;align-items:center;gap:6px;}
+    .jv-sf-legend .sw{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor;}
+    .jv-sf-legend .sw.g{background:var(--jv-dim);color:var(--jv-dim);}
+    .jv-sf-legend .sw.b{background:var(--jv-cyan);color:var(--jv-cyan);}
+    .jv-sf-legend .sw.gr{background:var(--jv-ok);color:var(--jv-ok);}
+    .jv-sf-legend .sw.y{background:var(--jv-warn);color:var(--jv-warn);}
+    .jv-sf-legend .sw.r{background:var(--jv-bad);color:var(--jv-bad);}
+    /* flow lane + nodes */
+    .jv-sf-lane{display:flex;align-items:stretch;flex-wrap:wrap;margin:4px 0;}
+    .jv-sf-node{flex:1 1 116px;min-width:104px;position:relative;border:1px solid var(--jv-edge);
+      border-radius:10px;padding:10px 11px;margin:6px 16px 6px 0;background:rgba(10,30,54,.45);}
+    .jv-sf-node .nlbl{font-size:11px;color:#dff1ff;font-weight:600;line-height:1.35;padding-right:12px;}
+    .jv-sf-node .nst{display:block;font-size:9px;letter-spacing:.10em;text-transform:uppercase;
+      margin-top:6px;color:var(--jv-dim);}
+    .jv-sf-node .ndot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;
+      background:var(--jv-dim);box-shadow:0 0 8px currentColor;color:var(--jv-dim);}
+    .jv-sf-node::after{content:"";position:absolute;right:-16px;top:50%;width:16px;height:1px;
+      translate:0 -50%;background:linear-gradient(90deg,var(--jv-edge),transparent);}
+    .jv-sf-node:last-child::after{display:none;}
+    .jv-sf-node.is-todo{opacity:.7;}
+    .jv-sf-node.is-done{border-color:rgba(55,245,168,.5);}
+    .jv-sf-node.is-done .ndot{background:var(--jv-ok);color:var(--jv-ok);}
+    .jv-sf-node.is-done .nst{color:var(--jv-ok);}
+    .jv-sf-node.is-watch{border-color:rgba(255,195,77,.55);}
+    .jv-sf-node.is-watch .ndot{background:var(--jv-warn);color:var(--jv-warn);}
+    .jv-sf-node.is-watch .nst{color:var(--jv-warn);}
+    .jv-sf-node.is-blocked{border-color:rgba(255,93,115,.55);}
+    .jv-sf-node.is-blocked .ndot{background:var(--jv-bad);color:var(--jv-bad);}
+    .jv-sf-node.is-blocked .nst{color:var(--jv-bad);}
+    .jv-sf-node.is-active{border-color:var(--jv-cyan);
+      box-shadow:0 0 12px 2px rgba(63,224,255,.25);animation:jvnode 2.4s ease-in-out infinite;}
+    .jv-sf-node.is-active .ndot{background:var(--jv-cyan);color:var(--jv-cyan);}
+    .jv-sf-node.is-active .nst{color:var(--jv-cyan);}
+    @keyframes jvnode{
+      0%,100%{box-shadow:0 0 12px 2px rgba(63,224,255,.25);}
+      50%{box-shadow:0 0 26px 7px rgba(63,224,255,.5);}
+    }
+    /* animated flow line */
+    .jv-sf-flow{position:relative;height:2px;margin:2px 0 16px;border-radius:2px;overflow:hidden;
+      background:linear-gradient(90deg,rgba(63,224,255,.10),rgba(63,224,255,.25),rgba(63,224,255,.10));}
+    .jv-sf-flow::after{content:"";position:absolute;top:0;left:0;height:100%;width:32%;
+      background:linear-gradient(90deg,transparent,var(--jv-cyan),transparent);
+      animation:jvsfflow 3.2s linear infinite;}
+    @keyframes jvsfflow{0%{transform:translateX(-120%);}100%{transform:translateX(360%);}}
+    /* combined view lanes + you-are-here */
+    .jv-sf-lanewrap{border:1px solid var(--jv-edge);border-radius:12px;padding:12px 12px 4px;
+      background:rgba(4,16,31,.4);margin-bottom:8px;}
+    .jv-sf-lanetag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+      color:var(--jv-cyan);margin-bottom:4px;}
+    .jv-sf-here{display:inline-flex;align-items:center;gap:7px;font-size:10px;
+      letter-spacing:.14em;text-transform:uppercase;color:#04121a;font-weight:700;
+      background:var(--jv-cyan);border-radius:999px;padding:3px 11px;
+      box-shadow:0 0 18px rgba(63,224,255,.45);}
+    .jv-sf-link{display:flex;justify-content:center;margin:6px 0;}
+    .jv-sf-link span{width:1px;height:24px;
+      background:linear-gradient(var(--jv-cyan),rgba(63,224,255,.1));}
+    .jv-sf-board{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));}
     @media (prefers-reduced-motion:reduce){
-      .jv-orb,.jv-ring,.jv-panel::after{animation:none;}
+      .jv-orb,.jv-ring,.jv-panel::after,
+      .jv-sf-node.is-active,.jv-sf-flow::after,.jv-sf-view.is-active{animation:none;}
     }
   </style>
 
@@ -333,6 +416,171 @@
     <div class="jv-panel jv-wide" id="pTradingDetail">
       <h2><span class="ic">&#x25C8;</span>Trading Research Detail <span class="jv-tag t-read">READ ONLY</span></h2>
       <div class="jv-loading">Reading research reports&hellip;</div>
+    </div>
+
+    <div class="jv-section"><span class="lbl">Strategy Factory</span><span class="ln"></span><span class="sub">mission flow &middot; read-only map &middot; no execution &middot; no broker</span></div>
+
+    <!-- Strategy Factory / Mission Flow. DISPLAY ONLY. Static read-only map of
+         the human workflow and the machine pipeline. The left rail switches six
+         internal views client-side; nothing here calls an API, mutates state, or
+         touches broker / paper / live trading. The render loop never targets
+         #pStrategyFlow, so this static markup is preserved on every refresh. -->
+    <div class="jv-panel jv-wide" id="pStrategyFlow">
+      <h2><span class="ic">&#x2699;</span>Strategy Factory &mdash; Mission Flow <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
+      <div class="jv-sf">
+
+        <div class="jv-sf-nav" role="tablist" aria-label="Strategy Factory views">
+          <span class="jv-sf-tab is-active" data-sf="overview" role="tab" tabindex="0" aria-selected="true">Overview</span>
+          <span class="jv-sf-tab" data-sf="workflow" role="tab" tabindex="0" aria-selected="false">Workflow</span>
+          <span class="jv-sf-tab" data-sf="pipeline" role="tab" tabindex="0" aria-selected="false">Pipeline</span>
+          <span class="jv-sf-tab" data-sf="combined" role="tab" tabindex="0" aria-selected="false">Combined View</span>
+          <span class="jv-sf-tab" data-sf="current" role="tab" tabindex="0" aria-selected="false">Current Run</span>
+          <span class="jv-sf-tab" data-sf="board" role="tab" tabindex="0" aria-selected="false">Strategy Board</span>
+        </div>
+
+        <div class="jv-sf-pane">
+
+          <!-- Overview -->
+          <div class="jv-sf-view is-active" data-sf="overview" role="tabpanel">
+            <h3>Overview</h3>
+            <p class="jv-sf-sub">
+              Two parallel tracks turn an idea into a validated strategy. The
+              <b>Workflow</b> is the human process &mdash; the decisions a person makes.
+              The <b>Pipeline</b> is the machine process &mdash; the data and validation
+              stages a candidate must survive. The <b>Combined View</b> aligns both
+              and marks where the current research sits. Everything here is a
+              read-only map: no test is launched, no report is generated, and no
+              strategy is promoted or deployed from this screen.
+            </p>
+            <div class="jv-sf-legend">
+              <span class="lg"><span class="sw g"></span>Not started</span>
+              <span class="lg"><span class="sw b"></span>Active</span>
+              <span class="lg"><span class="sw gr"></span>Complete / passed</span>
+              <span class="lg"><span class="sw y"></span>Watch / waiting</span>
+              <span class="lg"><span class="sw r"></span>Blocked / failed (gated)</span>
+            </div>
+            <div class="jv-detail">
+              The two safety gates &mdash; Paper Trading and Micro-Live &mdash; are shown for
+              context only. They are human-approved checkpoints; JARVIS never
+              crosses them and controls no broker, paper, or live execution.
+            </div>
+          </div>
+
+          <!-- Workflow (human process) -->
+          <div class="jv-sf-view" data-sf="workflow" role="tabpanel">
+            <h3>Workflow &mdash; Human Process</h3>
+            <p class="jv-sf-sub">Idea Intake &rarr; Research Review &rarr; Candidate Creation &rarr; Build Bundle &rarr; Run Tests &rarr; Generate Report &rarr; Decision &rarr; Commit / Archive / Promote</p>
+            <div class="jv-sf-lane">
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Idea Intake</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Research Review</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Run Tests</span><span class="nst">Active</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Generate Report</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Decision</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Commit / Archive / Promote</span><span class="nst">Not started</span></div>
+            </div>
+            <div class="jv-sf-flow"></div>
+            <div class="jv-detail">Display-only. Stage states are an illustrative snapshot, not a live controller.</div>
+          </div>
+
+          <!-- Pipeline (machine process) -->
+          <div class="jv-sf-view" data-sf="pipeline" role="tabpanel">
+            <h3>Pipeline &mdash; Machine Process</h3>
+            <p class="jv-sf-sub">Raw Data &rarr; Data QA &rarr; Dataset Freeze &rarr; Strategy Engine &rarr; Backtest &rarr; Fees / Slippage &rarr; OOS Validation &rarr; Stress Test &rarr; Risk Scoring &rarr; Final Report &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
+            <div class="jv-sf-lane">
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fees / Slippage</span><span class="nst">Passed</span></div>
+              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">OOS Validation</span><span class="nst">Active</span></div>
+              <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Stress Test</span><span class="nst">Waiting</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Risk Scoring</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Final Report</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Gated</span></div>
+              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
+            </div>
+            <div class="jv-sf-flow"></div>
+            <div class="jv-detail">Display-only. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution.</div>
+          </div>
+
+          <!-- Combined View -->
+          <div class="jv-sf-view" data-sf="combined" role="tabpanel">
+            <h3>Combined View</h3>
+            <p class="jv-sf-sub">Top lane is the human workflow; bottom lane is the machine pipeline. The marker shows where the current research sits across both lanes.</p>
+            <div class="jv-sf-lanewrap">
+              <div class="jv-sf-lanetag">Workflow &middot; human</div>
+              <div class="jv-sf-lane">
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Idea Intake</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Research Review</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Run Tests</span><span class="nst">Active</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Generate Report</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Decision</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Commit / Archive / Promote</span><span class="nst">Not started</span></div>
+              </div>
+            </div>
+            <div class="jv-sf-link"><span></span></div>
+            <div style="text-align:center;margin:2px 0 8px;"><span class="jv-sf-here">&#x25C9; You are here</span></div>
+            <div class="jv-sf-link"><span></span></div>
+            <div class="jv-sf-lanewrap">
+              <div class="jv-sf-lanetag">Pipeline &middot; machine</div>
+              <div class="jv-sf-lane">
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fees / Slippage</span><span class="nst">Passed</span></div>
+                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">OOS Validation</span><span class="nst">Active</span></div>
+                <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Stress Test</span><span class="nst">Waiting</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Risk Scoring</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Final Report</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Gated</span></div>
+                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
+              </div>
+            </div>
+            <div class="jv-detail">Display-only alignment map. The marker is illustrative; this view launches nothing.</div>
+          </div>
+
+          <!-- Current Run -->
+          <div class="jv-sf-view" data-sf="current" role="tabpanel">
+            <h3>Current Run</h3>
+            <p class="jv-sf-sub">A read-only snapshot of where the active research candidate sits. This is a static display; it does not poll, launch, or control any run.</p>
+            <div class="jv-sf-here">&#x25C9; You are here</div>
+            <div style="margin-top:12px;">
+              <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Run Tests</span></div>
+              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>OOS Validation</span></div>
+              <div class="jv-row"><span class="k">Next checkpoint</span><span class="v"><span class="jv-led warn"></span>Stress Test (waiting)</span></div>
+              <div class="jv-row"><span class="k">Paper Trading Gate</span><span class="v"><span class="jv-led lock"></span>Human approval required</span></div>
+              <div class="jv-row"><span class="k">Micro-Live Gate</span><span class="v"><span class="jv-led lock"></span>Locked &middot; never automated</span></div>
+            </div>
+            <div class="jv-detail" style="margin-top:10px;">
+              Live factory reports and the survival ledger are shown in the
+              read-only panels below this section. This card is an orientation
+              map only &mdash; it stages, promotes, and executes nothing.
+            </div>
+          </div>
+
+          <!-- Strategy Board -->
+          <div class="jv-sf-view" data-sf="board" role="tabpanel">
+            <h3>Strategy Board</h3>
+            <p class="jv-sf-sub">Illustrative overview of candidate strategies and where each one sits. Display-only &mdash; no promotion, archiving, or execution happens from this board.</p>
+            <div class="jv-sf-board">
+              <div class="jv-mcard"><div class="top"><span class="ttl">Trend SR EMA/RSI</span><span class="jv-led ok"></span></div><div class="jv-detail">Pipeline: OOS Validation &middot; <span style="color:var(--jv-cyan)">Active</span></div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">Decision Gate v2</span><span class="jv-led warn"></span></div><div class="jv-detail">Pipeline: Stress Test &middot; <span style="color:var(--jv-warn)">Waiting</span></div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">Friction Stress</span><span class="jv-led"></span></div><div class="jv-detail">Pipeline: Risk Scoring &middot; Not started</div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Baseline</span><span class="jv-led ok"></span></div><div class="jv-detail">Pipeline: Backtest &middot; <span style="color:var(--jv-ok)">Passed</span></div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">MNQ/MGC Long History</span><span class="jv-led bad"></span></div><div class="jv-detail">Pipeline: Micro-Live Gate &middot; <span style="color:var(--jv-bad)">Locked</span></div></div>
+            </div>
+            <div class="jv-detail" style="margin-top:10px;">Display-only board. Names and states are an illustrative snapshot for orientation, not a live controller.</div>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <div class="jv-section"><span class="lbl">Strategy Factory Readiness</span><span class="ln"></span><span class="sub">read-only observation &middot; no execution &middot; no broker</span></div>
@@ -1765,6 +2013,38 @@
   wireVoiceMode();
   wireVoice();
   wireSpeak();
+})();
+</script>
+
+<!-- Strategy Factory / Mission Flow: isolated, display-only sub-tab switcher.
+     Scoped to #pStrategyFlow only. No fetch, no state mutation, no broker /
+     trading control — it just shows one static view at a time. Kept separate
+     from the status-polling IIFE above so the two never interact. -->
+<script>
+(function(){
+  var panel = document.getElementById('pStrategyFlow');
+  if(!panel) return;
+  var tabs = Array.prototype.slice.call(panel.querySelectorAll('.jv-sf-tab'));
+  var views = Array.prototype.slice.call(panel.querySelectorAll('.jv-sf-view'));
+  function show(name){
+    tabs.forEach(function(t){
+      var on = t.getAttribute('data-sf') === name;
+      t.classList.toggle('is-active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    views.forEach(function(v){
+      v.classList.toggle('is-active', v.getAttribute('data-sf') === name);
+    });
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ show(t.getAttribute('data-sf')); });
+    t.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        show(t.getAttribute('data-sf'));
+      }
+    });
+  });
 })();
 </script>
 {% endblock %}
