@@ -1,0 +1,358 @@
+{
+  "checklist_id": "crypto_d1_operator_missing_items_checklist_v1",
+  "title": "SPARTA Crypto-D1 Operator Missing Items Checklist v1",
+  "version": "1.0",
+  "kind": "operator_missing_items_checklist",
+  "read_only": true,
+  "research_only": true,
+
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "order_placement_enabled": false,
+  "backtest_execution_enabled": false,
+  "dataset_processing_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "crypto_d1_protocol",
+  "target_assets": ["BTC", "ETH", "SOL"],
+  "allowed_market_type": "spot",
+  "timeframe": "1d",
+  "session_calendar": "24/7",
+  "weekday_only_filters_forbidden": true,
+
+  "companion_documents": {
+    "crypto_d1_data_acquisition_authorization_v1": "reports/crypto_d1_data_acquisition_authorization_v1/authorization_plan.json",
+    "crypto_d1_data_source_evaluation_v1": "reports/crypto_d1_data_source_evaluation_v1/data_source_evaluation.json",
+    "crypto_d1_data_qa_runtime_tool_v1": "reports/crypto_d1_data_qa_runtime_tool_v1/qa_runtime_tool.json",
+    "crypto_d1_manual_dataset_intake_runbook_v1": "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json",
+    "crypto_d1_readiness_gate_v1": "reports/crypto_d1_readiness_gate_v1/readiness_gate.json"
+  },
+
+  "research_objective": "Provide a fillable, schema-validated checklist that turns the Bundle 21 readiness gate's 16 missing-item verdict into a per-item operator template. This checklist authorizes nothing operational: no data fetch, no exchange connection, no QA against real data, no backtest, no paper/live trading. It records operator progress only. NOT_READY_FOR_REAL_DATA is the honest default. Specification completeness is not data readiness.",
+
+  "overall_readiness_status": "NOT_READY_FOR_REAL_DATA",
+  "overall_readiness_status_override_reason": "",
+
+  "item_status_options": ["MISSING", "COMPLETE", "BLOCKED", "NOT_APPLICABLE"],
+  "approval_status_options": ["PENDING", "APPROVED", "REJECTED", "WITHDRAWN"],
+
+  "items": [
+    {
+      "number": 1,
+      "name": "Operator acquire-decision",
+      "description": "An explicit operator decision to acquire Crypto-D1 data this cycle. A research decision, not a default. Reference the dated record (memo, decisions.md append, or signed checklist) that captures the decision.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator records a dated acquire-decision in the project log or this field."
+    },
+    {
+      "number": 2,
+      "name": "Source class",
+      "description": "Chosen source class per Bundle 18: one of A_exchange_public_historical_archives, B_exchange_public_apis (WATCH future-only, operator-side), C_paid_market_data_vendors (PREFERRED), D_existing_local_OHLCV_files. Classes E (web-scraped) and F (manual/screenshots) are REJECTED for evidence; never choose E or F.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator picks one of A/B/C/D and records the choice with a one-line justification."
+    },
+    {
+      "number": 3,
+      "name": "Source name",
+      "description": "Exact vendor / venue / archive identity (e.g., 'Vendor X paid daily-OHLCV CSV export, Y product tier'). Anonymous provenance is invalid per Bundle 12.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator names the concrete source for the chosen class."
+    },
+    {
+      "number": 4,
+      "name": "License/TOS confirmation",
+      "description": "Explicit pointer to the license / TOS that permits research use of the data. Recorded URL, document filename, or vendor confirmation reference.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator reviews license/TOS and records the reference; if license is restrictive or unclear, mark BLOCKED with reason."
+    },
+    {
+      "number": 5,
+      "name": "BTC/ETH/SOL spot 1D dataset",
+      "description": "A concrete dataset declaring BTC, ETH, and SOL on spot only at 1d timeframe. Perps / dated futures / options / leveraged tokens / margin spot / synthetic instruments are forbidden. Intraday is out of scope.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator confirms the dataset is spot-only, daily, and covers BTC + ETH + SOL."
+    },
+    {
+      "number": 6,
+      "name": "Date range",
+      "description": "ISO-8601 UTC time_start and time_end. The window must cover the dataset's full intended IS/OOS span without backfill peeking.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator records exact time_start and time_end."
+    },
+    {
+      "number": 7,
+      "name": "dataset_id",
+      "description": "Identifier in the form CRYPTO_D1_SPOT_<SYMBOLS_TAG>_V<NNN> (e.g., CRYPTO_D1_SPOT_BTC_ETH_SOL_V001).",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator mints a dataset_id matching the required pattern."
+    },
+    {
+      "number": 8,
+      "name": "dataset_version",
+      "description": "Immutable per-freeze version. Remediation requires a NEW version, never in-place edit.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator mints a monotonic dataset_version for the first freeze."
+    },
+    {
+      "number": 9,
+      "name": "Storage path",
+      "description": "Concrete storage path under data/crypto_d1_research/<dataset_id>/<dataset_version>/. Created only by operator action; SPARTA never creates it.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator creates the storage path and records it here."
+    },
+    {
+      "number": 10,
+      "name": "fees.json",
+      "description": "fees.json with per-venue taker fee + slippage (optional spread_proxy). No QA_PASS without taker fee AND slippage declared.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator authors fees.json with taker fee + slippage per venue."
+    },
+    {
+      "number": 11,
+      "name": "manifest.json",
+      "description": "Per-dataset manifest.json passing tools/crypto_d1_dataset_manifest_check.py. Pins protocol/data_contract/manifest versions; declares lane/market/timeframe/missing_day_policy/etc.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator authors manifest.json and confirms it passes the manifest validator."
+    },
+    {
+      "number": 12,
+      "name": "CHECKSUMS.txt",
+      "description": "One sha256_hex<TAB or 2-space>filename line per dataset file. The QA runtime tool verifies sha256 against this file at runtime.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator computes sha256 per dataset file and writes CHECKSUMS.txt."
+    },
+    {
+      "number": 13,
+      "name": "FREEZE_RECORD.txt",
+      "description": "key:value lines including freeze_timestamp_utc, operator (name/label), and protocol+data_contract+dataset_manifest+qa_freeze_spec+backtest_plan+authorization_plan version pins (>=3 of the 6 pins required by Bundle 19).",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator writes FREEZE_RECORD.txt with timestamp + operator + version pins."
+    },
+    {
+      "number": 14,
+      "name": "QA run / qa_report.json",
+      "description": "A QA run via tools/crypto_d1_data_qa_runtime_tool.py run --dataset-dir <PATH> --out-dir <PATH> producing qa_report.json + qa_report.md outside the dataset directory.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator runs the QA tool against the frozen dataset and records the qa_report.json path."
+    },
+    {
+      "number": 15,
+      "name": "QA_PASS or accepted QA_WARN",
+      "description": "qa_status in qa_report.json is QA_PASS, OR QA_WARN with an explicit operator-acceptance memo attached. QA_FAIL and QA_BLOCKED do not satisfy this item; remediation requires a NEW dataset_version.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "Operator reviews qa_report.json and either accepts QA_PASS, attaches a QA_WARN acceptance memo, or moves to a new dataset_version."
+    },
+    {
+      "number": 16,
+      "name": "Baseline backtest output",
+      "description": "A separately authorized baseline backtest run via tools/crypto_d1_backtest_runner.py producing per-strategy report output. This checklist does NOT authorize the backtest; it only records whether the output exists.",
+      "status": "MISSING",
+      "operator_answer": "",
+      "evidence_path": "",
+      "reviewer_notes": "",
+      "approval_status": "PENDING",
+      "blocking_reason": "",
+      "next_action": "After a separately authorized backtest bundle approves it, operator runs the backtest runner and records the report output path."
+    }
+  ],
+
+  "required_artifact_checks": [
+    "Exactly 16 items, numbered 1..16.",
+    "Every item has the 9 required fields (number, name, status, operator_answer, evidence_path, reviewer_notes, approval_status, blocking_reason, next_action).",
+    "Every item's status is one of MISSING / COMPLETE / BLOCKED / NOT_APPLICABLE.",
+    "Every item's approval_status is one of PENDING / APPROVED / REJECTED / WITHDRAWN.",
+    "Default state pins every item at MISSING with empty operator_answer + evidence_path + reviewer_notes + blocking_reason and approval_status=PENDING.",
+    "Anti-fake-completion: status=COMPLETE requires non-empty evidence_path AND approval_status=APPROVED.",
+    "Consistency: if any item is COMPLETE, overall_readiness_status must not remain 'NOT_READY_FOR_REAL_DATA' unless overall_readiness_status_override_reason explicitly documents why.",
+    "NOT_READY_FOR_REAL_DATA is the honest default. Specification completeness is not data readiness."
+  ],
+
+  "validator_checks": {
+    "tools_required": [
+      "tools/crypto_d1_operator_missing_items_checklist_check.py",
+      "tools/crypto_d1_readiness_gate_check.py",
+      "tools/crypto_d1_manual_dataset_intake_runbook_check.py",
+      "tools/crypto_d1_data_qa_runtime_tool.py",
+      "tools/crypto_d1_data_source_evaluation_check.py",
+      "tools/crypto_d1_data_acquisition_authorization_check.py",
+      "tools/crypto_d1_qa_freeze_spec_check.py",
+      "tools/crypto_d1_dataset_manifest_check.py",
+      "tools/crypto_d1_data_contract_check.py",
+      "tools/crypto_d1_protocol_check.py",
+      "tools/strategy_candidate_registry.py"
+    ],
+    "all_validators_pass": true,
+    "validation_command_example": "python tools/crypto_d1_operator_missing_items_checklist_check.py validate"
+  },
+
+  "safety_checks": {
+    "all_safety_flags_false_in_this_checklist": true,
+    "no_forbidden_capability_phrases_in_any_doc": true,
+    "no_real_data_files_created_by_this_bundle": true,
+    "no_data_crypto_d1_research_directory_created": true,
+    "no_qa_run_against_real_data_in_this_bundle": true,
+    "no_backtest_run_in_this_bundle": true,
+    "no_credentials_required_by_this_checklist": true,
+    "no_paper_or_live_execution_files_modified_by_this_bundle": true,
+    "no_jarvis_dashboard_files_modified_by_this_bundle": true,
+    "no_source_approved_by_default": true,
+    "registry_stays_WATCH_never_ACTIVE_never_STRONG": true
+  },
+
+  "allowed_next_steps": [
+    "Operator step (NOT a bundle): operator follows the Bundle 20 runbook, fills in this checklist item-by-item, and attaches evidence per item. Each item moves from MISSING -> COMPLETE only with non-empty evidence_path + approval_status=APPROVED.",
+    "After any operator fill, re-run python tools/crypto_d1_operator_missing_items_checklist_check.py validate to catch fake-completion or inconsistency.",
+    "After items 1-13 are COMPLETE, operator runs the Bundle 19 QA tool to populate item 14 with a qa_report.json path.",
+    "After QA_PASS or accepted QA_WARN, item 15 is COMPLETE; a separately authorized backtest bundle is then required before item 16 can move to COMPLETE.",
+    "Alternative: keep Crypto-D1 in WATCH; the foundation needs no further spec work."
+  ],
+
+  "forbidden_next_steps": [
+    "Do NOT fetch data of any kind from this checklist.",
+    "Do NOT connect to any exchange from this checklist.",
+    "Do NOT run any QA against real data from this checklist.",
+    "Do NOT run any backtest from this checklist.",
+    "Do NOT create data/crypto_d1_research/ from this checklist.",
+    "Do NOT mark any item COMPLETE without non-empty evidence_path AND approval_status=APPROVED.",
+    "Do NOT set overall_readiness_status to a higher lifecycle value without all required items COMPLETE and a recorded override_reason if any item remains BLOCKED.",
+    "Do NOT place any order anywhere.",
+    "Do NOT enable paper-order execution.",
+    "Do NOT enable live or micro-live trading.",
+    "Do NOT install any credentials / API keys / .env / private keys.",
+    "Do NOT install any scheduler / cron / daemon.",
+    "Do NOT mark the Crypto-D1 lane ACTIVE or STRONG.",
+    "Do NOT claim profitability, edge, or live-readiness."
+  ],
+
+  "future_authorization_requirements": {
+    "checklist_completion_gate": {
+      "name": "Future checklist-completion gate",
+      "all_required": [
+        "explicit_operator_authorization",
+        "all_16_items_status_COMPLETE_or_documented_BLOCKED_with_reason",
+        "all_COMPLETE_items_have_non_empty_evidence_path",
+        "all_COMPLETE_items_have_approval_status_APPROVED",
+        "re_run_of_bundle_21_readiness_gate_after_completion",
+        "no_credentials_unless_separately_authorized",
+        "no_trading_permissions"
+      ]
+    },
+    "trading_gate": {
+      "name": "Future paper / live / micro-live trading gate",
+      "explicitly_forbidden_by_this_checklist": true,
+      "requires_separate_far_future_authorization_after_evidence_exists": true,
+      "note": "This checklist does NOT authorize trading and never will. A separate future authorization stack would be required, and even then only after multi-bundle evidence exists. QA_PASS does not authorize live trading. QA_PASS does not authorize paper trading."
+    }
+  },
+
+  "lane_recommendation": {
+    "current_verdict": "WATCH",
+    "evidence_level": "MIXED",
+    "rationale": "The Bundle 21 readiness gate reports NOT_READY_FOR_REAL_DATA. This checklist hands the operator a fillable template for the 16 missing items; it adds no automation, fetches no data, and authorizes no operational step. The next move is OPERATOR-DRIVEN.",
+    "do_not_promote_to_ACTIVE": true,
+    "do_not_promote_to_STRONG_evidence": true,
+    "promotion_path_only_via_data_plus_qa_plus_separate_authorization": true
+  },
+
+  "safety_boundaries": [
+    "Research-only. Operator checklist / template only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No paper-order execution. No order placement.",
+    "No scheduler / background daemon. No external network calls in this checklist's runtime.",
+    "No data fetch in this bundle. No QA run against real data in this bundle. No backtest in this bundle.",
+    "Do not create data/crypto_d1_research/. Do not modify paper / live execution files.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence.",
+    "NOT_READY_FOR_REAL_DATA is the honest default. Specification completeness is not data readiness. Crypto-D1 remains WATCH / MIXED."
+  ],
+
+  "no_profit_claim_policy": [
+    "A checklist is not strategy validation.",
+    "Specification completeness is not data readiness.",
+    "QA_PASS does not authorize automatic backtesting.",
+    "QA_PASS does not authorize paper trading.",
+    "QA_PASS does not authorize live trading.",
+    "No real data has entered SPARTA.",
+    "A good historical chart does not imply future returns.",
+    "Crypto-D1 remains WATCH / MIXED."
+  ]
+}

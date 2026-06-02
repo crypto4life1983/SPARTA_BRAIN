@@ -152,6 +152,14 @@ SEED_LANES = (
         # no real data, no data directory created, no QA run against real
         # data, no backtest; authorizes nothing; never ACTIVE, never STRONG;
         # specification completeness is not data readiness).
+        # Bundle 22: SPARTA-side Crypto-D1 Operator Missing Items Checklist v1
+        # docs added. Still WATCH (fillable operator template for the 16
+        # missing items reported by Bundle 21; default every item MISSING /
+        # PENDING / empty; default overall_readiness_status
+        # NOT_READY_FOR_REAL_DATA; anti-fake-completion validator rejects
+        # COMPLETE without evidence_path + APPROVED; no fetch, no real data,
+        # no data directory created, no QA run, no backtest; authorizes
+        # nothing operational; never ACTIVE, never STRONG).
         "extra_files": (
             "reports/crypto_d1_protocol_v1/protocol.md",
             "reports/crypto_d1_protocol_v1/protocol.json",
@@ -173,6 +181,8 @@ SEED_LANES = (
             "reports/crypto_d1_manual_dataset_intake_runbook_v1/runbook.json",
             "reports/crypto_d1_readiness_gate_v1/readiness_gate.md",
             "reports/crypto_d1_readiness_gate_v1/readiness_gate.json",
+            "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.md",
+            "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.json",
         ),
         "lane_status_override": "WATCH",
     },

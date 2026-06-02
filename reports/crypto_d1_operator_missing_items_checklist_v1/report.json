@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "layer": "crypto_d1_operator_missing_items_checklist_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "bundle": 22,
+  "branch": "bundle22/crypto-d1-operator-missing-items-checklist",
+  "what_was_built": [
+    "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.json (machine-readable operator checklist template: 11 safety flags pinned False; research_only + read_only True; lane crypto_d1_protocol; BTC/ETH/SOL spot 1d 24/7; weekday-only filters forbidden; exactly 16 items numbered 1-16; each item carries the 9 required fields (number, name, status, operator_answer, evidence_path, reviewer_notes, approval_status, blocking_reason, next_action); item_status_options = MISSING/COMPLETE/BLOCKED/NOT_APPLICABLE; approval_status_options = PENDING/APPROVED/REJECTED/WITHDRAWN; default state pins every item at MISSING/PENDING with empty operator_answer + evidence_path + reviewer_notes + blocking_reason; default overall_readiness_status = NOT_READY_FOR_REAL_DATA; checklist_completion_gate + trading_gate (explicitly_forbidden) future-authorization gates; lane_recommendation pinned WATCH/MIXED with do_not_promote_to_ACTIVE/STRONG=True; safety_boundaries + no_profit_claim_policy carrying the 8 verbatim distinction phrases)",
+    "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.md (human-readable checklist with disclaimer header and sections 0-13: what this checklist is, lane+scope, item status options, approval status options, the 16-item table, per-item required fields, anti-fake-completion rules, consistency rule, what the checklist does NOT authorize, allowed next steps, forbidden next steps, registry status, safety boundaries, no-profit-claim policy)",
+    "tools/crypto_d1_operator_missing_items_checklist_check.py (stdlib-only validator; argparse/json/pathlib/__future__ only; validate + show subcommands; enforces schema, 11 False safety flags, scope pin (lane/assets/market/timeframe/calendar), exactly 16 items numbered 1..16 with the 9 required fields, status + approval_status enums, default overall_readiness_status NOT_READY_FOR_REAL_DATA, anti-fake-completion (COMPLETE requires non-empty evidence_path AND approval_status=APPROVED), BLOCKED requires non-empty blocking_reason, consistency rule (any COMPLETE item with overall NOT_READY_FOR_REAL_DATA requires override_reason), lane_recommendation WATCH/MIXED with no ACTIVE/STRONG promotion, 8 distinction phrases verbatim in BOTH md and json, no forbidden capability phrase in either doc)",
+    "tests/test_crypto_d1_operator_missing_items_checklist.py (stdlib + pytest; existence + validation; eleven safety flags False; scope pin; exactly 16 items numbered 1..16 with all 9 fields; default state (all MISSING/PENDING/empty); 4-value enum lists; default overall_readiness_status NOT_READY_FOR_REAL_DATA; lane WATCH/MIXED + no ACTIVE/STRONG; trading_gate forbidden; checklist_completion_gate requirements; 8 user-required verbatim phrases in MD; distinction phrases in BOTH docs; no forbidden phrases; no data/crypto_d1_research/; no real-data files in checklist dir; bundle dir contains only 4 expected docs; validator failure modes (tampered flag, invalid status, invalid approval_status, dropped item, missing field, fake-completion empty evidence, fake-completion PENDING approval, BLOCKED without reason, inconsistent overall status, promotion tamper, STRONG tamper, missing distinction phrase, forbidden phrase) + a happy partial-completion path; validator stdlib-only; no network/broker/subprocess/env tokens; CLI validate+show smoke; all 9 prior Crypto-D1 validators still pass; arbitrage readiness still passes; registry classifies crypto_d1 as WATCH/never-ACTIVE/never-STRONG with checklist.md + checklist.json in source_reports; registry validator still passes)",
+    "reports/crypto_d1_operator_missing_items_checklist_v1/report.md (this build report)",
+    "reports/crypto_d1_operator_missing_items_checklist_v1/report.json (build report)"
+  ],
+  "files_changed": [
+    "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.json",
+    "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.md",
+    "reports/crypto_d1_operator_missing_items_checklist_v1/report.json",
+    "reports/crypto_d1_operator_missing_items_checklist_v1/report.md",
+    "tools/crypto_d1_operator_missing_items_checklist_check.py",
+    "tests/test_crypto_d1_operator_missing_items_checklist.py",
+    "tools/strategy_candidate_registry.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md"
+  ],
+  "files_NOT_changed": [
+    "tools/crypto_d1_data_qa_runtime_tool.py (NOT modified)",
+    "tools/crypto_d1_backtest_runner.py (NOT modified)",
+    "tools/strategy_next_bundle.py (NOT modified)",
+    "app.py and templates/*.html (NOT touched -- no JARVIS UI changes)",
+    "paper_trading/* (NOT touched)",
+    "local_secrets/* (NOT touched)",
+    "brain_memory/projects/trading_bot/lessons.md (NOT touched -- no new lesson)",
+    "All prior Crypto-D1 spec docs (Bundles 11-21) + arbitrage validators NOT modified",
+    "data/crypto_d1_research/ NOT created (the checklist is a template; no data path is created)"
+  ],
+  "lane": "crypto_d1_protocol",
+  "scope_summary": {
+    "target_assets": ["BTC", "ETH", "SOL"],
+    "allowed_market_type": "spot",
+    "timeframe": "1d",
+    "session_calendar": "24/7",
+    "weekday_only_filters_forbidden": true,
+    "pipeline_position": "Operator-side companion to the Bundle 21 readiness gate; turns the gate's 16-item missing-items prose into a fillable, schema-validated template with anti-fake-completion checks. Adds no automation."
+  },
+  "default_overall_readiness_status": "NOT_READY_FOR_REAL_DATA",
+  "items_default_summary": {
+    "total_items": 16,
+    "status_MISSING": 16,
+    "status_COMPLETE": 0,
+    "status_BLOCKED": 0,
+    "status_NOT_APPLICABLE": 0,
+    "approval_status_PENDING": 16,
+    "approval_status_APPROVED": 0,
+    "all_evidence_paths_empty": true,
+    "all_operator_answers_empty": true,
+    "override_reason_empty": true
+  },
+  "authorizes_nothing": {
+    "authorizes_nothing_operational": true,
+    "does_not_authorize_data_fetch": true,
+    "does_not_authorize_exchange_connection": true,
+    "does_not_authorize_qa_run_against_real_data": true,
+    "does_not_authorize_backtest_run": true,
+    "does_not_authorize_paper_trading": true,
+    "does_not_authorize_live_trading": true,
+    "does_not_authorize_micro_live_trading": true,
+    "does_not_create_data_crypto_d1_research_directory": true,
+    "does_not_approve_any_source": true,
+    "qa_pass_does_not_authorize_automatic_backtesting": true,
+    "qa_pass_does_not_authorize_paper_trading": true,
+    "qa_pass_does_not_authorize_live_trading": true
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "validator_modules_used": ["argparse", "json", "pathlib", "__future__"],
+    "no_network_imports": true,
+    "no_broker_exchange_vendor_imports": true,
+    "no_subprocess_import": true,
+    "no_os_environ_or_getenv_access": true,
+    "no_dotenv_or_credentials_reads": true,
+    "eleven_safety_flags_pinned_false_in_checklist": [
+      "data_fetch_enabled", "exchange_connection_enabled", "live_trading_enabled",
+      "broker_control_enabled", "paper_order_execution_enabled", "order_placement_enabled",
+      "backtest_execution_enabled", "dataset_processing_enabled", "scheduler_enabled",
+      "network_calls_enabled", "credentials_required"
+    ],
+    "research_only_and_read_only_true": true,
+    "no_real_data_files_created": true,
+    "no_data_crypto_d1_research_directory_created": true,
+    "no_qa_run_against_real_data": true,
+    "no_backtest_run": true,
+    "candidate_registry_stays_WATCH_never_ACTIVE_never_STRONG": true
+  },
+  "candidate_registry_status_after_build": {
+    "status": "WATCH (unchanged disposition)",
+    "evidence_level": "MIXED",
+    "lane_status_override_active": "WATCH",
+    "note": "The crypto_d1_protocol seed extra_files were extended with checklist.md + checklist.json for traceability only. The lane stays WATCH; evidence does NOT become STRONG; the candidate is NOT marked ACTIVE. Promotion to ACTIVE still requires real operator-supplied data + QA_PASS + a separately authorized backtest."
+  },
+  "what_was_executed_in_this_bundle": "ONLY the new validator (validate + show) and the test suite. NO real dataset was acquired, placed, QA-checked, or backtested. No data directory was created. No item in the default checklist was marked COMPLETE.",
+  "real_local_data_found_on_disk_at_build_time": false,
+  "any_real_qa_or_backtest_run_executed_against_real_data_in_this_bundle": false,
+  "any_item_completed_in_default_checklist": false,
+  "recommended_next_bundle": [
+    "Operator step (NOT a bundle): operator follows the Bundle 20 runbook, fills items 1-13 in this checklist with evidence_path + approval_status=APPROVED for each. After each fill, re-run python tools/crypto_d1_operator_missing_items_checklist_check.py validate to catch fake-completion or inconsistency. After items 1-13 COMPLETE, operator runs the Bundle 19 QA tool to populate item 14, then accepts QA_PASS or attaches QA_WARN acceptance memo for item 15. Item 16 requires a separately authorized backtest bundle.",
+    "Crypto-D1 Baseline Results Report v1 (separately authorized; only AFTER operator has supplied data, reached QA_PASS or accepted QA_WARN, and run the backtest runner to produce output; documents the operator-reviewed run + pins verdict + caveats. Spec bundle; Claude works.)",
+    "Crypto-D1 Backtest Runner v2 (future) -- walk-forward + per-family parameter sweep + structured sensitivity sweep + per-strategy report emitter matching the full Bundle 15 schema. (Code bundle; recommend Codex.)"
+  ],
+  "no_profit_claim_policy": [
+    "A checklist is not strategy validation.",
+    "Specification completeness is not data readiness.",
+    "QA_PASS does not authorize automatic backtesting.",
+    "QA_PASS does not authorize paper trading.",
+    "QA_PASS does not authorize live trading.",
+    "No real data has entered SPARTA.",
+    "A good historical chart does not imply future returns.",
+    "Crypto-D1 remains WATCH / MIXED."
+  ]
+}
