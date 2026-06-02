@@ -77,6 +77,32 @@ def raw_full(tmp_path):
     return raw
 
 
+# Noisy filenames that mimic the full Kraken dump and must all be ignored.
+_NOISE_FILENAMES = (
+    "XBTUSD_1.csv", "XBTUSD_5.csv", "XBTUSD_60.csv", "XBTUSD_240.csv",
+    "XBTUSD1_1440.csv", "XBTUSDC_1440.csv", "XXBTZUSD_1440.csv",
+    "ETHUSD_1.csv", "ETHUSD_60.csv", "ETHUSD1_1440.csv", "ETHUSDC_1440.csv",
+    "XETHZUSD_1440.csv", "SOLUSD_1.csv", "SOLUSD_240.csv", "SOLUSDC_1440.csv",
+    "DOGEUSD_1440.csv", "README.txt",
+)
+
+
+@pytest.fixture
+def raw_full_noisy(tmp_path):
+    """A full-dump-style raw dir: the 3 exact daily files surrounded by many
+    other intervals / quote / name variants that must all be ignored."""
+    raw = tmp_path / "kraken_dump"
+    raw.mkdir()
+    rows = _full_rows()
+    _write_raw(raw / "XBTUSD_1440.csv", rows)
+    _write_raw(raw / "ETHUSD_1440.csv", rows)
+    _write_raw(raw / "SOLUSD_1440.csv", rows)
+    # garbage rows in the noise files; they should never be parsed
+    for name in _NOISE_FILENAMES:
+        (raw / name).write_text("not,real,data\n", encoding="utf-8")
+    return raw
+
+
 def _minimal_raw(tmp_path, btc_rows=None):
     """A tiny valid raw dir; BTC rows can be overridden to probe errors."""
     from datetime import date
@@ -133,6 +159,103 @@ def test_classify_xbt_maps_to_btc():
     assert norm.classify_raw_file(Path("ethusd_1440.csv")) == "ETH"
     assert norm.classify_raw_file(Path("SOLUSD_1440.csv")) == "SOL"
     assert norm.classify_raw_file(Path("DOGEUSD_1440.csv")) is None
+
+
+def test_classify_rejects_non_exact_variants():
+    # Lower intervals, alternate quotes, and alternate venue names are NOT the
+    # approved daily file and must be ignored (return None).
+    for variant in (
+        "XBTUSD_1.csv", "XBTUSD_5.csv", "XBTUSD_60.csv", "XBTUSD_240.csv",
+        "XBTUSD1_1440.csv", "XBTUSDC_1440.csv", "XXBTZUSD_1440.csv",
+        "ETHUSD1_1440.csv", "ETHUSDC_1440.csv", "XETHZUSD_1440.csv",
+        "SOLUSD_240.csv", "SOLUSDC_1440.csv",
+    ):
+        assert norm.classify_raw_file(Path(variant)) is None, variant
+
+
+# --- exact-filename selection against a noisy full dump --------------------
+
+
+def test_full_dump_selects_only_exact_daily_files(raw_full_noisy):
+    # (1) Full dump with noisy variants still selects only the exact _1440 files.
+    result = norm.normalize(raw_full_noisy)
+    assert {r[6] for r in result["rows"]} == {"BTC", "ETH", "SOL"}
+    assert result["per_asset"]["BTC"]["raw_file"] == "XBTUSD_1440.csv"
+    assert result["per_asset"]["ETH"]["raw_file"] == "ETHUSD_1440.csv"
+    assert result["per_asset"]["SOL"]["raw_file"] == "SOLUSD_1440.csv"
+
+
+def test_eth_variant_does_not_collide(tmp_path):
+    # (2) ETHUSD1_1440.csv must not collide with ETHUSD_1440.csv.
+    from datetime import date
+
+    raw = tmp_path / "eth_variant"
+    raw.mkdir()
+    one = [(date(2021, 6, 17), 100, 110, 90, 105, 1000, 42)]
+    _write_raw(raw / "XBTUSD_1440.csv", one)
+    _write_raw(raw / "ETHUSD_1440.csv", one)
+    _write_raw(raw / "SOLUSD_1440.csv", one)
+    (raw / "ETHUSD1_1440.csv").write_text("not,real,data\n", encoding="utf-8")
+    result = norm.normalize(raw)  # must NOT raise a duplicate error
+    assert result["per_asset"]["ETH"]["raw_file"] == "ETHUSD_1440.csv"
+
+
+def test_btc_quote_variant_does_not_collide(tmp_path):
+    # (3) XBTUSDC_1440.csv must not collide with XBTUSD_1440.csv.
+    from datetime import date
+
+    raw = tmp_path / "btc_variant"
+    raw.mkdir()
+    one = [(date(2021, 6, 17), 100, 110, 90, 105, 1000, 42)]
+    _write_raw(raw / "XBTUSD_1440.csv", one)
+    _write_raw(raw / "ETHUSD_1440.csv", one)
+    _write_raw(raw / "SOLUSD_1440.csv", one)
+    (raw / "XBTUSDC_1440.csv").write_text("not,real,data\n", encoding="utf-8")
+    result = norm.normalize(raw)  # must NOT raise a duplicate error
+    assert result["per_asset"]["BTC"]["raw_file"] == "XBTUSD_1440.csv"
+
+
+def test_missing_exact_file_fails_even_with_variants(tmp_path):
+    # (4) Missing the exact daily file fails even when variants are present.
+    from datetime import date
+
+    raw = tmp_path / "missing_exact"
+    raw.mkdir()
+    one = [(date(2021, 6, 17), 100, 110, 90, 105, 1000, 42)]
+    _write_raw(raw / "XBTUSD_1440.csv", one)
+    _write_raw(raw / "SOLUSD_1440.csv", one)
+    # only an ETH *variant* exists, not the exact ETHUSD_1440.csv
+    (raw / "ETHUSD1_1440.csv").write_text("not,real,data\n", encoding="utf-8")
+    with pytest.raises(norm.KrakenNormalizeError, match="missing required"):
+        norm.normalize(raw)
+
+
+def test_duplicate_exact_filename_in_subfolders_fails(tmp_path):
+    # (5) Same exact filename in two different subfolders is a hard error.
+    from datetime import date
+
+    raw = tmp_path / "dup_folders"
+    sub_a = raw / "a"
+    sub_b = raw / "b"
+    sub_a.mkdir(parents=True)
+    sub_b.mkdir(parents=True)
+    one = [(date(2021, 6, 17), 100, 110, 90, 105, 1000, 42)]
+    _write_raw(sub_a / "XBTUSD_1440.csv", one)
+    _write_raw(sub_b / "XBTUSD_1440.csv", one)
+    _write_raw(raw / "ETHUSD_1440.csv", one)
+    _write_raw(raw / "SOLUSD_1440.csv", one)
+    with pytest.raises(norm.KrakenNormalizeError, match="duplicate exact daily file"):
+        norm.normalize(raw)
+
+
+def test_dry_run_with_noisy_folder_reports_expected_counts(raw_full_noisy):
+    # (6) Dry-run over a noisy folder succeeds and reports 1659/asset, 4977 total.
+    result = norm.normalize(raw_full_noisy)
+    assert result["row_count_expected_per_asset"] == 1659
+    assert result["per_asset"]["BTC"]["row_count"] == 1659
+    assert result["per_asset"]["ETH"]["row_count"] == 1659
+    assert result["per_asset"]["SOL"]["row_count"] == 1659
+    assert result["row_count_total"] == 4977
 
 
 def test_header_row_is_skipped(tmp_path):

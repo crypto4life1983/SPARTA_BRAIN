@@ -24,9 +24,11 @@ Hard boundaries (asserted by the companion test suite via source + AST scan):
 - **Input is read-only.** ``--raw-dir`` files are opened for reading only.
 
 The raw input is the standard Kraken daily OHLCVT CSV (no header):
-``unix_time, open, high, low, close, volume[, trade_count]`` with the daily
-file named like ``XBTUSD_1440.csv`` / ``ETHUSD_1440.csv`` / ``SOLUSD_1440.csv``
-(``1440`` = daily in minutes). A leading header row, if present, is skipped.
+``unix_time, open, high, low, close, volume[, trade_count]``. The tool selects
+ONLY the three exact daily filenames ``XBTUSD_1440.csv`` / ``ETHUSD_1440.csv`` /
+``SOLUSD_1440.csv`` (``1440`` = daily in minutes); pointing ``--raw-dir`` at the
+full Kraken dump ignores every other interval / quote / name variant. A leading
+header row, if present, is skipped.
 
 Output canonical CSV schema (one combined file, all three assets)::
 
@@ -90,14 +92,18 @@ OPERATOR_LABEL = "Mahmoud Cherif — operator manual Kraken intake"
 SOURCE_NAME = "Kraken"
 SOURCE_TYPE = "operator_manual_offline_file"
 
-# Per-asset Kraken USD-quote symbol aliases. The tool matches a raw file to a
-# canonical asset by checking whether the (upper-cased) filename starts with
-# one of these venue tokens. Adding an asset requires a new dataset version.
-SYMBOL_ALIASES: dict[str, tuple[str, ...]] = {
-    "BTC": ("XBTUSD", "XXBTZUSD"),
-    "ETH": ("ETHUSD", "XETHZUSD"),
-    "SOL": ("SOLUSD",),
+# Exact approved Kraken daily (1440-minute) USD-quote export filenames, one per
+# canonical asset. Matching is by EXACT filename (case-insensitive) only -- no
+# prefix matching -- so that pointing --raw-dir at the full Kraken dump selects
+# precisely these three files and ignores every other interval / quote / name
+# variant (e.g. XBTUSD1_1440.csv, XBTUSDC_1440.csv, ETHUSD1_1440.csv, lower
+# intervals like XBTUSD_60.csv). Adding an asset requires a new dataset version.
+EXPECTED_DAILY_FILES: dict[str, str] = {
+    "BTC": "XBTUSD_1440.csv",
+    "ETH": "ETHUSD_1440.csv",
+    "SOL": "SOLUSD_1440.csv",
 }
+_FILENAME_TO_ASSET = {v.upper(): k for k, v in EXPECTED_DAILY_FILES.items()}
 ASSET_ORDER = ("BTC", "ETH", "SOL")
 
 CSV_HEADER = (
@@ -169,13 +175,11 @@ def expected_rows_per_asset() -> int:
 # --------------------------------------------------------------------------
 
 def classify_raw_file(path: Path) -> str | None:
-    """Return the canonical asset (BTC/ETH/SOL) a raw file maps to, else None."""
-    stem = path.name.upper()
-    for asset, aliases in SYMBOL_ALIASES.items():
-        for alias in aliases:
-            if stem.startswith(alias):
-                return asset
-    return None
+    """Return the canonical asset (BTC/ETH/SOL) for an EXACT approved daily
+    filename (case-insensitive), else None. No prefix / interval / quote-variant
+    matching: only ``XBTUSD_1440.csv`` / ``ETHUSD_1440.csv`` / ``SOLUSD_1440.csv``
+    are recognized."""
+    return _FILENAME_TO_ASSET.get(path.name.upper())
 
 
 def _looks_like_header(fields: list[str]) -> bool:
@@ -299,23 +303,24 @@ def normalize(raw_dir: Path) -> dict:
         raise KrakenNormalizeError(f"--raw-dir is not a directory: {raw_dir}")
 
     found: dict[str, Path] = {}
-    for p in sorted(raw_dir.iterdir()):
-        if not p.is_file() or p.suffix.lower() != ".csv":
+    for p in sorted(raw_dir.rglob("*")):
+        if not p.is_file():
             continue
         asset = classify_raw_file(p)
         if asset is None:
             continue
         if asset in found:
             raise KrakenNormalizeError(
-                f"two raw files map to {asset}: {found[asset].name} and "
-                f"{p.name} (single source per asset required)"
+                f"duplicate exact daily file for {asset}: {found[asset]} and "
+                f"{p} (expected exactly one {EXPECTED_DAILY_FILES[asset]})"
             )
         found[asset] = p
 
     missing_assets = [a for a in ASSET_ORDER if a not in found]
     if missing_assets:
+        wanted = ", ".join(f"{a} ({EXPECTED_DAILY_FILES[a]})" for a in missing_assets)
         raise KrakenNormalizeError(
-            f"missing required raw file(s) for: {', '.join(missing_assets)}"
+            f"missing required raw file(s) for: {wanted}"
         )
 
     rows: list[list[str]] = []
