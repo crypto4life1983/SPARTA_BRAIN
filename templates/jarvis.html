@@ -474,14 +474,14 @@
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Idea Intake</span><span class="nst">Passed</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Research Review</span><span class="nst">Passed</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
-              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Data-readiness / QA tooling &middot; You are here</span></div>
+              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Operator readiness / missing-items review &middot; You are here</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Run Tests</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Generate Report</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Decision</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Commit / Archive / Promote</span><span class="nst">Not started</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only snapshot trued to the Crypto-D1 research candidate (registry status WATCH). You are here: <b>Data-readiness / QA tooling</b> &mdash; the authorization &amp; freeze gate is complete and the next build is the QA runtime tool (data-readiness check). No live controller.</div>
+            <div class="jv-detail">Display-only snapshot trued to the Crypto-D1 research candidate (registry status WATCH / MIXED). You are here: <b>Operator readiness / missing-items review</b> &mdash; the Bundle&nbsp;21 readiness gate is complete (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>) and <b>16 operator items</b> are still pending before real-data intake. No live controller.</div>
           </div>
 
           <!-- Pipeline (machine process) -->
@@ -490,7 +490,7 @@
             <p class="jv-sf-sub">Raw Data &rarr; Data QA &rarr; Dataset Freeze &rarr; Strategy Engine &rarr; Backtest &rarr; Fees / Slippage &rarr; OOS Validation &rarr; Stress Test &rarr; Risk Scoring &rarr; Final Report &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
             <div class="jv-sf-lane">
               <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
-              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">QA runtime tool next &middot; You are here</span></div>
+              <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Not started</span></div>
@@ -503,7 +503,7 @@
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only, trued to Crypto-D1: the authorization &amp; freeze gate is complete, but <b>no real data has been fetched</b> (<code>data/crypto_d1_research/</code> does not exist) and there are <b>no baseline results yet</b>. Next is the Data QA / QA runtime tool. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution.</div>
+            <div class="jv-detail">Display-only, trued to Crypto-D1: <b>Readiness gate complete; real-data intake not ready</b> (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>, <b>16 operator items pending</b>). <b>No real data has been fetched</b> (<code>data/crypto_d1_research/</code> does not exist), no QA run against real data, and <b>no baseline results yet</b>. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution.</div>
           </div>
 
           <!-- Combined View -->
@@ -516,7 +516,7 @@
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Idea Intake</span><span class="nst">Passed</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Research Review</span><span class="nst">Passed</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
-                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Data-readiness / QA tooling</span></div>
+                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Operator readiness / missing-items review</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Run Tests</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Generate Report</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Decision</span><span class="nst">Not started</span></div>
@@ -530,7 +530,7 @@
               <div class="jv-sf-lanetag">Pipeline &middot; machine</div>
               <div class="jv-sf-lane">
                 <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
-                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">QA runtime tool next</span></div>
+                <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Not started</span></div>
@@ -553,21 +553,27 @@
             <div class="jv-sf-here">&#x25C9; You are here</div>
             <div style="margin-top:12px;">
               <div class="jv-row"><span class="k">Candidate</span><span class="v"><span class="jv-led warn"></span>Crypto-D1 Protocol</span></div>
-              <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Data-readiness / QA tooling</span></div>
-              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>Authorization gate complete; QA runtime tool next</span></div>
+              <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator readiness / missing-items review</span></div>
+              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>Readiness gate complete; real-data intake not ready</span></div>
+              <div class="jv-row"><span class="k">Readiness gate</span><span class="v"><span class="jv-led"></span>Complete (Bundle 21)</span></div>
+              <div class="jv-row"><span class="k">Readiness status</span><span class="v"><span class="jv-led warn"></span>NOT_READY_FOR_REAL_DATA</span></div>
+              <div class="jv-row"><span class="k">Missing operator items</span><span class="v"><span class="jv-led warn"></span>16 listed</span></div>
               <div class="jv-row"><span class="k">Data fetched</span><span class="v"><span class="jv-led warn"></span>No</span></div>
+              <div class="jv-row"><span class="k">QA run</span><span class="v"><span class="jv-led warn"></span>None against real data</span></div>
               <div class="jv-row"><span class="k">Baseline results</span><span class="v"><span class="jv-led warn"></span>None yet</span></div>
               <div class="jv-row"><span class="k">Status</span><span class="v"><span class="jv-led warn"></span>WATCH / MIXED</span></div>
               <div class="jv-row"><span class="k">Paper Trading Gate</span><span class="v"><span class="jv-led lock"></span>Human approval required</span></div>
               <div class="jv-row"><span class="k">Micro-Live Gate</span><span class="v"><span class="jv-led lock"></span>Locked &middot; never automated</span></div>
             </div>
             <div class="jv-detail" style="margin-top:10px;">
-              Trued to the Crypto-D1 research candidate: the authorization &amp; freeze
-              gate is complete, no real data has been fetched
-              (<code>data/crypto_d1_research/</code> does not exist), and there are no
-              baseline results yet. Live factory reports and the survival ledger are
-              shown in the read-only panels below this section. This card is an
-              orientation map only &mdash; it stages, promotes, and executes nothing.
+              Trued to the Crypto-D1 research candidate: the Bundle&nbsp;21 readiness
+              gate is complete (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>),
+              16 operator items are still pending, no real data has been fetched
+              (<code>data/crypto_d1_research/</code> does not exist), no QA run against
+              real data, and there are no baseline results yet. Live factory reports
+              and the survival ledger are shown in the read-only panels below this
+              section. This card is an orientation map only &mdash; it stages,
+              promotes, and executes nothing.
             </div>
           </div>
 
@@ -576,7 +582,7 @@
             <h3>Strategy Board</h3>
             <p class="jv-sf-sub">Trued to the candidate registry &mdash; 9 candidates (2 WATCH &middot; 4 IDEA &middot; 3 PARKED). Display-only: no candidate has a passed backtest, baseline result, or live status, and no promotion, archiving, or execution happens from this board.</p>
             <div class="jv-sf-board">
-              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH / MIXED</span> &middot; authorization complete, QA tooling next</div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH / MIXED</span> &middot; readiness gate complete &middot; NOT_READY_FOR_REAL_DATA &middot; 16 operator items pending</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">Arbitrage Research Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH</span> &middot; research-only</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-4H Protocol</span><span class="jv-led"></span></div><div class="jv-detail">Registry: IDEA &middot; not started</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">NQ/ES Futures Trend</span><span class="jv-led"></span></div><div class="jv-detail">Registry: IDEA &middot; not started</div></div>

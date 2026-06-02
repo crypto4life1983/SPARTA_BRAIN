@@ -171,22 +171,42 @@ def test_pipeline_oos_validation_not_active():
     # OOS Validation must not be shown as the active stage for Crypto-D1
     assert ('is-active"><span class="ndot"></span>'
             '<span class="nlbl">OOS Validation') not in block
-    # the real next step is the Data QA / QA runtime tool
+    # post-Bundle-21: the QA runtime tool is built, so Data QA is no longer the
+    # "active / next" pipeline node -- it is a watch node awaiting operator data.
     assert ('is-active"><span class="ndot"></span>'
+            '<span class="nlbl">Data QA') not in block
+    assert ('is-watch"><span class="ndot"></span>'
             '<span class="nlbl">Data QA') in block
+    # the stale "QA runtime tool next" framing must be gone from the panel
+    assert "QA runtime tool next" not in block
 
 
 def test_current_run_reflects_real_crypto_d1_state():
     block = _strategy_flow_block(_page())
     for token in (
-        "Data-readiness / QA tooling",
-        "Authorization gate complete",
+        "Operator readiness / missing-items review",
+        "Readiness gate complete; real-data intake not ready",
+        "Complete (Bundle 21)",
+        "NOT_READY_FOR_REAL_DATA",
+        "16 listed",
+        "None against real data",
         "Data fetched",
         "None yet",
         "WATCH / MIXED",
         "data/crypto_d1_research/",
     ):
         assert token in block, f"missing truthful Current Run token: {token}"
+    # the stale Bundle-19-era framing must be gone
+    for stale in ("Data-readiness / QA tooling", "Authorization gate complete"):
+        assert stale not in block, f"stale Current Run token still present: {stale}"
+
+
+def test_strategy_board_crypto_d1_reflects_readiness_gate():
+    block = _strategy_flow_block(_page())
+    # the board card must carry the post-Bundle-21 truth, not the old "QA tooling next"
+    assert "readiness gate complete" in block
+    assert "16 operator items pending" in block
+    assert "authorization complete, QA tooling next" not in block
 
 
 def test_strategy_board_trued_to_registry_no_fake_pass():
