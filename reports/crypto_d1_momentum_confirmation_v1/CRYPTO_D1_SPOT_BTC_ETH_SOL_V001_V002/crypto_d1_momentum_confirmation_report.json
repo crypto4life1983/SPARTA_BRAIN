@@ -1,0 +1,735 @@
+{
+  "IS_OOS_summary": {
+    "is_window": {
+      "end": "2024-06-16",
+      "start": "2021-06-17"
+    },
+    "oos_window": {
+      "end": "2025-12-31",
+      "start": "2024-06-17"
+    },
+    "per_asset_is_range": {
+      "BTC": {
+        "end": "2024-06-16",
+        "n_bars": 1095,
+        "start": "2021-06-17"
+      },
+      "ETH": {
+        "end": "2024-06-16",
+        "n_bars": 1096,
+        "start": "2021-06-17"
+      },
+      "SOL": {
+        "end": "2024-06-16",
+        "n_bars": 1096,
+        "start": "2021-06-17"
+      }
+    },
+    "per_asset_oos_range": {
+      "BTC": {
+        "end": "2025-12-31",
+        "n_bars": 563,
+        "start": "2024-06-17"
+      },
+      "ETH": {
+        "end": "2025-12-31",
+        "n_bars": 563,
+        "start": "2024-06-17"
+      },
+      "SOL": {
+        "end": "2025-12-31",
+        "n_bars": 563,
+        "start": "2024-06-17"
+      }
+    },
+    "split_method": "explicit_utc_date_windows",
+    "trade_count_floor_per_asset_for_oos_verdict": 20,
+    "trade_count_floor_per_family_for_oos_verdict": 30
+  },
+  "assets_missing": [],
+  "assets_seen": [
+    "BTC",
+    "ETH",
+    "SOL"
+  ],
+  "basket_oos_reporting": "allocate_once_oos_window_split",
+  "batch_label": "Momentum confirmation pass, N=20/N=30 (momentum_confirmation_v1)",
+  "benchmark_results": [
+    {
+      "asset": "BTC",
+      "family": "buy_and_hold_benchmark",
+      "is_metrics": {
+        "annualized_return_approx": 0.20264743018492348,
+        "annualized_vol_approx": 0.5784395859998948,
+        "end_equity": 173946.21489461104,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.7667251827270063,
+        "n_bars": 1095,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.3503346504797484,
+        "start_equity": 100000.0,
+        "total_cost_paid": 564.4804638874738,
+        "total_return": 0.7394621489461104,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "label": "A0. Buy & Hold benchmark (per-asset)",
+      "metrics": {
+        "annualized_return_approx": 0.1994164491193824,
+        "annualized_vol_approx": 0.5389705376506518,
+        "end_equity": 228411.79309946296,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.7667251827270063,
+        "n_bars": 1658,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.36999508356918664,
+        "start_equity": 100000.0,
+        "total_cost_paid": 564.4804638874738,
+        "total_return": 1.2841179309946296,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 0.1948761126205263,
+        "annualized_vol_approx": 0.4534122918723104,
+        "end_equity": 131603.6373699756,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.32129297527781864,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.4297989183659078,
+        "start_equity": 100000.0,
+        "total_cost_paid": 0.0,
+        "total_return": 0.316036373699756,
+        "trade_count": 0,
+        "turnover": 0
+      },
+      "parameters": {},
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "buy_and_hold_benchmark_btc",
+      "warnings": [
+        "OOS trade_count 0 below per-asset floor 20 (Bundle 15)."
+      ]
+    },
+    {
+      "asset": "ETH",
+      "family": "buy_and_hold_benchmark",
+      "is_metrics": {
+        "annualized_return_approx": 0.14889387693383904,
+        "annualized_vol_approx": 0.7233172944454795,
+        "end_equity": 151706.74665576176,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.7932916425063543,
+        "n_bars": 1096,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.2058486338944603,
+        "start_equity": 100000.0,
+        "total_cost_paid": 564.8168837136751,
+        "total_return": 0.5170674665576176,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "label": "A0. Buy & Hold benchmark (per-asset)",
+      "metrics": {
+        "annualized_return_approx": 0.04909632025701094,
+        "annualized_vol_approx": 0.7211301374527803,
+        "end_equity": 124339.78305136185,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.7932916425063543,
+        "n_bars": 1659,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.06808246904009857,
+        "start_equity": 100000.0,
+        "total_cost_paid": 564.8168837136751,
+        "total_return": 0.24339783051361863,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "oos_metrics": {
+        "annualized_return_approx": -0.10341054038101927,
+        "annualized_vol_approx": 0.7176208705002296,
+        "end_equity": 84504.00571879352,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.6326270340421286,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": -0.14410191318562854,
+        "start_equity": 100000.0,
+        "total_cost_paid": 0.0,
+        "total_return": -0.15495994281206482,
+        "trade_count": 0,
+        "turnover": 0
+      },
+      "parameters": {},
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "buy_and_hold_benchmark_eth",
+      "warnings": [
+        "OOS trade_count 0 below per-asset floor 20 (Bundle 15)."
+      ]
+    },
+    {
+      "asset": "SOL",
+      "family": "buy_and_hold_benchmark",
+      "is_metrics": {
+        "annualized_return_approx": 0.5652850200622679,
+        "annualized_vol_approx": 1.1011667140336732,
+        "end_equity": 383984.25760286127,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.9627710983105888,
+        "n_bars": 1096,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.5133509875099455,
+        "start_equity": 100000.0,
+        "total_cost_paid": 561.5129056989522,
+        "total_return": 2.839842576028613,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "label": "A0. Buy & Hold benchmark (per-asset)",
+      "metrics": {
+        "annualized_return_approx": 0.28813798080946795,
+        "annualized_vol_approx": 1.0191130473756078,
+        "end_equity": 316083.3631484786,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.9627710983105888,
+        "n_bars": 1659,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 0.28273407111357574,
+        "start_equity": 100000.0,
+        "total_cost_paid": 561.5129056989522,
+        "total_return": 2.160833631484786,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "oos_metrics": {
+        "annualized_return_approx": -0.08681386021091753,
+        "annualized_vol_approx": 0.8365850841003962,
+        "end_equity": 86928.88081598442,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.5970326182555159,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": -0.10377170458910458,
+        "start_equity": 100000.0,
+        "total_cost_paid": 0.0,
+        "total_return": -0.13071119184015578,
+        "trade_count": 0,
+        "turnover": 0
+      },
+      "parameters": {},
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "buy_and_hold_benchmark_sol",
+      "warnings": [
+        "OOS trade_count 0 below per-asset floor 20 (Bundle 15)."
+      ]
+    },
+    {
+      "asset": "BASKET",
+      "basket_oos_reporting": "allocate_once_oos_window_split",
+      "family": "buy_and_hold_benchmark",
+      "is_metrics": null,
+      "label": "A. Buy-and-hold benchmark (equal-weight, allocate once, no rebalance)",
+      "metrics": {
+        "annualized_return_approx": 0.19303695389890763,
+        "annualized_vol_approx": 0.7315369099764388,
+        "end_equity": 222944.97976643508,
+        "exposure_pct": 100.0,
+        "max_drawdown": -0.8836003042598654,
+        "n_bars": 1658,
+        "sharpe_caveat": "Sharpe-like; rf=0; daily-return approximation.",
+        "sharpe_like_with_caveat": 0.26387862494200726,
+        "start_equity": 100000.0,
+        "total_cost_paid": 600.0000000000001,
+        "total_return": 1.2294497976643508,
+        "trade_count": 1,
+        "turnover": 1
+      },
+      "oos_metrics": {
+        "annualized_return_approx": -0.014722286230468007,
+        "annualized_vol_approx": 0.6580004722556793,
+        "end_value": 222944.97976643508,
+        "entry_value": 228104.18041823,
+        "max_drawdown": -0.5085312928301021,
+        "n_bars": 563,
+        "note": "Benchmark-only OOS view of the allocate-once basket curve; construction unchanged (no rebalance, no second entry cost).",
+        "oos_window": {
+          "end": "2025-12-31",
+          "start": "2024-06-17"
+        },
+        "sharpe_caveat": "Sharpe-like; rf=0; daily-return approximation.",
+        "sharpe_like_with_caveat": -0.022374279124753222,
+        "total_return": -0.022617738273518317
+      },
+      "parameters": {
+        "basket_weights": "equal-weight 1/N per covered asset at entry",
+        "covered_assets": [
+          "BTC",
+          "ETH",
+          "SOL"
+        ],
+        "rebalance_frequency": "none (allocate once at first common date)"
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "buy_and_hold_basket_equal_weight",
+      "warnings": [
+        "Equal-weight allocate-once basket; one entry, no rebalance. OOS figure is a window-sliced view of the same curve (allocate_once_oos_window_split), NOT a re-entered basket."
+      ]
+    }
+  ],
+  "broker_control_enabled": false,
+  "config_mode": "momentum_confirmation_v1",
+  "cost_model": {
+    "cost_source": "v002_fees_json",
+    "default_assumption": "TAKER on every leg",
+    "fee_bps": 40.0,
+    "fees_as_distinct_pnl_line": true,
+    "fees_json_used": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002/fees.json",
+    "no_zero_slippage_baseline": true,
+    "round_trip_bps": 120.0,
+    "slippage_bps": 10.0,
+    "spread_proxy_bps": 10.0,
+    "total_per_side_bps": 60.0
+  },
+  "csv_files_seen": [
+    "daily_ohlcv.csv"
+  ],
+  "data_contract_version": "crypto_d1_data_contract_v1",
+  "data_fetch_enabled": false,
+  "dataset_manifest_spec_version": "crypto_d1_dataset_manifest_v1",
+  "exchange_connection_enabled": false,
+  "failures": [],
+  "family_oos_trade_counts": {
+    "momentum_20": {
+      "meets_family_floor": true,
+      "oos_trades_total": 86,
+      "per_asset": {
+        "BTC": 32,
+        "ETH": 31,
+        "SOL": 23
+      }
+    },
+    "momentum_30": {
+      "meets_family_floor": true,
+      "oos_trades_total": 64,
+      "per_asset": {
+        "BTC": 27,
+        "ETH": 19,
+        "SOL": 18
+      }
+    }
+  },
+  "family_trade_floor": {
+    "enforced_in_classify_run": false,
+    "per_family_floor": 30,
+    "review_mode": "operator-side review only (classify_run unchanged)"
+  },
+  "forbidden_next_steps": [
+    "Trade live or paper based on these results.",
+    "Connect SPARTA's runtime to any exchange or vendor over the network.",
+    "Promote crypto_d1_protocol to ACTIVE / STRONG without a separate operator decision.",
+    "Schedule a daemon / cron / background process that touches this runner.",
+    "Modify paper / live execution files.",
+    "Install or read any API key, OAuth token, or .env credential.",
+    "Use any synthetic / mock-priced data as evidence."
+  ],
+  "generated_at": "2026-06-03T20:47:44Z",
+  "input_data_dir": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002",
+  "input_data_hash_short": "2a3be425522a04ec",
+  "live_trading_enabled": false,
+  "missing_days_per_symbol": {
+    "BTC": {
+      "count": 1,
+      "dates": [
+        "2024-03-31"
+      ]
+    }
+  },
+  "momentum_confirmation_lookbacks": [
+    20,
+    30
+  ],
+  "next_action": "4 strategy result(s) show positive OOS + above-benchmark risk-adjusted return; this is INCOMPLETE evidence and does NOT promote the lane. PASS requires explicit operator review.",
+  "order_placement_enabled": false,
+  "paper_order_execution_enabled": false,
+  "pass_watch_fail_status": "WATCH",
+  "plan_version": "crypto_d1_baseline_backtest_plan_v1",
+  "primary_basket_benchmark": "buy_and_hold_basket_equal_weight",
+  "protocol_version": "crypto_d1_protocol_v1",
+  "qa_freeze_spec_version": "crypto_d1_qa_freeze_spec_v1",
+  "research_only": true,
+  "row_counts_per_symbol": {
+    "BTC": 1658,
+    "ETH": 1659,
+    "SOL": 1659
+  },
+  "rows_rejected": 0,
+  "rows_rejected_detail": [],
+  "run_id": "2a3be425522a04ec",
+  "runner_version": "crypto_d1_backtest_runner_v1",
+  "safety_notes": [
+    "Research-only. Local-only.",
+    "No data was fetched. No exchange was contacted. No order was placed.",
+    "Results do not imply profitability. Crypto trend ideas are not profitable until tested with full costs AND forward-validated under a separately authorized future plan; neither is authorized by this runner.",
+    "A future PASS verdict is not trading authorization."
+  ],
+  "start_equity": 100000.0,
+  "strategies_deferred": [
+    "volatility_regime_gate",
+    "mean_reversion"
+  ],
+  "strategy_results": [
+    {
+      "asset": "BTC",
+      "family": "momentum_20",
+      "is_metrics": {
+        "annualized_return_approx": 1.350661424010252,
+        "annualized_vol_approx": 0.3786951221594748,
+        "end_equity": 1298883.6226825349,
+        "exposure_pct": 52.83363802559415,
+        "max_drawdown": -0.19017163168271597,
+        "n_bars": 1095,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 3.5666195442609,
+        "start_equity": 100000.0,
+        "total_cost_paid": 309829.46073570143,
+        "total_return": 11.988836226825349,
+        "trade_count": 58,
+        "turnover": 116
+      },
+      "label": "M. Time-series momentum (N=20)",
+      "metrics": {
+        "annualized_return_approx": 1.130939656730622,
+        "annualized_vol_approx": 0.3516508019630374,
+        "end_equity": 3108301.972702824,
+        "exposure_pct": 51.35787567893784,
+        "max_drawdown": -0.19017163168271597,
+        "n_bars": 1658,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 3.2160872388668604,
+        "start_equity": 100000.0,
+        "total_cost_paid": 1241933.2248790187,
+        "total_return": 30.08301972702824,
+        "trade_count": 90,
+        "turnover": 180
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 0.760678191769314,
+        "annualized_vol_approx": 0.29228471149810675,
+        "end_equity": 239305.6559049819,
+        "exposure_pct": 48.57651245551602,
+        "max_drawdown": -0.14561186350830513,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.602524736481953,
+        "start_equity": 100000.0,
+        "total_cost_paid": 71761.9152221105,
+        "total_return": 1.393056559049819,
+        "trade_count": 32,
+        "turnover": 64
+      },
+      "parameters": {
+        "lookback": 20
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "momentum_20_btc",
+      "warnings": []
+    },
+    {
+      "asset": "BTC",
+      "family": "momentum_30",
+      "is_metrics": {
+        "annualized_return_approx": 1.2196668235566035,
+        "annualized_vol_approx": 0.3855110008199612,
+        "end_equity": 1093612.2658915683,
+        "exposure_pct": 52.285191956124315,
+        "max_drawdown": -0.24195593327501397,
+        "n_bars": 1095,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 3.163766587626391,
+        "start_equity": 100000.0,
+        "total_cost_paid": 183902.08944109766,
+        "total_return": 9.936122658915682,
+        "trade_count": 43,
+        "turnover": 86
+      },
+      "label": "M. Time-series momentum (N=30)",
+      "metrics": {
+        "annualized_return_approx": 1.0421666627907613,
+        "annualized_vol_approx": 0.36199769255456166,
+        "end_equity": 2561996.7592325676,
+        "exposure_pct": 51.96137598068799,
+        "max_drawdown": -0.24195593327501397,
+        "n_bars": 1658,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.8789317838916393,
+        "start_equity": 100000.0,
+        "total_cost_paid": 757565.2932722534,
+        "total_return": 24.619967592325676,
+        "trade_count": 70,
+        "turnover": 139
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 0.7365649407795372,
+        "annualized_vol_approx": 0.3116553872764744,
+        "end_equity": 234269.20483046127,
+        "exposure_pct": 51.42348754448398,
+        "max_drawdown": -0.1537819487179489,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.363395503014741,
+        "start_equity": 100000.0,
+        "total_cost_paid": 52455.81288021457,
+        "total_return": 1.3426920483046128,
+        "trade_count": 27,
+        "turnover": 53
+      },
+      "parameters": {
+        "lookback": 30
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "momentum_30_btc",
+      "warnings": []
+    },
+    {
+      "asset": "ETH",
+      "family": "momentum_20",
+      "is_metrics": {
+        "annualized_return_approx": 1.575706580904816,
+        "annualized_vol_approx": 0.4652485340132512,
+        "end_equity": 1713226.9848098431,
+        "exposure_pct": 48.49315068493151,
+        "max_drawdown": -0.20673702009980252,
+        "n_bars": 1096,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 3.386806116964437,
+        "start_equity": 100000.0,
+        "total_cost_paid": 423786.0181521076,
+        "total_return": 16.13226984809843,
+        "trade_count": 64,
+        "turnover": 128
+      },
+      "label": "M. Time-series momentum (N=20)",
+      "metrics": {
+        "annualized_return_approx": 1.3071146187831255,
+        "annualized_vol_approx": 0.46177855095673703,
+        "end_equity": 4469140.269134636,
+        "exposure_pct": 45.71773220747889,
+        "max_drawdown": -0.3294719976291004,
+        "n_bars": 1659,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.8306092088404213,
+        "start_equity": 100000.0,
+        "total_cost_paid": 1613006.756428671,
+        "total_return": 43.69140269134636,
+        "trade_count": 95,
+        "turnover": 190
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 0.8619296057750407,
+        "annualized_vol_approx": 0.455547512067706,
+        "end_equity": 260860.95472227698,
+        "exposure_pct": 40.3914590747331,
+        "max_drawdown": -0.3294719976291006,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 1.8920740053277605,
+        "start_equity": 100000.0,
+        "total_cost_paid": 69414.07932636309,
+        "total_return": 1.6086095472227697,
+        "trade_count": 31,
+        "turnover": 62
+      },
+      "parameters": {
+        "lookback": 20
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "momentum_20_eth",
+      "warnings": []
+    },
+    {
+      "asset": "ETH",
+      "family": "momentum_30",
+      "is_metrics": {
+        "annualized_return_approx": 1.5176976208594501,
+        "annualized_vol_approx": 0.5039390574236716,
+        "end_equity": 1599960.822558035,
+        "exposure_pct": 51.598173515981735,
+        "max_drawdown": -0.22209239685237697,
+        "n_bars": 1096,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 3.011668967709108,
+        "start_equity": 100000.0,
+        "total_cost_paid": 257916.7298838985,
+        "total_return": 14.99960822558035,
+        "trade_count": 42,
+        "turnover": 83
+      },
+      "label": "M. Time-series momentum (N=30)",
+      "metrics": {
+        "annualized_return_approx": 1.3506412741899525,
+        "annualized_vol_approx": 0.4847984088801343,
+        "end_equity": 4865396.810815449,
+        "exposure_pct": 47.34620024125452,
+        "max_drawdown": -0.22209239685237697,
+        "n_bars": 1659,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.78598536927933,
+        "start_equity": 100000.0,
+        "total_cost_paid": 859988.5643553518,
+        "total_return": 47.65396810815449,
+        "trade_count": 61,
+        "turnover": 121
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 1.097708960153498,
+        "annualized_vol_approx": 0.44517627083059075,
+        "end_equity": 313531.3725081248,
+        "exposure_pct": 38.96797153024911,
+        "max_drawdown": -0.15966006856964018,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.4657849757028596,
+        "start_equity": 100000.0,
+        "total_cost_paid": 38798.1527407384,
+        "total_return": 2.135313725081248,
+        "trade_count": 19,
+        "turnover": 38
+      },
+      "parameters": {
+        "lookback": 30
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "momentum_30_eth",
+      "warnings": [
+        "OOS trade_count 19 below per-asset floor 20 (Bundle 15)."
+      ]
+    },
+    {
+      "asset": "SOL",
+      "family": "momentum_20",
+      "is_metrics": {
+        "annualized_return_approx": 5.748751227047712,
+        "annualized_vol_approx": 0.7571252535622617,
+        "end_equity": 30898834.863442138,
+        "exposure_pct": 48.58447488584475,
+        "max_drawdown": -0.40654474817376635,
+        "n_bars": 1096,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 7.592866834120158,
+        "start_equity": 100000.0,
+        "total_cost_paid": 2892034.6065810574,
+        "total_return": 307.98834863442136,
+        "trade_count": 59,
+        "turnover": 118
+      },
+      "label": "M. Time-series momentum (N=20)",
+      "metrics": {
+        "annualized_return_approx": 3.6335606299280014,
+        "annualized_vol_approx": 0.6835476119020394,
+        "end_equity": 106345673.3938877,
+        "exposure_pct": 47.52714113389626,
+        "max_drawdown": -0.40654474817376635,
+        "n_bars": 1659,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 5.315738899031857,
+        "start_equity": 100000.0,
+        "total_cost_paid": 23944465.40099865,
+        "total_return": 1062.456733938877,
+        "trade_count": 82,
+        "turnover": 164
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 1.228433952030148,
+        "annualized_vol_approx": 0.5092159081356309,
+        "end_equity": 344173.73297046317,
+        "exposure_pct": 45.55160142348755,
+        "max_drawdown": -0.2222859546480055,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.4124029363649644,
+        "start_equity": 100000.0,
+        "total_cost_paid": 68133.41308000487,
+        "total_return": 2.441737329704632,
+        "trade_count": 23,
+        "turnover": 46
+      },
+      "parameters": {
+        "lookback": 20
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "momentum_20_sol",
+      "warnings": []
+    },
+    {
+      "asset": "SOL",
+      "family": "momentum_30",
+      "is_metrics": {
+        "annualized_return_approx": 6.109251846393769,
+        "annualized_vol_approx": 0.7650697440525515,
+        "end_equity": 36124800.92390175,
+        "exposure_pct": 48.21917808219178,
+        "max_drawdown": -0.350664991098544,
+        "n_bars": 1096,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 7.985222123715474,
+        "start_equity": 100000.0,
+        "total_cost_paid": 2196296.4288075804,
+        "total_return": 360.2480092390175,
+        "trade_count": 34,
+        "turnover": 68
+      },
+      "label": "M. Time-series momentum (N=30)",
+      "metrics": {
+        "annualized_return_approx": 3.84132272750628,
+        "annualized_vol_approx": 0.6988603283046553,
+        "end_equity": 129808245.83141775,
+        "exposure_pct": 48.67310012062726,
+        "max_drawdown": -0.350664991098544,
+        "n_bars": 1659,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 5.496552847440678,
+        "start_equity": 100000.0,
+        "total_cost_paid": 19344860.700023323,
+        "total_return": 1297.0824583141775,
+        "trade_count": 52,
+        "turnover": 104
+      },
+      "oos_metrics": {
+        "annualized_return_approx": 1.2915830058199589,
+        "annualized_vol_approx": 0.5460686439320277,
+        "end_equity": 359332.7645039861,
+        "exposure_pct": 49.644128113879006,
+        "max_drawdown": -0.2570795847750865,
+        "n_bars": 563,
+        "sharpe_caveat": "Sharpe-like: rf=0; daily-return approximation; NOT a true Sharpe; OOS sample may be small.",
+        "sharpe_like_with_caveat": 2.365239279296047,
+        "start_equity": 100000.0,
+        "total_cost_paid": 47470.3357046585,
+        "total_return": 2.593327645039861,
+        "trade_count": 18,
+        "turnover": 36
+      },
+      "parameters": {
+        "lookback": 30
+      },
+      "skip_reason": null,
+      "status": "RAN",
+      "strategy_id": "momentum_30_sol",
+      "warnings": [
+        "OOS trade_count 18 below per-asset floor 20 (Bundle 15)."
+      ]
+    }
+  ],
+  "warnings": [
+    "BTC: missing 1 day(s) between 2024-03-30 and 2024-04-01 -- flagged, never silently forward-filled"
+  ]
+}
