@@ -418,6 +418,18 @@
       <div class="jv-loading">Reading research reports&hellip;</div>
     </div>
 
+    <div class="jv-section"><span class="lbl">Crypto-D1 Lane</span><span class="ln"></span><span class="sub">read-only &middot; dynamic &middot; latest official checkpoint &middot; no execution</span></div>
+
+    <!-- Crypto-D1 Lane Monitor. DISPLAY ONLY, dynamic. Body is rendered by the
+         render() loop from the read-only lane_monitor payload (latest committed
+         plan / result / decision memo + clamped lane & readiness truth). The four
+         authorization booleans are hard-false; nothing here executes, promotes,
+         or touches a broker. -->
+    <div class="jv-panel jv-wide" id="pLaneMonitor">
+      <h2><span class="ic">&#x25C9;</span>Crypto-D1 Lane Monitor <span class="jv-tag t-display">DISPLAY ONLY</span></h2>
+      <div class="jv-loading">Reading latest Crypto-D1 checkpoint&hellip;</div>
+    </div>
+
     <div class="jv-section"><span class="lbl">Strategy Factory</span><span class="ln"></span><span class="sub">mission flow &middot; read-only map &middot; no execution &middot; no broker</span></div>
 
     <!-- Strategy Factory / Mission Flow. DISPLAY ONLY. Static read-only map of
@@ -861,6 +873,44 @@
       if(mf.baseline_present === true && mf.baseline_status){
         crSet('baseline', 'Ran · ' + mf.baseline_status + ' (V002 baseline)');
       }
+    })();
+
+    // Crypto-D1 Lane Monitor (DISPLAY-ONLY, dynamic). Renders the read-only
+    // lane_monitor payload: clamped lane / readiness truth + the latest committed
+    // checkpoint (plan / executed result / decision memo) + the four hard-false
+    // authorization flags. No buttons, no execution affordance, no promotion.
+    (function(){
+      var lm = d.lane_monitor;
+      if(!lm || lm.display_only !== true){ return; }
+      var cp = lm.latest_checkpoint || {};
+      function bool(x){ return x === true ? 'true' : 'false'; }
+      function flag(x){ return x === true ? 'blocked' : 'locked'; }
+      var html = '';
+      html += row('Crypto-D1 Lane', 'waiting', lm.lane_label || 'WATCH / MIXED');
+      html += row('Readiness', 'waiting',
+                  lm.readiness_status || 'NOT_READY_FOR_REAL_DATA');
+      html += row('Latest checkpoint', 'waiting', cp.status_label || '—',
+                  cp.run_id ? ('run_id ' + cp.run_id) : null);
+      var rn = lm.result_nuance || {};
+      html += row('Result nuance', '',
+                  rn.summary || 'details in latest report.',
+                  rn.available === true ? 'per-asset OOS trade floor = 20'
+                                        : null);
+      html += row('Latest master', '', lm.latest_master || '—');
+      html += row('Next required action', '', lm.next_required_action || '—');
+      html += row('Trading authorization', flag(lm.trading_authorization),
+                  bool(lm.trading_authorization));
+      html += row('Paper / live', flag(lm.paper_or_live_authorized),
+                  bool(lm.paper_or_live_authorized));
+      html += row('Bundle 23', flag(lm.bundle_23_started),
+                  bool(lm.bundle_23_started));
+      html += row('ACTIVE / STRONG', flag(lm.active_strong_promoted),
+                  bool(lm.active_strong_promoted));
+      if(lm.warnings && lm.warnings.length){
+        html += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-warn)">Warnings: '+
+          lm.warnings.map(function(w){ return esc(w); }).join('; ')+'</div>';
+      }
+      setPanel('pLaneMonitor', html);
     })();
 
     // Commander's Snapshot (derived top-level summary — display only)

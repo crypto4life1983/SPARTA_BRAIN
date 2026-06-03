@@ -8609,6 +8609,234 @@ def _jarvis_crypto_d1_mission_flow() -> dict:
     }
 
 
+# --- JARVIS Crypto-D1 Lane Monitor (READ-ONLY) -----------------------------
+# A compact, DYNAMIC lane summary for the dashboard. Reuses the already-clamped
+# lane / evidence / readiness truth from the Mission Flow source, then resolves
+# the LATEST official checkpoint by scanning committed plan + result + decision-
+# memo artifacts under reports/. Pure read: never writes, never spawns a
+# subprocess, never touches the network, never creates a directory. The four
+# authorization booleans are HARD-CLAMPED to False and can never surface True
+# regardless of source content (research-only monitor).
+_JARVIS_LM_PLAN_GLOB = "crypto_d1_*plan*/report.json"
+# The dashboard checkpoint may NEVER surface a promoting verdict. PASS is added
+# on top of the shared ACTIVE/STRONG set: classify_run never auto-PASSes, so a
+# PASS in a result file is treated as tampering and clamped to WATCH.
+_JARVIS_LM_FORBIDDEN_VERDICTS = frozenset({"ACTIVE", "STRONG", "PASS"})
+# Per-asset OOS trade floor used only to label confirmation nuance for display.
+_JARVIS_LM_PER_ASSET_OOS_FLOOR = 20
+
+
+def _jarvis_lm_humanize_plan(plan_dir_name: str) -> str:
+    """Turn a plan dir name into a readable title, e.g.
+    'crypto_d1_momentum_confirmation_v1_plan' -> 'Momentum Confirmation v1'.
+    Version tokens (v1, v2) are kept lowercase; other tokens are capitalized."""
+    base = plan_dir_name
+    if base.startswith("crypto_d1_"):
+        base = base[len("crypto_d1_"):]
+    if base.endswith("_plan"):
+        base = base[:-len("_plan")]
+    out = []
+    for tok in base.split("_"):
+        if not tok:
+            continue
+        if len(tok) >= 2 and tok[0] == "v" and tok[1:].isdigit():
+            out.append(tok)
+        else:
+            out.append(tok.capitalize())
+    return " ".join(out) if out else plan_dir_name
+
+
+def _jarvis_lm_result_nuance(robj) -> dict:
+    """Best-effort, READ-ONLY confirmation nuance from a result report dict.
+
+    Reads only ``family_oos_trade_counts`` (already in the committed report) and
+    labels, per lookback, which assets clear the per-asset 20-trade OOS floor —
+    e.g. N=20 floor-backed on all 3 assets; N=30 floor-backed on BTC only with
+    ETH/SOL sample-thin. Never raises: any parse problem falls back to the safe
+    'details in latest report.' summary. Computes no verdict and promotes
+    nothing — it only describes sample sufficiency."""
+    fallback = {"available": False, "summary": "details in latest report.",
+                "per_lookback": []}
+    try:
+        foc = robj.get("family_oos_trade_counts") if isinstance(robj, dict) \
+            else None
+        if not isinstance(foc, dict) or not foc:
+            return fallback
+        floor = _JARVIS_LM_PER_ASSET_OOS_FLOOR
+        lines, per_lb = [], []
+        for fam in sorted(foc):
+            info = foc.get(fam) or {}
+            per_asset = info.get("per_asset") if isinstance(info, dict) else None
+            if not isinstance(per_asset, dict) or not per_asset:
+                continue
+            clears = sorted(a for a, n in per_asset.items()
+                            if isinstance(n, (int, float)) and n >= floor)
+            thin = sorted(a for a, n in per_asset.items()
+                          if isinstance(n, (int, float)) and n < floor)
+            lb = fam.replace("momentum_", "N=") if isinstance(fam, str) else \
+                str(fam)
+            if clears and not thin:
+                lines.append(f"{lb} floor-backed on all {len(per_asset)} assets")
+            elif clears:
+                lines.append(f"{lb} floor-backed on {','.join(clears)} only "
+                             f"({','.join(thin)} sample-thin)")
+            else:
+                lines.append(f"{lb} below the {floor}-trade floor on all assets")
+            per_lb.append({"lookback": lb, "clears_floor": clears,
+                           "sample_thin": thin,
+                           "per_asset_oos_trades": dict(per_asset)})
+        if not lines:
+            return fallback
+        return {"available": True, "summary": "; ".join(lines),
+                "per_lookback": per_lb}
+    except Exception:  # noqa: BLE001 — nuance is cosmetic; never block the panel
+        return fallback
+
+
+def _jarvis_crypto_d1_lane_monitor(git_head=None) -> dict:
+    """READ-ONLY Crypto-D1 Lane Monitor source. Dynamically reflects the latest
+    official checkpoint (plan -> executed report -> decision memo) plus the
+    clamped lane / readiness truth. Never writes, never runs anything, never
+    promotes. The four authorization booleans are always False."""
+    warnings = []
+
+    # 1) Lane / evidence / readiness — reuse the already-clamped Mission Flow
+    # source so both panels agree and forbidden verdicts can never surface.
+    lane_status, evidence_level = "WATCH", "MIXED"
+    readiness_status = "NOT_READY_FOR_REAL_DATA"
+    try:
+        mf = _jarvis_crypto_d1_mission_flow()
+        if isinstance(mf, dict):
+            lane_status = mf.get("lane_status") or lane_status
+            evidence_level = mf.get("evidence_level") or evidence_level
+            readiness_status = mf.get("readiness_status") or readiness_status
+    except Exception:  # noqa: BLE001 — fail closed to the conservative default
+        warnings.append("mission-flow source unavailable; lane defaulted to "
+                        "WATCH / MIXED / NOT_READY_FOR_REAL_DATA")
+
+    # 2) Latest checkpoint — scan committed plan + result + decision-memo files.
+    checkpoint = {
+        "plan_id": None, "title": None, "stage": "UNKNOWN",
+        "status_label": "No Crypto-D1 plan found", "plan_status": None,
+        "plan_date": None, "verdict": None, "run_id": None,
+        "report_rel": None, "decision_memo_rel": None,
+    }
+    # Compact confirmation nuance (best-effort; falls back if not parseable).
+    result_nuance = {"available": False, "summary": "details in latest report.",
+                     "per_lookback": []}
+    reports_dir = BASE / "reports"
+    plans = []
+    if reports_dir.is_dir():
+        try:
+            for pj in reports_dir.glob(_JARVIS_LM_PLAN_GLOB):
+                obj, st = _jarvis_mf_load_json(pj.relative_to(BASE).as_posix())
+                if st == "ok" and isinstance(obj, dict):
+                    plans.append((pj, obj))
+        except Exception:  # noqa: BLE001 — presence probe fails closed
+            warnings.append("plan scan failed; checkpoint unresolved")
+    if plans:
+        # Newest by plan_date (ISO string, lexically sortable); tie-break by dir.
+        plans.sort(key=lambda t: (str(t[1].get("plan_date") or ""),
+                                  t[0].parent.name))
+        plan_path, plan_obj = plans[-1]
+        plan_dir = plan_path.parent
+        title = _jarvis_lm_humanize_plan(plan_dir.name)
+        plan_status = (str(plan_obj.get("status", "") or "")
+                       or "PLAN_ONLY_NOT_EXECUTED")
+        checkpoint["plan_id"] = str(plan_obj.get("plan_id", "") or plan_dir.name)
+        checkpoint["title"] = title
+        checkpoint["plan_status"] = plan_status
+        checkpoint["plan_date"] = str(plan_obj.get("plan_date", "") or "") or None
+
+        # Result dir convention: drop the trailing "_plan" from the plan dir.
+        result_base = (plan_dir.name[:-5] if plan_dir.name.endswith("_plan")
+                       else plan_dir.name)
+        result_dir = reports_dir / result_base
+        report_rel = verdict = run_id = memo_rel = None
+        if result_dir.is_dir():
+            try:
+                memos = sorted(result_dir.rglob("decision_memo.md"))
+            except Exception:  # noqa: BLE001 — presence probe fails closed
+                memos = []
+            if memos:
+                memo_rel = memos[-1].relative_to(BASE).as_posix()
+            try:
+                rpts = sorted(result_dir.rglob("*report*.json"))
+            except Exception:  # noqa: BLE001 — presence probe fails closed
+                rpts = []
+            if rpts:
+                rp = rpts[-1]
+                report_rel = rp.relative_to(BASE).as_posix()
+                robj, rst = _jarvis_mf_load_json(report_rel)
+                if rst == "ok" and isinstance(robj, dict):
+                    raw_v = str(
+                        robj.get("pass_watch_fail_status", "") or "").upper()
+                    if raw_v in _JARVIS_LM_FORBIDDEN_VERDICTS:
+                        warnings.append(
+                            f"result verdict {raw_v} forbidden on dashboard; "
+                            "clamped to WATCH")
+                        verdict = "WATCH"
+                    else:
+                        verdict = raw_v or None
+                    run_id = str(robj.get("run_id", "") or "") or None
+                    result_nuance = _jarvis_lm_result_nuance(robj)
+        # Stage precedence: decision memo > executed result > plan-only.
+        if memo_rel is not None:
+            stage = "DECISION_RECORDED"
+            status_label = (f"{title} — decision recorded"
+                            + (f" ({verdict})" if verdict else ""))
+        elif report_rel is not None:
+            stage = "EXECUTED"
+            status_label = (f"{title} — EXECUTED"
+                            + (f" ({verdict})" if verdict else ""))
+        else:
+            stage = "PLAN_ONLY"
+            status_label = f"{title} — {plan_status}"
+        checkpoint.update({
+            "stage": stage, "status_label": status_label, "verdict": verdict,
+            "run_id": run_id, "report_rel": report_rel,
+            "decision_memo_rel": memo_rel,
+        })
+    else:
+        warnings.append("no crypto_d1 plan artifact found under reports/")
+
+    # 3) Next required action — derived from the resolved stage.
+    stage = checkpoint["stage"]
+    if stage == "PLAN_ONLY":
+        next_action = ("Implement runner + tests, then run the confirmation "
+                       "report")
+    elif stage == "EXECUTED":
+        next_action = ("Operator review of the executed result; record a "
+                       "decision memo (no promotion without a separate "
+                       "operator decision)")
+    elif stage == "DECISION_RECORDED":
+        next_action = ("Proceed to the next checkpoint per the recorded "
+                       "decision memo")
+    else:
+        next_action = "Resolve the Crypto-D1 plan artifact"
+
+    return {
+        "read_only": True,
+        "display_only": True,
+        "no_execution": True,
+        "safety_level": "research_only",
+        "lane_status": lane_status,
+        "evidence_level": evidence_level,
+        "lane_label": f"{lane_status} / {evidence_level}",
+        "readiness_status": readiness_status,
+        "latest_checkpoint": checkpoint,
+        "result_nuance": result_nuance,
+        "latest_master": (str(git_head) if git_head else None),
+        "next_required_action": next_action,
+        # HARD-CLAMPED: a research-only monitor can never surface authorization.
+        "trading_authorization": False,
+        "paper_or_live_authorized": False,
+        "bundle_23_started": False,
+        "active_strong_promoted": False,
+        "warnings": warnings,
+    }
+
+
 def _jarvis_mission_board() -> dict:
     """READ-ONLY. Loads the operator mission board from a tracked JSON file
     and returns it for display. JARVIS never executes a mission, never runs
@@ -8990,6 +9218,9 @@ def api_jarvis_status():
     survival_ledger = _jarvis_safe(_jarvis_survival_ledger)
     candidate_registry = _jarvis_safe(_jarvis_candidate_registry)
     mission_flow = _jarvis_safe(_jarvis_crypto_d1_mission_flow)
+    lane_monitor = _jarvis_safe(
+        lambda: _jarvis_crypto_d1_lane_monitor(
+            git.get("head") if isinstance(git, dict) else None))
     freshness_guard = _jarvis_safe(_jarvis_freshness_guard)
     # Derived ONLY from the dicts already collected above — no new commands.
     commander_snapshot = _jarvis_safe(lambda: _jarvis_commander_snapshot(
@@ -9024,6 +9255,7 @@ def api_jarvis_status():
         "survival_ledger": survival_ledger,
         "candidate_registry": candidate_registry,
         "mission_flow": mission_flow,
+        "lane_monitor": lane_monitor,
         "freshness_guard": freshness_guard,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
