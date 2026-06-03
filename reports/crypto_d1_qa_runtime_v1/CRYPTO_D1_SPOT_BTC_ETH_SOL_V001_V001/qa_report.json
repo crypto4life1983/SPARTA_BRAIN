@@ -1,0 +1,312 @@
+{
+  "OHLCV_summary": {
+    "checks_failed": 0,
+    "checks_passed": 4,
+    "checks_run": 4,
+    "checks_warned": 0,
+    "details": [
+      {
+        "check_id": "impossible_candle_high_lt_low",
+        "detail": "no high < low rows",
+        "group": "C_OHLCV",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "ohlcv_self_consistency",
+        "detail": "every row satisfies high>=max(o,c,l) and low<=min(o,c,h)",
+        "group": "C_OHLCV",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "ohlc_positive",
+        "detail": "all OHLC values positive",
+        "group": "C_OHLCV",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "close_not_missing",
+        "detail": "all parsed rows have a close value (parser rejects empty close)",
+        "group": "C_OHLCV",
+        "severity": "PASS"
+      }
+    ],
+    "group": "C_OHLCV"
+  },
+  "_audit_context": {
+    "csv_files_seen": [
+      "daily_ohlcv.csv"
+    ],
+    "csv_parse_errors_count": 0,
+    "csv_parse_errors_sample": [],
+    "dataset_dir": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V001",
+    "qa_freeze_spec_version": "crypto_d1_qa_freeze_spec_v1",
+    "safety_notes": [
+      "Research-only. Local-only.",
+      "No data was fetched. No exchange was contacted. No order was placed.",
+      "QA_PASS is the deterministic outcome of mechanical checks; it does NOT imply profitability and does NOT authorize a backtest plan by itself.",
+      "Per Bundle 14, a QA_PASS qa_report is a PRECONDITION for a future backtest plan -- never the authorization itself.",
+      "A QA report cannot authorize paper or live trading."
+    ],
+    "tool_version": "crypto_d1_data_qa_runtime_tool_v1"
+  },
+  "allowed_next_step": "Remediation requires a NEW dataset_version. Do not reference this dataset.",
+  "blocking_failures": [
+    {
+      "check_id": "freeze_record_has_timestamp",
+      "detail": "FREEZE_RECORD.txt missing 'freeze_timestamp_utc' key",
+      "group": "G_freeze",
+      "severity": "FAIL"
+    }
+  ],
+  "checks_failed": 1,
+  "checks_passed": 35,
+  "checks_run": 37,
+  "checks_warned": 1,
+  "data_contract_version": "crypto_d1_data_contract_v1",
+  "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001",
+  "dataset_version": "V001",
+  "duplicate_summary": {
+    "per_asset": {
+      "BTC": 0,
+      "ETH": 0,
+      "SOL": 0
+    },
+    "total_duplicates": 0
+  },
+  "fee_slippage_summary": {
+    "checks_failed": 0,
+    "checks_passed": 4,
+    "checks_run": 4,
+    "checks_warned": 0,
+    "details": [
+      {
+        "check_id": "fees_json_present",
+        "detail": "fees.json exists and parses",
+        "group": "F_fee_slippage",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "fees_taker_declared",
+        "detail": "per-venue taker fee declared",
+        "group": "F_fee_slippage",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "slippage_declared",
+        "detail": "slippage assumption declared",
+        "group": "F_fee_slippage",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "spread_proxy_declared",
+        "detail": "spread_proxy declared",
+        "group": "F_fee_slippage",
+        "severity": "PASS"
+      }
+    ],
+    "group": "F_fee_slippage"
+  },
+  "forbidden_next_steps": [
+    "Trade live or paper based on a QA_PASS verdict.",
+    "Connect SPARTA's runtime to any exchange or vendor over the network.",
+    "Promote crypto_d1_protocol to ACTIVE / STRONG without a separate operator decision.",
+    "Schedule a daemon / cron / background process that touches this tool.",
+    "Modify paper / live execution files.",
+    "Install or read any API key, OAuth token, or .env credential.",
+    "Use any synthetic / mock-priced data as evidence."
+  ],
+  "freeze_summary": {
+    "checks_failed": 1,
+    "checks_passed": 6,
+    "checks_run": 7,
+    "checks_warned": 0,
+    "details": [
+      {
+        "check_id": "freeze_status_FROZEN",
+        "detail": "FROZEN",
+        "group": "G_freeze",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "checksums_txt_present",
+        "detail": "CHECKSUMS.txt exists",
+        "group": "G_freeze",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "checksums_verified",
+        "detail": "all 3 file(s) sha256-verified",
+        "group": "G_freeze",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "freeze_record_present",
+        "detail": "FREEZE_RECORD.txt exists",
+        "group": "G_freeze",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "freeze_record_has_timestamp",
+        "detail": "FREEZE_RECORD.txt missing 'freeze_timestamp_utc' key",
+        "group": "G_freeze",
+        "severity": "FAIL"
+      },
+      {
+        "check_id": "freeze_record_version_pins",
+        "detail": "3 of 6 version pins found",
+        "group": "G_freeze",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "row_count_recorded",
+        "detail": "row_count_actual = 4976",
+        "group": "G_freeze",
+        "severity": "PASS"
+      }
+    ],
+    "group": "G_freeze"
+  },
+  "generated_at": "2026-06-03T16:56:15Z",
+  "manifest_version": "crypto_d1_dataset_manifest_v1",
+  "missing_day_summary": {
+    "per_asset": {
+      "BTC": {
+        "expected": 1659,
+        "missing": 1,
+        "observed": 1658
+      },
+      "ETH": {
+        "expected": 1659,
+        "missing": 0,
+        "observed": 1659
+      },
+      "SOL": {
+        "expected": 1659,
+        "missing": 0,
+        "observed": 1659
+      }
+    },
+    "total_missing_days": 1
+  },
+  "protocol_version": "crypto_d1_protocol_v1",
+  "qa_report_id": "741f5efe87054dd7",
+  "qa_status": "QA_FAIL",
+  "row_count_observed": {
+    "per_asset": {
+      "BTC": 1658,
+      "ETH": 1659,
+      "SOL": 1659
+    },
+    "total": 4976
+  },
+  "safety_flags": {
+    "broker_control_enabled": false,
+    "data_fetch_enabled": false,
+    "exchange_connection_enabled": false,
+    "live_trading_enabled": false,
+    "order_placement_enabled": false,
+    "paper_order_execution_enabled": false,
+    "research_only": true
+  },
+  "source_provenance_summary": {
+    "checks_failed": 0,
+    "checks_passed": 5,
+    "checks_run": 5,
+    "checks_warned": 0,
+    "details": [
+      {
+        "check_id": "canonical_symbol_btc_eth_sol",
+        "detail": "target assets present: ['BTC', 'ETH', 'SOL']",
+        "group": "E_symbol_source",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "quote_currency_consistency",
+        "detail": "all rows per symbol share the same quote_currency",
+        "group": "E_symbol_source",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "source_consistency",
+        "detail": "all rows per symbol share the same source",
+        "group": "E_symbol_source",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "duplicate_symbol_source_timestamp",
+        "detail": "no duplicate (symbol, source, timestamp) triplets",
+        "group": "E_symbol_source",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "row_level_source_id_present",
+        "detail": "parser rejects rows missing source",
+        "group": "E_symbol_source",
+        "severity": "PASS"
+      }
+    ],
+    "group": "E_symbol_source"
+  },
+  "timestamp_summary": {
+    "checks_failed": 0,
+    "checks_passed": 3,
+    "checks_run": 4,
+    "checks_warned": 1,
+    "details": [
+      {
+        "check_id": "duplicate_symbol_timestamp",
+        "detail": "no duplicate (symbol, timestamp) rows",
+        "group": "B_timestamp",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "no_weekday_only_calendar",
+        "detail": "24/7 calendar coverage",
+        "group": "B_timestamp",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "missing_days_reconciled",
+        "detail": "missing days observed: [{'symbol': 'BTC', 'missing_days': 1}]; manifest's missing_day_policy text present",
+        "group": "B_timestamp",
+        "severity": "WARN"
+      },
+      {
+        "check_id": "utc_storage_required",
+        "detail": "all bar timestamps parsed as ISO-8601 UTC dates",
+        "group": "B_timestamp",
+        "severity": "PASS"
+      }
+    ],
+    "group": "B_timestamp"
+  },
+  "volume_summary": {
+    "checks_failed": 0,
+    "checks_passed": 2,
+    "checks_run": 2,
+    "checks_warned": 0,
+    "details": [
+      {
+        "check_id": "volume_non_negative",
+        "detail": "all volume >= 0",
+        "group": "D_volume",
+        "severity": "PASS"
+      },
+      {
+        "check_id": "zero_volume_flag",
+        "detail": "no zero-volume bars",
+        "group": "D_volume",
+        "severity": "PASS"
+      }
+    ],
+    "group": "D_volume"
+  },
+  "warnings": [
+    {
+      "check_id": "missing_days_reconciled",
+      "detail": "missing days observed: [{'symbol': 'BTC', 'missing_days': 1}]; manifest's missing_day_policy text present",
+      "group": "B_timestamp",
+      "severity": "WARN"
+    }
+  ]
+}
