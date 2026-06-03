@@ -38,7 +38,7 @@ import hashlib
 import json
 import math
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -127,6 +127,39 @@ DEFAULT_IS_FRACTION = 0.70
 # Bundle 15 trade-count floors (used by PASS/WATCH/FAIL classifier).
 OOS_MIN_TRADES_PER_ASSET = 20
 OOS_MIN_TRADES_PER_FAMILY = 30
+
+# ---------------------------------------------------------------------------
+# Spread-proxy cost (ADDITIVE). Default 0.0 keeps the default-mode cost model
+# byte-identical to v1; only the v002_addendum config turns it on.
+# ---------------------------------------------------------------------------
+DEFAULT_SPREAD_PROXY_BPS = 0.0
+SPREAD_BPS_MIN = 0.0
+SPREAD_BPS_MAX = 100.0
+
+# ---------------------------------------------------------------------------
+# v002_addendum config pins. Mirrors
+# reports/crypto_d1_baseline_backtest_plan_v1/v002_is_oos_addendum.md.
+# These are used ONLY when config == "v002_addendum"; default runs ignore them.
+# ---------------------------------------------------------------------------
+V002_CONFIG_NAME = "v002_addendum"
+# Explicit IS/OOS UTC date windows (no overlap; OOS sealed until IS fixed).
+V002_IS_START = "2021-06-17"
+V002_IS_END = "2024-06-16"
+V002_OOS_START = "2024-06-17"
+V002_OOS_END = "2025-12-31"
+# Frozen V002 fees.json fallback (Kraken Pro spot low-volume, conservative).
+V002_FALLBACK_FEE_BPS = 40.0
+V002_FALLBACK_SLIPPAGE_BPS = 10.0
+V002_FALLBACK_SPREAD_PROXY_BPS = 10.0
+# B1 -- SMA 50/200 CROSSOVER (distinct from the default single-window MA200 filter).
+SMA_FAST_WINDOW = 50
+SMA_SLOW_WINDOW = 200
+# B3 -- Donchian 55/20 (distinct from the default 20/10).
+V002_DONCHIAN_ENTRY_N = 55
+V002_DONCHIAN_EXIT_M = 20
+# B2 -- time-series momentum lookbacks (run BOTH).
+V002_MOMENTUM_N_FAST = 30
+V002_MOMENTUM_N_SLOW = 90
 
 
 # ===========================================================================
@@ -315,6 +348,39 @@ def split_is_oos(bars: list[Bar], fraction: float = DEFAULT_IS_FRACTION):
     return bars[:cut], bars[cut:]
 
 
+def split_is_oos_dates(bars: list[Bar], is_start: str, is_end: str,
+                       oos_start: str, oos_end: str):
+    """Split by inclusive UTC date windows. Timestamps are 'YYYY-MM-DD',
+    which sort lexicographically == chronologically. The caller's windows
+    enforce no-overlap; bars outside BOTH windows are excluded from both
+    slices (never reassigned, never synthesized)."""
+    is_bars = [b for b in bars if is_start <= b.timestamp <= is_end]
+    oos_bars = [b for b in bars if oos_start <= b.timestamp <= oos_end]
+    return is_bars, oos_bars
+
+
+def _detect_missing_days(bars: list[Bar]) -> list[str]:
+    """Return the sorted list of absent 'YYYY-MM-DD' dates inside a symbol's
+    [first, last] span (24/7 daily calendar -> bars must be consecutive).
+    Pure DETECTION only: never forward-fills, never synthesizes a bar."""
+    if len(bars) < 2:
+        return []
+    present = {b.timestamp for b in bars}
+    try:
+        d0 = datetime.strptime(bars[0].timestamp, "%Y-%m-%d")
+        d1 = datetime.strptime(bars[-1].timestamp, "%Y-%m-%d")
+    except ValueError:
+        return []
+    missing = []
+    cur = d0
+    while cur <= d1:
+        ds = cur.strftime("%Y-%m-%d")
+        if ds not in present:
+            missing.append(ds)
+        cur += timedelta(days=1)
+    return missing
+
+
 # ===========================================================================
 # Strategy primitives (return positions list; first element is 0 to align
 # with the first available next-bar return).
@@ -377,6 +443,27 @@ def momentum_continuation(bars: list[Bar], lookback: int = MOMENTUM_LOOKBACK):
     return positions, None
 
 
+def sma_crossover(bars: list[Bar], fast_window: int = SMA_FAST_WINDOW,
+                  slow_window: int = SMA_SLOW_WINDOW):
+    """SMA fast/slow CROSSOVER (B1): long when SMA(fast) > SMA(slow), else flat.
+    Distinct from `ma_trend_filter` (price-vs-single-MA filter). Long-only,
+    daily close; needs slow_window+1 bars to warm up."""
+    if fast_window >= slow_window:
+        return [], f"fast_window {fast_window} must be < slow_window {slow_window}"
+    need = slow_window + 1
+    if len(bars) < need:
+        return [], f"insufficient history: have {len(bars)} bars, need {need}"
+    positions = [0]
+    for t in range(1, len(bars)):
+        if t < slow_window:
+            positions.append(0)
+            continue
+        sma_fast = sum(b.close for b in bars[t - fast_window:t]) / fast_window
+        sma_slow = sum(b.close for b in bars[t - slow_window:t]) / slow_window
+        positions.append(1 if sma_fast > sma_slow else 0)
+    return positions, None
+
+
 def _rolling_annualized_vol(bars: list[Bar], t: int, window: int):
     """Annualized realized vol over the past `window` daily log-returns
     ending at bar t. 24/7 crypto -> sqrt(365)."""
@@ -425,11 +512,14 @@ def vol_regime_gated_donchian(bars: list[Bar],
 # ===========================================================================
 # Metrics + cost-aware equity simulation
 # ===========================================================================
-def _simulate_equity(positions, bars, fee_bps, slip_bps, start_equity):
+def _simulate_equity(positions, bars, fee_bps, slip_bps, start_equity,
+                     spread_bps: float = 0.0):
     """Simulate equity given positions[t] (held over bar t -> t+1 return).
 
-    Cost is applied when the position changes (round-trip cost is split:
-    entering = fee+slip; exiting = fee+slip)."""
+    Cost is applied when the position changes; per-side cost =
+    fee_bps + slip_bps + spread_bps (spread defaults to 0.0, preserving the v1
+    cost model). Round-trip cost is split: entering = per-side; exiting =
+    per-side."""
     if len(bars) < 2 or len(positions) != len(bars):
         return {
             "equity_curve": [start_equity],
@@ -444,7 +534,7 @@ def _simulate_equity(positions, bars, fee_bps, slip_bps, start_equity):
     trade_count = 0       # count of OPENING events (0 -> 1)
     turnover = 0          # total position-change events
     total_cost = 0.0
-    cost_per_change = (fee_bps + slip_bps) / 10_000.0
+    cost_per_change = (fee_bps + slip_bps + spread_bps) / 10_000.0
     exposed_bars = 0
     for t in range(1, len(bars)):
         prev_pos = positions[t - 1]
@@ -520,8 +610,10 @@ def _sharpe_like(total_return: float, n_bars: int, equity_curve):
     return ann_ret / ann_vol
 
 
-def compute_metrics(positions, bars, fee_bps, slip_bps, start_equity):
-    sim = _simulate_equity(positions, bars, fee_bps, slip_bps, start_equity)
+def compute_metrics(positions, bars, fee_bps, slip_bps, start_equity,
+                    spread_bps: float = 0.0):
+    sim = _simulate_equity(positions, bars, fee_bps, slip_bps, start_equity,
+                           spread_bps)
     n_bars = len(bars)
     return {
         "total_return": sim["total_return"],
@@ -546,11 +638,33 @@ def compute_metrics(positions, bars, fee_bps, slip_bps, start_equity):
 # ===========================================================================
 # Per-strategy runner
 # ===========================================================================
+def _slice_positions(bars: list[Bar], positions: list, sub_bars: list[Bar]):
+    """Align positions (computed on the FULL series, full warmup) to a
+    contiguous sub-window by timestamp. (symbol, timestamp) is unique per the
+    loader's dedup, so the index map is unambiguous. For a fraction prefix this
+    returns positions[:len(sub_bars)] exactly; for a date window it returns the
+    correctly-aligned slice."""
+    if not sub_bars:
+        return []
+    idx = {b.timestamp: i for i, b in enumerate(bars)}
+    return [positions[idx[b.timestamp]] for b in sub_bars]
+
+
 def _run_one_family(family_id: str, family_label: str, asset: str,
                     bars: list[Bar], params: dict, fee_bps: float,
                     slip_bps: float, start_equity: float,
-                    strategy_fn, watch_only: bool = False):
-    """Run one strategy family on one asset. Returns a result dict."""
+                    strategy_fn, watch_only: bool = False,
+                    spread_bps: float = 0.0,
+                    is_fraction: float = DEFAULT_IS_FRACTION,
+                    splitter=None):
+    """Run one strategy family on one asset. Returns a result dict.
+
+    Positions are computed on the FULL series (full indicator warmup) and then
+    sliced into IS/OOS. `splitter`, when provided, returns (is_bars, oos_bars)
+    by explicit date window; otherwise the fraction split honoring
+    `is_fraction` is used. NOTE: this fixes the prior latent bug where the
+    fraction was hardcoded to DEFAULT_IS_FRACTION, so --is-fraction now affects
+    per-strategy IS/OOS metrics, not just the display summary."""
     if watch_only:
         return {
             "strategy_id": f"{family_id}_{asset.lower()}",
@@ -587,13 +701,16 @@ def _run_one_family(family_id: str, family_label: str, asset: str,
             "oos_metrics": None,
             "warnings": [],
         }
-    is_bars, oos_bars = split_is_oos(bars, DEFAULT_IS_FRACTION)
-    is_positions = positions[:len(is_bars)]
-    oos_positions = positions[len(is_bars):]
-    full_metrics = compute_metrics(positions, bars, fee_bps, slip_bps, start_equity)
-    is_metrics = (compute_metrics(is_positions, is_bars, fee_bps, slip_bps, start_equity)
+    if splitter is not None:
+        is_bars, oos_bars = splitter(bars)
+    else:
+        is_bars, oos_bars = split_is_oos(bars, is_fraction)
+    is_positions = _slice_positions(bars, positions, is_bars)
+    oos_positions = _slice_positions(bars, positions, oos_bars)
+    full_metrics = compute_metrics(positions, bars, fee_bps, slip_bps, start_equity, spread_bps)
+    is_metrics = (compute_metrics(is_positions, is_bars, fee_bps, slip_bps, start_equity, spread_bps)
                   if len(is_bars) >= 2 else None)
-    oos_metrics = (compute_metrics(oos_positions, oos_bars, fee_bps, slip_bps, start_equity)
+    oos_metrics = (compute_metrics(oos_positions, oos_bars, fee_bps, slip_bps, start_equity, spread_bps)
                    if len(oos_bars) >= 2 else None)
     warnings = []
     if oos_metrics is None:
@@ -619,7 +736,8 @@ def _run_one_family(family_id: str, family_label: str, asset: str,
 
 
 def _basket_buy_and_hold(bars_by_symbol: dict[str, list[Bar]],
-                         fee_bps: float, slip_bps: float, start_equity: float):
+                         fee_bps: float, slip_bps: float, start_equity: float,
+                         spread_bps: float = 0.0):
     """Equal-weight daily-rebalanced basket buy-and-hold benchmark across the
     intersection of dates present in every covered asset."""
     if not bars_by_symbol:
@@ -636,7 +754,7 @@ def _basket_buy_and_hold(bars_by_symbol: dict[str, list[Bar]],
     closes = {s: {b.timestamp: b.close for b in bars_by_symbol[s]} for s in covered}
     equity = [start_equity]
     n_assets = len(covered)
-    cost_per_change = (fee_bps + slip_bps) / 10_000.0
+    cost_per_change = (fee_bps + slip_bps + spread_bps) / 10_000.0
     for i in range(1, len(sorted_dates)):
         d_prev = sorted_dates[i - 1]
         d_cur = sorted_dates[i]
@@ -753,12 +871,99 @@ def classify_run(strategy_results, benchmark_results, failures, warnings,
 # ===========================================================================
 # Run orchestration
 # ===========================================================================
+def _default_family_plan():
+    """Return (benchmark_specs, strategy_specs, deferred) reproducing the v1
+    default six-family run EXACTLY (order + params preserved)."""
+    bench = [
+        {"family_id": "buy_and_hold_benchmark",
+         "label": "A. Buy-and-hold benchmark", "params": {},
+         "fn": buy_and_hold},
+    ]
+    strat = [
+        {"family_id": "donchian_channel_breakout",
+         "label": "B. Donchian / channel breakout",
+         "params": {"entry_n": DONCHIAN_ENTRY_N, "exit_m": DONCHIAN_EXIT_M},
+         "fn": donchian_breakout},
+        {"family_id": "moving_average_trend_filter",
+         "label": "C. Moving-average trend filter",
+         "params": {"window": MA_FILTER_WINDOW}, "fn": ma_trend_filter},
+        {"family_id": "momentum_continuation",
+         "label": "D. Momentum continuation",
+         "params": {"lookback": MOMENTUM_LOOKBACK}, "fn": momentum_continuation},
+        {"family_id": "volatility_regime_gate",
+         "label": "E. Volatility-regime gate (experimental; additive filter on Donchian)",
+         "params": {"entry_n": DONCHIAN_ENTRY_N, "exit_m": DONCHIAN_EXIT_M,
+                    "vol_window": VOL_REGIME_WINDOW,
+                    "max_ann_vol": VOL_REGIME_MAX_ANNUALIZED},
+         "fn": vol_regime_gated_donchian},
+        {"family_id": "mean_reversion",
+         "label": "F. Daily mean reversion (WATCH-only; not primary)",
+         "params": {}, "fn": (lambda bars: ([], None)), "watch_only": True},
+    ]
+    return bench, strat, []
+
+
+def _v002_family_plan():
+    """Return (benchmark_specs, strategy_specs, deferred) for the v002_addendum
+    FIRST execution batch B0-B3. Volatility-regime gate and mean reversion are
+    DEFERRED (not run) per the addendum."""
+    bench = [
+        {"family_id": "buy_and_hold_benchmark",
+         "label": "B0. Buy & Hold benchmark (per-asset)", "params": {},
+         "fn": buy_and_hold},
+    ]
+    strat = [
+        {"family_id": "sma_50_200_trend_filter",
+         "label": "B1. SMA 50/200 crossover trend filter",
+         "params": {"fast_window": SMA_FAST_WINDOW, "slow_window": SMA_SLOW_WINDOW},
+         "fn": sma_crossover},
+        {"family_id": "momentum_30",
+         "label": "B2. Time-series momentum (N=30)",
+         "params": {"lookback": V002_MOMENTUM_N_FAST}, "fn": momentum_continuation},
+        {"family_id": "momentum_90",
+         "label": "B2. Time-series momentum (N=90)",
+         "params": {"lookback": V002_MOMENTUM_N_SLOW}, "fn": momentum_continuation},
+        {"family_id": "donchian_55_20",
+         "label": "B3. Donchian channel breakout (55/20)",
+         "params": {"entry_n": V002_DONCHIAN_ENTRY_N, "exit_m": V002_DONCHIAN_EXIT_M},
+         "fn": donchian_breakout},
+    ]
+    deferred = ["volatility_regime_gate", "mean_reversion"]
+    return bench, strat, deferred
+
+
+def _load_v002_costs(data_dir: Path, fee_bps: float, slip_bps: float,
+                     spread_bps: float):
+    """In v002_addendum mode, read costs from the frozen V002 fees.json when
+    present; otherwise fall back to the pinned addendum values (40/10/10).
+    Returns (fee_bps, slip_bps, spread_bps, source, fees_json_path_or_None).
+    Reads a LOCAL file only -- no network, no fetch."""
+    fees_path = Path(data_dir) / "fees.json"
+    if fees_path.is_file():
+        try:
+            d = json.loads(fees_path.read_text(encoding="utf-8"))
+            fee = float(d.get("taker_fee_bps",
+                              d.get("default_execution_fee_bps",
+                                    V002_FALLBACK_FEE_BPS)))
+            slip = float(d.get("slippage_bps", V002_FALLBACK_SLIPPAGE_BPS))
+            spread = float(d.get("spread_proxy_bps", V002_FALLBACK_SPREAD_PROXY_BPS))
+            return fee, slip, spread, "v002_fees_json", fees_path.as_posix()
+        except (OSError, ValueError, TypeError):
+            pass
+    return (V002_FALLBACK_FEE_BPS, V002_FALLBACK_SLIPPAGE_BPS,
+            V002_FALLBACK_SPREAD_PROXY_BPS, "v002_fallback_pins", None)
+
+
 def _hash_inputs(data_dir: Path, files: list[Path], fee_bps: float,
-                 slip_bps: float, start_equity: float, is_fraction: float):
+                 slip_bps: float, start_equity: float, is_fraction: float,
+                 spread_bps: float = 0.0, config=None):
     h = hashlib.sha256()
     h.update(RUNNER_VERSION.encode("utf-8"))
     h.update(PLAN_VERSION.encode("utf-8"))
     h.update(f"|{fee_bps}|{slip_bps}|{start_equity}|{is_fraction}|".encode("utf-8"))
+    # Only extend the hash when non-default, so default-mode run_id is unchanged.
+    if spread_bps or config:
+        h.update(f"spread={spread_bps}|config={config}|".encode("utf-8"))
     for p in files:
         h.update(p.name.encode("utf-8"))
         try:
@@ -771,12 +976,35 @@ def _hash_inputs(data_dir: Path, files: list[Path], fee_bps: float,
 def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
                  slip_bps: float = DEFAULT_SLIPPAGE_BPS,
                  start_equity: float = DEFAULT_START_EQUITY,
-                 is_fraction: float = DEFAULT_IS_FRACTION):
-    """Run the v1 baseline backtest against operator-supplied local CSVs.
+                 is_fraction: float = DEFAULT_IS_FRACTION,
+                 config=None, spread_bps: float = DEFAULT_SPREAD_PROXY_BPS,
+                 is_start=None, is_end=None, oos_start=None, oos_end=None):
+    """Run the baseline backtest against operator-supplied local CSVs.
+
+    Default mode is byte-identical to v1. When config == "v002_addendum":
+      * costs are read from the frozen V002 fees.json (else 40/10/10 fallback),
+        with spread_proxy folded into per-side cost;
+      * IS/OOS is split by explicit UTC date windows (defaulting to the
+        addendum pins) instead of a fraction;
+      * only the B0-B3 first batch runs (vol-gate + mean reversion deferred);
+      * missing days are reported per symbol (true gaps; never filled).
 
     Returns the report dict. Writes JSON + MD reports to out_dir.
     """
-    ok, errs = validate_config(fee_bps, slip_bps)
+    config_mode = config or "default"
+    is_v002 = (config == V002_CONFIG_NAME)
+    cost_source = "cli_or_default"
+    fees_json_used = None
+    if is_v002:
+        # Default the date windows to the addendum pins when not overridden.
+        is_start = is_start or V002_IS_START
+        is_end = is_end or V002_IS_END
+        oos_start = oos_start or V002_OOS_START
+        oos_end = oos_end or V002_OOS_END
+        fee_bps, slip_bps, spread_bps, cost_source, fees_json_used = _load_v002_costs(
+            Path(data_dir), fee_bps, slip_bps, spread_bps)
+
+    ok, errs = validate_config(fee_bps, slip_bps, spread_bps)
     if not ok:
         raise ValueError("invalid config: " + "; ".join(errs))
 
@@ -795,57 +1023,40 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     strategy_results = []
     benchmark_results = []
 
-    # Per-asset runs: benchmark + 4 primary + 1 additive-filter experiment.
+    # Date-window splitter is used ONLY in v002 mode; default mode keeps the
+    # fraction split (splitter=None -> _run_one_family honors is_fraction).
+    if is_v002:
+        def splitter(bars):
+            return split_is_oos_dates(bars, is_start, is_end, oos_start, oos_end)
+        bench_specs, strat_specs, deferred = _v002_family_plan()
+    else:
+        splitter = None
+        bench_specs, strat_specs, deferred = _default_family_plan()
+
     for asset in assets_seen:
         bars = bars_by_symbol[asset]
-        benchmark_results.append(_run_one_family(
-            family_id="buy_and_hold_benchmark",
-            family_label="A. Buy-and-hold benchmark",
-            asset=asset, bars=bars, params={}, fee_bps=fee_bps, slip_bps=slip_bps,
-            start_equity=start_equity, strategy_fn=buy_and_hold,
-        ))
-        strategy_results.append(_run_one_family(
-            family_id="donchian_channel_breakout",
-            family_label="B. Donchian / channel breakout",
-            asset=asset, bars=bars,
-            params={"entry_n": DONCHIAN_ENTRY_N, "exit_m": DONCHIAN_EXIT_M},
-            fee_bps=fee_bps, slip_bps=slip_bps, start_equity=start_equity,
-            strategy_fn=donchian_breakout,
-        ))
-        strategy_results.append(_run_one_family(
-            family_id="moving_average_trend_filter",
-            family_label="C. Moving-average trend filter",
-            asset=asset, bars=bars, params={"window": MA_FILTER_WINDOW},
-            fee_bps=fee_bps, slip_bps=slip_bps, start_equity=start_equity,
-            strategy_fn=ma_trend_filter,
-        ))
-        strategy_results.append(_run_one_family(
-            family_id="momentum_continuation",
-            family_label="D. Momentum continuation",
-            asset=asset, bars=bars, params={"lookback": MOMENTUM_LOOKBACK},
-            fee_bps=fee_bps, slip_bps=slip_bps, start_equity=start_equity,
-            strategy_fn=momentum_continuation,
-        ))
-        strategy_results.append(_run_one_family(
-            family_id="volatility_regime_gate",
-            family_label="E. Volatility-regime gate (experimental; additive filter on Donchian)",
-            asset=asset, bars=bars,
-            params={"entry_n": DONCHIAN_ENTRY_N, "exit_m": DONCHIAN_EXIT_M,
-                    "vol_window": VOL_REGIME_WINDOW,
-                    "max_ann_vol": VOL_REGIME_MAX_ANNUALIZED},
-            fee_bps=fee_bps, slip_bps=slip_bps, start_equity=start_equity,
-            strategy_fn=vol_regime_gated_donchian,
-        ))
-        strategy_results.append(_run_one_family(
-            family_id="mean_reversion",
-            family_label="F. Daily mean reversion (WATCH-only; not primary)",
-            asset=asset, bars=bars, params={},
-            fee_bps=fee_bps, slip_bps=slip_bps, start_equity=start_equity,
-            strategy_fn=lambda bars: ([], None), watch_only=True,
-        ))
+        for spec in bench_specs:
+            benchmark_results.append(_run_one_family(
+                family_id=spec["family_id"], family_label=spec["label"],
+                asset=asset, bars=bars, params=spec["params"],
+                fee_bps=fee_bps, slip_bps=slip_bps, spread_bps=spread_bps,
+                start_equity=start_equity, strategy_fn=spec["fn"],
+                watch_only=spec.get("watch_only", False),
+                is_fraction=is_fraction, splitter=splitter,
+            ))
+        for spec in strat_specs:
+            strategy_results.append(_run_one_family(
+                family_id=spec["family_id"], family_label=spec["label"],
+                asset=asset, bars=bars, params=spec["params"],
+                fee_bps=fee_bps, slip_bps=slip_bps, spread_bps=spread_bps,
+                start_equity=start_equity, strategy_fn=spec["fn"],
+                watch_only=spec.get("watch_only", False),
+                is_fraction=is_fraction, splitter=splitter,
+            ))
 
     # Basket benchmark.
-    basket = _basket_buy_and_hold(bars_by_symbol, fee_bps, slip_bps, start_equity)
+    basket = _basket_buy_and_hold(bars_by_symbol, fee_bps, slip_bps,
+                                  start_equity, spread_bps)
     if basket is not None:
         benchmark_results.append(basket)
 
@@ -867,28 +1078,64 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     failures.extend(extra_failures)
 
     # Determine IS/OOS span summary from any asset that ran.
-    is_oos_summary = {
-        "is_fraction": is_fraction,
-        "trade_count_floor_per_asset_for_oos_verdict": OOS_MIN_TRADES_PER_ASSET,
-        "trade_count_floor_per_family_for_oos_verdict": OOS_MIN_TRADES_PER_FAMILY,
-        "per_asset_is_range": {},
-        "per_asset_oos_range": {},
-    }
-    for asset in assets_seen:
-        bars = bars_by_symbol[asset]
-        is_b, oos_b = split_is_oos(bars, is_fraction)
-        if is_b:
-            is_oos_summary["per_asset_is_range"][asset] = {
-                "start": is_b[0].timestamp, "end": is_b[-1].timestamp, "n_bars": len(is_b)
-            }
-        if oos_b:
-            is_oos_summary["per_asset_oos_range"][asset] = {
-                "start": oos_b[0].timestamp, "end": oos_b[-1].timestamp, "n_bars": len(oos_b)
-            }
+    if is_v002:
+        is_oos_summary = {
+            "split_method": "explicit_utc_date_windows",
+            "is_window": {"start": is_start, "end": is_end},
+            "oos_window": {"start": oos_start, "end": oos_end},
+            "trade_count_floor_per_asset_for_oos_verdict": OOS_MIN_TRADES_PER_ASSET,
+            "trade_count_floor_per_family_for_oos_verdict": OOS_MIN_TRADES_PER_FAMILY,
+            "per_asset_is_range": {},
+            "per_asset_oos_range": {},
+        }
+        for asset in assets_seen:
+            bars = bars_by_symbol[asset]
+            is_b, oos_b = split_is_oos_dates(bars, is_start, is_end, oos_start, oos_end)
+            if is_b:
+                is_oos_summary["per_asset_is_range"][asset] = {
+                    "start": is_b[0].timestamp, "end": is_b[-1].timestamp, "n_bars": len(is_b)
+                }
+            if oos_b:
+                is_oos_summary["per_asset_oos_range"][asset] = {
+                    "start": oos_b[0].timestamp, "end": oos_b[-1].timestamp, "n_bars": len(oos_b)
+                }
+    else:
+        is_oos_summary = {
+            "is_fraction": is_fraction,
+            "trade_count_floor_per_asset_for_oos_verdict": OOS_MIN_TRADES_PER_ASSET,
+            "trade_count_floor_per_family_for_oos_verdict": OOS_MIN_TRADES_PER_FAMILY,
+            "per_asset_is_range": {},
+            "per_asset_oos_range": {},
+        }
+        for asset in assets_seen:
+            bars = bars_by_symbol[asset]
+            is_b, oos_b = split_is_oos(bars, is_fraction)
+            if is_b:
+                is_oos_summary["per_asset_is_range"][asset] = {
+                    "start": is_b[0].timestamp, "end": is_b[-1].timestamp, "n_bars": len(is_b)
+                }
+            if oos_b:
+                is_oos_summary["per_asset_oos_range"][asset] = {
+                    "start": oos_b[0].timestamp, "end": oos_b[-1].timestamp, "n_bars": len(oos_b)
+                }
+
+    cost_model = {"fee_bps": fee_bps, "slippage_bps": slip_bps,
+                  "default_assumption": "TAKER on every leg",
+                  "fees_as_distinct_pnl_line": True,
+                  "no_zero_slippage_baseline": True}
+    if is_v002:
+        per_side = fee_bps + slip_bps + spread_bps
+        cost_model.update({
+            "spread_proxy_bps": spread_bps,
+            "total_per_side_bps": per_side,
+            "round_trip_bps": 2.0 * per_side,
+            "cost_source": cost_source,
+            "fees_json_used": fees_json_used,
+        })
 
     report = {
         "run_id": _hash_inputs(data_dir_p, csv_files, fee_bps, slip_bps,
-                               start_equity, is_fraction),
+                               start_equity, is_fraction, spread_bps, config),
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         **SAFETY_FLAGS,
         "runner_version": RUNNER_VERSION,
@@ -899,17 +1146,15 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
         "qa_freeze_spec_version": QA_FREEZE_SPEC_VERSION,
         "input_data_dir": data_dir_p.as_posix(),
         "input_data_hash_short": _hash_inputs(data_dir_p, csv_files, fee_bps,
-                                              slip_bps, start_equity, is_fraction),
+                                              slip_bps, start_equity, is_fraction,
+                                              spread_bps, config),
         "csv_files_seen": [p.name for p in csv_files],
         "assets_seen": assets_seen,
         "assets_missing": assets_missing,
         "row_counts_per_symbol": rows_seen,
         "rows_rejected": len(rejections),
         "rows_rejected_detail": rejections[:200],
-        "cost_model": {"fee_bps": fee_bps, "slippage_bps": slip_bps,
-                       "default_assumption": "TAKER on every leg",
-                       "fees_as_distinct_pnl_line": True,
-                       "no_zero_slippage_baseline": True},
+        "cost_model": cost_model,
         "start_equity": start_equity,
         "IS_OOS_summary": is_oos_summary,
         "strategy_results": strategy_results,
@@ -921,6 +1166,18 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
         "forbidden_next_steps": list(FORBIDDEN_NEXT_STEPS),
         "safety_notes": list(SAFETY_NOTES),
     }
+
+    # v002_addendum-only report extensions (keys absent in default mode).
+    if is_v002:
+        missing_days_per_symbol = {}
+        for asset in assets_seen:
+            md = _detect_missing_days(bars_by_symbol[asset])
+            if md:
+                missing_days_per_symbol[asset] = {"count": len(md), "dates": md}
+        report["config_mode"] = config_mode
+        report["batch_label"] = "B0-B3 first execution batch (v002_addendum)"
+        report["strategies_deferred"] = deferred
+        report["missing_days_per_symbol"] = missing_days_per_symbol
 
     # Write JSON and MD reports.
     json_path = out_dir_p / "crypto_d1_backtest_report.json"
@@ -951,6 +1208,24 @@ def _render_md(report: dict) -> str:
         f"- **input_data_dir:** `{report['input_data_dir']}`",
         f"- **input_data_hash (short):** `{report['input_data_hash_short']}`",
         "",
+    ]
+    if report.get("config_mode") and report["config_mode"] != "default":
+        cm = report.get("cost_model", {})
+        iso = report.get("IS_OOS_summary", {})
+        lines += [
+            f"## Config mode: `{report['config_mode']}`",
+            f"- **batch:** {report.get('batch_label', '')}",
+            f"- **IS window:** {iso.get('is_window', {}).get('start')} -> {iso.get('is_window', {}).get('end')}",
+            f"- **OOS window:** {iso.get('oos_window', {}).get('start')} -> {iso.get('oos_window', {}).get('end')}",
+            f"- **cost per side (bps):** fee={cm.get('fee_bps')} + slip={cm.get('slippage_bps')}"
+            f" + spread={cm.get('spread_proxy_bps')} = {cm.get('total_per_side_bps')}"
+            f" (round-trip {cm.get('round_trip_bps')})",
+            f"- **cost source:** {cm.get('cost_source')}",
+            f"- **strategies deferred:** {', '.join(report.get('strategies_deferred', [])) or '(none)'}",
+            f"- **missing days (true gaps, never filled):** {report.get('missing_days_per_symbol') or '(none)'}",
+            "",
+        ]
+    lines += [
         "## Safety flags (pinned)",
         f"- research_only: {report['research_only']}",
         f"- data_fetch_enabled: {report['data_fetch_enabled']}",
@@ -1013,7 +1288,8 @@ def _render_md(report: dict) -> str:
 # Config + plan helpers
 # ===========================================================================
 def validate_config(fee_bps: float = DEFAULT_TAKER_FEE_BPS,
-                    slip_bps: float = DEFAULT_SLIPPAGE_BPS):
+                    slip_bps: float = DEFAULT_SLIPPAGE_BPS,
+                    spread_bps: float = DEFAULT_SPREAD_PROXY_BPS):
     errs = []
     try:
         f = float(fee_bps)
@@ -1025,10 +1301,17 @@ def validate_config(fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     except (TypeError, ValueError):
         errs.append("slippage_bps must be numeric")
         s = None
+    try:
+        sp = float(spread_bps)
+    except (TypeError, ValueError):
+        errs.append("spread_proxy_bps must be numeric")
+        sp = None
     if f is not None and (f < FEE_BPS_MIN or f > FEE_BPS_MAX):
         errs.append(f"fee_bps must be in [{FEE_BPS_MIN}, {FEE_BPS_MAX}] (got {f})")
     if s is not None and (s < SLIP_BPS_MIN or s > SLIP_BPS_MAX):
         errs.append(f"slippage_bps must be in [{SLIP_BPS_MIN}, {SLIP_BPS_MAX}] (got {s})")
+    if sp is not None and (sp < SPREAD_BPS_MIN or sp > SPREAD_BPS_MAX):
+        errs.append(f"spread_proxy_bps must be in [{SPREAD_BPS_MIN}, {SPREAD_BPS_MAX}] (got {sp})")
     return (not errs), errs
 
 
@@ -1079,6 +1362,33 @@ def show_plan() -> dict:
             "start_equity_default": DEFAULT_START_EQUITY,
             "start_equity_is_research_units_not_money": True,
         },
+        "v002_addendum_mode": {
+            "config_name": V002_CONFIG_NAME,
+            "is_window": {"start": V002_IS_START, "end": V002_IS_END},
+            "oos_window": {"start": V002_OOS_START, "end": V002_OOS_END},
+            "split_method": "explicit_utc_date_windows",
+            "first_batch": [
+                {"id": "buy_and_hold_benchmark", "label": "B0", "params": {}},
+                {"id": "sma_50_200_trend_filter", "label": "B1",
+                 "params": {"fast_window": SMA_FAST_WINDOW, "slow_window": SMA_SLOW_WINDOW}},
+                {"id": "momentum_30", "label": "B2", "params": {"lookback": V002_MOMENTUM_N_FAST}},
+                {"id": "momentum_90", "label": "B2", "params": {"lookback": V002_MOMENTUM_N_SLOW}},
+                {"id": "donchian_55_20", "label": "B3",
+                 "params": {"entry_n": V002_DONCHIAN_ENTRY_N, "exit_m": V002_DONCHIAN_EXIT_M}},
+            ],
+            "deferred": ["volatility_regime_gate", "mean_reversion"],
+            "cost_model": {
+                "fee_bps": V002_FALLBACK_FEE_BPS,
+                "slippage_bps": V002_FALLBACK_SLIPPAGE_BPS,
+                "spread_proxy_bps": V002_FALLBACK_SPREAD_PROXY_BPS,
+                "total_per_side_bps": (V002_FALLBACK_FEE_BPS + V002_FALLBACK_SLIPPAGE_BPS
+                                       + V002_FALLBACK_SPREAD_PROXY_BPS),
+                "round_trip_bps": 2.0 * (V002_FALLBACK_FEE_BPS + V002_FALLBACK_SLIPPAGE_BPS
+                                         + V002_FALLBACK_SPREAD_PROXY_BPS),
+                "source": "frozen V002 fees.json (else pinned fallback 40/10/10)",
+            },
+            "missing_day_policy": "true gap; never forward-filled or synthesized; reported per symbol",
+        },
         "safety_flags": dict(SAFETY_FLAGS),
         "safety_notes": list(SAFETY_NOTES),
         "forbidden_next_steps": list(FORBIDDEN_NEXT_STEPS),
@@ -1099,27 +1409,39 @@ def main(argv=None) -> int:
     p_run.add_argument("--out-dir", required=True, help="Directory to write JSON + MD reports.")
     p_run.add_argument("--fee-bps", type=float, default=DEFAULT_TAKER_FEE_BPS)
     p_run.add_argument("--slippage-bps", type=float, default=DEFAULT_SLIPPAGE_BPS)
+    p_run.add_argument("--spread-proxy-bps", type=float, default=DEFAULT_SPREAD_PROXY_BPS)
     p_run.add_argument("--start-equity", type=float, default=DEFAULT_START_EQUITY)
     p_run.add_argument("--is-fraction", type=float, default=DEFAULT_IS_FRACTION)
+    p_run.add_argument("--config", choices=["default", V002_CONFIG_NAME], default=None,
+                       help="Run mode. 'v002_addendum' pins dates/costs/batch to the addendum.")
+    p_run.add_argument("--is-start", default=None)
+    p_run.add_argument("--is-end", default=None)
+    p_run.add_argument("--oos-start", default=None)
+    p_run.add_argument("--oos-end", default=None)
 
     p_validate = sub.add_parser("validate-config", help="Validate cost-model bounds.")
     p_validate.add_argument("--fee-bps", type=float, default=DEFAULT_TAKER_FEE_BPS)
     p_validate.add_argument("--slippage-bps", type=float, default=DEFAULT_SLIPPAGE_BPS)
+    p_validate.add_argument("--spread-proxy-bps", type=float, default=DEFAULT_SPREAD_PROXY_BPS)
 
     sub.add_parser("show-plan", help="Print the pre-registered plan.")
 
     args = parser.parse_args(argv)
     if args.command == "run":
-        ok, errs = validate_config(args.fee_bps, args.slippage_bps)
+        ok, errs = validate_config(args.fee_bps, args.slippage_bps, args.spread_proxy_bps)
         if not ok:
             print("validate-config: FAIL")
             for e in errs:
                 print(f"  - {e}")
             return 2
+        config = None if args.config in (None, "default") else args.config
         report = run_backtest(
             data_dir=args.data_dir, out_dir=args.out_dir,
             fee_bps=args.fee_bps, slip_bps=args.slippage_bps,
             start_equity=args.start_equity, is_fraction=args.is_fraction,
+            config=config, spread_bps=args.spread_proxy_bps,
+            is_start=args.is_start, is_end=args.is_end,
+            oos_start=args.oos_start, oos_end=args.oos_end,
         )
         print(f"run_id:                {report['run_id']}")
         print(f"pass_watch_fail_status:{report['pass_watch_fail_status']}")
@@ -1130,7 +1452,7 @@ def main(argv=None) -> int:
         print(f"reports written to:    {Path(args.out_dir).as_posix()}")
         return 0 if report["pass_watch_fail_status"] != "FAIL" else 2
     if args.command == "validate-config":
-        ok, errs = validate_config(args.fee_bps, args.slippage_bps)
+        ok, errs = validate_config(args.fee_bps, args.slippage_bps, args.spread_proxy_bps)
         if ok:
             print("validate-config: OK")
             return 0

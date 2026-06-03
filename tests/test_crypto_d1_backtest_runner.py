@@ -592,6 +592,297 @@ def test_deterministic_run_on_same_input(tmp_path):
 
 
 # ===========================================================================
+# Latent-bug fix: --is-fraction must affect per-strategy IS/OOS metrics,
+# not just the display summary (previously _run_one_family hardcoded 0.70).
+# ===========================================================================
+def test_is_fraction_now_affects_per_strategy_metrics(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    _write_csv(data_dir / "btc.csv", "BTC", n_days=300)
+    out5 = tmp_path / "out5"
+    out7 = tmp_path / "out7"
+    r5 = cbr.run_backtest(data_dir=data_dir, out_dir=out5, is_fraction=0.5)
+    r7 = cbr.run_backtest(data_dir=data_dir, out_dir=out7, is_fraction=0.7)
+
+    def _is_nbars(report):
+        ran = [r for r in report["strategy_results"]
+               if r["status"] == "RAN" and r["is_metrics"]]
+        assert ran, "expected at least one RAN strategy with is_metrics"
+        return ran[0]["is_metrics"]["n_bars"]
+
+    n5, n7 = _is_nbars(r5), _is_nbars(r7)
+    # 0.5 split -> ~150 IS bars; 0.7 split -> ~210 IS bars. They MUST differ now.
+    assert n5 != n7, (n5, n7)
+    assert n5 == 150 and n7 == 210, (n5, n7)
+    # Summary stays consistent with the per-strategy split.
+    assert r5["IS_OOS_summary"]["per_asset_is_range"]["BTC"]["n_bars"] == 150
+    assert r7["IS_OOS_summary"]["per_asset_is_range"]["BTC"]["n_bars"] == 210
+
+
+# ===========================================================================
+# Spread-proxy cost model (additive; 0.0 default preserves v1 behavior)
+# ===========================================================================
+def test_default_cost_model_has_no_spread_key(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    _write_csv(data_dir / "btc.csv", "BTC", n_days=300)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out)
+    # Default mode: cost_model is byte-compatible with v1 (no spread/round-trip).
+    assert "spread_proxy_bps" not in r["cost_model"]
+    assert "config_mode" not in r
+    assert "strategies_deferred" not in r
+
+
+def test_simulate_equity_spread_increases_cost():
+    # 3-bar up move with one position change -> spread must add cost.
+    mk = lambda ts, c: cbr.Bar(timestamp=ts, open=c, high=c * 1.01, low=c * 0.99,
+                               close=c, volume=1.0, symbol="BTC",
+                               source="t", quote_currency="USDT")
+    series = [mk("2023-01-01", 100.0), mk("2023-01-02", 110.0), mk("2023-01-03", 121.0)]
+    positions = [0, 1, 1]
+    no_spread = cbr._simulate_equity(positions, series, 40.0, 10.0, 100_000.0, 0.0)
+    with_spread = cbr._simulate_equity(positions, series, 40.0, 10.0, 100_000.0, 10.0)
+    assert with_spread["total_cost_paid"] > no_spread["total_cost_paid"]
+
+
+def test_validate_config_rejects_high_spread():
+    ok, errs = cbr.validate_config(fee_bps=40.0, slip_bps=10.0, spread_bps=999.0)
+    assert not ok
+    assert any("spread_proxy_bps" in e for e in errs)
+
+
+def test_validate_config_accepts_v002_costs():
+    ok, errs = cbr.validate_config(fee_bps=40.0, slip_bps=10.0, spread_bps=10.0)
+    assert ok, errs
+
+
+# ===========================================================================
+# SMA 50/200 crossover strategy (B1) -- distinct from MA200 filter
+# ===========================================================================
+def test_sma_crossover_skips_on_insufficient_history():
+    mk = lambda i: cbr.Bar(timestamp=f"2023-{1 + i // 28:02d}-{1 + i % 28:02d}",
+                           open=100.0, high=101.0, low=99.0, close=100.0,
+                           volume=1.0, symbol="BTC", source="t",
+                           quote_currency="USDT")
+    bars = [mk(i) for i in range(50)]  # < slow_window + 1 = 201
+    pos, skip = cbr.sma_crossover(bars)
+    assert pos == [] and "insufficient history" in skip
+
+
+def test_sma_crossover_goes_long_on_uptrend():
+    # Strictly rising closes -> fast SMA > slow SMA once warmed up -> long.
+    bars = []
+    base = datetime.strptime("2021-01-01", "%Y-%m-%d")
+    for i in range(260):
+        c = 100.0 + i  # monotone rising
+        d = (base + timedelta(days=i)).strftime("%Y-%m-%d")
+        bars.append(cbr.Bar(timestamp=d, open=c, high=c + 1, low=c - 1, close=c,
+                            volume=1.0, symbol="BTC", source="t", quote_currency="USDT"))
+    pos, skip = cbr.sma_crossover(bars)
+    assert skip is None
+    # After warmup (>=200) on a monotone uptrend, the strategy is long.
+    assert pos[-1] == 1
+    # During warmup it is flat.
+    assert pos[100] == 0
+
+
+# ===========================================================================
+# Date-window IS/OOS split + missing-day detection
+# ===========================================================================
+def test_split_is_oos_dates_no_overlap():
+    base = datetime.strptime("2021-06-17", "%Y-%m-%d")
+    bars = []
+    for i in range(400):
+        d = (base + timedelta(days=i)).strftime("%Y-%m-%d")
+        bars.append(cbr.Bar(timestamp=d, open=1, high=1, low=1, close=1, volume=1,
+                            symbol="BTC", source="t", quote_currency="USDT"))
+    is_b, oos_b = cbr.split_is_oos_dates(bars, "2021-06-17", "2021-12-31",
+                                         "2022-01-01", "2022-07-21")
+    is_dates = {b.timestamp for b in is_b}
+    oos_dates = {b.timestamp for b in oos_b}
+    assert is_dates and oos_dates
+    assert is_dates.isdisjoint(oos_dates)
+    assert max(is_dates) < min(oos_dates)
+
+
+def test_detect_missing_days_finds_planted_gap():
+    base = datetime.strptime("2024-03-29", "%Y-%m-%d")
+    days = ["2024-03-29", "2024-03-30", "2024-04-01", "2024-04-02"]  # 2024-03-31 absent
+    bars = [cbr.Bar(timestamp=d, open=1, high=1, low=1, close=1, volume=1,
+                    symbol="BTC", source="t", quote_currency="USDT") for d in days]
+    missing = cbr._detect_missing_days(bars)
+    assert missing == ["2024-03-31"]
+
+
+# ===========================================================================
+# v002_addendum mode -- end-to-end behavior
+# ===========================================================================
+def _write_v002_dataset(data_dir: Path, write_fees: bool = True):
+    """Synthetic V002-shaped dataset spanning a custom IS/OOS range with a
+    planted BTC gap. NOT REAL DATA."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+    _write_csv(data_dir / "btc.csv", "BTC", n_days=900, start_date="2021-06-17",
+               start_price=100.0)
+    _write_csv(data_dir / "eth.csv", "ETH", n_days=900, start_date="2021-06-17",
+               start_price=50.0)
+    _write_csv(data_dir / "sol.csv", "SOL", n_days=900, start_date="2021-06-17",
+               start_price=10.0)
+    if write_fees:
+        (data_dir / "fees.json").write_text(json.dumps({
+            "venue": "Kraken Pro spot", "taker_fee_bps": 40,
+            "slippage_bps": 10, "spread_proxy_bps": 10,
+        }), encoding="utf-8")
+
+
+_V002_KW = dict(config="v002_addendum",
+                is_start="2021-06-17", is_end="2022-12-31",
+                oos_start="2023-01-01", oos_end="2023-12-03")
+
+
+def test_v002_runs_only_first_batch(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    fams = {x["family"] for x in r["strategy_results"]}
+    assert fams == {"sma_50_200_trend_filter", "momentum_30", "momentum_90",
+                    "donchian_55_20"}
+    # Deferred families MUST NOT appear.
+    assert "volatility_regime_gate" not in fams
+    assert "mean_reversion" not in fams
+    assert r["strategies_deferred"] == ["volatility_regime_gate", "mean_reversion"]
+    # B0 benchmark present per asset.
+    bench_fams = {x["family"] for x in r["benchmark_results"]}
+    assert "buy_and_hold_benchmark" in bench_fams
+
+
+def test_v002_cost_model_from_fees_json(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir, write_fees=True)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    cm = r["cost_model"]
+    assert cm["fee_bps"] == 40.0
+    assert cm["slippage_bps"] == 10.0
+    assert cm["spread_proxy_bps"] == 10.0
+    assert cm["total_per_side_bps"] == 60.0
+    assert cm["round_trip_bps"] == 120.0
+    assert cm["cost_source"] == "v002_fees_json"
+
+
+def test_v002_cost_model_fallback_when_no_fees_json(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir, write_fees=False)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    cm = r["cost_model"]
+    assert (cm["fee_bps"], cm["slippage_bps"], cm["spread_proxy_bps"]) == (40.0, 10.0, 10.0)
+    assert cm["cost_source"] == "v002_fallback_pins"
+
+
+def test_v002_uses_date_windows(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    iso = r["IS_OOS_summary"]
+    assert iso["split_method"] == "explicit_utc_date_windows"
+    assert iso["is_window"] == {"start": "2021-06-17", "end": "2022-12-31"}
+    assert iso["oos_window"] == {"start": "2023-01-01", "end": "2023-12-03"}
+    # Per-asset ranges fall strictly inside their windows.
+    rng_is = iso["per_asset_is_range"]["BTC"]
+    rng_oos = iso["per_asset_oos_range"]["BTC"]
+    assert rng_is["start"] >= "2021-06-17" and rng_is["end"] <= "2022-12-31"
+    assert rng_oos["start"] >= "2023-01-01" and rng_oos["end"] <= "2023-12-03"
+    assert rng_is["end"] < rng_oos["start"]
+
+
+def test_v002_default_windows_apply_without_override(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, config="v002_addendum")
+    iso = r["IS_OOS_summary"]
+    assert iso["is_window"] == {"start": cbr.V002_IS_START, "end": cbr.V002_IS_END}
+    assert iso["oos_window"] == {"start": cbr.V002_OOS_START, "end": cbr.V002_OOS_END}
+
+
+def test_v002_reports_missing_days(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    # Plant a BTC gap by writing two files that skip a day; ETH/SOL complete.
+    _write_csv(data_dir / "btc_a.csv", "BTC", n_days=300, start_date="2021-06-17")
+    # Resume BTC AFTER a one-day gap: 300 days from 2021-06-17 ends 2022-04-12;
+    # restart one day later than contiguous to create a true gap.
+    _write_csv(data_dir / "btc_b.csv", "BTC", n_days=300, start_date="2022-04-14")
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, config="v002_addendum",
+                         is_start="2021-06-17", is_end="2022-04-13",
+                         oos_start="2022-04-14", oos_end="2023-02-07")
+    md = r.get("missing_days_per_symbol", {})
+    assert "BTC" in md and md["BTC"]["count"] >= 1
+
+
+def test_v002_safety_flags_pinned(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    assert r["research_only"] is True
+    for flag in ("data_fetch_enabled", "exchange_connection_enabled",
+                 "live_trading_enabled", "broker_control_enabled",
+                 "paper_order_execution_enabled", "order_placement_enabled"):
+        assert r[flag] is False
+    assert r["pass_watch_fail_status"] != "PASS"
+
+
+def test_v002_default_run_id_unchanged_when_default(tmp_path):
+    # Adding spread/config args to the hash must NOT change the default run_id.
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    _write_csv(data_dir / "btc.csv", "BTC", n_days=300)
+    files = sorted(data_dir.glob("*.csv"))
+    legacy = cbr._hash_inputs(data_dir, files, cbr.DEFAULT_TAKER_FEE_BPS,
+                              cbr.DEFAULT_SLIPPAGE_BPS, cbr.DEFAULT_START_EQUITY,
+                              cbr.DEFAULT_IS_FRACTION)
+    with_defaults = cbr._hash_inputs(data_dir, files, cbr.DEFAULT_TAKER_FEE_BPS,
+                                     cbr.DEFAULT_SLIPPAGE_BPS, cbr.DEFAULT_START_EQUITY,
+                                     cbr.DEFAULT_IS_FRACTION, 0.0, None)
+    assert legacy == with_defaults
+
+
+def test_cli_run_v002_addendum(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    rc = cbr.main(["run", "--data-dir", str(data_dir), "--out-dir", str(out),
+                   "--config", "v002_addendum",
+                   "--is-start", "2021-06-17", "--is-end", "2022-12-31",
+                   "--oos-start", "2023-01-01", "--oos-end", "2023-12-03"])
+    assert rc in (0, 2)  # WATCH/PASS->0, FAIL->2; both are valid completions
+    j = _read_json(out / "crypto_d1_backtest_report.json")
+    assert j["config_mode"] == "v002_addendum"
+    assert j["cost_model"]["round_trip_bps"] == 120.0
+
+
+def test_cli_validate_config_v002_costs_ok():
+    assert cbr.main(["validate-config", "--fee-bps", "40",
+                     "--slippage-bps", "10"]) == 0
+
+
+def test_show_plan_includes_v002_mode():
+    plan = cbr.show_plan()
+    assert "v002_addendum_mode" in plan
+    v = plan["v002_addendum_mode"]
+    assert v["config_name"] == "v002_addendum"
+    ids = {f["id"] for f in v["first_batch"]}
+    assert ids == {"buy_and_hold_benchmark", "sma_50_200_trend_filter",
+                   "momentum_30", "momentum_90", "donchian_55_20"}
+    assert v["deferred"] == ["volatility_regime_gate", "mean_reversion"]
+
+
+# ===========================================================================
 # Repo invariants (no real data files were committed by this bundle).
 # ===========================================================================
 def test_no_real_data_files_committed_under_bundle_dir():
