@@ -503,7 +503,7 @@
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only, trued to Crypto-D1: <b>Readiness gate complete; real-data intake not ready</b> (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>, <b>16 operator items pending</b>). The <b>Bundle&nbsp;22 missing-items checklist is complete</b> and awaiting manual operator raw-data intake per the Bundle&nbsp;20 runbook &mdash; <b>no source named or approved</b>. <b>No real data has been fetched</b> (<code>data/crypto_d1_research/</code> does not exist), no QA run against real data, and <b>no baseline results yet</b>. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution.</div>
+            <div class="jv-detail">Display-only, trued to Crypto-D1: <b>Readiness gate complete; real-data intake not ready</b> (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>, <b>16 operator items pending</b>). The <b>Bundle&nbsp;22 missing-items checklist is complete</b> and awaiting manual operator raw-data intake per the Bundle&nbsp;20 runbook &mdash; <b>no source named or approved</b>. The <b>V002 dataset is frozen and present</b>; QA ran on V002 with verdict <b>QA_WARN</b> and operator acceptance; the IS/OOS addendum exists; a baseline backtest ran with result <b>WATCH</b>. Crypto-D1 remains <b>WATCH / MIXED</b> and <code>readiness_status</code> remains <b>NOT_READY_FOR_REAL_DATA</b> &mdash; no ACTIVE/STRONG promotion, no paper trading, and no live trading are authorized. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
           </div>
 
           <!-- Combined View -->
@@ -556,28 +556,22 @@
               <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator readiness / missing-items review</span></div>
               <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>Readiness gate complete; real-data intake not ready</span></div>
               <div class="jv-row"><span class="k">Readiness gate</span><span class="v"><span class="jv-led"></span>Complete (Bundle 21)</span></div>
-              <div class="jv-row"><span class="k">Missing-items checklist</span><span class="v"><span class="jv-led warn"></span>Bundle 22 &middot; 16 items MISSING / PENDING</span></div>
+              <div class="jv-row"><span class="k">Missing-items checklist</span><span class="v"><span class="jv-led warn"></span><span data-cr="checklist">Bundle 22 &middot; 16 items MISSING / PENDING (operator checklist; separate from data/QA/backtest progress)</span></span></div>
               <div class="jv-row"><span class="k">Readiness status</span><span class="v"><span class="jv-led warn"></span>NOT_READY_FOR_REAL_DATA</span></div>
               <div class="jv-row"><span class="k">Missing operator items</span><span class="v"><span class="jv-led warn"></span>16 listed</span></div>
-              <div class="jv-row"><span class="k">Data fetched</span><span class="v"><span class="jv-led warn"></span>No</span></div>
-              <div class="jv-row"><span class="k">QA run</span><span class="v"><span class="jv-led warn"></span>None against real data</span></div>
-              <div class="jv-row"><span class="k">Baseline results</span><span class="v"><span class="jv-led warn"></span>None yet</span></div>
+              <div class="jv-row"><span class="k">Data fetched</span><span class="v"><span class="jv-led warn"></span><span data-cr="data_fetched">V002 frozen dataset present</span></span></div>
+              <div class="jv-row"><span class="k">QA run</span><span class="v"><span class="jv-led warn"></span><span data-cr="qa_run">QA_WARN on V002 &middot; operator-accepted</span></span></div>
+              <div class="jv-row"><span class="k">Baseline results</span><span class="v"><span class="jv-led warn"></span><span data-cr="baseline">Ran &middot; WATCH (V002 baseline)</span></span></div>
               <div class="jv-row"><span class="k">Status</span><span class="v"><span class="jv-led warn"></span>WATCH / MIXED</span></div>
               <div class="jv-row"><span class="k">Paper Trading Gate</span><span class="v"><span class="jv-led lock"></span>Human approval required</span></div>
               <div class="jv-row"><span class="k">Micro-Live Gate</span><span class="v"><span class="jv-led lock"></span>Locked &middot; never automated</span></div>
             </div>
-            <div class="jv-detail" style="margin-top:10px;">
-              Trued to the Crypto-D1 research candidate: the Bundle&nbsp;21 readiness
-              gate is complete (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>),
-              16 operator items are still pending, no real data has been fetched
-              (<code>data/crypto_d1_research/</code> does not exist), no QA run against
-              real data, and there are no baseline results yet. The Bundle&nbsp;22
-              Operator Missing-Items Checklist provides the fillable 16-item template;
-              each item moves MISSING &rarr; COMPLETE only with non-empty evidence and
-              <code>approval_status=APPROVED</code>. Live factory reports
-              and the survival ledger are shown in the read-only panels below this
-              section. This card is an orientation map only &mdash; it stages,
-              promotes, and executes nothing.
+            <div class="jv-detail" style="margin-top:10px;" data-cr="detail">
+              V002 dataset is frozen and present; QA ran on V002 with verdict
+              QA_WARN (operator-accepted via memo); the IS/OOS addendum exists; a
+              baseline backtest ran with result WATCH. Crypto-D1 remains WATCH /
+              MIXED, NOT_READY_FOR_REAL_DATA &mdash; no ACTIVE/STRONG promotion, no
+              paper or live trading. This card stages, promotes, and executes nothing.
             </div>
           </div>
 
@@ -848,6 +842,24 @@
       }
       if(mf.baseline_present !== true){
         mfSet('backtest', 'is-todo', 'Ready for approved run · Not run yet');
+      }
+
+      // Current Run card (DISPLAY-ONLY, textContent only). Trues the rows that
+      // were previously static/false. Never promotes the lane: lane stays
+      // WATCH/MIXED and readiness stays NOT_READY regardless of this payload.
+      function crSet(key, text){
+        var el = document.querySelector('[data-cr="'+key+'"]');
+        if(el){ el.textContent = text; }
+      }
+      if(mf.data_present === true){
+        crSet('data_fetched', 'V002 frozen dataset present');
+      }
+      if(mf.qa_status){
+        crSet('qa_run', mf.qa_status + ' on V002'
+          + (mf.qa_accepted === true ? ' · operator-accepted' : ''));
+      }
+      if(mf.baseline_present === true && mf.baseline_status){
+        crSet('baseline', 'Ran · ' + mf.baseline_status + ' (V002 baseline)');
       }
     })();
 

@@ -8406,6 +8406,11 @@ _JARVIS_MF_QA_V002_MEMO_REL = (
     "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/operator_acceptance_memo.md")
 _JARVIS_MF_ADDENDUM_REL = (
     "reports/crypto_d1_baseline_backtest_plan_v1/v002_is_oos_addendum.md")
+# Baseline backtest RESULT (committed audit artifact). Presence + the single
+# verdict key are read; the runner is NEVER invoked from here.
+_JARVIS_MF_BASELINE_RESULT_REL = (
+    "reports/crypto_d1_backtest_runner_v1/"
+    "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/crypto_d1_backtest_report.json")
 # Dashboard logic may NEVER surface these verdicts; clamp to the safe default.
 _JARVIS_MF_FORBIDDEN_VERDICTS = frozenset({"ACTIVE", "STRONG"})
 _JARVIS_MF_ALLOWED_LANE_STATUS = frozenset(
@@ -8552,15 +8557,22 @@ def _jarvis_crypto_d1_mission_flow() -> dict:
     qa_accepted = (BASE / _JARVIS_MF_QA_V002_MEMO_REL).is_file()
     addendum_present = (BASE / _JARVIS_MF_ADDENDUM_REL).is_file()
 
-    # Baseline backtest RESULTS only (never the plan addendum). None exist yet.
+    # Baseline backtest RESULT (committed audit artifact) — never the plan
+    # addendum. Read the single verdict key; the runner is never invoked here.
     baseline_present = False
-    if data_present:
-        try:
-            bt_hits = (list(data_dir.rglob("backtest_report.json"))
-                       + list(data_dir.rglob("baseline_report.json")))
-        except Exception:  # noqa: BLE001 — presence probe fails closed
-            bt_hits = []
-        baseline_present = bool(bt_hits)
+    baseline_status = None
+    baseline_run_id = None
+    if (BASE / _JARVIS_MF_BASELINE_RESULT_REL).is_file():
+        bt_obj, bt_state = _jarvis_mf_load_json(_JARVIS_MF_BASELINE_RESULT_REL)
+        if bt_state == "ok" and isinstance(bt_obj, dict):
+            baseline_present = True
+            baseline_status = str(
+                bt_obj.get("pass_watch_fail_status", "") or "") or None
+            baseline_run_id = str(bt_obj.get("run_id", "") or "") or None
+        elif bt_state == "error":
+            warnings.append(
+                f"baseline result {_JARVIS_MF_BASELINE_RESULT_REL} "
+                "unreadable; baseline_status=None")
 
     # Aggregate state: 'ready' ONLY if the three core sources all loaded OK.
     core_states = (cand_state, rg_state, cl_state)
@@ -8591,6 +8603,8 @@ def _jarvis_crypto_d1_mission_flow() -> dict:
         "qa_accepted": qa_accepted,
         "addendum_present": addendum_present,
         "baseline_present": baseline_present,
+        "baseline_status": baseline_status,
+        "baseline_run_id": baseline_run_id,
         "warnings": warnings,
     }
 

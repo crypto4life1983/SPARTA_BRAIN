@@ -190,15 +190,20 @@ def test_current_run_reflects_real_crypto_d1_state():
         "Complete (Bundle 21)",
         "NOT_READY_FOR_REAL_DATA",
         "16 listed",
-        "None against real data",
         "Data fetched",
-        "None yet",
+        "V002 frozen dataset present",
+        "QA_WARN on V002",
+        "WATCH (V002 baseline)",
+        "baseline backtest ran with result WATCH",
         "WATCH / MIXED",
-        "data/crypto_d1_research/",
     ):
         assert token in block, f"missing truthful Current Run token: {token}"
     # the stale Bundle-19-era framing must be gone
     for stale in ("Data-readiness / QA tooling", "Authorization gate complete"):
+        assert stale not in block, f"stale Current Run token still present: {stale}"
+    # the pre-V002 "nothing has touched real data" framing is now false and gone
+    # from the Current Run card.
+    for stale in ("None against real data", "None yet"):
         assert stale not in block, f"stale Current Run token still present: {stale}"
 
 

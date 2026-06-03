@@ -102,6 +102,8 @@ def test_valid_sources_report_not_ready_watch_mixed(monkeypatch, tmp_path):
     assert mf["qa_accepted"] is False
     assert mf["addendum_present"] is False
     assert mf["baseline_present"] is False
+    assert mf["baseline_status"] is None
+    assert mf["baseline_run_id"] is None
     assert mf["warnings"] == []
 
 
@@ -216,9 +218,14 @@ def test_present_qa_report_under_reports_tree(monkeypatch, tmp_path):
     addendum = tmp_path / "reports" / "crypto_d1_baseline_backtest_plan_v1"
     addendum.mkdir(parents=True)
     (addendum / "v002_is_oos_addendum.md").write_text("plan", encoding="utf-8")
-    # a baseline RESULT under the dataset dir (NOT the plan addendum)
-    (v002 / "baseline_report.json").write_text(
-        json.dumps({"ok": True}), encoding="utf-8")
+    # The baseline RESULT is the committed runner artifact under the reports
+    # tree (NOT the dataset dir, NOT the plan addendum).
+    bt_dir = (tmp_path / "reports" / "crypto_d1_backtest_runner_v1"
+              / "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002")
+    bt_dir.mkdir(parents=True)
+    (bt_dir / "crypto_d1_backtest_report.json").write_text(
+        json.dumps({"pass_watch_fail_status": "WATCH",
+                    "run_id": "3f9a34612ef00747"}), encoding="utf-8")
     monkeypatch.setattr(app_module, "BASE", tmp_path)
     mf = app_module._jarvis_crypto_d1_mission_flow()
 
@@ -228,10 +235,14 @@ def test_present_qa_report_under_reports_tree(monkeypatch, tmp_path):
     assert mf["qa_accepted"] is True
     assert mf["addendum_present"] is True
     assert mf["baseline_present"] is True
+    assert mf["baseline_status"] == "WATCH"
+    assert mf["baseline_run_id"] == "3f9a34612ef00747"
     # truth never promotes the lane
     assert mf["lane_status"] == "WATCH"
     assert mf["evidence_level"] == "MIXED"
     assert mf["readiness_status"] == "NOT_READY_FOR_REAL_DATA"
+    # a WATCH baseline is never an ACTIVE/STRONG signal
+    assert mf["baseline_status"] not in ("ACTIVE", "STRONG")
 
 
 def test_qa_warn_not_accepted_when_memo_absent(monkeypatch, tmp_path):
