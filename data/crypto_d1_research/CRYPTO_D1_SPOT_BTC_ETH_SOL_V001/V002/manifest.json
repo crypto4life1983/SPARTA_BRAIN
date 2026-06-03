@@ -1,0 +1,75 @@
+{
+  "manifest_version": "crypto_d1_dataset_manifest_v1",
+  "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001",
+  "dataset_version": "V002",
+  "created_at": "2026-06-03T17:09:43Z",
+  "created_by": "Mahmoud Cherif — operator manual Kraken intake",
+  "research_lane": "crypto_d1_protocol",
+  "market_type": "spot",
+  "assets": [
+    "BTC",
+    "ETH",
+    "SOL"
+  ],
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL"
+  ],
+  "quote_currency": "USD",
+  "timeframe": "1d",
+  "time_start": "2021-06-17",
+  "time_end": "2025-12-31",
+  "timezone": "UTC",
+  "bar_boundary": "UTC 00:00:00, left-closed / right-open (bar-open)",
+  "data_frequency": "1d",
+  "source_type": "operator_manual_offline_file",
+  "source_name": "Kraken",
+  "source_location": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002/daily_ohlcv.csv",
+  "data_contract_version": "crypto_d1_data_contract_v1",
+  "protocol_version": "crypto_d1_protocol_v1",
+  "checksum_policy": "sha256 per file, recorded in CHECKSUMS.txt",
+  "row_count_expected": 4977,
+  "row_count_actual": 4976,
+  "missing_day_policy": "Missing daily bars are flagged per asset in missing_day_list; never silently forward-filled.",
+  "duplicate_policy": "Duplicate (symbol, timestamp) rows are rejected at normalization time; a duplicate is a hard error.",
+  "partial_day_policy": "Partial-day / out-of-range bars are excluded; only fully-closed UTC daily bars inside the declared range are kept.",
+  "zero_volume_policy": "Zero-volume daily bars are retained as-is and must be reviewed by the QA harness; not silently dropped, not silently accepted.",
+  "outlier_policy": "Outlier / suspicious-bar detection is deferred to the Crypto-D1 QA harness; this tool only enforces OHLC self-consistency.",
+  "normalization_policy": "Kraken USD-quote daily OHLCVT exports mapped to canonical BTC/ETH/SOL; venue aliases XBTUSD->BTC, ETHUSD->ETH, SOLUSD->SOL; unix-seconds bar-open converted to ISO-8601 UTC; prices kept as source strings to avoid precision loss.",
+  "fee_slippage_assumption_reference": "fees.json (FILLED_PENDING_QA: conservative Kraken Pro spot low-volume assumptions filled; QA_status stays QA_DRAFT until QA harness runs)",
+  "freeze_status": "FROZEN",
+  "QA_status": "QA_DRAFT",
+  "allowed_use": "Research-only offline input to the Crypto-D1 QA harness. Must earn QA_PASS (or an approved QA_WARN note) before any pre-registered backtest may cite it.",
+  "forbidden_use": "No live trading. No paper-order execution. No order placement. Does not authorize a backtest. Does not imply profitability or edge. A good historical chart does not imply future returns.",
+  "notes": "Operator-manual offline Kraken intake. No network call was made by SPARTA to obtain this data; the operator downloaded the Kraken historical OHLCVT exports out-of-band. Kraken Terms-of-Service evidence for research use must be cited in FREEZE_RECORD.txt before QA. FROZEN means checksummed and immutable, NOT QA-passed and NOT research-eligible.",
+  "remediation_of": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V001",
+  "remediation_note": "V002 remediates V001 QA_FAIL caused by FREEZE_RECORD.txt missing freeze_timestamp_utc; data content unchanged. daily_ohlcv.csv and fees.json are byte-identical to V001 (sha256 daily_ohlcv.csv 0c1cef4b151aac99f51e4e80cc4db0ed354f4e19590bc60f37b4ae82c91cf63a; fees.json 3b9ae2b0efe33d3bbe31eb34a5dab3ed5b12f64a316c24d64827244872a2d086). Only the freeze record schema and dataset_version changed.",
+  "missing_day_list": {
+    "BTC": {
+      "count": 1,
+      "dates": [
+        "2024-03-31"
+      ]
+    },
+    "ETH": {
+      "count": 0,
+      "dates": []
+    },
+    "SOL": {
+      "count": 0,
+      "dates": []
+    }
+  },
+  "per_asset_row_count": {
+    "BTC": 1658,
+    "ETH": 1659,
+    "SOL": 1659
+  },
+  "row_count_expected_per_asset": 1659,
+  "row_level_provenance": {
+    "BTC": "kraken:XBTUSD_1440.csv",
+    "ETH": "kraken:ETHUSD_1440.csv",
+    "SOL": "kraken:SOLUSD_1440.csv"
+  }
+}

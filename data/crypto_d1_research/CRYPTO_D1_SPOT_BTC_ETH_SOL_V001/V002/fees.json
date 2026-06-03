@@ -1,0 +1,12 @@
+{
+  "status": "FILLED_PENDING_QA",
+  "venue": "Kraken Pro spot",
+  "quote_currency": "USD",
+  "maker_fee_bps": 25,
+  "taker_fee_bps": 40,
+  "default_execution_fee_bps": 40,
+  "slippage_bps": 10,
+  "spread_proxy_bps": 10,
+  "source": "Kraken fee schedule, reviewed 2026-06-02",
+  "note": "conservative low-volume baseline assumptions; not a best-case fee tier"
+}

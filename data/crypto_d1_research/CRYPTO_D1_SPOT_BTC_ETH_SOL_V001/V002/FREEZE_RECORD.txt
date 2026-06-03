@@ -1,0 +1,24 @@
+{
+  "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001",
+  "dataset_version": "V002",
+  "freeze_timestamp_utc": "2026-06-03T17:09:43Z",
+  "operator": "Mahmoud Cherif — operator manual Kraken intake",
+  "source_name": "Kraken",
+  "manifest_version": "crypto_d1_dataset_manifest_v1",
+  "data_contract_version": "crypto_d1_data_contract_v1",
+  "protocol_version": "crypto_d1_protocol_v1",
+  "remediation_of": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V001",
+  "remediation_reason": "V002 created to correct FREEZE_RECORD key required by QA harness; data content unchanged from V001.",
+  "remediation_detail": "V001 earned QA_FAIL because its FREEZE_RECORD.txt used the key 'freeze_timestamp' while the Crypto-D1 QA harness requires the key 'freeze_timestamp_utc'. V002 corrects the freeze-record schema only. daily_ohlcv.csv and fees.json are byte-identical to V001; manifest.json differs only in dataset_version (V002), source_location, created_at, and the added remediation fields.",
+  "kraken_tos_evidence_reference": "PLACEHOLDER_FILL_BEFORE_QA: cite the Kraken Terms-of-Service clause permitting research use of downloaded historical OHLCVT exports, plus the download date and the operator who performed the offline download.",
+  "frozen_files": [
+    "daily_ohlcv.csv",
+    "fees.json",
+    "manifest.json"
+  ],
+  "byte_identical_to_v001": [
+    "daily_ohlcv.csv",
+    "fees.json"
+  ],
+  "freeze_means": "Files are checksummed and immutable. FROZEN does NOT mean QA-passed; QA_status is QA_DRAFT. No backtest, paper, or live trading is authorized by this freeze."
+}
