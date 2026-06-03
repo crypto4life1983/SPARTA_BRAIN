@@ -883,6 +883,188 @@ def test_show_plan_includes_v002_mode():
 
 
 # ===========================================================================
+# momentum_robustness_v1 mode -- additive sweep over the SAME V002 dataset.
+# ===========================================================================
+_ROBUST_KW = dict(config="momentum_robustness_v1",
+                  is_start="2021-06-17", is_end="2022-12-31",
+                  oos_start="2023-01-01", oos_end="2023-12-03")
+_ROBUST_REPORT = "crypto_d1_momentum_robustness_report"
+
+
+def test_robustness_config_exists():
+    # The mode is registered as a constant, a show-plan block, and a CLI choice.
+    assert cbr.MOMENTUM_ROBUSTNESS_CONFIG_NAME == "momentum_robustness_v1"
+    assert tuple(cbr.MOMENTUM_ROBUSTNESS_LOOKBACKS) == (20, 30, 45, 60, 90)
+    plan = cbr.show_plan()
+    assert "momentum_robustness_v1_mode" in plan
+    m = plan["momentum_robustness_v1_mode"]
+    assert m["config_name"] == "momentum_robustness_v1"
+    assert m["momentum_lookbacks"] == [20, 30, 45, 60, 90]
+    assert m["mutates_v002_addendum"] is False
+    assert m["promotes_anything"] is False
+    assert m["output_basename"] == _ROBUST_REPORT
+
+
+def test_robustness_runs_all_five_lookbacks(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_ROBUST_KW)
+    fams = {x["family"] for x in r["strategy_results"]}
+    assert fams == {"momentum_20", "momentum_30", "momentum_45",
+                    "momentum_60", "momentum_90"}
+    # Deferred families MUST NOT appear.
+    assert "volatility_regime_gate" not in fams
+    assert "mean_reversion" not in fams
+    assert r["strategies_deferred"] == ["volatility_regime_gate", "mean_reversion"]
+    assert r["momentum_robustness_lookbacks"] == [20, 30, 45, 60, 90]
+    assert r["config_mode"] == "momentum_robustness_v1"
+    # The report lands at the DISTINCT robustness basename, never overwriting
+    # the committed v002/default baseline report.
+    assert (out / f"{_ROBUST_REPORT}.json").exists()
+    assert (out / f"{_ROBUST_REPORT}.md").exists()
+    assert not (out / "crypto_d1_backtest_report.json").exists()
+
+
+def test_robustness_does_not_mutate_v002_addendum(tmp_path):
+    # v002_addendum still runs its own B0-B3 batch and daily-rebalanced basket,
+    # untouched by the new mode.
+    bench, strat, deferred = cbr._v002_family_plan()
+    strat_ids = {s["family_id"] for s in strat}
+    assert strat_ids == {"sma_50_200_trend_filter", "momentum_30",
+                         "momentum_90", "donchian_55_20"}
+    assert deferred == ["volatility_regime_gate", "mean_reversion"]
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    bench_strat_ids = {b["strategy_id"] for b in r["benchmark_results"]}
+    # v002 keeps the daily-rebalanced basket; NOT the allocate-once one.
+    assert "buy_and_hold_basket" in bench_strat_ids
+    assert "buy_and_hold_basket_equal_weight" not in bench_strat_ids
+    assert r["batch_label"] == "B0-B3 first execution batch (v002_addendum)"
+    assert (out / "crypto_d1_backtest_report.json").exists()
+
+
+def test_robustness_is_oos_dates_match_v002(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    # No override -> defaults must equal the V002 addendum pins.
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out,
+                         config="momentum_robustness_v1")
+    iso = r["IS_OOS_summary"]
+    assert iso["split_method"] == "explicit_utc_date_windows"
+    assert iso["is_window"] == {"start": cbr.V002_IS_START, "end": cbr.V002_IS_END}
+    assert iso["oos_window"] == {"start": cbr.V002_OOS_START, "end": cbr.V002_OOS_END}
+
+
+def test_robustness_costs_match_v002(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir, write_fees=True)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_ROBUST_KW)
+    cm = r["cost_model"]
+    assert (cm["fee_bps"], cm["slippage_bps"], cm["spread_proxy_bps"]) == (40.0, 10.0, 10.0)
+    assert cm["total_per_side_bps"] == 60.0
+    assert cm["round_trip_bps"] == 120.0
+    assert cm["cost_source"] == "v002_fees_json"
+
+
+def test_robustness_reports_btc_gap_not_filled(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    # Plant a true BTC one-day gap; never forward-filled or synthesized.
+    _write_csv(data_dir / "btc_a.csv", "BTC", n_days=300, start_date="2021-06-17")
+    _write_csv(data_dir / "btc_b.csv", "BTC", n_days=300, start_date="2022-04-14")
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out,
+                         config="momentum_robustness_v1",
+                         is_start="2021-06-17", is_end="2022-04-13",
+                         oos_start="2022-04-14", oos_end="2023-02-07")
+    md = r.get("missing_days_per_symbol", {})
+    assert "BTC" in md and md["BTC"]["count"] >= 1
+
+
+def test_robustness_primary_basket_is_allocate_once_not_daily(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_ROBUST_KW)
+    bench_ids = {b["strategy_id"] for b in r["benchmark_results"]}
+    # The daily-rebalanced basket (volatility-drag artifact) must NOT be the
+    # primary basket benchmark for this mode.
+    assert "buy_and_hold_basket" not in bench_ids
+    assert "buy_and_hold_basket_equal_weight" in bench_ids
+    assert r["primary_basket_benchmark"] == "buy_and_hold_basket_equal_weight"
+    # The allocate-once basket trades exactly once and never rebalances.
+    ew = next(b for b in r["benchmark_results"]
+              if b["strategy_id"] == "buy_and_hold_basket_equal_weight")
+    assert ew["metrics"]["trade_count"] == 1
+    assert ew["metrics"]["turnover"] == 1
+    assert "allocate once" in ew["parameters"]["rebalance_frequency"]
+
+
+def test_robustness_reports_family_oos_trade_counts(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_ROBUST_KW)
+    fc = r["family_oos_trade_counts"]
+    assert set(fc.keys()) == {"momentum_20", "momentum_30", "momentum_45",
+                              "momentum_60", "momentum_90"}
+    for fam, d in fc.items():
+        assert "oos_trades_total" in d and "per_asset" in d
+        assert "meets_family_floor" in d
+    # The per-family floor is REPORTED but NOT enforced in classify_run.
+    ft = r["family_trade_floor"]
+    assert ft["per_family_floor"] == cbr.OOS_MIN_TRADES_PER_FAMILY
+    assert ft["enforced_in_classify_run"] is False
+
+
+def test_robustness_safety_flags_pinned(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_ROBUST_KW)
+    assert r["research_only"] is True
+    for flag in ("data_fetch_enabled", "exchange_connection_enabled",
+                 "live_trading_enabled", "broker_control_enabled",
+                 "paper_order_execution_enabled", "order_placement_enabled"):
+        assert r[flag] is False
+    # The conservative classifier never auto-promotes (WATCH ceiling).
+    assert r["pass_watch_fail_status"] != "PASS"
+
+
+def test_robustness_mode_adds_no_network_or_execution_paths():
+    # The whole tool is stdlib-only (asserted elsewhere); pin that the new mode
+    # introduced no broker/paper/live/network tokens around its own code.
+    src = TOOL_FILE.read_text(encoding="utf-8").lower()
+    # locate the robustness family-plan + basket region and scan it.
+    start = src.index("_momentum_robustness_family_plan")
+    region = src[start:start + 4000]
+    for forbidden in ("requests", "urllib", "socket", "http", "fetch(",
+                      "place_order", "submit_order", "execute_trade",
+                      "broker", "api_key", "secret", "websocket", "subprocess"):
+        assert forbidden not in region, \
+            f"robustness mode must not reference {forbidden}"
+
+
+def test_cli_run_momentum_robustness_v1(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    rc = cbr.main(["run", "--data-dir", str(data_dir), "--out-dir", str(out),
+                   "--config", "momentum_robustness_v1",
+                   "--is-start", "2021-06-17", "--is-end", "2022-12-31",
+                   "--oos-start", "2023-01-01", "--oos-end", "2023-12-03"])
+    assert rc in (0, 2)
+    j = _read_json(out / f"{_ROBUST_REPORT}.json")
+    assert j["config_mode"] == "momentum_robustness_v1"
+    assert j["momentum_robustness_lookbacks"] == [20, 30, 45, 60, 90]
+
+
+# ===========================================================================
 # Repo invariants (no real data files were committed by this bundle).
 # ===========================================================================
 def test_no_real_data_files_committed_under_bundle_dir():

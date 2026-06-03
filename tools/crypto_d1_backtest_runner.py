@@ -161,6 +161,21 @@ V002_DONCHIAN_EXIT_M = 20
 V002_MOMENTUM_N_FAST = 30
 V002_MOMENTUM_N_SLOW = 90
 
+# ---------------------------------------------------------------------------
+# momentum_robustness_v1 config. ADDITIVE and read-only over the SAME V002
+# dataset, costs, and IS/OOS windows as v002_addendum. It sweeps the momentum
+# lookback across a contiguous, PRE-REGISTERED grid so the operator can see
+# whether momentum's OOS edge is a stable plateau or a single lucky point.
+# It does NOT mutate v002_addendum, never auto-promotes (WATCH ceiling via the
+# unchanged classify_run), and keeps every safety flag pinned. Volatility-regime
+# gate and mean reversion stay DEFERRED here -- a separate run owns them, so this
+# pass studies one factor at a time.
+# ---------------------------------------------------------------------------
+MOMENTUM_ROBUSTNESS_CONFIG_NAME = "momentum_robustness_v1"
+# Contiguous lookback grid, chosen pre-run (NOT OOS-tuned). 30 and 90 are
+# re-run so the sweep is directly comparable to the committed V002 baseline.
+MOMENTUM_ROBUSTNESS_LOOKBACKS = (20, 30, 45, 60, 90)
+
 
 # ===========================================================================
 # Data classes
@@ -812,6 +827,91 @@ def _basket_buy_and_hold(bars_by_symbol: dict[str, list[Bar]],
     }
 
 
+def _basket_buy_and_hold_equal_weight(bars_by_symbol: dict[str, list[Bar]],
+                                      fee_bps: float, slip_bps: float,
+                                      start_equity: float,
+                                      spread_bps: float = 0.0):
+    """Equal-weight buy-and-hold benchmark that ALLOCATES ONCE at the first
+    common date and is NEVER rebalanced (momentum_robustness_v1 primary
+    benchmark).
+
+    Each covered asset receives 1/N of start_equity at the first shared date;
+    one entry cost is paid per asset (trade_count == 1). The basket then drifts
+    with raw prices -- no daily rebalance, so it carries NO volatility-drag
+    turnover haircut, unlike the daily-rebalanced ``_basket_buy_and_hold``. This
+    is the honest 'just hold the basket' baseline the operator review asked for
+    after the daily-rebalanced curve produced a -99.6% drag artifact."""
+    if not bars_by_symbol:
+        return None
+    covered = [s for s in TARGET_ASSETS if s in bars_by_symbol and len(bars_by_symbol[s]) >= 2]
+    if len(covered) < 1:
+        return None
+    common_dates = set(b.timestamp for b in bars_by_symbol[covered[0]])
+    for s in covered[1:]:
+        common_dates &= set(b.timestamp for b in bars_by_symbol[s])
+    sorted_dates = sorted(common_dates)
+    if len(sorted_dates) < 2:
+        return None
+    closes = {s: {b.timestamp: b.close for b in bars_by_symbol[s]} for s in covered}
+    n_assets = len(covered)
+    alloc = start_equity / n_assets
+    entry_cost_frac = (fee_bps + slip_bps + spread_bps) / 10_000.0
+    # Units bought once at the first common date, after paying a one-time entry
+    # cost on each per-asset allocation. No further trades occur.
+    entry_date = sorted_dates[0]
+    units = {}
+    total_entry_cost = 0.0
+    for s in covered:
+        invested = alloc * (1.0 - entry_cost_frac)
+        total_entry_cost += alloc * entry_cost_frac
+        units[s] = invested / closes[s][entry_date]
+    equity = []
+    for d in sorted_dates:
+        eq = sum(units[s] * closes[s][d] for s in covered)
+        equity.append(eq)
+    peak = equity[0]
+    max_dd = 0.0
+    for x in equity:
+        if x > peak:
+            peak = x
+        dd = (x - peak) / peak if peak > 0 else 0.0
+        if dd < max_dd:
+            max_dd = dd
+    total_return = equity[-1] / start_equity - 1.0
+    return {
+        "strategy_id": "buy_and_hold_basket_equal_weight",
+        "family": "buy_and_hold_benchmark",
+        "label": "A. Buy-and-hold benchmark (equal-weight, allocate once, no rebalance)",
+        "asset": "BASKET",
+        "parameters": {
+            "rebalance_frequency": "none (allocate once at first common date)",
+            "basket_weights": "equal-weight 1/N per covered asset at entry",
+            "covered_assets": covered,
+        },
+        "status": "RAN",
+        "skip_reason": None,
+        "metrics": {
+            "total_return": total_return,
+            "max_drawdown": max_dd,
+            "trade_count": 1,
+            "exposure_pct": 100.0,
+            "turnover": 1,
+            "total_cost_paid": total_entry_cost,
+            "annualized_return_approx": _annualized_return(total_return, len(sorted_dates)),
+            "annualized_vol_approx": _annualized_vol_from_curve(equity),
+            "sharpe_like_with_caveat": _sharpe_like(total_return, len(sorted_dates), equity),
+            "sharpe_caveat": "Sharpe-like; rf=0; daily-return approximation.",
+            "n_bars": len(sorted_dates),
+            "start_equity": start_equity,
+            "end_equity": equity[-1],
+        },
+        "is_metrics": None,  # single benchmark stream; IS/OOS via per-asset.
+        "oos_metrics": None,
+        "warnings": ["Equal-weight allocate-once basket; one entry, no rebalance, "
+                     "no per-basket IS/OOS split."],
+    }
+
+
 # ===========================================================================
 # PASS / WATCH / FAIL classifier (conservative).
 # ===========================================================================
@@ -932,6 +1032,49 @@ def _v002_family_plan():
     return bench, strat, deferred
 
 
+def _momentum_robustness_family_plan():
+    """Return (benchmark_specs, strategy_specs, deferred) for momentum_robustness_v1.
+
+    Per-asset buy-and-hold benchmark plus one momentum_continuation family per
+    PRE-REGISTERED lookback in MOMENTUM_ROBUSTNESS_LOOKBACKS (20/30/45/60/90).
+    Volatility-regime gate and mean reversion stay DEFERRED -- this pass studies
+    momentum stability across the lookback grid only, one factor at a time."""
+    bench = [
+        {"family_id": "buy_and_hold_benchmark",
+         "label": "A0. Buy & Hold benchmark (per-asset)", "params": {},
+         "fn": buy_and_hold},
+    ]
+    strat = [
+        {"family_id": f"momentum_{n}",
+         "label": f"M. Time-series momentum (N={n})",
+         "params": {"lookback": n}, "fn": momentum_continuation}
+        for n in MOMENTUM_ROBUSTNESS_LOOKBACKS
+    ]
+    deferred = ["volatility_regime_gate", "mean_reversion"]
+    return bench, strat, deferred
+
+
+def _family_oos_trade_counts(strategy_results):
+    """Aggregate OOS trade_count per family across assets (operator-side review
+    of the per-family 30-trade floor; classify_run is NOT changed). Returns a
+    dict family_id -> {'oos_trades_total', 'per_asset', 'meets_family_floor'}."""
+    by_family: dict[str, dict] = {}
+    for r in strategy_results:
+        fam = r.get("family")
+        if fam is None:
+            continue
+        entry = by_family.setdefault(
+            fam, {"oos_trades_total": 0, "per_asset": {}, "meets_family_floor": False})
+        oos = r.get("oos_metrics")
+        tc = int(oos["trade_count"]) if oos and "trade_count" in oos else 0
+        entry["per_asset"][r.get("asset")] = tc
+        entry["oos_trades_total"] += tc
+    for entry in by_family.values():
+        entry["meets_family_floor"] = (
+            entry["oos_trades_total"] >= OOS_MIN_TRADES_PER_FAMILY)
+    return by_family
+
+
 def _load_v002_costs(data_dir: Path, fee_bps: float, slip_bps: float,
                      spread_bps: float):
     """In v002_addendum mode, read costs from the frozen V002 fees.json when
@@ -993,9 +1136,13 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     """
     config_mode = config or "default"
     is_v002 = (config == V002_CONFIG_NAME)
+    is_robust = (config == MOMENTUM_ROBUSTNESS_CONFIG_NAME)
+    # momentum_robustness_v1 reuses the SAME V002 dataset, costs, and IS/OOS
+    # date windows as v002_addendum -- so it shares the date-window protocol.
+    uses_date_window_protocol = is_v002 or is_robust
     cost_source = "cli_or_default"
     fees_json_used = None
-    if is_v002:
+    if uses_date_window_protocol:
         # Default the date windows to the addendum pins when not overridden.
         is_start = is_start or V002_IS_START
         is_end = is_end or V002_IS_END
@@ -1023,12 +1170,16 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     strategy_results = []
     benchmark_results = []
 
-    # Date-window splitter is used ONLY in v002 mode; default mode keeps the
-    # fraction split (splitter=None -> _run_one_family honors is_fraction).
-    if is_v002:
+    # Date-window splitter is used in v002 and momentum_robustness modes; default
+    # mode keeps the fraction split (splitter=None -> _run_one_family honors
+    # is_fraction).
+    if uses_date_window_protocol:
         def splitter(bars):
             return split_is_oos_dates(bars, is_start, is_end, oos_start, oos_end)
-        bench_specs, strat_specs, deferred = _v002_family_plan()
+        if is_robust:
+            bench_specs, strat_specs, deferred = _momentum_robustness_family_plan()
+        else:
+            bench_specs, strat_specs, deferred = _v002_family_plan()
     else:
         splitter = None
         bench_specs, strat_specs, deferred = _default_family_plan()
@@ -1054,9 +1205,15 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
                 is_fraction=is_fraction, splitter=splitter,
             ))
 
-    # Basket benchmark.
-    basket = _basket_buy_and_hold(bars_by_symbol, fee_bps, slip_bps,
-                                  start_equity, spread_bps)
+    # Basket benchmark. momentum_robustness_v1 uses the allocate-once
+    # equal-weight basket as PRIMARY (no daily-rebalance drag); default and
+    # v002 keep the daily-rebalanced basket.
+    if is_robust:
+        basket = _basket_buy_and_hold_equal_weight(
+            bars_by_symbol, fee_bps, slip_bps, start_equity, spread_bps)
+    else:
+        basket = _basket_buy_and_hold(bars_by_symbol, fee_bps, slip_bps,
+                                      start_equity, spread_bps)
     if basket is not None:
         benchmark_results.append(basket)
 
@@ -1078,7 +1235,7 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     failures.extend(extra_failures)
 
     # Determine IS/OOS span summary from any asset that ran.
-    if is_v002:
+    if uses_date_window_protocol:
         is_oos_summary = {
             "split_method": "explicit_utc_date_windows",
             "is_window": {"start": is_start, "end": is_end},
@@ -1123,7 +1280,7 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
                   "default_assumption": "TAKER on every leg",
                   "fees_as_distinct_pnl_line": True,
                   "no_zero_slippage_baseline": True}
-    if is_v002:
+    if uses_date_window_protocol:
         per_side = fee_bps + slip_bps + spread_bps
         cost_model.update({
             "spread_proxy_bps": spread_bps,
@@ -1167,21 +1324,40 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
         "safety_notes": list(SAFETY_NOTES),
     }
 
-    # v002_addendum-only report extensions (keys absent in default mode).
-    if is_v002:
+    # Date-window-protocol report extensions (keys absent in default mode).
+    # Shared by v002_addendum and momentum_robustness_v1; both report true
+    # missing days per symbol (NEVER forward-filled or synthesized).
+    if uses_date_window_protocol:
         missing_days_per_symbol = {}
         for asset in assets_seen:
             md = _detect_missing_days(bars_by_symbol[asset])
             if md:
                 missing_days_per_symbol[asset] = {"count": len(md), "dates": md}
         report["config_mode"] = config_mode
-        report["batch_label"] = "B0-B3 first execution batch (v002_addendum)"
         report["strategies_deferred"] = deferred
         report["missing_days_per_symbol"] = missing_days_per_symbol
+        if is_robust:
+            report["batch_label"] = (
+                "Momentum lookback robustness sweep (momentum_robustness_v1)")
+            report["momentum_robustness_lookbacks"] = list(
+                MOMENTUM_ROBUSTNESS_LOOKBACKS)
+            report["primary_basket_benchmark"] = "buy_and_hold_basket_equal_weight"
+            report["family_oos_trade_counts"] = _family_oos_trade_counts(
+                strategy_results)
+            report["family_trade_floor"] = {
+                "per_family_floor": OOS_MIN_TRADES_PER_FAMILY,
+                "enforced_in_classify_run": False,
+                "review_mode": "operator-side review only (classify_run unchanged)",
+            }
+        else:
+            report["batch_label"] = "B0-B3 first execution batch (v002_addendum)"
 
-    # Write JSON and MD reports.
-    json_path = out_dir_p / "crypto_d1_backtest_report.json"
-    md_path = out_dir_p / "crypto_d1_backtest_report.md"
+    # Write JSON and MD reports. momentum_robustness_v1 writes to a DISTINCT
+    # basename so it never overwrites the committed v002/default baseline report.
+    report_basename = ("crypto_d1_momentum_robustness_report" if is_robust
+                       else "crypto_d1_backtest_report")
+    json_path = out_dir_p / f"{report_basename}.json"
+    md_path = out_dir_p / f"{report_basename}.md"
     json_path.write_text(
         json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False, default=str),
         encoding="utf-8",
@@ -1225,6 +1401,19 @@ def _render_md(report: dict) -> str:
             f"- **missing days (true gaps, never filled):** {report.get('missing_days_per_symbol') or '(none)'}",
             "",
         ]
+        if report.get("momentum_robustness_lookbacks"):
+            fc = report.get("family_oos_trade_counts", {})
+            lines += [
+                f"- **momentum lookbacks swept:** {report['momentum_robustness_lookbacks']}",
+                f"- **primary basket benchmark:** {report.get('primary_basket_benchmark')}",
+                "- **per-family OOS trade counts (operator-side floor "
+                f"{OOS_MIN_TRADES_PER_FAMILY}, NOT enforced in classify_run):**",
+            ]
+            for fam, d in sorted(fc.items()):
+                lines.append(
+                    f"  - `{fam}`: total={d.get('oos_trades_total')}"
+                    f" meets_floor={d.get('meets_family_floor')} {d.get('per_asset')}")
+            lines.append("")
     lines += [
         "## Safety flags (pinned)",
         f"- research_only: {report['research_only']}",
@@ -1389,6 +1578,43 @@ def show_plan() -> dict:
             },
             "missing_day_policy": "true gap; never forward-filled or synthesized; reported per symbol",
         },
+        "momentum_robustness_v1_mode": {
+            "config_name": MOMENTUM_ROBUSTNESS_CONFIG_NAME,
+            "purpose": ("Sweep momentum lookback across a pre-registered grid over the "
+                        "SAME V002 dataset/costs/windows to test whether momentum's OOS "
+                        "edge is a stable plateau or a single lucky point."),
+            "is_window": {"start": V002_IS_START, "end": V002_IS_END},
+            "oos_window": {"start": V002_OOS_START, "end": V002_OOS_END},
+            "split_method": "explicit_utc_date_windows",
+            "momentum_lookbacks": list(MOMENTUM_ROBUSTNESS_LOOKBACKS),
+            "families": (
+                [{"id": "buy_and_hold_benchmark", "label": "A0", "params": {}}]
+                + [{"id": f"momentum_{n}", "label": "M",
+                    "params": {"lookback": n}} for n in MOMENTUM_ROBUSTNESS_LOOKBACKS]
+            ),
+            "deferred": ["volatility_regime_gate", "mean_reversion"],
+            "primary_basket_benchmark": {
+                "id": "buy_and_hold_basket_equal_weight",
+                "rebalance": "none (allocate once at first common date)",
+                "note": ("Replaces the daily-rebalanced basket as PRIMARY for this mode "
+                         "to avoid the volatility-drag artifact."),
+            },
+            "cost_model": {
+                "fee_bps": V002_FALLBACK_FEE_BPS,
+                "slippage_bps": V002_FALLBACK_SLIPPAGE_BPS,
+                "spread_proxy_bps": V002_FALLBACK_SPREAD_PROXY_BPS,
+                "source": "frozen V002 fees.json (else pinned fallback 40/10/10)",
+            },
+            "family_trade_floor": {
+                "per_family_floor": OOS_MIN_TRADES_PER_FAMILY,
+                "enforced_in_classify_run": False,
+                "review_mode": "operator-side review only",
+            },
+            "missing_day_policy": "true gap; never forward-filled or synthesized; reported per symbol",
+            "output_basename": "crypto_d1_momentum_robustness_report",
+            "promotes_anything": False,
+            "mutates_v002_addendum": False,
+        },
         "safety_flags": dict(SAFETY_FLAGS),
         "safety_notes": list(SAFETY_NOTES),
         "forbidden_next_steps": list(FORBIDDEN_NEXT_STEPS),
@@ -1412,8 +1638,12 @@ def main(argv=None) -> int:
     p_run.add_argument("--spread-proxy-bps", type=float, default=DEFAULT_SPREAD_PROXY_BPS)
     p_run.add_argument("--start-equity", type=float, default=DEFAULT_START_EQUITY)
     p_run.add_argument("--is-fraction", type=float, default=DEFAULT_IS_FRACTION)
-    p_run.add_argument("--config", choices=["default", V002_CONFIG_NAME], default=None,
-                       help="Run mode. 'v002_addendum' pins dates/costs/batch to the addendum.")
+    p_run.add_argument("--config",
+                       choices=["default", V002_CONFIG_NAME, MOMENTUM_ROBUSTNESS_CONFIG_NAME],
+                       default=None,
+                       help="Run mode. 'v002_addendum' pins dates/costs/batch to the addendum; "
+                            "'momentum_robustness_v1' sweeps the momentum lookback grid over "
+                            "the same V002 dataset/costs/windows.")
     p_run.add_argument("--is-start", default=None)
     p_run.add_argument("--is-end", default=None)
     p_run.add_argument("--oos-start", default=None)
