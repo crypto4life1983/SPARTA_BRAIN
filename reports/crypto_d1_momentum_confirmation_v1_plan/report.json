@@ -1,0 +1,116 @@
+{
+  "plan_id": "crypto_d1_momentum_confirmation_v1_plan",
+  "plan_version": "v1",
+  "plan_date": "2026-06-03",
+  "status": "PLAN_ONLY_NOT_EXECUTED",
+  "official_master_at_plan_time": "49d9f1b1ce082966de420c55077850af80b023f8",
+  "lane": "Crypto-D1",
+  "lane_status_unchanged": "WATCH / MIXED",
+  "readiness_status_unchanged": "NOT_READY_FOR_REAL_DATA",
+  "authorizes_execution": false,
+  "authorizes_paper_or_live": false,
+  "promotes_active_or_strong": false,
+  "starts_bundle_23": false,
+
+  "why_this_is_the_correct_next_step": [
+    "The momentum_robustness_v1 sweep (run_id 458a1e7764fff90d, status WATCH) showed momentum is positive OOS on every lookback (20/30/45/60/90) across BTC/ETH/SOL, beating per-asset buy-and-hold OOS everywhere.",
+    "OOS magnitude decays monotonically with longer lookback and statistical reliability collapses past the short end: only N=20 clears the per-asset 20-trade OOS floor on all three assets; N=30 clears it on BTC only (ETH 19, SOL 18 just under).",
+    "Therefore the honest next move is a FOCUSED confirmation on the best-sampled lookbacks (N=20, N=30) rather than widening the search, which would invite overfitting.",
+    "A reporting defect must be fixed before drawing conclusions: the allocate-once equal-weight basket currently emits OOS_ret=None (single stream, no per-basket IS/OOS split), so the basket cannot yet be compared to per-asset OOS strategy returns."
+  ],
+
+  "hypothesis": {
+    "primary": "On the frozen V002 dataset, with the unchanged IS/OOS split and 120 bps round-trip cost model, time-series momentum at N=20 and N=30 produces a POSITIVE, floor-clearing OOS edge that beats both per-asset buy-and-hold OOS and an allocate-once equal-weight basket OOS.",
+    "null": "Momentum N=20/N=30 OOS edge is not distinguishable from the buy-and-hold benchmarks once costs and the per-asset 20-trade floor are applied.",
+    "decision_relevance": "Confirmation keeps Crypto-D1 as primary for a deeper branch; non-confirmation parks momentum and re-opens the lane direction. Neither outcome authorizes trading."
+  },
+
+  "frozen_inputs_must_remain_unchanged": {
+    "dataset": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002",
+    "dataset_checksums": "V002 CHECKSUMS.txt must still pass (daily_ohlcv.csv, fees.json, manifest.json)",
+    "is_window": {"start": "2021-06-17", "end": "2024-06-16"},
+    "oos_window": {"start": "2024-06-17", "end": "2025-12-31"},
+    "split_method": "explicit_utc_date_windows",
+    "cost_model": {"fee_bps": 40, "slippage_bps": 10, "spread_proxy_bps": 10, "per_side_bps": 60, "round_trip_bps": 120, "source": "frozen V002 fees.json"},
+    "per_asset_oos_trade_floor": 20,
+    "per_family_oos_trade_floor": 30,
+    "classifier": "conservative classify_run unchanged (WATCH ceiling, never auto-PASS)",
+    "btc_missing_day": {"date": "2024-03-31", "policy": "true gap; flagged; never forward-filled or synthesized"},
+    "deferred_strategies": ["volatility_regime_gate", "mean_reversion"]
+  },
+
+  "lookbacks_under_test": [20, 30],
+  "lookbacks_dropped_from_confirmation": [45, 60, 90],
+
+  "n20_vs_n30_comparison_design": {
+    "per_asset_table": "For each of BTC/ETH/SOL and each lookback: IS total_return, OOS total_return, OOS trade_count, OOS max_drawdown, OOS sharpe_like_with_caveat, clears_20_trade_floor (bool).",
+    "vs_benchmark": "Each strategy OOS total_return compared to (a) the same-asset buy-and-hold OOS total_return and (b) the allocate-once equal-weight basket OOS total_return (after the reporting fix below).",
+    "robustness_check": "N=20 and N=30 must agree in sign and direction on each asset; a confirmation requires both lookbacks positive OOS on at least 2 of 3 assets AND clearing the per-asset floor where claimed.",
+    "is_vs_oos_decay": "Report the IS->OOS shrinkage ratio per cell so the reader can see expected regime decay vs. suspicious collapse.",
+    "no_parameter_tuning": "N=20 and N=30 are pre-registered from the robustness memo; no new lookback grid search is performed in this confirmation pass."
+  },
+
+  "basket_oos_reporting_fix": {
+    "current_defect": "buy_and_hold_basket_equal_weight is a single equity stream with is_metrics=None and oos_metrics=None, so OOS_ret renders as None and the basket is not comparable to per-asset OOS strategy figures.",
+    "fix_options_to_decide_at_implementation": [
+      "OPTION A (preferred): split the allocate-once basket equity curve by the same explicit OOS date window and report a basket OOS total_return / max_drawdown computed from the OOS sub-curve (entry value = basket equity at first OOS date), as a benchmark-only figure.",
+      "OPTION B: keep oos_metrics=None but add an explicit clarifying field basket_oos_reporting='single_stream_no_split' so consumers never misread None as zero."
+    ],
+    "constraint": "The allocate-once (no daily rebalance) construction is KEPT; this is a reporting clarification, not a benchmark redefinition.",
+    "optional_future": "A monthly-rebalanced basket variant MAY be added later as an additive third benchmark; NOT part of confirmation v1."
+  },
+
+  "runner_and_reporting_design": {
+    "approach": "Additive new config mode, mirroring how momentum_robustness_v1 was added; do NOT modify default or v002_addendum or momentum_robustness_v1 behavior.",
+    "proposed_config_name": "momentum_confirmation_v1",
+    "proposed_lookbacks_constant": "MOMENTUM_CONFIRMATION_LOOKBACKS = (20, 30)",
+    "family_plan": "Per-asset buy_and_hold benchmark + momentum_continuation families momentum_20, momentum_30 only; vol-regime gate and mean reversion remain DEFERRED.",
+    "basket": "Reuse the existing allocate-once _basket_buy_and_hold_equal_weight; add the OOS basket figure per the reporting fix.",
+    "reuses": "Same V002 cost loader, same date-window splitter, same missing-day detector, same conservative classify_run.",
+    "output_basename": "crypto_d1_momentum_confirmation_report",
+    "distinct_output_dir": "reports/crypto_d1_momentum_confirmation_v1/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/ (never overwrites baseline or robustness reports)"
+  },
+
+  "future_execution_files_created_or_changed": {
+    "note": "These are what a FUTURE, separately-approved execution step would touch. NONE are created or changed by this plan.",
+    "code_changed": [
+      "tools/crypto_d1_backtest_runner.py (additive: MOMENTUM_CONFIRMATION_LOOKBACKS, _momentum_confirmation_family_plan, basket OOS reporting helper, is_confirmation flag wiring, show-plan block, CLI --config choice)"
+    ],
+    "tests_changed": [
+      "tests/test_crypto_d1_backtest_runner.py (additive tests: confirmation config exists, only N=20/N=30 run, v002 + robustness modes unchanged, basket OOS figure present, safety flags locked, no network/broker/paper/live paths)"
+    ],
+    "result_files_created_by_run": [
+      "reports/crypto_d1_momentum_confirmation_v1/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/crypto_d1_momentum_confirmation_report.json",
+      "reports/crypto_d1_momentum_confirmation_v1/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/crypto_d1_momentum_confirmation_report.md"
+    ],
+    "must_not_change": [
+      "V002 dataset files", "QA reports", "operator acceptance memo", "IS/OOS addendum",
+      "readiness gate / checklist", "dashboards", "brain_memory",
+      "existing baseline and robustness result files"
+    ]
+  },
+
+  "pass_watch_fail_criteria": {
+    "ceiling": "WATCH is the maximum verdict this pass can emit; classify_run is unchanged and never auto-PASSes.",
+    "operator_confirmation_signal": "Treat as CONFIRMED-WATCH (continue momentum branch) if BOTH N=20 and N=30 are positive OOS on >=2 of 3 assets, clear the per-asset 20-trade floor where the claim is made, and beat same-asset buy-and-hold OOS.",
+    "watch_mixed": "If results are positive but floor-clearing only intermittently (e.g. N=30 only on BTC, as in robustness), remain WATCH / MIXED and recommend no deeper branch yet.",
+    "fail_signal": "If either lookback turns negative OOS on a majority of assets or fails to beat buy-and-hold OOS after costs, park momentum and re-open lane direction.",
+    "no_promotion": "No criterion in this pass can promote to ACTIVE/STRONG or authorize paper/live; those require separate gates and real-data readiness."
+  },
+
+  "safety_gates": {
+    "research_only": true,
+    "data_fetch_enabled": false,
+    "exchange_connection_enabled": false,
+    "live_trading_enabled": false,
+    "broker_control_enabled": false,
+    "paper_order_execution_enabled": false,
+    "order_placement_enabled": false,
+    "no_new_data": true,
+    "lane_remains": "WATCH / MIXED",
+    "readiness_remains": "NOT_READY_FOR_REAL_DATA",
+    "bundle_23_not_started": true
+  },
+
+  "non_authorization_statement": "This document is a PLAN ONLY. It runs no backtest, creates no result files, changes no dataset, QA file, runner logic, or dashboard, and authorizes no paper, live, broker, or exchange action. It does not promote any lane to ACTIVE or STRONG. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA. A positive backtest result is not trading authorization. Implementation and execution require separate explicit operator approval."
+}
