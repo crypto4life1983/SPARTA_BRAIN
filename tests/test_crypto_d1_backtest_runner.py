@@ -1065,6 +1065,152 @@ def test_cli_run_momentum_robustness_v1(tmp_path):
 
 
 # ===========================================================================
+# momentum_confirmation_v1 mode -- focused N=20/N=30 confirmation + basket OOS fix.
+# ===========================================================================
+_CONFIRM_KW = dict(config="momentum_confirmation_v1",
+                   is_start="2021-06-17", is_end="2022-12-31",
+                   oos_start="2023-01-01", oos_end="2023-12-03")
+_CONFIRM_REPORT = "crypto_d1_momentum_confirmation_report"
+
+
+def test_confirmation_config_exists():
+    # Registered as a constant, a show-plan block, and a CLI choice.
+    assert cbr.MOMENTUM_CONFIRMATION_CONFIG_NAME == "momentum_confirmation_v1"
+    assert tuple(cbr.MOMENTUM_CONFIRMATION_LOOKBACKS) == (20, 30)
+    plan = cbr.show_plan()
+    assert "momentum_confirmation_v1_mode" in plan
+    m = plan["momentum_confirmation_v1_mode"]
+    assert m["config_name"] == "momentum_confirmation_v1"
+    assert m["momentum_lookbacks"] == [20, 30]
+    assert m["lookbacks_dropped_as_thin_sample"] == [45, 60, 90]
+    assert m["mutates_v002_addendum"] is False
+    assert m["mutates_momentum_robustness_v1"] is False
+    assert m["promotes_anything"] is False
+    assert m["output_basename"] == _CONFIRM_REPORT
+
+
+def test_confirmation_accepts_only_n20_and_n30(tmp_path):
+    # CATEGORY 1 + 2: N=20 and N=30 are accepted; every other lookback (the
+    # thin-sample 45/60/90 dropped pre-registration) is EXCLUDED -- no new search.
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_CONFIRM_KW)
+    fams = {x["family"] for x in r["strategy_results"]}
+    assert fams == {"momentum_20", "momentum_30"}
+    for excluded in ("momentum_45", "momentum_60", "momentum_90"):
+        assert excluded not in fams
+    # Deferred families still excluded.
+    assert "volatility_regime_gate" not in fams
+    assert "mean_reversion" not in fams
+    assert r["momentum_confirmation_lookbacks"] == [20, 30]
+    assert r["config_mode"] == "momentum_confirmation_v1"
+    # Distinct basename; never overwrites baseline or robustness reports.
+    assert (out / f"{_CONFIRM_REPORT}.json").exists()
+    assert (out / f"{_CONFIRM_REPORT}.md").exists()
+    assert not (out / "crypto_d1_backtest_report.json").exists()
+    assert not (out / "crypto_d1_momentum_robustness_report.json").exists()
+
+
+def test_confirmation_is_additive_does_not_alter_existing_modes(tmp_path):
+    # CATEGORY 3: confirmation mode leaves default, v002, and robustness modes
+    # byte-for-byte unchanged in behavior.
+    # 3a. The family-plan helpers are independent.
+    cb, cs, cd = cbr._momentum_confirmation_family_plan()
+    confirm_ids = {s["family_id"] for s in cs}
+    assert confirm_ids == {"momentum_20", "momentum_30"}
+    assert cd == ["volatility_regime_gate", "mean_reversion"]
+    rb, rs, rd = cbr._momentum_robustness_family_plan()
+    robust_ids = {s["family_id"] for s in rs}
+    assert robust_ids == {"momentum_20", "momentum_30", "momentum_45",
+                          "momentum_60", "momentum_90"}
+    # 3b. v002 still keeps its own batch + daily-rebalanced basket.
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    rv = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_V002_KW)
+    v_ids = {b["strategy_id"] for b in rv["benchmark_results"]}
+    assert "buy_and_hold_basket" in v_ids
+    assert "buy_and_hold_basket_equal_weight" not in v_ids
+    assert rv["batch_label"] == "B0-B3 first execution batch (v002_addendum)"
+    # 3c. robustness mode (no OOS window passed to basket) still reports None OOS.
+    out2 = tmp_path / "out2"
+    rr = cbr.run_backtest(data_dir=data_dir, out_dir=out2, **_ROBUST_KW)
+    ew_r = next(b for b in rr["benchmark_results"]
+                if b["strategy_id"] == "buy_and_hold_basket_equal_weight")
+    assert ew_r["oos_metrics"] is None
+    assert ew_r["basket_oos_reporting"] == "single_stream_no_split"
+
+
+def test_confirmation_basket_oos_reporting_is_fixed_and_labeled(tmp_path):
+    # CATEGORY 4: the allocate-once basket now reports a benchmark-only OOS
+    # figure (Option A), explicitly labeled, instead of OOS_ret=None. The
+    # construction is unchanged (still one entry, no rebalance).
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_CONFIRM_KW)
+    ew = next(b for b in r["benchmark_results"]
+              if b["strategy_id"] == "buy_and_hold_basket_equal_weight")
+    # Construction KEPT: allocate once, no rebalance.
+    assert ew["metrics"]["trade_count"] == 1
+    assert ew["metrics"]["turnover"] == 1
+    assert "allocate once" in ew["parameters"]["rebalance_frequency"]
+    # OOS reporting fixed and explicitly labeled (never silently None).
+    assert ew["oos_metrics"] is not None
+    assert ew["basket_oos_reporting"] == "allocate_once_oos_window_split"
+    oos = ew["oos_metrics"]
+    assert oos["oos_window"] == {"start": "2023-01-01", "end": "2023-12-03"}
+    assert "total_return" in oos and "max_drawdown" in oos
+    assert oos["n_bars"] >= 2
+    # The report-level field mirrors the basket label.
+    assert r["basket_oos_reporting"] == "allocate_once_oos_window_split"
+    # IS/OOS not silently mixed: the all-history metrics differ from the OOS view
+    # (different windows), and IS metrics remain None for this single stream.
+    assert ew["is_metrics"] is None
+
+
+def test_confirmation_safety_flags_pinned(tmp_path):
+    # CATEGORY 5: no execution authorization, no paper/live, WATCH ceiling.
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    r = cbr.run_backtest(data_dir=data_dir, out_dir=out, **_CONFIRM_KW)
+    assert r["research_only"] is True
+    for flag in ("data_fetch_enabled", "exchange_connection_enabled",
+                 "live_trading_enabled", "broker_control_enabled",
+                 "paper_order_execution_enabled", "order_placement_enabled"):
+        assert r[flag] is False
+    assert r["pass_watch_fail_status"] != "PASS"
+
+
+def test_confirmation_mode_adds_no_network_or_execution_paths():
+    src = TOOL_FILE.read_text(encoding="utf-8").lower()
+    start = src.index("_momentum_confirmation_family_plan")
+    region = src[start:start + 4000]
+    for forbidden in ("requests", "urllib", "socket", "http", "fetch(",
+                      "place_order", "submit_order", "execute_trade",
+                      "broker", "api_key", "secret", "websocket", "subprocess"):
+        assert forbidden not in region, \
+            f"confirmation mode must not reference {forbidden}"
+
+
+def test_cli_run_momentum_confirmation_v1(tmp_path):
+    data_dir = tmp_path / "data"
+    _write_v002_dataset(data_dir)
+    out = tmp_path / "out"
+    rc = cbr.main(["run", "--data-dir", str(data_dir), "--out-dir", str(out),
+                   "--config", "momentum_confirmation_v1",
+                   "--is-start", "2021-06-17", "--is-end", "2022-12-31",
+                   "--oos-start", "2023-01-01", "--oos-end", "2023-12-03"])
+    assert rc in (0, 2)
+    j = _read_json(out / f"{_CONFIRM_REPORT}.json")
+    assert j["config_mode"] == "momentum_confirmation_v1"
+    assert j["momentum_confirmation_lookbacks"] == [20, 30]
+    assert j["basket_oos_reporting"] == "allocate_once_oos_window_split"
+
+
+# ===========================================================================
 # Repo invariants (no real data files were committed by this bundle).
 # ===========================================================================
 def test_no_real_data_files_committed_under_bundle_dir():

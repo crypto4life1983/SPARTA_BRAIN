@@ -176,6 +176,18 @@ MOMENTUM_ROBUSTNESS_CONFIG_NAME = "momentum_robustness_v1"
 # re-run so the sweep is directly comparable to the committed V002 baseline.
 MOMENTUM_ROBUSTNESS_LOOKBACKS = (20, 30, 45, 60, 90)
 
+# ---------------------------------------------------------------------------
+# momentum_confirmation_v1 config. ADDITIVE and read-only over the SAME V002
+# dataset, costs, and IS/OOS windows. It re-runs ONLY the two best-sampled,
+# floor-clearing lookbacks (N=20, N=30) that the robustness sweep pre-registered
+# -- no new grid search -- and fixes the equal-weight basket OOS reporting defect
+# (the allocate-once basket previously reported OOS_ret=None). Same conservative
+# classify_run (WATCH ceiling), same safety flags pinned, same deferred families.
+# ---------------------------------------------------------------------------
+MOMENTUM_CONFIRMATION_CONFIG_NAME = "momentum_confirmation_v1"
+# Pre-registered from the robustness memo; NOT OOS-tuned. No new lookback search.
+MOMENTUM_CONFIRMATION_LOOKBACKS = (20, 30)
+
 
 # ===========================================================================
 # Data classes
@@ -830,7 +842,9 @@ def _basket_buy_and_hold(bars_by_symbol: dict[str, list[Bar]],
 def _basket_buy_and_hold_equal_weight(bars_by_symbol: dict[str, list[Bar]],
                                       fee_bps: float, slip_bps: float,
                                       start_equity: float,
-                                      spread_bps: float = 0.0):
+                                      spread_bps: float = 0.0,
+                                      oos_start: str | None = None,
+                                      oos_end: str | None = None):
     """Equal-weight buy-and-hold benchmark that ALLOCATES ONCE at the first
     common date and is NEVER rebalanced (momentum_robustness_v1 primary
     benchmark).
@@ -840,7 +854,17 @@ def _basket_buy_and_hold_equal_weight(bars_by_symbol: dict[str, list[Bar]],
     with raw prices -- no daily rebalance, so it carries NO volatility-drag
     turnover haircut, unlike the daily-rebalanced ``_basket_buy_and_hold``. This
     is the honest 'just hold the basket' baseline the operator review asked for
-    after the daily-rebalanced curve produced a -99.6% drag artifact."""
+    after the daily-rebalanced curve produced a -99.6% drag artifact.
+
+    Basket OOS reporting (momentum_confirmation_v1 fix, Option A): when both
+    ``oos_start`` and ``oos_end`` are given, the SAME allocate-once equity curve
+    is sliced to the OOS date window and a benchmark-only OOS total_return /
+    max_drawdown is reported (entry value = basket equity at the first OOS date).
+    The construction is NOT changed -- still allocate-once, no rebalance, no
+    second entry cost -- this only adds a window-sliced *view* so the basket is
+    comparable to per-asset OOS strategy returns instead of rendering OOS_ret as
+    None. When the window is omitted (robustness/default modes), behaviour and
+    output are byte-identical to before (``oos_metrics`` stays None)."""
     if not bars_by_symbol:
         return None
     covered = [s for s in TARGET_ASSETS if s in bars_by_symbol and len(bars_by_symbol[s]) >= 2]
@@ -878,6 +902,45 @@ def _basket_buy_and_hold_equal_weight(bars_by_symbol: dict[str, list[Bar]],
         if dd < max_dd:
             max_dd = dd
     total_return = equity[-1] / start_equity - 1.0
+
+    # Option A basket OOS reporting: slice the SAME allocate-once curve to the
+    # OOS window. Entry value = basket equity at the first date >= oos_start.
+    oos_metrics = None
+    basket_oos_reporting = "single_stream_no_split"
+    oos_warning = ("Equal-weight allocate-once basket; one entry, no rebalance, "
+                   "no per-basket IS/OOS split.")
+    if oos_start is not None and oos_end is not None:
+        oos_idx = [i for i, d in enumerate(sorted_dates) if oos_start <= d <= oos_end]
+        if len(oos_idx) >= 2:
+            oos_curve = [equity[i] for i in oos_idx]
+            oos_entry = oos_curve[0]
+            oos_total_return = oos_curve[-1] / oos_entry - 1.0 if oos_entry > 0 else 0.0
+            oos_peak = oos_curve[0]
+            oos_max_dd = 0.0
+            for x in oos_curve:
+                if x > oos_peak:
+                    oos_peak = x
+                dd = (x - oos_peak) / oos_peak if oos_peak > 0 else 0.0
+                if dd < oos_max_dd:
+                    oos_max_dd = dd
+            oos_metrics = {
+                "total_return": oos_total_return,
+                "max_drawdown": oos_max_dd,
+                "n_bars": len(oos_curve),
+                "oos_window": {"start": oos_start, "end": oos_end},
+                "entry_value": oos_entry,
+                "end_value": oos_curve[-1],
+                "annualized_return_approx": _annualized_return(oos_total_return, len(oos_curve)),
+                "annualized_vol_approx": _annualized_vol_from_curve(oos_curve),
+                "sharpe_like_with_caveat": _sharpe_like(oos_total_return, len(oos_curve), oos_curve),
+                "sharpe_caveat": "Sharpe-like; rf=0; daily-return approximation.",
+                "note": "Benchmark-only OOS view of the allocate-once basket curve; "
+                        "construction unchanged (no rebalance, no second entry cost).",
+            }
+            basket_oos_reporting = "allocate_once_oos_window_split"
+            oos_warning = ("Equal-weight allocate-once basket; one entry, no rebalance. "
+                           "OOS figure is a window-sliced view of the same curve "
+                           "(allocate_once_oos_window_split), NOT a re-entered basket.")
     return {
         "strategy_id": "buy_and_hold_basket_equal_weight",
         "family": "buy_and_hold_benchmark",
@@ -906,9 +969,9 @@ def _basket_buy_and_hold_equal_weight(bars_by_symbol: dict[str, list[Bar]],
             "end_equity": equity[-1],
         },
         "is_metrics": None,  # single benchmark stream; IS/OOS via per-asset.
-        "oos_metrics": None,
-        "warnings": ["Equal-weight allocate-once basket; one entry, no rebalance, "
-                     "no per-basket IS/OOS split."],
+        "oos_metrics": oos_metrics,
+        "basket_oos_reporting": basket_oos_reporting,
+        "warnings": [oos_warning],
     }
 
 
@@ -1054,6 +1117,29 @@ def _momentum_robustness_family_plan():
     return bench, strat, deferred
 
 
+def _momentum_confirmation_family_plan():
+    """Return (benchmark_specs, strategy_specs, deferred) for momentum_confirmation_v1.
+
+    Per-asset buy-and-hold benchmark plus ONLY the two PRE-REGISTERED, best-sampled
+    lookbacks from MOMENTUM_CONFIRMATION_LOOKBACKS (20, 30) -- the floor-clearing
+    short end of the robustness sweep. No new grid search; the longer lookbacks
+    (45/60/90) are dropped as thin-sample. Volatility-regime gate and mean reversion
+    stay DEFERRED."""
+    bench = [
+        {"family_id": "buy_and_hold_benchmark",
+         "label": "A0. Buy & Hold benchmark (per-asset)", "params": {},
+         "fn": buy_and_hold},
+    ]
+    strat = [
+        {"family_id": f"momentum_{n}",
+         "label": f"M. Time-series momentum (N={n})",
+         "params": {"lookback": n}, "fn": momentum_continuation}
+        for n in MOMENTUM_CONFIRMATION_LOOKBACKS
+    ]
+    deferred = ["volatility_regime_gate", "mean_reversion"]
+    return bench, strat, deferred
+
+
 def _family_oos_trade_counts(strategy_results):
     """Aggregate OOS trade_count per family across assets (operator-side review
     of the per-family 30-trade floor; classify_run is NOT changed). Returns a
@@ -1137,9 +1223,11 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
     config_mode = config or "default"
     is_v002 = (config == V002_CONFIG_NAME)
     is_robust = (config == MOMENTUM_ROBUSTNESS_CONFIG_NAME)
-    # momentum_robustness_v1 reuses the SAME V002 dataset, costs, and IS/OOS
-    # date windows as v002_addendum -- so it shares the date-window protocol.
-    uses_date_window_protocol = is_v002 or is_robust
+    is_confirm = (config == MOMENTUM_CONFIRMATION_CONFIG_NAME)
+    # momentum_robustness_v1 and momentum_confirmation_v1 reuse the SAME V002
+    # dataset, costs, and IS/OOS date windows as v002_addendum -- so they share
+    # the date-window protocol.
+    uses_date_window_protocol = is_v002 or is_robust or is_confirm
     cost_source = "cli_or_default"
     fees_json_used = None
     if uses_date_window_protocol:
@@ -1178,6 +1266,8 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
             return split_is_oos_dates(bars, is_start, is_end, oos_start, oos_end)
         if is_robust:
             bench_specs, strat_specs, deferred = _momentum_robustness_family_plan()
+        elif is_confirm:
+            bench_specs, strat_specs, deferred = _momentum_confirmation_family_plan()
         else:
             bench_specs, strat_specs, deferred = _v002_family_plan()
     else:
@@ -1205,10 +1295,16 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
                 is_fraction=is_fraction, splitter=splitter,
             ))
 
-    # Basket benchmark. momentum_robustness_v1 uses the allocate-once
-    # equal-weight basket as PRIMARY (no daily-rebalance drag); default and
-    # v002 keep the daily-rebalanced basket.
-    if is_robust:
+    # Basket benchmark. momentum_robustness_v1 and momentum_confirmation_v1 use
+    # the allocate-once equal-weight basket as PRIMARY (no daily-rebalance drag);
+    # default and v002 keep the daily-rebalanced basket. Confirmation additionally
+    # passes the OOS window so the basket reports a benchmark-only OOS figure
+    # (Option A fix) instead of OOS_ret=None.
+    if is_confirm:
+        basket = _basket_buy_and_hold_equal_weight(
+            bars_by_symbol, fee_bps, slip_bps, start_equity, spread_bps,
+            oos_start=oos_start, oos_end=oos_end)
+    elif is_robust:
         basket = _basket_buy_and_hold_equal_weight(
             bars_by_symbol, fee_bps, slip_bps, start_equity, spread_bps)
     else:
@@ -1349,13 +1445,34 @@ def run_backtest(data_dir, out_dir, fee_bps: float = DEFAULT_TAKER_FEE_BPS,
                 "enforced_in_classify_run": False,
                 "review_mode": "operator-side review only (classify_run unchanged)",
             }
+        elif is_confirm:
+            report["batch_label"] = (
+                "Momentum confirmation pass, N=20/N=30 (momentum_confirmation_v1)")
+            report["momentum_confirmation_lookbacks"] = list(
+                MOMENTUM_CONFIRMATION_LOOKBACKS)
+            report["primary_basket_benchmark"] = "buy_and_hold_basket_equal_weight"
+            report["basket_oos_reporting"] = (
+                basket.get("basket_oos_reporting") if basket is not None
+                else "no_basket")
+            report["family_oos_trade_counts"] = _family_oos_trade_counts(
+                strategy_results)
+            report["family_trade_floor"] = {
+                "per_family_floor": OOS_MIN_TRADES_PER_FAMILY,
+                "enforced_in_classify_run": False,
+                "review_mode": "operator-side review only (classify_run unchanged)",
+            }
         else:
             report["batch_label"] = "B0-B3 first execution batch (v002_addendum)"
 
-    # Write JSON and MD reports. momentum_robustness_v1 writes to a DISTINCT
-    # basename so it never overwrites the committed v002/default baseline report.
-    report_basename = ("crypto_d1_momentum_robustness_report" if is_robust
-                       else "crypto_d1_backtest_report")
+    # Write JSON and MD reports. momentum_robustness_v1 and
+    # momentum_confirmation_v1 each write to a DISTINCT basename so they never
+    # overwrite the committed v002/default baseline or each other's reports.
+    if is_robust:
+        report_basename = "crypto_d1_momentum_robustness_report"
+    elif is_confirm:
+        report_basename = "crypto_d1_momentum_confirmation_report"
+    else:
+        report_basename = "crypto_d1_backtest_report"
     json_path = out_dir_p / f"{report_basename}.json"
     md_path = out_dir_p / f"{report_basename}.md"
     json_path.write_text(
@@ -1406,6 +1523,20 @@ def _render_md(report: dict) -> str:
             lines += [
                 f"- **momentum lookbacks swept:** {report['momentum_robustness_lookbacks']}",
                 f"- **primary basket benchmark:** {report.get('primary_basket_benchmark')}",
+                "- **per-family OOS trade counts (operator-side floor "
+                f"{OOS_MIN_TRADES_PER_FAMILY}, NOT enforced in classify_run):**",
+            ]
+            for fam, d in sorted(fc.items()):
+                lines.append(
+                    f"  - `{fam}`: total={d.get('oos_trades_total')}"
+                    f" meets_floor={d.get('meets_family_floor')} {d.get('per_asset')}")
+            lines.append("")
+        if report.get("momentum_confirmation_lookbacks"):
+            fc = report.get("family_oos_trade_counts", {})
+            lines += [
+                f"- **momentum lookbacks confirmed (pre-registered):** {report['momentum_confirmation_lookbacks']}",
+                f"- **primary basket benchmark:** {report.get('primary_basket_benchmark')}",
+                f"- **basket OOS reporting:** {report.get('basket_oos_reporting')}",
                 "- **per-family OOS trade counts (operator-side floor "
                 f"{OOS_MIN_TRADES_PER_FAMILY}, NOT enforced in classify_run):**",
             ]
@@ -1615,6 +1746,48 @@ def show_plan() -> dict:
             "promotes_anything": False,
             "mutates_v002_addendum": False,
         },
+        "momentum_confirmation_v1_mode": {
+            "config_name": MOMENTUM_CONFIRMATION_CONFIG_NAME,
+            "purpose": ("Focused confirmation of ONLY the pre-registered, floor-clearing "
+                        "short-end lookbacks (N=20, N=30) over the SAME V002 dataset/"
+                        "costs/windows, plus the equal-weight basket OOS reporting fix. "
+                        "No new lookback search; WATCH ceiling unchanged."),
+            "is_window": {"start": V002_IS_START, "end": V002_IS_END},
+            "oos_window": {"start": V002_OOS_START, "end": V002_OOS_END},
+            "split_method": "explicit_utc_date_windows",
+            "momentum_lookbacks": list(MOMENTUM_CONFIRMATION_LOOKBACKS),
+            "lookbacks_dropped_as_thin_sample": [45, 60, 90],
+            "families": (
+                [{"id": "buy_and_hold_benchmark", "label": "A0", "params": {}}]
+                + [{"id": f"momentum_{n}", "label": "M",
+                    "params": {"lookback": n}} for n in MOMENTUM_CONFIRMATION_LOOKBACKS]
+            ),
+            "deferred": ["volatility_regime_gate", "mean_reversion"],
+            "primary_basket_benchmark": {
+                "id": "buy_and_hold_basket_equal_weight",
+                "rebalance": "none (allocate once at first common date)",
+                "basket_oos_reporting": "allocate_once_oos_window_split",
+                "note": ("Allocate-once construction UNCHANGED; the confirmation pass adds "
+                         "a benchmark-only OOS window-sliced view (Option A) so the basket "
+                         "reports an OOS figure instead of OOS_ret=None."),
+            },
+            "cost_model": {
+                "fee_bps": V002_FALLBACK_FEE_BPS,
+                "slippage_bps": V002_FALLBACK_SLIPPAGE_BPS,
+                "spread_proxy_bps": V002_FALLBACK_SPREAD_PROXY_BPS,
+                "source": "frozen V002 fees.json (else pinned fallback 40/10/10)",
+            },
+            "family_trade_floor": {
+                "per_family_floor": OOS_MIN_TRADES_PER_FAMILY,
+                "enforced_in_classify_run": False,
+                "review_mode": "operator-side review only",
+            },
+            "missing_day_policy": "true gap; never forward-filled or synthesized; reported per symbol",
+            "output_basename": "crypto_d1_momentum_confirmation_report",
+            "promotes_anything": False,
+            "mutates_v002_addendum": False,
+            "mutates_momentum_robustness_v1": False,
+        },
         "safety_flags": dict(SAFETY_FLAGS),
         "safety_notes": list(SAFETY_NOTES),
         "forbidden_next_steps": list(FORBIDDEN_NEXT_STEPS),
@@ -1639,11 +1812,13 @@ def main(argv=None) -> int:
     p_run.add_argument("--start-equity", type=float, default=DEFAULT_START_EQUITY)
     p_run.add_argument("--is-fraction", type=float, default=DEFAULT_IS_FRACTION)
     p_run.add_argument("--config",
-                       choices=["default", V002_CONFIG_NAME, MOMENTUM_ROBUSTNESS_CONFIG_NAME],
+                       choices=["default", V002_CONFIG_NAME, MOMENTUM_ROBUSTNESS_CONFIG_NAME,
+                                MOMENTUM_CONFIRMATION_CONFIG_NAME],
                        default=None,
                        help="Run mode. 'v002_addendum' pins dates/costs/batch to the addendum; "
                             "'momentum_robustness_v1' sweeps the momentum lookback grid over "
-                            "the same V002 dataset/costs/windows.")
+                            "the same V002 dataset/costs/windows; 'momentum_confirmation_v1' "
+                            "re-runs only N=20/N=30 and adds the basket OOS reporting fix.")
     p_run.add_argument("--is-start", default=None)
     p_run.add_argument("--is-end", default=None)
     p_run.add_argument("--oos-start", default=None)
