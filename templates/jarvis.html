@@ -489,11 +489,11 @@
             <h3>Pipeline &mdash; Machine Process</h3>
             <p class="jv-sf-sub">Raw Data &rarr; Data QA &rarr; Dataset Freeze &rarr; Strategy Engine &rarr; Backtest &rarr; Fees / Slippage &rarr; OOS Validation &rarr; Stress Test &rarr; Risk Scoring &rarr; Final Report &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
             <div class="jv-sf-lane">
-              <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
-              <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-watch" data-mf="raw_data"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
+              <div class="jv-sf-node is-watch" data-mf="data_qa"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
+              <div class="jv-sf-node is-todo" data-mf="dataset_freeze"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-todo" data-mf="backtest"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Fees / Slippage</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">OOS Validation</span><span class="nst">Not started</span></div>
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Stress Test</span><span class="nst">Not started</span></div>
@@ -529,11 +529,11 @@
             <div class="jv-sf-lanewrap">
               <div class="jv-sf-lanetag">Pipeline &middot; machine</div>
               <div class="jv-sf-lane">
-                <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
-                <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-watch" data-mf="raw_data"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
+                <div class="jv-sf-node is-watch" data-mf="data_qa"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
+                <div class="jv-sf-node is-todo" data-mf="dataset_freeze"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-todo" data-mf="backtest"><span class="ndot"></span><span class="nlbl">Backtest</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Fees / Slippage</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">OOS Validation</span><span class="nst">Not started</span></div>
                 <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Stress Test</span><span class="nst">Not started</span></div>
@@ -821,6 +821,36 @@
   }
 
   function render(d){
+    // Crypto-D1 Mission Flow truth (DISPLAY-ONLY). Re-labels the four pipeline
+    // nodes from the read-only mission_flow payload. No buttons, no forms, no
+    // execution affordance, no extra network call — purely reflects committed
+    // source-of-truth. Paper / Micro-Live gates are never touched here.
+    (function(){
+      var mf = d.mission_flow || {};
+      if(!mf || mf.display_only !== true){ return; }
+      function mfSet(key, cls, label){
+        var nodes = document.querySelectorAll('.jv-sf-node[data-mf="'+key+'"]');
+        for(var i=0;i<nodes.length;i++){
+          nodes[i].classList.remove('is-watch','is-todo','is-done',
+            'is-blocked','is-active');
+          nodes[i].classList.add(cls);
+          var nst = nodes[i].querySelector('.nst');
+          if(nst){ nst.textContent = label; }
+        }
+      }
+      if(mf.data_present === true){
+        mfSet('raw_data', 'is-done', 'V002 Frozen · Dataset Present');
+        mfSet('dataset_freeze', 'is-done', 'FROZEN');
+      }
+      if(mf.qa_status === 'QA_WARN'){
+        mfSet('data_qa', 'is-watch',
+          mf.qa_accepted === true ? 'QA_WARN Accepted' : 'QA_WARN');
+      }
+      if(mf.baseline_present !== true){
+        mfSet('backtest', 'is-todo', 'Ready for approved run · Not run yet');
+      }
+    })();
+
     // Commander's Snapshot (derived top-level summary — display only)
     var cs = d.commander_snapshot || {};
     var snapEl = document.getElementById('pSnapshot');

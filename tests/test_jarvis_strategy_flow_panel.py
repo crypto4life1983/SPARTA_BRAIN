@@ -172,9 +172,11 @@ def test_pipeline_oos_validation_not_active():
             '<span class="nlbl">OOS Validation') not in block
     # post-Bundle-21: the QA runtime tool is built, so Data QA is no longer the
     # "active / next" pipeline node -- it is a watch node awaiting operator data.
-    assert ('is-active"><span class="ndot"></span>'
+    # (The node now carries a data-mf hook so the display-only mission_flow patch
+    # can re-label it client-side; the static fallback class stays is-watch.)
+    assert ('is-active" data-mf="data_qa"><span class="ndot"></span>'
             '<span class="nlbl">Data QA') not in block
-    assert ('is-watch"><span class="ndot"></span>'
+    assert ('is-watch" data-mf="data_qa"><span class="ndot"></span>'
             '<span class="nlbl">Data QA') in block
     # the stale "QA runtime tool next" framing must be gone from the panel
     assert "QA runtime tool next" not in block

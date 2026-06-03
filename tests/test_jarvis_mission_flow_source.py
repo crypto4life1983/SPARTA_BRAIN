@@ -99,6 +99,8 @@ def test_valid_sources_report_not_ready_watch_mixed(monkeypatch, tmp_path):
     assert mf["data_present"] is False
     assert mf["qa_present"] is False
     assert mf["qa_status"] is None
+    assert mf["qa_accepted"] is False
+    assert mf["addendum_present"] is False
     assert mf["baseline_present"] is False
     assert mf["warnings"] == []
 
@@ -192,21 +194,60 @@ def test_no_side_effects_no_dir_no_subprocess(monkeypatch, tmp_path):
     assert mf["data_present"] is False
 
 
-def test_present_data_dir_reports_presence_only(monkeypatch, tmp_path):
-    """If an operator HAS produced qa/baseline artifacts, presence is reflected
-    truthfully (presence-only; the aggregator still never runs them)."""
+def test_present_qa_report_under_reports_tree(monkeypatch, tmp_path):
+    """QA reports live under the reports tree (NOT the dataset dir). When the
+    operator HAS produced the V002 QA report + acceptance memo + IS/OOS addendum
+    + a baseline result, presence is reflected truthfully (presence-only; the
+    aggregator still never runs them and never promotes the lane)."""
     import app as app_module
     _seed_valid(tmp_path)
-    data_dir = tmp_path / "data" / "crypto_d1_research" / "run1"
-    data_dir.mkdir(parents=True)
-    (data_dir / "qa_report.json").write_text(
-        json.dumps({"qa_status": "PASS"}), encoding="utf-8")
-    (data_dir / "baseline_report.json").write_text(
+    # dataset dir present (freeze materialized)
+    v002 = (tmp_path / "data" / "crypto_d1_research"
+            / "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001" / "V002")
+    v002.mkdir(parents=True)
+    # V002 QA report lives under the reports tree, not the dataset dir
+    qa_dir = (tmp_path / "reports" / "crypto_d1_qa_runtime_v1"
+              / "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002")
+    qa_dir.mkdir(parents=True)
+    (qa_dir / "qa_report.json").write_text(
+        json.dumps({"qa_status": "QA_WARN"}), encoding="utf-8")
+    (qa_dir / "operator_acceptance_memo.md").write_text(
+        "accepted", encoding="utf-8")
+    addendum = tmp_path / "reports" / "crypto_d1_baseline_backtest_plan_v1"
+    addendum.mkdir(parents=True)
+    (addendum / "v002_is_oos_addendum.md").write_text("plan", encoding="utf-8")
+    # a baseline RESULT under the dataset dir (NOT the plan addendum)
+    (v002 / "baseline_report.json").write_text(
         json.dumps({"ok": True}), encoding="utf-8")
     monkeypatch.setattr(app_module, "BASE", tmp_path)
     mf = app_module._jarvis_crypto_d1_mission_flow()
 
     assert mf["data_present"] is True
     assert mf["qa_present"] is True
-    assert mf["qa_status"] == "PASS"
+    assert mf["qa_status"] == "QA_WARN"
+    assert mf["qa_accepted"] is True
+    assert mf["addendum_present"] is True
     assert mf["baseline_present"] is True
+    # truth never promotes the lane
+    assert mf["lane_status"] == "WATCH"
+    assert mf["evidence_level"] == "MIXED"
+    assert mf["readiness_status"] == "NOT_READY_FOR_REAL_DATA"
+
+
+def test_qa_warn_not_accepted_when_memo_absent(monkeypatch, tmp_path):
+    """QA report present but no acceptance memo => qa_accepted is False."""
+    import app as app_module
+    _seed_valid(tmp_path)
+    qa_dir = (tmp_path / "reports" / "crypto_d1_qa_runtime_v1"
+              / "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002")
+    qa_dir.mkdir(parents=True)
+    (qa_dir / "qa_report.json").write_text(
+        json.dumps({"qa_status": "QA_WARN"}), encoding="utf-8")
+    monkeypatch.setattr(app_module, "BASE", tmp_path)
+    mf = app_module._jarvis_crypto_d1_mission_flow()
+
+    assert mf["qa_present"] is True
+    assert mf["qa_status"] == "QA_WARN"
+    assert mf["qa_accepted"] is False
+    assert mf["addendum_present"] is False
+    assert mf["baseline_present"] is False

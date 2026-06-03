@@ -8395,6 +8395,17 @@ _JARVIS_MF_CHECKLIST_REL = \
     "reports/crypto_d1_operator_missing_items_checklist_v1/checklist.json"
 _JARVIS_MF_DATA_DIR_REL = "data/crypto_d1_research"
 _JARVIS_MF_LANE_ID = "crypto_d1_protocol"
+# QA reports are written under the reports tree, NOT the dataset dir. Prefer the
+# V002 report; the acceptance memo + IS/OOS addendum are presence-only signals.
+_JARVIS_MF_QA_REPORTS_DIR_REL = "reports/crypto_d1_qa_runtime_v1"
+_JARVIS_MF_QA_V002_REL = (
+    "reports/crypto_d1_qa_runtime_v1/"
+    "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/qa_report.json")
+_JARVIS_MF_QA_V002_MEMO_REL = (
+    "reports/crypto_d1_qa_runtime_v1/"
+    "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/operator_acceptance_memo.md")
+_JARVIS_MF_ADDENDUM_REL = (
+    "reports/crypto_d1_baseline_backtest_plan_v1/v002_is_oos_addendum.md")
 # Dashboard logic may NEVER surface these verdicts; clamp to the safe default.
 _JARVIS_MF_FORBIDDEN_VERDICTS = frozenset({"ACTIVE", "STRONG"})
 _JARVIS_MF_ALLOWED_LANE_STATUS = frozenset(
@@ -8510,20 +8521,40 @@ def _jarvis_crypto_d1_mission_flow() -> dict:
     # 4-6) Filesystem PRESENCE ONLY — never create, never run anything.
     data_dir = BASE / _JARVIS_MF_DATA_DIR_REL
     data_present = data_dir.is_dir()
+
+    # QA reports live under the reports tree (reports/crypto_d1_qa_runtime_v1/**)
+    # — NOT under the dataset dir. Prefer the V002 report; otherwise fall back to
+    # the newest qa_report.json in that tree. Presence-only; never runs QA.
     qa_present = False
     qa_status = None
+    qa_rel = None
+    if (BASE / _JARVIS_MF_QA_V002_REL).is_file():
+        qa_rel = _JARVIS_MF_QA_V002_REL
+    else:
+        reports_dir = BASE / _JARVIS_MF_QA_REPORTS_DIR_REL
+        if reports_dir.is_dir():
+            try:
+                hits = sorted(reports_dir.rglob("qa_report.json"))
+            except Exception:  # noqa: BLE001 — presence probe fails closed
+                hits = []
+            if hits:
+                qa_rel = hits[-1].relative_to(BASE).as_posix()
+    if qa_rel is not None:
+        qa_obj, qa_st = _jarvis_mf_load_json(qa_rel)
+        if qa_st == "ok" and isinstance(qa_obj, dict):
+            qa_present = True
+            qa_status = str(qa_obj.get("qa_status", "") or "") or None
+        elif qa_st == "error":
+            warnings.append(f"qa report {qa_rel} unreadable; qa_status=None")
+
+    # Operator acceptance of the V002 QA_WARN (memo presence only) + IS/OOS
+    # backtest *plan* addendum (a plan doc — NOT a backtest result).
+    qa_accepted = (BASE / _JARVIS_MF_QA_V002_MEMO_REL).is_file()
+    addendum_present = (BASE / _JARVIS_MF_ADDENDUM_REL).is_file()
+
+    # Baseline backtest RESULTS only (never the plan addendum). None exist yet.
     baseline_present = False
     if data_present:
-        try:
-            qa_hits = list(data_dir.rglob("qa_report.json"))
-        except Exception:  # noqa: BLE001 — presence probe fails closed
-            qa_hits = []
-        qa_present = bool(qa_hits)
-        if qa_present:
-            qa_obj, qa_st = _jarvis_mf_load_json(
-                qa_hits[0].relative_to(BASE).as_posix())
-            if qa_st == "ok" and isinstance(qa_obj, dict):
-                qa_status = str(qa_obj.get("qa_status", "") or "") or None
         try:
             bt_hits = (list(data_dir.rglob("backtest_report.json"))
                        + list(data_dir.rglob("baseline_report.json")))
@@ -8557,6 +8588,8 @@ def _jarvis_crypto_d1_mission_flow() -> dict:
         "data_present": data_present,
         "qa_present": qa_present,
         "qa_status": qa_status,
+        "qa_accepted": qa_accepted,
+        "addendum_present": addendum_present,
         "baseline_present": baseline_present,
         "warnings": warnings,
     }
