@@ -1,0 +1,78 @@
+# SPARTA Crypto-D1 Backtest Runner v1 -- Run Report
+
+> **Research-only. Local-only.** No data fetched. No exchange contacted. No order placed. No paper or live trading authorized.
+
+- **run_id:** `3f9a34612ef00747`
+- **generated_at:** 2026-06-03T18:37:18Z
+- **runner_version:** crypto_d1_backtest_runner_v1
+- **plan_version:** crypto_d1_baseline_backtest_plan_v1
+- **protocol_version:** crypto_d1_protocol_v1
+- **data_contract_version:** crypto_d1_data_contract_v1
+- **dataset_manifest_spec_version:** crypto_d1_dataset_manifest_v1
+- **qa_freeze_spec_version:** crypto_d1_qa_freeze_spec_v1
+- **input_data_dir:** `data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002`
+- **input_data_hash (short):** `3f9a34612ef00747`
+
+## Config mode: `v002_addendum`
+- **batch:** B0-B3 first execution batch (v002_addendum)
+- **IS window:** 2021-06-17 -> 2024-06-16
+- **OOS window:** 2024-06-17 -> 2025-12-31
+- **cost per side (bps):** fee=40.0 + slip=10.0 + spread=10.0 = 60.0 (round-trip 120.0)
+- **cost source:** v002_fees_json
+- **strategies deferred:** volatility_regime_gate, mean_reversion
+- **missing days (true gaps, never filled):** {'BTC': {'count': 1, 'dates': ['2024-03-31']}}
+
+## Safety flags (pinned)
+- research_only: True
+- data_fetch_enabled: False
+- exchange_connection_enabled: False
+- live_trading_enabled: False
+- broker_control_enabled: False
+- paper_order_execution_enabled: False
+- order_placement_enabled: False
+
+## Assets
+- **seen:** BTC, ETH, SOL
+- **missing:** (none)
+
+## Verdict
+- **pass_watch_fail_status:** **WATCH**
+- **next_action:** 1 strategy result(s) show positive OOS + above-benchmark risk-adjusted return; this is INCOMPLETE evidence and does NOT promote the lane. PASS requires explicit operator review.
+
+## Warnings
+- BTC: missing 1 day(s) between 2024-03-30 and 2024-04-01 -- flagged, never silently forward-filled
+
+## Benchmark results
+- `buy_and_hold_benchmark_btc` (BTC): total_return=1.2841179309946296, max_drawdown=-0.7667251827270063, trade_count=1
+- `buy_and_hold_benchmark_eth` (ETH): total_return=0.24339783051361863, max_drawdown=-0.7932916425063543, trade_count=1
+- `buy_and_hold_benchmark_sol` (SOL): total_return=2.160833631484786, max_drawdown=-0.9627710983105888, trade_count=1
+- `buy_and_hold_basket` (BASKET): total_return=-0.9962761819632279, max_drawdown=-0.9978132390101793, trade_count=1
+
+## Strategy results
+- `sma_50_200_trend_filter_btc` (BTC): total_return=0.5472714796853848, oos_total_return=-0.18217602062085003, oos_trade_count=2
+- `momentum_30_btc` (BTC): total_return=24.619967592325676, oos_total_return=1.3426920483046128, oos_trade_count=27
+- `momentum_90_btc` (BTC): total_return=4.925082483717493, oos_total_return=1.0485607077301546, oos_trade_count=9
+- `donchian_55_20_btc` (BTC): total_return=4.3625627594543985, oos_total_return=0.3768530310277314, oos_trade_count=7
+- `sma_50_200_trend_filter_eth` (ETH): total_return=-0.33442763637530215, oos_total_return=-0.46054755298061445, oos_trade_count=2
+- `momentum_30_eth` (ETH): total_return=47.65396810815449, oos_total_return=2.135313725081248, oos_trade_count=19
+- `momentum_90_eth` (ETH): total_return=2.98174347793381, oos_total_return=0.7039291026476235, oos_trade_count=8
+- `donchian_55_20_eth` (ETH): total_return=5.833381713086211, oos_total_return=1.5253020572941356, oos_trade_count=5
+- `sma_50_200_trend_filter_sol` (SOL): total_return=-0.25235113591873204, oos_total_return=-0.5468787367375838, oos_trade_count=2
+- `momentum_30_sol` (SOL): total_return=1297.0824583141775, oos_total_return=2.593327645039861, oos_trade_count=18
+- `momentum_90_sol` (SOL): total_return=13.060109715782513, oos_total_return=0.6353349341083436, oos_trade_count=16
+- `donchian_55_20_sol` (SOL): total_return=55.071165939835815, oos_total_return=0.31267157408189616, oos_trade_count=6
+
+## Forbidden next steps
+- Trade live or paper based on these results.
+- Connect SPARTA's runtime to any exchange or vendor over the network.
+- Promote crypto_d1_protocol to ACTIVE / STRONG without a separate operator decision.
+- Schedule a daemon / cron / background process that touches this runner.
+- Modify paper / live execution files.
+- Install or read any API key, OAuth token, or .env credential.
+- Use any synthetic / mock-priced data as evidence.
+
+## Safety notes
+- Research-only. Local-only.
+- No data was fetched. No exchange was contacted. No order was placed.
+- Results do not imply profitability. Crypto trend ideas are not profitable until tested with full costs AND forward-validated under a separately authorized future plan; neither is authorized by this runner.
+- A future PASS verdict is not trading authorization.
