@@ -1,0 +1,787 @@
+{
+  "chain": [
+    "queue",
+    "orchestrator",
+    "runner_output_adapter",
+    "deeper_validation",
+    "validation_report",
+    "decision_memo",
+    "registry_update_proposal",
+    "dashboard_feed_preview",
+    "next_action"
+  ],
+  "config_mode": "strategy_factory_integration_v1",
+  "dashboard_feed_preview": {
+    "applied_to_dashboard": false,
+    "dashboard_write_performed": false,
+    "entry": {
+      "category": "Strategy Factory",
+      "how_it_works": "Composes existing read-only factory layers over synthetic bars and emits a report, a decision memo, a registry update proposal, and this preview. It runs nothing and changes nothing.",
+      "module_key": "strategy_factory_integration_v1",
+      "module_name": "Strategy Factory v1 Integration (Dry-Run)",
+      "short_description": "Research-only dry-run that joins the queue, orchestrator, safety, and registry views with the Crypto-D1 N=20 deeper-validation sections into one synthetic bundle.",
+      "sort_order": 950,
+      "status": "FAIL / research-only",
+      "user_action": "Review the bundle artifacts; separate operator approval is required before any further step.",
+      "when_to_use": "To inspect how the Crypto-D1 N=20 research chain would connect end to end before any future real-data step."
+    },
+    "layer": "strategy_factory_integration_v1",
+    "non_authorization_statement": "Research-only dry-run INTEGRATION layer. Composes read-only factory views over synthetic bars and emits descriptive artifacts plus a registry proposal and a dashboard preview. It runs no backtest over frozen data, executes no queue task, mutates no queue/registry/dashboard/dataset, and authorizes no paper/live/broker/exchange/order/fetch action. It promotes no lane to ACTIVE/STRONG and emits no PASS. Verdict ceiling stays WATCH; Crypto-D1 stays WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive synthetic view is not a trading authorization.",
+    "preview_only": true,
+    "safety_flags": {
+      "active_strong_promoted": false,
+      "broker_path_enabled": false,
+      "bundle_23_started": false,
+      "dashboard_mutation_allowed": false,
+      "dataset_mutation_allowed": false,
+      "exchange_path_enabled": false,
+      "execution_authorized": false,
+      "fetch_live_data_enabled": false,
+      "order_path_enabled": false,
+      "paper_live_authorized": false,
+      "queue_mutation_allowed": false,
+      "registry_mutation_allowed": false,
+      "research_only": true
+    },
+    "schema_version": 1,
+    "target_table": "system_manual_entries"
+  },
+  "decision_memo": {
+    "allowed_verdicts": [
+      "WATCH",
+      "FAIL",
+      "INSUFFICIENT_EVIDENCE"
+    ],
+    "checks": {
+      "all_assets_positive": true,
+      "fee_stress_survived": true,
+      "meets_family_floor": false,
+      "neighborhood_sensitivity_not_optimization": true,
+      "not_outlier_dependent": false,
+      "not_single_regime": true,
+      "per_asset_floor_all_clear": false
+    },
+    "evidence_level": "NONE",
+    "promotion_blocked": true,
+    "rationale": "Synthetic dry-run did not clear the per-asset/family research trade floors; recorded as FAIL pending a future real-data review.",
+    "reason_capped_at_watch": "Research-only synthetic dry-run; not real-data validation. No promotion tier above WATCH is reachable from this dry-run.",
+    "verdict": "FAIL",
+    "verdict_ceiling": "WATCH"
+  },
+  "dry_run": true,
+  "executes_anything": false,
+  "executes_backtest": false,
+  "forbidden_term_scan_on_human_text": [],
+  "layer": "strategy_factory_integration_v1",
+  "next_action": "Await separate operator approval to (a) wire real runner OOS slices into the adapter for true validation and (b) decide whether to apply the registry proposal. No further step is authorized now. Verdict stays capped at WATCH (current synthetic read: FAIL).",
+  "non_authorization_statement": "Research-only dry-run INTEGRATION layer. Composes read-only factory views over synthetic bars and emits descriptive artifacts plus a registry proposal and a dashboard preview. It runs no backtest over frozen data, executes no queue task, mutates no queue/registry/dashboard/dataset, and authorizes no paper/live/broker/exchange/order/fetch action. It promotes no lane to ACTIVE/STRONG and emits no PASS. Verdict ceiling stays WATCH; Crypto-D1 stays WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive synthetic view is not a trading authorization.",
+  "orchestrator_summary": {
+    "dry_run": true,
+    "executes_anything": false,
+    "execution_halted": false,
+    "layer": "strategy_factory_orchestrator_v1",
+    "task_count": 1
+  },
+  "primary_lookback": 20,
+  "queue_summary": {
+    "blocked_item_count": 0,
+    "item_count": 1,
+    "layer": "strategy_factory_queue_v1",
+    "valid_item_count": 1
+  },
+  "read_only": true,
+  "reads_frozen_dataset": false,
+  "registry_summary": {
+    "layer": "strategy_report_registry_v1",
+    "strategy_count": 3
+  },
+  "registry_update_proposal": {
+    "applied": false,
+    "human_approval_required_to_apply": true,
+    "layer": "strategy_factory_integration_v1",
+    "non_authorization_statement": "Research-only dry-run INTEGRATION layer. Composes read-only factory views over synthetic bars and emits descriptive artifacts plus a registry proposal and a dashboard preview. It runs no backtest over frozen data, executes no queue task, mutates no queue/registry/dashboard/dataset, and authorizes no paper/live/broker/exchange/order/fetch action. It promotes no lane to ACTIVE/STRONG and emits no PASS. Verdict ceiling stays WATCH; Crypto-D1 stays WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive synthetic view is not a trading authorization.",
+    "proposal_only": true,
+    "proposed_candidate": {
+      "allowed_next_steps": [
+        "operator_review",
+        "wire_real_runner_oos_slices_after_approval"
+      ],
+      "candidate_id": "crypto_d1_momentum_n20",
+      "evidence_level": "NONE",
+      "forbidden_next_steps": [
+        "promote_active",
+        "promote_strong",
+        "mark_pass",
+        "paper",
+        "live",
+        "broker",
+        "exchange",
+        "order",
+        "fetch"
+      ],
+      "hypothesis": "Daily momentum continuation on BTC/ETH/SOL at N=20.",
+      "lane": "crypto_d1_momentum_n20",
+      "market": "crypto",
+      "neighborhood_is_sensitivity_not_optimization": true,
+      "neighborhood_lookbacks": [
+        18,
+        20,
+        22
+      ],
+      "next_action": "Await separate operator approval to (a) wire real runner OOS slices into the adapter for true validation and (b) decide whether to apply the registry proposal. No further step is authorized now. Verdict stays capped at WATCH (current synthetic read: FAIL).",
+      "primary_lookback": 20,
+      "source_reports": [
+        "reports/strategy_factory_integration_v1_build/report.json"
+      ],
+      "status": "FAILED",
+      "timeframe": "1d",
+      "title": "Crypto-D1 Momentum N=20 (research-only)",
+      "winner_reselected": false
+    },
+    "registry_mutation_performed": false,
+    "safety_flags": {
+      "active_strong_promoted": false,
+      "broker_path_enabled": false,
+      "bundle_23_started": false,
+      "dashboard_mutation_allowed": false,
+      "dataset_mutation_allowed": false,
+      "exchange_path_enabled": false,
+      "execution_authorized": false,
+      "fetch_live_data_enabled": false,
+      "order_path_enabled": false,
+      "paper_live_authorized": false,
+      "queue_mutation_allowed": false,
+      "registry_mutation_allowed": false,
+      "research_only": true
+    },
+    "schema_version": 1,
+    "verdict_ceiling": "WATCH"
+  },
+  "safety_flags": {
+    "active_strong_promoted": false,
+    "broker_path_enabled": false,
+    "bundle_23_started": false,
+    "dashboard_mutation_allowed": false,
+    "dataset_mutation_allowed": false,
+    "exchange_path_enabled": false,
+    "execution_authorized": false,
+    "fetch_live_data_enabled": false,
+    "order_path_enabled": false,
+    "paper_live_authorized": false,
+    "queue_mutation_allowed": false,
+    "registry_mutation_allowed": false,
+    "research_only": true
+  },
+  "safety_summary": {
+    "layer": "strategy_factory_safety_v1",
+    "safe": true,
+    "valid": true
+  },
+  "schema_version": 1,
+  "uses_synthetic_data_only": true,
+  "validation_report": {
+    "config_mode": "momentum_n20_deeper_validation_v1",
+    "cost_model_round_trip_bps": 120.0,
+    "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002",
+    "executes_backtest": false,
+    "insufficient_history_notes": {},
+    "is_window": {
+      "end": "2024-06-16",
+      "start": "2021-06-17"
+    },
+    "layer": "crypto_d1_momentum_n20_deeper_validation_v1",
+    "neighborhood_is_sensitivity_not_optimization": true,
+    "neighborhood_lookbacks": [
+      18,
+      20,
+      22
+    ],
+    "non_authorization_statement": "Deeper-validation ANALYSIS layer only. Computes descriptive views of the frozen N=20 OOS evidence; authorizes no paper, live, broker, exchange, order, or fetch action; promotes no lane to ACTIVE/STRONG; starts no Bundle 23; mutates no dataset. Verdict ceiling stays WATCH; lane stays WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive view is not a trading authorization.",
+    "oos_window": {
+      "end": "2025-12-31",
+      "start": "2024-06-17"
+    },
+    "primary_lookback": 20,
+    "reference_lookback": 30,
+    "safety_flags": {
+      "active_strong_promoted": false,
+      "broker_path_enabled": false,
+      "bundle_23_started": false,
+      "dataset_mutation_allowed": false,
+      "exchange_path_enabled": false,
+      "execution_authorized": false,
+      "fetch_live_data_enabled": false,
+      "order_path_enabled": false,
+      "paper_live_authorized": false,
+      "research_only": true
+    },
+    "status": "DEEPER_VALIDATION_ANALYSIS_ONLY",
+    "validation_sections": {
+      "1_yearly_oos_breakdown": {
+        "BTC": {
+          "2024": {
+            "max_drawdown": -0.01612903225806456,
+            "n_bars": 198,
+            "positive": true,
+            "total_return": 1.4684333333333353,
+            "trade_count": 1
+          },
+          "2025": {
+            "max_drawdown": -0.006622516556291375,
+            "n_bars": 42,
+            "positive": true,
+            "total_return": 0.12582781456953684,
+            "trade_count": 0
+          }
+        },
+        "ETH": {
+          "2024": {
+            "max_drawdown": -0.024,
+            "n_bars": 198,
+            "positive": true,
+            "total_return": 1.4684333333333317,
+            "trade_count": 1
+          },
+          "2025": {
+            "max_drawdown": -0.009900990099009941,
+            "n_bars": 42,
+            "positive": true,
+            "total_return": 0.12211221122112192,
+            "trade_count": 0
+          }
+        },
+        "SOL": {
+          "2024": {
+            "max_drawdown": -0.043165467625899186,
+            "n_bars": 198,
+            "positive": true,
+            "total_return": 2.035523076923064,
+            "trade_count": 1
+          },
+          "2025": {
+            "max_drawdown": -0.014778325123152754,
+            "n_bars": 42,
+            "positive": true,
+            "total_return": 0.1330049261083741,
+            "trade_count": 0
+          }
+        }
+      },
+      "2_monthly_return_drawdown_profile": {
+        "BTC": {
+          "longest_drawdown_bars": 1,
+          "oos_max_drawdown": -0.01612903225806456,
+          "per_month": {
+            "2024-06": {
+              "n_bars": 14,
+              "total_return": 0.0
+            },
+            "2024-07": {
+              "n_bars": 31,
+              "total_return": 0.22593333333333332
+            },
+            "2024-08": {
+              "n_bars": 31,
+              "total_return": 0.2054794520547938
+            },
+            "2024-09": {
+              "n_bars": 30,
+              "total_return": 0.1444444444444446
+            },
+            "2024-10": {
+              "n_bars": 31,
+              "total_return": 0.14285714285714257
+            },
+            "2024-11": {
+              "n_bars": 30,
+              "total_return": 0.13445378151260434
+            },
+            "2024-12": {
+              "n_bars": 31,
+              "total_return": 0.11194029850746223
+            },
+            "2025-01": {
+              "n_bars": 31,
+              "total_return": 0.09933774834437115
+            },
+            "2025-02": {
+              "n_bars": 11,
+              "total_return": 0.030303030303030054
+            }
+          },
+          "worst_month": "2024-06",
+          "worst_month_return": 0.0
+        },
+        "ETH": {
+          "longest_drawdown_bars": 1,
+          "oos_max_drawdown": -0.024,
+          "per_month": {
+            "2024-06": {
+              "n_bars": 14,
+              "total_return": 0.0
+            },
+            "2024-07": {
+              "n_bars": 31,
+              "total_return": 0.23421666666666652
+            },
+            "2024-08": {
+              "n_bars": 31,
+              "total_return": 0.205479452054794
+            },
+            "2024-09": {
+              "n_bars": 30,
+              "total_return": 0.13812154696132595
+            },
+            "2024-10": {
+              "n_bars": 31,
+              "total_return": 0.14218009478672977
+            },
+            "2024-11": {
+              "n_bars": 30,
+              "total_return": 0.1386554621848739
+            },
+            "2024-12": {
+              "n_bars": 31,
+              "total_return": 0.11194029850746268
+            },
+            "2025-01": {
+              "n_bars": 31,
+              "total_return": 0.09900990099009865
+            },
+            "2025-02": {
+              "n_bars": 11,
+              "total_return": 0.030303030303030054
+            }
+          },
+          "worst_month": "2024-06",
+          "worst_month_return": 0.0
+        },
+        "SOL": {
+          "longest_drawdown_bars": 1,
+          "oos_max_drawdown": -0.043165467625899186,
+          "per_month": {
+            "2024-06": {
+              "n_bars": 14,
+              "total_return": 0.0
+            },
+            "2024-07": {
+              "n_bars": 31,
+              "total_return": 0.33807692307692316
+            },
+            "2024-08": {
+              "n_bars": 31,
+              "total_return": 0.2662721893491098
+            },
+            "2024-09": {
+              "n_bars": 30,
+              "total_return": 0.16143497757847314
+            },
+            "2024-10": {
+              "n_bars": 31,
+              "total_return": 0.16791044776119213
+            },
+            "2024-11": {
+              "n_bars": 30,
+              "total_return": 0.16612377850162807
+            },
+            "2024-12": {
+              "n_bars": 31,
+              "total_return": 0.12784090909090784
+            },
+            "2025-01": {
+              "n_bars": 31,
+              "total_return": 0.11083743842364524
+            },
+            "2025-02": {
+              "n_bars": 11,
+              "total_return": 0.033707865168539186
+            }
+          },
+          "worst_month": "2024-06",
+          "worst_month_return": 0.0
+        }
+      },
+      "3_per_asset_consistency": {
+        "all_positive": true,
+        "n_positive_assets": 3,
+        "per_asset": {
+          "BTC": {
+            "clears_per_asset_floor": false,
+            "max_drawdown": -0.01612903225806456,
+            "positive": true,
+            "total_return": 1.8163333333333336,
+            "trade_count": 1,
+            "turnover": 1
+          },
+          "ETH": {
+            "clears_per_asset_floor": false,
+            "max_drawdown": -0.024,
+            "positive": true,
+            "total_return": 1.816333333333331,
+            "trade_count": 1,
+            "turnover": 1
+          },
+          "SOL": {
+            "clears_per_asset_floor": false,
+            "max_drawdown": -0.043165467625899186,
+            "positive": true,
+            "total_return": 2.517230769230754,
+            "trade_count": 1,
+            "turnover": 1
+          }
+        },
+        "single_asset_carrying_flag": null
+      },
+      "4_trade_count_and_turnover": {
+        "family_oos_trade_total": 3,
+        "meets_family_floor": false,
+        "per_asset": {
+          "BTC": {
+            "clears_per_asset_floor": false,
+            "exposure_pct": 92.05020920502092,
+            "trade_count": 1,
+            "turnover": 1
+          },
+          "ETH": {
+            "clears_per_asset_floor": false,
+            "exposure_pct": 92.05020920502092,
+            "trade_count": 1,
+            "turnover": 1
+          },
+          "SOL": {
+            "clears_per_asset_floor": false,
+            "exposure_pct": 92.05020920502092,
+            "trade_count": 1,
+            "turnover": 1
+          }
+        },
+        "per_asset_floor": 20,
+        "per_family_floor": 30
+      },
+      "5_fee_slippage_stress": {
+        "BTC": {
+          "approx_breakeven_round_trip_bps": null,
+          "baseline_round_trip_bps": 120.0,
+          "baseline_total_return": 1.8163333333333336,
+          "stress_levels": {
+            "150": {
+              "round_trip_bps": 150.0,
+              "survives_positive": true,
+              "total_return": 1.8120833333333337
+            },
+            "180": {
+              "round_trip_bps": 180.0,
+              "survives_positive": true,
+              "total_return": 1.8078333333333338
+            },
+            "240": {
+              "round_trip_bps": 240.0,
+              "survives_positive": true,
+              "total_return": 1.7993333333333337
+            }
+          }
+        },
+        "ETH": {
+          "approx_breakeven_round_trip_bps": null,
+          "baseline_round_trip_bps": 120.0,
+          "baseline_total_return": 1.816333333333331,
+          "stress_levels": {
+            "150": {
+              "round_trip_bps": 150.0,
+              "survives_positive": true,
+              "total_return": 1.8120833333333306
+            },
+            "180": {
+              "round_trip_bps": 180.0,
+              "survives_positive": true,
+              "total_return": 1.8078333333333307
+            },
+            "240": {
+              "round_trip_bps": 240.0,
+              "survives_positive": true,
+              "total_return": 1.7993333333333297
+            }
+          }
+        },
+        "SOL": {
+          "approx_breakeven_round_trip_bps": null,
+          "baseline_round_trip_bps": 120.0,
+          "baseline_total_return": 2.517230769230754,
+          "stress_levels": {
+            "150": {
+              "round_trip_bps": 150.0,
+              "survives_positive": true,
+              "total_return": 2.511923076923048
+            },
+            "180": {
+              "round_trip_bps": 180.0,
+              "survives_positive": true,
+              "total_return": 2.5066153846153623
+            },
+            "240": {
+              "round_trip_bps": 240.0,
+              "survives_positive": true,
+              "total_return": 2.4959999999999813
+            }
+          }
+        }
+      },
+      "6_outlier_sensitivity": {
+        "BTC": {
+          "compounded_trade_return_all": 1.7993333333333363,
+          "edge_outlier_dependent": true,
+          "exclude_best": 0.0,
+          "exclude_worst": 0.0,
+          "n_trades": 1
+        },
+        "ETH": {
+          "compounded_trade_return_all": 1.7993333333333332,
+          "edge_outlier_dependent": true,
+          "exclude_best": 0.0,
+          "exclude_worst": 0.0,
+          "n_trades": 1
+        },
+        "SOL": {
+          "compounded_trade_return_all": 2.4959999999999773,
+          "edge_outlier_dependent": true,
+          "exclude_best": 0.0,
+          "exclude_worst": 0.0,
+          "n_trades": 1
+        }
+      },
+      "7_regime_sensitivity": {
+        "BTC": {
+          "buckets": {
+            "downtrend": {
+              "n_bars": 0,
+              "strategy_return_in_bucket": 0.0
+            },
+            "high_vol": {
+              "n_bars": 0,
+              "strategy_return_in_bucket": 0.0
+            },
+            "low_vol": {
+              "n_bars": 210,
+              "strategy_return_in_bucket": 1.6153846153846185
+            },
+            "trend_undefined": {
+              "n_bars": 49,
+              "strategy_return_in_bucket": 0.24999999999999978
+            },
+            "uptrend": {
+              "n_bars": 190,
+              "strategy_return_in_bucket": 1.2666666666666675
+            },
+            "vol_undefined": {
+              "n_bars": 29,
+              "strategy_return_in_bucket": 0.0833333333333337
+            }
+          },
+          "confined_to_single_regime": false,
+          "positive_regime_buckets": [
+            "low_vol",
+            "uptrend"
+          ],
+          "proxies": {
+            "look_ahead": false,
+            "trend_sma": 50,
+            "vol_threshold_annualized": 1.5,
+            "vol_window": 30
+          }
+        },
+        "ETH": {
+          "buckets": {
+            "downtrend": {
+              "n_bars": 0,
+              "strategy_return_in_bucket": 0.0
+            },
+            "high_vol": {
+              "n_bars": 0,
+              "strategy_return_in_bucket": 0.0
+            },
+            "low_vol": {
+              "n_bars": 210,
+              "strategy_return_in_bucket": 1.6153846153846159
+            },
+            "trend_undefined": {
+              "n_bars": 49,
+              "strategy_return_in_bucket": 0.24999999999999933
+            },
+            "uptrend": {
+              "n_bars": 190,
+              "strategy_return_in_bucket": 1.2666666666666648
+            },
+            "vol_undefined": {
+              "n_bars": 29,
+              "strategy_return_in_bucket": 0.08333333333333282
+            }
+          },
+          "confined_to_single_regime": false,
+          "positive_regime_buckets": [
+            "low_vol",
+            "uptrend"
+          ],
+          "proxies": {
+            "look_ahead": false,
+            "trend_sma": 50,
+            "vol_threshold_annualized": 1.5,
+            "vol_window": 30
+          }
+        },
+        "SOL": {
+          "buckets": {
+            "downtrend": {
+              "n_bars": 0,
+              "strategy_return_in_bucket": 0.0
+            },
+            "high_vol": {
+              "n_bars": 0,
+              "strategy_return_in_bucket": 0.0
+            },
+            "low_vol": {
+              "n_bars": 210,
+              "strategy_return_in_bucket": 2.1724137931034186
+            },
+            "trend_undefined": {
+              "n_bars": 49,
+              "strategy_return_in_bucket": 0.34615384615384515
+            },
+            "uptrend": {
+              "n_bars": 190,
+              "strategy_return_in_bucket": 1.6285714285714121
+            },
+            "vol_undefined": {
+              "n_bars": 29,
+              "strategy_return_in_bucket": 0.11538461538461542
+            }
+          },
+          "confined_to_single_regime": false,
+          "positive_regime_buckets": [
+            "low_vol",
+            "uptrend"
+          ],
+          "proxies": {
+            "look_ahead": false,
+            "trend_sma": 50,
+            "vol_threshold_annualized": 1.5,
+            "vol_window": 30
+          }
+        }
+      },
+      "8_basket_vs_per_asset": {
+        "equal_weight_basket_oos_return": 2.0499658119658064,
+        "mean_per_asset_oos_return": 2.0499658119658064,
+        "per_asset_solo": {
+          "BTC": {
+            "total_return": 1.8163333333333336,
+            "trade_count": 1
+          },
+          "ETH": {
+            "total_return": 1.816333333333331,
+            "trade_count": 1
+          },
+          "SOL": {
+            "total_return": 2.517230769230754,
+            "trade_count": 1
+          }
+        },
+        "rebalance": "none (allocate once)"
+      },
+      "9_small_parameter_neighborhood_sensitivity": {
+        "BTC": {
+          "is_sensitivity_not_optimization": true,
+          "neighborhood": [
+            18,
+            20,
+            22
+          ],
+          "per_lookback": {
+            "18": {
+              "is_primary": false,
+              "lookback": 18,
+              "total_return": 1.8640677966101724,
+              "trade_count": 1
+            },
+            "20": {
+              "is_primary": true,
+              "lookback": 20,
+              "total_return": 1.8163333333333336,
+              "trade_count": 1
+            },
+            "22": {
+              "is_primary": false,
+              "lookback": 22,
+              "total_return": 1.770163934426225,
+              "trade_count": 1
+            }
+          },
+          "primary_lookback": 20,
+          "winner_reselected": false
+        },
+        "ETH": {
+          "is_sensitivity_not_optimization": true,
+          "neighborhood": [
+            18,
+            20,
+            22
+          ],
+          "per_lookback": {
+            "18": {
+              "is_primary": false,
+              "lookback": 18,
+              "total_return": 1.864067796610167,
+              "trade_count": 1
+            },
+            "20": {
+              "is_primary": true,
+              "lookback": 20,
+              "total_return": 1.816333333333331,
+              "trade_count": 1
+            },
+            "22": {
+              "is_primary": false,
+              "lookback": 22,
+              "total_return": 1.7701639344262285,
+              "trade_count": 1
+            }
+          },
+          "primary_lookback": 20,
+          "winner_reselected": false
+        },
+        "SOL": {
+          "is_sensitivity_not_optimization": true,
+          "neighborhood": [
+            18,
+            20,
+            22
+          ],
+          "per_lookback": {
+            "18": {
+              "is_primary": false,
+              "lookback": 18,
+              "total_return": 2.6003149606299,
+              "trade_count": 1
+            },
+            "20": {
+              "is_primary": true,
+              "lookback": 20,
+              "total_return": 2.517230769230754,
+              "trade_count": 1
+            },
+            "22": {
+              "is_primary": false,
+              "lookback": 22,
+              "total_return": 2.4378947368420847,
+              "trade_count": 1
+            }
+          },
+          "primary_lookback": 20,
+          "winner_reselected": false
+        }
+      }
+    },
+    "verdict_ceiling": "WATCH",
+    "winner_reselected": false
+  },
+  "verdict_ceiling": "WATCH"
+}

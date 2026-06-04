@@ -1,0 +1,35 @@
+{
+  "applied_to_dashboard": false,
+  "dashboard_write_performed": false,
+  "entry": {
+    "category": "Strategy Factory",
+    "how_it_works": "Composes existing read-only factory layers over synthetic bars and emits a report, a decision memo, a registry update proposal, and this preview. It runs nothing and changes nothing.",
+    "module_key": "strategy_factory_integration_v1",
+    "module_name": "Strategy Factory v1 Integration (Dry-Run)",
+    "short_description": "Research-only dry-run that joins the queue, orchestrator, safety, and registry views with the Crypto-D1 N=20 deeper-validation sections into one synthetic bundle.",
+    "sort_order": 950,
+    "status": "FAIL / research-only",
+    "user_action": "Review the bundle artifacts; separate operator approval is required before any further step.",
+    "when_to_use": "To inspect how the Crypto-D1 N=20 research chain would connect end to end before any future real-data step."
+  },
+  "layer": "strategy_factory_integration_v1",
+  "non_authorization_statement": "Research-only dry-run INTEGRATION layer. Composes read-only factory views over synthetic bars and emits descriptive artifacts plus a registry proposal and a dashboard preview. It runs no backtest over frozen data, executes no queue task, mutates no queue/registry/dashboard/dataset, and authorizes no paper/live/broker/exchange/order/fetch action. It promotes no lane to ACTIVE/STRONG and emits no PASS. Verdict ceiling stays WATCH; Crypto-D1 stays WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive synthetic view is not a trading authorization.",
+  "preview_only": true,
+  "safety_flags": {
+    "active_strong_promoted": false,
+    "broker_path_enabled": false,
+    "bundle_23_started": false,
+    "dashboard_mutation_allowed": false,
+    "dataset_mutation_allowed": false,
+    "exchange_path_enabled": false,
+    "execution_authorized": false,
+    "fetch_live_data_enabled": false,
+    "order_path_enabled": false,
+    "paper_live_authorized": false,
+    "queue_mutation_allowed": false,
+    "registry_mutation_allowed": false,
+    "research_only": true
+  },
+  "schema_version": 1,
+  "target_table": "system_manual_entries"
+}

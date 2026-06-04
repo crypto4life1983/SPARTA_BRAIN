@@ -1,0 +1,62 @@
+{
+  "applied": false,
+  "human_approval_required_to_apply": true,
+  "layer": "strategy_factory_integration_v1",
+  "non_authorization_statement": "Research-only dry-run INTEGRATION layer. Composes read-only factory views over synthetic bars and emits descriptive artifacts plus a registry proposal and a dashboard preview. It runs no backtest over frozen data, executes no queue task, mutates no queue/registry/dashboard/dataset, and authorizes no paper/live/broker/exchange/order/fetch action. It promotes no lane to ACTIVE/STRONG and emits no PASS. Verdict ceiling stays WATCH; Crypto-D1 stays WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive synthetic view is not a trading authorization.",
+  "proposal_only": true,
+  "proposed_candidate": {
+    "allowed_next_steps": [
+      "operator_review",
+      "wire_real_runner_oos_slices_after_approval"
+    ],
+    "candidate_id": "crypto_d1_momentum_n20",
+    "evidence_level": "NONE",
+    "forbidden_next_steps": [
+      "promote_active",
+      "promote_strong",
+      "mark_pass",
+      "paper",
+      "live",
+      "broker",
+      "exchange",
+      "order",
+      "fetch"
+    ],
+    "hypothesis": "Daily momentum continuation on BTC/ETH/SOL at N=20.",
+    "lane": "crypto_d1_momentum_n20",
+    "market": "crypto",
+    "neighborhood_is_sensitivity_not_optimization": true,
+    "neighborhood_lookbacks": [
+      18,
+      20,
+      22
+    ],
+    "next_action": "Await separate operator approval to (a) wire real runner OOS slices into the adapter for true validation and (b) decide whether to apply the registry proposal. No further step is authorized now. Verdict stays capped at WATCH (current synthetic read: FAIL).",
+    "primary_lookback": 20,
+    "source_reports": [
+      "reports/strategy_factory_integration_v1_build/report.json"
+    ],
+    "status": "FAILED",
+    "timeframe": "1d",
+    "title": "Crypto-D1 Momentum N=20 (research-only)",
+    "winner_reselected": false
+  },
+  "registry_mutation_performed": false,
+  "safety_flags": {
+    "active_strong_promoted": false,
+    "broker_path_enabled": false,
+    "bundle_23_started": false,
+    "dashboard_mutation_allowed": false,
+    "dataset_mutation_allowed": false,
+    "exchange_path_enabled": false,
+    "execution_authorized": false,
+    "fetch_live_data_enabled": false,
+    "order_path_enabled": false,
+    "paper_live_authorized": false,
+    "queue_mutation_allowed": false,
+    "registry_mutation_allowed": false,
+    "research_only": true
+  },
+  "schema_version": 1,
+  "verdict_ceiling": "WATCH"
+}
