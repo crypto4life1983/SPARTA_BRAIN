@@ -493,7 +493,7 @@
               <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Commit / Archive / Promote</span><span class="nst">Not started</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only snapshot trued to the Crypto-D1 research candidate (registry status WATCH / MIXED). You are here: <b>Operator readiness / missing-items review</b> &mdash; the Bundle&nbsp;21 readiness gate is complete (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>) and <b>16 operator items</b> are still pending before real-data intake. Those 16 items are tracked in the <b>Bundle&nbsp;22 Operator Missing-Items Checklist</b> (16 items, all MISSING / PENDING). No live controller.</div>
+            <div class="jv-detail">Display-only snapshot trued to the Crypto-D1 research candidate (registry status WATCH / MIXED). You are here: <b>Operator readiness / missing-items review</b> &mdash; the Bundle&nbsp;21 readiness gate is complete (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>) and <b><span data-cr="narr_items">9 of 16 checklist items complete, 7 missing (7 pending approval)</span></b> before real-data intake. These are tracked in the <b>Bundle&nbsp;22 Operator Missing-Items Checklist</b>. No live controller.</div>
           </div>
 
           <!-- Pipeline (machine process) -->
@@ -515,7 +515,7 @@
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only, trued to Crypto-D1: <b>Readiness gate complete; real-data intake not ready</b> (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>, <b>16 operator items pending</b>). The <b>Bundle&nbsp;22 missing-items checklist is complete</b> and awaiting manual operator raw-data intake per the Bundle&nbsp;20 runbook &mdash; <b>no source named or approved</b>. The <b>V002 dataset is frozen and present</b>; QA ran on V002 with verdict <b>QA_WARN</b> and operator acceptance; the IS/OOS addendum exists; a baseline backtest ran with result <b>WATCH</b>. Crypto-D1 remains <b>WATCH / MIXED</b> and <code>readiness_status</code> remains <b>NOT_READY_FOR_REAL_DATA</b> &mdash; no ACTIVE/STRONG promotion, no paper trading, and no live trading are authorized. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
+            <div class="jv-detail">Display-only, trued to Crypto-D1: <b>Readiness gate complete; real-data intake not ready</b> (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>, <b><span data-cr="narr_items2">9 of 16 checklist items complete, 7 missing (7 pending approval)</span></b>). The <b>Bundle&nbsp;22 missing-items checklist</b> is tracked and awaiting manual operator raw-data intake per the Bundle&nbsp;20 runbook &mdash; <b>no source named or approved</b>. The <b>V002 dataset is frozen and present</b>; QA ran on V002 with verdict <b>QA_WARN</b> and operator acceptance; the IS/OOS addendum exists; a baseline backtest ran with result <b>WATCH</b>. Crypto-D1 remains <b>WATCH / MIXED</b> and <code>readiness_status</code> remains <b>NOT_READY_FOR_REAL_DATA</b> &mdash; no ACTIVE/STRONG promotion, no paper trading, and no live trading are authorized. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
           </div>
 
           <!-- Combined View -->
@@ -568,13 +568,13 @@
               <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator readiness / missing-items review</span></div>
               <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>Readiness gate complete; real-data intake not ready</span></div>
               <div class="jv-row"><span class="k">Readiness gate</span><span class="v"><span class="jv-led"></span>Complete (Bundle 21)</span></div>
-              <div class="jv-row"><span class="k">Missing-items checklist</span><span class="v"><span class="jv-led warn"></span><span data-cr="checklist">Bundle 22 &middot; 16 items MISSING / PENDING (operator checklist; separate from data/QA/backtest progress)</span></span></div>
-              <div class="jv-row"><span class="k">Readiness status</span><span class="v"><span class="jv-led warn"></span>NOT_READY_FOR_REAL_DATA</span></div>
-              <div class="jv-row"><span class="k">Missing operator items</span><span class="v"><span class="jv-led warn"></span>16 listed</span></div>
+              <div class="jv-row"><span class="k">Missing-items checklist</span><span class="v"><span class="jv-led warn"></span><span data-cr="checklist">Bundle 22 &middot; 16 items &middot; 9 COMPLETE &middot; 7 MISSING &middot; 7 pending approval</span></span></div>
+              <div class="jv-row"><span class="k">Readiness status</span><span class="v"><span class="jv-led warn"></span><span data-cr="cr_readiness">NOT_READY_FOR_REAL_DATA</span></span></div>
+              <div class="jv-row"><span class="k">Missing operator items</span><span class="v"><span class="jv-led warn"></span><span data-cr="missing_items">7 MISSING &middot; 7 pending approval (of 16 checklist items)</span></span></div>
               <div class="jv-row"><span class="k">Data fetched</span><span class="v"><span class="jv-led warn"></span><span data-cr="data_fetched">V002 frozen dataset present</span></span></div>
               <div class="jv-row"><span class="k">QA run</span><span class="v"><span class="jv-led warn"></span><span data-cr="qa_run">QA_WARN on V002 &middot; operator-accepted</span></span></div>
               <div class="jv-row"><span class="k">Baseline results</span><span class="v"><span class="jv-led warn"></span><span data-cr="baseline">Ran &middot; WATCH (V002 baseline)</span></span></div>
-              <div class="jv-row"><span class="k">Status</span><span class="v"><span class="jv-led warn"></span>WATCH / MIXED</span></div>
+              <div class="jv-row"><span class="k">Status</span><span class="v"><span class="jv-led warn"></span><span data-cr="cr_status">WATCH / MIXED</span></span></div>
               <div class="jv-row"><span class="k">Paper Trading Gate</span><span class="v"><span class="jv-led lock"></span>Human approval required</span></div>
               <div class="jv-row"><span class="k">Micro-Live Gate</span><span class="v"><span class="jv-led lock"></span>Locked &middot; never automated</span></div>
             </div>
@@ -592,7 +592,7 @@
             <h3>Strategy Board</h3>
             <p class="jv-sf-sub">Trued to the candidate registry &mdash; 9 candidates (2 WATCH &middot; 4 IDEA &middot; 3 PARKED). Display-only: no candidate has a passed backtest, baseline result, or live status, and no promotion, archiving, or execution happens from this board.</p>
             <div class="jv-sf-board">
-              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH / MIXED</span> &middot; readiness gate complete &middot; NOT_READY_FOR_REAL_DATA &middot; 16 operator items pending &middot; checklist (Bundle 22) &middot; 16 items MISSING / PENDING</div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH / MIXED</span> &middot; readiness gate complete &middot; NOT_READY_FOR_REAL_DATA &middot; checklist (Bundle 22) &middot; <span data-cr="board_checklist">16 items &middot; 9 COMPLETE &middot; 7 MISSING &middot; 7 pending</span></div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">Arbitrage Research Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH</span> &middot; research-only</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-4H Protocol</span><span class="jv-led"></span></div><div class="jv-detail">Registry: IDEA &middot; not started</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">NQ/ES Futures Trend</span><span class="jv-led"></span></div><div class="jv-detail">Registry: IDEA &middot; not started</div></div>
@@ -877,6 +877,36 @@
       }
       if(mf.baseline_present === true && mf.baseline_status){
         crSet('baseline', 'Ran · ' + mf.baseline_status + ' (V002 baseline)');
+      }
+
+      // Operator missing-items checklist — trued from the live counts the
+      // backend already computes (checklist_counts + pending_approval_count).
+      // Previously these rows were hard-coded "16 MISSING / PENDING" and never
+      // updated; now they reflect the real MISSING / COMPLETE / pending split.
+      if(mf.checklist_counts){
+        var cc = mf.checklist_counts || {};
+        var miss = cc.MISSING || 0;
+        var comp = cc.COMPLETE || 0;
+        var blk  = cc.BLOCKED || 0;
+        var tot  = mf.checklist_total || (miss + comp + blk);
+        var pend = mf.pending_approval_count || 0;
+        var blkTxt = blk ? ' · ' + blk + ' BLOCKED' : '';
+        crSet('checklist', 'Bundle 22 · ' + tot + ' items · ' + comp +
+          ' COMPLETE · ' + miss + ' MISSING' + blkTxt +
+          ' · ' + pend + ' pending approval');
+        crSet('missing_items', miss + ' MISSING · ' + pend +
+          ' pending approval (of ' + tot + ' checklist items)');
+        crSet('board_checklist', tot + ' items · ' + comp + ' COMPLETE · ' +
+          miss + ' MISSING' + blkTxt + ' · ' + pend + ' pending');
+        var narr = comp + ' of ' + tot + ' checklist items complete, ' +
+          miss + ' missing (' + pend + ' pending approval)';
+        crSet('narr_items', narr);
+        crSet('narr_items2', narr);
+      }
+      if(mf.readiness_status){ crSet('cr_readiness', mf.readiness_status); }
+      if(mf.lane_status){
+        crSet('cr_status', mf.lane_status + ' / ' +
+          (mf.evidence_level || 'MIXED'));
       }
     })();
 
