@@ -1,0 +1,51 @@
+{
+  "schema": "sparta_commander.strategy_factory_run_queue.v1",
+  "_note": "Illustrative sample only. NOT a live or authorized run queue. No execution, no data, no trading is implied by this fixture.",
+  "entries": [
+    {
+      "run_id": "SFR-001",
+      "candidate_id": "arb-research",
+      "phase": "idea_intake",
+      "status": "QUEUED",
+      "priority": 1,
+      "blockers": [],
+      "safety_level": "research_only"
+    },
+    {
+      "run_id": "SFR-002",
+      "candidate_id": "crypto-d1",
+      "phase": "data_contract_gate",
+      "status": "READY_FOR_NEXT_PHASE",
+      "priority": 2,
+      "blockers": [],
+      "safety_level": "research_only"
+    },
+    {
+      "run_id": "SFR-003",
+      "candidate_id": "blocked-one",
+      "phase": "hypothesis_spec",
+      "status": "BLOCKED",
+      "priority": 1,
+      "blockers": ["missing operator prereg"],
+      "safety_level": "research_only"
+    },
+    {
+      "run_id": "SFR-004",
+      "candidate_id": "human-one",
+      "phase": "offline_backtest_run",
+      "status": "AWAITING_HUMAN_REVIEW",
+      "priority": 1,
+      "blockers": [],
+      "safety_level": "research_only"
+    },
+    {
+      "run_id": "SFR-005",
+      "candidate_id": "done-one",
+      "phase": "block_idea_draft",
+      "status": "DONE",
+      "priority": 3,
+      "blockers": [],
+      "safety_level": "research_only"
+    }
+  ]
+}
