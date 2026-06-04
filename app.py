@@ -8390,10 +8390,10 @@ def _jarvis_candidate_registry() -> dict:
 # clamped to WATCH; preview_only is forced True and applied_to_dashboard forced
 # False; an artifact claiming it was applied/written is surfaced as an anomaly
 # and never trusted.
+# Fixed v1 build folder — used as the safe fallback when discovery finds no
+# qualifying latest folder. The reader derives the three fixed-basename rel
+# paths from the chosen (discovered or fallback) folder at request time.
 _JARVIS_SFI_DIR_REL = "reports/strategy_factory_integration_v1_build"
-_JARVIS_SFI_PREVIEW_REL = _JARVIS_SFI_DIR_REL + "/dashboard_feed_preview.json"
-_JARVIS_SFI_REPORT_REL = _JARVIS_SFI_DIR_REL + "/report.json"
-_JARVIS_SFI_PROPOSAL_REL = _JARVIS_SFI_DIR_REL + "/registry_update_proposal.json"
 _JARVIS_SFI_VERDICT_CEILING = "WATCH"
 _JARVIS_SFI_ALLOWED_VERDICTS = frozenset(
     {"WATCH", "FAIL", "INSUFFICIENT_EVIDENCE"})
@@ -8406,6 +8406,74 @@ _JARVIS_SFI_DANGER_FLAGS = (
     "dashboard_mutation_allowed", "active_strong_promoted", "bundle_23_started",
     "execution_authorized",
 )
+# Latest-artifact discovery (v2). Scans ONLY the top level of this dir; tests
+# repoint it at a temp tree. Never created by the reader.
+_JARVIS_SFI_REPORTS_ROOT_REL = "reports"
+# Anchored allowlist for candidate build-folder names. Rejects '..', path
+# separators, dotfiles, and anything not of the form
+# 'strategy_factory_integration_<segments>_build'.
+_JARVIS_SFI_DIR_NAME_RE = re.compile(
+    r"^strategy_factory_integration_[a-z0-9]+(?:_[a-z0-9]+)*_build$")
+# Optional version token used as the PRIMARY ordering key (e.g. 'v2' -> 2).
+_JARVIS_SFI_VERSION_RE = re.compile(r"(?:^|_)v(\d+)(?:_|$)")
+_JARVIS_SFI_ANCHOR_NAME = "dashboard_feed_preview.json"
+
+
+def _jarvis_sfi_dir_version(name):
+    """Parse the integer version from a build-folder name ('..._v2_build' -> 2);
+    0 when no version token is present. Used as the primary ordering key."""
+    m = _JARVIS_SFI_VERSION_RE.search(str(name or ""))
+    return int(m.group(1)) if m else 0
+
+
+def _jarvis_sfi_discover_latest_dir():
+    """READ-ONLY: discover the latest Strategy Factory integration build folder.
+
+    Scans ONLY the top level of ``reports/`` (no recursion). Keeps real
+    directories (not symlinks) whose name matches the anchored allowlist and
+    that stay inside ``reports/`` after resolving, and that contain a readable,
+    object-shaped ``dashboard_feed_preview.json``. Orders by (parsed version,
+    anchor mtime, name) and returns the winner's rel path, or ``None`` when
+    nothing qualifies. Never writes; never creates ``reports/``; never raises."""
+    root = BASE / _JARVIS_SFI_REPORTS_ROOT_REL
+    try:
+        if not root.is_dir():
+            return None
+        root_resolved = root.resolve()
+        entries = list(root.iterdir())
+    except OSError:
+        return None
+
+    qualified = []  # (version:int, mtime:float, name:str, rel:str)
+    for entry in entries:
+        try:
+            name = entry.name
+            if not _JARVIS_SFI_DIR_NAME_RE.match(name):
+                continue
+            if entry.is_symlink() or not entry.is_dir():
+                continue
+            # Containment guard: a resolved path must stay under reports/.
+            resolved = entry.resolve()
+            if not resolved.is_relative_to(root_resolved):
+                continue
+            anchor = entry / _JARVIS_SFI_ANCHOR_NAME
+            if anchor.is_symlink() or not anchor.is_file():
+                continue
+            rel = f"{_JARVIS_SFI_REPORTS_ROOT_REL}/{name}/{_JARVIS_SFI_ANCHOR_NAME}"
+            data, state = _jarvis_mf_load_json(rel)
+            if state != "ok" or not isinstance(data, dict):
+                continue
+            mtime = anchor.stat().st_mtime
+        except OSError:
+            continue
+        qualified.append((_jarvis_sfi_dir_version(name), mtime, name,
+                          f"{_JARVIS_SFI_REPORTS_ROOT_REL}/{name}"))
+
+    if not qualified:
+        return None
+    # Highest (version, mtime, name) wins; name is the final deterministic key.
+    qualified.sort(key=lambda t: (t[0], t[1], t[2]))
+    return qualified[-1][3]
 
 
 def _jarvis_sfi_clamp_verdict(raw, warnings):
@@ -8448,6 +8516,8 @@ def _jarvis_strategy_factory_integration() -> dict:
             "registry_proposal_status": "UNKNOWN",
             "registry_proposal_only": True,
             "registry_proposal_applied": False,  # forced FALSE
+            "source_dir": None,
+            "source_selection": "none",
             "next_action": None,
             "non_authorization_statement": None,
             "safety_locks": {"research_only": True},
@@ -8461,15 +8531,30 @@ def _jarvis_strategy_factory_integration() -> dict:
         base.update(extra)
         return base
 
+    # 0) Pick which build folder to read: the latest discovered one, else the
+    # fixed v1 folder as a safe fallback. Discovery is read-only and never
+    # creates reports/.
+    latest_dir = _jarvis_sfi_discover_latest_dir()
+    if latest_dir:
+        source_dir = latest_dir
+        source_selection = "latest_discovered"
+    else:
+        source_dir = _JARVIS_SFI_DIR_REL
+        source_selection = "fixed_fallback"
+    preview_rel = f"{source_dir}/dashboard_feed_preview.json"
+    report_rel = f"{source_dir}/report.json"
+    proposal_rel = f"{source_dir}/registry_update_proposal.json"
+    src = {"source_dir": source_dir, "source_selection": source_selection}
+
     # 1) Anchor: dashboard_feed_preview.json (presence gate / fail closed).
-    pv, pv_state = _jarvis_mf_load_json(_JARVIS_SFI_PREVIEW_REL)
+    pv, pv_state = _jarvis_mf_load_json(preview_rel)
     if pv_state == "missing":
-        return _safe("missing",
-                     detail=f"{_JARVIS_SFI_PREVIEW_REL} not found (NOT_FOUND).")
+        return _safe("missing", detail=f"{preview_rel} not found (NOT_FOUND).",
+                     **src)
     if pv_state != "ok" or not isinstance(pv, dict):
         return _safe("invalid",
                      detail="dashboard_feed_preview.json unreadable/corrupt or "
-                            "not an object -> fail closed.")
+                            "not an object -> fail closed.", **src)
 
     entry = pv.get("entry") if isinstance(pv.get("entry"), dict) else {}
     bundle = (entry.get("module_name") or pv.get("layer")
@@ -8510,7 +8595,7 @@ def _jarvis_strategy_factory_integration() -> dict:
         non_auth = None
 
     # 2) report.json: verdict ceiling / latest dry-run verdict / next action.
-    rep, rep_state = _jarvis_mf_load_json(_JARVIS_SFI_REPORT_REL)
+    rep, rep_state = _jarvis_mf_load_json(report_rel)
     latest_verdict = "UNKNOWN"
     next_action = None
     if rep_state == "ok" and isinstance(rep, dict):
@@ -8527,7 +8612,7 @@ def _jarvis_strategy_factory_integration() -> dict:
             f"report.json {rep_state}; latest verdict / next action UNKNOWN")
 
     # 3) registry_update_proposal.json: proposal status (never applied here).
-    prop, prop_state = _jarvis_mf_load_json(_JARVIS_SFI_PROPOSAL_REL)
+    prop, prop_state = _jarvis_mf_load_json(proposal_rel)
     proposal_status = "UNKNOWN"
     proposal_only = True
     if prop_state == "ok" and isinstance(prop, dict):
@@ -8562,6 +8647,7 @@ def _jarvis_strategy_factory_integration() -> dict:
         safety_anomaly=bool(anomaly),
         commander_color="RED" if anomaly else "GREEN",
         warnings=warnings,
+        **src,
     )
 
 

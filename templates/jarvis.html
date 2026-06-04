@@ -1636,6 +1636,7 @@
     if(sfi.state === 'missing' || sfi.state === 'invalid'){
       setPanel('pStrategyFactoryIntegration',
         row('Preview', 'waiting', (sfi.state||'').toUpperCase(), sfi.detail || 'no integration preview') +
+        row('Reading', 'locked', esc(sfi.source_dir || '—') + ' (' + esc(sfi.source_selection || 'none') + ')') +
         row('Preview only', 'locked', 'TRUE') +
         row('Applied to dashboard', 'locked', 'FALSE') +
         row('Verdict ceiling', 'locked', 'WATCH') +
@@ -1643,9 +1644,13 @@
     } else {
       var sfiColor = (sfi.commander_color || 'YELLOW');
       var sfiColorCls = (sfiColor === 'GREEN') ? 'online' : (sfiColor === 'RED') ? 'bad' : 'waiting';
+      var sfiSrcMode = (sfi.source_selection === 'latest_discovered') ? 'latest discovered'
+                       : (sfi.source_selection === 'fixed_fallback') ? 'fallback'
+                       : (sfi.source_selection || 'none');
       var sfiHtml =
         row('Bundle', 'online', esc(sfi.bundle || '—')) +
         row('Status', sfiColorCls, esc(sfi.status || 'UNKNOWN')) +
+        row('Reading', 'locked', esc(sfi.source_dir || '—') + ' (' + esc(sfiSrcMode) + ')') +
         row('Preview only', 'locked', sfi.preview_only ? 'TRUE' : 'FALSE') +
         row('Applied to dashboard', 'locked', sfi.applied_to_dashboard ? 'TRUE' : 'FALSE') +
         row('Verdict ceiling', 'locked', esc(sfi.verdict_ceiling || 'WATCH')) +
