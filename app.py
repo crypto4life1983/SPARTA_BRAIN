@@ -8379,6 +8379,192 @@ def _jarvis_candidate_registry() -> dict:
     }
 
 
+# --- JARVIS Strategy Factory Integration preview source (READ-ONLY) --------
+# Surfaces the committed research-only dry-run integration bundle on the
+# dashboard. Anchors on dashboard_feed_preview.json and ALSO reads the sibling
+# report.json (verdict ceiling / latest dry-run verdict / next action) and
+# registry_update_proposal.json (proposal status) -- all committed, read-only.
+# Performs NO write, NO DB upsert, NO subprocess, NO network, NO backtest, NO
+# Strategy Factory execution. Fail-closed: a missing/corrupt source degrades to
+# safe defaults and NEVER infers a promotion. Any ACTIVE/STRONG/PASS verdict is
+# clamped to WATCH; preview_only is forced True and applied_to_dashboard forced
+# False; an artifact claiming it was applied/written is surfaced as an anomaly
+# and never trusted.
+_JARVIS_SFI_DIR_REL = "reports/strategy_factory_integration_v1_build"
+_JARVIS_SFI_PREVIEW_REL = _JARVIS_SFI_DIR_REL + "/dashboard_feed_preview.json"
+_JARVIS_SFI_REPORT_REL = _JARVIS_SFI_DIR_REL + "/report.json"
+_JARVIS_SFI_PROPOSAL_REL = _JARVIS_SFI_DIR_REL + "/registry_update_proposal.json"
+_JARVIS_SFI_VERDICT_CEILING = "WATCH"
+_JARVIS_SFI_ALLOWED_VERDICTS = frozenset(
+    {"WATCH", "FAIL", "INSUFFICIENT_EVIDENCE"})
+_JARVIS_SFI_FORBIDDEN_VERDICTS = frozenset({"ACTIVE", "STRONG", "PASS"})
+# Flags that must NEVER read True off disk; any True is an anomaly, pinned False.
+_JARVIS_SFI_DANGER_FLAGS = (
+    "paper_live_authorized", "broker_path_enabled", "exchange_path_enabled",
+    "order_path_enabled", "fetch_live_data_enabled", "dataset_mutation_allowed",
+    "queue_mutation_allowed", "registry_mutation_allowed",
+    "dashboard_mutation_allowed", "active_strong_promoted", "bundle_23_started",
+    "execution_authorized",
+)
+
+
+def _jarvis_sfi_clamp_verdict(raw, warnings):
+    """Clamp a verdict string to the safe allowlist. ACTIVE/STRONG/PASS -> WATCH
+    (with a warning); unknown/empty -> UNKNOWN. NEVER surfaces a promotion."""
+    v = str(raw or "").upper().strip()
+    if v in _JARVIS_SFI_FORBIDDEN_VERDICTS:
+        warnings.append(f"verdict {v} forbidden on dashboard; clamped to WATCH")
+        return "WATCH"
+    if v in _JARVIS_SFI_ALLOWED_VERDICTS:
+        return v
+    if not v:
+        return "UNKNOWN"
+    warnings.append(f"unrecognized verdict {v!r}; shown as UNKNOWN")
+    return "UNKNOWN"
+
+
+def _jarvis_strategy_factory_integration() -> dict:
+    """READ-ONLY view of the Strategy Factory v1 research-only integration bundle.
+
+    Anchors on dashboard_feed_preview.json and additionally reads the sibling
+    report.json and registry_update_proposal.json (all committed). Reads only;
+    writes nothing; runs no backtest, no Factory job, no subprocess, no network.
+    Fail-closed and conservative; clamps verdicts to WATCH; pins preview_only
+    True / applied_to_dashboard False; flags any 'applied/written' claim as an
+    anomaly without trusting it."""
+    warnings: list = []
+
+    def _safe(state, **extra):
+        base = {
+            "state": state,
+            "read_only": True,
+            "preview_only": True,            # forced TRUE
+            "applied_to_dashboard": False,   # forced FALSE
+            "dashboard_write_performed": False,
+            "bundle": None,
+            "status": "UNKNOWN",
+            "verdict_ceiling": _JARVIS_SFI_VERDICT_CEILING,
+            "latest_verdict": "UNKNOWN",
+            "registry_proposal_status": "UNKNOWN",
+            "registry_proposal_only": True,
+            "registry_proposal_applied": False,  # forced FALSE
+            "next_action": None,
+            "non_authorization_statement": None,
+            "safety_locks": {"research_only": True},
+            "safety_anomaly": False,
+            "commander_color": "YELLOW",
+            "warnings": [],
+            "note": "Research-only dry-run integration preview. JARVIS reads "
+                    "committed artifacts display-only; it applies nothing, "
+                    "mutates no registry/dashboard, and runs no backtest.",
+        }
+        base.update(extra)
+        return base
+
+    # 1) Anchor: dashboard_feed_preview.json (presence gate / fail closed).
+    pv, pv_state = _jarvis_mf_load_json(_JARVIS_SFI_PREVIEW_REL)
+    if pv_state == "missing":
+        return _safe("missing",
+                     detail=f"{_JARVIS_SFI_PREVIEW_REL} not found (NOT_FOUND).")
+    if pv_state != "ok" or not isinstance(pv, dict):
+        return _safe("invalid",
+                     detail="dashboard_feed_preview.json unreadable/corrupt or "
+                            "not an object -> fail closed.")
+
+    entry = pv.get("entry") if isinstance(pv.get("entry"), dict) else {}
+    bundle = (entry.get("module_name") or pv.get("layer")
+              or "strategy_factory_integration_v1")
+
+    # status string (scan for forbidden verdict tokens; clamp display if found).
+    raw_status = str(entry.get("status", "") or "")
+    status = raw_status or "UNKNOWN"
+    up_status = raw_status.upper()
+    if any(tok in up_status for tok in _JARVIS_SFI_FORBIDDEN_VERDICTS):
+        warnings.append(
+            f"preview status {raw_status!r} names a forbidden verdict; "
+            "clamped for display")
+        status = "WATCH / research-only (clamped)"
+
+    # anomaly: a preview that claims it was applied/written is never trusted.
+    anomaly = (pv.get("applied_to_dashboard") is True
+               or pv.get("dashboard_write_performed") is True
+               or pv.get("preview_only") is False)
+    if anomaly:
+        warnings.append(
+            "preview artifact claims it was applied/written; pinned safe and "
+            "flagged (never trusted).")
+
+    # safety locks from the preview's safety_flags: display pinned, any True
+    # danger flag on disk is an anomaly.
+    sf = pv.get("safety_flags") if isinstance(pv.get("safety_flags"), dict) else {}
+    safety_locks = {"research_only": True}
+    for flag in _JARVIS_SFI_DANGER_FLAGS:
+        if sf.get(flag) is True:
+            anomaly = True
+            warnings.append(
+                f"safety flag {flag}=true on disk; pinned False + flagged")
+        safety_locks[flag] = False
+
+    non_auth = pv.get("non_authorization_statement")
+    if not isinstance(non_auth, str):
+        non_auth = None
+
+    # 2) report.json: verdict ceiling / latest dry-run verdict / next action.
+    rep, rep_state = _jarvis_mf_load_json(_JARVIS_SFI_REPORT_REL)
+    latest_verdict = "UNKNOWN"
+    next_action = None
+    if rep_state == "ok" and isinstance(rep, dict):
+        dm = (rep.get("decision_memo")
+              if isinstance(rep.get("decision_memo"), dict) else {})
+        latest_verdict = _jarvis_sfi_clamp_verdict(dm.get("verdict"), warnings)
+        na = rep.get("next_action")
+        next_action = na if isinstance(na, str) else None
+        rc = str(rep.get("verdict_ceiling", "") or "").upper()
+        if rc and rc != "WATCH":
+            warnings.append(f"report verdict_ceiling={rc}; forced to WATCH")
+    else:
+        warnings.append(
+            f"report.json {rep_state}; latest verdict / next action UNKNOWN")
+
+    # 3) registry_update_proposal.json: proposal status (never applied here).
+    prop, prop_state = _jarvis_mf_load_json(_JARVIS_SFI_PROPOSAL_REL)
+    proposal_status = "UNKNOWN"
+    proposal_only = True
+    if prop_state == "ok" and isinstance(prop, dict):
+        cand = (prop.get("proposed_candidate")
+                if isinstance(prop.get("proposed_candidate"), dict) else {})
+        if cand.get("status"):
+            proposal_status = _jarvis_sfi_clamp_verdict(
+                cand.get("status"), warnings)
+        proposal_only = bool(prop.get("proposal_only", True))
+        if (prop.get("applied") is True or prop.get("proposal_only") is False
+                or prop.get("registry_mutation_performed") is True):
+            anomaly = True
+            warnings.append(
+                "registry proposal claims it was applied/mutated; pinned "
+                "unapplied + flagged (never trusted).")
+    else:
+        warnings.append(
+            f"registry_update_proposal.json {prop_state}; proposal status "
+            "UNKNOWN")
+
+    return _safe(
+        "ready",
+        bundle=bundle,
+        status=status,
+        latest_verdict=latest_verdict,
+        registry_proposal_status=proposal_status,
+        registry_proposal_only=proposal_only,
+        registry_proposal_applied=False,
+        next_action=next_action,
+        non_authorization_statement=non_auth,
+        safety_locks=safety_locks,
+        safety_anomaly=bool(anomaly),
+        commander_color="RED" if anomaly else "GREEN",
+        warnings=warnings,
+    )
+
+
 # --- JARVIS Crypto-D1 Mission Flow source (READ-ONLY, Phase A) -------------
 # Summarizes the current Crypto-D1 workflow/pipeline truth from committed
 # source-of-truth files for the Mission Flow panel. Reads ONLY: never writes,
@@ -9217,6 +9403,8 @@ def api_jarvis_status():
     strategy_factory = _jarvis_safe(_jarvis_strategy_factory_snapshot)
     survival_ledger = _jarvis_safe(_jarvis_survival_ledger)
     candidate_registry = _jarvis_safe(_jarvis_candidate_registry)
+    strategy_factory_integration = _jarvis_safe(
+        _jarvis_strategy_factory_integration)
     mission_flow = _jarvis_safe(_jarvis_crypto_d1_mission_flow)
     lane_monitor = _jarvis_safe(
         lambda: _jarvis_crypto_d1_lane_monitor(
@@ -9254,6 +9442,7 @@ def api_jarvis_status():
         "strategy_factory": strategy_factory,
         "survival_ledger": survival_ledger,
         "candidate_registry": candidate_registry,
+        "strategy_factory_integration": strategy_factory_integration,
         "mission_flow": mission_flow,
         "lane_monitor": lane_monitor,
         "freshness_guard": freshness_guard,

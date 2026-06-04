@@ -636,6 +636,11 @@
       <div class="jv-loading">Reading candidate registry&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pStrategyFactoryIntegration">
+      <h2><span class="ic">&#x29C9;</span>Strategy Factory Integration Feed <span class="jv-tag t-read">PREVIEW ONLY</span></h2>
+      <div class="jv-loading">Reading integration preview&hellip;</div>
+    </div>
+
     <div class="jv-panel" id="pFreshness">
       <h2><span class="ic">&#x21BB;</span>Live-Server Freshness <span class="jv-tag t-read">READ ONLY</span></h2>
       <div class="jv-loading">Comparing build to HEAD&hellip;</div>
@@ -1621,6 +1626,64 @@
       }
       if(cr.note){ crHtml += '<div class="jv-detail" style="margin-top:8px">'+esc(cr.note)+'</div>'; }
       setPanel('pCandidateRegistry', crHtml);
+    }
+
+    // Strategy Factory Integration Feed: read-only preview of the committed
+    // research-only dry-run bundle. preview_only TRUE / applied_to_dashboard
+    // FALSE are forced by the backend; an anomaly forces RED. No controls.
+    var sfi = d.strategy_factory_integration || {};
+    var sfiSafetyLine = '<div class="jv-detail" style="margin-top:8px">Research-only &middot; Preview only &middot; Not applied to dashboard &middot; No registry mutation &middot; No backtest &middot; No paper/live/broker/exchange/order/fetch.</div>';
+    if(sfi.state === 'missing' || sfi.state === 'invalid'){
+      setPanel('pStrategyFactoryIntegration',
+        row('Preview', 'waiting', (sfi.state||'').toUpperCase(), sfi.detail || 'no integration preview') +
+        row('Preview only', 'locked', 'TRUE') +
+        row('Applied to dashboard', 'locked', 'FALSE') +
+        row('Verdict ceiling', 'locked', 'WATCH') +
+        sfiSafetyLine);
+    } else {
+      var sfiColor = (sfi.commander_color || 'YELLOW');
+      var sfiColorCls = (sfiColor === 'GREEN') ? 'online' : (sfiColor === 'RED') ? 'bad' : 'waiting';
+      var sfiHtml =
+        row('Bundle', 'online', esc(sfi.bundle || '—')) +
+        row('Status', sfiColorCls, esc(sfi.status || 'UNKNOWN')) +
+        row('Preview only', 'locked', sfi.preview_only ? 'TRUE' : 'FALSE') +
+        row('Applied to dashboard', 'locked', sfi.applied_to_dashboard ? 'TRUE' : 'FALSE') +
+        row('Verdict ceiling', 'locked', esc(sfi.verdict_ceiling || 'WATCH')) +
+        row('Latest dry-run verdict', 'online', esc(sfi.latest_verdict || 'UNKNOWN')) +
+        row('Registry proposal', 'online', esc(sfi.registry_proposal_status || 'UNKNOWN') +
+            (sfi.registry_proposal_applied ? ' (APPLIED?)' : ' (proposal only, not applied)'));
+      var sfiLocks = sfi.safety_locks || {};
+      sfiHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Safety locks</div>';
+      sfiHtml +=
+        row('Research only', 'locked', sfiLocks.research_only ? 'TRUE' : 'FALSE') +
+        row('Execution authorized', 'locked', sfiLocks.execution_authorized ? 'ENABLED' : 'DISABLED') +
+        row('Paper / live authorized', 'locked', sfiLocks.paper_live_authorized ? 'ENABLED' : 'DISABLED') +
+        row('Broker path', 'locked', sfiLocks.broker_path_enabled ? 'ENABLED' : 'DISABLED') +
+        row('Exchange path', 'locked', sfiLocks.exchange_path_enabled ? 'ENABLED' : 'DISABLED') +
+        row('Order path', 'locked', sfiLocks.order_path_enabled ? 'ENABLED' : 'DISABLED') +
+        row('Fetch live data', 'locked', sfiLocks.fetch_live_data_enabled ? 'ENABLED' : 'DISABLED') +
+        row('Registry mutation', 'locked', sfiLocks.registry_mutation_allowed ? 'ALLOWED' : 'BLOCKED') +
+        row('Dashboard mutation', 'locked', sfiLocks.dashboard_mutation_allowed ? 'ALLOWED' : 'BLOCKED');
+      if(sfi.safety_anomaly === true){
+        sfiHtml += '<div class="jv-detail" style="margin-top:8px;color:var(--jv-bad)">SAFETY ANOMALY: an artifact claimed it was applied/written or a trading flag enabled. Pinned safe; status forced RED.</div>';
+      }
+      if(sfi.next_action){
+        sfiHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Next action</div>';
+        sfiHtml += '<div class="jv-detail">'+esc(sfi.next_action)+'</div>';
+      }
+      if(sfi.non_authorization_statement){
+        sfiHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Non-authorization</div>';
+        sfiHtml += '<div class="jv-detail">'+esc(sfi.non_authorization_statement)+'</div>';
+      }
+      var sfiWarn = sfi.warnings || [];
+      if(sfiWarn.length){
+        sfiHtml += '<div class="jv-detail" style="margin:10px 0 4px;letter-spacing:.1em;text-transform:uppercase;font-size:9px">Warnings</div>';
+        sfiWarn.forEach(function(w){
+          sfiHtml += '<div class="jv-mcard"><div class="jv-detail">'+esc(w)+'</div></div>';
+        });
+      }
+      sfiHtml += sfiSafetyLine;
+      setPanel('pStrategyFactoryIntegration', sfiHtml);
     }
 
     // Strategy Factory Readiness banner — derived ONLY from the four panels
