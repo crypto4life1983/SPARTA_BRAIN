@@ -1,0 +1,188 @@
+{
+  "plan_id": "crypto_d1_momentum_n20_deeper_validation_plan",
+  "plan_version": "v1",
+  "plan_date": "2026-06-04",
+  "status": "PLAN_ONLY_NOT_EXECUTED",
+  "official_master_at_plan_time": "6812bebc1505149f4f6d6d453973ed118cc89fef",
+  "task_id": "crypto_d1_momentum_n20_deeper_validation_v1",
+  "strategy_id": "crypto_d1_momentum_confirmation_v1",
+  "lane": "Crypto-D1",
+  "lane_status_unchanged": "WATCH / MIXED",
+  "readiness_status_unchanged": "NOT_READY_FOR_REAL_DATA",
+
+  "authorizes_execution": false,
+  "authorizes_paper_or_live": false,
+  "authorizes_broker_exchange_order_fetch": false,
+  "promotes_active_or_strong": false,
+  "starts_bundle_23": false,
+  "modifies_datasets": false,
+  "modifies_runners": false,
+  "modifies_dashboard": false,
+  "runs_backtest": false,
+  "executes_orchestrator": false,
+
+  "1_current_evidence_summary": {
+    "source_run_id": "2a3be425522a04ec",
+    "source_report": "reports/crypto_d1_momentum_confirmation_v1/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/crypto_d1_momentum_confirmation_report.json",
+    "registry_stage": "EXECUTED",
+    "registry_verdict": "WATCH",
+    "classifier_status": "WATCH (ceiling; classify_run never auto-PASSes)",
+    "per_asset_oos_trade_floor": 20,
+    "per_family_oos_trade_floor": 30,
+    "n20_oos": {
+      "BTC": {"oos_total_return": 1.393056559049819, "oos_trade_count": 32, "oos_max_drawdown": -0.14561186350830513, "oos_sharpe_like_caveat": 2.602524736481953, "clears_per_asset_floor": true},
+      "ETH": {"oos_total_return": 1.6086095472227697, "oos_trade_count": 31, "oos_max_drawdown": -0.3294719976291006, "oos_sharpe_like_caveat": 1.8920740053277605, "clears_per_asset_floor": true},
+      "SOL": {"oos_total_return": 2.441737329704632, "oos_trade_count": 23, "oos_max_drawdown": -0.2222859546480055, "oos_sharpe_like_caveat": 2.4124029363649644, "clears_per_asset_floor": true},
+      "family_oos_trades_total": 86,
+      "family_meets_floor": true
+    },
+    "n30_oos": {
+      "BTC": {"oos_total_return": 1.3426920483046128, "oos_trade_count": 27, "clears_per_asset_floor": true},
+      "ETH": {"oos_total_return": 2.135313725081248, "oos_trade_count": 19, "clears_per_asset_floor": false},
+      "SOL": {"oos_total_return": 2.593327645039861, "oos_trade_count": 18, "clears_per_asset_floor": false},
+      "family_oos_trades_total": 64,
+      "note": "Directionally positive on all three assets but sample-thin: ETH (19) and SOL (18) sit just under the per-asset 20-trade OOS floor."
+    },
+    "buy_and_hold_oos_benchmark": {
+      "BTC": 0.316036373699756,
+      "ETH": -0.15495994281206482,
+      "SOL": -0.13071119184015578,
+      "BASKET_equal_weight_allocate_once": -0.022617738273518317
+    },
+    "headline": "On the frozen V002 dataset with the 120 bps round-trip cost model, time-series momentum N=20 is POSITIVE OOS on BTC/ETH/SOL, beats same-asset buy-and-hold OOS on all three, and clears the per-asset 20-trade OOS floor on all three. This is the best-sampled, most floor-robust candidate. It remains WATCH-ceiling evidence only and is NOT a trading authorization.",
+    "known_caveats": [
+      "Sharpe-like figures are rf=0 daily-return approximations, NOT true Sharpe; OOS sample is small (563 OOS bars per asset).",
+      "BTC has one true missing day (2024-03-31), flagged and never forward-filled.",
+      "OOS window is a single 2024-06-17..2025-12-31 period; no yearly/monthly decomposition has been produced yet.",
+      "Costs are taker-on-every-leg; no zero-slippage baseline; sensitivity to higher costs not yet stress-tested.",
+      "SOL N=20 clears the floor by only 3 trades (23 vs 20); least-sampled of the three."
+    ]
+  },
+
+  "2_why_n20_is_the_focus": [
+    "N=20 is the ONLY lookback that clears the per-asset 20-trade OOS floor on all three assets (BTC 32, ETH 31, SOL 23); N=30 misses on ETH (19) and SOL (18), so its OOS verdict rests on a thinner sample.",
+    "N=20 is positive OOS on every asset AND beats same-asset buy-and-hold OOS on every asset, while two of three buy-and-hold legs (ETH, SOL) are negative OOS.",
+    "Both N=20 and N=30 were pre-registered from the momentum_robustness_v1 memo; this is confirmation of a pre-declared candidate, NOT a fresh parameter search, so deeper validation of N=20 does not invite new overfitting.",
+    "Concentrating deeper validation on the single best-sampled candidate is the honest next move versus widening the lookback grid, which would re-open multiple-comparison risk.",
+    "N=30 remains a secondary reference but is not promoted to the deeper-validation focus until/unless its OOS sample clears the floor under a separately approved design."
+  ],
+
+  "3_what_must_remain_frozen": {
+    "dataset": {
+      "path": "data/crypto_d1_research/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002",
+      "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002",
+      "checksums": "V002 CHECKSUMS.txt must still pass (daily_ohlcv.csv, fees.json, manifest.json); no new rows, no re-fetch, no synthetic data.",
+      "missing_day_policy": "BTC 2024-03-31 stays a flagged true gap; never forward-filled or synthesized."
+    },
+    "split": {
+      "is_window": {"start": "2021-06-17", "end": "2024-06-16"},
+      "oos_window": {"start": "2024-06-17", "end": "2025-12-31"},
+      "split_method": "explicit_utc_date_windows",
+      "rule": "The IS/OOS boundary is fixed; no re-splitting, no rolling re-optimization, no peeking OOS to tune N."
+    },
+    "cost_assumptions": {
+      "fee_bps": 40,
+      "slippage_bps": 10,
+      "spread_proxy_bps": 10,
+      "per_side_bps": 60,
+      "round_trip_bps": 120,
+      "default_assumption": "TAKER on every leg",
+      "source": "frozen V002 fees.json",
+      "rule": "Baseline cost model is unchanged; cost STRESS is an additive sensitivity view (see test 5), never a redefinition of the baseline."
+    },
+    "safety_flags": {
+      "research_only": true,
+      "data_fetch_enabled": false,
+      "exchange_connection_enabled": false,
+      "live_trading_enabled": false,
+      "broker_control_enabled": false,
+      "paper_order_execution_enabled": false,
+      "order_placement_enabled": false,
+      "dataset_mutation_allowed": false,
+      "active_strong_promoted": false,
+      "bundle_23_started": false,
+      "execution_authorized": false
+    },
+    "no_paper_live": "No paper and no live execution at any point in deeper validation; this remains an offline, stdlib backtest-analysis exercise behind the Step-3 safety contract and the human-approval gates.",
+    "classifier": "Conservative classify_run unchanged; WATCH ceiling; never auto-PASS."
+  },
+
+  "4_validation_tests_to_run_later": {
+    "note": "These describe what a FUTURE, separately-approved execution step would compute. NONE are run by this plan.",
+    "tests": [
+      {"id": "yearly_oos_breakdown", "what": "Decompose the 2024-06-17..2025-12-31 OOS window into per-calendar-year sub-returns (2024 partial, 2025) per asset for N=20, to see whether the edge is one-year-driven or persistent.", "guard": "Read-only slice of the existing OOS equity curve; no re-split of the IS/OOS boundary."},
+      {"id": "monthly_return_drawdown_profile", "what": "Per-asset monthly OOS return series and rolling max-drawdown profile for N=20; report worst month, longest drawdown, recovery behavior.", "guard": "Descriptive only; no parameter change."},
+      {"id": "per_asset_consistency_btc_eth_sol", "what": "Side-by-side N=20 OOS consistency table (return sign, floor clearance, drawdown, turnover) across BTC/ETH/SOL; flag any asset carrying the basket.", "guard": "Uses already-computed per-asset OOS metrics."},
+      {"id": "trade_count_and_turnover", "what": "Confirm N=20 OOS trade counts (BTC 32 / ETH 31 / SOL 23) and turnover; verify each still clears the per-asset 20-trade floor and report family total (86).", "guard": "Recount from frozen data; no signal change."},
+      {"id": "fee_slippage_stress", "what": "Re-price the SAME N=20 OOS trade ledger at elevated round-trip costs (e.g. 150 / 180 / 240 bps) as an additive sensitivity column; identify the breakeven cost at which each asset's OOS edge disappears.", "guard": "Baseline 120 bps stays the headline; stress figures are clearly labeled as sensitivity, not a new baseline."},
+      {"id": "outlier_sensitivity", "what": "Recompute N=20 OOS returns excluding the single best and single worst OOS trade per asset (and a small top-k) to test whether the edge is outlier-dependent, especially for SOL.", "guard": "Reported as a robustness diagnostic; the unmodified result remains the official figure."},
+      {"id": "regime_sensitivity", "what": "Tag OOS bars by a simple, pre-declared trend/vol regime proxy (computed from the frozen data only) and report N=20 OOS performance by regime bucket; check the edge is not confined to a single regime.", "guard": "Regime proxy is descriptive and derived only from frozen V002 bars; no external data, no look-ahead."},
+      {"id": "basket_vs_per_asset_behavior", "what": "Compare the allocate-once equal-weight basket OOS view (window-sliced, -0.0226) against per-asset N=20 OOS, and quantify how much of the strategy edge survives equal-weight basketing without rebalancing.", "guard": "Basket construction unchanged (allocate-once, no rebalance); reporting clarification only."},
+      {"id": "robustness_to_small_parameter_changes_around_n20", "what": "OPTIONAL and only if explicitly authorized at execution time: probe N in {18, 20, 22} as a stability neighborhood check (NOT a new optimization) to confirm the edge is locally smooth, not a knife-edge at exactly 20.", "guard": "Pre-declared tiny neighborhood; results are stability evidence only; the winner is NOT re-selected from this probe; if not authorized, this test is skipped."}
+    ]
+  },
+
+  "5_future_files_created_in_execution_step": {
+    "note": "What a FUTURE, separately-approved execution step would create. NONE are created by this plan.",
+    "result_files_created_by_run": [
+      "reports/crypto_d1_momentum_n20_deeper_validation_v1/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/crypto_d1_momentum_n20_deeper_validation_report.json",
+      "reports/crypto_d1_momentum_n20_deeper_validation_v1/CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002/crypto_d1_momentum_n20_deeper_validation_report.md"
+    ],
+    "code_that_might_change_only_if_additive_and_separately_approved": [
+      "tools/crypto_d1_backtest_runner.py (additive deeper-validation reporting mode ONLY; must not alter default / v002_addendum / momentum_robustness_v1 / momentum_confirmation_v1 behavior)"
+    ],
+    "tests_that_would_be_added": [
+      "tests/test_crypto_d1_backtest_runner.py (additive: deeper-validation mode exists, only N=20 deep-analyzed, prior modes byte-stable, safety flags locked, no network/broker/paper/live)"
+    ],
+    "must_not_change": [
+      "V002 dataset files", "V002 CHECKSUMS.txt", "QA freeze reports", "operator acceptance memo",
+      "IS/OOS addendum", "readiness gate / checklist", "dashboards", "brain_memory",
+      "existing baseline, robustness, and confirmation result files"
+    ]
+  },
+
+  "6_runner_and_mode_used_later": {
+    "runner": "tools/crypto_d1_backtest_runner.py",
+    "config_mode_proposed": "momentum_n20_deeper_validation_v1 (additive, mirrors how momentum_confirmation_v1 was added)",
+    "lookback_under_deep_analysis": 20,
+    "reference_lookback": 30,
+    "reuses": "Same V002 cost loader, same explicit date-window splitter, same missing-day detector, same conservative classify_run (WATCH ceiling).",
+    "allowlist_conformance": "Runner tools/crypto_d1_backtest_runner.py, dataset CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002, mode momentum_confirmation_v1 family, market crypto all match the Step-3 safety contract allowlists.",
+    "no_runner_change_in_this_plan": true
+  },
+
+  "7_pass_watch_fail_criteria": {
+    "ceiling": "WATCH is the maximum verdict any deeper-validation pass can emit; classify_run is unchanged and never auto-PASSes.",
+    "confirmed_watch_continue": "Treat N=20 as CONFIRMED-WATCH (continue the momentum branch) if it stays positive OOS on >=2 of 3 assets across yearly/monthly breakdown, clears the per-asset 20-trade floor, survives fee/slippage stress at >=150 bps on a majority of assets, and is not outlier- or single-regime-dependent.",
+    "watch_mixed_hold": "Remain WATCH / MIXED (no deeper branch yet) if the edge is positive but fragile: floor cleared only intermittently across sub-periods, or survives only at baseline cost, or one asset carries the basket.",
+    "fail_park": "Park momentum and re-open lane direction if N=20 turns negative OOS on a majority of assets in the yearly/monthly breakdown, fails to beat buy-and-hold OOS after the stress views, or the edge collapses once a single outlier or single regime is removed.",
+    "no_promotion": "No criterion here can promote to ACTIVE/STRONG or authorize paper/live; those require separate gates plus real-data readiness."
+  },
+
+  "8_safety_gates": {
+    "research_only": true,
+    "data_fetch_enabled": false,
+    "exchange_connection_enabled": false,
+    "live_trading_enabled": false,
+    "broker_control_enabled": false,
+    "paper_order_execution_enabled": false,
+    "order_placement_enabled": false,
+    "no_new_data": true,
+    "dataset_mutation_allowed": false,
+    "active_strong_promoted": false,
+    "bundle_23_started": false,
+    "execution_authorized": false,
+    "human_approval_required_for": ["execution", "paper_or_live", "active_strong_promotion"],
+    "lane_remains": "WATCH / MIXED",
+    "readiness_remains": "NOT_READY_FOR_REAL_DATA"
+  },
+
+  "9_how_this_updates_registry_queue_orchestrator_later": {
+    "registry": "After a future approved execution, the registry would gain a deeper-validation result for strategy_id crypto_d1_momentum_confirmation_v1, keeping stage EXECUTED and verdict clamped at WATCH (never auto-PASS). This PLAN itself adds only a PLAN_ONLY artifact and does not change any registry verdict.",
+    "queue": "configs/research_queue.json task crypto_d1_momentum_n20_deeper_validation_v1 would move from NEEDS_PLAN toward an approved-for-research state ONLY by a separate operator edit once this plan is approved; this plan does NOT modify the queue file.",
+    "orchestrator": "The Step-4 dry-run orchestrator would, on its next read, see this plan exists and surface the task as plan-backed; executable stays hard-pinned false and would_run_command stays null. No orchestrator code changes.",
+    "ordering": "Plan (this) -> operator approval -> queue flag edit -> separately-approved additive runner mode -> execution run -> registry deeper-validation result -> operator PASS/WATCH/FAIL review. Each arrow is a human gate."
+  },
+
+  "10_non_authorization_statement": "This document is a PLAN ONLY. It runs no backtest, executes no orchestrator, creates no result files, changes no dataset, QA file, runner logic, queue config, or dashboard, and authorizes no paper, live, broker, exchange, order, or fetch action. It does not promote any lane to ACTIVE or STRONG and does not start Bundle 23. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA. A positive backtest result is not trading authorization. Implementation and execution require separate explicit operator approval."
+}
