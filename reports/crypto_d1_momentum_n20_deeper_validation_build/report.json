@@ -1,0 +1,61 @@
+{
+  "build_date": "2026-06-04",
+  "build_only": true,
+  "config_name": "momentum_n20_deeper_validation_v1",
+  "execution_run": false,
+  "files_changed": [],
+  "files_created": [
+    "tools/crypto_d1_deeper_validation.py",
+    "tests/test_crypto_d1_deeper_validation.py",
+    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.md",
+    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.json"
+  ],
+  "lane_status_unchanged": "WATCH / MIXED",
+  "layer": "crypto_d1_momentum_n20_deeper_validation_v1",
+  "official_master_at_build_time": "44c71fe990cb1c90c583d94494d8e4d70561b28f",
+  "primary_lookback": 20,
+  "reference_lookback": 30,
+  "parameter_neighborhood": [18, 20, 22],
+  "neighborhood_is_sensitivity_not_optimization": true,
+  "neighborhood_winner_fixed_at": 20,
+  "neighborhood_winner_reselected_from_probe": false,
+  "ran_backtest": false,
+  "readiness_status_unchanged": "NOT_READY_FOR_REAL_DATA",
+  "required_sections": [
+    "yearly_oos_breakdown",
+    "monthly_return_drawdown_profile",
+    "per_asset_consistency",
+    "trade_count_and_turnover",
+    "fee_slippage_stress",
+    "outlier_sensitivity",
+    "regime_sensitivity",
+    "basket_vs_per_asset",
+    "parameter_neighborhood"
+  ],
+  "runner_modified": false,
+  "runner_path": "tools/crypto_d1_backtest_runner.py",
+  "safety_flags": {
+    "active_strong_promoted": false,
+    "broker_path_enabled": false,
+    "bundle_23_started": false,
+    "dataset_mutation_allowed": false,
+    "exchange_path_enabled": false,
+    "execution_authorized": false,
+    "fetch_live_data_enabled": false,
+    "order_path_enabled": false,
+    "paper_live_authorized": false,
+    "research_only": true
+  },
+  "schema_version": 1,
+  "source_plan": "reports/crypto_d1_momentum_n20_deeper_validation_plan/report.json",
+  "task_id": "crypto_d1_momentum_n20_deeper_validation_v1",
+  "tests": {
+    "command": "pytest test_crypto_d1_deeper_validation.py test_crypto_d1_backtest_runner.py",
+    "new_suite_passed": 28,
+    "combined_passed": 103,
+    "pre_existing_unrelated_failures": 1,
+    "pre_existing_failure_id": "test_crypto_d1_backtest_runner.py::test_no_real_data_files_committed_under_data_crypto_d1_research",
+    "pre_existing_failure_note": "Asserts frozen V001/V002 daily_ohlcv.csv not committed; they were committed by a prior operator dataset action, not by this build. Fails identically without the new file."
+  },
+  "non_authorization": "BUILD ONLY. Runs no backtest, executes no task, imports/calls no runner, constructs no runnable command, mutates no dataset, and authorizes no paper/live/broker/exchange/order/fetch action. No ACTIVE/STRONG promotion. No Bundle 23."
+}
