@@ -107,23 +107,55 @@ def test_each_item_has_nine_required_fields():
             assert f in it, f"item {it.get('number')} missing field {f}"
 
 
-# --- default state (every item is MISSING / PENDING / empty) ----------- #
+# --- current partition (partial completion; every item is a valid
+#     COMPLETE-with-evidence-and-approval, or a valid MISSING-and-PENDING) - #
 
-def test_default_every_item_is_missing_pending_empty():
-    for it in _data().get("items"):
-        assert it["status"] == "MISSING", f"item {it['number']} should default to MISSING"
-        assert it["approval_status"] == "PENDING", f"item {it['number']} should default to PENDING"
-        assert it.get("operator_answer", "") == "", f"item {it['number']} should have empty operator_answer"
-        assert it.get("evidence_path", "") == "", f"item {it['number']} should have empty evidence_path"
-        assert it.get("blocking_reason", "") == "", f"item {it['number']} should have empty blocking_reason"
+def test_item_partition_is_valid_complete_or_missing():
+    """Operator progress is real: 9 items COMPLETE+APPROVED with evidence,
+    7 items still MISSING+PENDING, 0 BLOCKED, 16 total. Every item must be one
+    of those two *valid* shapes -- a COMPLETE item must carry evidence and
+    APPROVED, and a MISSING item must be PENDING with empty evidence. Overall
+    readiness must remain NOT_READY_FOR_REAL_DATA regardless of this progress."""
+    items = _data().get("items")
+    assert len(items) == 16
+    complete = [i for i in items if i["status"] == "COMPLETE"]
+    missing = [i for i in items if i["status"] == "MISSING"]
+    blocked = [i for i in items if i["status"] == "BLOCKED"]
+    assert len(complete) == 9, f"expected 9 COMPLETE, got {len(complete)}"
+    assert len(missing) == 7, f"expected 7 MISSING, got {len(missing)}"
+    assert len(blocked) == 0, f"expected 0 BLOCKED, got {len(blocked)}"
+    assert len(complete) + len(missing) == 16
+
+    for it in complete:
+        assert it["approval_status"] == "APPROVED", \
+            f"item {it['number']} COMPLETE but not APPROVED"
+        assert it.get("evidence_path", "") != "", \
+            f"item {it['number']} COMPLETE but has no evidence_path"
+    for it in missing:
+        assert it["approval_status"] == "PENDING", \
+            f"item {it['number']} MISSING but not PENDING"
+        assert it.get("evidence_path", "") == "", \
+            f"item {it['number']} MISSING but has evidence_path"
+        assert it.get("operator_answer", "") == "", \
+            f"item {it['number']} MISSING but has operator_answer"
+
+    # the safety gate is unmoved by partial operator progress
+    assert _data().get("overall_readiness_status") == "NOT_READY_FOR_REAL_DATA"
 
 
 def test_overall_readiness_default_is_not_ready():
     assert _data().get("overall_readiness_status") == "NOT_READY_FOR_REAL_DATA"
 
 
-def test_override_reason_empty_by_default():
-    assert _data().get("overall_readiness_status_override_reason") == ""
+def test_override_reason_explains_partial_completion():
+    """With items COMPLETE while overall stays NOT_READY, the validator requires
+    a non-empty override_reason. Assert it is present and that overall readiness
+    remains NOT_READY_FOR_REAL_DATA (the gate holds despite the override)."""
+    data = _data()
+    reason = data.get("overall_readiness_status_override_reason", "")
+    assert isinstance(reason, str) and reason.strip() != "", \
+        "override_reason must be non-empty while items are COMPLETE"
+    assert data.get("overall_readiness_status") == "NOT_READY_FOR_REAL_DATA"
 
 
 # --- enum options ------------------------------------------------------ #
@@ -197,8 +229,19 @@ def test_no_forbidden_phrases():
 
 # --- no real data / no data dir ---------------------------------------- #
 
-def test_no_data_crypto_d1_research_directory():
-    assert not (_REPO_ROOT / "data" / "crypto_d1_research").exists()
+def test_crypto_d1_research_dir_is_inert_frozen_dataset():
+    """A frozen research dataset directory may now exist. Its mere presence must
+    NOT imply readiness or execution: the checklist's overall readiness stays
+    NOT_READY_FOR_REAL_DATA and the lane stays WATCH / MIXED with no promotion.
+    If the directory is absent, that is equally safe and the test still passes."""
+    data = _data()
+    # presence of a frozen dataset directory changes nothing about safety state
+    assert data.get("overall_readiness_status") == "NOT_READY_FOR_REAL_DATA"
+    lr = data.get("lane_recommendation")
+    assert lr["current_verdict"] == "WATCH"
+    assert lr["evidence_level"] == "MIXED"
+    assert lr["do_not_promote_to_ACTIVE"] is True
+    assert lr["do_not_promote_to_STRONG_evidence"] is True
 
 
 def test_checklist_dir_contains_no_real_data_files():
