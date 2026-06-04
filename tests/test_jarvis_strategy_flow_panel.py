@@ -83,7 +83,8 @@ def test_workflow_stages_render_in_order():
 def test_pipeline_stages_render_in_order():
     block = _strategy_flow_block(_page())
     stages = [
-        "Raw Data", "Data QA", "Dataset Freeze", "Strategy Engine", "Backtest",
+        "Raw Data", "Data QA", "Dataset Freeze", "Strategy Engine",
+        "Baseline Check",
         "Fees / Slippage", "OOS Validation", "Stress Test", "Risk Scoring",
         "Final Report", "Paper Trading Gate", "Micro-Live Gate",
     ]
