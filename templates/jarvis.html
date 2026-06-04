@@ -857,7 +857,10 @@
         mfSet('data_qa', 'is-watch',
           mf.qa_accepted === true ? 'QA_WARN Accepted' : 'QA_WARN');
       }
-      if(mf.baseline_present !== true){
+      if(mf.baseline_present === true){
+        mfSet('backtest', 'is-watch', 'Ran · '
+          + (mf.baseline_status || 'WATCH') + ' (V002 baseline)');
+      } else {
         mfSet('backtest', 'is-todo', 'Ready for approved run · Not run yet');
       }
 

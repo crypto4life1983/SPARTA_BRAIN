@@ -144,6 +144,32 @@ def test_strategy_flow_switcher_script_is_scoped_and_inert():
         assert forbidden not in script, f"switcher must not contain {forbidden}"
 
 
+def test_backtest_node_reflects_live_baseline_when_present():
+    """Display-only label fix: when the live mission_flow payload reports
+    baseline_present === true, the Pipeline 'Backtest' node must be re-labelled
+    to the live baseline result (e.g. 'Ran · WATCH (V002 baseline)') so it no
+    longer contradicts the Current Run card. When no baseline is present it must
+    keep the 'Not started / Not run yet' behavior. This is a textContent/CSS
+    label change only -- it must not promote the lane or touch any gate."""
+    body = _page()
+    # the render JS must branch on the live baseline_present flag for backtest
+    assert "mf.baseline_present === true" in body
+    # the present-branch re-labels the backtest node with the live status
+    assert "mfSet('backtest', 'is-watch'" in body
+    assert "(V002 baseline)" in body
+    # the absent-branch keeps the prior 'not run yet' label
+    assert "Ready for approved run" in body
+    # safety: the backtest node must not be promoted to the active marker and
+    # the branch must carry no execution verbs.
+    block = _strategy_flow_block(body).lower()
+    for forbidden in ('is-active" data-mf="backtest', "place_order",
+                      "execute_trade", "submit_order"):
+        assert forbidden not in block, f"backtest fix must not include {forbidden}"
+    # the Paper Trading / Micro-Live gates remain gated/locked, untouched
+    assert "human approval required" in body.lower()
+    assert "locked &middot; never automated" in body.lower()
+
+
 def test_status_api_unchanged_no_strategy_flow_keys():
     import app as app_module
     from fastapi.testclient import TestClient
