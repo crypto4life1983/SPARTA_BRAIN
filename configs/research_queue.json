@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "layer": "strategy_factory_queue_v1",
+  "description": "Human-authored, approved research backlog for SPARTA Strategy Factory v1. This file lists which research tasks MAY be considered later by the orchestrator. Listing a task here is NOT authorization to execute it. Every item is research-only and non-executable in v1: execution_authorized is pinned false, and the validator fails closed on any forbidden safety flag or unknown runner/dataset.",
+  "allowed_runners": ["tools/crypto_d1_backtest_runner.py"],
+  "allowed_datasets": ["CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002"],
+  "allowed_modes": ["momentum_confirmation_v1"],
+  "queue_safety_flags": {
+    "research_only": true,
+    "paper_live_authorized": false,
+    "broker_path_enabled": false,
+    "exchange_path_enabled": false,
+    "order_path_enabled": false,
+    "active_strong_promoted": false,
+    "bundle_23_started": false,
+    "dataset_mutation_allowed": false,
+    "execution_authorized": false
+  },
+  "items": [
+    {
+      "task_id": "crypto_d1_momentum_n20_deeper_validation_v1",
+      "strategy_id": "crypto_d1_momentum_confirmation_v1",
+      "strategy_family": "crypto_d1_momentum",
+      "market": "crypto",
+      "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002",
+      "allowed_runner": "tools/crypto_d1_backtest_runner.py",
+      "allowed_mode": "momentum_confirmation_v1",
+      "priority": 1,
+      "status": "NEEDS_PLAN",
+      "approved_for_research": false,
+      "execution_authorized": false,
+      "blocked_reasons": [],
+      "max_runtime_seconds": 1800,
+      "expected_outputs": [
+        "reports/crypto_d1_momentum_confirmation_v1/<dataset>/crypto_d1_momentum_confirmation_report.json",
+        "reports/crypto_d1_momentum_confirmation_v1/<dataset>/decision_memo.md"
+      ],
+      "safety_flags": {
+        "research_only": true,
+        "paper_live_authorized": false,
+        "broker_path_enabled": false,
+        "exchange_path_enabled": false,
+        "order_path_enabled": false,
+        "active_strong_promoted": false,
+        "bundle_23_started": false,
+        "dataset_mutation_allowed": false,
+        "execution_authorized": false
+      },
+      "created_at": "2026-06-04",
+      "updated_at": "2026-06-04",
+      "next_action": "Create the N=20 deeper-validation plan before any execution (no execution in Step 2)."
+    }
+  ]
+}

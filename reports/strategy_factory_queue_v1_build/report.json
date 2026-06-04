@@ -1,0 +1,139 @@
+{
+  "build_id": "strategy_factory_queue_v1_build",
+  "step": 2,
+  "step_name": "Research Queue v1 schema + loader/validator (read-only, non-executable)",
+  "build_date": "2026-06-04",
+  "official_master_at_build_time": "9ad578c424d829e71678610176d3c4421da7992a",
+  "status": "BUILT_SCHEMA_AND_VALIDATOR_ONLY",
+
+  "authorizes_execution": false,
+  "authorizes_paper_or_live": false,
+  "authorizes_broker_exchange_order_fetch": false,
+  "promotes_active_or_strong": false,
+  "starts_bundle_23": false,
+  "modifies_datasets": false,
+  "modifies_existing_runners": false,
+  "modifies_dashboard": false,
+  "runs_backtest": false,
+  "executes_queue_items": false,
+  "imports_or_calls_runner_modules": false,
+  "builds_orchestrator": false,
+
+  "what_was_implemented": {
+    "schema": "configs/research_queue.json",
+    "tool": "tools/strategy_factory_queue.py",
+    "description": "Standard-library-only, read-only loader + fail-closed validator for the research queue. It loads configs/research_queue.json, validates every item against runner/dataset/mode allowlists and a pinned-false safety-flag contract, and emits a normalized deterministic report. It executes nothing, imports no runner, and writes only the opt-in build report.",
+    "public_surface": [
+      "load_queue_file(path) -> (obj, status)  (pure read; fail closed)",
+      "validate_queue(queue_obj, load_status, source) -> report  (never raises)",
+      "build(base) -> report  (loads configs/research_queue.json; pure read)",
+      "to_stable_json(report) -> str  (sorted-key deterministic serialization)",
+      "render_markdown(report) -> str  (compact human table)",
+      "write_build_report(base, report) -> [paths]  (opt-in; writes ONLY to reports/strategy_factory_queue_v1_build/)",
+      "CLI: --base, --format json|md, --write (default read-only stdout)"
+    ],
+    "item_fields": ["task_id", "strategy_id", "strategy_family", "market", "dataset_id", "allowed_runner", "allowed_mode", "priority", "status", "approved_for_research", "blocked_reasons", "max_runtime_seconds", "expected_outputs", "safety_flags", "created_at", "updated_at", "next_action"],
+    "derived_per_item_fields": ["valid", "eligible_for_research_listing", "executable"],
+    "allowlists": {
+      "allowed_runners": ["tools/crypto_d1_backtest_runner.py"],
+      "allowed_datasets": ["CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002"],
+      "allowed_modes": ["momentum_confirmation_v1"]
+    },
+    "validator_rules": [
+      "required-field presence: missing any item field -> blocked_reason (item blocked, never executed)",
+      "runner allowlist: any runner not in ALLOWED_RUNNERS -> blocked",
+      "dataset allowlist: any dataset not in ALLOWED_DATASETS -> blocked",
+      "mode allowlist: any mode not in ALLOWED_MODES -> blocked",
+      "safety flags: research_only must be true; every other flag (incl. execution_authorized) must be present and false; any forbidden flag true -> blocked",
+      "execution_authorized=true (flag OR top-level field) -> blocked AND never executable",
+      "approved_for_research must be a bool; even when true it confers ONLY research-listing eligibility, never execution",
+      "executable is ALWAYS false in v1 (invariant, not computed from input)",
+      "deterministic ordering by (priority, task_id); sorted-key JSON; no wall-clock dependence",
+      "missing/corrupt file -> empty fail-closed report with a warning, never an exception"
+    ],
+    "separation_of_approval": "approved_for_research (queue-listing eligibility) is kept strictly separate from execution. There is NO execution authorization path in v1: execution_authorized must be false on every item, and 'executable' is pinned false by construction."
+  },
+
+  "builds_on": {
+    "plan": "reports/strategy_factory_v1_plan/report.json",
+    "registry_step_1": "reports/strategy_factory_registry_v1_build/report.json",
+    "mapping": "Implements roadmap Step 2 (Research Queue v1). The registry (Step 1) is the read-only single source of truth describing EXISTING experiments; the queue (Step 2) is the human-authored, approved BACKLOG of research tasks that MAY later be considered by an orchestrator (Step 3, not built). Item field set, the nine pinned-false safety flags, and the fail-closed posture match plan section 9. No orchestrator and no execution are implemented here."
+  },
+
+  "routine_layer_reuse": {
+    "reused_conventions": "stdlib-only, deterministic, repo-root-relative, fail-closed style of tools/strategy_report_registry.py (Step 1): same _repo_root(), _load_json-style fail-closed reads, sorted-key to_stable_json, opt-in write_build_report confined to a single build folder, and pinned-false safety flags.",
+    "not_reused": "No runner, orchestrator, or execution code is imported or created. The validator is a separate single-purpose module so the registry scanner stays untouched.",
+    "duplication_avoided": "New loader is minimal and single-purpose; it mirrors the Step-1 safety posture rather than forking a parallel system."
+  },
+
+  "files_created": [
+    "configs/research_queue.json",
+    "tools/strategy_factory_queue.py",
+    "tests/test_strategy_factory_queue.py",
+    "reports/strategy_factory_queue_v1_build/report.md",
+    "reports/strategy_factory_queue_v1_build/report.json"
+  ],
+  "files_changed": [],
+
+  "test_results": {
+    "test_strategy_factory_queue": "23 passed",
+    "test_strategy_report_registry": "13 passed (unchanged; no indirect breakage)",
+    "command": "cd tests && PYTHONPATH=repo .venv python -m pytest test_strategy_factory_queue.py test_strategy_report_registry.py --rootdir=. -q",
+    "covered_cases": [
+      "valid queue loads -> item valid, listed, but executable=false",
+      "missing required field -> item blocked (recorded, not raised)",
+      "unknown runner / unknown dataset / unknown mode -> item blocked",
+      "every forbidden safety flag true (8 parametrized incl. execution_authorized) -> item blocked",
+      "research_only=false -> item blocked",
+      "execution_authorized=true -> rejected, not executable, not listing-eligible",
+      "approved_for_research=true -> listing eligible but still not executable",
+      "no subprocess / no stray writes; no runner module imported",
+      "deterministic ordering by (priority, task_id) + byte-identical JSON",
+      "missing/corrupt queue file fails closed with a warning (no crash)",
+      "SHIPPED configs/research_queue.json validates; N=20 task appears but is non-executable",
+      "opt-in writer confined to reports/strategy_factory_queue_v1_build/"
+    ]
+  },
+
+  "safety_confirmations": {
+    "read_only_by_default": true,
+    "executes_anything": false,
+    "no_subprocess_in_load_path": true,
+    "no_runner_import": true,
+    "no_network_broker_exchange_order_fetch_code": true,
+    "write_path_confined_to": "reports/strategy_factory_queue_v1_build/",
+    "queue_safety_flags": {
+      "research_only": true,
+      "paper_live_authorized": false,
+      "broker_path_enabled": false,
+      "exchange_path_enabled": false,
+      "order_path_enabled": false,
+      "active_strong_promoted": false,
+      "bundle_23_started": false,
+      "dataset_mutation_allowed": false,
+      "execution_authorized": false
+    },
+    "lane_unchanged": "Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA"
+  },
+
+  "live_validation_snapshot": {
+    "schema_version": 1,
+    "layer": "strategy_factory_queue_v1",
+    "source": "configs/research_queue.json",
+    "item_count": 1,
+    "valid_item_count": 1,
+    "blocked_item_count": 0,
+    "items": [
+      {"task_id": "crypto_d1_momentum_n20_deeper_validation_v1", "strategy_id": "crypto_d1_momentum_confirmation_v1", "strategy_family": "crypto_d1_momentum", "status": "NEEDS_PLAN", "valid": true, "approved_for_research": false, "eligible_for_research_listing": false, "executable": false}
+    ],
+    "warnings": []
+  },
+
+  "next_step": {
+    "step": 3,
+    "name": "Research Orchestrator v1 (DRY-RUN ONLY, plan-emitting)",
+    "deliverable": "A read-only orchestrator that joins the Step-1 registry with the Step-2 queue and emits a DRY-RUN execution plan (what WOULD run, in what order, against which frozen dataset) WITHOUT running anything. Dry-run by default; an 'execute' mode must be a separate, explicitly approved build behind the safety-gate contract. No backtest, no dataset mutation, no runner call until separately approved."
+  },
+
+  "non_authorization_statement": "This build adds a research-queue schema, a read-only fail-closed loader/validator, and its tests only. It authorizes no paper or live trading, no broker/exchange/order/fetch path, no ACTIVE/STRONG promotion, and no Bundle 23. It executes no queue item, runs no backtest, imports no runner, builds no orchestrator, and mutates no dataset. Every queue item is non-executable by construction. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA."
+}
