@@ -350,7 +350,7 @@ def test_shipped_repo_dry_run_for_n20_task():
     assert e["strategy_id"] == _STRATEGY_ID
     assert e["current_stage"] == "EXECUTED"
     assert e["current_verdict"] == "WATCH"
-    assert e["queue_status"] == "NEEDS_PLAN"
+    assert e["queue_status"] == "PLAN_EXISTS_AWAITING_EXECUTION_APPROVAL"
     assert e["contract_conformant"] is True
     assert e["allowed_for_listing"] is True
     assert e["executable"] is False

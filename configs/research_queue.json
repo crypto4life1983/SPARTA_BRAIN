@@ -26,7 +26,7 @@
       "allowed_runner": "tools/crypto_d1_backtest_runner.py",
       "allowed_mode": "momentum_confirmation_v1",
       "priority": 1,
-      "status": "NEEDS_PLAN",
+      "status": "PLAN_EXISTS_AWAITING_EXECUTION_APPROVAL",
       "approved_for_research": false,
       "execution_authorized": false,
       "blocked_reasons": [],
@@ -48,7 +48,7 @@
       },
       "created_at": "2026-06-04",
       "updated_at": "2026-06-04",
-      "next_action": "Create the N=20 deeper-validation plan before any execution (no execution in Step 2)."
+      "next_action": "Await explicit approval for N20 deeper-validation execution design/build; no execution authorized."
     }
   ]
 }
