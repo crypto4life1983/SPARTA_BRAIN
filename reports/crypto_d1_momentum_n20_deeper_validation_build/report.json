@@ -1,61 +1,83 @@
 {
-  "build_date": "2026-06-04",
-  "build_only": true,
-  "config_name": "momentum_n20_deeper_validation_v1",
-  "execution_run": false,
-  "files_changed": [],
-  "files_created": [
-    "tools/crypto_d1_deeper_validation.py",
-    "tests/test_crypto_d1_deeper_validation.py",
-    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.md",
-    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.json"
-  ],
-  "lane_status_unchanged": "WATCH / MIXED",
+  "schema_version": 1,
   "layer": "crypto_d1_momentum_n20_deeper_validation_v1",
-  "official_master_at_build_time": "44c71fe990cb1c90c583d94494d8e4d70561b28f",
+  "config_name": "momentum_n20_deeper_validation_v1",
+  "task_id": "crypto_d1_momentum_n20_deeper_validation_v1",
+  "build_date": "2026-06-04",
+  "build_kind": "reconciliation_merge_of_two_parallel_drafts",
+  "official_master_at_build_time": "9211d835c6550d9eff2be922eacfe501f3c027da",
+  "source_plan": "reports/crypto_d1_momentum_n20_deeper_validation_plan/report.json",
+  "build_only": true,
+  "execution_run": false,
+  "ran_backtest": false,
+  "runner_modified": false,
+  "runner_path": "tools/crypto_d1_backtest_runner.py",
+  "runner_integration_status": "DEFERRED_TO_SEPARATELY_APPROVED_STEP",
+  "helper_module": "tools/crypto_d1_deeper_validation.py",
+  "reconciliation": "Merged the two parallel deeper-validation drafts into ONE kept module (tools/crypto_d1_deeper_validation.py): runner-backed single-source-of-truth analysis from the untracked N20 draft PLUS deterministic JSON serializer + confined opt-in writer + read-only CLI + AST/import/call-surface safety tests from the pushed helper. The untracked duplicates tools/crypto_d1_n20_deeper_validation.py and tests/test_crypto_d1_n20_deeper_validation.py were deleted after the merged tests went green. No duplicate public helpers remain.",
   "primary_lookback": 20,
   "reference_lookback": 30,
   "parameter_neighborhood": [18, 20, 22],
   "neighborhood_is_sensitivity_not_optimization": true,
   "neighborhood_winner_fixed_at": 20,
   "neighborhood_winner_reselected_from_probe": false,
-  "ran_backtest": false,
+  "verdict_ceiling": "WATCH",
+  "lane_status_unchanged": "WATCH / MIXED",
   "readiness_status_unchanged": "NOT_READY_FOR_REAL_DATA",
-  "required_sections": [
-    "yearly_oos_breakdown",
-    "monthly_return_drawdown_profile",
-    "per_asset_consistency",
-    "trade_count_and_turnover",
-    "fee_slippage_stress",
-    "outlier_sensitivity",
-    "regime_sensitivity",
-    "basket_vs_per_asset",
-    "parameter_neighborhood"
+  "files_final_kept": [
+    "tools/crypto_d1_deeper_validation.py",
+    "tests/test_crypto_d1_deeper_validation.py",
+    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.md",
+    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.json"
   ],
-  "runner_modified": false,
-  "runner_path": "tools/crypto_d1_backtest_runner.py",
-  "safety_flags": {
-    "active_strong_promoted": false,
-    "broker_path_enabled": false,
-    "bundle_23_started": false,
-    "dataset_mutation_allowed": false,
-    "exchange_path_enabled": false,
-    "execution_authorized": false,
-    "fetch_live_data_enabled": false,
-    "order_path_enabled": false,
-    "paper_live_authorized": false,
-    "research_only": true
+  "files_modified_this_reconciliation": [
+    "tools/crypto_d1_deeper_validation.py",
+    "tests/test_crypto_d1_deeper_validation.py",
+    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.md",
+    "reports/crypto_d1_momentum_n20_deeper_validation_build/report.json"
+  ],
+  "files_deleted_this_reconciliation": [
+    "tools/crypto_d1_n20_deeper_validation.py",
+    "tests/test_crypto_d1_n20_deeper_validation.py"
+  ],
+  "files_changed_outside_scope": [],
+  "required_sections": [
+    "1_yearly_oos_breakdown",
+    "2_monthly_return_drawdown_profile",
+    "3_per_asset_consistency",
+    "4_trade_count_and_turnover",
+    "5_fee_slippage_stress",
+    "6_outlier_sensitivity",
+    "7_regime_sensitivity",
+    "8_basket_vs_per_asset",
+    "9_small_parameter_neighborhood_sensitivity"
+  ],
+  "single_source_of_truth": {
+    "cost_equity_math": "crypto_d1_backtest_runner._simulate_equity",
+    "signal": "crypto_d1_backtest_runner.momentum_continuation",
+    "reimplemented_cost_model": false
   },
-  "schema_version": 1,
-  "source_plan": "reports/crypto_d1_momentum_n20_deeper_validation_plan/report.json",
-  "task_id": "crypto_d1_momentum_n20_deeper_validation_v1",
   "tests": {
-    "command": "pytest test_crypto_d1_deeper_validation.py test_crypto_d1_backtest_runner.py",
-    "new_suite_passed": 28,
-    "combined_passed": 103,
+    "command": "pytest test_crypto_d1_deeper_validation.py test_crypto_d1_backtest_runner.py (+ factory suites)",
+    "merged_suite_file": "tests/test_crypto_d1_deeper_validation.py",
+    "merged_suite_passed": 19,
+    "runner_suite_passed": 75,
+    "factory_suites_passed": 91,
     "pre_existing_unrelated_failures": 1,
     "pre_existing_failure_id": "test_crypto_d1_backtest_runner.py::test_no_real_data_files_committed_under_data_crypto_d1_research",
-    "pre_existing_failure_note": "Asserts frozen V001/V002 daily_ohlcv.csv not committed; they were committed by a prior operator dataset action, not by this build. Fails identically without the new file."
+    "pre_existing_failure_note": "Filesystem scan finds operator-placed frozen V001/V002 daily_ohlcv.csv (gitignored) under data/crypto_d1_research/. Fails identically without this build; this build touches nothing under data/."
   },
-  "non_authorization": "BUILD ONLY. Runs no backtest, executes no task, imports/calls no runner, constructs no runnable command, mutates no dataset, and authorizes no paper/live/broker/exchange/order/fetch action. No ACTIVE/STRONG promotion. No Bundle 23."
+  "safety_flags": {
+    "research_only": true,
+    "paper_live_authorized": false,
+    "broker_path_enabled": false,
+    "exchange_path_enabled": false,
+    "order_path_enabled": false,
+    "fetch_live_data_enabled": false,
+    "dataset_mutation_allowed": false,
+    "active_strong_promoted": false,
+    "bundle_23_started": false,
+    "execution_authorized": false
+  },
+  "non_authorization": "BUILD ONLY. Runs no backtest, executes no task, calls no runner run-mode, constructs no runnable command, mutates no dataset, and authorizes no paper/live/broker/exchange/order/fetch action. No ACTIVE/STRONG promotion. No Bundle 23."
 }

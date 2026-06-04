@@ -1,38 +1,32 @@
-"""Crypto-D1 Momentum N=20 — Deeper-Validation analysis capability (BUILD ONLY).
+"""Crypto-D1 Momentum N=20 deeper-validation analysis layer (BUILD ONLY).
 
-This module is the ADDITIVE, standard-library-only capability that the committed
-PLAN ONLY artifact
-``reports/crypto_d1_momentum_n20_deeper_validation_plan/report.json`` describes.
-It implements the *analysis* half of deeper validation as a set of pure,
-deterministic functions plus a schema assembler, so a FUTURE, separately-approved
-execution step can feed an N=20 momentum OOS result into it and emit the required
-validation report.
+Research-only, local-only, stdlib-only. This module is the single, reconciled
+*analysis* capability described by the committed plan
+``reports/crypto_d1_momentum_n20_deeper_validation_plan/`` -- the nine deeper-
+validation views of the SAME frozen N=20 OOS evidence. It:
 
-WHY A SEPARATE MODULE (not a new run_backtest mode):
-  The deeper-validation outputs (yearly/monthly decomposition, fee/slippage
-  re-pricing, outlier exclusion, regime bucketing, basket comparison, bounded
-  N-neighborhood stability) are DESCRIPTIVE post-processing over an already
-  computed N=20 OOS result. Keeping them out of the 1876-line
-  ``tools/crypto_d1_backtest_runner.py`` guarantees the existing
-  ``momentum_confirmation_v1`` / ``momentum_robustness_v1`` / ``v002_addendum``
-  paths stay byte-identical (zero regression risk), and lets every function be
-  unit-tested on tiny synthetic inputs WITHOUT running any backtest. The future
-  execution mode is a thin wiring: run an N=20 momentum pass via the existing
-  confirmation engine, then pass its per-asset OOS series/ledger into the
-  functions here.
+  * runs NO backtest by itself over frozen data (the caller feeds in already-
+    sliced OOS ``cbr.Bar`` series; unit tests feed tiny synthetic series);
+  * executes no subprocess, opens no network, touches no credentials, places no
+    order, and authorizes no paper/live/broker/exchange/fetch;
+  * mutates no dataset, no QA freeze, no queue, no safety contract, no dashboard;
+  * reuses ``crypto_d1_backtest_runner._simulate_equity`` /
+    ``momentum_continuation`` as the SINGLE SOURCE OF TRUTH for the cost-aware
+    equity + signal math (no divergent re-implementation of the cost model);
+  * keeps N=20 the PRIMARY validation target. The {18, 20, 22} neighborhood is a
+    bounded, explicitly-labeled *stability sensitivity* -- the winner is NEVER
+    re-selected and N stays 20 (no parameter hunt, no OOS-tuning);
+  * never promotes ACTIVE/STRONG, never auto-PASSes (verdict ceiling = WATCH).
 
-HARD SAFETY POSTURE (asserted by tests):
-  * BUILD ONLY. Importing or calling anything here runs NO backtest, executes no
-    Strategy Factory task, and writes nothing unless ``write_build_report`` is
-    called explicitly (and then only under
-    ``reports/crypto_d1_momentum_n20_deeper_validation_build/``).
-  * research_only=true; every paper/live/broker/exchange/order/fetch/
-    dataset-mutation/ACTIVE-STRONG/Bundle-23/execution flag pinned FALSE.
-  * The N-neighborhood {18, 20, 22} is a PRE-REGISTERED, BOUNDED *sensitivity*
-    check, never an optimization: the winner is N=20 and is never re-selected
-    from the neighborhood probe.
-  * No network, no subprocess, no broker/exchange/order/fetch code. Stdlib only.
-  * Deterministic: sorted-key JSON; no wall-clock in computed values.
+This module reconciles the two earlier parallel drafts into one: it keeps the
+runner-backed single-source-of-truth analysis AND the deterministic JSON
+serializer + confined opt-in writer + read-only CLI. There is exactly one public
+analysis API; no duplicate helpers.
+
+Runner CLI/dispatch integration (a new ``--config
+momentum_n20_deeper_validation_v1`` mode in ``crypto_d1_backtest_runner.py``) is
+DEFERRED to a separately-approved step per the plan, so this build does not make
+the analysis runnable over the frozen dataset.
 """
 from __future__ import annotations
 
@@ -40,29 +34,53 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Optional
 
-SCHEMA_VERSION = 1
-LAYER_NAME = "crypto_d1_momentum_n20_deeper_validation_v1"
+_TOOLS_DIR = Path(__file__).resolve().parent
+if str(_TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(_TOOLS_DIR))
 
-# The deeper-validation capability is keyed to the single best-sampled candidate.
+import crypto_d1_backtest_runner as cbr  # noqa: E402
+
+# --- Identity / pre-registered parameters (NOT OOS-tuned) ------------------
 CONFIG_NAME = "momentum_n20_deeper_validation_v1"
+LAYER = "crypto_d1_momentum_n20_deeper_validation_v1"
 PRIMARY_LOOKBACK = 20
 REFERENCE_LOOKBACK = 30
+# Bounded stability neighborhood. This is a SENSITIVITY band, not a grid search:
+# the winner is never re-selected and the primary stays PRIMARY_LOOKBACK.
+NEIGHBORHOOD_LOOKBACKS = (18, 20, 22)
+VERDICT_CEILING = "WATCH"
 
-# Pre-registered, BOUNDED neighborhood for a stability (NOT optimization) probe.
-# The winner stays N=20; the neighborhood is reported as sensitivity only.
-PARAMETER_NEIGHBORHOOD = (18, 20, 22)
-NEIGHBORHOOD_IS_SENSITIVITY_NOT_OPTIMIZATION = True
+# Frozen V002 cost pins -> 60 bps/side, 120 bps round-trip, taker every leg.
+# Derived from the runner constants (one source of truth), NOT hardcoded.
+_BASELINE_PER_SIDE_BPS = (
+    cbr.V002_FALLBACK_FEE_BPS
+    + cbr.V002_FALLBACK_SLIPPAGE_BPS
+    + cbr.V002_FALLBACK_SPREAD_PROXY_BPS
+)
+BASELINE_ROUND_TRIP_BPS = 2.0 * _BASELINE_PER_SIDE_BPS  # 120.0
+# Additive labeled cost-stress column (baseline 120 stays the headline).
+STRESS_ROUND_TRIP_BPS = (150.0, 180.0, 240.0)
+# Pre-declared regime proxies (computed only from frozen bars; no look-ahead).
+REGIME_VOL_WINDOW = cbr.VOL_REGIME_WINDOW            # 30
+REGIME_VOL_THRESHOLD = cbr.VOL_REGIME_MAX_ANNUALIZED  # 1.50 annualized
+REGIME_TREND_SMA = 50
 
-# Frozen cost baseline from the plan (V002 fees.json: 60 bps/side, 120 round-trip).
-BASELINE_ROUND_TRIP_BPS = 120
-DEFAULT_STRESS_ROUND_TRIP_BPS = (150, 180, 240)
+# Single confined writer target (opt-in only).
+_BUILD_OUT_RELDIR = Path("reports") / "crypto_d1_momentum_n20_deeper_validation_build"
 
-PER_ASSET_OOS_TRADE_FLOOR = 20
-ASSETS = ("BTC", "ETH", "SOL")
+VALIDATION_SECTION_KEYS = (
+    "1_yearly_oos_breakdown",
+    "2_monthly_return_drawdown_profile",
+    "3_per_asset_consistency",
+    "4_trade_count_and_turnover",
+    "5_fee_slippage_stress",
+    "6_outlier_sensitivity",
+    "7_regime_sensitivity",
+    "8_basket_vs_per_asset",
+    "9_small_parameter_neighborhood_sensitivity",
+)
 
-# Every flag pinned to the non-authorizing value. This module authorizes nothing.
 SAFETY_FLAGS = {
     "research_only": True,
     "paper_live_authorized": False,
@@ -76,485 +94,517 @@ SAFETY_FLAGS = {
     "execution_authorized": False,
 }
 
-_BUILD_OUT_RELDIR = Path("reports") / "crypto_d1_momentum_n20_deeper_validation_build"
-
-# The required validation sections, in plan order. Used both to render the empty
-# capability contract and to validate that a computed report is complete.
-REQUIRED_SECTIONS = (
-    "yearly_oos_breakdown",
-    "monthly_return_drawdown_profile",
-    "per_asset_consistency",
-    "trade_count_and_turnover",
-    "fee_slippage_stress",
-    "outlier_sensitivity",
-    "regime_sensitivity",
-    "basket_vs_per_asset",
-    "parameter_neighborhood",
+NON_AUTHORIZATION = (
+    "Deeper-validation ANALYSIS layer only. Computes descriptive views of the "
+    "frozen N=20 OOS evidence; authorizes no paper, live, broker, exchange, "
+    "order, or fetch action; promotes no lane to ACTIVE/STRONG; starts no "
+    "Bundle 23; mutates no dataset. Verdict ceiling stays WATCH; lane stays "
+    "WATCH/MIXED and NOT_READY_FOR_REAL_DATA. A positive view is not a trading "
+    "authorization."
 )
 
 
-# ---------------------------------------------------------------------------
-# Small deterministic numeric helpers (pure).
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Cost helper -- one knob (round-trip bps) folded onto the runner's simulator.
+# Every equity/return/cost number in this module flows through here, so there is
+# no second cost model and no drift from the runner.
+# ===========================================================================
+def _metrics_at_round_trip(bars, positions, round_trip_bps, start_equity):
+    """Cost-aware metrics for the SAME positions at a given round-trip cost.
 
-def _round(x: Optional[float], n: int = 10) -> Optional[float]:
-    return None if x is None else round(float(x), n)
+    Folds the whole round-trip into the runner's per-side cost knob
+    (per-side = round_trip / 2; slip/spread = 0) so the cost model stays
+    ``crypto_d1_backtest_runner._simulate_equity`` -- one source of truth."""
+    return cbr._simulate_equity(
+        positions, bars, fee_bps=round_trip_bps / 2.0, slip_bps=0.0,
+        start_equity=start_equity, spread_bps=0.0,
+    )
 
 
-def compound_returns(returns) -> float:
-    """Compound a sequence of per-step simple returns into a total return."""
-    mult = 1.0
-    for r in returns:
-        mult *= (1.0 + float(r))
-    return mult - 1.0
+def _positions_for(bars, lookback):
+    pos, err = cbr.momentum_continuation(bars, lookback)
+    return pos, err
 
 
-def equity_to_daily_returns(dates, equity_curve):
-    """Convert a date-aligned equity curve into [(date, simple_return), ...].
+def _oos_trade_ledger(bars, positions, round_trip_bps):
+    """Per-trade net-return ledger for outlier analysis (a NEW descriptive view
+    the runner does not expose). A trade spans entry (0->1) to the bar it returns
+    flat (or the final bar). Net return compounds held-bar returns then applies
+    ONE round-trip cost anchored to the same BASELINE_ROUND_TRIP_BPS constant --
+    a per-trade decomposition, NOT a second equity model. Headline numbers stay
+    from the runner's simulator."""
+    trades = []
+    rt = round_trip_bps / 10_000.0
+    n = min(len(bars), len(positions))
+    t = 1
+    while t < n:
+        if positions[t] == 1 and positions[t - 1] == 0:
+            entry = t
+            gross = 1.0
+            while t < n and positions[t] == 1:
+                gross *= bars[t].close / bars[t - 1].close
+                t += 1
+            net = gross * (1.0 - rt) - 1.0
+            trades.append({
+                "entry_date": bars[entry].timestamp,
+                "exit_date": bars[min(t, n) - 1].timestamp,
+                "held_bars": min(t, n) - entry,
+                "net_return": net,
+            })
+        else:
+            t += 1
+    return trades
 
-    ``equity_curve`` has one more point than there are return steps (it includes
-    the starting equity). ``dates`` aligns to the post-step equity points.
-    """
-    out = []
-    for i in range(1, len(equity_curve)):
-        prev, cur = float(equity_curve[i - 1]), float(equity_curve[i])
-        ret = (cur / prev - 1.0) if prev != 0 else 0.0
-        d = dates[i - 1] if i - 1 < len(dates) else None
-        out.append((d, ret))
+
+# ===========================================================================
+# Section 1 -- Yearly OOS breakdown
+# ===========================================================================
+def yearly_oos_breakdown(bars, positions, start_equity):
+    """Per-calendar-year OOS sub-returns/trades/max-dd (read-only slice; no
+    re-split, no re-optimization). Each year is re-simulated as a fresh slice."""
+    years: dict[str, list[int]] = {}
+    for i, b in enumerate(bars):
+        years.setdefault(b.timestamp[:4], []).append(i)
+    out = {}
+    for yr in sorted(years):
+        idx = years[yr]
+        sub_bars = [bars[i] for i in idx]
+        sub_pos = [positions[i] for i in idx]
+        m = _metrics_at_round_trip(sub_bars, sub_pos, BASELINE_ROUND_TRIP_BPS,
+                                   start_equity)
+        out[yr] = {
+            "total_return": m["total_return"],
+            "trade_count": m["trade_count"],
+            "max_drawdown": m["max_drawdown"],
+            "n_bars": len(sub_bars),
+            "positive": m["total_return"] > 0.0,
+        }
     return out
 
 
-def _equity_from_returns(daily_returns, start: float = 1.0):
-    eq = [start]
-    for _d, r in daily_returns:
-        eq.append(eq[-1] * (1.0 + float(r)))
-    return eq
-
-
-def max_drawdown(equity_curve) -> float:
-    """Most negative peak-to-trough drawdown of an equity curve (<= 0)."""
-    if not equity_curve:
-        return 0.0
-    peak = equity_curve[0]
-    worst = 0.0
-    for v in equity_curve:
-        if v > peak:
-            peak = v
-        dd = (v / peak - 1.0) if peak != 0 else 0.0
-        if dd < worst:
-            worst = dd
-    return worst
-
-
-# ---------------------------------------------------------------------------
-# Validation-section functions (pure). Each takes already-computed inputs that a
-# future N=20 run would supply; none of them runs a backtest.
-# ---------------------------------------------------------------------------
-
-def yearly_oos_breakdown(daily_returns) -> dict:
-    """Per-calendar-year compounded OOS return + day count from a dated return
-    series. Read-only slice; never re-splits the IS/OOS boundary."""
-    by_year: dict = {}
-    for d, r in daily_returns:
-        year = str(d)[:4] if d else "unknown"
-        by_year.setdefault(year, []).append(float(r))
-    return {
-        "by_year": {
-            y: {"total_return": _round(compound_returns(rs)), "n_days": len(rs)}
-            for y, rs in sorted(by_year.items())
-        },
-        "note": "Descriptive per-year slice of the frozen OOS window; no re-split.",
-    }
-
-
-def monthly_return_drawdown_profile(daily_returns) -> dict:
-    """Per-month compounded return and worst intramonth drawdown, plus overall
-    worst month and longest drawdown (in steps)."""
-    by_month: dict = {}
-    for d, r in daily_returns:
-        key = str(d)[:7] if d else "unknown"
-        by_month.setdefault(key, []).append(float(r))
-
+# ===========================================================================
+# Section 2 -- Monthly return / drawdown profile
+# ===========================================================================
+def monthly_return_drawdown(bars, positions, start_equity):
+    """Per-month OOS returns plus the OOS curve's worst month, longest drawdown
+    (in bars), and max drawdown. Descriptive."""
+    months: dict[str, list[int]] = {}
+    for i, b in enumerate(bars):
+        months.setdefault(b.timestamp[:7], []).append(i)
     monthly = {}
-    worst_month = None
-    for m, rs in sorted(by_month.items()):
-        tot = compound_returns(rs)
-        dd = max_drawdown(_equity_from_returns([(None, x) for x in rs]))
-        monthly[m] = {"total_return": _round(tot),
-                      "max_drawdown": _round(dd)}
-        if worst_month is None or tot < monthly[worst_month]["total_return"]:
-            worst_month = m
+    for mo in sorted(months):
+        idx = months[mo]
+        sub_bars = [bars[i] for i in idx]
+        sub_pos = [positions[i] for i in idx]
+        m = _metrics_at_round_trip(sub_bars, sub_pos, BASELINE_ROUND_TRIP_BPS,
+                                   start_equity)
+        monthly[mo] = {"total_return": m["total_return"], "n_bars": len(sub_bars)}
 
-    full_eq = _equity_from_returns(daily_returns)
+    full = _metrics_at_round_trip(bars, positions, BASELINE_ROUND_TRIP_BPS,
+                                  start_equity)
+    curve = full["equity_curve"]
+    longest, cur_len, peak = 0, 0, curve[0] if curve else start_equity
+    for x in curve:
+        if x >= peak:
+            peak = x
+            cur_len = 0
+        else:
+            cur_len += 1
+            longest = max(longest, cur_len)
+    worst_month = min(monthly, key=lambda k: monthly[k]["total_return"]) if monthly else None
     return {
-        "by_month": monthly,
+        "per_month": monthly,
         "worst_month": worst_month,
-        "overall_max_drawdown": _round(max_drawdown(full_eq)),
-        "longest_drawdown_steps": _longest_drawdown_steps(full_eq),
-        "note": "Descriptive monthly profile; no parameter change.",
+        "worst_month_return": monthly[worst_month]["total_return"] if worst_month else None,
+        "longest_drawdown_bars": longest,
+        "oos_max_drawdown": full["max_drawdown"],
     }
 
 
-def _longest_drawdown_steps(equity_curve) -> int:
-    if not equity_curve:
-        return 0
-    peak = equity_curve[0]
-    longest = 0
-    cur = 0
-    for v in equity_curve:
-        if v >= peak:
-            peak = v
-            cur = 0
-        else:
-            cur += 1
-            longest = max(longest, cur)
-    return longest
-
-
-def per_asset_consistency(per_asset_oos: dict, floor: int = PER_ASSET_OOS_TRADE_FLOOR) -> dict:
-    """Side-by-side BTC/ETH/SOL N=20 OOS consistency. Flags whether a single
-    asset is carrying the result."""
-    rows = {}
-    positive = []
-    clears = []
-    for asset, m in per_asset_oos.items():
-        tr = m.get("total_return")
-        tc = m.get("trade_count")
-        rows[asset] = {
-            "total_return": _round(tr),
-            "trade_count": tc,
-            "max_drawdown": _round(m.get("max_drawdown")),
-            "turnover": m.get("turnover"),
-            "clears_per_asset_floor": (tc is not None and tc >= floor),
+# ===========================================================================
+# Section 3 -- Per-asset consistency (BTC/ETH/SOL)
+# ===========================================================================
+def per_asset_consistency(per_asset_metrics):
+    """Side-by-side per-asset N=20 OOS table (sign, floor clearance, dd,
+    turnover) + a flag for any single asset carrying the basket."""
+    table = {}
+    positive_assets = []
+    for asset, m in per_asset_metrics.items():
+        clears = m["trade_count"] >= cbr.OOS_MIN_TRADES_PER_ASSET
+        table[asset] = {
+            "total_return": m["total_return"],
+            "positive": m["total_return"] > 0.0,
+            "trade_count": m["trade_count"],
+            "clears_per_asset_floor": clears,
+            "max_drawdown": m["max_drawdown"],
+            "turnover": m["turnover"],
         }
-        if tr is not None and tr > 0:
-            positive.append(asset)
-        if tc is not None and tc >= floor:
-            clears.append(asset)
-
-    returns = [(a, rows[a]["total_return"]) for a in rows
-               if rows[a]["total_return"] is not None]
-    carrier = max(returns, key=lambda kv: kv[1])[0] if returns else None
+        if m["total_return"] > 0.0:
+            positive_assets.append(asset)
+    total_pos = sum(max(0.0, m["total_return"]) for m in per_asset_metrics.values())
+    single_asset_carry = None
+    if total_pos > 0 and per_asset_metrics:
+        for asset, m in per_asset_metrics.items():
+            if m["total_return"] > 0.0 and (m["total_return"] / total_pos) >= 0.60:
+                single_asset_carry = asset
+                break
     return {
-        "rows": rows,
-        "all_positive_oos": len(positive) == len(rows) and len(rows) > 0,
-        "assets_positive_oos": sorted(positive),
-        "assets_clearing_floor": sorted(clears),
-        "all_clear_floor": len(clears) == len(rows) and len(rows) > 0,
-        "highest_return_asset": carrier,
-        "note": "Uses already-computed per-asset OOS metrics; no recompute of signals.",
+        "per_asset": table,
+        "n_positive_assets": len(positive_assets),
+        "all_positive": len(positive_assets) == len(per_asset_metrics) and bool(per_asset_metrics),
+        "single_asset_carrying_flag": single_asset_carry,
     }
 
 
-def trade_count_and_turnover(per_asset_trades: dict,
-                             floor: int = PER_ASSET_OOS_TRADE_FLOOR) -> dict:
-    """Confirm OOS trade counts / turnover and per-asset floor clearance, with a
-    family total."""
-    rows = {}
+# ===========================================================================
+# Section 4 -- Trade count & turnover
+# ===========================================================================
+def trade_count_turnover(per_asset_metrics):
+    """Re-confirm OOS counts, turnover, per-asset floor clearance, family total
+    against the per-family floor (operator-side; classify_run unchanged)."""
+    per_asset = {}
     family_total = 0
-    for asset, m in per_asset_trades.items():
-        tc = int(m.get("trade_count") or 0)
-        family_total += tc
-        rows[asset] = {
-            "trade_count": tc,
-            "turnover": m.get("turnover"),
-            "clears_per_asset_floor": tc >= floor,
+    for asset, m in per_asset_metrics.items():
+        per_asset[asset] = {
+            "trade_count": m["trade_count"],
+            "turnover": m["turnover"],
+            "exposure_pct": m["exposure_pct"],
+            "clears_per_asset_floor": m["trade_count"] >= cbr.OOS_MIN_TRADES_PER_ASSET,
         }
+        family_total += m["trade_count"]
     return {
-        "rows": rows,
-        "family_oos_trades_total": family_total,
-        "per_asset_floor": floor,
-        "all_clear_floor": all(r["clears_per_asset_floor"] for r in rows.values())
-        and len(rows) > 0,
+        "per_asset": per_asset,
+        "per_asset_floor": cbr.OOS_MIN_TRADES_PER_ASSET,
+        "family_oos_trade_total": family_total,
+        "per_family_floor": cbr.OOS_MIN_TRADES_PER_FAMILY,
+        "meets_family_floor": family_total >= cbr.OOS_MIN_TRADES_PER_FAMILY,
     }
 
 
-def fee_slippage_stress(trade_gross_returns,
-                        baseline_round_trip_bps: int = BASELINE_ROUND_TRIP_BPS,
-                        stress_round_trip_bps=DEFAULT_STRESS_ROUND_TRIP_BPS) -> dict:
-    """Re-price the SAME OOS trade ledger at higher round-trip costs.
-
-    Each entry in ``trade_gross_returns`` is one round-trip trade's PRE-COST
-    simple return. Net per trade at cost ``c`` bps = (1+g)*(1 - c/1e4) - 1;
-    results are compounded. The baseline stays the headline; stress columns are
-    explicitly labeled sensitivity, never a redefinition of the baseline.
-    """
-    def compounded_at(bps):
-        c = bps / 10000.0
-        mult = 1.0
-        for g in trade_gross_returns:
-            mult *= (1.0 + float(g)) * (1.0 - c)
-        return mult - 1.0
-
-    levels = {str(int(b)): _round(compounded_at(b))
-              for b in (baseline_round_trip_bps, *stress_round_trip_bps)}
+# ===========================================================================
+# Section 5 -- Fee / slippage stress
+# ===========================================================================
+def fee_slippage_stress(bars, positions, start_equity,
+                        stress_levels=STRESS_ROUND_TRIP_BPS):
+    """Re-price the SAME N=20 OOS ledger at higher round-trip costs as an
+    additive column; report each level's return + an approximate breakeven cost.
+    Baseline 120 bps stays the headline (never redefined)."""
+    base = _metrics_at_round_trip(bars, positions, BASELINE_ROUND_TRIP_BPS,
+                                  start_equity)
+    levels = {}
+    for rt in stress_levels:
+        m = _metrics_at_round_trip(bars, positions, rt, start_equity)
+        levels[f"{rt:g}"] = {
+            "round_trip_bps": rt,
+            "total_return": m["total_return"],
+            "survives_positive": m["total_return"] > 0.0,
+        }
+    # Approximate breakeven round-trip cost via bisection (total_return is
+    # monotonically non-increasing in cost when trades exist).
+    breakeven = None
+    if base["trade_count"] > 0 and base["total_return"] > 0.0:
+        lo, hi = BASELINE_ROUND_TRIP_BPS, 4000.0
+        if _metrics_at_round_trip(bars, positions, hi, start_equity)["total_return"] <= 0.0:
+            for _ in range(40):
+                mid = (lo + hi) / 2.0
+                r = _metrics_at_round_trip(bars, positions, mid, start_equity)["total_return"]
+                if r > 0.0:
+                    lo = mid
+                else:
+                    hi = mid
+            breakeven = round((lo + hi) / 2.0, 2)
     return {
-        "baseline_round_trip_bps": baseline_round_trip_bps,
-        "headline_total_return": _round(compounded_at(baseline_round_trip_bps)),
-        "stress_total_return_by_bps": levels,
-        "breakeven_round_trip_bps": _breakeven_bps(trade_gross_returns),
-        "label": "SENSITIVITY ONLY — baseline 120 bps remains the headline cost model.",
+        "baseline_round_trip_bps": BASELINE_ROUND_TRIP_BPS,
+        "baseline_total_return": base["total_return"],
+        "stress_levels": levels,
+        "approx_breakeven_round_trip_bps": breakeven,
     }
 
 
-def _breakeven_bps(trade_gross_returns, lo: int = 0, hi: int = 5000) -> Optional[int]:
-    """Smallest 1-bp round-trip cost at which compounded OOS return turns <= 0.
-    Binary search; returns None if even hi bps stays positive."""
-    def comp(bps):
-        c = bps / 10000.0
-        mult = 1.0
-        for g in trade_gross_returns:
-            mult *= (1.0 + float(g)) * (1.0 - c)
-        return mult - 1.0
+# ===========================================================================
+# Section 6 -- Outlier sensitivity
+# ===========================================================================
+def outlier_sensitivity(bars, positions, top_k=(1, 3)):
+    """Recompute the compounded trade-return edge excluding the best, the worst,
+    and the small top-k best/worst OOS trades. Flags an outlier-dependent edge.
+    Descriptive; the unmodified result stays official."""
+    ledger = _oos_trade_ledger(bars, positions, BASELINE_ROUND_TRIP_BPS)
+    rets = sorted(t["net_return"] for t in ledger)
 
-    if comp(lo) <= 0:
-        return lo
-    if comp(hi) > 0:
-        return None
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if comp(mid) > 0:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo
+    def _compound(seq):
+        eq = 1.0
+        for r in seq:
+            eq *= (1.0 + r)
+        return eq - 1.0
 
-
-def outlier_sensitivity(trade_returns, top_k=(1, 2, 3)) -> dict:
-    """Recompute compounded OOS return after removing the single best, the single
-    worst, and the top-k largest-magnitude trades. The UNMODIFIED figure stays
-    the official one; these are robustness diagnostics only."""
-    rs = [float(x) for x in trade_returns]
-    base = compound_returns(rs)
+    base = _compound(rets)
     out = {
-        "base_total_return": _round(base),
-        "ex_best": _round(compound_returns([x for x in rs if x != max(rs)])) if rs else None,
-        "ex_worst": _round(compound_returns([x for x in rs if x != min(rs)])) if rs else None,
-        "ex_top_k": {},
-        "note": "Diagnostic only; the unmodified result remains the official figure.",
+        "n_trades": len(rets),
+        "compounded_trade_return_all": base,
+        "exclude_best": _compound(rets[:-1]) if rets else None,
+        "exclude_worst": _compound(rets[1:]) if rets else None,
     }
     for k in top_k:
-        kept = _drop_top_k_by_magnitude(rs, k)
-        out["ex_top_k"][str(k)] = _round(compound_returns(kept))
+        if len(rets) > 2 * k:
+            out[f"exclude_top{k}_best"] = _compound(rets[:-k])
+            out[f"exclude_top{k}_worst"] = _compound(rets[k:])
+    # Outlier-dependent if dropping the single best flips the edge sign.
+    out["edge_outlier_dependent"] = bool(
+        rets and base > 0.0 and out["exclude_best"] is not None
+        and out["exclude_best"] <= 0.0
+    )
     return out
 
 
-def _drop_top_k_by_magnitude(rs, k):
-    order = sorted(range(len(rs)), key=lambda i: abs(rs[i]), reverse=True)
-    drop = set(order[:k])
-    return [x for i, x in enumerate(rs) if i not in drop]
-
-
-def simple_trend_regime(prices, lookback: int = PRIMARY_LOOKBACK):
-    """Pre-declared, descriptive trend label per bar derived ONLY from frozen
-    prices: 'bull' if price[i] > price[i-lookback] else 'bear'. Bars before the
-    lookback warmup are labeled 'warmup'. No external data, no look-ahead beyond
-    the trailing window."""
-    labels = []
-    for i in range(len(prices)):
-        if i < lookback:
-            labels.append("warmup")
+# ===========================================================================
+# Section 7 -- Regime sensitivity
+# ===========================================================================
+def regime_sensitivity(bars, positions, start_equity):
+    """Bucket OOS bars by PRE-DECLARED trailing vol (>/<= threshold) and trend
+    (price vs trailing SMA) proxies -- computed only from frozen bars, no
+    look-ahead -- and report the strategy's bucketed contribution so the edge is
+    not confined to a single regime."""
+    buckets = {
+        "low_vol": [], "high_vol": [], "uptrend": [], "downtrend": [],
+        "vol_undefined": [], "trend_undefined": [],
+    }
+    n = min(len(bars), len(positions))
+    for t in range(1, n):
+        ann_vol = cbr._rolling_annualized_vol(bars, t, REGIME_VOL_WINDOW)
+        if ann_vol is None:
+            buckets["vol_undefined"].append(t)
+        elif ann_vol <= REGIME_VOL_THRESHOLD:
+            buckets["low_vol"].append(t)
         else:
-            labels.append("bull" if float(prices[i]) > float(prices[i - lookback]) else "bear")
-    return labels
+            buckets["high_vol"].append(t)
+        if t >= REGIME_TREND_SMA:
+            sma = sum(b.close for b in bars[t - REGIME_TREND_SMA:t]) / REGIME_TREND_SMA
+            (buckets["uptrend"] if bars[t].close > sma else buckets["downtrend"]).append(t)
+        else:
+            buckets["trend_undefined"].append(t)
 
+    def _bucket_return(idxs):
+        eq = 1.0
+        for t in idxs:
+            ret = bars[t].close / bars[t - 1].close - 1.0
+            eq *= (1.0 + positions[t] * ret)
+        return eq - 1.0
 
-def regime_sensitivity(daily_returns, regime_labels) -> dict:
-    """Bucket the OOS daily returns by a pre-declared regime label and report the
-    compounded return + day count per bucket. Confirms the edge is not confined
-    to a single regime."""
-    buckets: dict = {}
-    n = min(len(daily_returns), len(regime_labels))
-    for i in range(n):
-        lab = regime_labels[i]
-        if lab == "warmup":
-            continue
-        buckets.setdefault(lab, []).append(float(daily_returns[i][1]))
+    summary = {}
+    for name, idxs in buckets.items():
+        summary[name] = {
+            "n_bars": len(idxs),
+            "strategy_return_in_bucket": _bucket_return(idxs) if idxs else 0.0,
+        }
+    decisive = [k for k in ("low_vol", "high_vol", "uptrend", "downtrend")
+                if summary[k]["strategy_return_in_bucket"] > 0.0]
     return {
-        "by_regime": {
-            lab: {"total_return": _round(compound_returns(rs)), "n_days": len(rs)}
-            for lab, rs in sorted(buckets.items())
+        "proxies": {
+            "vol_window": REGIME_VOL_WINDOW,
+            "vol_threshold_annualized": REGIME_VOL_THRESHOLD,
+            "trend_sma": REGIME_TREND_SMA,
+            "look_ahead": False,
         },
-        "regime_proxy": f"simple trailing-{PRIMARY_LOOKBACK} trend sign from frozen prices",
-        "note": "Descriptive; regime proxy derived only from frozen V002 bars; no look-ahead.",
+        "buckets": summary,
+        "positive_regime_buckets": decisive,
+        "confined_to_single_regime": len(decisive) <= 1,
     }
 
 
-def basket_vs_per_asset(per_asset_oos: dict, basket_oos_return: Optional[float]) -> dict:
-    """Compare the allocate-once equal-weight basket OOS view against per-asset
-    N=20 OOS, quantifying how much edge survives equal-weight basketing."""
-    per = {a: _round(m.get("total_return")) for a, m in per_asset_oos.items()}
-    vals = [v for v in per.values() if v is not None]
-    avg = sum(vals) / len(vals) if vals else None
+# ===========================================================================
+# Section 8 -- Basket vs per-asset behavior
+# ===========================================================================
+def basket_vs_per_asset(per_asset_bars, start_equity):
+    """Allocate-once equal-weight basket OOS vs per-asset N=20: how much edge
+    survives equal-weight basketing (no rebalance). Construction unchanged."""
+    per_asset = {}
+    for asset, bars in per_asset_bars.items():
+        pos, err = _positions_for(bars, PRIMARY_LOOKBACK)
+        if err is not None:
+            per_asset[asset] = {"error": err}
+            continue
+        m = _metrics_at_round_trip(bars, pos, BASELINE_ROUND_TRIP_BPS, start_equity)
+        per_asset[asset] = {"total_return": m["total_return"], "trade_count": m["trade_count"]}
+    valid = {a: d for a, d in per_asset.items() if "total_return" in d}
+    basket_return = (sum(d["total_return"] for d in valid.values()) / len(valid)
+                     if valid else None)
+    mean_solo = basket_return  # equal-weight allocate-once == mean of per-asset legs
     return {
-        "per_asset_oos_total_return": per,
-        "equal_weight_mean_of_per_asset": _round(avg),
-        "allocate_once_basket_oos_total_return": _round(basket_oos_return),
-        "edge_retained_vs_mean": (
-            _round(basket_oos_return - avg)
-            if (basket_oos_return is not None and avg is not None) else None),
-        "construction": "allocate-once, no daily rebalance (unchanged); reporting clarification only.",
+        "per_asset_solo": per_asset,
+        "equal_weight_basket_oos_return": basket_return,
+        "mean_per_asset_oos_return": mean_solo,
+        "rebalance": "none (allocate once)",
     }
 
 
-def parameter_neighborhood(results_by_n: Optional[dict] = None) -> dict:
-    """BOUNDED, pre-registered stability probe around N=20 (default {18,20,22}).
+# ===========================================================================
+# Section 9 -- Small parameter neighborhood (SENSITIVITY, not optimization)
+# ===========================================================================
+def neighborhood_sensitivity(bars, start_equity,
+                             lookbacks=NEIGHBORHOOD_LOOKBACKS):
+    """Probe N in the bounded {18, 20, 22} neighborhood as a STABILITY view.
 
-    Reports each neighborhood lookback's OOS total return as a *sensitivity*
-    surface so the reader can see N=20 is locally smooth, not a knife-edge. The
-    winner is hard-fixed at N=20 and is NEVER re-selected from this probe. If no
-    results are supplied (build-time schema), the surface is empty but the bounds
-    and the no-optimization guard are still declared."""
-    surface = {}
-    if results_by_n:
-        for n in PARAMETER_NEIGHBORHOOD:
-            if n in results_by_n:
-                surface[str(n)] = _round(results_by_n[n].get("oos_total_return"))
+    This is NOT a re-optimization: the winner is never re-selected, the primary
+    stays N=20, and no N is promoted by being best here. Reports each N's OOS
+    return/trades purely so the operator can see whether 20 sits on a plateau."""
+    out = {}
+    for n in lookbacks:
+        pos, err = _positions_for(bars, n)
+        if err is not None:
+            out[str(n)] = {"error": err}
+            continue
+        m = _metrics_at_round_trip(bars, pos, BASELINE_ROUND_TRIP_BPS, start_equity)
+        out[str(n)] = {
+            "lookback": n,
+            "total_return": m["total_return"],
+            "trade_count": m["trade_count"],
+            "is_primary": n == PRIMARY_LOOKBACK,
+        }
     return {
-        "neighborhood": list(PARAMETER_NEIGHBORHOOD),
-        "winner_fixed_at": PRIMARY_LOOKBACK,
-        "is_sensitivity_not_optimization": NEIGHBORHOOD_IS_SENSITIVITY_NOT_OPTIMIZATION,
-        "winner_reselected_from_probe": False,
-        "oos_total_return_by_n": surface,
-        "guard": ("Bounded pre-registered neighborhood; stability evidence only; "
-                  "the winner is NOT re-selected. Run only if the plan authorizes it."),
+        "neighborhood": list(lookbacks),
+        "primary_lookback": PRIMARY_LOOKBACK,
+        "winner_reselected": False,
+        "is_sensitivity_not_optimization": True,
+        "per_lookback": out,
     }
 
 
-# ---------------------------------------------------------------------------
-# Schema assembler + serialization (read-only).
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Assembler -- the full 9-section deeper-validation report (no execution)
+# ===========================================================================
+def build_deeper_validation_report(per_asset, start_equity=cbr.DEFAULT_START_EQUITY):
+    """Assemble the 9-section deeper-validation report from per-asset OOS bars.
 
-def build_deeper_validation_schema(inputs: Optional[dict] = None) -> dict:
-    """Assemble the deeper-validation report schema.
+    ``per_asset`` is a list of ``{"asset": str, "bars": [cbr.Bar, ...]}`` where
+    ``bars`` are the OOS-window bars only. Runs NO full backtest over frozen
+    data; performs only descriptive analysis on the supplied series. Verdict
+    ceiling stays WATCH; no promotion; all safety flags pinned false."""
+    per_asset_bars = {}
+    per_asset_metrics = {}
+    notes = {}
+    for item in per_asset:
+        asset = item["asset"]
+        bars = item["bars"]
+        per_asset_bars[asset] = bars
+        pos, err = _positions_for(bars, PRIMARY_LOOKBACK)
+        if err is not None:
+            notes[asset] = err
+            continue
+        m = _metrics_at_round_trip(bars, pos, BASELINE_ROUND_TRIP_BPS, start_equity)
+        per_asset_metrics[asset] = m
 
-    With ``inputs=None`` this returns the BUILD-time capability contract: every
-    required section is present as a declared placeholder (``computed=False``) so
-    consumers can see the full shape without any backtest having run. With
-    ``inputs`` supplied (e.g. unit tests, or a future approved execution feeding
-    real N=20 OOS series), each section is computed from those inputs.
-    """
-    computed = inputs is not None
-    sections: dict = {}
+    sections = {
+        "1_yearly_oos_breakdown": {},
+        "2_monthly_return_drawdown_profile": {},
+        "5_fee_slippage_stress": {},
+        "6_outlier_sensitivity": {},
+        "7_regime_sensitivity": {},
+    }
+    for asset, bars in per_asset_bars.items():
+        pos, err = _positions_for(bars, PRIMARY_LOOKBACK)
+        if err is not None:
+            continue
+        sections["1_yearly_oos_breakdown"][asset] = yearly_oos_breakdown(bars, pos, start_equity)
+        sections["2_monthly_return_drawdown_profile"][asset] = monthly_return_drawdown(bars, pos, start_equity)
+        sections["5_fee_slippage_stress"][asset] = fee_slippage_stress(bars, pos, start_equity)
+        sections["6_outlier_sensitivity"][asset] = outlier_sensitivity(bars, pos)
+        sections["7_regime_sensitivity"][asset] = regime_sensitivity(bars, pos, start_equity)
 
-    if not computed:
-        for name in REQUIRED_SECTIONS:
-            sections[name] = {"computed": False,
-                              "description": _section_description(name)}
-    else:
-        dr = inputs.get("daily_returns", [])
-        pa = inputs.get("per_asset_oos", {})
-        pat = inputs.get("per_asset_trades", pa)
-        sections["yearly_oos_breakdown"] = yearly_oos_breakdown(dr)
-        sections["monthly_return_drawdown_profile"] = monthly_return_drawdown_profile(dr)
-        sections["per_asset_consistency"] = per_asset_consistency(pa)
-        sections["trade_count_and_turnover"] = trade_count_and_turnover(pat)
-        sections["fee_slippage_stress"] = fee_slippage_stress(
-            inputs.get("trade_gross_returns", []))
-        sections["outlier_sensitivity"] = outlier_sensitivity(
-            inputs.get("trade_returns", []))
-        sections["regime_sensitivity"] = regime_sensitivity(
-            dr, inputs.get("regime_labels", []))
-        sections["basket_vs_per_asset"] = basket_vs_per_asset(
-            pa, inputs.get("basket_oos_return"))
-        sections["parameter_neighborhood"] = parameter_neighborhood(
-            inputs.get("neighborhood_results"))
+    sections["3_per_asset_consistency"] = per_asset_consistency(per_asset_metrics)
+    sections["4_trade_count_and_turnover"] = trade_count_turnover(per_asset_metrics)
+    sections["8_basket_vs_per_asset"] = basket_vs_per_asset(per_asset_bars, start_equity)
+    sections["9_small_parameter_neighborhood_sensitivity"] = {
+        asset: neighborhood_sensitivity(bars, start_equity)
+        for asset, bars in per_asset_bars.items()
+    }
 
     return {
-        "schema_version": SCHEMA_VERSION,
-        "layer": LAYER_NAME,
-        "config_name": CONFIG_NAME,
-        "build_only": True,
-        "is_execution_result": False,
-        "ran_backtest": False,
+        "layer": LAYER,
+        "config_mode": CONFIG_NAME,
+        "executes_backtest": False,
+        "status": "DEEPER_VALIDATION_ANALYSIS_ONLY",
+        "dataset_id": "CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002",
+        "is_window": {"start": cbr.V002_IS_START, "end": cbr.V002_IS_END},
+        "oos_window": {"start": cbr.V002_OOS_START, "end": cbr.V002_OOS_END},
         "primary_lookback": PRIMARY_LOOKBACK,
         "reference_lookback": REFERENCE_LOOKBACK,
-        "parameter_neighborhood": list(PARAMETER_NEIGHBORHOOD),
-        "neighborhood_is_sensitivity_not_optimization": NEIGHBORHOOD_IS_SENSITIVITY_NOT_OPTIMIZATION,
-        "baseline_round_trip_bps": BASELINE_ROUND_TRIP_BPS,
-        "per_asset_oos_trade_floor": PER_ASSET_OOS_TRADE_FLOOR,
-        "computed": computed,
-        "required_sections": list(REQUIRED_SECTIONS),
-        "sections": sections,
+        "neighborhood_lookbacks": list(NEIGHBORHOOD_LOOKBACKS),
+        "neighborhood_is_sensitivity_not_optimization": True,
+        "winner_reselected": False,
+        "cost_model_round_trip_bps": BASELINE_ROUND_TRIP_BPS,
+        "verdict_ceiling": VERDICT_CEILING,
+        "insufficient_history_notes": notes,
+        "validation_sections": sections,
         "safety_flags": dict(SAFETY_FLAGS),
-        "lane_status_unchanged": "WATCH / MIXED",
-        "readiness_status_unchanged": "NOT_READY_FOR_REAL_DATA",
-        "source_plan": "reports/crypto_d1_momentum_n20_deeper_validation_plan/report.json",
-        "non_authorization": ("BUILD ONLY capability. Runs no backtest, executes "
-                              "no task, mutates no dataset, and authorizes no "
-                              "paper/live/broker/exchange/order/fetch action. No "
-                              "ACTIVE/STRONG promotion. No Bundle 23."),
+        "non_authorization_statement": NON_AUTHORIZATION,
     }
 
 
-def _section_description(name: str) -> str:
+def show_plan():
+    """Read-only descriptor of this deeper-validation mode (no execution)."""
     return {
-        "yearly_oos_breakdown": "Per-calendar-year compounded OOS return per asset (read-only slice; no re-split).",
-        "monthly_return_drawdown_profile": "Per-month OOS return + rolling max-drawdown; worst month, longest drawdown.",
-        "per_asset_consistency": "BTC/ETH/SOL N=20 OOS sign/floor/drawdown/turnover; flags any single carrier asset.",
-        "trade_count_and_turnover": "OOS trade counts + turnover; per-asset 20-trade floor clearance; family total.",
-        "fee_slippage_stress": "Re-price the SAME N=20 OOS ledger at 150/180/240 bps; breakeven cost. Sensitivity only.",
-        "outlier_sensitivity": "Recompute excluding best/worst and small top-k trades; unmodified figure stays official.",
-        "regime_sensitivity": "Bucket OOS by a pre-declared trailing-trend regime proxy from frozen prices; no look-ahead.",
-        "basket_vs_per_asset": "Allocate-once equal-weight basket OOS vs per-asset N=20; how much edge survives basketing.",
-        "parameter_neighborhood": "Bounded {18,20,22} stability probe; sensitivity not optimization; winner fixed at N=20.",
-    }.get(name, name)
+        "config_name": CONFIG_NAME,
+        "layer": LAYER,
+        "purpose": (
+            "Deeper validation of the pre-registered N=20 Crypto-D1 momentum "
+            "candidate via nine descriptive views of the frozen OOS evidence. "
+            "No new parameter search; N stays 20; verdict ceiling WATCH."
+        ),
+        "primary_lookback": PRIMARY_LOOKBACK,
+        "reference_lookback": REFERENCE_LOOKBACK,
+        "neighborhood_lookbacks": list(NEIGHBORHOOD_LOOKBACKS),
+        "neighborhood_is_sensitivity_not_optimization": True,
+        "validation_sections": list(VALIDATION_SECTION_KEYS),
+        "is_window": {"start": cbr.V002_IS_START, "end": cbr.V002_IS_END},
+        "oos_window": {"start": cbr.V002_OOS_START, "end": cbr.V002_OOS_END},
+        "cost_model_round_trip_bps": BASELINE_ROUND_TRIP_BPS,
+        "stress_round_trip_bps": list(STRESS_ROUND_TRIP_BPS),
+        "runner_integration": "DEFERRED to a separately-approved step",
+        "build_only": True,
+        "executes_backtest": False,
+        "safety_flags": dict(SAFETY_FLAGS),
+        "non_authorization_statement": NON_AUTHORIZATION,
+    }
 
 
-def to_stable_json(obj: dict) -> str:
-    return json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+# ===========================================================================
+# Deterministic serialization + opt-in confined writer + read-only CLI.
+# ===========================================================================
+def to_stable_json(obj) -> str:
+    """Deterministic, sorted-key JSON (matches the factory convention). Uses
+    default=str so any non-JSON scalars serialize stably and byte-identically."""
+    return json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=False,
+                      default=str) + "\n"
 
 
-def render_markdown(schema: dict) -> str:
-    lines = ["# Crypto-D1 Momentum N=20 — Deeper-Validation capability (BUILD ONLY)", ""]
-    lines.append(f"- config_name: `{schema.get('config_name')}`")
-    lines.append(f"- **build_only: {schema.get('build_only')}  |  ran_backtest: "
-                 f"{schema.get('ran_backtest')}  |  is_execution_result: "
-                 f"{schema.get('is_execution_result')}**")
-    lines.append(f"- primary_lookback: {schema.get('primary_lookback')}  |  "
-                 f"neighborhood (sensitivity only): {schema.get('parameter_neighborhood')}")
-    lines.append(f"- lane: {schema.get('lane_status_unchanged')}  |  "
-                 f"readiness: {schema.get('readiness_status_unchanged')}")
-    lines += ["", "## Required validation sections", ""]
-    for name in schema.get("required_sections", []):
-        lines.append(f"- **{name}** — {_section_description(name)}")
-    lines += ["", "## Safety flags (all non-authorizing)", ""]
-    for k, v in sorted(schema.get("safety_flags", {}).items()):
-        lines.append(f"- {k}: {v}")
-    lines += ["", schema.get("non_authorization", ""), ""]
-    return "\n".join(lines) + "\n"
-
-
-def write_build_report(base: Path, schema: dict) -> list:
-    """Opt-in writer. Writes ONLY under the single build folder. Returns the
-    repo-relative paths written."""
+def write_build_report(base, descriptor) -> list:
+    """Opt-in writer. Writes ONLY under the single build folder
+    reports/crypto_d1_momentum_n20_deeper_validation_build/. Returns the
+    repo-relative paths written. Writes no result/backtest data."""
     out_dir = Path(base) / _BUILD_OUT_RELDIR
     out_dir.mkdir(parents=True, exist_ok=True)
-    json_path = out_dir / "capability_schema.json"
-    md_path = out_dir / "capability_schema.md"
-    json_path.write_text(to_stable_json(schema), encoding="utf-8")
-    md_path.write_text(render_markdown(schema), encoding="utf-8")
-    return [json_path.relative_to(base).as_posix(),
-            md_path.relative_to(base).as_posix()]
+    json_path = out_dir / "capability_plan.json"
+    json_path.write_text(to_stable_json(descriptor), encoding="utf-8")
+    return [json_path.relative_to(base).as_posix()]
 
 
 def main(argv=None) -> int:
+    """Read-only CLI: prints the deeper-validation plan descriptor. Runs NO
+    backtest, performs no simulation, executes nothing, returns 0."""
     parser = argparse.ArgumentParser(
-        description="Crypto-D1 N=20 deeper-validation capability (BUILD ONLY; "
-                    "runs no backtest, executes nothing).")
+        description="Crypto-D1 N=20 deeper-validation plan descriptor (BUILD "
+                    "ONLY; runs no backtest, executes nothing).")
     parser.add_argument("--base", default=None, help="repo root (default: cwd)")
-    parser.add_argument("--format", choices=("json", "md"), default="json")
     parser.add_argument("--write", action="store_true",
-                        help="ALSO write capability_schema.json/.md under "
+                        help="ALSO write capability_plan.json under "
                              "reports/crypto_d1_momentum_n20_deeper_validation_build/")
     args = parser.parse_args(argv)
-    base = Path(args.base) if args.base else Path(".")
-    schema = build_deeper_validation_schema(None)  # build-time contract only
+    descriptor = show_plan()  # read-only; no simulation, no frozen-data access
     if args.write:
-        written = write_build_report(base, schema)
+        base = Path(args.base) if args.base else Path(".")
+        written = write_build_report(base, descriptor)
         sys.stderr.write("wrote: " + ", ".join(written) + "\n")
-    sys.stdout.write(render_markdown(schema) if args.format == "md"
-                     else to_stable_json(schema))
+    sys.stdout.write(to_stable_json(descriptor))
     return 0
 
 

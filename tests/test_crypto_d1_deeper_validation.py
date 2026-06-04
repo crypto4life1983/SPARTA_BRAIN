@@ -1,36 +1,26 @@
-"""Crypto-D1 Momentum N=20 deeper-validation capability tests (BUILD ONLY).
+"""Tests for the reconciled Crypto-D1 Momentum N=20 deeper-validation layer.
 
-Pure stdlib + pytest. Every test runs on tiny synthetic inputs; NONE runs a
-backtest, executes a Strategy Factory task, touches real research data, or hits
-the network/broker/exchange/order/fetch paths. Asserts:
-
-  * module is stdlib-only; no network/broker/exchange/order/fetch/subprocess
-    tokens in the source
-  * pure numeric helpers (compound_returns, equity_to_daily_returns,
-    max_drawdown) are correct on hand-checkable inputs
-  * each of the 9 required validation sections computes the expected shape on
-    synthetic ledgers
-  * fee/slippage stress is a re-pricing of the SAME ledger (monotonic in cost)
-    and reports a breakeven
-  * outlier_sensitivity removes best/worst/top-k WITHOUT mutating the official
-    base figure
-  * regime_sensitivity buckets by a frozen-price trend proxy, dropping warmup
-  * parameter_neighborhood is BOUNDED {18,20,22}, labeled sensitivity, winner
-    fixed at N=20 and NEVER re-selected
-  * build-time schema (inputs=None) lists all 9 sections as computed=False and
-    ran_backtest=False
-  * computed schema (inputs supplied) fills all 9 sections
-  * safety flags pinned False; lane/readiness unchanged strings present
-  * to_stable_json is deterministic + sorted
-  * write_build_report writes ONLY under the single build folder
-  * existing momentum_confirmation_v1 runner behavior is untouched (imported
-    runner still exposes its modes and classify_run is WATCH-ceiling)
+Pure stdlib + pytest, synthetic fixtures only. Asserts:
+  * the deeper-validation mode/config exists and N=20 is the PRIMARY target;
+  * the {18,20,22} neighborhood is bounded + labeled sensitivity, not
+    optimization (winner never re-selected, primary stays 20);
+  * the report schema includes all nine required validation sections;
+  * safety flags stay pinned false; non-authorization statement present;
+  * no network / no subprocess / no broker / no order / no fetch paths;
+  * the module imports the runner only (no parallel cost-model re-implementation
+    of _simulate_equity) and runs no full frozen-data backtest;
+  * momentum_confirmation_v1 runner behavior is untouched (smoke import check);
+  * the deterministic JSON serializer is byte-stable;
+  * the opt-in writer is confined to the single build folder;
+  * the read-only CLI returns 0 and runs no simulation.
 """
 from __future__ import annotations
 
 import ast
+import io
 import json
 import sys
+import tokenize
 from pathlib import Path
 
 import pytest
@@ -40,367 +30,281 @@ _TOOLS_DIR = _REPO_ROOT / "tools"
 if str(_TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(_TOOLS_DIR))
 
+import crypto_d1_backtest_runner as cbr  # noqa: E402
 import crypto_d1_deeper_validation as dv  # noqa: E402
 
 TOOL_FILE = _TOOLS_DIR / "crypto_d1_deeper_validation.py"
 
 
 # ---------------------------------------------------------------------------
-# Synthetic input helpers (NOT real data).
+# Synthetic Bar fixture -- deterministic, NEVER touches real research data.
 # ---------------------------------------------------------------------------
-def _dated_returns(pairs):
-    """[(YYYY-MM-DD, simple_return), ...] from a list of (date, r)."""
-    return [(d, float(r)) for d, r in pairs]
+def _bars(symbol: str, closes, start="2024-06-17"):
+    from datetime import datetime, timedelta
+    d0 = datetime.strptime(start, "%Y-%m-%d")
+    out = []
+    for i, c in enumerate(closes):
+        ts = (d0 + timedelta(days=i)).strftime("%Y-%m-%d")
+        out.append(cbr.Bar(timestamp=ts, open=c, high=c, low=c, close=float(c),
+                           volume=1.0, symbol=symbol, source="synthetic",
+                           quote_currency="USD"))
+    return out
+
+
+def _trending_closes(n, base=100.0, step=1.0, wobble=0.0):
+    """Mild uptrend with optional alternating wobble so momentum opens trades."""
+    out = []
+    price = base
+    for i in range(n):
+        price += step + (wobble if i % 2 == 0 else -wobble)
+        out.append(price)
+    return out
+
+
+def _three_assets(n=200):
+    return [
+        {"asset": "BTC", "bars": _bars("BTCUSDT", _trending_closes(n, 100, 1.0, 3.0))},
+        {"asset": "ETH", "bars": _bars("ETHUSDT", _trending_closes(n, 50, 0.5, 2.0))},
+        {"asset": "SOL", "bars": _bars("SOLUSDT", _trending_closes(n, 20, 0.3, 1.5))},
+    ]
 
 
 # ---------------------------------------------------------------------------
-# Source-level safety: no forbidden execution surfaces.
+# Identity / mode-exists
 # ---------------------------------------------------------------------------
-def test_source_imports_no_forbidden_modules():
-    # Parse the AST so prose in the docstring (which legitimately says the module
-    # does NOT use subprocess/broker/exchange/fetch) cannot false-positive. We
-    # assert on actual import statements, not substrings.
-    tree = ast.parse(TOOL_FILE.read_text(encoding="utf-8"))
-    forbidden = {"subprocess", "socket", "requests", "urllib", "http",
-                 "ftplib", "ccxt", "websocket", "ssl", "asyncio"}
+def test_mode_config_exists_and_primary_is_n20():
+    assert dv.CONFIG_NAME == "momentum_n20_deeper_validation_v1"
+    assert dv.PRIMARY_LOOKBACK == 20
+    assert dv.REFERENCE_LOOKBACK == 30
+    plan = dv.show_plan()
+    assert plan["config_name"] == "momentum_n20_deeper_validation_v1"
+    assert plan["primary_lookback"] == 20
+    assert plan["build_only"] is True
+    assert plan["executes_backtest"] is False
+
+
+def test_neighborhood_is_bounded_sensitivity_not_optimization():
+    assert dv.NEIGHBORHOOD_LOOKBACKS == (18, 20, 22)
+    assert 20 in dv.NEIGHBORHOOD_LOOKBACKS
+    assert len(dv.NEIGHBORHOOD_LOOKBACKS) == 3
+    bars = _bars("BTCUSDT", _trending_closes(120, 100, 1.0, 3.0))
+    n = dv.neighborhood_sensitivity(bars, cbr.DEFAULT_START_EQUITY)
+    assert n["is_sensitivity_not_optimization"] is True
+    assert n["winner_reselected"] is False
+    assert n["primary_lookback"] == 20
+    assert n["per_lookback"]["20"]["is_primary"] is True
+    assert n["per_lookback"]["18"]["is_primary"] is False
+    assert n["per_lookback"]["22"]["is_primary"] is False
+
+
+# ---------------------------------------------------------------------------
+# Full report schema -- all nine sections present
+# ---------------------------------------------------------------------------
+def test_report_has_all_nine_validation_sections():
+    rep = dv.build_deeper_validation_report(_three_assets(n=220))
+    secs = rep["validation_sections"]
+    for key in dv.VALIDATION_SECTION_KEYS:
+        assert key in secs, f"missing section {key}"
+    assert rep["config_mode"] == "momentum_n20_deeper_validation_v1"
+    assert rep["executes_backtest"] is False
+    assert rep["primary_lookback"] == 20
+    assert rep["verdict_ceiling"] == "WATCH"
+
+
+def test_report_is_json_serializable_and_deterministic():
+    fixt = _three_assets(n=210)
+    a = dv.build_deeper_validation_report(fixt)
+    b = dv.build_deeper_validation_report(fixt)
+    sa = json.dumps(a, sort_keys=True, default=str)
+    sb = json.dumps(b, sort_keys=True, default=str)
+    assert sa == sb  # pure analysis -> byte-identical
+
+
+# ---------------------------------------------------------------------------
+# Per-section behavior
+# ---------------------------------------------------------------------------
+def test_yearly_and_monthly_breakdowns_populated():
+    bars = _bars("BTCUSDT", _trending_closes(420, 100, 1.0, 3.0))  # spans 2 years
+    pos, err = cbr.momentum_continuation(bars, 20)
+    assert err is None
+    yr = dv.yearly_oos_breakdown(bars, pos, cbr.DEFAULT_START_EQUITY)
+    assert len(yr) >= 2
+    for d in yr.values():
+        assert "total_return" in d and "trade_count" in d and "max_drawdown" in d
+    mo = dv.monthly_return_drawdown(bars, pos, cbr.DEFAULT_START_EQUITY)
+    assert mo["per_month"]
+    assert "longest_drawdown_bars" in mo and "worst_month" in mo
+
+
+def test_fee_stress_is_additive_and_baseline_120():
+    bars = _bars("BTCUSDT", _trending_closes(160, 100, 1.0, 3.0))
+    pos, _ = cbr.momentum_continuation(bars, 20)
+    s = dv.fee_slippage_stress(bars, pos, cbr.DEFAULT_START_EQUITY)
+    assert s["baseline_round_trip_bps"] == 120.0
+    assert set(s["stress_levels"]) == {"150", "180", "240"}
+    # Higher cost never increases return (monotonic non-increasing).
+    base = s["baseline_total_return"]
+    assert s["stress_levels"]["150"]["total_return"] <= base + 1e-9
+    assert s["stress_levels"]["240"]["total_return"] <= s["stress_levels"]["180"]["total_return"] + 1e-9
+
+
+def test_outlier_and_regime_sections_shape():
+    bars = _bars("BTCUSDT", _trending_closes(180, 100, 1.0, 4.0))
+    pos, _ = cbr.momentum_continuation(bars, 20)
+    o = dv.outlier_sensitivity(bars, pos)
+    assert "compounded_trade_return_all" in o and "edge_outlier_dependent" in o
+    r = dv.regime_sensitivity(bars, pos, cbr.DEFAULT_START_EQUITY)
+    assert r["proxies"]["look_ahead"] is False
+    assert set(("low_vol", "high_vol", "uptrend", "downtrend")).issubset(r["buckets"])
+
+
+def test_per_asset_consistency_and_basket():
+    rep = dv.build_deeper_validation_report(_three_assets(n=220))
+    cons = rep["validation_sections"]["3_per_asset_consistency"]
+    assert set(cons["per_asset"]) == {"BTC", "ETH", "SOL"}
+    basket = rep["validation_sections"]["8_basket_vs_per_asset"]
+    assert basket["rebalance"] == "none (allocate once)"
+    assert "equal_weight_basket_oos_return" in basket
+
+
+# ---------------------------------------------------------------------------
+# Cost single-source-of-truth
+# ---------------------------------------------------------------------------
+def test_baseline_round_trip_derived_from_runner_constants():
+    expected = 2.0 * (cbr.V002_FALLBACK_FEE_BPS + cbr.V002_FALLBACK_SLIPPAGE_BPS
+                      + cbr.V002_FALLBACK_SPREAD_PROXY_BPS)
+    assert dv.BASELINE_ROUND_TRIP_BPS == expected == 120.0
+
+
+# ---------------------------------------------------------------------------
+# Safety
+# ---------------------------------------------------------------------------
+def test_safety_flags_pinned_false():
+    rep = dv.build_deeper_validation_report(_three_assets(n=120))
+    flags = rep["safety_flags"]
+    assert flags["research_only"] is True
+    for k in ("paper_live_authorized", "broker_path_enabled", "exchange_path_enabled",
+              "order_path_enabled", "fetch_live_data_enabled", "dataset_mutation_allowed",
+              "active_strong_promoted", "bundle_23_started", "execution_authorized"):
+        assert flags[k] is False, f"{k} must be pinned false"
+    assert rep["non_authorization_statement"]
+
+
+def _code_names_and_strings(src: str):
+    """Return (code identifiers, code string-literal contents) with comments and
+    docstring/prose removed -- so safety PROSE mentioning e.g. 'subprocess' is
+    not mistaken for an execution path."""
+    names, strings = set(), []
+    toks = tokenize.generate_tokens(io.StringIO(src).readline)
+    for tok in toks:
+        if tok.type == tokenize.NAME:
+            names.add(tok.string)
+        elif tok.type == tokenize.STRING:
+            strings.append(tok.string)
+    return names, strings
+
+
+def test_source_has_no_execution_or_network_paths():
+    src = TOOL_FILE.read_text(encoding="utf-8")
+    names, strings = _code_names_and_strings(src)
+    # Forbidden execution/network identifiers must not appear as CODE names.
+    for bad in ("subprocess", "socket", "urllib", "requests", "ccxt", "Popen",
+                "system", "popen"):
+        assert bad not in names, f"forbidden code identifier: {bad!r}"
+    # No URL/exchange/credential literals in actual string constants.
+    joined = "".join(strings).lower()
+    for bad in ("http://", "https://", "binance.com", "private_key",
+                "api_secret", "place_order"):
+        assert bad not in joined, f"forbidden string literal: {bad!r}"
+
+
+def test_module_imports_allowlist_only():
+    src = TOOL_FILE.read_text(encoding="utf-8")
+    tree = ast.parse(src)
     imported = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            for n in node.names:
-                imported.add(n.name.split(".")[0])
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                imported.add(node.module.split(".")[0])
-    bad = imported & forbidden
-    assert not bad, f"forbidden imports in source: {sorted(bad)}"
-    # Allowed stdlib surface only.
-    assert imported <= {"__future__", "argparse", "json", "sys", "pathlib",
-                        "typing"}, f"unexpected imports: {sorted(imported)}"
+            for a in node.names:
+                imported.add(a.name.split(".")[0])
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module.split(".")[0])
+    allowed = {"argparse", "json", "sys", "pathlib", "datetime",
+               "crypto_d1_backtest_runner", "__future__"}
+    assert imported <= allowed, f"unexpected imports: {imported - allowed}"
+    for bad in ("subprocess", "socket", "urllib", "requests", "http", "ccxt"):
+        assert bad not in imported, f"unexpected import: {bad}"
 
 
 def test_source_has_no_execution_call_surfaces():
-    # Code-level (not prose) check: no call expressions to known execution /
-    # network surfaces. We scan call source segments excluding the docstring.
     src = TOOL_FILE.read_text(encoding="utf-8")
     tree = ast.parse(src)
+    forbidden_attrs = {"Popen", "run", "call", "system", "popen", "urlopen",
+                       "connect", "request", "place_order", "create_order"}
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
-            seg = (ast.get_source_segment(src, node) or "").lower()
-            for tok in ("subprocess", "popen", "socket(", "urlopen",
-                        "requests.", "place_order", "create_order", "ccxt"):
-                assert tok not in seg, f"forbidden call surface: {tok}"
+            f = node.func
+            if isinstance(f, ast.Attribute) and f.attr in forbidden_attrs:
+                # cbr._simulate_equity etc are fine; flag os/subprocess/socket attrs.
+                root = f.value
+                root_name = root.id if isinstance(root, ast.Name) else None
+                assert root_name not in ("os", "subprocess", "socket", "urllib"), (
+                    f"forbidden call surface: {root_name}.{f.attr}")
 
 
-def test_module_imports_no_runner():
-    # The capability is standalone; it must not import the heavy backtest runner.
-    assert "crypto_d1_backtest_runner" not in sys.modules or True
+def test_reuses_runner_simulator_single_source_of_truth():
+    # The helper must delegate cost/equity math to the runner, not re-implement it.
     src = TOOL_FILE.read_text(encoding="utf-8")
-    assert "import crypto_d1_backtest_runner" not in src
-    assert "from crypto_d1_backtest_runner" not in src
+    assert "crypto_d1_backtest_runner" in src
+    assert "_simulate_equity" in src
+    assert "momentum_continuation" in src
+
+
+def test_runner_confirmation_mode_untouched_smoke():
+    # momentum_confirmation_v1 wiring still present & importable (no regression).
+    assert cbr.MOMENTUM_CONFIRMATION_CONFIG_NAME == "momentum_confirmation_v1"
+    assert cbr.MOMENTUM_CONFIRMATION_LOOKBACKS == (20, 30)
+
+
+def test_insufficient_history_is_noted_not_crashed():
+    # Fewer than lookback+1 bars -> momentum skips; report still assembles.
+    short = [{"asset": "BTC", "bars": _bars("BTCUSDT", _trending_closes(10))}]
+    rep = dv.build_deeper_validation_report(short)
+    assert "BTC" in rep["insufficient_history_notes"]
+    assert rep["validation_sections"]["4_trade_count_and_turnover"]["per_asset"] == {}
 
 
 # ---------------------------------------------------------------------------
-# Pure numeric helpers.
+# Deterministic serializer + confined writer + read-only CLI
 # ---------------------------------------------------------------------------
-def test_compound_returns_basic():
-    assert dv.compound_returns([]) == 0.0
-    assert dv.compound_returns([0.1, 0.1]) == pytest.approx(0.21)
-    assert dv.compound_returns([0.5, -0.5]) == pytest.approx(-0.25)
-
-
-def test_equity_to_daily_returns_alignment():
-    dr = dv.equity_to_daily_returns(["d1", "d2"], [1.0, 1.1, 1.21])
-    assert [d for d, _ in dr] == ["d1", "d2"]
-    assert dr[0][1] == pytest.approx(0.1)
-    assert dr[1][1] == pytest.approx(0.1)
-
-
-def test_max_drawdown_simple():
-    eq = [1.0, 1.2, 0.6, 0.9]
-    assert dv.max_drawdown(eq) == pytest.approx(0.6 / 1.2 - 1.0)
-    assert dv.max_drawdown([]) == 0.0
-    assert dv.max_drawdown([1.0, 1.1, 1.2]) == 0.0
-
-
-# ---------------------------------------------------------------------------
-# Section 1: yearly OOS breakdown.
-# ---------------------------------------------------------------------------
-def test_yearly_oos_breakdown_splits_by_year():
-    dr = _dated_returns([
-        ("2024-07-01", 0.1), ("2024-08-01", 0.1),
-        ("2025-01-01", -0.05), ("2025-02-01", 0.2),
-    ])
-    out = dv.yearly_oos_breakdown(dr)
-    assert set(out["by_year"]) == {"2024", "2025"}
-    assert out["by_year"]["2024"]["n_days"] == 2
-    assert out["by_year"]["2024"]["total_return"] == pytest.approx(0.21)
-
-
-# ---------------------------------------------------------------------------
-# Section 2: monthly return / drawdown profile.
-# ---------------------------------------------------------------------------
-def test_monthly_profile_worst_month_and_drawdown():
-    dr = _dated_returns([
-        ("2024-07-01", 0.1), ("2024-07-15", -0.2),
-        ("2024-08-01", 0.05),
-    ])
-    out = dv.monthly_return_drawdown_profile(dr)
-    assert set(out["by_month"]) == {"2024-07", "2024-08"}
-    assert out["worst_month"] == "2024-07"
-    assert out["overall_max_drawdown"] <= 0.0
-    assert out["longest_drawdown_steps"] >= 1
-
-
-# ---------------------------------------------------------------------------
-# Section 3: per-asset consistency.
-# ---------------------------------------------------------------------------
-def test_per_asset_consistency_flags_carrier_and_floor():
-    pa = {
-        "BTC": {"total_return": 1.39, "trade_count": 32, "max_drawdown": -0.15, "turnover": 5},
-        "ETH": {"total_return": 1.61, "trade_count": 31, "max_drawdown": -0.33, "turnover": 5},
-        "SOL": {"total_return": 2.44, "trade_count": 23, "max_drawdown": -0.22, "turnover": 4},
-    }
-    out = dv.per_asset_consistency(pa, floor=20)
-    assert out["all_positive_oos"] is True
-    assert out["all_clear_floor"] is True
-    assert out["highest_return_asset"] == "SOL"
-    assert out["rows"]["SOL"]["clears_per_asset_floor"] is True
-
-
-def test_per_asset_consistency_detects_floor_miss():
-    pa = {
-        "BTC": {"total_return": 1.0, "trade_count": 32},
-        "ETH": {"total_return": 2.0, "trade_count": 19},  # under floor
-    }
-    out = dv.per_asset_consistency(pa, floor=20)
-    assert out["all_clear_floor"] is False
-    assert "ETH" not in out["assets_clearing_floor"]
-
-
-# ---------------------------------------------------------------------------
-# Section 4: trade count & turnover.
-# ---------------------------------------------------------------------------
-def test_trade_count_and_turnover_family_total():
-    pat = {
-        "BTC": {"trade_count": 32, "turnover": 5},
-        "ETH": {"trade_count": 31, "turnover": 5},
-        "SOL": {"trade_count": 23, "turnover": 4},
-    }
-    out = dv.trade_count_and_turnover(pat, floor=20)
-    assert out["family_oos_trades_total"] == 86
-    assert out["all_clear_floor"] is True
-
-
-# ---------------------------------------------------------------------------
-# Section 5: fee / slippage stress.
-# ---------------------------------------------------------------------------
-def test_fee_slippage_stress_monotonic_and_breakeven():
-    # Two winning round-trip trades, pre-cost.
-    gross = [0.05, 0.04]
-    out = dv.fee_slippage_stress(gross, baseline_round_trip_bps=120,
-                                 stress_round_trip_bps=(150, 180, 240))
-    levels = out["stress_total_return_by_bps"]
-    # Higher cost -> lower net return.
-    assert levels["120"] >= levels["150"] >= levels["180"] >= levels["240"]
-    assert out["headline_total_return"] == levels["120"]
-    # A breakeven exists for a finitely-profitable ledger.
-    assert out["breakeven_round_trip_bps"] is not None
-    assert out["breakeven_round_trip_bps"] > 120
-    assert "SENSITIVITY" in out["label"]
-
-
-def test_breakeven_none_when_always_positive():
-    # Impossibly large per-trade gross so even hi=5000 bps stays positive.
-    assert dv._breakeven_bps([10.0, 10.0]) is None
-
-
-# ---------------------------------------------------------------------------
-# Section 6: outlier sensitivity.
-# ---------------------------------------------------------------------------
-def test_outlier_sensitivity_removes_without_mutating_base():
-    rs = [0.5, 0.01, -0.4, 0.02, 0.03]
-    out = dv.outlier_sensitivity(rs, top_k=(1, 2, 3))
-    assert out["base_total_return"] == dv._round(dv.compound_returns(rs))
-    # ex_best removes the single max (0.5) -> lower compounded return.
-    assert out["ex_best"] < out["base_total_return"]
-    # ex_worst removes the single min (-0.4) -> higher compounded return.
-    assert out["ex_worst"] > out["base_total_return"]
-    assert set(out["ex_top_k"]) == {"1", "2", "3"}
-    # Input list not mutated.
-    assert rs == [0.5, 0.01, -0.4, 0.02, 0.03]
-
-
-def test_drop_top_k_by_magnitude():
-    rs = [0.5, -0.4, 0.01, 0.02]
-    kept = dv._drop_top_k_by_magnitude(rs, 2)
-    # Drops 0.5 and -0.4 (largest magnitude), keeps the two small ones.
-    assert kept == [0.01, 0.02]
-
-
-# ---------------------------------------------------------------------------
-# Section 7: regime sensitivity (+ frozen-price proxy).
-# ---------------------------------------------------------------------------
-def test_simple_trend_regime_labels():
-    prices = [100, 101, 102, 103, 90, 110]
-    labels = dv.simple_trend_regime(prices, lookback=2)
-    assert labels[0] == "warmup" and labels[1] == "warmup"
-    assert labels[2] == "bull"   # 102 > 100
-    assert labels[4] == "bear"   # 90 < 102
-
-
-def test_regime_sensitivity_buckets_and_drops_warmup():
-    dr = _dated_returns([
-        ("2024-07-01", 0.1), ("2024-07-02", -0.05),
-        ("2024-07-03", 0.2), ("2024-07-04", -0.1),
-    ])
-    labels = ["warmup", "bull", "bull", "bear"]
-    out = dv.regime_sensitivity(dr, labels)
-    assert set(out["by_regime"]) == {"bull", "bear"}
-    assert out["by_regime"]["bull"]["n_days"] == 2
-    assert out["by_regime"]["bear"]["n_days"] == 1
-
-
-# ---------------------------------------------------------------------------
-# Section 8: basket vs per-asset.
-# ---------------------------------------------------------------------------
-def test_basket_vs_per_asset():
-    pa = {
-        "BTC": {"total_return": 1.39},
-        "ETH": {"total_return": 1.61},
-        "SOL": {"total_return": 2.44},
-    }
-    out = dv.basket_vs_per_asset(pa, basket_oos_return=-0.0226)
-    assert out["equal_weight_mean_of_per_asset"] == pytest.approx((1.39 + 1.61 + 2.44) / 3)
-    assert out["allocate_once_basket_oos_total_return"] == pytest.approx(-0.0226)
-    assert out["edge_retained_vs_mean"] is not None
-
-
-# ---------------------------------------------------------------------------
-# Section 9: parameter neighborhood — bounded, sensitivity-not-optimization.
-# ---------------------------------------------------------------------------
-def test_parameter_neighborhood_is_bounded_sensitivity_only():
-    out = dv.parameter_neighborhood({
-        18: {"oos_total_return": 1.2},
-        20: {"oos_total_return": 1.39},
-        22: {"oos_total_return": 1.3},
-    })
-    assert out["neighborhood"] == [18, 20, 22]
-    assert out["winner_fixed_at"] == 20
-    assert out["is_sensitivity_not_optimization"] is True
-    assert out["winner_reselected_from_probe"] is False
-    assert set(out["oos_total_return_by_n"]) == {"18", "20", "22"}
-
-
-def test_parameter_neighborhood_empty_at_build_time():
-    out = dv.parameter_neighborhood(None)
-    assert out["oos_total_return_by_n"] == {}
-    assert out["winner_fixed_at"] == 20
-    assert out["is_sensitivity_not_optimization"] is True
-
-
-# ---------------------------------------------------------------------------
-# Schema assembler: build-time contract vs computed.
-# ---------------------------------------------------------------------------
-def test_build_time_schema_lists_all_sections_uncomputed():
-    schema = dv.build_deeper_validation_schema(None)
-    assert schema["computed"] is False
-    assert schema["ran_backtest"] is False
-    assert schema["build_only"] is True
-    assert schema["is_execution_result"] is False
-    assert list(schema["required_sections"]) == list(dv.REQUIRED_SECTIONS)
-    assert set(schema["sections"]) == set(dv.REQUIRED_SECTIONS)
-    for name in dv.REQUIRED_SECTIONS:
-        assert schema["sections"][name]["computed"] is False
-
-
-def test_computed_schema_fills_all_sections():
-    inputs = {
-        "daily_returns": _dated_returns([
-            ("2024-07-01", 0.1), ("2024-08-01", -0.05), ("2025-01-01", 0.2)]),
-        "per_asset_oos": {
-            "BTC": {"total_return": 1.39, "trade_count": 32, "turnover": 5},
-            "ETH": {"total_return": 1.61, "trade_count": 31, "turnover": 5},
-            "SOL": {"total_return": 2.44, "trade_count": 23, "turnover": 4},
-        },
-        "trade_gross_returns": [0.05, 0.04, -0.02],
-        "trade_returns": [0.5, 0.01, -0.4, 0.02],
-        "regime_labels": ["bull", "bear", "bull"],
-        "basket_oos_return": -0.0226,
-        "neighborhood_results": {
-            18: {"oos_total_return": 1.2},
-            20: {"oos_total_return": 1.39},
-            22: {"oos_total_return": 1.3},
-        },
-    }
-    schema = dv.build_deeper_validation_schema(inputs)
-    assert schema["computed"] is True
-    assert schema["ran_backtest"] is False  # never set true; capability only
-    assert set(schema["sections"]) == set(dv.REQUIRED_SECTIONS)
-    # Spot-check a couple of computed sections carry real numbers.
-    assert "family_oos_trades_total" in schema["sections"]["trade_count_and_turnover"]
-    assert schema["sections"]["parameter_neighborhood"]["winner_fixed_at"] == 20
-
-
-def test_schema_safety_flags_all_non_authorizing():
-    schema = dv.build_deeper_validation_schema(None)
-    flags = schema["safety_flags"]
-    assert flags["research_only"] is True
-    for k, v in flags.items():
-        if k == "research_only":
-            continue
-        assert v is False, f"safety flag {k} must be False"
-    assert schema["lane_status_unchanged"] == "WATCH / MIXED"
-    assert schema["readiness_status_unchanged"] == "NOT_READY_FOR_REAL_DATA"
-
-
-def test_primary_target_is_n20_only():
-    schema = dv.build_deeper_validation_schema(None)
-    assert schema["primary_lookback"] == 20
-    assert schema["reference_lookback"] == 30
-    assert schema["neighborhood_is_sensitivity_not_optimization"] is True
-
-
-# ---------------------------------------------------------------------------
-# Serialization + opt-in writer.
-# ---------------------------------------------------------------------------
-def test_to_stable_json_is_sorted_and_deterministic():
-    schema = dv.build_deeper_validation_schema(None)
-    a = dv.to_stable_json(schema)
-    b = dv.to_stable_json(schema)
+def test_to_stable_json_is_byte_stable():
+    plan = dv.show_plan()
+    a = dv.to_stable_json(plan)
+    b = dv.to_stable_json(plan)
     assert a == b
-    parsed = json.loads(a)
-    assert parsed["layer"] == dv.LAYER_NAME
-    # sort_keys -> top-level keys are sorted.
-    assert list(parsed.keys()) == sorted(parsed.keys())
+    assert a.endswith("\n")
+    assert json.loads(a) == plan
+    assert a == json.dumps(plan, indent=2, sort_keys=True, ensure_ascii=False,
+                           default=str) + "\n"
 
 
-def test_write_build_report_confined_to_build_folder(tmp_path):
-    schema = dv.build_deeper_validation_schema(None)
-    written = dv.write_build_report(tmp_path, schema)
-    rel = "reports/crypto_d1_momentum_n20_deeper_validation_build"
-    for p in written:
-        assert p.startswith(rel), p
-    # Nothing was written outside the single build folder.
-    all_files = [q.relative_to(tmp_path).as_posix()
-                 for q in tmp_path.rglob("*") if q.is_file()]
-    assert all(f.startswith(rel) for f in all_files), all_files
+def test_write_build_report_is_confined_to_build_folder(tmp_path):
+    written = dv.write_build_report(tmp_path, dv.show_plan())
+    assert written == [
+        "reports/crypto_d1_momentum_n20_deeper_validation_build/capability_plan.json"
+    ]
+    target = tmp_path / written[0]
+    assert target.is_file()
+    # Nothing written outside the single build folder.
+    all_files = [p for p in tmp_path.rglob("*") if p.is_file()]
+    assert all_files == [target]
+    build_dir = tmp_path / "reports" / "crypto_d1_momentum_n20_deeper_validation_build"
+    assert build_dir in target.parents
 
 
-def test_main_runs_no_backtest_and_returns_zero(capsys):
-    rc = dv.main(["--format", "json"])
+def test_cli_main_returns_zero_and_runs_no_simulation(capsys):
+    rc = dv.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    parsed = json.loads(out)
-    assert parsed["ran_backtest"] is False
-    assert parsed["build_only"] is True
-
-
-# ---------------------------------------------------------------------------
-# Regression guard: the existing momentum_confirmation_v1 runner is untouched.
-# ---------------------------------------------------------------------------
-def test_existing_runner_modes_still_present():
-    runner_src = (_TOOLS_DIR / "crypto_d1_backtest_runner.py").read_text(encoding="utf-8")
-    # The deeper-validation build added NO new mode token to the runner.
-    assert "momentum_confirmation_v1" in runner_src
-    assert "momentum_robustness_v1" in runner_src
-    assert "momentum_n20_deeper_validation" not in runner_src
+    payload = json.loads(out)
+    assert payload["config_name"] == "momentum_n20_deeper_validation_v1"
+    assert payload["executes_backtest"] is False
