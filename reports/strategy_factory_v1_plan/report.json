@@ -1,0 +1,196 @@
+{
+  "plan_id": "strategy_factory_v1_plan",
+  "plan_version": "v1",
+  "plan_date": "2026-06-03",
+  "status": "PLAN_ONLY_NOT_EXECUTED",
+  "official_master_at_plan_time": "3bd2633d0236fcc18dc30a7965c37eaf6bb4353b",
+  "title": "SPARTA Strategy Factory v1 — Research-Only Automation Backbone",
+
+  "authorizes_execution": false,
+  "authorizes_paper_or_live": false,
+  "authorizes_broker_exchange_order_fetch": false,
+  "promotes_active_or_strong": false,
+  "starts_bundle_23": false,
+  "modifies_code": false,
+  "modifies_dashboard": false,
+  "modifies_datasets": false,
+  "runs_backtest": false,
+
+  "relationship_to_existing_work": {
+    "existing_routine_layer": "tools/strategy_factory_routines.py writes reports/strategy_factory_routines/{candidate_registry,strategy_queue,daily_state,weekly_review}/",
+    "principle": "Strategy Factory v1 BUILDS ON the read-only routine layer; it does not replace or duplicate it. Reuse the candidate registry, the routine-layer queue, the frozen Crypto-D1 dataset, and tools/crypto_d1_backtest_runner.py.",
+    "adds": "queue -> orchestrator -> runner-adapter -> report -> decision-memo -> registry -> dashboard-feed backbone with a machine-enforced safety-gate contract"
+  },
+
+  "section_1_current_state": {
+    "official_master": "3bd2633",
+    "crypto_d1_momentum_confirmation_v1": "EXECUTED",
+    "latest_run_id": "2a3be425522a04ec",
+    "current_best_candidate": "Crypto-D1 Momentum N=20",
+    "best_candidate_evidence": "OOS positive and floor-backed on all 3 assets (BTC 32 / ETH 31 / SOL 23 trades vs floor 20); N=30 floor-backed on BTC only (ETH 19 / SOL 18 sample-thin)",
+    "status": "WATCH / MIXED",
+    "readiness": "NOT_READY_FOR_REAL_DATA",
+    "jarvis_lane_monitor": "read-only, dynamic, committed at 3bd2633; hard-clamps the four authorization flags to false",
+    "paper_live_authorization": "none anywhere; no broker/exchange/order/fetch path exists",
+    "reusable_assets": [
+      "tools/crypto_d1_backtest_runner.py (only in-scope runner)",
+      "frozen dataset CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002",
+      "reports/strategy_factory_routines/candidate_registry/candidates.json",
+      "reports/strategy_factory_routines/strategy_queue/queue.json"
+    ]
+  },
+
+  "section_2_purpose": {
+    "is_not": "a live trading bot",
+    "is": "a deterministic, research-only automation factory that runs already-approved experiments through an allow-listed offline runner against frozen data and emits standard reports, decision memos, and a machine-readable registry",
+    "single_goal": "remove manual copy-paste from the research loop; change who types the commands, not what is allowed to happen",
+    "safety_preservation": "every existing property (offline, frozen data, WATCH ceiling, no promotion) is preserved and made machine-enforced rather than convention-enforced"
+  },
+
+  "section_3_components": [
+    {"name": "Strategy Report Registry v1", "role": "single source of truth; JSON+MD listing every strategy with latest verdict/run_id/report_path/decision_memo_path/safety_flags/next_action; built by read-only scan, updated additively"},
+    {"name": "Research Queue v1", "role": "human-authored version-controlled JSON backlog; nothing runs unless queued AND approved_for_research with zero blocked_reasons"},
+    {"name": "Research-only Orchestrator v1", "role": "reads queue, validates safety contract, invokes allow-listed runner; DEFAULT mode is dry-run (validate+plan+manifest, run nothing)"},
+    {"name": "Runner Adapter layer", "role": "explicit allow-list mapping allowed_runner -> known offline runner (initially only crypto_d1_backtest_runner); rejects unknown runners; never builds broker/exchange/order/fetch calls"},
+    {"name": "Auto Decision Memo v1", "role": "after an executed run, generate a DRAFT memo (verdict echo, sample-sufficiency nuance, recommended next checkpoint) marked requires_operator_signoff=true; records, never promotes"},
+    {"name": "Dashboard Registry Feed", "role": "read-only adapter exposing the registry to JARVIS; GET-only, hard-false auth flags, forbidden-verdict clamp, fail-closed"},
+    {"name": "Safety Gate Contract", "role": "single declarative config configs/strategy_factory_safety.json; every component loads and enforces it; orchestrator refuses to act if missing/malformed/weakened"},
+    {"name": "Failure Classifier", "role": "deterministic closed vocabulary: QUEUE_REJECTED, SAFETY_BLOCKED, RUNNER_NOT_ALLOWED, RUN_ERROR, REPORT_MISSING, OK_WATCH, OK_FAIL; never emits PASS/ACTIVE/STRONG"},
+    {"name": "Audit / Run Manifest", "role": "every orchestrator invocation writes a manifest (inputs, resolved safety flags, runner, dataset hash, start/stop, outcome, classifier label) so any run is reconstructable from disk"}
+  ],
+
+  "section_4_file_architecture": {
+    "note": "FUTURE files. NONE are created by this plan except the two plan files below.",
+    "tools": [
+      "tools/strategy_factory.py (orchestrator + CLI, dry-run default)",
+      "tools/strategy_report_registry.py (read-only scanner + additive updater)"
+    ],
+    "configs": [
+      "configs/research_queue.json (human-authored approved backlog)",
+      "configs/strategy_factory_safety.json (declarative safety-gate contract)"
+    ],
+    "reports": [
+      "reports/strategy_factory_v1_plan/report.md (THIS plan, human)",
+      "reports/strategy_factory_v1_plan/report.json (THIS plan, machine)",
+      "reports/strategy_factory_registry/registry.json|.md (generated by future runs)",
+      "reports/strategy_factory_runs/<run_id>/manifest.json (generated, future)",
+      "reports/strategy_factory_runs/<run_id>/decision_memo.md (generated, future)"
+    ],
+    "tests": [
+      "tests/test_strategy_factory_registry.py",
+      "tests/test_strategy_factory_queue.py",
+      "tests/test_strategy_factory_safety.py",
+      "tests/test_strategy_factory_orchestrator.py"
+    ],
+    "constraints": [
+      "configs/ does not exist yet; created by a future step",
+      "all new tools are Python standard library only",
+      "nothing here is created by the present plan except the two plan files"
+    ]
+  },
+
+  "section_5_data_flow": [
+    "configs/research_queue.json (human-approved, version-controlled)",
+    "-> tools/strategy_factory.py loads configs/strategy_factory_safety.json; validate each item; fail closed on violation",
+    "-> Runner Adapter (allow-list) -> tools/crypto_d1_backtest_runner.py (offline, frozen data); execute mode only; dry-run default writes plan+manifest and runs nothing",
+    "-> reports/crypto_d1_*/.../<report>.json (standard runner output, WATCH ceiling)",
+    "-> tools/strategy_report_registry.py -> reports/strategy_factory_registry/registry.json (additive update)",
+    "-> Auto Decision Memo (draft, requires_operator_signoff=true)",
+    "-> Dashboard Registry Feed -> JARVIS /api/jarvis/status (read-only, GET, clamped)"
+  ],
+  "data_flow_invariants": "every arrow is one-directional and read-or-append-only downstream of the queue; the orchestrator never writes upstream of itself and never mutates frozen datasets",
+
+  "section_6_safety_gates": {
+    "contract_file": "configs/strategy_factory_safety.json",
+    "pinned_flags": {
+      "research_only": true,
+      "data_fetch_enabled": false,
+      "exchange_connection_enabled": false,
+      "broker_control_enabled": false,
+      "live_trading_enabled": false,
+      "paper_order_execution_enabled": false,
+      "order_placement_enabled": false,
+      "data_mutation_enabled": false,
+      "promotes_active_or_strong": false,
+      "starts_bundle_23": false,
+      "network_calls_enabled": false,
+      "scheduler_install_enabled": false,
+      "human_approval_required_for_dangerous_actions": true,
+      "allowed_runners": ["crypto_d1_backtest_runner"],
+      "allowed_datasets": ["CRYPTO_D1_SPOT_BTC_ETH_SOL_V001/V002"],
+      "verdict_ceiling": "WATCH"
+    },
+    "enforcement_rules": [
+      "orchestrator loads the contract first; missing/malformed/weakened contract => hard stop, run nothing",
+      "any queue item requesting a disabled capability is rejected and recorded with a blocked_reason; never silently downgraded into running",
+      "dangerous actions require explicit human approval and are out of scope for the automated path in v1",
+      "verdict ceiling is WATCH; any PASS/ACTIVE/STRONG seen in a result is clamped"
+    ]
+  },
+
+  "section_7_first_lane": {
+    "lane": "Crypto-D1 only",
+    "scope": [
+      "Crypto-D1 Momentum N=20 deeper validation using the existing frozen dataset and existing offline runner",
+      "read-only registry scan of existing Crypto-D1 reports (run nothing)",
+      "no new live data, no new dataset freeze, no fetch"
+    ],
+    "deferred_not_in_v1": ["nq_es_futures_trend", "crypto_4h", "equities_rotation", "arbitrage_research_protocol"]
+  },
+
+  "section_8_registry_design": {
+    "path": "reports/strategy_factory_registry/registry.json",
+    "required_fields": ["strategy_id", "market", "dataset_id", "runner_mode", "status", "verdict", "run_id", "report_path", "decision_memo_path", "safety_flags", "next_action", "created_at", "updated_at"],
+    "construction": "read-only scan first (derive from committed reports), then additive update after orchestrated runs",
+    "verdict_rule": "never invents a verdict; echoes the clamped runner output (WATCH ceiling; never PASS/ACTIVE/STRONG)"
+  },
+
+  "section_9_queue_design": {
+    "path": "configs/research_queue.json",
+    "required_fields": ["task_id", "strategy_id", "priority", "allowed_runner", "allowed_dataset", "allowed_mode", "approved_for_research", "blocked_reasons", "max_runtime", "expected_outputs"],
+    "run_condition": "runs only if approved_for_research is true, blocked_reasons is empty, and allowed_runner/allowed_dataset pass the contract allow-list; otherwise skipped with a recorded reason"
+  },
+
+  "section_10_orchestrator_behavior": [
+    "read the queue (configs/research_queue.json)",
+    "load + validate the Safety Gate Contract; hard-stop if missing/weakened",
+    "validate each item against the contract and the allow-lists",
+    "run only approved research tasks, only via the Runner Adapter allow-list, against frozen data",
+    "fail closed: skip-and-classify on any validation failure, missing input, or runner error; no improvised fallback that does more than approved",
+    "write an audit manifest for every invocation (whether or not anything ran)",
+    "never trade, never place/route an order, never touch a broker/exchange",
+    "never mutate frozen data (verify dataset checksums; refuse on mismatch)",
+    "stop on unsafe config rather than proceeding with a degraded contract",
+    "produce a clear operator report (eligible / ran / blocked-and-why / verdicts / next actions)",
+    "DEFAULT mode is dry-run (validate+plan+manifest, execute nothing); execute mode is a separate explicitly-approved invocation"
+  ],
+
+  "section_11_dashboard_integration": {
+    "end_state": "single registry-driven JARVIS feed instead of bespoke per-lane scanners",
+    "mechanism": "read-only _jarvis_strategy_registry_feed() (same pattern as the shipped Lane Monitor: GET-only, hard-false auth flags, forbidden-verdict clamp, fail-closed) renders one row per strategy from registry.json",
+    "migration": "additive and staged; registry feed ships alongside the existing Lane Monitor and the Lane Monitor is only retired once the feed reproduces its content; NO dashboard change in this plan"
+  },
+
+  "section_12_tests_required": [
+    "queue validation: schema/required fields; approved/blocked gating; allow-list enforcement; malformed queue fails closed",
+    "safety flags: every flag pinned false as specified; missing/weakened contract => hard stop; human_approval_required cannot be toggled off via a queue item",
+    "runner allow-list: only allow-listed runners resolve; unknown runner => RUNNER_NOT_ALLOWED, nothing executed",
+    "no broker/order paths: assert no broker/exchange/order/fetch/paper/live symbol reachable; monkeypatch subprocess/network to raise and prove never called in dry-run",
+    "registry generation: read-only scan produces correct records from seeded reports; verdict clamped to WATCH; additive update does not drop existing records",
+    "fail-closed behavior: missing input, checksum mismatch, contract error all skip-and-record, never proceed",
+    "dashboard feed read-only (future): hard-false auth flags, clamps PASS/ACTIVE/STRONG, no execution affordance"
+  ],
+
+  "section_13_roadmap": [
+    {"step": 1, "name": "Registry scanner", "deliverable": "tools/strategy_report_registry.py (read-only scan) + test_strategy_factory_registry.py"},
+    {"step": 2, "name": "Queue schema", "deliverable": "configs/research_queue.json schema + loader + test_strategy_factory_queue.py (no orchestration yet)"},
+    {"step": 3, "name": "Safety contract", "deliverable": "configs/strategy_factory_safety.json + loader/validator + test_strategy_factory_safety.py"},
+    {"step": 4, "name": "Orchestrator dry-run mode", "deliverable": "tools/strategy_factory.py validate-and-manifest-only + test_strategy_factory_orchestrator.py; no execution"},
+    {"step": 5, "name": "Decision memo generator", "deliverable": "draft-memo writer with requires_operator_signoff=true"},
+    {"step": 6, "name": "Dashboard registry feed", "deliverable": "read-only JARVIS feed over the registry, additive alongside the Lane Monitor"},
+    {"step": 7, "name": "Nightly scheduler (later, separately approved)", "deliverable": "opt-in local scheduler, still research-only, still dry-run by default; only after Steps 1-6 proven"}
+  ],
+  "roadmap_rule": "each step is its own commit, gated on its tests, separately approved before it runs; execute mode for the orchestrator is a distinct approval after dry-run is trusted",
+
+  "section_14_non_authorization_statement": "This document is a PLAN ONLY. It writes no tool, no config, no test, no dashboard change, no dataset change, and runs no backtest. It authorizes no paper or live trading, no broker/exchange/order/fetch path, no ACTIVE/STRONG promotion, and no Bundle 23. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA. The current best candidate (Crypto-D1 Momentum N=20) remains a research candidate only. Every implementation step requires separate, explicit operator approval before any code is written or run."
+}
