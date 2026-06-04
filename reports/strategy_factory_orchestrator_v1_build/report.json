@@ -1,0 +1,160 @@
+{
+  "build_id": "strategy_factory_orchestrator_v1_build",
+  "step": 4,
+  "step_name": "Dry-run Research Orchestrator v1 (joins registry + queue + safety contract)",
+  "build_date": "2026-06-04",
+  "official_master_at_build_time": "3780c938720a5a23cd2e72a349df42801de7a474",
+  "status": "BUILT_DRY_RUN_ORCHESTRATOR_ONLY",
+
+  "authorizes_execution": false,
+  "authorizes_paper_or_live": false,
+  "authorizes_broker_exchange_order_fetch": false,
+  "promotes_active_or_strong": false,
+  "starts_bundle_23": false,
+  "modifies_datasets": false,
+  "modifies_existing_runners": false,
+  "modifies_dashboard": false,
+  "runs_backtest": false,
+  "executes_queue_items": false,
+  "imports_or_calls_runner_modules": false,
+  "constructs_real_command": false,
+
+  "what_was_implemented": {
+    "tool": "tools/strategy_factory_orchestrator.py",
+    "description": "A standard-library-only, read-only DRY-RUN orchestrator that joins the three shipped read-only layers (registry v1, queue v1, safety contract v1) into a single deterministic 'what would run / what is blocked / why' plan. It constructs no command, calls no runner, imports no runner, and pins executable=false for every task. It imports only the three factory tools (themselves read-only); it never imports a runner module.",
+    "public_surface": [
+      "build_dry_run_plan(base) -> dict  (joins registry+queue+safety; pure read)",
+      "to_stable_json(plan) -> str  (sorted-key deterministic serialization)",
+      "render_markdown(plan) -> str  (compact human plan)",
+      "write_build_report(base, plan) -> [paths]  (opt-in; writes ONLY to reports/strategy_factory_orchestrator_v1_build/)",
+      "CLI: --base, --format json|md, --write (exit 0 unless execution_halted, then 2)"
+    ],
+    "joins": [
+      "Step 1 registry via strategy_report_registry.build_registry(base) -> per-strategy stage + clamped verdict, keyed by strategy_id",
+      "Step 2 queue via strategy_factory_queue.build(base) -> normalized backlog items (status, validity, next_action), keyed by task_id",
+      "Step 3 safety via strategy_factory_safety.build(base) -> contract safe? + queue_integration that screens the RAW queue items against the contract"
+    ],
+    "per_task_plan_fields": ["task_id", "strategy_id", "current_stage", "current_verdict", "queue_status", "contract_conformant", "allowed_for_listing", "executable", "blocked_reasons", "warnings", "next_action", "would_run_command", "would_write_outputs", "disabled_preview"],
+    "executable_invariant": "executable is hard-pinned to false for every task; would_run_command is always null; would_write_outputs is always []. The only command-ish field is disabled_preview: an explicitly-labeled, incomplete, NON-EXECUTABLE prose note with no entrypoint or arguments that cannot be copied and run.",
+    "fail_closed_rules": [
+      "missing registry (no reports/ directory) -> execution_halted; no execution",
+      "missing or unreadable queue -> execution_halted; no execution",
+      "missing or unsafe safety contract -> execution_halted; every task contract_conformant=false, allowed_for_listing=false",
+      "queue item invalid -> queue-level blocked_reasons surfaced on the task",
+      "unknown strategy_id (not in registry) -> task blocked",
+      "execution_authorized=true or forbidden broker/order/fetch/live/paper token in the RAW queue item -> contract screen blocks it"
+    ]
+  },
+
+  "builds_on": {
+    "registry_step_1": "reports/strategy_factory_registry_v1_build/report.json",
+    "queue_step_2": "reports/strategy_factory_queue_v1_build/report.json",
+    "safety_step_3": "reports/strategy_factory_safety_v1_build/report.json",
+    "mapping": "Step 4 is the first component that READS all three prior layers together. Registry answers 'what has happened' (stage/verdict). Queue answers 'what is allowed to be considered' (backlog/status). Safety contract answers 'may it be considered at all' (the central gate). The orchestrator joins queue items to registry entries by strategy_id, screens each RAW queue item through the Step-3 contract, and emits a dry-run plan. It is the safety-gated read-only precursor to any future execute mode (Step 5+, NOT built), which would remain behind this contract plus the human-approval gates."
+  },
+
+  "config_change": {
+    "changed_research_queue_json": false,
+    "reason": "No config change was necessary. The shipped configs/research_queue.json and configs/strategy_factory_safety.json already join cleanly: the queue item's strategy_id matches the registry strategy_id, and the contract screen passes. Nothing was modified."
+  },
+
+  "routine_layer_reuse": {
+    "reused_conventions": "stdlib-only, deterministic, repo-root-relative, fail-closed style of Steps 1-3: same _repo_root(), sorted-key to_stable_json, opt-in write_build_report confined to a single build folder, pinned-false safety flags, and the listing-vs-execution separation.",
+    "not_reused": "No runner, no execution code, no subprocess, no network. The orchestrator imports the three read-only factory tools but never a runner module.",
+    "duplication_avoided": "The orchestrator delegates registry scanning, queue validation, and contract screening to the existing Step 1-3 modules rather than reimplementing them, so there is one source of truth per concern."
+  },
+
+  "files_created": [
+    "tools/strategy_factory_orchestrator.py",
+    "tests/test_strategy_factory_orchestrator.py",
+    "reports/strategy_factory_orchestrator_v1_build/report.md",
+    "reports/strategy_factory_orchestrator_v1_build/report.json"
+  ],
+  "files_changed": [],
+
+  "dry_run_output_summary": {
+    "dry_run": true,
+    "executes_anything": false,
+    "execution_halted": false,
+    "would_run_command": null,
+    "inputs": {"registry_strategy_count": 2, "queue_item_count": 1, "contract_safe": true},
+    "task_count": 1,
+    "tasks": [
+      {
+        "task_id": "crypto_d1_momentum_n20_deeper_validation_v1",
+        "strategy_id": "crypto_d1_momentum_confirmation_v1",
+        "current_stage": "EXECUTED",
+        "current_verdict": "WATCH",
+        "queue_status": "NEEDS_PLAN",
+        "contract_conformant": true,
+        "allowed_for_listing": true,
+        "executable": false,
+        "would_run_command": null,
+        "would_write_outputs": [],
+        "blocked_reasons": [
+          "execution not authorized: dry-run orchestrator v1 never executes (executable is pinned false)",
+          "task not approved_for_research: create the N=20 deeper-validation plan before any execution"
+        ],
+        "next_action": "Create the N=20 deeper-validation plan before any execution (no execution in Step 2)."
+      }
+    ]
+  },
+
+  "test_results": {
+    "test_strategy_factory_orchestrator": "13 passed",
+    "test_strategy_factory_safety": "42 passed (unchanged)",
+    "test_strategy_factory_queue": "23 passed (unchanged)",
+    "test_strategy_report_registry": "13 passed (unchanged)",
+    "total": "91 passed",
+    "command": "cd tests && PYTHONPATH=repo .venv python -m pytest test_strategy_factory_orchestrator.py test_strategy_factory_safety.py test_strategy_factory_queue.py test_strategy_report_registry.py --rootdir=. -q",
+    "covered_cases": [
+      "dry-run loads registry + queue + safety contract",
+      "known Crypto-D1 task appears and joins to registry EXECUTED / WATCH",
+      "executable is always false (multi-item)",
+      "no real command emitted (would_run_command null; no python/.venv/subprocess token in serialized plan)",
+      "missing safety contract halts everything (contract_conformant=false for all)",
+      "unsafe safety contract halts everything",
+      "unknown strategy_id blocks the item (stage null)",
+      "execution_authorized=true item blocked by contract screen",
+      "forbidden broker/order path item blocked by contract screen",
+      "no subprocess / no network / no runner import / no stray writes",
+      "deterministic ordering (sorted by task_id) + byte-identical JSON",
+      "opt-in writer confined to reports/strategy_factory_orchestrator_v1_build/",
+      "shipped repo dry-run yields the expected N=20 result"
+    ]
+  },
+
+  "safety_confirmations": {
+    "read_only_by_default": true,
+    "executes_anything": false,
+    "dry_run_only": true,
+    "executable_pinned_false_for_all_tasks": true,
+    "would_run_command_always_null": true,
+    "no_real_command_constructed": true,
+    "no_subprocess": true,
+    "no_network": true,
+    "no_runner_import": true,
+    "write_path_confined_to": "reports/strategy_factory_orchestrator_v1_build/",
+    "safety_flags": {
+      "research_only": true,
+      "paper_live_authorized": false,
+      "broker_path_enabled": false,
+      "exchange_path_enabled": false,
+      "order_path_enabled": false,
+      "fetch_live_data_enabled": false,
+      "dataset_mutation_allowed": false,
+      "active_strong_promoted": false,
+      "bundle_23_started": false,
+      "execution_authorized": false
+    },
+    "lane_unchanged": "Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA"
+  },
+
+  "next_step": {
+    "step": 5,
+    "name": "Decision-Memo generator v1 (read-only) OR Dashboard feed v1 (read-only)",
+    "deliverable": "A read-only component that turns the dry-run plan + registry into an operator-facing artifact: either (a) a decision-memo generator that drafts a human-review memo template per EXECUTED/WATCH strategy (no promotion, operator fills + approves), or (b) a read-only dashboard feed that surfaces the dry-run plan in JARVIS. NEITHER executes anything. An actual 'execute' mode for the orchestrator remains a SEPARATE, explicitly-approved build behind the Step-3 safety contract plus the human-approval gates, and is not part of Step 5."
+  },
+
+  "non_authorization_statement": "This build adds a read-only dry-run orchestrator and its tests only. It authorizes no paper or live trading, no broker/exchange/order/fetch path, no ACTIVE/STRONG promotion, and no Bundle 23. It executes no queue item, runs no backtest, calls no runner, imports no runner, constructs no real command, and mutates no dataset. executable is pinned false for every task. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA."
+}
