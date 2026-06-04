@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "layer": "strategy_factory_safety_v1",
+  "description": "Central machine-readable safety contract for SPARTA Strategy Factory v1. EVERY future Strategy Factory component (queue, orchestrator, runner-adapter, dashboard feed) must validate against this contract before any research task may even be CONSIDERED. The contract authorizes nothing: it is research-only, it pins every execution/paper/live/broker/exchange/order/fetch/promotion/Bundle-23 path to false, and it requires explicit human approval for execution, paper/live, and promotion. Fail-closed: a missing file, malformed JSON, a missing key, any forbidden flag set true, or an unknown runner/dataset/mode/market makes the system UNSAFE.",
+  "research_only": true,
+  "safety_flags": {
+    "research_only": true,
+    "paper_live_authorized": false,
+    "broker_path_enabled": false,
+    "exchange_path_enabled": false,
+    "order_path_enabled": false,
+    "fetch_live_data_enabled": false,
+    "dataset_mutation_allowed": false,
+    "active_strong_promoted": false,
+    "bundle_23_started": false,
+    "execution_authorized": false
+  },
+  "allowed_datasets": ["CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002"],
+  "allowed_runners": ["tools/crypto_d1_backtest_runner.py"],
+  "allowed_modes": ["momentum_confirmation_v1"],
+  "allowed_markets": ["crypto"],
+  "forbidden_terms": [
+    "broker",
+    "exchange",
+    "order",
+    "live",
+    "paper",
+    "fetch",
+    "kraken",
+    "binance live",
+    "ACTIVE",
+    "STRONG",
+    "Bundle 23"
+  ],
+  "human_approval": {
+    "human_approval_required_for_execution": true,
+    "human_approval_required_for_paper_live": true,
+    "human_approval_required_for_promotion": true
+  },
+  "non_authorization_statement": "This contract authorizes no paper or live trading, no broker/exchange/order/fetch path, no ACTIVE/STRONG promotion, and no Bundle 23. It executes nothing and mutates no dataset. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA."
+}

@@ -1,0 +1,172 @@
+{
+  "build_id": "strategy_factory_safety_v1_build",
+  "step": 3,
+  "step_name": "Safety Contract v1 (central machine-readable contract + read-only validator)",
+  "build_date": "2026-06-04",
+  "official_master_at_build_time": "f6f07ecb03d99a64eac960fe01c7e1369cdb8938",
+  "status": "BUILT_SAFETY_CONTRACT_AND_VALIDATOR_ONLY",
+
+  "authorizes_execution": false,
+  "authorizes_paper_or_live": false,
+  "authorizes_broker_exchange_order_fetch": false,
+  "promotes_active_or_strong": false,
+  "starts_bundle_23": false,
+  "modifies_datasets": false,
+  "modifies_existing_runners": false,
+  "modifies_dashboard": false,
+  "runs_backtest": false,
+  "executes_queue_items": false,
+  "imports_or_calls_runner_modules": false,
+  "builds_orchestrator": false,
+
+  "what_was_implemented": {
+    "contract": "configs/strategy_factory_safety.json",
+    "tool": "tools/strategy_factory_safety.py",
+    "description": "A central, machine-readable safety contract that every future Strategy Factory component must validate against before any research task may even be considered, plus a standard-library-only, read-only, fail-closed validator. The validator loads the contract, checks required keys / pinned-false flags / allowlists / forbidden terms / human-approval gates, and additionally runs a read-only integration screen of configs/research_queue.json against the contract. It executes nothing, imports no runner, and writes only the opt-in build report.",
+    "public_surface": [
+      "load_safety_file(path) -> (obj, status)  (pure read; fail closed)",
+      "validate_contract(contract_obj, load_status, source) -> result  (never raises)",
+      "screen_text(text, forbidden_terms) -> [hits]  (case-insensitive candidate screen)",
+      "validate_task_against_contract(task, normalized_contract) -> per-task result",
+      "validate_queue_against_contract(base, contract_result) -> queue integration (read-only)",
+      "build(base) -> result  (loads contract + runs queue integration; pure read)",
+      "to_stable_json(result) -> str  (sorted-key deterministic serialization)",
+      "render_markdown(result) -> str  (compact human report)",
+      "write_build_report(base, result) -> [paths]  (opt-in; writes ONLY to reports/strategy_factory_safety_v1_build/)",
+      "CLI: --base, --format json|md, --write (exit 0 if SAFE, 2 if UNSAFE)"
+    ],
+    "result_object_fields": ["valid", "safe", "blocked_reasons", "warnings", "normalized_contract", "safety_flags"],
+    "contract_requirements_met": {
+      "research_only": true,
+      "blocks": ["paper/live trading", "broker path", "exchange path", "order path", "fetch/live-data path", "dataset mutation", "ACTIVE/STRONG promotion", "Bundle 23", "execution authorization"],
+      "allowlists": {
+        "allowed_datasets": ["CRYPTO_D1_SPOT_BTC_ETH_SOL_V001_V002"],
+        "allowed_runners": ["tools/crypto_d1_backtest_runner.py"],
+        "allowed_modes": ["momentum_confirmation_v1"],
+        "allowed_markets": ["crypto"]
+      },
+      "forbidden_terms": ["broker", "exchange", "order", "live", "paper", "fetch", "kraken", "binance live", "ACTIVE", "STRONG", "Bundle 23"],
+      "human_approval": {
+        "human_approval_required_for_execution": true,
+        "human_approval_required_for_paper_live": true,
+        "human_approval_required_for_promotion": true
+      }
+    },
+    "fail_closed_rules": [
+      "missing safety file -> UNSAFE",
+      "malformed JSON -> UNSAFE",
+      "missing required key -> UNSAFE",
+      "research_only not true -> UNSAFE",
+      "any forbidden safety flag true -> UNSAFE",
+      "unknown runner/dataset/mode/market in any allowlist -> UNSAFE",
+      "missing required forbidden term -> UNSAFE",
+      "any human-approval gate not true -> UNSAFE"
+    ],
+    "forbidden_term_scope": "screen_text screens CANDIDATE task identifiers/paths (task_id, strategy_id, strategy_family, next_action, runner paths), NOT the contract's own metadata — the contract legitimately names 'broker'/'order'/etc. in its forbidden_terms list and flag names."
+  },
+
+  "builds_on": {
+    "plan": "reports/strategy_factory_v1_plan/report.json",
+    "registry_step_1": "reports/strategy_factory_registry_v1_build/report.json",
+    "queue_step_2": "reports/strategy_factory_queue_v1_build/report.json",
+    "mapping": "Step 1 registry = read-only single source of truth for EXISTING experiments. Step 2 queue = human-authored approved BACKLOG of considerable tasks. Step 3 safety contract = the central gate both (and every future component) must pass: it centralizes the pinned-false flags, allowlists, forbidden terms, and human-approval gates that Steps 1-2 each embedded locally, and provides the canonical screen an orchestrator (Step 4, NOT built) will be required to call before considering any task. The validator already proves the shipped queue item conforms for LISTING while remaining non-executable."
+  },
+
+  "routine_layer_reuse": {
+    "reused_conventions": "stdlib-only, deterministic, repo-root-relative, fail-closed style of tools/strategy_report_registry.py (Step 1) and tools/strategy_factory_queue.py (Step 2): same _repo_root(), fail-closed JSON reads, sorted-key to_stable_json, opt-in write_build_report confined to a single build folder, pinned-false safety flags, and the listing-vs-execution separation.",
+    "not_reused": "No runner, orchestrator, or execution code is imported or created. The validator is a separate single-purpose module; the registry and queue tools are untouched.",
+    "duplication_avoided": "The contract centralizes safety constants that were previously repeated per-component, so future steps validate against one source instead of re-declaring flags."
+  },
+
+  "files_created": [
+    "configs/strategy_factory_safety.json",
+    "tools/strategy_factory_safety.py",
+    "tests/test_strategy_factory_safety.py",
+    "reports/strategy_factory_safety_v1_build/report.md",
+    "reports/strategy_factory_safety_v1_build/report.json"
+  ],
+  "files_changed": [],
+
+  "test_results": {
+    "test_strategy_factory_safety": "42 passed",
+    "test_strategy_factory_queue": "23 passed (unchanged)",
+    "test_strategy_report_registry": "13 passed (unchanged)",
+    "total": "78 passed",
+    "command": "cd tests && PYTHONPATH=repo .venv python -m pytest test_strategy_factory_safety.py test_strategy_factory_queue.py test_strategy_report_registry.py --rootdir=. -q",
+    "covered_cases": [
+      "valid contract is SAFE",
+      "missing file / malformed JSON fail closed (UNSAFE, no crash)",
+      "every required key missing (parametrized) fails closed",
+      "every forbidden safety flag true (parametrized) fails closed; research_only=false fails closed",
+      "unknown runner/dataset/mode/market (parametrized) fails closed",
+      "execution_authorized=true and paper_live_authorized=true each block the contract",
+      "broker/exchange/order/fetch/live/kraken/ACTIVE/STRONG screened as forbidden terms",
+      "a task smuggling a forbidden token or unlisted runner is blocked (not conformant, not executable)",
+      "shipped queue item: contract_conformant + allowed_for_listing, but executable=false",
+      "no subprocess / no network / no runner import / no stray writes",
+      "deterministic normalized output (byte-identical JSON)",
+      "opt-in writer confined to reports/strategy_factory_safety_v1_build/"
+    ]
+  },
+
+  "integration_check": {
+    "validated": "configs/research_queue.json against configs/strategy_factory_safety.json",
+    "contract_safe": true,
+    "queue_item": "crypto_d1_momentum_n20_deeper_validation_v1",
+    "contract_conformant": true,
+    "allowed_for_listing": true,
+    "executable": false
+  },
+
+  "safety_confirmations": {
+    "read_only_by_default": true,
+    "executes_anything": false,
+    "no_subprocess_in_load_path": true,
+    "no_runner_import": true,
+    "no_network_broker_exchange_order_fetch_code": true,
+    "write_path_confined_to": "reports/strategy_factory_safety_v1_build/",
+    "contract_safety_flags": {
+      "research_only": true,
+      "paper_live_authorized": false,
+      "broker_path_enabled": false,
+      "exchange_path_enabled": false,
+      "order_path_enabled": false,
+      "fetch_live_data_enabled": false,
+      "dataset_mutation_allowed": false,
+      "active_strong_promoted": false,
+      "bundle_23_started": false,
+      "execution_authorized": false
+    },
+    "human_approval_required": {
+      "for_execution": true,
+      "for_paper_live": true,
+      "for_promotion": true
+    },
+    "lane_unchanged": "Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA"
+  },
+
+  "live_validation_snapshot": {
+    "schema_version": 1,
+    "layer": "strategy_factory_safety_v1",
+    "source": "configs/strategy_factory_safety.json",
+    "valid": true,
+    "safe": true,
+    "blocked_reasons": [],
+    "queue_integration": {
+      "checked": true,
+      "item_count": 1,
+      "conformant_count": 1,
+      "items": [
+        {"task_id": "crypto_d1_momentum_n20_deeper_validation_v1", "contract_conformant": true, "allowed_for_listing": true, "executable": false}
+      ]
+    }
+  },
+
+  "next_step": {
+    "step": 4,
+    "name": "Research Orchestrator v1 (DRY-RUN ONLY, safety-gated)",
+    "deliverable": "A read-only orchestrator that, for each queue item, FIRST calls the Step-3 safety contract validator and refuses to consider any task unless safe=true and the task is contract_conformant; then emits a DRY-RUN plan (what WOULD run, in what order, against which frozen dataset) WITHOUT running anything. Dry-run by default; an 'execute' mode must be a separate, explicitly approved build behind this contract plus the human-approval gates. No backtest, no dataset mutation, no runner call until separately approved."
+  },
+
+  "non_authorization_statement": "This build adds a central safety contract, a read-only fail-closed validator, and its tests only. It authorizes no paper or live trading, no broker/exchange/order/fetch path, no ACTIVE/STRONG promotion, and no Bundle 23. It executes no queue item, runs no backtest, imports no runner, builds no orchestrator, and mutates no dataset. Crypto-D1 remains WATCH / MIXED and NOT_READY_FOR_REAL_DATA."
+}
