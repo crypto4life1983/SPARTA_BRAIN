@@ -85,12 +85,12 @@ __all__ = [
 REGISTRY_VERSION = "v1"
 REGISTRY_MODE = "RESEARCH_ONLY"
 
-# Post-Bundle-49 backbone state: the research-only dry-run preview contract
-# exists on paper and points to a research-only, dry-run-review-only future
+# Post-Bundle-50 backbone state: the research-only dry-run review contract
+# exists on paper and points to a research-only, dry-run-decision-only future
 # contract. Nothing downstream is authorized; the pipeline stays blocked until
-# that next research-only dry-run-review contract is BUILT (still on paper).
-CURRENT_STAGE = "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_REVIEW_CONTRACT_REQUIRED"
-NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_REVIEW_CONTRACT"
+# that next research-only dry-run-decision contract is BUILT (still on paper).
+CURRENT_STAGE = "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_DECISION_CONTRACT_REQUIRED"
+NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_DECISION_CONTRACT"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -102,6 +102,12 @@ _BUNDLE_48_COMPLETE_STAGE = (
 # is registered as complete. Bundle 48 advances into this stage.
 _BUNDLE_49_COMPLETE_STAGE = (
     "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT_COMPLETE"
+)
+
+# The completion stage published once Bundle 50 (research-only dry-run review)
+# is registered as complete. Bundle 49 advances into this stage.
+_BUNDLE_50_COMPLETE_STAGE = (
+    "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_REVIEW_CONTRACT_COMPLETE"
 )
 
 # Read-only safety posture for the registry as a whole. Nothing here can
@@ -187,7 +193,10 @@ def _bundles() -> tuple[dict[str, Any], ...]:
     circular import. Resolving it here runs only after both modules are fully
     initialized, which breaks the cycle for every import order. The Bundle 49
     schema constant is imported the same way: Bundle 49 imports Bundle 48, which
-    imports this registry, so a top-level import would re-enter the cycle.
+    imports this registry, so a top-level import would re-enter the cycle. The
+    Bundle 50 schema constant is imported the same way: Bundle 50 imports
+    Bundle 49, which (transitively) imports this registry, so a top-level import
+    would re-enter the cycle as well.
     """
     global _BUNDLES_CACHE
     if _BUNDLES_CACHE is not None:
@@ -197,6 +206,9 @@ def _bundles() -> tuple[dict[str, Any], ...]:
     )
     from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_preview_contract import (  # noqa: E501
         PREVIEW_SCHEMA_VERSION,
+    )
+    from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_review_contract import (  # noqa: E501
+        REVIEW_SCHEMA_VERSION,
     )
     _BUNDLES_CACHE = (
         _bundle(
@@ -338,11 +350,32 @@ def _bundles() -> tuple[dict[str, Any], ...]:
         schema_constant="PREVIEW_SCHEMA_VERSION",
         schema_version=PREVIEW_SCHEMA_VERSION,
         stage=_BUNDLE_49_COMPLETE_STAGE,
-        next_gate=CURRENT_STAGE,
+        next_gate=_BUNDLE_50_COMPLETE_STAGE,
         reason=(
             "Read-only research-only dry-run PREVIEW paper contract only. It "
             "only PREVIEWS, on paper, what a research-only dry run would look "
             "like; it authorizes nothing and executes nothing: no dry-run "
+            "execution, no real data acquisition, data fetch, data inspection, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "market-data validation, paper, live, broker, exchange, automation, "
+            "or runtime/registry/dashboard write is unlocked."
+        ),
+    ),
+    _bundle(
+        number=50,
+        name="Crypto-D1 Research-Only Dry-Run Review Contract",
+        module=(
+            "sparta_commander.strategy_factory_crypto_d1_research_only_"
+            "dry_run_review_contract"
+        ),
+        schema_constant="REVIEW_SCHEMA_VERSION",
+        schema_version=REVIEW_SCHEMA_VERSION,
+        stage=_BUNDLE_50_COMPLETE_STAGE,
+        next_gate=CURRENT_STAGE,
+        reason=(
+            "Read-only research-only dry-run REVIEW paper contract only. It "
+            "only REVIEWS, on paper, what a research-only dry-run preview "
+            "produced; it authorizes nothing and executes nothing: no dry-run "
             "execution, no real data acquisition, data fetch, data inspection, "
             "dataset loading, QA, baseline, backtest, simulation, trade signal, "
             "market-data validation, paper, live, broker, exchange, automation, "
