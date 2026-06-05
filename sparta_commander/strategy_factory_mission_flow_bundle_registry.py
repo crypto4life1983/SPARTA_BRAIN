@@ -59,6 +59,11 @@ from sparta_commander.strategy_factory_crypto_d1_pre_acquisition_human_gate_cont
 from sparta_commander.strategy_factory_crypto_d1_human_approved_offline_acquisition_execution_boundary_contract import (  # noqa: E501
     BOUNDARY_SCHEMA_VERSION,
 )
+# NOTE: the Bundle 48 post-boundary next-step contract module imports
+# CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
+# schema constant at module top would create a circular import. It is therefore
+# imported lazily inside _bundles() (a normal stdlib `from ... import`, resolved
+# only after both modules are fully initialized).
 
 __all__ = [
     "REGISTRY_VERSION",
@@ -80,14 +85,18 @@ __all__ = [
 REGISTRY_VERSION = "v1"
 REGISTRY_MODE = "RESEARCH_ONLY"
 
-# Post-Bundle-47 backbone state: the execution-boundary contract exists on
-# paper, but nothing downstream is authorized. The pipeline is still blocked
-# until the next research-only contract is DEFINED.
-CURRENT_STAGE = (
-    "CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_"
-    "STILL_BLOCKED_NEXT_CONTRACT_REQUIRED"
+# Post-Bundle-48 backbone state: the post-boundary next-step contract exists on
+# paper and points to a research-only, dry-run-preview-only future contract.
+# Nothing downstream is authorized; the pipeline stays blocked until that next
+# research-only dry-run-preview contract is BUILT (still on paper).
+CURRENT_STAGE = "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT_REQUIRED"
+NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT"
+
+# The completion stage published once Bundle 48 (post-boundary next-step) is
+# registered as complete. Bundle 47 advances into this stage.
+_BUNDLE_48_COMPLETE_STAGE = (
+    "CRYPTO_D1_POST_BOUNDARY_RESEARCH_ONLY_NEXT_STEP_CONTRACT_COMPLETE"
 )
-NEXT_REQUIRED_ACTION = "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_POST_BOUNDARY_CONTRACT"
 
 # Read-only safety posture for the registry as a whole. Nothing here can
 # execute or mutate anything; every real-world capability stays blocked.
@@ -160,9 +169,27 @@ def _bundle(
     return record
 
 
-_BUNDLES: tuple[dict[str, Any], ...] = (
-    _bundle(
-        number=42,
+_BUNDLES_CACHE: tuple[dict[str, Any], ...] | None = None
+
+
+def _bundles() -> tuple[dict[str, Any], ...]:
+    """Build (once, memoized) the read-only tuple of bundle records.
+
+    The Bundle 48 schema constant is imported here, function-locally, instead
+    of at module top: the Bundle 48 module imports CURRENT_STAGE /
+    NEXT_REQUIRED_ACTION from this registry, so a top-level import would be a
+    circular import. Resolving it here runs only after both modules are fully
+    initialized, which breaks the cycle for every import order.
+    """
+    global _BUNDLES_CACHE
+    if _BUNDLES_CACHE is not None:
+        return _BUNDLES_CACHE
+    from sparta_commander.strategy_factory_crypto_d1_post_boundary_research_only_next_step_contract import (  # noqa: E501
+        NEXT_STEP_SCHEMA_VERSION,
+    )
+    _BUNDLES_CACHE = (
+        _bundle(
+            number=42,
         name="Crypto-D1 Acquire Decision Contract",
         module=(
             "sparta_commander."
@@ -262,7 +289,7 @@ _BUNDLES: tuple[dict[str, Any], ...] = (
             "CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_"
             "BOUNDARY_CONTRACT_COMPLETE"
         ),
-        next_gate=CURRENT_STAGE,
+        next_gate=_BUNDLE_48_COMPLETE_STAGE,
         reason=(
             "Read-only execution-boundary paper contract only. It authorizes "
             "nothing and executes nothing: no data acquisition, data fetch, "
@@ -270,7 +297,28 @@ _BUNDLES: tuple[dict[str, Any], ...] = (
             "broker, exchange, or automation is unlocked."
         ),
     ),
-)
+    _bundle(
+        number=48,
+        name="Crypto-D1 Post-Boundary Research-Only Next-Step Contract",
+        module=(
+            "sparta_commander.strategy_factory_crypto_d1_post_boundary_"
+            "research_only_next_step_contract"
+        ),
+        schema_constant="NEXT_STEP_SCHEMA_VERSION",
+        schema_version=NEXT_STEP_SCHEMA_VERSION,
+        stage=_BUNDLE_48_COMPLETE_STAGE,
+        next_gate=CURRENT_STAGE,
+        reason=(
+            "Read-only post-boundary next-step paper contract only. It only "
+            "DECIDES which research-only, dry-run-preview-only contract should "
+            "be built next; it authorizes nothing and executes nothing: no real "
+            "data acquisition, data fetch, data inspection, QA, baseline, "
+            "backtest, simulation, paper, live, broker, exchange, automation, "
+            "or runtime/registry/dashboard write is unlocked."
+        ),
+    ),
+    )
+    return _BUNDLES_CACHE
 
 
 def _clone_bundle(record: dict[str, Any]) -> dict[str, Any]:
@@ -280,24 +328,24 @@ def _clone_bundle(record: dict[str, Any]) -> dict[str, Any]:
 
 def list_registered_bundles() -> list[dict[str, Any]]:
     """All registered bundle records (display-only), ascending by number."""
-    return [_clone_bundle(b) for b in _BUNDLES]
+    return [_clone_bundle(b) for b in _bundles()]
 
 
 def list_completed_bundles() -> list[dict[str, Any]]:
     """Registered bundles whose contract is complete (display-only)."""
-    return [_clone_bundle(b) for b in _BUNDLES if b["complete"] is True]
+    return [_clone_bundle(b) for b in _bundles() if b["complete"] is True]
 
 
 def get_latest_completed_bundle() -> dict[str, Any]:
     """The highest-numbered completed bundle record."""
-    completed = [b for b in _BUNDLES if b["complete"] is True]
+    completed = [b for b in _bundles() if b["complete"] is True]
     latest = max(completed, key=lambda b: b["bundle_number"])
     return _clone_bundle(latest)
 
 
 def get_bundle_by_number(number: int) -> dict[str, Any] | None:
     """The bundle record with the given number, or None."""
-    for b in _BUNDLES:
+    for b in _bundles():
         if b["bundle_number"] == number:
             return _clone_bundle(b)
     return None
@@ -305,7 +353,7 @@ def get_bundle_by_number(number: int) -> dict[str, Any] | None:
 
 def get_bundle_by_id(bundle_id: str) -> dict[str, Any] | None:
     """The bundle record with the given id (e.g. 'BUNDLE_47'), or None."""
-    for b in _BUNDLES:
+    for b in _bundles():
         if b["bundle_id"] == bundle_id:
             return _clone_bundle(b)
     return None

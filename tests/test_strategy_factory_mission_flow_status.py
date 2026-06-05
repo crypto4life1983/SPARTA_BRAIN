@@ -2,14 +2,14 @@
 
 The adapter is a PURE, stdlib-only, read-only display/status feed for the JARVIS
 "Mission Flow" panel. It maps where the Strategy Factory backbone stands as of
-Bundle 47 (Crypto-D1 human-approved offline acquisition execution boundary
-contract complete) and proves it executes nothing and unlocks nothing real.
+Bundle 48 (Crypto-D1 post-boundary research-only next-step contract complete)
+and proves it executes nothing and unlocks nothing real.
 
 Coverage:
 - stable output schema (keys + types)
 - mode RESEARCH_ONLY, read_only True, executes False, human_approval_required True
-- Bundles 42-47 recognized complete; next stage is a research-only post-boundary
-  paper contract (to be DEFINED, not real execution)
+- Bundles 42-48 recognized complete; next stage is a research-only dry-run-preview
+  paper contract (to be BUILT, not real execution)
 - Real Data QA blocked, Baseline Backtest blocked
 - Paper Trading Gate locked, Micro-Live Gate locked + never automated
 - no stage unlocks real data / QA / baseline / backtest / paper / live /
@@ -123,9 +123,9 @@ def test_safety_flags_all_false():
     assert all(v is False for v in flags.values())
 
 
-# --- 3: Bundles 42-47 complete; next = post-boundary research-only contract -
+# --- 3: Bundles 42-48 complete; next = research-only dry-run-preview contract
 
-def test_bundles_42_through_47_recognized_complete():
+def test_bundles_42_through_48_recognized_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     for stage_id in (
         "crypto_d1_acquire_decision_contract",          # Bundle 42
@@ -134,6 +134,7 @@ def test_bundles_42_through_47_recognized_complete():
         "crypto_d1_offline_acquisition_plan_contract",  # Bundle 45
         "crypto_d1_pre_acquisition_human_gate_contract",  # Bundle 46
         "crypto_d1_human_approved_offline_acquisition_execution_boundary_contract",  # Bundle 47  # noqa: E501
+        "crypto_d1_post_boundary_research_only_next_step_contract",  # Bundle 48
     ):
         assert pipe[stage_id]["state"] == STATE_COMPLETE, stage_id
 
@@ -169,19 +170,30 @@ def test_bundle47_authorizes_nothing_executes_nothing():
     assert get_mission_flow_status()["executes"] is False
 
 
-def test_latest_completed_bundle_is_bundle47():
-    assert "Bundle 47" in LATEST_COMPLETED_BUNDLE
-    assert "Human-Approved Offline Acquisition Execution" in LATEST_COMPLETED_BUNDLE
-    assert "Boundary Contract" in LATEST_COMPLETED_BUNDLE
+def test_bundle48_recognized_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_post_boundary_research_only_next_step_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Bundle 48" in row["reason"]
+    reason = row["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+
+
+def test_latest_completed_bundle_is_bundle48():
+    assert "Bundle 48" in LATEST_COMPLETED_BUNDLE
+    assert "Post-Boundary Research-Only Next-Step" in LATEST_COMPLETED_BUNDLE
+    assert "Contract" in LATEST_COMPLETED_BUNDLE
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_research_only_post_boundary_contract():
+def test_next_required_action_is_research_only_dry_run_preview_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_POST_BOUNDARY_CONTRACT"
+        "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT"
     )
-    # it names a research-only CONTRACT to be DEFINED, not real execution
+    # it names a research-only CONTRACT to be BUILT, not real execution
     assert "RESEARCH_ONLY" in NEXT_REQUIRED_ACTION
+    assert "DRY_RUN_PREVIEW" in NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION.endswith("_CONTRACT")
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
@@ -189,19 +201,19 @@ def test_next_required_action_is_research_only_post_boundary_contract():
         assert banned not in NEXT_REQUIRED_ACTION, banned
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
-    # defining the next contract still unlocks nothing real
+    # building the next contract still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_post_boundary_research_only_contract"]
+    nxt = pipe["crypto_d1_research_only_dry_run_preview_contract"]
     assert nxt["state"] == STATE_NEXT
 
 
-def test_current_stage_is_after_bundle47():
+def test_current_stage_is_after_bundle48():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_"
-        "STILL_BLOCKED_NEXT_CONTRACT_REQUIRED"
+        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT_REQUIRED"
     )
-    assert "STILL_BLOCKED" in CURRENT_STAGE
+    assert "RESEARCH_ONLY" in CURRENT_STAGE
+    assert "DRY_RUN_PREVIEW" in CURRENT_STAGE
     assert get_mission_flow_status()["current_stage"] == CURRENT_STAGE
     human = {r["id"]: r for r in human_workflow_lane()}
     assert human["operator_review_before_real_strategy_intake"]["state"] == STATE_CURRENT

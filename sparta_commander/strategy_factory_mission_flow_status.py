@@ -17,15 +17,15 @@ network, spawns no subprocess, reads no environment, mints no id, records no
 timestamp, and dynamically imports nothing.
 
 The snapshot is hardcoded from the known, committed contract/checkpoint state of
-the Strategy Factory backbone as of Bundle 47 (Crypto-D1 human-approved offline
-acquisition execution boundary contract complete). It requires no IO to produce
-the default status. Reaching any stage in this map unlocks nothing real: every
+the Strategy Factory backbone as of Bundle 48 (Crypto-D1 post-boundary
+research-only next-step contract complete). It requires no IO to produce the
+default status. Reaching any stage in this map unlocks nothing real: every
 downstream real-world capability (real data, QA, baseline, backtest, paper, live,
 broker, exchange, automation, runtime/registry/dashboard writes) stays blocked
-and human-gated. Bundle 47 only means the execution-boundary *contract* exists on
-paper; it authorizes nothing and executes nothing: no data acquisition, data
-fetch, data inspection, QA, baseline, backtest, paper/live, broker/exchange, or
-automation is unlocked.
+and human-gated. Bundle 48 only means the post-boundary next-step *contract*
+exists on paper; it authorizes nothing and executes nothing: no data acquisition,
+data fetch, data inspection, QA, baseline, backtest, paper/live, broker/exchange,
+or automation is unlocked.
 
 Public API:
   - MISSION_FLOW_VERSION
@@ -64,6 +64,9 @@ from sparta_commander.strategy_factory_crypto_d1_pre_acquisition_human_gate_cont
 )
 from sparta_commander.strategy_factory_crypto_d1_human_approved_offline_acquisition_execution_boundary_contract import (  # noqa: E501
     BOUNDARY_SCHEMA_VERSION,
+)
+from sparta_commander.strategy_factory_crypto_d1_post_boundary_research_only_next_step_contract import (  # noqa: E501
+    NEXT_STEP_SCHEMA_VERSION,
 )
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
@@ -156,7 +159,7 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "id": "backbone_build",
         "label": "Backbone Build",
         "state": STATE_COMPLETE,
-        "reason": "Strategy Factory backbone (Bundles 11-47) complete on paper.",
+        "reason": "Strategy Factory backbone (Bundles 11-48) complete on paper.",
     },
     {
         "id": "fake_lane",
@@ -169,11 +172,11 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "label": "Operator Review Before Real Strategy Intake",
         "state": STATE_CURRENT,
         "reason": (
-            "You are here. Bundles 42-47 contract chain is complete on paper, "
-            "through the Crypto-D1 human-approved offline acquisition execution "
-            "boundary contract. Next is another research-only paper contract "
-            "after the boundary, still on paper. Nothing is authorized to run: "
-            "real strategy intake remains paused for operator review."
+            "You are here. Bundles 42-48 contract chain is complete on paper, "
+            "through the Crypto-D1 post-boundary research-only next-step "
+            "contract. Next is a research-only, dry-run-preview-only paper "
+            "contract to be built, still on paper. Nothing is authorized to "
+            "run: real strategy intake remains paused for operator review."
         ),
     },
     {
@@ -277,14 +280,28 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
-        "id": "crypto_d1_post_boundary_research_only_contract",
-        "label": "Crypto-D1 Post-Boundary Research-Only Contract",
+        "id": "crypto_d1_post_boundary_research_only_next_step_contract",
+        "label": "Crypto-D1 Post-Boundary Research-Only Next-Step Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 48 complete (" + NEXT_STEP_SCHEMA_VERSION + "). Read-only "
+            "post-boundary next-step paper contract only. It only DECIDES which "
+            "research-only, dry-run-preview-only contract is built next; it "
+            "authorizes nothing and executes nothing: no real data acquisition, "
+            "data fetch, data inspection, QA, baseline, backtest, simulation, "
+            "paper, live, broker, exchange, automation, or runtime/registry/"
+            "dashboard write is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_research_only_dry_run_preview_contract",
+        "label": "Crypto-D1 Research-Only Dry-Run Preview Contract",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". Another "
-            "read-only paper contract template to be DEFINED after the "
-            "execution boundary. Defining it acquires no data, runs no QA or "
-            "backtest, and executes nothing."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". A read-only, "
+            "dry-run-preview-only paper contract template to be BUILT after the "
+            "post-boundary next-step contract. Building it acquires no data, "
+            "runs no QA or backtest, and executes nothing."
         ),
     },
     {
