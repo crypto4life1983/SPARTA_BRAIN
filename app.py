@@ -9452,6 +9452,18 @@ _JARVIS_NEXT_ACTIONS = [
 ]
 
 
+def _jarvis_mission_flow_status() -> dict:
+    """READ-ONLY Strategy Factory mission-flow status (Block 71 adapter).
+
+    Returns a deterministic, plain-data map of where the Strategy Factory
+    backbone stands (Bundle 42 complete). Pure in-memory: NO data fetch, NO
+    network, NO subprocess, NO file write, NO QA/backtest, executes nothing."""
+    from sparta_commander.strategy_factory_mission_flow_status import (
+        get_mission_flow_status,
+    )
+    return get_mission_flow_status()
+
+
 @app.get("/api/jarvis/status")
 def api_jarvis_status():
     """Read-only aggregate feed for the JARVIS console. Every section is
@@ -9492,6 +9504,7 @@ def api_jarvis_status():
     strategy_factory_integration = _jarvis_safe(
         _jarvis_strategy_factory_integration)
     mission_flow = _jarvis_safe(_jarvis_crypto_d1_mission_flow)
+    mission_flow_status = _jarvis_safe(_jarvis_mission_flow_status)
     lane_monitor = _jarvis_safe(
         lambda: _jarvis_crypto_d1_lane_monitor(
             git.get("head") if isinstance(git, dict) else None))
@@ -9530,6 +9543,7 @@ def api_jarvis_status():
         "candidate_registry": candidate_registry,
         "strategy_factory_integration": strategy_factory_integration,
         "mission_flow": mission_flow,
+        "mission_flow_status": mission_flow_status,
         "lane_monitor": lane_monitor,
         "freshness_guard": freshness_guard,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
