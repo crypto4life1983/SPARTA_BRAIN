@@ -133,6 +133,7 @@ COMMANDER_2_MODULES = (
     "sparta_commander/strategy_factory_fake_dry_walk_result_review_contract.py",
     "sparta_commander/strategy_factory_fake_walk_report_contract.py",
     "sparta_commander/strategy_factory_fake_walk_report_operator_review_gate.py",
+    "sparta_commander/strategy_factory_fake_report_renderer_contract.py",
 )
 
 COMMANDER_2_TESTS = (
@@ -239,6 +240,7 @@ COMMANDER_2_TESTS = (
     "tests/test_strategy_factory_fake_dry_walk_result_review_contract.py",
     "tests/test_strategy_factory_fake_walk_report_contract.py",
     "tests/test_strategy_factory_fake_walk_report_operator_review_gate.py",
+    "tests/test_strategy_factory_fake_report_renderer_contract.py",
 )
 
 # Shared files that were *touched* (additive) and are checked with targeted,
