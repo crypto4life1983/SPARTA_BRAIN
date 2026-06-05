@@ -133,14 +133,29 @@ def test_pipeline_stages_render_in_order():
 def test_you_are_here_points_to_operator_review_gate():
     block = _strategy_flow_block(_page())
     assert "You are here" in block
+    # the gate id is still present, but only as a hidden tooltip/debug attribute
     assert "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE" in block
-    # the active marker sits on the Operator Review node and names the gate
+    # the active marker sits on the Operator Review node, shows the clean human
+    # label "Current Review", and carries the technical gate id in title/data-debug
     assert (
-        'is-active"><span class="ndot"></span>'
+        'is-active" title="Gate: PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE" '
+        'data-debug="PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE">'
+        '<span class="ndot"></span>'
         '<span class="nlbl">Operator Review Before Real Strategy Intake</span>'
-        '<span class="nst">Current &middot; You are here &middot; '
-        'PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE'
+        '<span class="nst">Current Review</span>'
     ) in block
+
+
+def test_long_gate_id_not_rendered_inside_visible_status_pill():
+    """The long technical gate id must never sit inside a visible .nst pill;
+    it is allowed only in hidden title/data-debug attributes."""
+    block = _strategy_flow_block(_page())
+    gate = "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE"
+    # find every status-pill body and confirm none contains the raw gate id
+    for pill in re.findall(r'<span class="nst">(.*?)</span>', block):
+        assert gate not in pill, f"raw gate id leaked into a visible pill: {pill!r}"
+    # the clean human label is what the active card shows instead
+    assert '<span class="nst">Current Review</span>' in block
 
 
 def test_combined_view_lane_tags_present():

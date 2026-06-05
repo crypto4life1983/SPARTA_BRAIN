@@ -227,11 +227,21 @@
     .jv-sf-legend .sw.r{background:var(--jv-bad);color:var(--jv-bad);}
     /* flow lane + nodes */
     .jv-sf-lane{display:flex;align-items:stretch;flex-wrap:wrap;margin:4px 0;}
-    .jv-sf-node{flex:1 1 116px;min-width:104px;position:relative;border:1px solid var(--jv-edge);
-      border-radius:10px;padding:10px 11px;margin:6px 16px 6px 0;background:rgba(10,30,54,.45);}
-    .jv-sf-node .nlbl{font-size:11px;color:#dff1ff;font-weight:600;line-height:1.35;padding-right:12px;}
-    .jv-sf-node .nst{display:block;font-size:9px;letter-spacing:.10em;text-transform:uppercase;
-      margin-top:6px;color:var(--jv-dim);}
+    .jv-sf-node{flex:1 1 128px;min-width:128px;max-width:188px;position:relative;overflow:hidden;
+      border:1px solid var(--jv-edge);border-radius:10px;padding:10px 11px;margin:6px 16px 6px 0;
+      background:rgba(10,30,54,.45);}
+    .jv-sf-node .nlbl{font-size:11px;color:#dff1ff;font-weight:600;line-height:1.25;padding-right:12px;
+      overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+      overflow:hidden;}
+    /* status pill: hugs its text, clamps to 2 lines, never overflows the card */
+    .jv-sf-node .nst{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      width:fit-content;max-width:100%;overflow:hidden;font-size:9px;letter-spacing:.08em;
+      text-transform:uppercase;margin-top:8px;color:var(--jv-dim);border:1px solid var(--jv-edge);
+      border-radius:999px;padding:3px 9px;background:rgba(255,255,255,.03);line-height:1.35;}
+    /* muted secondary reason line (human text only — never a technical ID) */
+    .jv-sf-node .nrsn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      width:100%;overflow:hidden;overflow-wrap:anywhere;margin-top:6px;font-size:9px;line-height:1.35;
+      color:var(--jv-dim);opacity:.85;}
     .jv-sf-node .ndot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;
       background:var(--jv-dim);box-shadow:0 0 8px currentColor;color:var(--jv-dim);}
     .jv-sf-node::after{content:"";position:absolute;right:-16px;top:50%;width:16px;height:1px;
@@ -240,17 +250,21 @@
     .jv-sf-node.is-todo{opacity:.7;}
     .jv-sf-node.is-done{border-color:rgba(55,245,168,.5);}
     .jv-sf-node.is-done .ndot{background:var(--jv-ok);color:var(--jv-ok);}
-    .jv-sf-node.is-done .nst{color:var(--jv-ok);}
+    .jv-sf-node.is-done .nst{color:var(--jv-ok);border-color:rgba(55,245,168,.4);
+      background:rgba(55,245,168,.06);}
     .jv-sf-node.is-watch{border-color:rgba(255,195,77,.55);}
     .jv-sf-node.is-watch .ndot{background:var(--jv-warn);color:var(--jv-warn);}
-    .jv-sf-node.is-watch .nst{color:var(--jv-warn);}
+    .jv-sf-node.is-watch .nst{color:var(--jv-warn);border-color:rgba(255,195,77,.45);
+      background:rgba(255,195,77,.06);}
     .jv-sf-node.is-blocked{border-color:rgba(255,93,115,.55);}
     .jv-sf-node.is-blocked .ndot{background:var(--jv-bad);color:var(--jv-bad);}
-    .jv-sf-node.is-blocked .nst{color:var(--jv-bad);}
+    .jv-sf-node.is-blocked .nst{color:var(--jv-bad);border-color:rgba(255,93,115,.45);
+      background:rgba(255,93,115,.06);}
     .jv-sf-node.is-active{border-color:var(--jv-cyan);
       box-shadow:0 0 12px 2px rgba(63,224,255,.25);animation:jvnode 2.4s ease-in-out infinite;}
     .jv-sf-node.is-active .ndot{background:var(--jv-cyan);color:var(--jv-cyan);}
-    .jv-sf-node.is-active .nst{color:var(--jv-cyan);}
+    .jv-sf-node.is-active .nst{color:var(--jv-cyan);border-color:rgba(63,224,255,.5);
+      background:rgba(63,224,255,.08);}
     @keyframes jvnode{
       0%,100%{box-shadow:0 0 12px 2px rgba(63,224,255,.25);}
       50%{box-shadow:0 0 26px 7px rgba(63,224,255,.5);}
@@ -488,7 +502,7 @@
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Backbone Build</span><span class="nst">Complete</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Lane</span><span class="nst">Complete</span></div>
-              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Operator Review Before Real Strategy Intake</span><span class="nst">Current &middot; You are here &middot; PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
+              <div class="jv-sf-node is-active" title="Gate: PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE" data-debug="PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE"><span class="ndot"></span><span class="nlbl">Operator Review Before Real Strategy Intake</span><span class="nst">Current Review</span><span class="nrsn">You are here &middot; operator approval required</span></div>
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Strategy Intake</span><span class="nst">Blocked &middot; not started</span></div>
             </div>
             <div class="jv-sf-flow"></div>
@@ -526,7 +540,7 @@
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Backbone Build</span><span class="nst">Complete</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Lane</span><span class="nst">Complete</span></div>
-                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Operator Review Before Real Strategy Intake</span><span class="nst">Current &middot; PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
+                <div class="jv-sf-node is-active" title="Gate: PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE" data-debug="PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE"><span class="ndot"></span><span class="nlbl">Operator Review Before Real Strategy Intake</span><span class="nst">Current Review</span><span class="nrsn">Operator approval required</span></div>
                 <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Strategy Intake</span><span class="nst">Blocked &middot; not started</span></div>
               </div>
             </div>
