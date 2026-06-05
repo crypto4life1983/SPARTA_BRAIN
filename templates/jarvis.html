@@ -481,58 +481,53 @@
           <!-- Workflow (human process) -->
           <div class="jv-sf-view" data-sf="workflow" role="tabpanel">
             <h3>Workflow &mdash; Human Process</h3>
-            <p class="jv-sf-sub">Idea Intake &rarr; Research Review &rarr; Candidate Creation &rarr; Build Bundle &rarr; Run Tests &rarr; Generate Report &rarr; Decision &rarr; Commit / Archive / Promote</p>
+            <p class="jv-sf-sub">Idea Intake &rarr; Research Review &rarr; Candidate Creation &rarr; Backbone Build &rarr; Fake Lane &rarr; Operator Review Before Real Strategy Intake &rarr; Real Strategy Intake</p>
             <div class="jv-sf-lane">
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Idea Intake</span><span class="nst">Passed</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Research Review</span><span class="nst">Passed</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
-              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Operator readiness / missing-items review &middot; You are here</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Run Tests</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Generate Report</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Decision</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Commit / Archive / Promote</span><span class="nst">Not started</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Backbone Build</span><span class="nst">Complete</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Lane</span><span class="nst">Complete</span></div>
+              <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Operator Review Before Real Strategy Intake</span><span class="nst">Current &middot; You are here &middot; PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
+              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Strategy Intake</span><span class="nst">Blocked &middot; not started</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only snapshot trued to the Crypto-D1 research candidate (registry status WATCH / MIXED). You are here: <b>Operator readiness / missing-items review</b> &mdash; the Bundle&nbsp;21 readiness gate is complete (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>) and <b><span data-cr="narr_items">9 of 16 checklist items complete, 7 missing (7 pending approval)</span></b> before real-data intake. These are tracked in the <b>Bundle&nbsp;22 Operator Missing-Items Checklist</b>. No live controller.</div>
+            <div class="jv-detail">Display-only snapshot of the Strategy Factory backbone state. The backbone build and the fake-only lane (fake dry walk, fake report renderer, fake lane closure) are <b>complete on paper</b>. You are here: <b>Operator Review Before Real Strategy Intake</b> &mdash; current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. Recommended next phase: <code>OPERATOR_REVIEW_BEFORE_CRYPTO_D1_OR_REAL_STRATEGY_INTAKE</code>. Real strategy intake stays blocked; no live controller.</div>
           </div>
 
           <!-- Pipeline (machine process) -->
           <div class="jv-sf-view" data-sf="pipeline" role="tabpanel">
             <h3>Pipeline &mdash; Machine Process</h3>
-            <p class="jv-sf-sub">Raw Data &rarr; Data QA &rarr; Dataset Freeze &rarr; Baseline Check &rarr; Strategy Engine &rarr; Fees / Slippage &rarr; OOS Validation &rarr; Stress Test &rarr; Risk Scoring &rarr; Final Report &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
+            <p class="jv-sf-sub">Strategy Factory Backbone &rarr; Fake Dry Walk &rarr; Fake Report Renderer &rarr; Fake Lane Closure &rarr; Crypto-D1 Intake Reconciliation &rarr; Real Data QA &rarr; Baseline Backtest &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
             <div class="jv-sf-lane">
-              <div class="jv-sf-node is-watch" data-mf="raw_data"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
-              <div class="jv-sf-node is-watch" data-mf="data_qa"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
-              <div class="jv-sf-node is-todo" data-mf="dataset_freeze"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo" data-mf="backtest"><span class="ndot"></span><span class="nlbl">Baseline Check</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Fees / Slippage</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">OOS Validation</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Stress Test</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Risk Scoring</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Final Report</span><span class="nst">Not started</span></div>
-              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Gated</span></div>
-              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Strategy Factory Backbone</span><span class="nst">Complete</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Dry Walk</span><span class="nst">Complete</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Report Renderer</span><span class="nst">Complete</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Lane Closure</span><span class="nst">Complete</span></div>
+              <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Crypto-D1 Intake Reconciliation</span><span class="nst">Next &middot; not started</span></div>
+              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Data QA</span><span class="nst">Blocked</span></div>
+              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Baseline Backtest</span><span class="nst">Blocked</span></div>
+              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Locked &middot; human approval required</span></div>
+              <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked &middot; never automated</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only, trued to Crypto-D1: <b>Readiness gate complete; real-data intake not ready</b> (<code>readiness_status = NOT_READY_FOR_REAL_DATA</code>, <b><span data-cr="narr_items2">9 of 16 checklist items complete, 7 missing (7 pending approval)</span></b>). The <b>Bundle&nbsp;22 missing-items checklist</b> is tracked and awaiting manual operator raw-data intake per the Bundle&nbsp;20 runbook &mdash; <b>no source named or approved</b>. The <b>V002 dataset is frozen and present</b>; QA ran on V002 with verdict <b>QA_WARN</b> and operator acceptance; the IS/OOS addendum exists; a baseline backtest ran with result <b>WATCH</b>. Crypto-D1 remains <b>WATCH / MIXED</b> and <code>readiness_status</code> remains <b>NOT_READY_FOR_REAL_DATA</b> &mdash; no ACTIVE/STRONG promotion, no paper trading, and no live trading are authorized. The Paper Trading and Micro-Live gates are human-approved; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
+            <div class="jv-detail">Display-only, trued to the Bundle 40 Strategy Factory state: the backbone and the fake-only lane are <b>complete on paper</b> (fake dry walk, fake report renderer, fake lane closure). <b>Crypto-D1 Intake Reconciliation</b> is the next step but is <b>not started</b>, and <b>Real Data QA</b> and <b>Baseline Backtest</b> remain <b>blocked</b> behind the current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. No real data has been fetched, loaded, validated, or computed; nothing real is unlocked. The Paper Trading and Micro-Live gates are human-approved and locked; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
           </div>
 
           <!-- Combined View -->
           <div class="jv-sf-view" data-sf="combined" role="tabpanel">
             <h3>Combined View</h3>
-            <p class="jv-sf-sub">Top lane is the human workflow; bottom lane is the machine pipeline. The marker shows where the current research sits across both lanes.</p>
+            <p class="jv-sf-sub">Top lane is the human workflow; bottom lane is the machine pipeline. The marker shows where the Strategy Factory currently sits across both lanes.</p>
             <div class="jv-sf-lanewrap">
               <div class="jv-sf-lanetag">Workflow &middot; human</div>
               <div class="jv-sf-lane">
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Idea Intake</span><span class="nst">Passed</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Research Review</span><span class="nst">Passed</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Candidate Creation</span><span class="nst">Passed</span></div>
-                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Build Bundle</span><span class="nst">Operator readiness / missing-items review</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Run Tests</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Generate Report</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Decision</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Commit / Archive / Promote</span><span class="nst">Not started</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Backbone Build</span><span class="nst">Complete</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Lane</span><span class="nst">Complete</span></div>
+                <div class="jv-sf-node is-active"><span class="ndot"></span><span class="nlbl">Operator Review Before Real Strategy Intake</span><span class="nst">Current &middot; PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
+                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Strategy Intake</span><span class="nst">Blocked &middot; not started</span></div>
               </div>
             </div>
             <div class="jv-sf-link"><span></span></div>
@@ -541,18 +536,15 @@
             <div class="jv-sf-lanewrap">
               <div class="jv-sf-lanetag">Pipeline &middot; machine</div>
               <div class="jv-sf-lane">
-                <div class="jv-sf-node is-watch" data-mf="raw_data"><span class="ndot"></span><span class="nlbl">Raw Data</span><span class="nst">Awaiting operator</span></div>
-                <div class="jv-sf-node is-watch" data-mf="data_qa"><span class="ndot"></span><span class="nlbl">Data QA</span><span class="nst">Tool built &middot; awaiting operator data</span></div>
-                <div class="jv-sf-node is-todo" data-mf="dataset_freeze"><span class="ndot"></span><span class="nlbl">Dataset Freeze</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo" data-mf="backtest"><span class="ndot"></span><span class="nlbl">Baseline Check</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Strategy Engine</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Fees / Slippage</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">OOS Validation</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Stress Test</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Risk Scoring</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Final Report</span><span class="nst">Not started</span></div>
-                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Gated</span></div>
-                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Strategy Factory Backbone</span><span class="nst">Complete</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Dry Walk</span><span class="nst">Complete</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Report Renderer</span><span class="nst">Complete</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Lane Closure</span><span class="nst">Complete</span></div>
+                <div class="jv-sf-node is-todo"><span class="ndot"></span><span class="nlbl">Crypto-D1 Intake Reconciliation</span><span class="nst">Next &middot; not started</span></div>
+                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Data QA</span><span class="nst">Blocked</span></div>
+                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Baseline Backtest</span><span class="nst">Blocked</span></div>
+                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Locked &middot; human approval required</span></div>
+                <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked &middot; never automated</span></div>
               </div>
             </div>
             <div class="jv-detail">Display-only alignment map. The marker is illustrative; this view launches nothing.</div>
@@ -561,29 +553,28 @@
           <!-- Current Run -->
           <div class="jv-sf-view" data-sf="current" role="tabpanel">
             <h3>Current Run</h3>
-            <p class="jv-sf-sub">A read-only snapshot of where the active research candidate sits. This is a static display; it does not poll, launch, or control any run.</p>
+            <p class="jv-sf-sub">A read-only snapshot of where the Strategy Factory sits. This is a static display; it does not poll, launch, or control any run.</p>
             <div class="jv-sf-here">&#x25C9; You are here</div>
             <div style="margin-top:12px;">
-              <div class="jv-row"><span class="k">Candidate</span><span class="v"><span class="jv-led warn"></span>Crypto-D1 Protocol</span></div>
-              <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator readiness / missing-items review</span></div>
-              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>Readiness gate complete; real-data intake not ready</span></div>
-              <div class="jv-row"><span class="k">Readiness gate</span><span class="v"><span class="jv-led"></span>Complete (Bundle 21)</span></div>
-              <div class="jv-row"><span class="k">Missing-items checklist</span><span class="v"><span class="jv-led warn"></span><span data-cr="checklist">Bundle 22 &middot; 16 items &middot; 9 COMPLETE &middot; 7 MISSING &middot; 7 pending approval</span></span></div>
-              <div class="jv-row"><span class="k">Readiness status</span><span class="v"><span class="jv-led warn"></span><span data-cr="cr_readiness">NOT_READY_FOR_REAL_DATA</span></span></div>
-              <div class="jv-row"><span class="k">Missing operator items</span><span class="v"><span class="jv-led warn"></span><span data-cr="missing_items">7 MISSING &middot; 7 pending approval (of 16 checklist items)</span></span></div>
-              <div class="jv-row"><span class="k">Data fetched</span><span class="v"><span class="jv-led warn"></span><span data-cr="data_fetched">V002 frozen dataset present</span></span></div>
-              <div class="jv-row"><span class="k">QA run</span><span class="v"><span class="jv-led warn"></span><span data-cr="qa_run">QA_WARN on V002 &middot; operator-accepted</span></span></div>
-              <div class="jv-row"><span class="k">Baseline results</span><span class="v"><span class="jv-led warn"></span><span data-cr="baseline">Ran &middot; WATCH (V002 baseline)</span></span></div>
-              <div class="jv-row"><span class="k">Status</span><span class="v"><span class="jv-led warn"></span><span data-cr="cr_status">WATCH / MIXED</span></span></div>
-              <div class="jv-row"><span class="k">Paper Trading Gate</span><span class="v"><span class="jv-led lock"></span>Human approval required</span></div>
+              <div class="jv-row"><span class="k">Current gate</span><span class="v"><span class="jv-led warn"></span>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
+              <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator Review Before Real Strategy Intake</span></div>
+              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led"></span>Fake Lane Closure complete; real intake not started</span></div>
+              <div class="jv-row"><span class="k">Strategy Factory Backbone</span><span class="v"><span class="jv-led ok"></span>Complete</span></div>
+              <div class="jv-row"><span class="k">Fake-only lane</span><span class="v"><span class="jv-led ok"></span>Complete (fake dry walk, fake report renderer, fake lane closure)</span></div>
+              <div class="jv-row"><span class="k">Recommended next phase</span><span class="v"><span class="jv-led warn"></span>OPERATOR_REVIEW_BEFORE_CRYPTO_D1_OR_REAL_STRATEGY_INTAKE</span></div>
+              <div class="jv-row"><span class="k">Crypto-D1 Intake Reconciliation</span><span class="v"><span class="jv-led"></span>Next &middot; not started</span></div>
+              <div class="jv-row"><span class="k">Real Strategy Intake</span><span class="v"><span class="jv-led warn"></span>Blocked &middot; not started</span></div>
+              <div class="jv-row"><span class="k">Real Data QA</span><span class="v"><span class="jv-led warn"></span>Blocked</span></div>
+              <div class="jv-row"><span class="k">Baseline Backtest</span><span class="v"><span class="jv-led warn"></span>Blocked</span></div>
+              <div class="jv-row"><span class="k">Paper Trading Gate</span><span class="v"><span class="jv-led lock"></span>Locked &middot; human approval required</span></div>
               <div class="jv-row"><span class="k">Micro-Live Gate</span><span class="v"><span class="jv-led lock"></span>Locked &middot; never automated</span></div>
             </div>
-            <div class="jv-detail" style="margin-top:10px;" data-cr="detail">
-              V002 dataset is frozen and present; QA ran on V002 with verdict
-              QA_WARN (operator-accepted via memo); the IS/OOS addendum exists; a
-              baseline backtest ran with result WATCH. Crypto-D1 remains WATCH /
-              MIXED, NOT_READY_FOR_REAL_DATA &mdash; no ACTIVE/STRONG promotion, no
-              paper or live trading. This card stages, promotes, and executes nothing.
+            <div class="jv-detail" style="margin-top:10px;">
+              The Strategy Factory backbone and the fake-only lane are complete on
+              paper. The current gate is PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE;
+              the recommended next phase is OPERATOR_REVIEW_BEFORE_CRYPTO_D1_OR_REAL_STRATEGY_INTAKE.
+              No real data has been fetched, loaded, validated, or computed, and no
+              real strategy intake is unlocked. This card stages, promotes, and executes nothing.
             </div>
           </div>
 
@@ -592,7 +583,7 @@
             <h3>Strategy Board</h3>
             <p class="jv-sf-sub">Trued to the candidate registry &mdash; 9 candidates (2 WATCH &middot; 4 IDEA &middot; 3 PARKED). Display-only: no candidate has a passed backtest, baseline result, or live status, and no promotion, archiving, or execution happens from this board.</p>
             <div class="jv-sf-board">
-              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH / MIXED</span> &middot; readiness gate complete &middot; NOT_READY_FOR_REAL_DATA &middot; checklist (Bundle 22) &middot; <span data-cr="board_checklist">16 items &middot; 9 COMPLETE &middot; 7 MISSING &middot; 7 pending</span></div></div>
+              <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-D1 Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH / MIXED</span> &middot; backbone + fake lane complete &middot; real intake blocked &middot; operator review pending (PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE)</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">Arbitrage Research Protocol</span><span class="jv-led warn"></span></div><div class="jv-detail">Registry: <span style="color:var(--jv-warn)">WATCH</span> &middot; research-only</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">Crypto-4H Protocol</span><span class="jv-led"></span></div><div class="jv-detail">Registry: IDEA &middot; not started</div></div>
               <div class="jv-mcard"><div class="top"><span class="ttl">NQ/ES Futures Trend</span><span class="jv-led"></span></div><div class="jv-detail">Registry: IDEA &middot; not started</div></div>
@@ -832,86 +823,11 @@
   }
 
   function render(d){
-    // Crypto-D1 Mission Flow truth (DISPLAY-ONLY). Re-labels the four pipeline
-    // nodes from the read-only mission_flow payload. No buttons, no forms, no
-    // execution affordance, no extra network call — purely reflects committed
-    // source-of-truth. Paper / Micro-Live gates are never touched here.
-    (function(){
-      var mf = d.mission_flow || {};
-      if(!mf || mf.display_only !== true){ return; }
-      function mfSet(key, cls, label){
-        var nodes = document.querySelectorAll('.jv-sf-node[data-mf="'+key+'"]');
-        for(var i=0;i<nodes.length;i++){
-          nodes[i].classList.remove('is-watch','is-todo','is-done',
-            'is-blocked','is-active');
-          nodes[i].classList.add(cls);
-          var nst = nodes[i].querySelector('.nst');
-          if(nst){ nst.textContent = label; }
-        }
-      }
-      if(mf.data_present === true){
-        mfSet('raw_data', 'is-done', 'V002 Frozen · Dataset Present');
-        mfSet('dataset_freeze', 'is-done', 'FROZEN');
-      }
-      if(mf.qa_status === 'QA_WARN'){
-        mfSet('data_qa', 'is-watch',
-          mf.qa_accepted === true ? 'QA_WARN Accepted' : 'QA_WARN');
-      }
-      if(mf.baseline_present === true){
-        mfSet('backtest', 'is-watch', 'Ran · '
-          + (mf.baseline_status || 'WATCH') + ' (V002 baseline)');
-      } else {
-        mfSet('backtest', 'is-todo', 'Ready for approved run · Not run yet');
-      }
-
-      // Current Run card (DISPLAY-ONLY, textContent only). Trues the rows that
-      // were previously static/false. Never promotes the lane: lane stays
-      // WATCH/MIXED and readiness stays NOT_READY regardless of this payload.
-      function crSet(key, text){
-        var el = document.querySelector('[data-cr="'+key+'"]');
-        if(el){ el.textContent = text; }
-      }
-      if(mf.data_present === true){
-        crSet('data_fetched', 'V002 frozen dataset present');
-      }
-      if(mf.qa_status){
-        crSet('qa_run', mf.qa_status + ' on V002'
-          + (mf.qa_accepted === true ? ' · operator-accepted' : ''));
-      }
-      if(mf.baseline_present === true && mf.baseline_status){
-        crSet('baseline', 'Ran · ' + mf.baseline_status + ' (V002 baseline)');
-      }
-
-      // Operator missing-items checklist — trued from the live counts the
-      // backend already computes (checklist_counts + pending_approval_count).
-      // Previously these rows were hard-coded "16 MISSING / PENDING" and never
-      // updated; now they reflect the real MISSING / COMPLETE / pending split.
-      if(mf.checklist_counts){
-        var cc = mf.checklist_counts || {};
-        var miss = cc.MISSING || 0;
-        var comp = cc.COMPLETE || 0;
-        var blk  = cc.BLOCKED || 0;
-        var tot  = mf.checklist_total || (miss + comp + blk);
-        var pend = mf.pending_approval_count || 0;
-        var blkTxt = blk ? ' · ' + blk + ' BLOCKED' : '';
-        crSet('checklist', 'Bundle 22 · ' + tot + ' items · ' + comp +
-          ' COMPLETE · ' + miss + ' MISSING' + blkTxt +
-          ' · ' + pend + ' pending approval');
-        crSet('missing_items', miss + ' MISSING · ' + pend +
-          ' pending approval (of ' + tot + ' checklist items)');
-        crSet('board_checklist', tot + ' items · ' + comp + ' COMPLETE · ' +
-          miss + ' MISSING' + blkTxt + ' · ' + pend + ' pending');
-        var narr = comp + ' of ' + tot + ' checklist items complete, ' +
-          miss + ' missing (' + pend + ' pending approval)';
-        crSet('narr_items', narr);
-        crSet('narr_items2', narr);
-      }
-      if(mf.readiness_status){ crSet('cr_readiness', mf.readiness_status); }
-      if(mf.lane_status){
-        crSet('cr_status', mf.lane_status + ' / ' +
-          (mf.evidence_level || 'MIXED'));
-      }
-    })();
+    // Strategy Factory Mission Flow (DISPLAY-ONLY) is now a static Bundle 40
+    // map rendered directly in the #pStrategyFlow markup above: backbone +
+    // fake-only lane complete, current gate
+    // PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE. It carries no
+    // data-mf/data-cr hooks and is never re-labelled from a runtime payload.
 
     // Crypto-D1 Lane Monitor (DISPLAY-ONLY, dynamic). Renders the read-only
     // lane_monitor payload: clamped lane / readiness truth + the latest committed

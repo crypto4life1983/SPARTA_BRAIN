@@ -1,13 +1,21 @@
 """Tests for the JARVIS Strategy Factory / Mission Flow panel (additive, display-only).
 
+State target: Bundle 40 static sync. The panel is a read-only map of the
+Strategy Factory backbone + fake-only lane being complete on paper, with the
+current gate PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE and real
+strategy intake still blocked.
+
 Coverage:
-- the new Strategy Factory section + #pStrategyFlow panel render in the page
+- the Strategy Factory section + #pStrategyFlow panel render in the page
 - all six internal views are present (Overview / Workflow / Pipeline /
   Combined View / Current Run / Strategy Board)
-- the human workflow stages and machine pipeline stages render in order text
-- the "You are here" marker and the five status-colour legend labels render
+- the Bundle 40 human workflow stages and machine pipeline stages render in order
+- the "You are here" marker points to PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE
+- the stale Bundle-21/22 "Build Bundle / Operator readiness" active marker is gone
+- locked/blocked gates are preserved (Real Strategy Intake, Real Data QA,
+  Baseline Backtest, Paper Trading Gate, Micro-Live Gate)
 - the panel is display-only: no <form>, no inline on*-handlers, no fetch/XHR,
-  and no order/broker/execution control affordances inside the block
+  and no order/broker/upload/autopilot/execution control affordances
 - GET /api/jarvis/status is unchanged by this UI (no new keys introduced here)
 
 This panel adds NO backend behavior: it is static markup switched client-side.
@@ -37,13 +45,12 @@ def _strategy_flow_block(body: str) -> str:
     """Return only the #pStrategyFlow panel markup, so 'forbidden affordance'
     assertions are scoped to the new block and never to the wider page."""
     start = body.index('id="pStrategyFlow"')
-    # back up to the opening div of the panel
     open_idx = body.rfind("<div", 0, start)
-    # the panel is closed before the next jv-section divider ("Strategy Factory
-    # Readiness"); slice up to that marker to capture the whole block.
     end = body.index("Strategy Factory Readiness", start)
     return body[open_idx:end]
 
+
+# --- structural pins -------------------------------------------------------
 
 def test_strategy_factory_section_and_panel_render():
     body = _page()
@@ -60,17 +67,43 @@ def test_strategy_flow_has_all_six_views():
         "Combined View", "Current Run", "Strategy Board",
     ):
         assert label in body, f"missing Strategy Factory view: {label}"
-    # six clickable tabs + six tab panels
     block = _strategy_flow_block(body)
     assert block.count('class="jv-sf-tab') == 6
     assert block.count('class="jv-sf-view') == 6
 
 
+# --- Bundle 40 vocabulary present ------------------------------------------
+
+def test_bundle40_vocabulary_present():
+    block = _strategy_flow_block(_page())
+    for token in (
+        # human lane
+        "Backbone Build",
+        "Fake Lane",
+        "Operator Review Before Real Strategy Intake",
+        "Real Strategy Intake",
+        # machine lane
+        "Strategy Factory Backbone",
+        "Fake Dry Walk",
+        "Fake Report Renderer",
+        "Fake Lane Closure",
+        "Crypto-D1 Intake Reconciliation",
+        "Real Data QA",
+        "Baseline Backtest",
+        # gate
+        "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
+        # recommended next phase
+        "OPERATOR_REVIEW_BEFORE_CRYPTO_D1_OR_REAL_STRATEGY_INTAKE",
+    ):
+        assert token in block, f"missing Bundle 40 token: {token}"
+
+
 def test_workflow_stages_render_in_order():
     block = _strategy_flow_block(_page())
     stages = [
-        "Idea Intake", "Research Review", "Candidate Creation", "Build Bundle",
-        "Run Tests", "Generate Report", "Decision", "Commit / Archive / Promote",
+        "Idea Intake", "Research Review", "Candidate Creation",
+        "Backbone Build", "Fake Lane",
+        "Operator Review Before Real Strategy Intake", "Real Strategy Intake",
     ]
     last = -1
     for s in stages:
@@ -83,10 +116,9 @@ def test_workflow_stages_render_in_order():
 def test_pipeline_stages_render_in_order():
     block = _strategy_flow_block(_page())
     stages = [
-        "Raw Data", "Data QA", "Dataset Freeze", "Baseline Check",
-        "Strategy Engine",
-        "Fees / Slippage", "OOS Validation", "Stress Test", "Risk Scoring",
-        "Final Report", "Paper Trading Gate", "Micro-Live Gate",
+        "Strategy Factory Backbone", "Fake Dry Walk", "Fake Report Renderer",
+        "Fake Lane Closure", "Crypto-D1 Intake Reconciliation", "Real Data QA",
+        "Baseline Backtest", "Paper Trading Gate", "Micro-Live Gate",
     ]
     last = -1
     for s in stages:
@@ -96,13 +128,76 @@ def test_pipeline_stages_render_in_order():
         last = idx
 
 
-def test_combined_view_has_you_are_here_marker():
+# --- "You are here" marker location ----------------------------------------
+
+def test_you_are_here_points_to_operator_review_gate():
     block = _strategy_flow_block(_page())
     assert "You are here" in block
-    # both lanes labelled in the combined view
+    assert "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE" in block
+    # the active marker sits on the Operator Review node and names the gate
+    assert (
+        'is-active"><span class="ndot"></span>'
+        '<span class="nlbl">Operator Review Before Real Strategy Intake</span>'
+        '<span class="nst">Current &middot; You are here &middot; '
+        'PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE'
+    ) in block
+
+
+def test_combined_view_lane_tags_present():
+    block = _strategy_flow_block(_page())
     assert "Workflow &middot; human" in block
     assert "Pipeline &middot; machine" in block
 
+
+# --- stale Bundle-21/22 active marker is gone ------------------------------
+
+def test_stale_build_bundle_active_marker_gone():
+    block = _strategy_flow_block(_page())
+    # "Build Bundle" must not be the active "You are here" stage anymore
+    assert (
+        'is-active"><span class="ndot"></span>'
+        '<span class="nlbl">Build Bundle'
+    ) not in block
+    # the old Crypto-D1 readiness framing must be gone from the panel
+    assert "Operator readiness / missing-items review" not in block
+    assert "Bundle 22" not in block
+    assert "Bundle&nbsp;22" not in block
+    assert "missing-items checklist" not in block.lower()
+
+
+# --- locked / blocked gates preserved --------------------------------------
+
+def test_blocked_and_locked_gates_preserved():
+    block = _strategy_flow_block(_page())
+    # Real Strategy Intake is blocked / not started
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Strategy Intake</span>'
+        '<span class="nst">Blocked &middot; not started'
+    ) in block
+    # Real Data QA blocked
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    # Baseline Backtest blocked
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    # Paper Trading Gate locked
+    assert (
+        '<span class="nlbl">Paper Trading Gate</span>'
+        '<span class="nst">Locked &middot; human approval required'
+    ) in block
+    # Micro-Live Gate locked
+    assert (
+        '<span class="nlbl">Micro-Live Gate</span>'
+        '<span class="nst">Locked &middot; never automated'
+    ) in block
+
+
+# --- legend + display-only safety ------------------------------------------
 
 def test_status_colour_legend_present():
     block = _strategy_flow_block(_page())
@@ -120,13 +215,14 @@ def test_strategy_flow_block_is_display_only():
         assert tag not in block, f"display-only block must not contain {tag}"
     # no inline event handlers (handlers live in an isolated, scoped script)
     assert not re.search(r"on\w+\s*=", block), "no inline on*-handlers allowed"
-    # no client-side execution / network affordances inside the block.
-    # NB: the words "broker"/"trading" appear in READ-ONLY disclaimers ("controls
-    # no broker, paper, or live execution"), so we forbid concrete control verbs
-    # and network calls, not safety-disclaimer nouns.
+    # no client-side execution / network / control affordances inside the block.
+    # NB: nouns like "broker"/"trading"/"live"/"paper" appear in READ-ONLY
+    # disclaimers, so we forbid concrete control verbs / surfaces, not nouns.
     for forbidden in (
         "fetch(", "xmlhttprequest", "place_order", "submit_order",
-        "execute_trade", "websocket", "eval(", "broker_login", "broker_control",
+        "execute_trade", "websocket", "eval(", "broker_login",
+        "broker_control", "autopilot", "upload(", "deploy(",
+        "enable_live", "go_live",
     ):
         assert forbidden not in block, f"forbidden affordance in panel: {forbidden}"
 
@@ -134,8 +230,7 @@ def test_strategy_flow_block_is_display_only():
 def test_strategy_flow_switcher_script_is_scoped_and_inert():
     body = _page()
     # the switcher targets only the panel and never fetches or mutates state
-    assert 'getElementById(\'pStrategyFlow\')' in body
-    # isolate the switcher script and confirm it has no network/exec calls
+    assert "getElementById('pStrategyFlow')" in body
     marker = "Mission Flow: isolated, display-only sub-tab switcher"
     assert marker in body
     tail = body[body.index(marker):]
@@ -145,136 +240,44 @@ def test_strategy_flow_switcher_script_is_scoped_and_inert():
         assert forbidden not in script, f"switcher must not contain {forbidden}"
 
 
-def test_backtest_node_reflects_live_baseline_when_present():
-    """Display-only label fix: when the live mission_flow payload reports
-    baseline_present === true, the Pipeline 'Backtest' node must be re-labelled
-    to the live baseline result (e.g. 'Ran · WATCH (V002 baseline)') so it no
-    longer contradicts the Current Run card. When no baseline is present it must
-    keep the 'Not started / Not run yet' behavior. This is a textContent/CSS
-    label change only -- it must not promote the lane or touch any gate."""
-    body = _page()
-    # the render JS must branch on the live baseline_present flag for backtest
-    assert "mf.baseline_present === true" in body
-    # the present-branch re-labels the backtest node with the live status
-    assert "mfSet('backtest', 'is-watch'" in body
-    assert "(V002 baseline)" in body
-    # the absent-branch keeps the prior 'not run yet' label
-    assert "Ready for approved run" in body
-    # safety: the backtest node must not be promoted to the active marker and
-    # the branch must carry no execution verbs.
-    block = _strategy_flow_block(body).lower()
-    for forbidden in ('is-active" data-mf="backtest', "place_order",
-                      "execute_trade", "submit_order"):
-        assert forbidden not in block, f"backtest fix must not include {forbidden}"
-    # the Paper Trading / Micro-Live gates remain gated/locked, untouched
-    assert "human approval required" in body.lower()
-    assert "locked &middot; never automated" in body.lower()
-
+# --- backend status API unchanged by this static UI ------------------------
 
 def test_status_api_unchanged_no_strategy_flow_keys():
     import app as app_module
     from fastapi.testclient import TestClient
     client = TestClient(app_module.app)
     data = client.get("/api/jarvis/status").json()
-    # this UI is static; it must not have added any feed keys
     assert "strategy_flow" not in data
 
 
-# --- truthful-state pins (state-accuracy patch) ----------------------------
-# These guard against the panel ever again implying invented progress for the
-# Crypto-D1 research candidate (no data fetched, no baseline, no passed backtest).
+# --- truthful-state pins ----------------------------------------------------
 
-def test_no_invented_crypto_d1_backtest_pass():
+def test_no_invented_backtest_pass():
     block = _strategy_flow_block(_page())
-    # the old misleading board card claimed a passed Crypto-D1 backtest
+    # the panel must never claim a passed/green baseline or backtest
     assert "Crypto-D1 Baseline" not in block
     assert 'Pipeline: Backtest &middot; <span style="color:var(--jv-ok)">Passed</span>' \
         not in block
+    # the removed live-baseline re-label JS must not resurface in the panel
+    assert "V002 baseline" not in block
+    assert "(V002 baseline)" not in block
 
 
-def test_pipeline_oos_validation_not_active():
-    block = _strategy_flow_block(_page())
-    # OOS Validation must not be shown as the active stage for Crypto-D1
-    assert ('is-active"><span class="ndot"></span>'
-            '<span class="nlbl">OOS Validation') not in block
-    # post-Bundle-21: the QA runtime tool is built, so Data QA is no longer the
-    # "active / next" pipeline node -- it is a watch node awaiting operator data.
-    # (The node now carries a data-mf hook so the display-only mission_flow patch
-    # can re-label it client-side; the static fallback class stays is-watch.)
-    assert ('is-active" data-mf="data_qa"><span class="ndot"></span>'
-            '<span class="nlbl">Data QA') not in block
-    assert ('is-watch" data-mf="data_qa"><span class="ndot"></span>'
-            '<span class="nlbl">Data QA') in block
-    # the stale "QA runtime tool next" framing must be gone from the panel
-    assert "QA runtime tool next" not in block
-
-
-def test_current_run_reflects_real_crypto_d1_state():
+def test_current_run_reflects_bundle40_state():
     block = _strategy_flow_block(_page())
     for token in (
-        "Operator readiness / missing-items review",
-        "Readiness gate complete; real-data intake not ready",
-        "Complete (Bundle 21)",
-        "NOT_READY_FOR_REAL_DATA",
-        "7 MISSING",
-        'data-cr="missing_items"',
-        "Data fetched",
-        "V002 frozen dataset present",
-        "QA_WARN on V002",
-        "WATCH (V002 baseline)",
-        "baseline backtest ran with result WATCH",
-        "WATCH / MIXED",
+        "Current gate",
+        "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
+        "Operator Review Before Real Strategy Intake",
+        "Fake Lane Closure complete; real intake not started",
+        "OPERATOR_REVIEW_BEFORE_CRYPTO_D1_OR_REAL_STRATEGY_INTAKE",
+        "Crypto-D1 Intake Reconciliation",
     ):
-        assert token in block, f"missing truthful Current Run token: {token}"
-    # the stale Bundle-19-era framing must be gone
-    for stale in ("Data-readiness / QA tooling", "Authorization gate complete"):
+        assert token in block, f"missing Bundle 40 Current Run token: {token}"
+    # stale Crypto-D1 readiness-era tokens must be gone
+    for stale in ("NOT_READY_FOR_REAL_DATA", "QA_WARN on V002",
+                  "readiness gate", "9 COMPLETE", "7 MISSING"):
         assert stale not in block, f"stale Current Run token still present: {stale}"
-    # the pre-V002 "nothing has touched real data" framing is now false and gone
-    # from the Current Run card.
-    for stale in ("None against real data", "None yet"):
-        assert stale not in block, f"stale Current Run token still present: {stale}"
-
-
-def test_current_run_acknowledges_bundle22_checklist():
-    block = _strategy_flow_block(_page())
-    # Bundle 22 sits ALONGSIDE the Bundle 21 readiness gate, never relabelling it.
-    assert "Complete (Bundle 21)" in block  # readiness gate label unchanged
-    for token in (
-        "Missing-items checklist",
-        "Bundle 22",
-        "9 COMPLETE",
-        "7 MISSING",
-        "7 pending approval",
-        'data-cr="checklist"',
-    ):
-        assert token in block, f"missing Bundle 22 checklist token: {token}"
-    # safety state must not have moved
-    assert "NOT_READY_FOR_REAL_DATA" in block
-    assert "WATCH / MIXED" in block
-
-
-def test_workflow_and_pipeline_acknowledge_bundle22_checklist():
-    block = _strategy_flow_block(_page())
-    # Workflow detail: 16 operator items tracked in the Bundle 22 checklist.
-    assert "Bundle&nbsp;22 Operator Missing-Items Checklist" in block
-    # Pipeline detail: checklist tracked, source-agnostic (no source approved).
-    assert "Bundle&nbsp;22 missing-items checklist" in block
-    assert "tracked and awaiting" in block
-    assert "no source named or approved" in block
-    # source-agnostic guarantee: no concrete venue named on the dashboard
-    assert "Kraken" not in block
-
-
-def test_strategy_board_crypto_d1_reflects_readiness_gate():
-    block = _strategy_flow_block(_page())
-    # the board card must carry the post-Bundle-21 truth, not the old "QA tooling next"
-    assert "readiness gate complete" in block
-    assert "authorization complete, QA tooling next" not in block
-    # Bundle 22 checklist acknowledged alongside the Bundle 21 gate
-    assert "checklist (Bundle 22)" in block
-    assert "9 COMPLETE" in block
-    assert "7 MISSING" in block
-    assert 'data-cr="board_checklist"' in block
 
 
 def test_strategy_board_trued_to_registry_no_fake_pass():
@@ -282,6 +285,5 @@ def test_strategy_board_trued_to_registry_no_fake_pass():
     # real registry candidate names appear; none asserts a passed/live status
     assert "Crypto-D1 Protocol" in block
     assert "Arbitrage Research Protocol" in block
-    # board carries WATCH/IDEA/PARKED registry statuses, never a green pass led
     for status in ("WATCH", "IDEA", "PARKED"):
         assert status in block, f"missing registry status on board: {status}"
