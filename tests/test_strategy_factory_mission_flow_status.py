@@ -2,13 +2,14 @@
 
 The adapter is a PURE, stdlib-only, read-only display/status feed for the JARVIS
 "Mission Flow" panel. It maps where the Strategy Factory backbone stands as of
-Bundle 42 (Crypto-D1 acquire decision contract complete) and proves it executes
-nothing and unlocks nothing real.
+Bundle 46 (Crypto-D1 pre-acquisition human approval gate contract complete) and
+proves it executes nothing and unlocks nothing real.
 
 Coverage:
 - stable output schema (keys + types)
 - mode RESEARCH_ONLY, read_only True, executes False, human_approval_required True
-- Bundle 42 recognized complete; current/next stage is Source Class Contract
+- Bundles 42-46 recognized complete; current/next stage is the human-approved
+  offline acquisition execution contract (a paper contract, not real execution)
 - Real Data QA blocked, Baseline Backtest blocked
 - Paper Trading Gate locked, Micro-Live Gate locked + never automated
 - no stage unlocks real data / QA / baseline / backtest / paper / live /
@@ -122,27 +123,73 @@ def test_safety_flags_all_false():
     assert all(v is False for v in flags.values())
 
 
-# --- 3: Bundle 42 complete; next = Source Class Contract -------------------
+# --- 3: Bundles 42-46 complete; next = execution-boundary contract ---------
 
-def test_bundle42_recognized_complete():
-    assert "Bundle 42" in LATEST_COMPLETED_BUNDLE
+def test_bundles_42_through_46_recognized_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    assert pipe["crypto_d1_acquire_decision_contract"]["state"] == STATE_COMPLETE
+    for stage_id in (
+        "crypto_d1_acquire_decision_contract",          # Bundle 42
+        "crypto_d1_source_class_contract",              # Bundle 43
+        "crypto_d1_source_specification_contract",      # Bundle 44
+        "crypto_d1_offline_acquisition_plan_contract",  # Bundle 45
+        "crypto_d1_pre_acquisition_human_gate_contract",  # Bundle 46
+    ):
+        assert pipe[stage_id]["state"] == STATE_COMPLETE, stage_id
 
 
-def test_next_required_action_is_source_class_contract():
-    assert NEXT_REQUIRED_ACTION == "CRYPTO_D1_SOURCE_CLASS_CONTRACT_REQUIRED"
+def test_bundle45_recognized_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_offline_acquisition_plan_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Bundle 45" in row["reason"]
+
+
+def test_bundle46_recognized_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_pre_acquisition_human_gate_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Bundle 46" in row["reason"]
+
+
+def test_latest_completed_bundle_is_bundle46():
+    assert "Bundle 46" in LATEST_COMPLETED_BUNDLE
+    assert "Pre-Acquisition Human Approval Gate" in LATEST_COMPLETED_BUNDLE
+    assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
+
+
+def test_next_required_action_is_execution_boundary_contract_not_execution():
+    assert NEXT_REQUIRED_ACTION == (
+        "BUILD_CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_CONTRACT"
+    )
+    # it is an instruction to BUILD a paper CONTRACT, not to run real execution
+    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    assert NEXT_REQUIRED_ACTION.endswith("_CONTRACT")
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
+    # building the next contract still unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    assert pipe["crypto_d1_source_class_contract"]["state"] == STATE_NEXT
+    nxt = pipe["crypto_d1_human_approved_offline_acquisition_execution_contract"]
+    assert nxt["state"] == STATE_NEXT
 
 
-def test_current_stage_is_operator_review():
-    assert "OPERATOR_REVIEW" in CURRENT_STAGE
+def test_current_stage_is_after_bundle46():
+    assert CURRENT_STAGE == (
+        "CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_CONTRACT_REQUIRED"
+    )
+    assert "OPERATOR_REVIEW" not in CURRENT_STAGE
     assert get_mission_flow_status()["current_stage"] == CURRENT_STAGE
     human = {r["id"]: r for r in human_workflow_lane()}
     assert human["operator_review_before_real_strategy_intake"]["state"] == STATE_CURRENT
+
+
+def test_bundle46_authorizes_nothing_to_run():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    reason = pipe["crypto_d1_pre_acquisition_human_gate_contract"]["reason"].lower()
+    assert "authorizes nothing" in reason
+    # the gate contract existing does not flip any real capability on
+    assert all(v is False for v in safety_flags().values())
+    assert get_mission_flow_status()["executes"] is False
 
 
 def test_backbone_and_fake_lane_complete():

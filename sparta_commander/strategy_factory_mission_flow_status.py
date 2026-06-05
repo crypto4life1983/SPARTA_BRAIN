@@ -17,11 +17,14 @@ network, spawns no subprocess, reads no environment, mints no id, records no
 timestamp, and dynamically imports nothing.
 
 The snapshot is hardcoded from the known, committed contract/checkpoint state of
-the Strategy Factory backbone as of Bundle 42 (Crypto-D1 acquire decision
-contract complete). It requires no IO to produce the default status. Reaching
-any stage in this map unlocks nothing real: every downstream real-world
-capability (real data, QA, baseline, backtest, paper, live, broker, exchange,
-automation, runtime/registry/dashboard writes) stays blocked and human-gated.
+the Strategy Factory backbone as of Bundle 46 (Crypto-D1 pre-acquisition human
+approval gate contract complete). It requires no IO to produce the default
+status. Reaching any stage in this map unlocks nothing real: every downstream
+real-world capability (real data, QA, baseline, backtest, paper, live, broker,
+exchange, automation, runtime/registry/dashboard writes) stays blocked and
+human-gated. Bundle 46 only means the human approval gate *contract* exists; it
+authorizes no data acquisition, QA, backtest, paper/live, broker/exchange, or
+automation.
 
 Public API:
   - MISSION_FLOW_VERSION
@@ -45,7 +48,18 @@ from typing import Any
 
 from sparta_commander.strategy_factory_crypto_d1_acquire_decision_contract import (  # noqa: E501
     ACQUIRE_SCHEMA_VERSION,
-    NEXT_GATE_CRYPTO_D1_SOURCE_CLASS_CONTRACT_REQUIRED,
+)
+from sparta_commander.strategy_factory_crypto_d1_source_class_contract import (  # noqa: E501
+    SOURCE_CLASS_SCHEMA_VERSION,
+)
+from sparta_commander.strategy_factory_crypto_d1_source_specification_contract import (  # noqa: E501
+    SPEC_SCHEMA_VERSION,
+)
+from sparta_commander.strategy_factory_crypto_d1_offline_acquisition_plan_contract import (  # noqa: E501
+    PLAN_SCHEMA_VERSION,
+)
+from sparta_commander.strategy_factory_crypto_d1_pre_acquisition_human_gate_contract import (  # noqa: E501
+    GATE_SCHEMA_VERSION,
 )
 
 __all__ = [
@@ -101,11 +115,13 @@ STATE_BLOCKED = "BLOCKED"
 STATE_LOCKED = "LOCKED"
 STATE_PARKED = "PARKED"
 
-CURRENT_STAGE = "OPERATOR_REVIEW_BEFORE_CRYPTO_D1_SOURCE_CLASS_CONTRACT"
+CURRENT_STAGE = "CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_CONTRACT_REQUIRED"  # noqa: E501
 LATEST_COMPLETED_BUNDLE = (
-    "Bundle 42 - Crypto-D1 Acquire Decision Contract (read-only template)"
+    "Bundle 46 - Crypto-D1 Pre-Acquisition Human Approval Gate"
 )
-NEXT_REQUIRED_ACTION = NEXT_GATE_CRYPTO_D1_SOURCE_CLASS_CONTRACT_REQUIRED
+NEXT_REQUIRED_ACTION = (
+    "BUILD_CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_CONTRACT"
+)
 
 # --- human workflow lane ---------------------------------------------------
 
@@ -132,7 +148,7 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "id": "backbone_build",
         "label": "Backbone Build",
         "state": STATE_COMPLETE,
-        "reason": "Strategy Factory backbone (Bundles 11-42) complete on paper.",
+        "reason": "Strategy Factory backbone (Bundles 11-46) complete on paper.",
     },
     {
         "id": "fake_lane",
@@ -145,9 +161,11 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "label": "Operator Review Before Real Strategy Intake",
         "state": STATE_CURRENT,
         "reason": (
-            "You are here. Bundle 42 acquire-decision contract is complete; "
-            "next is a Crypto-D1 source-class contract template, still on "
-            "paper. Real strategy intake remains paused for operator review."
+            "You are here. Bundles 42-46 contract chain is complete on paper, "
+            "through the Crypto-D1 pre-acquisition human approval gate "
+            "contract. Next is a human-approved offline acquisition execution "
+            "contract template, still on paper. Nothing is authorized to run: "
+            "real strategy intake remains paused for operator review."
         ),
     },
     {
@@ -203,11 +221,50 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_source_class_contract",
         "label": "Crypto-D1 Source Class Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 43 complete (" + SOURCE_CLASS_SCHEMA_VERSION + "). "
+            "Read-only source-class paper contract; acquires no data."
+        ),
+    },
+    {
+        "id": "crypto_d1_source_specification_contract",
+        "label": "Crypto-D1 Source Specification Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 44 complete (" + SPEC_SCHEMA_VERSION + "). Read-only "
+            "source-specification paper contract; acquires no data."
+        ),
+    },
+    {
+        "id": "crypto_d1_offline_acquisition_plan_contract",
+        "label": "Crypto-D1 Offline Acquisition Plan Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 45 complete (" + PLAN_SCHEMA_VERSION + "). Read-only "
+            "offline-acquisition-plan paper contract; acquires no data."
+        ),
+    },
+    {
+        "id": "crypto_d1_pre_acquisition_human_gate_contract",
+        "label": "Crypto-D1 Pre-Acquisition Human Approval Gate",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 46 complete (" + GATE_SCHEMA_VERSION + "). Read-only "
+            "human-approval-gate paper contract only. It defines the gate but "
+            "authorizes nothing: no data acquisition, QA, baseline, backtest, "
+            "simulation, paper, broker, exchange, or automation is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_human_approved_offline_acquisition_execution_contract",
+        "label": "Crypto-D1 Human-Approved Offline Acquisition Execution Contract",  # noqa: E501
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: "
-            + NEXT_GATE_CRYPTO_D1_SOURCE_CLASS_CONTRACT_REQUIRED
-            + ". Another read-only paper contract template; acquires no data."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". Another "
+            "read-only paper contract template that would only DEFINE the "
+            "human-approved offline acquisition execution boundary on paper. "
+            "Building it acquires no data and runs nothing."
         ),
     },
     {
