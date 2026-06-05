@@ -143,6 +143,7 @@ COMMANDER_2_MODULES = (
     "sparta_commander/strategy_factory_crypto_d1_source_specification_contract.py",
     "sparta_commander/strategy_factory_crypto_d1_offline_acquisition_plan_contract.py",
     "sparta_commander/strategy_factory_crypto_d1_pre_acquisition_human_gate_contract.py",
+    "sparta_commander/strategy_factory_crypto_d1_human_approved_offline_acquisition_execution_boundary_contract.py",
     "sparta_commander/strategy_factory_mission_flow_status.py",
 )
 
@@ -260,6 +261,7 @@ COMMANDER_2_TESTS = (
     "tests/test_strategy_factory_crypto_d1_source_specification_contract.py",
     "tests/test_strategy_factory_crypto_d1_offline_acquisition_plan_contract.py",
     "tests/test_strategy_factory_crypto_d1_pre_acquisition_human_gate_contract.py",
+    "tests/test_strategy_factory_crypto_d1_human_approved_offline_acquisition_execution_boundary_contract.py",
     "tests/test_strategy_factory_mission_flow_status.py",
 )
 
