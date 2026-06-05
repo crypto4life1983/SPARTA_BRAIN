@@ -73,6 +73,10 @@ from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_preview_c
     validate_crypto_d1_research_only_dry_run_preview_contract,
     render_crypto_d1_research_only_dry_run_preview_contract_markdown,
 )
+from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
+    CURRENT_STAGE as _REGISTRY_CURRENT_STAGE,
+    NEXT_REQUIRED_ACTION as _REGISTRY_NEXT_REQUIRED_ACTION,
+)
 
 _MODPATH = (
     pathlib.Path(__file__).resolve().parents[1]
@@ -214,12 +218,11 @@ def test_next_gate_constants_stable():
 
 
 def test_next_required_action_and_stage_constants():
-    assert DRY_RUN_PREVIEW_NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT"
-    )
-    assert DRY_RUN_PREVIEW_CURRENT_STAGE == (
-        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT_REQUIRED"
-    )
+    # Bundle 49 re-exports the mission-flow registry's live values, so derive
+    # the expectation from the registry instead of a literal that goes stale
+    # whenever the registry advances (e.g. Block 84 moved this to REVIEW).
+    assert DRY_RUN_PREVIEW_NEXT_REQUIRED_ACTION == _REGISTRY_NEXT_REQUIRED_ACTION
+    assert DRY_RUN_PREVIEW_CURRENT_STAGE == _REGISTRY_CURRENT_STAGE
     assert PREVIEW_CRYPTO_D1_DRY_RUN_PREVIEW_REQUIRED == (
         "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_REQUIRED"
     )
