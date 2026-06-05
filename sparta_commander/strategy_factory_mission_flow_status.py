@@ -65,6 +65,11 @@ from sparta_commander.strategy_factory_crypto_d1_pre_acquisition_human_gate_cont
 from sparta_commander.strategy_factory_crypto_d1_human_approved_offline_acquisition_execution_boundary_contract import (  # noqa: E501
     BOUNDARY_SCHEMA_VERSION,
 )
+from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
+    get_current_stage as _registry_current_stage,
+    get_latest_completed_bundle_label as _registry_latest_bundle_label,
+    get_next_required_action as _registry_next_required_action,
+)
 
 __all__ = [
     "MISSION_FLOW_VERSION",
@@ -119,14 +124,12 @@ STATE_BLOCKED = "BLOCKED"
 STATE_LOCKED = "LOCKED"
 STATE_PARKED = "PARKED"
 
-CURRENT_STAGE = "CRYPTO_D1_HUMAN_APPROVED_OFFLINE_ACQUISITION_EXECUTION_STILL_BLOCKED_NEXT_CONTRACT_REQUIRED"  # noqa: E501
-LATEST_COMPLETED_BUNDLE = (
-    "Bundle 47 - Crypto-D1 Human-Approved Offline Acquisition Execution "
-    "Boundary Contract"
-)
-NEXT_REQUIRED_ACTION = (
-    "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_POST_BOUNDARY_CONTRACT"
-)
+# Derived from the read-only bundle registry (single source of truth) so the
+# mission-flow feed follows the pipeline from structured metadata instead of a
+# hardcoded bundle list. Values are equivalent to the prior hardcoded ones.
+CURRENT_STAGE = _registry_current_stage()
+LATEST_COMPLETED_BUNDLE = _registry_latest_bundle_label()
+NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
 
