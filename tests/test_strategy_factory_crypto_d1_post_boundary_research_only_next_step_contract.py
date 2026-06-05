@@ -222,10 +222,18 @@ def test_next_gate_constants_stable():
 
 
 def test_post_boundary_action_and_stage_from_registry():
-    assert POST_BOUNDARY_NEXT_REQUIRED_ACTION == (
-        "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_POST_BOUNDARY_CONTRACT"
+    # Derive expected truth from the mission-flow registry helpers so this stays
+    # in lock-step with the committed backend instead of a stale literal.
+    from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
+        get_next_required_action,
+        get_current_stage,
     )
-    assert "STILL_BLOCKED" in POST_BOUNDARY_CURRENT_STAGE
+
+    assert POST_BOUNDARY_NEXT_REQUIRED_ACTION == get_next_required_action()
+    assert POST_BOUNDARY_NEXT_REQUIRED_ACTION == (
+        "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT"
+    )
+    assert POST_BOUNDARY_CURRENT_STAGE == get_current_stage()
 
 
 # --- 3: required field schedules -------------------------------------------
