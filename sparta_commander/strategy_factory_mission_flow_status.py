@@ -77,6 +77,9 @@ from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_review_co
 from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_decision_contract import (  # noqa: E501
     DECISION_SCHEMA_VERSION,
 )
+from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_decision_review_contract import (  # noqa: E501
+    DECISION_REVIEW_SCHEMA_VERSION,
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -181,11 +184,11 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "label": "Operator Review Before Real Strategy Intake",
         "state": STATE_CURRENT,
         "reason": (
-            "You are here. Bundles 42-51 contract chain is complete on paper, "
-            "through the Crypto-D1 research-only dry-run decision contract. Next "
-            "is a research-only, dry-run-decision-review-only paper contract to "
-            "be built, still on paper. Nothing is authorized to run: real "
-            "strategy intake remains paused for operator review."
+            "You are here. Bundles 42-52 contract chain is complete on paper, "
+            "through the Crypto-D1 research-only dry-run decision review "
+            "contract. Next is a research-only, dry-run-final-decision-only "
+            "paper contract to be built, still on paper. Nothing is authorized "
+            "to run: real strategy intake remains paused for operator review."
         ),
     },
     {
@@ -351,13 +354,30 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_research_only_dry_run_decision_review_contract",
         "label": "Crypto-D1 Research-Only Dry-Run Decision Review Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 52 complete (" + DECISION_REVIEW_SCHEMA_VERSION + "). "
+            "Read-only research-only dry-run DECISION REVIEW paper contract "
+            "only. It only REVIEWS, on paper, what a research-only dry-run "
+            "decision produced and which research-only dry-run-final-decision-"
+            "only contract is built next; it authorizes nothing and executes "
+            "nothing: no dry-run execution, no real data acquisition, data "
+            "fetch, data inspection, dataset loading, QA, baseline, backtest, "
+            "simulation, trade signal, market-data validation, paper, live, "
+            "broker, exchange, automation, or runtime/registry/dashboard write "
+            "is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_research_only_dry_run_final_decision_contract",
+        "label": "Crypto-D1 Research-Only Dry-Run Final Decision Contract",
         "state": STATE_NEXT,
         "reason": (
             "Next required action: " + NEXT_REQUIRED_ACTION + ". A read-only, "
-            "dry-run-decision-review-only paper contract template to be BUILT "
-            "after the research-only dry-run decision contract. Building it "
-            "acquires no data, runs no dry run, QA, or backtest, and executes "
-            "nothing."
+            "dry-run-final-decision-only paper contract template to be BUILT "
+            "after the research-only dry-run decision review contract. Building "
+            "it acquires no data, runs no dry run, QA, or backtest, and "
+            "executes nothing."
         ),
     },
     {
