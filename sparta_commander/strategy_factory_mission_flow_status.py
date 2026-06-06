@@ -17,12 +17,12 @@ network, spawns no subprocess, reads no environment, mints no id, records no
 timestamp, and dynamically imports nothing.
 
 The snapshot is hardcoded from the known, committed contract/checkpoint state of
-the Strategy Factory backbone as of Bundle 50 (Crypto-D1 research-only dry-run
-review contract complete). It requires no IO to produce the default status.
+the Strategy Factory backbone as of Bundle 51 (Crypto-D1 research-only dry-run
+decision contract complete). It requires no IO to produce the default status.
 Reaching any stage in this map unlocks nothing real: every downstream real-world
 capability (real data, QA, baseline, backtest, paper, live, broker, exchange,
 automation, runtime/registry/dashboard writes) stays blocked and human-gated.
-Bundle 50 only means the research-only dry-run review *contract* exists on
+Bundle 51 only means the research-only dry-run decision *contract* exists on
 paper; it authorizes nothing and executes nothing: no dry-run execution, data
 acquisition, data fetch, data inspection, QA, baseline, backtest, paper/live,
 broker/exchange, or automation is unlocked.
@@ -73,6 +73,9 @@ from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_preview_c
 )
 from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_review_contract import (  # noqa: E501
     REVIEW_SCHEMA_VERSION,
+)
+from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_decision_contract import (  # noqa: E501
+    DECISION_SCHEMA_VERSION,
 )
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
@@ -165,7 +168,7 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "id": "backbone_build",
         "label": "Backbone Build",
         "state": STATE_COMPLETE,
-        "reason": "Strategy Factory backbone (Bundles 11-50) complete on paper.",
+        "reason": "Strategy Factory backbone (Bundles 11-51) complete on paper.",
     },
     {
         "id": "fake_lane",
@@ -178,11 +181,11 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "label": "Operator Review Before Real Strategy Intake",
         "state": STATE_CURRENT,
         "reason": (
-            "You are here. Bundles 42-50 contract chain is complete on paper, "
-            "through the Crypto-D1 research-only dry-run review contract. Next "
-            "is a research-only, dry-run-decision-only paper contract to be "
-            "built, still on paper. Nothing is authorized to run: real strategy "
-            "intake remains paused for operator review."
+            "You are here. Bundles 42-51 contract chain is complete on paper, "
+            "through the Crypto-D1 research-only dry-run decision contract. Next "
+            "is a research-only, dry-run-decision-review-only paper contract to "
+            "be built, still on paper. Nothing is authorized to run: real "
+            "strategy intake remains paused for operator review."
         ),
     },
     {
@@ -332,12 +335,29 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_research_only_dry_run_decision_contract",
         "label": "Crypto-D1 Research-Only Dry-Run Decision Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 51 complete (" + DECISION_SCHEMA_VERSION + "). Read-only "
+            "research-only dry-run DECISION paper contract only. It only "
+            "DECIDES, on paper, what a research-only dry-run review produced and "
+            "which research-only dry-run-decision-review-only contract is built "
+            "next; it authorizes nothing and executes nothing: no dry-run "
+            "execution, no real data acquisition, data fetch, data inspection, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "market-data validation, paper, live, broker, exchange, automation, "
+            "or runtime/registry/dashboard write is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_research_only_dry_run_decision_review_contract",
+        "label": "Crypto-D1 Research-Only Dry-Run Decision Review Contract",
         "state": STATE_NEXT,
         "reason": (
             "Next required action: " + NEXT_REQUIRED_ACTION + ". A read-only, "
-            "dry-run-decision-only paper contract template to be BUILT after "
-            "the research-only dry-run review contract. Building it acquires no "
-            "data, runs no dry run, QA, or backtest, and executes nothing."
+            "dry-run-decision-review-only paper contract template to be BUILT "
+            "after the research-only dry-run decision contract. Building it "
+            "acquires no data, runs no dry run, QA, or backtest, and executes "
+            "nothing."
         ),
     },
     {
