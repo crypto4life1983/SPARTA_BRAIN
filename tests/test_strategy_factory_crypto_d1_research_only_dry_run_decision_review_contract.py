@@ -237,12 +237,26 @@ def test_next_required_action_and_stage_are_strings():
     )
 
 
-def test_next_required_action_is_what_this_bundle_fulfills():
+def test_next_required_action_and_stage_match_registry_truth():
+    # These constants point FORWARD to the next required action/stage published
+    # by the mission-flow registry. After Bundle 52 was registered (Block 90),
+    # the registry's committed truth advanced to Bundle 53's build action and
+    # stage. Derive the expectation from the registry helpers so this test does
+    # not go stale again as the chain advances.
+    from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
+        get_current_stage,
+        get_next_required_action,
+    )
+
     assert DRY_RUN_DECISION_REVIEW_NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_DECISION_REVIEW_CONTRACT"
+        get_next_required_action()
+    )
+    assert DRY_RUN_DECISION_REVIEW_CURRENT_STAGE == get_current_stage()
+    assert DRY_RUN_DECISION_REVIEW_NEXT_REQUIRED_ACTION == (
+        "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_FINAL_DECISION_CONTRACT"
     )
     assert DRY_RUN_DECISION_REVIEW_CURRENT_STAGE == (
-        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_DECISION_REVIEW_CONTRACT_REQUIRED"
+        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_FINAL_DECISION_CONTRACT_REQUIRED"
     )
 
 
