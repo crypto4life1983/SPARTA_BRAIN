@@ -40,6 +40,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_PROTOCOL,
     LATEST_COMPLETED_PROTOCOL_CONTRACT,
     LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT,
+    LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -52,6 +53,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_protocol_contract_label,
     get_latest_completed_family_selection_contract,
     get_latest_completed_family_selection_contract_label,
+    get_latest_completed_family_review_contract,
+    get_latest_completed_family_review_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -148,28 +151,28 @@ def test_get_bundle_by_id():
 
 # --- 3: stage / next action match post-protocol-definition state ------------
 
-def test_current_stage_is_post_family_selection_contract():
+def test_current_stage_is_post_family_review_contract():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_REVIEW_CONTRACT_REQUIRED"
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_CONTRACT_REQUIRED"
     )
     assert get_current_stage() == CURRENT_STAGE
     assert "STRATEGY_CANDIDATE" in CURRENT_STAGE
-    assert "FAMILY_REVIEW" in CURRENT_STAGE
+    assert "RESEARCH_PLAN" in CURRENT_STAGE
     assert "CONTRACT_REQUIRED" in CURRENT_STAGE
-    # a safe post-family-selection-contract research-only stage, not execution
+    # a safe post-family-review-contract research-only stage, not execution
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION"):
         assert banned not in CURRENT_STAGE, banned
 
 
-def test_next_required_action_is_build_family_review_contract():
+def test_next_required_action_is_build_research_plan_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_REVIEW_CONTRACT"
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_CONTRACT"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "FAMILY_REVIEW_CONTRACT" in NEXT_REQUIRED_ACTION
+    assert "RESEARCH_PLAN_CONTRACT" in NEXT_REQUIRED_ACTION
     # it names building a research-only paper contract, not real execution
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
@@ -695,6 +698,126 @@ def test_recognized_family_selection_contract_deterministic_isolated():
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_family_selection_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5e: recognized research-only family-review contract (Block 101) ---------
+
+def test_latest_completed_family_review_contract_label():
+    assert LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT == (
+        "Block 101 - Crypto-D1 Strategy Candidate Family Review Contract"
+    )
+    assert (
+        get_latest_completed_family_review_contract_label()
+        == LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION"):
+        assert banned not in (
+            LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_strategy_candidate_family_review_contract():
+    c = get_latest_completed_family_review_contract()
+    assert c["family_review_contract_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_REVIEW_CONTRACT"
+    )
+    assert c["name"] == (
+        "Crypto-D1 Strategy Candidate Family Review Contract"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_strategy_candidate_family_review_"
+        "contract"
+    )
+    assert c["schema_constant"] == (
+        "STRATEGY_CANDIDATE_FAMILY_REVIEW_SCHEMA_VERSION"
+    )
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_strategy_candidate_family_review_"
+        "contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+    assert c["validates_protocol_name"] == (
+        "Crypto-D1 Strategy Candidate Protocol v1"
+    )
+
+
+def test_recognized_family_review_contract_research_only_no_execute():
+    c = get_latest_completed_family_review_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+
+
+def test_recognized_family_review_contract_universe_btc_eth_sol_spot_d1():
+    c = get_latest_completed_family_review_contract()
+    assert c["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert c["market_type"] == "SPOT"
+    assert c["timeframe"] == "D1"
+
+
+def test_recognized_family_review_contract_preserves_four_families():
+    c = get_latest_completed_family_review_contract()
+    assert c["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+    assert len(c["candidate_family_ids"]) == 4
+    assert c["candidate_family_names"] == [
+        "Momentum / Trend Continuation",
+        "Breakout / Donchian / Volatility Expansion",
+        "Pullback / Mean Reversion After Strong Trend",
+        "Regime Filter Layer",
+    ]
+
+
+def test_recognized_family_review_contract_authorizes_nothing():
+    c = get_latest_completed_family_review_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_CONTRACT"
+    )
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+
+
+def test_recognized_family_review_contract_preserves_prior_truth():
+    # Recognizing the family-review contract must NOT invent a new execution
+    # bundle and must NOT disturb the latest bundle / protocol / protocol
+    # contract / family-selection contract.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_PROTOCOL == (
+        "Block 95 - Crypto-D1 Strategy Candidate Protocol v1"
+    )
+    assert LATEST_COMPLETED_PROTOCOL_CONTRACT == (
+        "Block 97 - Crypto-D1 Strategy Candidate Protocol Contract"
+    )
+    assert LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT == (
+        "Block 99 - Crypto-D1 Strategy Candidate Family Selection Contract"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_family_review_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_family_review_contract()
+        == get_latest_completed_family_review_contract()
+    )
+    c = get_latest_completed_family_review_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_family_review_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
