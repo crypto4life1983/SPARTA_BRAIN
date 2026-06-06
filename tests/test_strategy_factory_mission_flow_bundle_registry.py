@@ -7,7 +7,10 @@ the pipeline from structured metadata instead of hardcoding each bundle inline.
 Coverage:
 - registry includes Bundles 42 through 54, all complete
 - latest completed bundle is Bundle 54
-- current_stage / next_required_action match the post-Bundle-54 state
+- recognized research-only protocol (Block 95): Crypto-D1 Strategy Candidate
+  Protocol v1 (RESEARCH_ONLY, read_only, no execute, BTC/ETH/SOL, spot, D1,
+  four candidate families, unlocks nothing real, creates no new bundle)
+- current_stage / next_required_action match the post-protocol-definition state
 - every registered bundle is RESEARCH_ONLY, read_only True, executes False
 - no registered bundle authorizes real-world action or unlocks any real
   capability (data, QA, baseline, backtest, paper/live, broker/exchange,
@@ -30,12 +33,15 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     REGISTRY_SAFETY_POSTURE,
     CURRENT_STAGE,
     NEXT_REQUIRED_ACTION,
+    LATEST_COMPLETED_PROTOCOL,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
     get_bundle_by_number,
     get_bundle_by_id,
     get_latest_completed_bundle_label,
+    get_latest_completed_protocol,
+    get_latest_completed_protocol_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -130,25 +136,31 @@ def test_get_bundle_by_id():
     assert get_bundle_by_id("BUNDLE_404") is None
 
 
-# --- 3: stage / next action match post-Bundle-54 state ----------------------
+# --- 3: stage / next action match post-protocol-definition state ------------
 
-def test_current_stage_is_post_bundle54():
+def test_current_stage_is_post_protocol_definition():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_LANE_CLOSED_OR_READY_FOR_NEXT_"
-        "RESEARCH_PROTOCOL"
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_DEFINED_NEXT_CONTRACT_REQUIRED"
     )
     assert get_current_stage() == CURRENT_STAGE
-    assert "RESEARCH_ONLY" in CURRENT_STAGE
-    assert "LANE_CLOSED" in CURRENT_STAGE
+    assert "STRATEGY_CANDIDATE_PROTOCOL" in CURRENT_STAGE
+    assert "DEFINED" in CURRENT_STAGE
+    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
+    # a safe post-protocol-definition research-only stage, not real execution
+    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
+                   "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
+                   "EXCHANGE", "AUTOMATION"):
+        assert banned not in CURRENT_STAGE, banned
 
 
-def test_next_required_action_is_research_only_next_protocol():
+def test_next_required_action_is_build_candidate_protocol_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_PROTOCOL"
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_CONTRACT"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
-    assert "RESEARCH_ONLY" in NEXT_REQUIRED_ACTION
-    assert NEXT_REQUIRED_ACTION.startswith("DEFINE_NEXT")
+    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    assert "PROTOCOL_CONTRACT" in NEXT_REQUIRED_ACTION
+    # it names building a research-only paper contract, not real execution
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE"):
@@ -358,6 +370,101 @@ def test_bundle_54_is_research_only_and_unlocks_nothing():
     )
     for flag in _CAPABILITY_FLAGS:
         assert b54[flag] is False, flag
+
+
+# --- 5b: recognized research-only protocol (Block 95) -----------------------
+
+_EXPECTED_FAMILY_IDS = [
+    "MOMENTUM_TREND_CONTINUATION",
+    "BREAKOUT_DONCHIAN_VOLATILITY_EXPANSION",
+    "PULLBACK_MEAN_REVERSION_AFTER_STRONG_TREND",
+    "REGIME_FILTER_LAYER",
+]
+
+
+def test_latest_completed_protocol_label():
+    assert LATEST_COMPLETED_PROTOCOL == (
+        "Block 95 - Crypto-D1 Strategy Candidate Protocol v1"
+    )
+    assert get_latest_completed_protocol_label() == LATEST_COMPLETED_PROTOCOL
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION"):
+        assert banned not in LATEST_COMPLETED_PROTOCOL.upper(), banned
+
+
+def test_registry_recognizes_strategy_candidate_protocol_v1():
+    p = get_latest_completed_protocol()
+    assert p["protocol_id"] == "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    assert p["protocol_name"] == "Crypto-D1 Strategy Candidate Protocol v1"
+    assert p["module"] == (
+        "sparta_commander.strategy_factory_crypto_d1_next_research_protocol"
+    )
+    assert p["schema_constant"] == "PROTOCOL_SCHEMA_VERSION"
+    assert p["schema_version"] == (
+        "strategy_factory_crypto_d1_next_research_protocol.v1"
+    )
+    assert p["defined"] is True
+    assert p["complete"] is True
+
+
+def test_recognized_protocol_is_research_only_read_only_no_execute():
+    p = get_latest_completed_protocol()
+    assert p["mode"] == "RESEARCH_ONLY"
+    assert p["read_only"] is True
+    assert p["executes"] is False
+    assert p["human_approval_required"] is True
+
+
+def test_recognized_protocol_universe_is_btc_eth_sol_spot_d1():
+    p = get_latest_completed_protocol()
+    assert p["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert p["market_type"] == "SPOT"
+    assert p["timeframe"] == "D1"
+
+
+def test_recognized_protocol_has_four_candidate_families():
+    p = get_latest_completed_protocol()
+    assert p["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+    assert len(p["candidate_family_ids"]) == 4
+    assert p["candidate_family_names"] == [
+        "Momentum / Trend Continuation",
+        "Breakout / Donchian / Volatility Expansion",
+        "Pullback / Mean Reversion After Strong Trend",
+        "Regime Filter Layer",
+    ]
+
+
+def test_recognized_protocol_authorizes_nothing_unlocks_nothing():
+    p = get_latest_completed_protocol()
+    for flag in _CAPABILITY_FLAGS:
+        assert p[flag] is False, flag
+    assert p["next_required_action"] == (
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_CONTRACT"
+    )
+    reason = p["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+
+
+def test_recognized_protocol_does_not_change_latest_bundle():
+    # Recognizing the protocol must NOT invent a new execution bundle; the
+    # highest completed bundle is still Bundle 54.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_protocol_deterministic_and_mutation_isolated():
+    assert get_latest_completed_protocol() == get_latest_completed_protocol()
+    p = get_latest_completed_protocol()
+    p["executes"] = True
+    p["research_universe"].append("TAMPERED")
+    p["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_protocol()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
 
 
 def test_registry_version_stable():

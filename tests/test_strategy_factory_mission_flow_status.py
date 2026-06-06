@@ -9,8 +9,10 @@ nothing and unlocks nothing real.
 Coverage:
 - stable output schema (keys + types)
 - mode RESEARCH_ONLY, read_only True, executes False, human_approval_required True
-- Bundles 42-54 recognized complete; next stage is a research-only planning step
-  (DEFINE the next research-only Crypto-D1 protocol, not real execution)
+- Bundles 42-54 recognized complete; the next research-only protocol (Crypto-D1
+  Strategy Candidate Protocol v1, Block 95) is recognized DEFINED/COMPLETE, and
+  the next stage is a research-only planning step (BUILD the candidate-protocol
+  contract, Bundle 55, not real execution)
 - Real Data QA blocked, Baseline Backtest blocked
 - Paper Trading Gate locked, Micro-Live Gate locked + never automated
 - no stage unlocks real data / QA / baseline / backtest / paper / live /
@@ -38,6 +40,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     STATE_LOCKED,
     CURRENT_STAGE,
     LATEST_COMPLETED_BUNDLE,
+    LATEST_COMPLETED_PROTOCOL,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -70,6 +73,7 @@ def test_status_schema_is_stable():
         "human_approval_required",
         "current_stage",
         "latest_completed_bundle",
+        "latest_completed_protocol",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -256,33 +260,70 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_research_only_next_protocol():
+def test_next_required_action_is_build_candidate_protocol_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_PROTOCOL"
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_CONTRACT"
     )
-    # it names a research-only planning step, not real execution
-    assert "RESEARCH_ONLY" in NEXT_REQUIRED_ACTION
-    assert NEXT_REQUIRED_ACTION.startswith("DEFINE_NEXT")
+    # it names a research-only planning step (build a paper contract), not real
+    # execution
+    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    assert "PROTOCOL_CONTRACT" in NEXT_REQUIRED_ACTION
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE"):
         assert banned not in NEXT_REQUIRED_ACTION, banned
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
-    # defining the next protocol still unlocks nothing real
+    # building the next contract still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_research_only_next_protocol_definition"]
+    nxt = pipe["crypto_d1_strategy_candidate_protocol_contract"]
     assert nxt["state"] == STATE_NEXT
 
 
-def test_current_stage_is_after_bundle54():
-    assert CURRENT_STAGE == (
-        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_LANE_CLOSED_OR_READY_FOR_NEXT_"
-        "RESEARCH_PROTOCOL"
+def test_next_protocol_definition_now_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_research_only_next_protocol_definition"]
+    assert row["state"] == STATE_COMPLETE
+    reason = row["reason"].lower()
+    assert "protocol defined" in reason
+    assert "btc/eth/sol" in reason
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+
+
+def test_strategy_candidate_protocol_contract_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_strategy_candidate_protocol_contract"]
+    assert row["state"] == STATE_NEXT
+    assert NEXT_REQUIRED_ACTION in row["reason"]
+    assert "Bundle 55" in row["reason"]
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+
+
+def test_latest_completed_protocol_is_strategy_candidate_v1():
+    assert LATEST_COMPLETED_PROTOCOL == (
+        "Block 95 - Crypto-D1 Strategy Candidate Protocol v1"
     )
-    assert "RESEARCH_ONLY" in CURRENT_STAGE
-    assert "LANE_CLOSED" in CURRENT_STAGE
+    s = get_mission_flow_status()
+    assert s["latest_completed_protocol"] == LATEST_COMPLETED_PROTOCOL
+    # the recognized protocol unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+
+
+def test_current_stage_is_post_protocol_definition():
+    assert CURRENT_STAGE == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_DEFINED_NEXT_CONTRACT_REQUIRED"
+    )
+    assert "STRATEGY_CANDIDATE_PROTOCOL" in CURRENT_STAGE
+    assert "DEFINED" in CURRENT_STAGE
+    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
+    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
+                   "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
+                   "EXCHANGE", "AUTOMATION"):
+        assert banned not in CURRENT_STAGE, banned
     assert get_mission_flow_status()["current_stage"] == CURRENT_STAGE
     human = {r["id"]: r for r in human_workflow_lane()}
     assert human["operator_review_before_real_strategy_intake"]["state"] == STATE_CURRENT
