@@ -20,8 +20,9 @@ The snapshot is derived from the known, committed contract/checkpoint state of
 the Strategy Factory backbone as of Bundle 54 (Crypto-D1 research-only dry-run
 research archive or closure contract complete, which closes the research-only
 dry-run lane) plus the recognized Crypto-D1 Strategy Candidate Protocol v1
-(defined on paper in Block 95). It requires no IO to produce the default
-status. Reaching any
+(defined on paper in Block 95) and the recognized Crypto-D1 Strategy Candidate
+Protocol Contract (built on paper in Block 97). It requires no IO to produce the
+default status. Reaching any
 stage in this map unlocks nothing real: every downstream real-world capability
 (real data, QA, baseline, backtest, paper, live, broker, exchange, automation,
 runtime/registry/dashboard writes) stays blocked and human-gated. Bundle 54
@@ -39,6 +40,7 @@ Public API:
   - CURRENT_STAGE
   - LATEST_COMPLETED_BUNDLE
   - LATEST_COMPLETED_PROTOCOL
+  - LATEST_COMPLETED_PROTOCOL_CONTRACT
   - NEXT_REQUIRED_ACTION
   - human_workflow_lane()
   - machine_pipeline_lane()
@@ -93,10 +95,14 @@ from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_research_
 from sparta_commander.strategy_factory_crypto_d1_next_research_protocol import (  # noqa: E501
     PROTOCOL_SCHEMA_VERSION as NEXT_RESEARCH_PROTOCOL_SCHEMA_VERSION,
 )
+from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_protocol_contract import (  # noqa: E501
+    STRATEGY_CANDIDATE_PROTOCOL_SCHEMA_VERSION as STRATEGY_CANDIDATE_PROTOCOL_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
     get_latest_completed_protocol_label as _registry_latest_protocol_label,
+    get_latest_completed_protocol_contract_label as _registry_latest_protocol_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -114,6 +120,7 @@ __all__ = [
     "CURRENT_STAGE",
     "LATEST_COMPLETED_BUNDLE",
     "LATEST_COMPLETED_PROTOCOL",
+    "LATEST_COMPLETED_PROTOCOL_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -160,6 +167,7 @@ STATE_PARKED = "PARKED"
 CURRENT_STAGE = _registry_current_stage()
 LATEST_COMPLETED_BUNDLE = _registry_latest_bundle_label()
 LATEST_COMPLETED_PROTOCOL = _registry_latest_protocol_label()
+LATEST_COMPLETED_PROTOCOL_CONTRACT = _registry_latest_protocol_contract_label()
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -203,11 +211,13 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
             "You are here. Bundles 42-54 contract chain is complete on paper, "
             "through the Crypto-D1 research-only dry-run research archive or "
             "closure contract, which closes the research-only dry-run lane. "
-            "Block 95 has now DEFINED the next research-only protocol (Crypto-"
-            "D1 Strategy Candidate Protocol v1, on paper). The only next step "
-            "is a research-only planning step: BUILD the candidate-protocol "
-            "contract, still on paper. Nothing is authorized to run: real "
-            "strategy intake remains paused for operator review."
+            "Block 95 DEFINED the next research-only protocol (Crypto-D1 "
+            "Strategy Candidate Protocol v1, on paper) and Block 97 has now "
+            "BUILT the Strategy Candidate Protocol Contract that validates "
+            "whether a proposed candidate plan follows it. The only next step "
+            "is a research-only planning step: BUILD the candidate-family-"
+            "selection contract, still on paper. Nothing is authorized to run: "
+            "real strategy intake remains paused for operator review."
         ),
     },
     {
@@ -439,13 +449,31 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_strategy_candidate_protocol_contract",
         "label": "Crypto-D1 Strategy Candidate Protocol Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 97 complete ("
+            + STRATEGY_CANDIDATE_PROTOCOL_CONTRACT_SCHEMA_VERSION + "). "
+            "Read-only Strategy Candidate Protocol Contract only. It only "
+            "VALIDATES, on paper, whether a proposed candidate plan follows the "
+            "Crypto-D1 Strategy Candidate Protocol v1; it authorizes nothing and "
+            "executes nothing: no real data acquisition, data fetch, data "
+            "inspection, dataset loading, QA, baseline, backtest, simulation, "
+            "trade signal, market-data validation, paper, live, broker, "
+            "exchange, automation, or runtime/registry/dashboard write is "
+            "unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_strategy_candidate_family_selection_contract",
+        "label": "Crypto-D1 Strategy Candidate Family Selection Contract",
         "state": STATE_NEXT,
         "reason": (
             "Next required action: " + NEXT_REQUIRED_ACTION + ". The next step "
             "is a research-only planning step: BUILD the Crypto-D1 candidate-"
-            "protocol contract (Bundle 55) that formalizes the defined "
-            "protocol on paper. Building it acquires no data, runs no dry run, "
-            "QA, baseline, or backtest, and executes nothing."
+            "family-selection contract that, on paper, scopes which of the four "
+            "defined candidate strategy families to research first. Building it "
+            "acquires no data, runs no dry run, QA, baseline, or backtest, and "
+            "executes nothing."
         ),
     },
     {
@@ -563,6 +591,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "current_stage": CURRENT_STAGE,
         "latest_completed_bundle": LATEST_COMPLETED_BUNDLE,
         "latest_completed_protocol": LATEST_COMPLETED_PROTOCOL,
+        "latest_completed_protocol_contract": LATEST_COMPLETED_PROTOCOL_CONTRACT,
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
