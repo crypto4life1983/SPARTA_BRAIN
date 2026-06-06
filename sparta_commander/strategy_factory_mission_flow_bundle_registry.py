@@ -41,6 +41,9 @@ Public API:
   - LATEST_COMPLETED_PROTOCOL_CONTRACT
   - get_latest_completed_protocol_contract()
   - get_latest_completed_protocol_contract_label()
+  - LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT
+  - get_latest_completed_family_selection_contract()
+  - get_latest_completed_family_selection_contract_label()
 """
 
 from __future__ import annotations
@@ -86,6 +89,14 @@ from sparta_commander.strategy_factory_crypto_d1_next_research_protocol import (
 from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_protocol_contract import (  # noqa: E501
     STRATEGY_CANDIDATE_PROTOCOL_SCHEMA_VERSION as _PROTOCOL_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 99 strategy-candidate-family-selection-contract module imports only
+# __future__, typing, the Block 95 protocol module, and the Block 97 protocol-
+# contract module (none of which import this registry); it does NOT import this
+# registry, so reading its stable schema constant at module top is cycle-safe
+# (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_family_selection_contract import (  # noqa: E501
+    STRATEGY_CANDIDATE_FAMILY_SELECTION_SCHEMA_VERSION as _FAMILY_SELECTION_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -113,25 +124,31 @@ __all__ = [
     "LATEST_COMPLETED_PROTOCOL_CONTRACT",
     "get_latest_completed_protocol_contract",
     "get_latest_completed_protocol_contract_label",
+    "LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT",
+    "get_latest_completed_family_selection_contract",
+    "get_latest_completed_family_selection_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
 REGISTRY_MODE = "RESEARCH_ONLY"
 
-# Post-Block-97 backbone state: the Crypto-D1 research-only dry-run governance
+# Post-Block-99 backbone state: the Crypto-D1 research-only dry-run governance
 # lane is closed (Bundle 54), Block 95 DEFINED the next research-only protocol
 # (the Crypto-D1 Strategy Candidate Protocol v1, BTC/ETH/SOL, spot-only,
-# daily-only, four candidate strategy families), and Block 97 has now BUILT the
-# research-only Strategy Candidate Protocol *Contract* that validates whether a
-# proposed candidate plan follows that protocol. The latest completed *bundle*
-# is still Bundle 54; the latest recognized *protocol* is the Strategy Candidate
-# Protocol v1; the latest recognized *protocol contract* is Block 97.
-# Recognizing the contract unlocks nothing real: the only next step is a
-# research-only planning step -- BUILD a candidate-family-selection contract,
-# still on paper. No real acquisition, QA, baseline, backtest, paper/live,
-# broker/exchange, or automation is unlocked.
+# daily-only, four candidate strategy families), Block 97 BUILT the research-only
+# Strategy Candidate Protocol *Contract* that validates whether a proposed
+# candidate plan follows that protocol, and Block 99 has now BUILT the research-
+# only Strategy Candidate Family *Selection* Contract that validates which of the
+# four candidate families a selection scopes for research first. The latest
+# completed *bundle* is still Bundle 54; the latest recognized *protocol* is the
+# Strategy Candidate Protocol v1 (Block 95); the latest recognized *protocol
+# contract* is Block 97; the latest recognized *family-selection contract* is
+# Block 99. Recognizing the family-selection contract unlocks nothing real: the
+# only next step is a research-only planning step -- BUILD a candidate-family-
+# review contract, still on paper. No real acquisition, QA, baseline, backtest,
+# paper/live, broker/exchange, or automation is unlocked.
 CURRENT_STAGE = (
-    "CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_SELECTION_CONTRACT_REQUIRED"
+    "CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_REVIEW_CONTRACT_REQUIRED"
 )
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
@@ -146,10 +163,26 @@ _RECOGNIZED_PROTOCOL_CONTRACT_LABEL = (
     "Block 97 - Crypto-D1 Strategy Candidate Protocol Contract"
 )
 LATEST_COMPLETED_PROTOCOL_CONTRACT = _RECOGNIZED_PROTOCOL_CONTRACT_LABEL
-# Next required action: build the research-only candidate-family-selection
+# The protocol contract's own declared next step (now complete): BUILD the
+# research-only candidate-family-selection contract, which Block 99 has since
+# completed on paper. Held as a fixed local so the global NEXT_REQUIRED_ACTION
+# can advance without rewriting the Block 97 record's historical next step.
+_PROTOCOL_CONTRACT_NEXT_ACTION = (
+    "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_SELECTION_CONTRACT"
+)
+# The single recognized latest research-only family-selection *contract*
+# (Block 99). Building the contract is a research-only planning step and creates
+# no execution bundle. The label intentionally does not name a trading stage.
+_RECOGNIZED_FAMILY_SELECTION_CONTRACT_LABEL = (
+    "Block 99 - Crypto-D1 Strategy Candidate Family Selection Contract"
+)
+LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT = (
+    _RECOGNIZED_FAMILY_SELECTION_CONTRACT_LABEL
+)
+# Next required action: build the research-only candidate-family-review
 # contract, still on paper. It authorizes nothing and unlocks nothing real.
 NEXT_REQUIRED_ACTION = (
-    "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_SELECTION_CONTRACT"
+    "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_REVIEW_CONTRACT"
 )
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
@@ -734,7 +767,7 @@ def _recognized_protocol_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": _PROTOCOL_CONTRACT_NEXT_ACTION,
         "reason": (
             "Read-only recognition of the Crypto-D1 Strategy Candidate Protocol "
             "Contract, BUILT in Block 97. It records, on paper, that the "
@@ -744,9 +777,9 @@ def _recognized_protocol_contract() -> dict[str, Any]:
             "and executes nothing: no real data acquisition, data fetch, data "
             "inspection, dataset loading, QA, baseline, backtest, simulation, "
             "trade signal, market-data validation, paper/live, broker/exchange, "
-            "automation, or runtime/registry/dashboard write is unlocked. The "
-            "only next step is to BUILD a research-only candidate-family-"
-            "selection contract."
+            "automation, or runtime/registry/dashboard write is unlocked. Its "
+            "declared next step was to BUILD a research-only candidate-family-"
+            "selection contract, which Block 99 has since completed on paper."
         ),
     }
     record.update(_BUNDLE_LOCKED_CAPABILITIES)
@@ -761,6 +794,80 @@ def get_latest_completed_protocol_contract() -> dict[str, Any]:
 def get_latest_completed_protocol_contract_label() -> str:
     """Human label for the latest recognized research-only protocol contract."""
     return _RECOGNIZED_PROTOCOL_CONTRACT_LABEL
+
+
+def _recognized_family_selection_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-family-selection-contract
+    record.
+
+    Recognizing the family-selection contract records, on paper, that the Block
+    99 Crypto-D1 Strategy Candidate Family Selection Contract is COMPLETE. It is
+    NOT an execution bundle: it authorizes nothing, executes nothing, and unlocks
+    no real capability. The contract only VALIDATES whether a proposed family
+    selection follows the Block 97 protocol contract (and therefore the Block 95
+    protocol): which of the four candidate families are selected or explicitly
+    parked, kept on BTC/ETH/SOL spot daily candles. It acquires/fetches/inspects/
+    loads no data and runs no QA, baseline, backtest, simulation, paper/live, or
+    broker/exchange. A fresh record (with fresh lists) is returned every call for
+    mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "family_selection_contract_id": (
+            "CRYPTO_D1_STRATEGY_CANDIDATE_FAMILY_SELECTION_CONTRACT"
+        ),
+        "name": "Crypto-D1 Strategy Candidate Family Selection Contract",
+        "label": _RECOGNIZED_FAMILY_SELECTION_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_strategy_candidate_family_selection_"
+            "contract"
+        ),
+        "schema_constant": "STRATEGY_CANDIDATE_FAMILY_SELECTION_SCHEMA_VERSION",
+        "schema_version": _FAMILY_SELECTION_CONTRACT_SCHEMA_VERSION,
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Strategy Candidate Family "
+            "Selection Contract, BUILT in Block 99. It records, on paper, that "
+            "the research-only contract validating which of the four candidate "
+            "families a proposed selection scopes for research first "
+            "(BTC/ETH/SOL, spot, daily candles) now exists; it authorizes "
+            "nothing and executes nothing: no real data acquisition, data fetch, "
+            "data inspection, dataset loading, QA, baseline, backtest, "
+            "simulation, trade signal, market-data validation, paper/live, "
+            "broker/exchange, automation, or runtime/registry/dashboard write is "
+            "unlocked. The only next step is to BUILD a research-only candidate-"
+            "family-review contract."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_family_selection_contract() -> dict[str, Any]:
+    """The latest recognized research-only family-selection-contract record."""
+    return _recognized_family_selection_contract()
+
+
+def get_latest_completed_family_selection_contract_label() -> str:
+    """Human label for the latest recognized research-only family-selection
+    contract."""
+    return _RECOGNIZED_FAMILY_SELECTION_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
