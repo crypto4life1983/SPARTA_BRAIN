@@ -85,18 +85,17 @@ __all__ = [
 REGISTRY_VERSION = "v1"
 REGISTRY_MODE = "RESEARCH_ONLY"
 
-# Post-Bundle-53 backbone state: the research-only dry-run final decision
-# contract exists on paper and points to a research-only, archive/closure-only
-# future contract. Nothing downstream is authorized; the pipeline stays blocked
-# until that next research-only dry-run research-archive-or-closure contract is
-# BUILT (still on paper).
+# Post-Bundle-54 backbone state: the research-only dry-run research-archive-or-
+# closure contract exists on paper, which closes the Crypto-D1 research-only
+# dry-run lane. Nothing downstream is authorized; the pipeline stays blocked.
+# The lane is closed / ready for the next research-only protocol to be DEFINED
+# (still a research-only planning step, on paper). No real acquisition, QA,
+# baseline, backtest, paper/live, broker/exchange, or automation is unlocked.
 CURRENT_STAGE = (
-    "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_RESEARCH_ARCHIVE_OR_CLOSURE_CONTRACT_"
-    "REQUIRED"
+    "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_LANE_CLOSED_OR_READY_FOR_NEXT_RESEARCH_"
+    "PROTOCOL"
 )
-NEXT_REQUIRED_ACTION = (
-    "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_RESEARCH_ARCHIVE_OR_CLOSURE_CONTRACT"
-)
+NEXT_REQUIRED_ACTION = "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_PROTOCOL"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -132,6 +131,14 @@ _BUNDLE_52_COMPLETE_STAGE = (
 # decision) is registered as complete. Bundle 52 advances into this stage.
 _BUNDLE_53_COMPLETE_STAGE = (
     "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_FINAL_DECISION_CONTRACT_COMPLETE"
+)
+
+# The completion stage published once Bundle 54 (research-only dry-run research
+# archive or closure) is registered as complete. Bundle 53 advances into this
+# stage; Bundle 54 itself advances into CURRENT_STAGE (lane closed).
+_BUNDLE_54_COMPLETE_STAGE = (
+    "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_RESEARCH_ARCHIVE_OR_CLOSURE_CONTRACT_"
+    "COMPLETE"
 )
 
 # Read-only safety posture for the registry as a whole. Nothing here can
@@ -227,7 +234,10 @@ def _bundles() -> tuple[dict[str, Any], ...]:
     which (transitively) imports this registry, so a top-level import would
     re-enter the cycle as well. The Bundle 53 schema constant is imported the
     same way: Bundle 53 imports Bundle 52, which (transitively) imports this
-    registry, so a top-level import would re-enter the cycle as well.
+    registry, so a top-level import would re-enter the cycle as well. The Bundle
+    54 schema constant is imported the same way: Bundle 54 imports Bundle 53,
+    which (transitively) imports this registry, so a top-level import would
+    re-enter the cycle as well.
     """
     global _BUNDLES_CACHE
     if _BUNDLES_CACHE is not None:
@@ -249,6 +259,9 @@ def _bundles() -> tuple[dict[str, Any], ...]:
     )
     from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_final_decision_contract import (  # noqa: E501
         FINAL_DECISION_SCHEMA_VERSION,
+    )
+    from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_research_archive_or_closure_contract import (  # noqa: E501
+        ARCHIVE_OR_CLOSURE_SCHEMA_VERSION,
     )
     _BUNDLES_CACHE = (
         _bundle(
@@ -478,7 +491,7 @@ def _bundles() -> tuple[dict[str, Any], ...]:
         schema_constant="FINAL_DECISION_SCHEMA_VERSION",
         schema_version=FINAL_DECISION_SCHEMA_VERSION,
         stage=_BUNDLE_53_COMPLETE_STAGE,
-        next_gate=CURRENT_STAGE,
+        next_gate=_BUNDLE_54_COMPLETE_STAGE,
         reason=(
             "Read-only research-only dry-run FINAL DECISION paper contract "
             "only. It only FINALIZES, on paper, the research-only dry-run "
@@ -489,6 +502,32 @@ def _bundles() -> tuple[dict[str, Any], ...]:
             "simulation, trade signal, market-data validation, paper, live, "
             "broker, exchange, automation, or runtime/registry/dashboard write "
             "is unlocked."
+        ),
+    ),
+    _bundle(
+        number=54,
+        name=(
+            "Crypto-D1 Research-Only Dry-Run Research Archive or Closure "
+            "Contract"
+        ),
+        module=(
+            "sparta_commander.strategy_factory_crypto_d1_research_only_"
+            "dry_run_research_archive_or_closure_contract"
+        ),
+        schema_constant="ARCHIVE_OR_CLOSURE_SCHEMA_VERSION",
+        schema_version=ARCHIVE_OR_CLOSURE_SCHEMA_VERSION,
+        stage=_BUNDLE_54_COMPLETE_STAGE,
+        next_gate=CURRENT_STAGE,
+        reason=(
+            "Read-only research-only dry-run RESEARCH ARCHIVE OR CLOSURE paper "
+            "contract only. It only records, on paper, whether the research-"
+            "only dry-run lane should be ARCHIVED or CLOSED, which closes the "
+            "Crypto-D1 research-only dry-run lane; it authorizes nothing and "
+            "executes nothing: no dry-run execution, no real data acquisition, "
+            "data fetch, data inspection, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, market-data validation, paper, "
+            "live, broker, exchange, automation, or runtime/registry/dashboard "
+            "write is unlocked."
         ),
     ),
     )

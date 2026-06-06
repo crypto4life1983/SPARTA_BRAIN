@@ -17,14 +17,15 @@ network, spawns no subprocess, reads no environment, mints no id, records no
 timestamp, and dynamically imports nothing.
 
 The snapshot is derived from the known, committed contract/checkpoint state of
-the Strategy Factory backbone as of Bundle 53 (Crypto-D1 research-only dry-run
-final decision contract complete). It requires no IO to produce the default
-status. Reaching any stage in this map unlocks nothing real: every downstream
-real-world capability (real data, QA, baseline, backtest, paper, live, broker,
-exchange, automation, runtime/registry/dashboard writes) stays blocked and
-human-gated. Bundle 53 only means the research-only dry-run final decision
-*contract* exists on paper; it authorizes nothing and executes nothing: no
-dry-run execution, data acquisition, data fetch, data inspection, QA, baseline,
+the Strategy Factory backbone as of Bundle 54 (Crypto-D1 research-only dry-run
+research archive or closure contract complete, which closes the research-only
+dry-run lane). It requires no IO to produce the default status. Reaching any
+stage in this map unlocks nothing real: every downstream real-world capability
+(real data, QA, baseline, backtest, paper, live, broker, exchange, automation,
+runtime/registry/dashboard writes) stays blocked and human-gated. Bundle 54
+only means the research-only dry-run research archive or closure *contract*
+exists on paper; it authorizes nothing and executes nothing: no dry-run
+execution, data acquisition, data fetch, data inspection, QA, baseline,
 backtest, paper/live, broker/exchange, or automation is unlocked.
 
 Public API:
@@ -82,6 +83,9 @@ from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_decision_
 )
 from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_final_decision_contract import (  # noqa: E501
     FINAL_DECISION_SCHEMA_VERSION,
+)
+from sparta_commander.strategy_factory_crypto_d1_research_only_dry_run_research_archive_or_closure_contract import (  # noqa: E501
+    ARCHIVE_OR_CLOSURE_SCHEMA_VERSION,
 )
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
@@ -174,7 +178,7 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "id": "backbone_build",
         "label": "Backbone Build",
         "state": STATE_COMPLETE,
-        "reason": "Strategy Factory backbone (Bundles 11-53) complete on paper.",
+        "reason": "Strategy Factory backbone (Bundles 11-54) complete on paper.",
     },
     {
         "id": "fake_lane",
@@ -187,11 +191,12 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
         "label": "Operator Review Before Real Strategy Intake",
         "state": STATE_CURRENT,
         "reason": (
-            "You are here. Bundles 42-53 contract chain is complete on paper, "
-            "through the Crypto-D1 research-only dry-run final decision "
-            "contract. Next is a research-only, research-archive-or-closure-only "
-            "paper contract to be built, still on paper. Nothing is authorized "
-            "to run: real strategy intake remains paused for operator review."
+            "You are here. Bundles 42-54 contract chain is complete on paper, "
+            "through the Crypto-D1 research-only dry-run research archive or "
+            "closure contract, which closes the research-only dry-run lane. "
+            "Next is a research-only planning step: define the next research-"
+            "only Crypto-D1 protocol, still on paper. Nothing is authorized to "
+            "run: real strategy intake remains paused for operator review."
         ),
     },
     {
@@ -391,13 +396,31 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_research_only_dry_run_research_archive_or_closure_contract",  # noqa: E501
         "label": "Crypto-D1 Research-Only Dry-Run Research Archive or Closure Contract",  # noqa: E501
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Bundle 54 complete (" + ARCHIVE_OR_CLOSURE_SCHEMA_VERSION + "). "
+            "Read-only research-only dry-run RESEARCH ARCHIVE OR CLOSURE paper "
+            "contract only. It only records, on paper, whether the research-"
+            "only dry-run lane should be ARCHIVED or CLOSED, which closes the "
+            "Crypto-D1 research-only dry-run lane; it authorizes nothing and "
+            "executes nothing: no dry-run execution, no real data acquisition, "
+            "data fetch, data inspection, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, market-data validation, paper, "
+            "live, broker, exchange, automation, or runtime/registry/dashboard "
+            "write is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_research_only_next_protocol_definition",
+        "label": "Crypto-D1 Research-Only Next Protocol Definition",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". A read-only, "
-            "research-archive-or-closure-only paper contract template to be "
-            "BUILT after the research-only dry-run final decision contract. "
-            "Building it acquires no data, runs no dry run, QA, or backtest, "
-            "and executes nothing."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Crypto-D1 "
+            "research-only dry-run lane is closed on paper through Bundle 54. "
+            "The only next step is a research-only planning step: DEFINE the "
+            "next research-only Crypto-D1 protocol, still on paper. Defining it "
+            "acquires no data, runs no dry run, QA, or backtest, and executes "
+            "nothing."
         ),
     },
     {

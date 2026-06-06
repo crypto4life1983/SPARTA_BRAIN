@@ -5,9 +5,9 @@ Strategy Factory bundle metadata. It lets the JARVIS Mission Flow feed follow
 the pipeline from structured metadata instead of hardcoding each bundle inline.
 
 Coverage:
-- registry includes Bundles 42 through 53, all complete
-- latest completed bundle is Bundle 53
-- current_stage / next_required_action match the post-Bundle-53 state
+- registry includes Bundles 42 through 54, all complete
+- latest completed bundle is Bundle 54
+- current_stage / next_required_action match the post-Bundle-54 state
 - every registered bundle is RESEARCH_ONLY, read_only True, executes False
 - no registered bundle authorizes real-world action or unlocks any real
   capability (data, QA, baseline, backtest, paper/live, broker/exchange,
@@ -70,15 +70,15 @@ _CAPABILITY_FLAGS = (
 
 # --- 1: registry membership -------------------------------------------------
 
-def test_registry_includes_bundles_42_through_53():
+def test_registry_includes_bundles_42_through_54():
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
-    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 
 
 def test_all_registered_bundles_complete():
     for b in list_registered_bundles():
         assert b["complete"] is True, b["bundle_id"]
-    assert len(list_completed_bundles()) == 12
+    assert len(list_completed_bundles()) == 13
 
 
 def test_bundle_record_has_stable_keys():
@@ -98,18 +98,19 @@ def test_bundle_ids_match_numbers():
 
 # --- 2: latest completed / lookups -----------------------------------------
 
-def test_latest_completed_bundle_is_bundle_53():
+def test_latest_completed_bundle_is_bundle_54():
     latest = get_latest_completed_bundle()
-    assert latest["bundle_number"] == 53
-    assert latest["bundle_id"] == "BUNDLE_53"
+    assert latest["bundle_number"] == 54
+    assert latest["bundle_id"] == "BUNDLE_54"
     assert latest["name"] == (
-        "Crypto-D1 Research-Only Dry-Run Final Decision Contract"
+        "Crypto-D1 Research-Only Dry-Run Research Archive or Closure Contract"
     )
 
 
 def test_latest_completed_bundle_label():
     assert get_latest_completed_bundle_label() == (
-        "Bundle 53 - Crypto-D1 Research-Only Dry-Run Final Decision Contract"
+        "Bundle 54 - Crypto-D1 Research-Only Dry-Run Research Archive or "
+        "Closure Contract"
     )
 
 
@@ -129,26 +130,25 @@ def test_get_bundle_by_id():
     assert get_bundle_by_id("BUNDLE_404") is None
 
 
-# --- 3: stage / next action match post-Bundle-53 state ----------------------
+# --- 3: stage / next action match post-Bundle-54 state ----------------------
 
-def test_current_stage_is_post_bundle53():
+def test_current_stage_is_post_bundle54():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_RESEARCH_ARCHIVE_OR_CLOSURE_CONTRACT_"
-        "REQUIRED"
+        "CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_LANE_CLOSED_OR_READY_FOR_NEXT_"
+        "RESEARCH_PROTOCOL"
     )
     assert get_current_stage() == CURRENT_STAGE
     assert "RESEARCH_ONLY" in CURRENT_STAGE
-    assert "ARCHIVE_OR_CLOSURE" in CURRENT_STAGE
+    assert "LANE_CLOSED" in CURRENT_STAGE
 
 
-def test_next_required_action_is_research_only_archive_or_closure_contract():
+def test_next_required_action_is_research_only_next_protocol():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_RESEARCH_ARCHIVE_OR_CLOSURE_"
-        "CONTRACT"
+        "DEFINE_NEXT_RESEARCH_ONLY_CRYPTO_D1_PROTOCOL"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
     assert "RESEARCH_ONLY" in NEXT_REQUIRED_ACTION
-    assert "ARCHIVE_OR_CLOSURE" in NEXT_REQUIRED_ACTION
+    assert NEXT_REQUIRED_ACTION.startswith("DEFINE_NEXT")
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE"):
@@ -230,6 +230,14 @@ def test_schema_versions_readable_and_stable():
     assert final_decision["schema_version"] == (
         "strategy_factory_crypto_d1_research_only_dry_run_final_decision_"
         "contract.v1"
+    )
+    archive_or_closure = get_bundle_by_number(54)
+    assert archive_or_closure["schema_constant"] == (
+        "ARCHIVE_OR_CLOSURE_SCHEMA_VERSION"
+    )
+    assert archive_or_closure["schema_version"] == (
+        "strategy_factory_crypto_d1_research_only_dry_run_research_archive_"
+        "or_closure_contract.v1"
     )
 
 
@@ -333,6 +341,23 @@ def test_bundle_53_is_research_only_and_unlocks_nothing():
     )
     for flag in _CAPABILITY_FLAGS:
         assert b53[flag] is False, flag
+
+
+def test_bundle_54_is_research_only_and_unlocks_nothing():
+    b54 = get_bundle_by_number(54)
+    assert b54 is not None
+    assert b54["bundle_id"] == "BUNDLE_54"
+    assert b54["mode"] == "RESEARCH_ONLY"
+    assert b54["read_only"] is True
+    assert b54["executes"] is False
+    assert b54["human_approval_required"] is True
+    assert b54["complete"] is True
+    assert b54["module"] == (
+        "sparta_commander.strategy_factory_crypto_d1_research_only_"
+        "dry_run_research_archive_or_closure_contract"
+    )
+    for flag in _CAPABILITY_FLAGS:
+        assert b54[flag] is False, flag
 
 
 def test_registry_version_stable():
