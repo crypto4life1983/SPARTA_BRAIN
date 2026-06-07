@@ -110,6 +110,9 @@ from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_family_revie
 from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_plan_contract import (  # noqa: E501
     BOT_EVIDENCE_RESEARCH_PLAN_SCHEMA_VERSION as STRATEGY_CANDIDATE_RESEARCH_PLAN_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_plan_review_contract import (  # noqa: E501
+    RESEARCH_PLAN_REVIEW_SCHEMA_VERSION as STRATEGY_CANDIDATE_RESEARCH_PLAN_REVIEW_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -118,6 +121,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_family_selection_contract_label as _registry_latest_family_selection_contract_label,  # noqa: E501
     get_latest_completed_family_review_contract_label as _registry_latest_family_review_contract_label,  # noqa: E501
     get_latest_completed_research_plan_contract_label as _registry_latest_research_plan_contract_label,  # noqa: E501
+    get_latest_completed_research_plan_review_contract_label as _registry_latest_research_plan_review_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -139,6 +143,7 @@ __all__ = [
     "LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT",
     "LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT",
     "LATEST_COMPLETED_RESEARCH_PLAN_CONTRACT",
+    "LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -194,6 +199,9 @@ LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT = (
 )
 LATEST_COMPLETED_RESEARCH_PLAN_CONTRACT = (
     _registry_latest_research_plan_contract_label()
+)
+LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT = (
+    _registry_latest_research_plan_review_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -552,14 +560,32 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_strategy_candidate_research_plan_review_contract",
         "label": "Crypto-D1 Strategy Candidate Research Plan Review Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 105 complete ("
+            + STRATEGY_CANDIDATE_RESEARCH_PLAN_REVIEW_CONTRACT_SCHEMA_VERSION
+            + "). Read-only Strategy Candidate Research Plan Review Contract "
+            "only. It only reviews, on paper, whether the Block 103 research "
+            "plan is reasonable before any real strategy research begins; it "
+            "authorizes nothing and executes nothing: no real data acquisition, "
+            "data fetch, data inspection, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, market-data validation, paper, "
+            "live, broker, exchange, automation, or runtime/registry/dashboard "
+            "write is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_strategy_candidate_research_plan_approval_contract",
+        "label": "Crypto-D1 Strategy Candidate Research Plan Approval Contract",
         "state": STATE_NEXT,
         "reason": (
             "Next required action: " + NEXT_REQUIRED_ACTION + ". The next step "
             "is a research-only planning step: BUILD the Crypto-D1 candidate "
-            "research-plan review contract that, on paper, reviews whether the "
-            "research plan is reasonable before any real strategy research "
-            "begins. Building it acquires no data, runs no dry run, QA, "
-            "baseline, or backtest, and executes nothing."
+            "research-plan approval contract that, on paper, records the "
+            "separate, later human approval the research-plan review READY gate "
+            "requires before any real strategy research begins. Building it "
+            "acquires no data, runs no dry run, QA, baseline, or backtest, and "
+            "executes nothing."
         ),
     },
     {
@@ -681,6 +707,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_family_selection_contract": LATEST_COMPLETED_FAMILY_SELECTION_CONTRACT,  # noqa: E501
         "latest_completed_family_review_contract": LATEST_COMPLETED_FAMILY_REVIEW_CONTRACT,  # noqa: E501
         "latest_completed_research_plan_contract": LATEST_COMPLETED_RESEARCH_PLAN_CONTRACT,  # noqa: E501
+        "latest_completed_research_plan_review_contract": LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

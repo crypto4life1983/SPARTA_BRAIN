@@ -120,6 +120,16 @@ from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_family_revie
 from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_plan_contract import (  # noqa: E501
     BOT_EVIDENCE_RESEARCH_PLAN_SCHEMA_VERSION as _RESEARCH_PLAN_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 105 strategy-candidate-research-plan-review-contract module imports
+# only __future__, typing, the Block 95 protocol module, the Block 97 protocol-
+# contract module, the Block 99 family-selection-contract module, the Block 101
+# family-review-contract module, and the Block 103 research-plan-contract module
+# (none of which import this registry); it does NOT import this registry, so
+# reading its stable schema constant at module top is cycle-safe (no circular
+# import).
+from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_plan_review_contract import (  # noqa: E501
+    RESEARCH_PLAN_REVIEW_SCHEMA_VERSION as _RESEARCH_PLAN_REVIEW_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -156,6 +166,9 @@ __all__ = [
     "LATEST_COMPLETED_RESEARCH_PLAN_CONTRACT",
     "get_latest_completed_research_plan_contract",
     "get_latest_completed_research_plan_contract_label",
+    "LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT",
+    "get_latest_completed_research_plan_review_contract",
+    "get_latest_completed_research_plan_review_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -183,7 +196,7 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # *review* contract, still on paper. No real acquisition, QA, baseline, backtest,
 # paper/live, broker/exchange, or automation is unlocked.
 CURRENT_STAGE = (
-    "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_REVIEW_CONTRACT_REQUIRED"
+    "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_APPROVAL_CONTRACT_REQUIRED"
 )
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
@@ -246,10 +259,29 @@ _RECOGNIZED_RESEARCH_PLAN_CONTRACT_LABEL = (
 LATEST_COMPLETED_RESEARCH_PLAN_CONTRACT = (
     _RECOGNIZED_RESEARCH_PLAN_CONTRACT_LABEL
 )
-# Next required action: build the research-only candidate research-plan *review*
-# contract, still on paper. It authorizes nothing and unlocks nothing real.
-NEXT_REQUIRED_ACTION = (
+# The research-plan contract's own declared next step (now complete): BUILD the
+# research-only candidate research-plan *review* contract, which Block 105 has
+# since completed on paper. Held as a fixed local so the global
+# NEXT_REQUIRED_ACTION can advance without rewriting the Block 103 record's
+# historical next step.
+_RESEARCH_PLAN_CONTRACT_NEXT_ACTION = (
     "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_REVIEW_CONTRACT"
+)
+# The single recognized latest research-only research-plan *review* contract
+# (Block 105). Building the contract is a research-only planning step and creates
+# no execution bundle. The label intentionally does not name a trading stage.
+_RECOGNIZED_RESEARCH_PLAN_REVIEW_CONTRACT_LABEL = (
+    "Block 105 - Crypto-D1 Strategy Candidate Research Plan Review Contract"
+)
+LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT = (
+    _RECOGNIZED_RESEARCH_PLAN_REVIEW_CONTRACT_LABEL
+)
+# Next required action: build the research-only candidate research-plan
+# *approval* contract, still on paper -- the separate, later human step the
+# Block 105 review READY gate requires before any real strategy research. It
+# authorizes nothing and unlocks nothing real.
+NEXT_REQUIRED_ACTION = (
+    "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_APPROVAL_CONTRACT"
 )
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
@@ -1056,7 +1088,7 @@ def _recognized_research_plan_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": _RESEARCH_PLAN_CONTRACT_NEXT_ACTION,
         "reason": (
             "Read-only recognition of the Crypto-D1 Strategy Candidate Research "
             "Plan Contract, BUILT in Block 103. It records, on paper, that the "
@@ -1067,8 +1099,9 @@ def _recognized_research_plan_contract() -> dict[str, Any]:
             "data inspection, dataset loading, QA, baseline, backtest, "
             "simulation, trade signal, market-data validation, paper/live, "
             "broker/exchange, automation, or runtime/registry/dashboard write is "
-            "unlocked. The only next step is to BUILD a research-only candidate "
-            "research-plan review contract."
+            "unlocked. Its declared next step was to BUILD a research-only "
+            "candidate research-plan review contract, which Block 105 has since "
+            "completed on paper."
         ),
     }
     record.update(_BUNDLE_LOCKED_CAPABILITIES)
@@ -1084,6 +1117,82 @@ def get_latest_completed_research_plan_contract_label() -> str:
     """Human label for the latest recognized research-only research-plan
     contract."""
     return _RECOGNIZED_RESEARCH_PLAN_CONTRACT_LABEL
+
+
+def _recognized_research_plan_review_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-research-plan-review-
+    contract record.
+
+    Recognizing the research-plan-review contract records, on paper, that the
+    Block 105 Crypto-D1 Strategy Candidate Research Plan Review Contract is
+    COMPLETE. It is NOT an execution bundle: it authorizes nothing, executes
+    nothing, and unlocks no real capability. The contract only REVIEWS, on paper,
+    whether the Block 103 research plan is reasonable under the Block 101 family-
+    review READY gate, the Block 97 protocol contract, and therefore the Block 95
+    protocol, kept on BTC/ETH/SOL spot daily candles. It acquires/fetches/
+    inspects/loads no data and runs no QA, baseline, backtest, simulation,
+    paper/live, or broker/exchange. A fresh record (with fresh lists) is returned
+    every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "research_plan_review_contract_id": (
+            "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_REVIEW_CONTRACT"
+        ),
+        "name": "Crypto-D1 Strategy Candidate Research Plan Review Contract",
+        "label": _RECOGNIZED_RESEARCH_PLAN_REVIEW_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_strategy_candidate_research_plan_review_"
+            "contract"
+        ),
+        "schema_constant": "RESEARCH_PLAN_REVIEW_SCHEMA_VERSION",
+        "schema_version": _RESEARCH_PLAN_REVIEW_CONTRACT_SCHEMA_VERSION,
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Strategy Candidate Research "
+            "Plan Review Contract, BUILT in Block 105. It records, on paper, that "
+            "the research-only contract reviewing whether the Block 103 research "
+            "plan is reasonable before any real strategy research begins "
+            "(BTC/ETH/SOL, spot, daily candles) now exists; it authorizes "
+            "nothing and executes nothing: no real data acquisition, data fetch, "
+            "data inspection, dataset loading, QA, baseline, backtest, "
+            "simulation, trade signal, market-data validation, paper/live, "
+            "broker/exchange, automation, or runtime/registry/dashboard write is "
+            "unlocked. The only next step is to BUILD a research-only candidate "
+            "research-plan approval contract -- the separate, later human step "
+            "the review READY gate requires."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_research_plan_review_contract() -> dict[str, Any]:
+    """The latest recognized research-only research-plan-review-contract
+    record."""
+    return _recognized_research_plan_review_contract()
+
+
+def get_latest_completed_research_plan_review_contract_label() -> str:
+    """Human label for the latest recognized research-only research-plan-review
+    contract."""
+    return _RECOGNIZED_RESEARCH_PLAN_REVIEW_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
