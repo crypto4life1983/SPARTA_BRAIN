@@ -47,6 +47,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_RESEARCH_DESIGN_CONTRACT,
     LATEST_COMPLETED_RESEARCH_DESIGN_REVIEW_CONTRACT,
     LATEST_COMPLETED_RESEARCH_DESIGN_APPROVAL_CONTRACT,
+    LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -73,6 +74,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_research_design_review_contract_label,
     get_latest_completed_research_design_approval_contract,
     get_latest_completed_research_design_approval_contract_label,
+    get_latest_completed_research_readiness_contract,
+    get_latest_completed_research_readiness_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -169,32 +172,38 @@ def test_get_bundle_by_id():
 
 # --- 3: stage / next action match post-protocol-definition state ------------
 
-def test_current_stage_is_post_research_design_approval_contract():
+def test_current_stage_is_post_research_readiness_contract():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED"
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
+        "AWAIT_HUMAN_BOUNDARY_DECISION"
     )
     assert get_current_stage() == CURRENT_STAGE
     assert "STRATEGY_CANDIDATE" in CURRENT_STAGE
     assert "RESEARCH_READINESS" in CURRENT_STAGE
-    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
-    # a safe post-research-design-approval-contract research-only stage, not exec
+    assert "AWAIT_HUMAN" in CURRENT_STAGE
+    # a safe post-research-readiness-contract await-human stage, not execution
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION"):
         assert banned not in CURRENT_STAGE, banned
 
 
-def test_next_required_action_is_build_research_readiness_contract():
+def test_next_required_action_is_await_human_boundary_decision():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT"
+        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
-    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "RESEARCH_READINESS_CONTRACT" in NEXT_REQUIRED_ACTION
-    # it names building a research-only paper contract, not real execution
-    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
+    # the readiness paper chain is complete; the only next step is a separate,
+    # human-controlled boundary decision -- it is NOT a build/run step and never
+    # authorizes real work (it merely names real_data_qa as the still-blocked
+    # boundary it waits before).
+    assert NEXT_REQUIRED_ACTION.startswith("AWAIT_HUMAN")
+    assert "BOUNDARY_DECISION" in NEXT_REQUIRED_ACTION
+    assert "BEFORE_REAL_DATA_QA" in NEXT_REQUIRED_ACTION
+    assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
-                   "EXCHANGE"):
+                   "EXCHANGE", "AUTOMATION"):
         assert banned not in NEXT_REQUIRED_ACTION, banned
 
 
@@ -1629,6 +1638,132 @@ def test_recognized_research_design_approval_contract_deterministic_isolated():
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_research_design_approval_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5l: recognized research-only research-readiness contract (Block 115) -----
+
+def test_latest_completed_research_readiness_contract_label():
+    assert LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT == (
+        "Block 115 - Crypto-D1 Strategy Candidate Research Readiness Contract"
+    )
+    assert (
+        get_latest_completed_research_readiness_contract_label()
+        == LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION"):
+        assert banned not in (
+            LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_strategy_candidate_research_readiness_contract():
+    c = get_latest_completed_research_readiness_contract()
+    assert c["research_readiness_contract_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT"
+    )
+    assert c["name"] == (
+        "Crypto-D1 Strategy Candidate Research Readiness Contract"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_strategy_candidate_research_readiness_"
+        "contract"
+    )
+    assert c["schema_constant"] == "RESEARCH_READINESS_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_strategy_candidate_research_readiness_"
+        "contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+    assert c["validates_protocol_name"] == (
+        "Crypto-D1 Strategy Candidate Protocol v1"
+    )
+
+
+def test_recognized_research_readiness_contract_research_only_no_execute():
+    c = get_latest_completed_research_readiness_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+
+
+def test_recognized_research_readiness_contract_universe_btc_eth_sol_spot_d1():
+    c = get_latest_completed_research_readiness_contract()
+    assert c["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert c["market_type"] == "SPOT"
+    assert c["timeframe"] == "D1"
+
+
+def test_recognized_research_readiness_contract_preserves_four_families():
+    c = get_latest_completed_research_readiness_contract()
+    assert c["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+    assert len(c["candidate_family_ids"]) == 4
+    assert c["candidate_family_names"] == [
+        "Momentum / Trend Continuation",
+        "Breakout / Donchian / Volatility Expansion",
+        "Pullback / Mean Reversion After Strong Trend",
+        "Regime Filter Layer",
+    ]
+
+
+def test_recognized_research_readiness_contract_authorizes_nothing():
+    c = get_latest_completed_research_readiness_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # readiness is terminal in the paper chain: the next step is a separate,
+    # human-controlled boundary decision -- not a build/run step.
+    assert c["next_required_action"] == (
+        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
+    )
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    # readiness is paper readiness only and never opens real_data_qa
+    assert "real_data_qa stays blocked" in reason
+
+
+def test_recognized_research_design_approval_contract_next_action_pinned_to_readiness():
+    # After Block 115, the global NEXT_REQUIRED_ACTION advanced to the await-human
+    # boundary decision, but the Block 113 research-design-approval record keeps its
+    # historical next step (build the research-readiness contract, now complete).
+    c = get_latest_completed_research_design_approval_contract()
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT"
+    )
+
+
+def test_recognized_research_readiness_contract_preserves_prior_truth():
+    # Recognizing the research-readiness contract must NOT invent a new execution
+    # bundle and must NOT disturb the latest bundle / prior contracts.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_RESEARCH_DESIGN_APPROVAL_CONTRACT == (
+        "Block 113 - Crypto-D1 Strategy Candidate Research Design Approval "
+        "Contract"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_research_readiness_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_research_readiness_contract()
+        == get_latest_completed_research_readiness_contract()
+    )
+    c = get_latest_completed_research_readiness_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_research_readiness_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS

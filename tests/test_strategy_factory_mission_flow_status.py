@@ -59,6 +59,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     STRATEGY_CANDIDATE_RESEARCH_DESIGN_REVIEW_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_RESEARCH_DESIGN_APPROVAL_CONTRACT,
     STRATEGY_CANDIDATE_RESEARCH_DESIGN_APPROVAL_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT,
+    STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -101,6 +103,7 @@ def test_status_schema_is_stable():
         "latest_completed_research_design_contract",
         "latest_completed_research_design_review_contract",
         "latest_completed_research_design_approval_contract",
+        "latest_completed_research_readiness_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -287,24 +290,28 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_build_research_readiness_contract():
+def test_next_required_action_is_await_human_boundary_decision():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT"
+        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
     )
-    # it names a research-only planning step (build a paper contract), not real
-    # execution
-    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "RESEARCH_READINESS_CONTRACT" in NEXT_REQUIRED_ACTION
-    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
+    # the readiness paper chain is complete; the only next step is a separate,
+    # human-controlled boundary decision -- not a build/run step, and it never
+    # authorizes real work (it only names real_data_qa as the still-blocked
+    # boundary it waits before).
+    assert NEXT_REQUIRED_ACTION.startswith("AWAIT_HUMAN")
+    assert "BOUNDARY_DECISION" in NEXT_REQUIRED_ACTION
+    assert "BEFORE_REAL_DATA_QA" in NEXT_REQUIRED_ACTION
+    assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE"):
         assert banned not in NEXT_REQUIRED_ACTION, banned
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
-    # building the next contract still unlocks nothing real
+    # the await-human boundary decision still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_strategy_candidate_research_readiness_contract"]
+    nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert nxt["state"] == STATE_NEXT
 
 
@@ -434,13 +441,31 @@ def test_strategy_candidate_research_design_approval_contract_now_complete():
     assert "executes nothing" in reason
 
 
-def test_strategy_candidate_research_readiness_contract_is_next():
+def test_strategy_candidate_research_readiness_contract_now_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["crypto_d1_strategy_candidate_research_readiness_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 115" in row["reason"]
+    assert STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # readiness is paper readiness only and never opens real_data_qa
+    assert "real_data_qa stays blocked" in reason
+
+
+def test_human_controlled_real_data_qa_boundary_decision_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert row["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in row["reason"]
     reason = row["reason"].lower()
     assert "executes nothing" in reason
+    # the next step is a human boundary decision, not a build/run step, and
+    # real_data_qa stays blocked
+    assert "boundary decision" in reason
+    assert "real_data_qa stays" in reason
 
 
 def test_latest_completed_protocol_contract_is_block_97():
@@ -574,13 +599,27 @@ def test_latest_completed_research_design_approval_contract_is_block_113():
     assert s["executes"] is False
 
 
-def test_current_stage_is_post_research_design_approval_contract():
+def test_latest_completed_research_readiness_contract_is_block_115():
+    assert LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT == (
+        "Block 115 - Crypto-D1 Strategy Candidate Research Readiness Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_research_readiness_contract"] == (
+        LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT
+    )
+    # the recognized research-readiness contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+
+
+def test_current_stage_is_post_research_readiness_contract():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED"
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
+        "AWAIT_HUMAN_BOUNDARY_DECISION"
     )
     assert "STRATEGY_CANDIDATE" in CURRENT_STAGE
     assert "RESEARCH_READINESS" in CURRENT_STAGE
-    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
+    assert "AWAIT_HUMAN" in CURRENT_STAGE
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION"):
