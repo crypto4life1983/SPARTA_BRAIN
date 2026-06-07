@@ -77,6 +77,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,
     CRYPTO_D1_COHORT_INDEPENDENCE_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT,
+    CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -128,6 +130,7 @@ def test_status_schema_is_stable():
         "latest_completed_daily_alpha_brief_review_contract",
         "latest_completed_daily_alpha_brief_approval_contract",
         "latest_completed_cohort_independence_contract",
+        "latest_completed_real_data_qa_boundary_decision_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -607,6 +610,27 @@ def test_cohort_independence_contract_now_complete():
     assert "purely additive latest-completed metadata" in reason
 
 
+def test_real_data_qa_boundary_decision_contract_now_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_real_data_qa_boundary_decision_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 134" in row["reason"]
+    assert CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # the contract readies a human decision; it never trades and never unlocks
+    assert "never what to trade and never an unlock" in reason
+    # recognizing it is purely additive -- it does not advance the boundary stage
+    assert "purely additive latest-completed metadata" in reason
+    # the boundary decision itself stays the STATE_NEXT human step (unchanged)
+    nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
+    assert nxt["state"] == STATE_NEXT
+    # recognizing the contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+
+
 def test_human_controlled_real_data_qa_boundary_decision_is_next():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["human_controlled_real_data_qa_boundary_decision"]
@@ -893,6 +917,30 @@ def test_latest_completed_cohort_independence_contract_is_block_132():
     # the Block 129 approval contract completion is preserved alongside it
     assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
         "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
+    )
+
+
+def test_latest_completed_real_data_qa_boundary_decision_contract_is_block_134():
+    assert LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT == (
+        "Block 134 - Crypto-D1 Real Data QA Boundary Decision Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_boundary_decision_contract"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT
+    )
+    # the recognized boundary-decision contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    # registering Block 134 does not advance the boundary stage or next action
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the Block 132 cohort contract completion is preserved alongside it
+    assert s["latest_completed_cohort_independence_contract"] == (
+        "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
     )
 
 
