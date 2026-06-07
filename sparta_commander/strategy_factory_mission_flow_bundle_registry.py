@@ -220,6 +220,16 @@ from sparta_commander.strategy_factory_crypto_d1_cohort_independence_correlation
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision_contract import (  # noqa: E501
     RDQ_BOUNDARY_SCHEMA_VERSION as _REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 136 real-data-QA human-approval-packet and readiness-checklist
+# contract modules each import ONLY __future__ and typing -- neither imports this
+# registry -- so reading their stable schema constants at module top is cycle-safe
+# (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_human_approval_packet_contract import (  # noqa: E501
+    RDQ_APPROVAL_SCHEMA_VERSION as _REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_readiness_checklist_contract import (  # noqa: E501
+    RDQ_READINESS_SCHEMA_VERSION as _REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -301,6 +311,12 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT",
     "get_latest_completed_real_data_qa_boundary_decision_contract",
     "get_latest_completed_real_data_qa_boundary_decision_contract_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT",
+    "get_latest_completed_real_data_qa_human_approval_packet_contract",
+    "get_latest_completed_real_data_qa_human_approval_packet_contract_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT",
+    "get_latest_completed_real_data_qa_readiness_checklist_contract",
+    "get_latest_completed_real_data_qa_readiness_checklist_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -716,6 +732,46 @@ _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT = (
     _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_LABEL
+)
+
+# The single recognized latest research-only Real Data QA Human Approval Packet
+# contract (Block 136, Phase A). It is the research-only paper contract that
+# DEFINES the structured eight-field human approval packet (plus an exact approval
+# phrase) a person must complete BEFORE any Real Data QA may even be planned. It
+# assesses a static packet into exactly one outcome (BLOCK / INCOMPLETE /
+# COMPLETE) and, even at COMPLETE, only marks the packet ready for human review:
+# it authorizes nothing, fetches no data, calls no API, inspects no dataset, runs
+# no QA/baseline/backtest/simulation, touches no broker/exchange/paper/live
+# surface, and unlocks no downstream gate. Registering it is purely additive
+# latest-completed metadata: it does NOT advance CURRENT_STAGE or
+# NEXT_REQUIRED_ACTION, both of which remain at the human-controlled real-data QA
+# boundary above. real_data_qa and baseline stay BLOCKED and the paper/micro-live
+# gates stay LOCKED unless a separate, future, human-approved step authorizes it.
+_RECOGNIZED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT_LABEL = (
+    "Block 136 - Crypto-D1 Real Data QA Human Approval Packet Contract"
+)
+LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT = (
+    _RECOGNIZED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT_LABEL
+)
+
+# The single recognized latest research-only Real Data QA Readiness Checklist
+# contract (Block 136, Phase B). It is the research-only paper contract that
+# DEFINES the eight-item readiness checklist that must ALL pass BEFORE a human is
+# even asked to approve Real Data QA. It assesses a static payload into exactly one
+# outcome (BLOCK / NOT_READY / READY) and, even at READY, only means "ready for a
+# separate human approval review": it authorizes nothing, fetches no data, calls
+# no API, inspects no dataset, runs no QA/baseline/backtest/simulation, touches no
+# broker/exchange/paper/live surface, and unlocks no downstream gate. Registering
+# it is purely additive latest-completed metadata: it does NOT advance
+# CURRENT_STAGE or NEXT_REQUIRED_ACTION, both of which remain at the human-
+# controlled real-data QA boundary above. real_data_qa and baseline stay BLOCKED
+# and the paper/micro-live gates stay LOCKED unless a separate, future, human-
+# approved step authorizes it.
+_RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL = (
+    "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
+)
+LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT = (
+    _RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL
 )
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
@@ -2872,6 +2928,185 @@ def get_latest_completed_real_data_qa_boundary_decision_contract_label() -> str:
     """Human label for the latest recognized research-only human-controlled Real
     Data QA boundary-decision contract."""
     return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_LABEL
+
+
+def _recognized_real_data_qa_human_approval_packet_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Real Data QA Human
+    Approval Packet contract record.
+
+    Recognizing the human-approval-packet contract records, on paper, that the
+    Block 136 Crypto-D1 Real Data QA Human Approval Packet Contract is COMPLETE. It
+    is the research-only paper contract that DEFINES the structured eight-field
+    human approval packet (plus an exact approval phrase) a person must complete
+    BEFORE any Real Data QA may even be planned. Given a static, caller-supplied
+    packet it assigns exactly one outcome (BLOCK / INCOMPLETE / COMPLETE); even its
+    most favourable outcome, COMPLETE, only marks the packet ready for human review
+    and authorizes nothing. It is NOT an execution bundle: it authorizes nothing,
+    executes nothing, and unlocks no real capability. It fetches no data, calls no
+    API, inspects no dataset, acquires/loads no data, and runs no QA, baseline,
+    backtest, simulation, paper/live, broker/exchange, or automation; every field
+    is derived from static input only. A fresh record (with fresh lists) is
+    returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "real_data_qa_human_approval_packet_contract_id": (
+            "CRYPTO_D1_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Real Data QA Human Approval Packet Contract"
+        ),
+        "label": _RECOGNIZED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_human_approval_packet_contract"
+        ),
+        "schema_constant": "RDQ_APPROVAL_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Human Approval "
+            "Packet Contract, BUILT in Block 136 (Phase A). It records, on paper, "
+            "that the research-only paper contract -- which defines the structured "
+            "eight-field human approval packet plus an exact approval phrase a "
+            "person must complete BEFORE any Real Data QA may even be planned, "
+            "assigning a static packet exactly one outcome (BLOCK / INCOMPLETE / "
+            "COMPLETE) -- now exists; it authorizes nothing and executes nothing: "
+            "no data fetch, API call, dataset inspection, real data acquisition, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "order placement, Telegram trade command, paper/live, automation, or "
+            "runtime/registry/dashboard write is unlocked. Its highest outcome, "
+            "COMPLETE, only marks the packet ready for human review, never a buy/"
+            "sell/long/short/entry/exit/order instruction and never an unlock of "
+            "real_data_qa; it always requires independent confirmation. "
+            "Registering it is purely additive latest-completed metadata: it does "
+            "not advance the global stage. real_data_qa and baseline stay BLOCKED "
+            "and the paper/micro-live gates stay LOCKED unless a separate, future, "
+            "human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_human_approval_packet_contract() -> dict[str, Any]:
+    """The latest recognized research-only Real Data QA human-approval-packet-
+    contract record."""
+    return _recognized_real_data_qa_human_approval_packet_contract()
+
+
+def get_latest_completed_real_data_qa_human_approval_packet_contract_label() -> str:
+    """Human label for the latest recognized research-only Real Data QA human-
+    approval-packet contract."""
+    return _RECOGNIZED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT_LABEL
+
+
+def _recognized_real_data_qa_readiness_checklist_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Real Data QA Readiness
+    Checklist contract record.
+
+    Recognizing the readiness-checklist contract records, on paper, that the Block
+    136 Crypto-D1 Real Data QA Readiness Checklist Contract is COMPLETE. It is the
+    research-only paper contract that DEFINES the eight-item readiness checklist
+    that must ALL pass BEFORE a human is even asked to approve Real Data QA. Given
+    a static, caller-supplied payload it assigns exactly one outcome (BLOCK /
+    NOT_READY / READY); even its most favourable outcome, READY, only means the
+    checklist passed and this is ready for a SEPARATE human approval review -- it
+    authorizes nothing. It is NOT an execution bundle: it authorizes nothing,
+    executes nothing, and unlocks no real capability. It fetches no data, calls no
+    API, inspects no dataset, acquires/loads no data, and runs no QA, baseline,
+    backtest, simulation, paper/live, broker/exchange, or automation; every field
+    is derived from static input only. A fresh record (with fresh lists) is
+    returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "real_data_qa_readiness_checklist_contract_id": (
+            "CRYPTO_D1_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Real Data QA Readiness Checklist Contract"
+        ),
+        "label": _RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_readiness_checklist_contract"
+        ),
+        "schema_constant": "RDQ_READINESS_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Readiness "
+            "Checklist Contract, BUILT in Block 136 (Phase B). It records, on "
+            "paper, that the research-only paper contract -- which defines the "
+            "eight-item readiness checklist that must ALL pass BEFORE a human is "
+            "even asked to approve Real Data QA, assigning a static payload exactly "
+            "one outcome (BLOCK / NOT_READY / READY) -- now exists; it authorizes "
+            "nothing and executes nothing: no data fetch, API call, dataset "
+            "inspection, real data acquisition, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, order placement, Telegram trade "
+            "command, paper/live, automation, or runtime/registry/dashboard write "
+            "is unlocked. Its highest outcome, READY, only means the checklist "
+            "passed and this is ready for a separate human approval review, never "
+            "a buy/sell/long/short/entry/exit/order instruction and never an "
+            "unlock of real_data_qa; it always requires independent confirmation. "
+            "Registering it is purely additive latest-completed metadata: it does "
+            "not advance the global stage. The only next step remains the human-"
+            "controlled real-data QA boundary decision. real_data_qa and baseline "
+            "stay BLOCKED and the paper/micro-live gates stay LOCKED unless a "
+            "separate, future, human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_readiness_checklist_contract() -> dict[str, Any]:
+    """The latest recognized research-only Real Data QA readiness-checklist-
+    contract record."""
+    return _recognized_real_data_qa_readiness_checklist_contract()
+
+
+def get_latest_completed_real_data_qa_readiness_checklist_contract_label() -> str:
+    """Human label for the latest recognized research-only Real Data QA readiness-
+    checklist contract."""
+    return _RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:

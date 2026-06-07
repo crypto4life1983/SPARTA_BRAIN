@@ -57,6 +57,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,
     LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT,
+    LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT,
+    LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -103,6 +105,10 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_cohort_independence_contract_label,
     get_latest_completed_real_data_qa_boundary_decision_contract,
     get_latest_completed_real_data_qa_boundary_decision_contract_label,
+    get_latest_completed_real_data_qa_human_approval_packet_contract,
+    get_latest_completed_real_data_qa_human_approval_packet_contract_label,
+    get_latest_completed_real_data_qa_readiness_checklist_contract,
+    get_latest_completed_real_data_qa_readiness_checklist_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -2772,6 +2778,166 @@ def test_recognized_real_data_qa_boundary_decision_contract_deterministic_isolat
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+def test_latest_completed_real_data_qa_human_approval_packet_contract_label():
+    assert LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT == (
+        "Block 136 - Crypto-D1 Real Data QA Human Approval Packet Contract"
+    )
+    assert (
+        get_latest_completed_real_data_qa_human_approval_packet_contract_label()
+        == LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT
+    )
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_real_data_qa_human_approval_packet_contract():
+    c = get_latest_completed_real_data_qa_human_approval_packet_contract()
+    assert c["real_data_qa_human_approval_packet_contract_id"] == (
+        "CRYPTO_D1_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT"
+    )
+    assert c["name"] == (
+        "Crypto-D1 Real Data QA Human Approval Packet Contract"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_real_data_qa_human_approval_packet_contract"
+    )
+    assert c["schema_constant"] == "RDQ_APPROVAL_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_real_data_qa_human_approval_packet_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_real_data_qa_human_approval_packet_contract_research_only():
+    c = get_latest_completed_real_data_qa_human_approval_packet_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_real_data_qa_human_approval_packet_contract_authorizes_nothing():
+    c = get_latest_completed_real_data_qa_human_approval_packet_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "purely additive latest-completed metadata" in reason
+    assert "never an unlock of real_data_qa" in reason
+
+
+def test_latest_completed_real_data_qa_readiness_checklist_contract_label():
+    assert LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT == (
+        "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
+    )
+    assert (
+        get_latest_completed_real_data_qa_readiness_checklist_contract_label()
+        == LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT
+    )
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_real_data_qa_readiness_checklist_contract():
+    c = get_latest_completed_real_data_qa_readiness_checklist_contract()
+    assert c["real_data_qa_readiness_checklist_contract_id"] == (
+        "CRYPTO_D1_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT"
+    )
+    assert c["name"] == (
+        "Crypto-D1 Real Data QA Readiness Checklist Contract"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_real_data_qa_readiness_checklist_contract"
+    )
+    assert c["schema_constant"] == "RDQ_READINESS_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_real_data_qa_readiness_checklist_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_real_data_qa_readiness_checklist_contract_research_only():
+    c = get_latest_completed_real_data_qa_readiness_checklist_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_real_data_qa_readiness_checklist_contract_authorizes_nothing():
+    c = get_latest_completed_real_data_qa_readiness_checklist_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "purely additive latest-completed metadata" in reason
+    assert "never an unlock of real_data_qa" in reason
+
+
+def test_recognized_real_data_qa_block_136_contracts_deterministic_isolated():
+    for getter in (
+        get_latest_completed_real_data_qa_human_approval_packet_contract,
+        get_latest_completed_real_data_qa_readiness_checklist_contract,
+    ):
+        assert getter() == getter()
+        c = getter()
+        c["executes"] = True
+        c["research_universe"].append("TAMPERED")
+        c["candidate_family_ids"].append("TAMPERED")
+        fresh = getter()
+        assert fresh["executes"] is False
+        assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+        assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+def test_block_136_registration_preserves_prior_truth():
+    # Registering both Block 136 contracts must NOT advance the boundary stage,
+    # must NOT disturb the latest bundle, and must NOT disturb the Block 134
+    # boundary-decision contract recognition.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT == (
+        "Block 134 - Crypto-D1 Real Data QA Boundary Decision Contract"
+    )
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 
 
 def test_registry_version_stable():

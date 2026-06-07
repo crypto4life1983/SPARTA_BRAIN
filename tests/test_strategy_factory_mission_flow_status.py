@@ -78,6 +78,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,
     CRYPTO_D1_COHORT_INDEPENDENCE_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT,
+    LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT,
+    LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT,
     CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
@@ -131,6 +133,8 @@ def test_status_schema_is_stable():
         "latest_completed_daily_alpha_brief_approval_contract",
         "latest_completed_cohort_independence_contract",
         "latest_completed_real_data_qa_boundary_decision_contract",
+        "latest_completed_real_data_qa_human_approval_packet_contract",
+        "latest_completed_real_data_qa_readiness_checklist_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -941,6 +945,60 @@ def test_latest_completed_real_data_qa_boundary_decision_contract_is_block_134()
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
         "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
+    )
+
+
+def test_latest_completed_real_data_qa_human_approval_packet_contract_is_block_136():
+    assert LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT == (
+        "Block 136 - Crypto-D1 Real Data QA Human Approval Packet Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_real_data_qa_human_approval_packet_contract"
+    ]["state"] == STATE_COMPLETE
+    # recognizing Phase A unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the Block 134 boundary-decision contract completion is preserved alongside it
+    assert s["latest_completed_real_data_qa_boundary_decision_contract"] == (
+        "Block 134 - Crypto-D1 Real Data QA Boundary Decision Contract"
+    )
+
+
+def test_latest_completed_real_data_qa_readiness_checklist_contract_is_block_136():
+    assert LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT == (
+        "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_readiness_checklist_contract"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_real_data_qa_readiness_checklist_contract"
+    ]["state"] == STATE_COMPLETE
+    # recognizing Phase B unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the Phase A approval-packet contract completion is preserved alongside it
+    assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
+        "Block 136 - Crypto-D1 Real Data QA Human Approval Packet Contract"
     )
 
 
