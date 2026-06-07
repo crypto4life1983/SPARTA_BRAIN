@@ -166,6 +166,12 @@ from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_des
 from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_readiness_contract import (  # noqa: E501
     RESEARCH_READINESS_SCHEMA_VERSION as _RESEARCH_READINESS_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 117 external-bot-evidence-intake contract module imports ONLY
+# __future__ and typing -- it does not import this registry -- so reading its
+# stable schema constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_external_bot_evidence_intake_contract import (  # noqa: E501
+    EXTERNAL_BOT_EVIDENCE_INTAKE_SCHEMA_VERSION as _EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -220,6 +226,9 @@ __all__ = [
     "LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT",
     "get_latest_completed_research_readiness_contract",
     "get_latest_completed_research_readiness_contract_label",
+    "LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT",
+    "get_latest_completed_external_bot_evidence_intake_contract",
+    "get_latest_completed_external_bot_evidence_intake_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -251,15 +260,19 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # recognized *research design contract* is Block 109; the latest recognized
 # *research design review contract* is Block 111; the latest recognized *research
 # design approval contract* is Block 113.
-# Recognizing the research design approval contract unlocks nothing real: the only
-# next step is a research-only planning step -- BUILD a candidate research
-# *readiness* contract, still on paper -- a final readiness paper gate before the
-# still-blocked real_data_qa boundary. No real acquisition, QA, baseline,
-# backtest, paper/live, broker/exchange, or automation is unlocked.
-CURRENT_STAGE = (
-    "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
-    "AWAIT_HUMAN_BOUNDARY_DECISION"
-)
+# Block 115 BUILT the research-only Strategy Candidate Research *Readiness*
+# Contract (a final readiness paper gate), and Block 117 has now BUILT the
+# research-only External Bot Evidence *Intake* Contract that classifies external
+# AI trading bot / tool / video ideas into research-only evidence buckets
+# (useful_for_research, risky_requires_validation, blocked_execution_feature,
+# dashboard_or_brief_candidate, ignore_or_marketing_claim). Recognizing the
+# external-bot-evidence-intake contract unlocks nothing real: the only next step
+# is the next research-only evidence paper contract -- BUILD a Crypto-D1
+# Hyperliquid Whale *Evidence* Contract, still on paper, treating whale tracking
+# as external research evidence only and never as execution permission. No real
+# acquisition, QA, baseline, backtest, paper/live, broker/exchange, or automation
+# is unlocked.
+CURRENT_STAGE = "CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -422,14 +435,34 @@ _RECOGNIZED_RESEARCH_READINESS_CONTRACT_LABEL = (
 LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT = (
     _RECOGNIZED_RESEARCH_READINESS_CONTRACT_LABEL
 )
-# Next required action: the research-only paper chain is COMPLETE through the
-# Block 115 readiness contract. The only next step is a separate, human-controlled
-# boundary decision before the still-blocked real_data_qa boundary. It is not a
-# build step, authorizes nothing, and unlocks nothing real -- real_data_qa stays
-# BLOCKED unless a separate, future, human-approved boundary contract is built.
-NEXT_REQUIRED_ACTION = (
-    "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
+# Frozen historical next step for the Block 115 record: BUILD the research-only
+# External Bot Evidence *Intake* Contract, which Block 117 has since completed on
+# paper. Held as a fixed local so the global NEXT_REQUIRED_ACTION can advance
+# without rewriting the Block 115 record's historical next step.
+_RESEARCH_READINESS_CONTRACT_NEXT_ACTION = (
+    "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT"
 )
+# The single recognized latest research-only External Bot Evidence *Intake*
+# contract (Block 117). Building the contract is a research-only planning step
+# and creates no execution bundle. It classifies external AI trading bot / tool /
+# video ideas into research-only evidence buckets; it authorizes no real-world
+# action and unlocks no downstream gate. The label intentionally does not name a
+# trading stage.
+_RECOGNIZED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_LABEL = (
+    "Block 117 - Crypto-D1 External Bot Evidence Intake Contract"
+)
+LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT = (
+    _RECOGNIZED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_LABEL
+)
+# Next required action: the research-only paper chain now continues into the
+# external-evidence sub-chain. With the Block 117 intake contract complete, the
+# only next step is the next research-only evidence paper contract -- BUILD a
+# Crypto-D1 Hyperliquid Whale *Evidence* Contract, treating whale tracking as
+# external research evidence only and never as execution permission. It is a
+# research-only build step, authorizes nothing, and unlocks nothing real --
+# real_data_qa stays BLOCKED unless a separate, future, human-approved boundary
+# contract is built.
+NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -1711,7 +1744,7 @@ def _recognized_research_readiness_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": _RESEARCH_READINESS_CONTRACT_NEXT_ACTION,
         "reason": (
             "Read-only recognition of the Crypto-D1 Strategy Candidate Research "
             "Readiness Contract, BUILT in Block 115. It records, on paper, that "
@@ -1722,10 +1755,10 @@ def _recognized_research_readiness_contract() -> dict[str, Any]:
             "dataset loading, QA, baseline, backtest, simulation, trade signal, "
             "market-data validation, paper/live, broker/exchange, automation, or "
             "runtime/registry/dashboard write is unlocked. Readiness is paper "
-            "readiness ONLY: real_data_qa stays BLOCKED. The only next step is a "
-            "separate, human-controlled boundary decision before any real_data_qa "
-            "could ever be considered, which a separate, future, human-approved "
-            "boundary contract would have to authorize."
+            "readiness ONLY: real_data_qa stays BLOCKED. The only next step is to "
+            "BUILD a research-only External Bot Evidence Intake Contract, still on "
+            "paper, that classifies external AI trading bot / tool / video ideas "
+            "into research-only evidence buckets and authorizes nothing."
         ),
     }
     record.update(_BUNDLE_LOCKED_CAPABILITIES)
@@ -1741,6 +1774,94 @@ def get_latest_completed_research_readiness_contract_label() -> str:
     """Human label for the latest recognized research-only research-readiness
     contract."""
     return _RECOGNIZED_RESEARCH_READINESS_CONTRACT_LABEL
+
+
+def _recognized_external_bot_evidence_intake_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-external-bot-evidence-
+    intake-contract record.
+
+    Recognizing the external-bot-evidence-intake contract records, on paper, that
+    the Block 117 Crypto-D1 External Bot Evidence Intake Contract is COMPLETE. It
+    is NOT an execution bundle: it authorizes nothing, executes nothing, and
+    unlocks no real capability. It records only that the research-only paper chain
+    now has a contract that classifies external AI trading bot / tool / video
+    ideas (support/resistance chart reads, Pine Script generation/debugging,
+    TradingView webhooks, Telegram command assistant, portfolio dashboard,
+    funding-rate scanning, Hyperliquid whale tracking, daily alpha brief, cloud
+    bot operation) into research-only evidence buckets -- useful_for_research,
+    risky_requires_validation, blocked_execution_feature,
+    dashboard_or_brief_candidate, ignore_or_marketing_claim. Every execution-
+    capable idea is marked blocked_execution_feature and every attractive-but-
+    unverified claim is marked risky_requires_validation; evidence is never
+    converted into permission. It acquires/fetches/inspects/loads no data and runs
+    no QA, baseline, backtest, simulation, paper/live, or broker/exchange. A fresh
+    record (with fresh lists) is returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "external_bot_evidence_intake_contract_id": (
+            "CRYPTO_D1_STRATEGY_CANDIDATE_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 External Bot Evidence Intake Contract"
+        ),
+        "label": _RECOGNIZED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_external_bot_evidence_intake_contract"
+        ),
+        "schema_constant": "EXTERNAL_BOT_EVIDENCE_INTAKE_SCHEMA_VERSION",
+        "schema_version": _EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_SCHEMA_VERSION,
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 External Bot Evidence Intake "
+            "Contract, BUILT in Block 117. It records, on paper, that the "
+            "research-only contract classifying external AI trading bot / tool / "
+            "video ideas into research-only evidence buckets now exists; it "
+            "authorizes nothing and executes nothing: no real data acquisition, "
+            "data fetch, data inspection, dataset loading, QA, baseline, backtest, "
+            "simulation, trade signal, market-data validation, order placement, "
+            "broker/exchange connection, Telegram trade command, TradingView "
+            "execution webhook, portfolio account control, live strategy "
+            "deployment, cloud bot operation, paper/live, automation, or runtime/"
+            "registry/dashboard write is unlocked. Every execution-capable idea is "
+            "marked blocked_execution_feature and every attractive-but-unverified "
+            "claim is marked risky_requires_validation; evidence is never converted "
+            "into permission. The only next step is to BUILD a research-only "
+            "Crypto-D1 Hyperliquid Whale Evidence Contract, still on paper, "
+            "treating whale tracking as external research evidence only and never "
+            "as execution permission."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_external_bot_evidence_intake_contract() -> dict[str, Any]:
+    """The latest recognized research-only external-bot-evidence-intake-contract
+    record."""
+    return _recognized_external_bot_evidence_intake_contract()
+
+
+def get_latest_completed_external_bot_evidence_intake_contract_label() -> str:
+    """Human label for the latest recognized research-only external-bot-evidence-
+    intake contract."""
+    return _RECOGNIZED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:

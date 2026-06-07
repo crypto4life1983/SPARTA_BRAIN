@@ -61,6 +61,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     STRATEGY_CANDIDATE_RESEARCH_DESIGN_APPROVAL_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT,
     STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT,
+    STRATEGY_CANDIDATE_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -104,6 +106,7 @@ def test_status_schema_is_stable():
         "latest_completed_research_design_review_contract",
         "latest_completed_research_design_approval_contract",
         "latest_completed_research_readiness_contract",
+        "latest_completed_external_bot_evidence_intake_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -290,28 +293,26 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_await_human_boundary_decision():
+def test_next_required_action_is_build_hyperliquid_whale_evidence_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
+        "BUILD_CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT"
     )
-    # the readiness paper chain is complete; the only next step is a separate,
-    # human-controlled boundary decision -- not a build/run step, and it never
-    # authorizes real work (it only names real_data_qa as the still-blocked
-    # boundary it waits before).
-    assert NEXT_REQUIRED_ACTION.startswith("AWAIT_HUMAN")
-    assert "BOUNDARY_DECISION" in NEXT_REQUIRED_ACTION
-    assert "BEFORE_REAL_DATA_QA" in NEXT_REQUIRED_ACTION
-    assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    # the readiness paper chain continues into the research-only external-evidence
+    # sub-chain; the only next step is to BUILD another paper evidence contract --
+    # it never authorizes real work and treats whale tracking as evidence only.
+    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    assert "HYPERLIQUID_WHALE_EVIDENCE" in NEXT_REQUIRED_ACTION
+    assert "CONTRACT" in NEXT_REQUIRED_ACTION
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
-                   "EXCHANGE"):
+                   "EXCHANGE", "ORDER", "TRACK"):
         assert banned not in NEXT_REQUIRED_ACTION, banned
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
-    # the await-human boundary decision still unlocks nothing real
+    # the next evidence-contract build still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
+    nxt = pipe["crypto_d1_hyperliquid_whale_evidence_contract"]
     assert nxt["state"] == STATE_NEXT
 
 
@@ -455,16 +456,42 @@ def test_strategy_candidate_research_readiness_contract_now_complete():
     assert "real_data_qa stays blocked" in reason
 
 
-def test_human_controlled_real_data_qa_boundary_decision_is_next():
+def test_external_bot_evidence_intake_contract_now_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    row = pipe["human_controlled_real_data_qa_boundary_decision"]
+    row = pipe["crypto_d1_external_bot_evidence_intake_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 117" in row["reason"]
+    assert STRATEGY_CANDIDATE_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # every execution-capable idea is blocked; evidence is never permission
+    assert "blocked_execution_feature" in reason
+    assert "never converting evidence into" in reason
+
+
+def test_hyperliquid_whale_evidence_contract_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_hyperliquid_whale_evidence_contract"]
     assert row["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in row["reason"]
     reason = row["reason"].lower()
     assert "executes nothing" in reason
-    # the next step is a human boundary decision, not a build/run step, and
-    # real_data_qa stays blocked
-    assert "boundary decision" in reason
+    # whale tracking is treated as external research evidence only
+    assert "evidence only" in reason
+    assert "real_data_qa stays" in reason
+
+
+def test_human_controlled_real_data_qa_boundary_decision_now_blocked():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["human_controlled_real_data_qa_boundary_decision"]
+    assert row["state"] == STATE_BLOCKED
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # the external-evidence sub-chain now precedes this boundary, which stays
+    # blocked; real_data_qa stays blocked
+    assert "boundary" in reason
     assert "real_data_qa stays" in reason
 
 
@@ -612,17 +639,26 @@ def test_latest_completed_research_readiness_contract_is_block_115():
     assert s["executes"] is False
 
 
-def test_current_stage_is_post_research_readiness_contract():
-    assert CURRENT_STAGE == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
-        "AWAIT_HUMAN_BOUNDARY_DECISION"
+def test_latest_completed_external_bot_evidence_intake_contract_is_block_117():
+    assert LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT == (
+        "Block 117 - Crypto-D1 External Bot Evidence Intake Contract"
     )
-    assert "STRATEGY_CANDIDATE" in CURRENT_STAGE
-    assert "RESEARCH_READINESS" in CURRENT_STAGE
-    assert "AWAIT_HUMAN" in CURRENT_STAGE
+    s = get_mission_flow_status()
+    assert s["latest_completed_external_bot_evidence_intake_contract"] == (
+        LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT
+    )
+    # the recognized external-bot-evidence-intake contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+
+
+def test_current_stage_is_external_bot_evidence_intake_complete():
+    assert CURRENT_STAGE == "CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_REQUIRED"
+    assert "HYPERLIQUID_WHALE_EVIDENCE" in CURRENT_STAGE
+    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
-                   "EXCHANGE", "AUTOMATION"):
+                   "EXCHANGE", "AUTOMATION", "ORDER"):
         assert banned not in CURRENT_STAGE, banned
     assert get_mission_flow_status()["current_stage"] == CURRENT_STAGE
     human = {r["id"]: r for r in human_workflow_lane()}
