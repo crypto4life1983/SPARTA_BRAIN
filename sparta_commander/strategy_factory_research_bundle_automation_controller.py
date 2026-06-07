@@ -271,6 +271,92 @@ _CAPABILITY_FLAGS: tuple[str, ...] = tuple(
 
 _DEFAULT_BUNDLE_TYPE = "research_contract"
 
+# Advisory list of the next SAFE research-only big-bundle candidates. This is a
+# menu for a human to choose from; it crosses NO real-world boundary and unlocks
+# nothing. Every candidate is RESEARCH_ONLY and does not touch real_data_qa.
+# `kind` maps each candidate to a next-action category for context only.
+DEFAULT_BIG_BUNDLE_CANDIDATES: tuple[dict[str, Any], ...] = (
+    {
+        "id": "A",
+        "label": "JARVIS UI sync for Bundle 136 packet/checklist visibility",
+        "kind": NEXT_ACTION_UI_SYNC,
+        "note": (
+            "Display-only sync of the Block 136 packet / checklist into the "
+            "JARVIS panel. A human performs the dashboard edit; the controller "
+            "writes no UI output."
+        ),
+        "research_only": True,
+        "crosses_real_data_qa_boundary": False,
+    },
+    {
+        "id": "B",
+        "label": "Strategy Candidate Ranking continuation",
+        "kind": NEXT_ACTION_BUILD,
+        "note": (
+            "Continue the research-only Crypto-D1 strategy candidate ranking "
+            "paper contract chain. Pure paper module + test."
+        ),
+        "research_only": True,
+        "crosses_real_data_qa_boundary": False,
+    },
+    {
+        "id": "C",
+        "label": "External Human Trader Evidence Contract",
+        "kind": NEXT_ACTION_BUILD,
+        "note": (
+            "Add a research-only evidence-intake paper contract for external "
+            "human-trader observations (quarantined, advisory). Pure paper "
+            "module + test."
+        ),
+        "research_only": True,
+        "crosses_real_data_qa_boundary": False,
+    },
+    {
+        "id": "D",
+        "label": "Evidence Scoring integration / registration",
+        "kind": NEXT_ACTION_REGISTER,
+        "note": (
+            "Register an already-built research-only evidence-scoring paper "
+            "contract in the mission flow. Additive registry metadata only."
+        ),
+        "research_only": True,
+        "crosses_real_data_qa_boundary": False,
+    },
+    {
+        "id": "E",
+        "label": "Hold at human boundary",
+        "kind": NEXT_ACTION_HOLD,
+        "note": (
+            "Take no new bundle. Hold at the human-controlled Real Data QA "
+            "boundary and wait for the human decision."
+        ),
+        "research_only": True,
+        "crosses_real_data_qa_boundary": False,
+    },
+)
+
+
+def _big_bundle_candidates(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return the next-safe research-only big-bundle candidate menu. Accepts a
+    caller override (`candidate_bundles`) but defaults to the standard menu. Any
+    candidate that claims to cross the real_data_qa boundary or is not research-
+    only is dropped, so the menu can never advertise an unsafe option."""
+    raw = payload.get("candidate_bundles")
+    source: tuple[dict[str, Any], ...] | list[dict[str, Any]]
+    if isinstance(raw, (list, tuple)) and raw:
+        source = [dict(c) for c in raw if isinstance(c, dict)]
+    else:
+        source = DEFAULT_BIG_BUNDLE_CANDIDATES
+    safe: list[dict[str, Any]] = []
+    for c in source:
+        candidate = dict(c)
+        candidate.setdefault("research_only", True)
+        candidate["crosses_real_data_qa_boundary"] = False
+        if candidate.get("research_only") is not True:
+            continue
+        safe.append(candidate)
+    return safe
+
 
 # A deterministic, illustrative paper input. It is anchored to the live mission
 # flow, which sits at the human-controlled Real Data QA boundary, so the default
@@ -612,6 +698,7 @@ def build_research_bundle_automation_decision(
         "allowed_paths": allowed,
         "forbidden_paths": list(CONTROLLER_FORBIDDEN_PATHS),
         "scoped_tests": scoped,
+        "next_big_bundle_candidates": _big_bundle_candidates(data),
         "hard_stop_rules": list(CONTROLLER_HARD_STOP_RULES),
         "safety_flags_all_false": safety_flags_all_false,
         "real_data_qa_state": REAL_DATA_QA_STATE_BLOCKED,
@@ -692,6 +779,7 @@ _REQUIRED_DECISION_FIELDS: tuple[str, ...] = (
     "allowed_paths",
     "forbidden_paths",
     "scoped_tests",
+    "next_big_bundle_candidates",
     "hard_stop_rules",
     "safety_flags_all_false",
     "real_data_qa_state",
@@ -807,6 +895,20 @@ def validate_research_bundle_automation_decision(
     scoped_tests = d.get("scoped_tests")
     scoped_tests_ok = isinstance(scoped_tests, list) and bool(scoped_tests)
 
+    # the big-bundle candidate menu must exist and advertise NO unsafe option:
+    # every candidate is research-only and crosses no real_data_qa boundary.
+    candidates = d.get("next_big_bundle_candidates")
+    candidates_ok = (
+        isinstance(candidates, list)
+        and bool(candidates)
+        and all(
+            isinstance(c, dict)
+            and c.get("research_only") is True
+            and c.get("crosses_real_data_qa_boundary") is False
+            for c in candidates
+        )
+    )
+
     # generated guidance must carry no execution / trade verbs as whole words.
     guidance_blob = " ".join(
         str(d.get(k, ""))
@@ -848,6 +950,7 @@ def validate_research_bundle_automation_decision(
         "allowed_paths_ok": allowed_paths_ok,
         "no_forbidden_in_allowed": no_forbidden_in_allowed,
         "scoped_tests_ok": scoped_tests_ok,
+        "candidates_ok": candidates_ok,
         "no_trade_language": no_trade_language,
     }
     verdict = dict(checks)
@@ -899,6 +1002,19 @@ def render_research_bundle_automation_decision_markdown(
     _emit(lines, "Allowed Paths", list(d.get("allowed_paths") or []))
     _emit(lines, "Forbidden Paths", list(d.get("forbidden_paths") or []))
     _emit(lines, "Scoped Tests", list(d.get("scoped_tests") or []))
+    _emit(
+        lines,
+        "Next Safe Big-Bundle Candidates",
+        [
+            str(c.get("id"))
+            + ". "
+            + str(c.get("label"))
+            + " ["
+            + str(c.get("kind"))
+            + "]"
+            for c in (d.get("next_big_bundle_candidates") or [])
+        ],
+    )
     _emit(lines, "Operator Checklist", list(d.get("operator_checklist") or []))
     _emit(
         lines,

@@ -31,6 +31,7 @@ from sparta_commander.strategy_factory_research_bundle_automation_controller imp
     CONTROLLER_SAFETY_FLAGS,
     CONTROLLER_SCHEMA_VERSION,
     CONTROLLER_STATUS,
+    DEFAULT_BIG_BUNDLE_CANDIDATES,
     DEFAULT_CONTROLLER_INPUT,
     MISSION_FLOW_CURRENT_STAGE,
     MISSION_FLOW_NEXT_REQUIRED_ACTION,
@@ -317,6 +318,72 @@ def test_decision_exposes_every_expected_output():
     assert decision["operator_summary"]
 
 
+def test_decision_exposes_next_big_bundle_candidates():
+    decision = _BUILD(DEFAULT_CONTROLLER_INPUT)
+    candidates = decision["next_big_bundle_candidates"]
+    assert isinstance(candidates, list) and candidates
+    ids = [c["id"] for c in candidates]
+    assert ids == ["A", "B", "C", "D", "E"]
+    # every advertised candidate is research-only and crosses no boundary.
+    for c in candidates:
+        assert c["research_only"] is True, c
+        assert c["crosses_real_data_qa_boundary"] is False, c
+        assert isinstance(c["label"], str) and c["label"]
+        assert c["kind"] in NEXT_ACTION_CATEGORIES, c
+
+
+def test_default_big_bundle_candidates_cover_the_five_options():
+    ids = [c["id"] for c in DEFAULT_BIG_BUNDLE_CANDIDATES]
+    assert ids == ["A", "B", "C", "D", "E"]
+    hold = [c for c in DEFAULT_BIG_BUNDLE_CANDIDATES if c["id"] == "E"][0]
+    assert hold["kind"] == NEXT_ACTION_HOLD
+
+
+def test_candidate_menu_is_not_shared_between_builds():
+    d1 = _BUILD()
+    d2 = _BUILD()
+    d1["next_big_bundle_candidates"].append({"id": "tampered"})
+    assert all(
+        c.get("id") != "tampered" for c in d2["next_big_bundle_candidates"]
+    )
+
+
+def test_caller_supplied_candidates_are_forced_safe():
+    # A caller candidate that claims to cross the boundary is sanitized to False;
+    # a non-research-only candidate is dropped entirely.
+    payload = _flow_input(
+        candidate_bundles=[
+            {
+                "id": "X",
+                "label": "claims to cross",
+                "kind": NEXT_ACTION_BUILD,
+                "research_only": True,
+                "crosses_real_data_qa_boundary": True,
+            },
+            {
+                "id": "Y",
+                "label": "not research only",
+                "kind": NEXT_ACTION_BUILD,
+                "research_only": False,
+            },
+        ]
+    )
+    decision = _BUILD(payload)
+    candidates = decision["next_big_bundle_candidates"]
+    ids = [c["id"] for c in candidates]
+    assert ids == ["X"]
+    assert candidates[0]["crosses_real_data_qa_boundary"] is False
+    assert _VALIDATE(decision)["candidates_ok"] is True
+
+
+def test_validate_rejects_boundary_crossing_candidate():
+    decision = _BUILD()
+    decision["next_big_bundle_candidates"][0]["crosses_real_data_qa_boundary"] = True
+    verdict = _VALIDATE(decision)
+    assert verdict["valid"] is False
+    assert verdict["candidates_ok"] is False
+
+
 def test_allowed_paths_are_only_module_test_and_safety():
     paths = allowed_paths_for_bundle("research_contract", "crypto_d1_example")
     assert len(paths) == 3
@@ -466,6 +533,7 @@ def test_render_is_a_readonly_markdown_string():
     assert "## Allowed Paths" in text
     assert "## Forbidden Paths" in text
     assert "## Scoped Tests" in text
+    assert "## Next Safe Big-Bundle Candidates" in text
     assert "## Hard Stop Rules" in text
     assert "## Approval Packet" in text
 
