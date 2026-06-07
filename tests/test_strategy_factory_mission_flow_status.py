@@ -71,6 +71,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,
     CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,
+    CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -119,6 +121,7 @@ def test_status_schema_is_stable():
         "latest_completed_funding_rate_evidence_contract",
         "latest_completed_bitcoin_cycle_timing_evidence_contract",
         "latest_completed_daily_alpha_brief_research_contract",
+        "latest_completed_daily_alpha_brief_review_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -305,17 +308,20 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_build_daily_alpha_brief_review_contract():
-    # After Block 126, the only next step is to BUILD the daily alpha brief
-    # *review* contract -- a research-only paper build. No stale research-build
-    # literal remains on the global next action.
+def test_next_required_action_is_build_daily_alpha_brief_approval_contract():
+    # After Block 128, the only next step is to BUILD the daily alpha brief
+    # *approval* contract -- a research-only paper build. No stale review/
+    # research-build literal remains on the global next action.
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
     assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
     assert "DAILY_ALPHA_BRIEF" in NEXT_REQUIRED_ACTION
-    assert "REVIEW" in NEXT_REQUIRED_ACTION
+    assert "APPROVAL" in NEXT_REQUIRED_ACTION
     assert "CONTRACT" in NEXT_REQUIRED_ACTION
+    assert NEXT_REQUIRED_ACTION != (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
+    )
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
     )
@@ -328,7 +334,7 @@ def test_next_required_action_is_build_daily_alpha_brief_review_contract():
     # the next research-contract build still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_daily_alpha_brief_review_contract"]
+    nxt = pipe["crypto_d1_daily_alpha_brief_approval_contract"]
     assert nxt["state"] == STATE_NEXT
 
 
@@ -550,9 +556,23 @@ def test_daily_alpha_brief_research_contract_now_complete():
     assert "watch / research_only" in reason
 
 
-def test_daily_alpha_brief_review_contract_is_next():
+def test_daily_alpha_brief_review_contract_now_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["crypto_d1_daily_alpha_brief_review_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 127" in row["reason"]
+    assert CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # the review escalates for approval, never a trade; highest verdict is READY
+    assert "never what to trade" in reason
+
+
+def test_daily_alpha_brief_approval_contract_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_daily_alpha_brief_approval_contract"]
     assert row["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in row["reason"]
     reason = row["reason"].lower()
@@ -768,13 +788,13 @@ def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
     # the recognized bitcoin-cycle-timing-evidence contract unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
-    # after Block 126, the global stage has advanced past the daily alpha brief
-    # research build to the daily alpha brief review build.
+    # after Block 128, the global stage has advanced past the daily alpha brief
+    # review build to the daily alpha brief approval build.
     assert s["current_stage"] == (
-        "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     )
     assert s["next_required_action"] == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
 
 
@@ -791,11 +811,29 @@ def test_latest_completed_daily_alpha_brief_research_contract_is_block_125():
     assert s["executes"] is False
 
 
-def test_current_stage_is_daily_alpha_brief_review_required():
-    assert CURRENT_STAGE == "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
+def test_latest_completed_daily_alpha_brief_review_contract_is_block_127():
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT == (
+        "Block 127 - Crypto-D1 Daily Alpha Brief Review Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_daily_alpha_brief_review_contract"] == (
+        LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT
+    )
+    # the recognized daily-alpha-brief-review contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    # the Block 125 research contract completion is preserved alongside it
+    assert s["latest_completed_daily_alpha_brief_research_contract"] == (
+        "Block 125 - Crypto-D1 Daily Alpha Brief Research Contract"
+    )
+
+
+def test_current_stage_is_daily_alpha_brief_approval_required():
+    assert CURRENT_STAGE == "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     assert "DAILY_ALPHA_BRIEF" in CURRENT_STAGE
-    assert "REVIEW" in CURRENT_STAGE
+    assert "APPROVAL" in CURRENT_STAGE
     assert "CONTRACT_REQUIRED" in CURRENT_STAGE
+    assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
