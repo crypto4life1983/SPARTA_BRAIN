@@ -49,6 +49,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_RESEARCH_DESIGN_APPROVAL_CONTRACT,
     LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT,
     LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT,
+    LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -79,6 +80,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_research_readiness_contract_label,
     get_latest_completed_external_bot_evidence_intake_contract,
     get_latest_completed_external_bot_evidence_intake_contract_label,
+    get_latest_completed_hyperliquid_whale_evidence_contract,
+    get_latest_completed_hyperliquid_whale_evidence_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -175,29 +178,29 @@ def test_get_bundle_by_id():
 
 # --- 3: stage / next action match post-protocol-definition state ------------
 
-def test_current_stage_is_external_bot_evidence_intake_complete():
-    assert CURRENT_STAGE == "CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_REQUIRED"
+def test_current_stage_is_hyperliquid_whale_evidence_complete():
+    assert CURRENT_STAGE == "CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_REQUIRED"
     assert get_current_stage() == CURRENT_STAGE
-    assert "HYPERLIQUID_WHALE_EVIDENCE" in CURRENT_STAGE
+    assert "FUNDING_RATE_EVIDENCE" in CURRENT_STAGE
     assert "CONTRACT_REQUIRED" in CURRENT_STAGE
-    # a safe research-only evidence-contract stage, not execution. (Whale tracking
-    # is named only as external research evidence, never as execution permission.)
+    # a safe research-only evidence-contract stage, not execution. (Funding-rate
+    # signals are named only as external research evidence, never as permission.)
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER"):
         assert banned not in CURRENT_STAGE, banned
 
 
-def test_next_required_action_is_build_hyperliquid_whale_evidence_contract():
+def test_next_required_action_is_build_funding_rate_evidence_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT"
+        "BUILD_CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
     # the readiness paper chain continues into the research-only external-evidence
     # sub-chain; the only next step is to BUILD another paper evidence contract --
-    # it never authorizes real work and treats whale tracking as evidence only.
+    # it never authorizes real work and treats funding-rate signals as evidence.
     assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "HYPERLIQUID_WHALE_EVIDENCE" in NEXT_REQUIRED_ACTION
+    assert "FUNDING_RATE_EVIDENCE" in NEXT_REQUIRED_ACTION
     assert "CONTRACT" in NEXT_REQUIRED_ACTION
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
@@ -1851,6 +1854,97 @@ def test_recognized_external_bot_evidence_intake_contract_deterministic_isolated
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_external_bot_evidence_intake_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5n: recognized research-only hyperliquid-whale-evidence (Block 119) -------
+
+def test_latest_completed_hyperliquid_whale_evidence_contract_label():
+    assert LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT == (
+        "Block 119 - Crypto-D1 Hyperliquid Whale Evidence Contract"
+    )
+    assert (
+        get_latest_completed_hyperliquid_whale_evidence_contract_label()
+        == LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_hyperliquid_whale_evidence_contract():
+    c = get_latest_completed_hyperliquid_whale_evidence_contract()
+    assert c["hyperliquid_whale_evidence_contract_id"] == (
+        "CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT"
+    )
+    assert c["name"] == "Crypto-D1 Hyperliquid Whale Evidence Contract"
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_hyperliquid_whale_evidence_contract"
+    )
+    assert c["schema_constant"] == "WHALE_EVIDENCE_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_hyperliquid_whale_evidence_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_hyperliquid_whale_evidence_contract_research_only():
+    c = get_latest_completed_hyperliquid_whale_evidence_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_hyperliquid_whale_evidence_contract_authorizes_nothing():
+    c = get_latest_completed_hyperliquid_whale_evidence_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # the whale contract's own next step is to BUILD the next paper evidence
+    # contract -- the global next required action (funding-rate evidence).
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT"
+    )
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    # whale evidence is never converted into permission and needs confirmation
+    assert "never converted" in reason
+    assert "independent confirmation" in reason
+
+
+def test_recognized_hyperliquid_whale_evidence_contract_preserves_prior_truth():
+    # Recognizing the whale contract must NOT invent a new execution bundle and
+    # must NOT disturb the latest bundle / prior intake contract.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT == (
+        "Block 117 - Crypto-D1 External Bot Evidence Intake Contract"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_hyperliquid_whale_evidence_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_hyperliquid_whale_evidence_contract()
+        == get_latest_completed_hyperliquid_whale_evidence_contract()
+    )
+    c = get_latest_completed_hyperliquid_whale_evidence_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_hyperliquid_whale_evidence_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS

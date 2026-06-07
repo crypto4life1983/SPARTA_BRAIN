@@ -134,6 +134,9 @@ from sparta_commander.strategy_factory_crypto_d1_strategy_candidate_research_rea
 from sparta_commander.strategy_factory_crypto_d1_external_bot_evidence_intake_contract import (  # noqa: E501
     EXTERNAL_BOT_EVIDENCE_INTAKE_SCHEMA_VERSION as STRATEGY_CANDIDATE_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_hyperliquid_whale_evidence_contract import (  # noqa: E501
+    WHALE_EVIDENCE_SCHEMA_VERSION as CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -149,6 +152,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_research_design_approval_contract_label as _registry_latest_research_design_approval_contract_label,  # noqa: E501
     get_latest_completed_research_readiness_contract_label as _registry_latest_research_readiness_contract_label,  # noqa: E501
     get_latest_completed_external_bot_evidence_intake_contract_label as _registry_latest_external_bot_evidence_intake_contract_label,  # noqa: E501
+    get_latest_completed_hyperliquid_whale_evidence_contract_label as _registry_latest_hyperliquid_whale_evidence_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -177,6 +181,7 @@ __all__ = [
     "LATEST_COMPLETED_RESEARCH_DESIGN_APPROVAL_CONTRACT",
     "LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT",
     "LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT",
+    "LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -254,6 +259,9 @@ LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT = (
 LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT = (
     _registry_latest_external_bot_evidence_intake_contract_label()
 )
+LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT = (
+    _registry_latest_hyperliquid_whale_evidence_contract_label()
+)
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -323,19 +331,22 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
             "Block 115 BUILT the Strategy Candidate Research Readiness Contract "
             "that records, on paper, that the research-only paper chain is "
             "internally ready -- a final readiness paper gate before the still-"
-            "blocked real_data_qa boundary -- and Block 117 has now BUILT the "
+            "blocked real_data_qa boundary -- Block 117 BUILT the "
             "External Bot Evidence Intake Contract that classifies external AI "
-            "trading bot / tool / video ideas into research-only evidence buckets "
-            "(useful_for_research, risky_requires_validation, "
-            "blocked_execution_feature, dashboard_or_brief_candidate, "
-            "ignore_or_marketing_claim), marking every execution-capable idea "
-            "blocked and never converting evidence into permission. The only next "
-            "step is to BUILD a research-only Crypto-D1 Hyperliquid Whale Evidence "
-            "Contract, still on paper, treating whale tracking as external "
-            "research evidence only; real_data_qa stays BLOCKED unless a separate, "
-            "future, human-approved boundary contract authorizes it. Nothing is "
-            "authorized to run: real strategy intake remains paused for operator "
-            "review."
+            "trading bot / tool / video ideas into research-only evidence buckets, "
+            "and Block 119 has now BUILT the Hyperliquid Whale Evidence Contract "
+            "that classifies external Hyperliquid whale-tracking ideas into "
+            "research-only evidence buckets (useful_for_research, "
+            "risky_requires_validation, blocked_execution_feature, "
+            "ignore_or_marketing_claim, needs_independent_confirmation), marking "
+            "every execution-capable whale idea blocked, requiring independent "
+            "confirmation, and never converting whale evidence into permission. The "
+            "only next step is to BUILD a research-only Crypto-D1 Funding Rate "
+            "Evidence Contract, still on paper, treating funding-rate signals as "
+            "external research evidence only; real_data_qa stays BLOCKED unless a "
+            "separate, future, human-approved boundary contract authorizes it. "
+            "Nothing is authorized to run: real strategy intake remains paused for "
+            "operator review."
         ),
     },
     {
@@ -763,12 +774,35 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_hyperliquid_whale_evidence_contract",
         "label": "Crypto-D1 Hyperliquid Whale Evidence Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 119 complete ("
+            + CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_SCHEMA_VERSION
+            + "). Read-only Hyperliquid Whale Evidence Contract only. It only "
+            "classifies external Hyperliquid whale-tracking ideas into research-"
+            "only evidence buckets (useful_for_research, risky_requires_validation, "
+            "blocked_execution_feature, ignore_or_marketing_claim, "
+            "needs_independent_confirmation), marking every execution-capable whale "
+            "idea blocked, every unverified whale movement claim risky, requiring "
+            "independent confirmation, and never converting whale evidence into "
+            "permission; it authorizes nothing and executes nothing: no Hyperliquid "
+            "API connection, wallet monitoring, account/portfolio access, exchange "
+            "connection, real data acquisition, data fetch, data inspection, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "order placement, copy/follow whale execution, whale alert automation, "
+            "Telegram trade command, paper, live, automation, or runtime/registry/"
+            "dashboard write is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_funding_rate_evidence_contract",
+        "label": "Crypto-D1 Funding Rate Evidence Contract",
         "state": STATE_NEXT,
         "reason": (
             "Next required action: " + NEXT_REQUIRED_ACTION + ". The research-"
             "only paper chain continues into the external-evidence sub-chain. "
-            "The only next step is to BUILD a research-only Crypto-D1 Hyperliquid "
-            "Whale Evidence Contract, still on paper, treating whale tracking as "
+            "The only next step is to BUILD a research-only Crypto-D1 Funding Rate "
+            "Evidence Contract, still on paper, treating funding-rate signals as "
             "external research evidence only and never as execution permission. "
             "It is a research-only build step: it acquires no data, runs no QA, "
             "baseline, or backtest, and executes nothing. real_data_qa stays "
@@ -915,6 +949,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_research_design_approval_contract": LATEST_COMPLETED_RESEARCH_DESIGN_APPROVAL_CONTRACT,  # noqa: E501
         "latest_completed_research_readiness_contract": LATEST_COMPLETED_RESEARCH_READINESS_CONTRACT,  # noqa: E501
         "latest_completed_external_bot_evidence_intake_contract": LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT,  # noqa: E501
+        "latest_completed_hyperliquid_whale_evidence_contract": LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
