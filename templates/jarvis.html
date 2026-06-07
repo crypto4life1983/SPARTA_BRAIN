@@ -511,13 +511,13 @@
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Strategy Intake</span><span class="nst">Blocked &middot; not started</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only snapshot of the Strategy Factory backbone state. The backbone build and the fake-only lane (fake dry walk, fake report renderer, fake lane closure) are <b>complete on paper</b>. The Crypto-D1 contract chain (Bundles 42&ndash;54) and the Strategy Candidate contract chain (Blocks 95&ndash;113) are also <b>complete on paper</b>, through <b>Block 113</b> (the Crypto-D1 Strategy Candidate Research Design Approval Contract). You are here: <b>Operator Review Before Real Strategy Intake</b> &mdash; current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. Next required action &mdash; <code>BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT</code>. Real strategy intake stays blocked; no live controller.</div>
+            <div class="jv-detail">Display-only snapshot of the Strategy Factory backbone state. The backbone build and the fake-only lane (fake dry walk, fake report renderer, fake lane closure) are <b>complete on paper</b>. The Crypto-D1 contract chain (Bundles 42&ndash;54) and the Strategy Candidate contract chain (Blocks 95&ndash;115) are also <b>complete on paper</b>, through <b>Block 115</b> (the Crypto-D1 Strategy Candidate Research Readiness Contract). You are here: <b>Operator Review Before Real Strategy Intake</b> &mdash; current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. Next required action &mdash; <code>AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA</code>. Real strategy intake stays blocked; no live controller.</div>
           </div>
 
           <!-- Pipeline (machine process) -->
           <div class="jv-sf-view" data-sf="pipeline" role="tabpanel">
             <h3>Pipeline &mdash; Machine Process</h3>
-            <p class="jv-sf-sub">Strategy Factory Backbone &rarr; Fake Dry Walk &rarr; Fake Report Renderer &rarr; Fake Lane Closure &rarr; Crypto-D1 Intake Reconciliation &rarr; (Crypto-D1 contract chain, Bundles 42&ndash;54, complete) &rarr; (Strategy Candidate contract chain, Blocks 95&ndash;113, complete) &rarr; Crypto-D1 Strategy Candidate Research Readiness Contract &rarr; Real Data QA &rarr; Baseline Backtest &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
+            <p class="jv-sf-sub">Strategy Factory Backbone &rarr; Fake Dry Walk &rarr; Fake Report Renderer &rarr; Fake Lane Closure &rarr; Crypto-D1 Intake Reconciliation &rarr; (Crypto-D1 contract chain, Bundles 42&ndash;54, complete) &rarr; (Strategy Candidate contract chain, Blocks 95&ndash;115, complete) &rarr; Human-Controlled Real Data QA Boundary Decision &rarr; Real Data QA &rarr; Baseline Backtest &rarr; Paper Trading Gate &rarr; Micro-Live Gate</p>
             <div class="jv-sf-lane">
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Strategy Factory Backbone</span><span class="nst">Complete</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Fake Dry Walk</span><span class="nst">Complete</span></div>
@@ -533,15 +533,16 @@
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Post-Boundary Research-Only Next-Step Contract</span><span class="nst">Bundle 48 &middot; Complete</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Research-Only Dry-Run Lane (Bundles 49&ndash;54)</span><span class="nst">Complete</span></div>
               <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Protocol &amp; Contracts (Blocks 95&ndash;111)</span><span class="nst">Complete</span></div>
-              <div class="jv-sf-node is-done" title="Latest completed paper gate: Block 113" data-debug="BLOCK_113_COMPLETE"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Design Approval Contract</span><span class="nst">Block 113 &middot; Complete</span></div>
-              <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Readiness Contract</span><span class="nst">Next &middot; to be built</span></div>
+              <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Design Approval Contract</span><span class="nst">Block 113 &middot; Complete</span></div>
+              <div class="jv-sf-node is-done" title="Latest completed paper gate: Block 115" data-debug="BLOCK_115_COMPLETE"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Readiness Contract</span><span class="nst">Block 115 &middot; Complete</span></div>
+              <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Human-Controlled Real Data QA Boundary Decision</span><span class="nst">Next &middot; awaiting human decision</span></div>
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Data QA</span><span class="nst">Blocked</span></div>
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Baseline Backtest</span><span class="nst">Blocked</span></div>
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Locked &middot; human approval required</span></div>
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked &middot; never automated</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only, trued to the Block 113 Strategy Factory state: the backbone, the fake-only lane (fake dry walk, fake report renderer, fake lane closure), the Crypto-D1 contract chain (<b>Bundles 42&ndash;54</b>), and the Strategy Candidate contract chain (<b>Blocks 95&ndash;113</b>) are all <b>complete on paper</b>, through <b>Block 113</b> (the Crypto-D1 Strategy Candidate Research Design Approval Contract). The next step is to <b>build</b> the <b>Crypto-D1 Strategy Candidate Research Readiness Contract</b> &mdash; another read-only paper template (<code>BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT</code>); it is <b>not yet built</b>. <b>Real Data QA</b> and <b>Baseline Backtest</b> remain <b>blocked</b> behind the current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. No real data has been acquired, fetched, loaded, inspected, validated, or computed; nothing real is unlocked &mdash; no data acquisition, data fetch, data inspection, QA, baseline, backtest, simulation, broker/exchange, paper/live, automation, or runtime/registry/dashboard write. The Paper Trading and Micro-Live gates are human-approved and locked; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
+            <div class="jv-detail">Display-only, trued to the Block 115 Strategy Factory state: the backbone, the fake-only lane (fake dry walk, fake report renderer, fake lane closure), the Crypto-D1 contract chain (<b>Bundles 42&ndash;54</b>), and the Strategy Candidate contract chain (<b>Blocks 95&ndash;115</b>) are all <b>complete on paper</b>, through <b>Block 115</b> (the Crypto-D1 Strategy Candidate Research Readiness Contract). The next step is a <b>human-controlled boundary decision</b> before the still-blocked real_data_qa (<code>AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA</code>) &mdash; not a build/run step, and it unlocks nothing real. <b>Real Data QA</b> and <b>Baseline Backtest</b> remain <b>blocked</b> behind the current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. No real data has been acquired, fetched, loaded, inspected, validated, or computed; nothing real is unlocked &mdash; no data acquisition, data fetch, data inspection, QA, baseline, backtest, simulation, broker/exchange, paper/live, automation, or runtime/registry/dashboard write. The Paper Trading and Micro-Live gates are human-approved and locked; JARVIS never crosses them and controls no broker or live execution. This dashboard stages, promotes, and executes nothing.</div>
           </div>
 
           <!-- Combined View -->
@@ -578,15 +579,16 @@
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Post-Boundary Research-Only Next-Step Contract</span><span class="nst">Bundle 48 &middot; Complete</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Research-Only Dry-Run Lane (Bundles 49&ndash;54)</span><span class="nst">Complete</span></div>
                 <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Protocol &amp; Contracts (Blocks 95&ndash;111)</span><span class="nst">Complete</span></div>
-                <div class="jv-sf-node is-done" title="Latest completed paper gate: Block 113" data-debug="BLOCK_113_COMPLETE"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Design Approval Contract</span><span class="nst">Block 113 &middot; Complete</span></div>
-                <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Readiness Contract</span><span class="nst">Next &middot; to be built</span></div>
+                <div class="jv-sf-node is-done"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Design Approval Contract</span><span class="nst">Block 113 &middot; Complete</span></div>
+                <div class="jv-sf-node is-done" title="Latest completed paper gate: Block 115" data-debug="BLOCK_115_COMPLETE"><span class="ndot"></span><span class="nlbl">Crypto-D1 Strategy Candidate Research Readiness Contract</span><span class="nst">Block 115 &middot; Complete</span></div>
+                <div class="jv-sf-node is-watch"><span class="ndot"></span><span class="nlbl">Human-Controlled Real Data QA Boundary Decision</span><span class="nst">Next &middot; awaiting human decision</span></div>
                 <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Data QA</span><span class="nst">Blocked</span></div>
                 <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Baseline Backtest</span><span class="nst">Blocked</span></div>
                 <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Paper Trading Gate</span><span class="nst">Locked &middot; human approval required</span></div>
                 <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Micro-Live Gate</span><span class="nst">Locked &middot; never automated</span></div>
               </div>
             </div>
-            <div class="jv-detail">Display-only alignment map. The &ldquo;You are here&rdquo; badge sits inside the active human-workflow card (Operator Review Before Real Strategy Intake); the machine lane below is complete through Block 113. This view launches nothing.</div>
+            <div class="jv-detail">Display-only alignment map. The &ldquo;You are here&rdquo; badge sits inside the active human-workflow card (Operator Review Before Real Strategy Intake); the machine lane below is complete through Block 115. This view launches nothing.</div>
           </div>
 
           <!-- Current Run -->
@@ -596,17 +598,17 @@
             <div style="margin-top:12px;">
               <div class="jv-row"><span class="k">Current gate</span><span class="v"><span class="jv-led warn"></span>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
               <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator Review Before Real Strategy Intake <span class="jv-sf-here-in">&#x25C9; You are here</span></span></div>
-              <div class="jv-row"><span class="k">Current stage</span><span class="v"><span class="jv-led warn"></span>CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED</span></div>
-              <div class="jv-row"><span class="k">Latest completed paper gate</span><span class="v"><span class="jv-led ok"></span>Block 113 &middot; Crypto-D1 Strategy Candidate Research Design Approval Contract</span></div>
+              <div class="jv-row"><span class="k">Current stage</span><span class="v"><span class="jv-led warn"></span>CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_AWAIT_HUMAN_BOUNDARY_DECISION</span></div>
+              <div class="jv-row"><span class="k">Latest completed paper gate</span><span class="v"><span class="jv-led ok"></span>Block 115 &middot; Crypto-D1 Strategy Candidate Research Readiness Contract</span></div>
               <div class="jv-row"><span class="k">Latest completed bundle</span><span class="v"><span class="jv-led ok"></span>Bundle 54 &middot; Crypto-D1 Research-Only Dry-Run Research Archive or Closure Contract</span></div>
-              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led ok"></span>Block 113 research design approval complete; research readiness contract not yet built</span></div>
+              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led ok"></span>Block 115 research readiness complete; awaiting human-controlled boundary decision before real_data_qa</span></div>
               <div class="jv-row"><span class="k">Strategy Factory Backbone</span><span class="v"><span class="jv-led ok"></span>Complete</span></div>
               <div class="jv-row"><span class="k">Fake-only lane</span><span class="v"><span class="jv-led ok"></span>Complete (fake dry walk, fake report renderer, fake lane closure)</span></div>
               <div class="jv-row"><span class="k">Crypto-D1 Intake Reconciliation</span><span class="v"><span class="jv-led ok"></span>Complete</span></div>
               <div class="jv-row"><span class="k">Crypto-D1 contract chain (Bundles 42&ndash;54)</span><span class="v"><span class="jv-led ok"></span>Complete on paper</span></div>
-              <div class="jv-row"><span class="k">Strategy Candidate contract chain (Blocks 95&ndash;113)</span><span class="v"><span class="jv-led ok"></span>Complete on paper</span></div>
-              <div class="jv-row"><span class="k">Next required action</span><span class="v"><span class="jv-led warn"></span>BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT</span></div>
-              <div class="jv-row"><span class="k">Crypto-D1 Strategy Candidate Research Readiness Contract</span><span class="v"><span class="jv-led warn"></span>Next &middot; to be built</span></div>
+              <div class="jv-row"><span class="k">Strategy Candidate contract chain (Blocks 95&ndash;115)</span><span class="v"><span class="jv-led ok"></span>Complete on paper</span></div>
+              <div class="jv-row"><span class="k">Next required action</span><span class="v"><span class="jv-led warn"></span>AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA</span></div>
+              <div class="jv-row"><span class="k">Human-Controlled Real Data QA Boundary Decision</span><span class="v"><span class="jv-led warn"></span>Next &middot; awaiting human decision</span></div>
               <div class="jv-row"><span class="k">Real Strategy Intake</span><span class="v"><span class="jv-led warn"></span>Blocked &middot; not started</span></div>
               <div class="jv-row"><span class="k">Real Data QA</span><span class="v"><span class="jv-led warn"></span>Blocked</span></div>
               <div class="jv-row"><span class="k">Baseline Backtest</span><span class="v"><span class="jv-led warn"></span>Blocked</span></div>
@@ -616,12 +618,12 @@
             <div class="jv-detail" style="margin-top:10px;">
               The Strategy Factory backbone, the fake-only lane, the Crypto-D1
               contract chain (Bundles 42&ndash;54), and the Strategy Candidate
-              contract chain (Blocks 95&ndash;113) are complete on paper, through
-              Block 113 (the Crypto-D1 Strategy Candidate Research Design Approval
+              contract chain (Blocks 95&ndash;115) are complete on paper, through
+              Block 115 (the Crypto-D1 Strategy Candidate Research Readiness
               contract). The current gate is
               PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE; the next required
-              action is BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT &mdash;
-              another read-only paper contract template, not yet built. No real data
+              action is AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA &mdash;
+              a human-controlled boundary decision, not a build/run step, that unlocks nothing real. No real data
               has been acquired, fetched, loaded, inspected, validated, or computed, and
               no real strategy intake is unlocked &mdash; no data acquisition, data
               fetch, data inspection, QA, baseline, backtest, simulation,
@@ -876,12 +878,12 @@
 
   function render(d){
     // Strategy Factory Mission Flow (DISPLAY-ONLY) is a static map rendered
-    // directly in the #pStrategyFlow markup above, trued to the Block 113
+    // directly in the #pStrategyFlow markup above, trued to the Block 115
     // backbone state: backbone + fake-only lane + Crypto-D1 contract chain
-    // (Bundles 42-54) + Strategy Candidate contract chain (Blocks 95-113)
+    // (Bundles 42-54) + Strategy Candidate contract chain (Blocks 95-115)
     // complete on paper, current gate
     // PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE, next action
-    // BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT. It carries
+    // AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA. It carries
     // no data-mf/data-cr hooks and is never re-labelled from a runtime payload.
 
     // Crypto-D1 Lane Monitor (DISPLAY-ONLY, dynamic). Renders the read-only

@@ -1,11 +1,11 @@
 """Tests for the JARVIS Strategy Factory / Mission Flow panel (additive, display-only).
 
-State target: Block 113 static sync. The panel is a read-only map of the
+State target: Block 115 static sync. The panel is a read-only map of the
 Strategy Factory backbone + fake-only lane + Crypto-D1 contract chain
-(Bundles 42-54) + Strategy Candidate contract chain (Blocks 95-113) being
+(Bundles 42-54) + Strategy Candidate contract chain (Blocks 95-115) being
 complete on paper, with the current gate
 PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE, the next required action
-BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT, and real
+AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA, and real
 strategy intake still blocked.
 
 The static panel can drift from backend truth (it is hand-synced markup the
@@ -21,9 +21,10 @@ Coverage:
 - the human workflow stages and machine pipeline stages render in order
 - the "You are here" badge is OWNED by the active card (no free-floating,
   page-centered marker) and points to the Operator Review gate
-- the machine lane is trued to Block 113 (no stale Bundle-48-as-latest anchor
+- the machine lane is trued to Block 115 (no stale Bundle-48-as-latest anchor
   and no stale research-only dry-run preview contract as the next step); the
-  Strategy Candidate Research Readiness Contract is the next machine step
+  Strategy Candidate Research Readiness Contract is COMPLETE and the
+  Human-Controlled Real Data QA Boundary Decision is the next machine step
 - the visible current stage / next action match the mission_flow_status backend
 - the stale Bundle-21/22 "Build Bundle / Operator readiness" active marker is gone
 - locked/blocked gates are preserved (Real Strategy Intake, Real Data QA,
@@ -86,9 +87,9 @@ def test_strategy_flow_has_all_six_views():
     assert block.count('class="jv-sf-view') == 6
 
 
-# --- Block 113 vocabulary present ------------------------------------------
+# --- Block 115 vocabulary present ------------------------------------------
 
-def test_block113_vocabulary_present():
+def test_block115_vocabulary_present():
     block = _strategy_flow_block(_page())
     for token in (
         # human lane
@@ -106,19 +107,21 @@ def test_block113_vocabulary_present():
         "Bundle 47",
         "Bundle 48",
         "Crypto-D1 Post-Boundary Research-Only Next-Step Contract",
-        # Strategy Candidate contract chain (Blocks 95-113) complete on paper
+        # Strategy Candidate contract chain (Blocks 95-115) complete on paper
         "Block 113",
         "Crypto-D1 Strategy Candidate Research Design Approval Contract",
-        # next machine step (research readiness contract, to be built)
+        "Block 115",
         "Crypto-D1 Strategy Candidate Research Readiness Contract",
+        # next machine step (human-controlled boundary decision)
+        "Human-Controlled Real Data QA Boundary Decision",
         "Real Data QA",
         "Baseline Backtest",
         # gate
         "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
-        # next required action (research readiness contract, to be built)
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT",
+        # next required action (await human-controlled boundary decision)
+        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA",
     ):
-        assert token in block, f"missing Block 113 token: {token}"
+        assert token in block, f"missing Block 115 token: {token}"
 
 
 def test_workflow_stages_render_in_order():
@@ -303,23 +306,32 @@ def test_no_invented_backtest_pass():
     assert "(V002 baseline)" not in block
 
 
-def test_current_run_reflects_block113_state():
+def test_current_run_reflects_block115_state():
     block = _strategy_flow_block(_page())
     for token in (
         "Current gate",
         "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
         "Operator Review Before Real Strategy Intake",
         "Current stage",
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED",
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_AWAIT_HUMAN_BOUNDARY_DECISION",
         "Latest completed paper gate",
-        "Block 113",
-        "Block 113 &middot; Crypto-D1 Strategy Candidate Research Design Approval Contract",
-        "Block 113 research design approval complete; research readiness contract not yet built",
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT",
-        "Crypto-D1 Strategy Candidate Research Readiness Contract",
+        "Block 115",
+        "Block 115 &middot; Crypto-D1 Strategy Candidate Research Readiness Contract",
+        "Block 115 research readiness complete; awaiting human-controlled boundary decision before real_data_qa",
+        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA",
+        "Human-Controlled Real Data QA Boundary Decision",
         "Crypto-D1 Intake Reconciliation",
     ):
-        assert token in block, f"missing Block 113 Current Run token: {token}"
+        assert token in block, f"missing Block 115 Current Run token: {token}"
+    # stale Block-113-as-latest Current Run framing must be gone
+    for stale in (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED",
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT",
+        "Block 113 research design approval complete; research readiness contract not yet built",
+        "Block 113 &middot; Crypto-D1 Strategy Candidate Research Design Approval Contract",
+        "Next &middot; to be built",
+    ):
+        assert stale not in block, f"stale Current Run token still present: {stale}"
     # stale Bundle-48-as-latest Current Run framing must be gone
     for stale in (
         "Bundle 48 post-boundary next-step contract complete; dry-run preview contract not yet built",
@@ -370,24 +382,31 @@ def test_no_floating_center_you_are_here_marker():
     assert '<div class="jv-sf-here">' not in block
 
 
-def test_machine_lane_truth_synced_to_block113():
+def test_machine_lane_truth_synced_to_block115():
     """The machine lane reflects the Crypto-D1 contract chain (Bundles 42-54)
-    and the Strategy Candidate contract chain (Blocks 95-113) complete on
-    paper, with Block 113 as the latest completed paper gate and the Strategy
-    Candidate Research Readiness Contract as the next machine step."""
+    and the Strategy Candidate contract chain (Blocks 95-115) complete on
+    paper, with Block 115 as the latest completed paper gate and the
+    Human-Controlled Real Data QA Boundary Decision as the next machine step."""
     block = _strategy_flow_block(_page())
     for n in ("Bundle 42", "Bundle 43", "Bundle 44",
               "Bundle 45", "Bundle 46", "Bundle 47", "Bundle 48"):
         assert n in block, f"missing completed bundle marker: {n}"
-    # Block 113 (research design approval) is complete; readiness contract is next
+    # Block 113 (research design approval) and Block 115 (research readiness)
+    # are both complete; the human boundary decision is the next machine step
     assert (
         "Crypto-D1 Strategy Candidate Research Design Approval Contract" in block
     )
     assert "Crypto-D1 Strategy Candidate Research Readiness Contract" in block
-    assert "Next &middot; to be built" in block
-    # Block 113 latest-completed status surfaced in accessible data attributes
-    assert 'data-debug="BLOCK_113_COMPLETE"' in block
-    assert 'title="Latest completed paper gate: Block 113"' in block
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    # Block 115 latest-completed status surfaced in accessible data attributes
+    assert 'data-debug="BLOCK_115_COMPLETE"' in block
+    assert 'title="Latest completed paper gate: Block 115"' in block
+    # the stale Block-113-as-latest attributes must be gone
+    assert 'data-debug="BLOCK_113_COMPLETE"' not in block
+    assert 'title="Latest completed paper gate: Block 113"' not in block
+    # the readiness contract must no longer be marked as the next step "to be built"
+    assert "Next &middot; to be built" not in block
     # the stale Bundle-48-as-latest attributes must be gone
     assert 'data-debug="BUNDLE_48_COMPLETE"' not in block
     assert 'title="Latest completed bundle: Bundle 48"' not in block
@@ -435,14 +454,14 @@ def test_visible_current_stage_matches_mission_flow_backend():
     assert current[0]["label"] == "Operator Review Before Real Strategy Intake"
 
 
-# --- Block 82: static fallback aligned to committed Bundle 48 backend truth --
+# --- static fallback aligned to committed Block 115 backend truth -----------
 
-def test_static_fallback_matches_block113_backend_truth():
+def test_static_fallback_matches_block115_backend_truth():
     """The visible static dashboard panel must match the committed backend truth
-    at Block 113: current_stage =
-    CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED, next
-    required action = BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT,
-    latest completed research-design approval = Block 113.
+    at Block 115: current_stage =
+    CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_AWAIT_HUMAN_BOUNDARY_DECISION,
+    next required action = AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA,
+    latest completed research-readiness = Block 115.
 
     Skips (rather than errors) if the backend module is not importable, e.g.
     while it is mid-edit (a mid-edit backend can raise NameError, not just
@@ -455,29 +474,32 @@ def test_static_fallback_matches_block113_backend_truth():
         pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
     status = mf.get_mission_flow_status()
     assert status["current_stage"] == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT_REQUIRED"
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
+        "AWAIT_HUMAN_BOUNDARY_DECISION"
     )
     assert status["next_required_action"] == (
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT"
+        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
     )
-    assert status["latest_completed_research_design_approval_contract"] == (
-        "Block 113 - Crypto-D1 Strategy Candidate Research Design Approval "
-        "Contract"
+    assert status["latest_completed_research_readiness_contract"] == (
+        "Block 115 - Crypto-D1 Strategy Candidate Research Readiness Contract"
     )
     block = _strategy_flow_block(_page())
-    # the visible static panel carries Block 113 as the latest completed paper gate
+    # the visible static panel carries Block 115 as the latest completed paper gate
     assert (
-        "Block 113 &middot; Crypto-D1 Strategy Candidate Research Design "
-        "Approval Contract"
+        "Block 115 &middot; Crypto-D1 Strategy Candidate Research Readiness "
+        "Contract"
     ) in block
-    assert 'data-debug="BLOCK_113_COMPLETE"' in block
-    assert 'title="Latest completed paper gate: Block 113"' in block
+    assert 'data-debug="BLOCK_115_COMPLETE"' in block
+    assert 'title="Latest completed paper gate: Block 115"' in block
     # the visible current stage + next required action match the backend exactly
     assert status["current_stage"] in block
     assert status["next_required_action"] in block
-    # the next visible machine step is the research readiness contract
-    assert "Crypto-D1 Strategy Candidate Research Readiness Contract" in block
-    assert "Next &middot; to be built" in block
+    # the next visible machine step is the human-controlled boundary decision
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    # no stale Block-113-as-latest framing leaks into the visible panel
+    assert 'data-debug="BLOCK_113_COMPLETE"' not in block
+    assert "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT" not in block
     # no stale Bundle-48-as-latest framing leaks into the visible panel
     assert 'data-debug="BUNDLE_48_COMPLETE"' not in block
     assert "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT" not in block
@@ -511,18 +533,18 @@ def test_panel_matches_live_backend_truth():
         f"{status['current_stage']!r} is not shown in the panel"
     )
 
-    # 2) the live latest-completed research-design approval gate (e.g.
-    #    "Block 113 - <name>") is shown: both its block id and contract name.
-    approval = status["latest_completed_research_design_approval_contract"]
-    block_id, _, contract_name = approval.partition(" - ")
+    # 2) the live latest-completed research-readiness gate (e.g.
+    #    "Block 115 - <name>") is shown: both its block id and contract name.
+    readiness = status["latest_completed_research_readiness_contract"]
+    block_id, _, contract_name = readiness.partition(" - ")
     assert block_id in block, (
-        f"panel is stale: latest approval gate {block_id!r} not shown"
+        f"panel is stale: latest readiness gate {block_id!r} not shown"
     )
     assert contract_name in block, (
-        f"panel is stale: latest approval contract {contract_name!r} not shown"
+        f"panel is stale: latest readiness contract {contract_name!r} not shown"
     )
 
-    # 3) the NEXT machine node carries the readiness contract the backend names
+    # 3) the NEXT machine node (the boundary decision) the backend names is shown
     next_node = next(
         s for s in mf.machine_pipeline_lane() if s["state"] == mf.STATE_NEXT
     )
