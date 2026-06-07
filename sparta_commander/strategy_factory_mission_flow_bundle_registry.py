@@ -178,6 +178,12 @@ from sparta_commander.strategy_factory_crypto_d1_external_bot_evidence_intake_co
 from sparta_commander.strategy_factory_crypto_d1_hyperliquid_whale_evidence_contract import (  # noqa: E501
     WHALE_EVIDENCE_SCHEMA_VERSION as _HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 121 funding-rate-evidence contract module imports ONLY __future__
+# and typing -- it does not import this registry -- so reading its stable schema
+# constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_funding_rate_evidence_contract import (  # noqa: E501
+    FUNDING_RATE_EVIDENCE_SCHEMA_VERSION as _FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -238,6 +244,9 @@ __all__ = [
     "LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT",
     "get_latest_completed_hyperliquid_whale_evidence_contract",
     "get_latest_completed_hyperliquid_whale_evidence_contract_label",
+    "LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT",
+    "get_latest_completed_funding_rate_evidence_contract",
+    "get_latest_completed_funding_rate_evidence_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -271,18 +280,21 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # design approval contract* is Block 113.
 # Block 115 BUILT the research-only Strategy Candidate Research *Readiness*
 # Contract (a final readiness paper gate), Block 117 BUILT the research-only
-# External Bot Evidence *Intake* Contract, and Block 119 has now BUILT the
-# research-only Hyperliquid Whale *Evidence* Contract that classifies external
-# Hyperliquid whale-tracking ideas into research-only evidence buckets
+# External Bot Evidence *Intake* Contract, Block 119 BUILT the research-only
+# Hyperliquid Whale *Evidence* Contract, and Block 121 has now BUILT the
+# research-only Funding Rate *Evidence* Contract that classifies external
+# funding-rate scanner ideas into research-only evidence buckets
 # (useful_for_research, risky_requires_validation, blocked_execution_feature,
 # ignore_or_marketing_claim, needs_independent_confirmation). Recognizing the
-# whale-evidence contract unlocks nothing real: the only next step is the next
-# research-only evidence paper contract -- BUILD a Crypto-D1 Funding Rate
-# *Evidence* Contract, still on paper, treating funding-rate signals as external
-# research evidence only and never as execution permission. No Hyperliquid API,
-# wallet monitoring, account/exchange access, real acquisition, QA, baseline,
-# backtest, paper/live, broker/exchange, or automation is unlocked.
-CURRENT_STAGE = "CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_REQUIRED"
+# funding-rate-evidence contract unlocks nothing real: the only next step is the
+# next research-only evidence paper contract -- BUILD a Crypto-D1 Daily Alpha
+# Brief *Research* Contract, still on paper, treating funding-rate signals as
+# external research evidence only and never as execution permission or "free
+# money". No exchange API, futures/perps account access, position opening,
+# hedging, carry-trade/arbitrage execution, live funding monitor, real
+# acquisition, QA, baseline, backtest, paper/live, broker/exchange, or
+# automation is unlocked.
+CURRENT_STAGE = "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -484,15 +496,34 @@ _RECOGNIZED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_LABEL = (
 LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT = (
     _RECOGNIZED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_LABEL
 )
+# Frozen historical next step for the Block 119 record: BUILD the research-only
+# Funding Rate *Evidence* Contract, which Block 121 has since completed on paper.
+# Held as a fixed local so the global NEXT_REQUIRED_ACTION can advance without
+# rewriting the Block 119 record's historical next step.
+_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_NEXT_ACTION = (
+    "BUILD_CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT"
+)
+# The single recognized latest research-only Funding Rate *Evidence* contract
+# (Block 121). Building the contract is a research-only planning step and creates
+# no execution bundle. It classifies external funding-rate scanner ideas into
+# research-only evidence buckets; it authorizes no real-world action, connects to
+# no exchange API / futures account / exchange, and unlocks no downstream gate.
+# The label intentionally does not name a trading stage.
+_RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL = (
+    "Block 121 - Crypto-D1 Funding Rate Evidence Contract"
+)
+LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT = (
+    _RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL
+)
 # Next required action: the research-only paper chain now continues into the
-# external-evidence sub-chain. With the Block 119 whale-evidence contract
+# external-evidence sub-chain. With the Block 121 funding-rate-evidence contract
 # complete, the only next step is the next research-only evidence paper contract
-# -- BUILD a Crypto-D1 Funding Rate *Evidence* Contract, treating funding-rate
-# signals as external research evidence only and never as execution permission.
-# It is a research-only build step, authorizes nothing, and unlocks nothing real
-# -- real_data_qa stays BLOCKED unless a separate, future, human-approved
-# boundary contract is built.
-NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT"
+# -- BUILD a Crypto-D1 Daily Alpha Brief *Research* Contract, treating
+# funding-rate signals as external research evidence only and never as execution
+# permission. It is a research-only build step, authorizes nothing, and unlocks
+# nothing real -- real_data_qa stays BLOCKED unless a separate, future,
+# human-approved boundary contract is built.
+NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -1949,7 +1980,7 @@ def _recognized_hyperliquid_whale_evidence_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": _HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_NEXT_ACTION,
         "reason": (
             "Read-only recognition of the Crypto-D1 Hyperliquid Whale Evidence "
             "Contract, BUILT in Block 119. It records, on paper, that the "
@@ -1985,6 +2016,102 @@ def get_latest_completed_hyperliquid_whale_evidence_contract_label() -> str:
     """Human label for the latest recognized research-only hyperliquid-whale-
     evidence contract."""
     return _RECOGNIZED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_LABEL
+
+
+def _recognized_funding_rate_evidence_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-funding-rate-evidence-
+    contract record.
+
+    Recognizing the funding-rate-evidence contract records, on paper, that the
+    Block 121 Crypto-D1 Funding Rate Evidence Contract is COMPLETE. It is NOT an
+    execution bundle: it authorizes nothing, executes nothing, and unlocks no
+    real capability. It records only that the research-only paper chain now has a
+    contract that classifies external funding-rate scanner ideas (funding-rate
+    scanning, positive/negative funding claims, basis/spread observations,
+    carry-trade execution, funding arbitrage execution, exchange API connection,
+    futures/perps account access, position opening, hedging logic, live funding
+    monitor, guaranteed-yield / risk-free-funding marketing) into research-only
+    evidence buckets -- useful_for_research, risky_requires_validation,
+    blocked_execution_feature, ignore_or_marketing_claim,
+    needs_independent_confirmation. Every execution-capable idea is marked
+    blocked_execution_feature, every unverified funding-rate claim is marked
+    risky_requires_validation, and funding-rate evidence is never converted into
+    permission and always requires independent confirmation before later use. It
+    connects to no exchange API, accesses no futures/perps account, opens no
+    position, runs no hedging/carry/arbitrage execution, runs no live funding
+    monitor, connects to no exchange, acquires/fetches/inspects/loads no data,
+    and runs no QA, baseline, backtest, simulation, paper/live, broker/exchange,
+    or automation. A fresh record (with fresh lists) is returned every call for
+    mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "funding_rate_evidence_contract_id": (
+            "CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Funding Rate Evidence Contract"
+        ),
+        "label": _RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_funding_rate_evidence_contract"
+        ),
+        "schema_constant": "FUNDING_RATE_EVIDENCE_SCHEMA_VERSION",
+        "schema_version": _FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION,
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Funding Rate Evidence "
+            "Contract, BUILT in Block 121. It records, on paper, that the "
+            "research-only contract classifying external funding-rate scanner "
+            "ideas into research-only evidence buckets now exists; it authorizes "
+            "nothing and executes nothing: no exchange API connection, futures/"
+            "perps account access, position opening, hedging, carry-trade "
+            "execution, arbitrage execution, live funding monitor, real data "
+            "acquisition, data fetch, data inspection, dataset loading, QA, "
+            "baseline, backtest, simulation, trade signal, order placement, "
+            "Telegram trade command, paper/live, automation, or runtime/registry/"
+            "dashboard write is unlocked. Every execution-capable funding idea is "
+            "marked blocked_execution_feature, every unverified funding-rate "
+            "claim is marked risky_requires_validation, and funding-rate evidence "
+            "always requires independent confirmation before it can be used in "
+            "any later research protocol; evidence is never converted into "
+            "permission. The only next step is to BUILD a research-only Crypto-D1 "
+            "Daily Alpha Brief Research Contract, still on paper, treating "
+            "funding-rate signals as external research evidence only and never as "
+            "execution permission."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_funding_rate_evidence_contract() -> dict[str, Any]:
+    """The latest recognized research-only funding-rate-evidence-contract
+    record."""
+    return _recognized_funding_rate_evidence_contract()
+
+
+def get_latest_completed_funding_rate_evidence_contract_label() -> str:
+    """Human label for the latest recognized research-only funding-rate-
+    evidence contract."""
+    return _RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:

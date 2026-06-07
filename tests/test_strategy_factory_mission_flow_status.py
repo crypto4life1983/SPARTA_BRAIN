@@ -65,6 +65,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     STRATEGY_CANDIDATE_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,
     CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT,
+    CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -110,6 +112,7 @@ def test_status_schema_is_stable():
         "latest_completed_research_readiness_contract",
         "latest_completed_external_bot_evidence_intake_contract",
         "latest_completed_hyperliquid_whale_evidence_contract",
+        "latest_completed_funding_rate_evidence_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -296,15 +299,15 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_build_funding_rate_evidence_contract():
+def test_next_required_action_is_build_daily_alpha_brief_research_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT"
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
     )
     # the readiness paper chain continues into the research-only external-evidence
-    # sub-chain; the only next step is to BUILD another paper evidence contract --
-    # it never authorizes real work and treats funding-rate signals as evidence.
+    # sub-chain; the only next step is to BUILD another paper research contract --
+    # it never authorizes real work and treats daily-alpha-brief signals as evidence.
     assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "FUNDING_RATE_EVIDENCE" in NEXT_REQUIRED_ACTION
+    assert "DAILY_ALPHA_BRIEF" in NEXT_REQUIRED_ACTION
     assert "CONTRACT" in NEXT_REQUIRED_ACTION
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
@@ -312,10 +315,10 @@ def test_next_required_action_is_build_funding_rate_evidence_contract():
         assert banned not in NEXT_REQUIRED_ACTION, banned
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
-    # the next evidence-contract build still unlocks nothing real
+    # the next research-contract build still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_funding_rate_evidence_contract"]
+    nxt = pipe["crypto_d1_daily_alpha_brief_research_contract"]
     assert nxt["state"] == STATE_NEXT
 
 
@@ -490,14 +493,30 @@ def test_hyperliquid_whale_evidence_contract_now_complete():
     assert "never converting whale evidence into" in reason
 
 
-def test_funding_rate_evidence_contract_is_next():
+def test_funding_rate_evidence_contract_now_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["crypto_d1_funding_rate_evidence_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 121" in row["reason"]
+    assert CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # every execution-capable funding idea is blocked; evidence is never permission
+    assert "blocked_execution_feature" in reason
+    assert "needs_independent_confirmation" in reason
+    assert "never converting funding-rate" in reason
+
+
+def test_daily_alpha_brief_research_contract_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_daily_alpha_brief_research_contract"]
     assert row["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in row["reason"]
     reason = row["reason"].lower()
     assert "executes nothing" in reason
-    # funding-rate signals are treated as external research evidence only
+    # daily-alpha-brief signals are treated as external research evidence only
     assert "evidence only" in reason
     assert "real_data_qa stays" in reason
 
@@ -684,9 +703,22 @@ def test_latest_completed_hyperliquid_whale_evidence_contract_is_block_119():
     assert s["executes"] is False
 
 
-def test_current_stage_is_hyperliquid_whale_evidence_complete():
-    assert CURRENT_STAGE == "CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_REQUIRED"
-    assert "FUNDING_RATE_EVIDENCE" in CURRENT_STAGE
+def test_latest_completed_funding_rate_evidence_contract_is_block_121():
+    assert LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT == (
+        "Block 121 - Crypto-D1 Funding Rate Evidence Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_funding_rate_evidence_contract"] == (
+        LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT
+    )
+    # the recognized funding-rate-evidence contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+
+
+def test_current_stage_is_funding_rate_evidence_complete():
+    assert CURRENT_STAGE == "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+    assert "DAILY_ALPHA_BRIEF" in CURRENT_STAGE
     assert "CONTRACT_REQUIRED" in CURRENT_STAGE
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
