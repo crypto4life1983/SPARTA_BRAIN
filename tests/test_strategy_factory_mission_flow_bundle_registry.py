@@ -55,6 +55,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,
+    LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -97,6 +98,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_daily_alpha_brief_review_contract_label,
     get_latest_completed_daily_alpha_brief_approval_contract,
     get_latest_completed_daily_alpha_brief_approval_contract_label,
+    get_latest_completed_cohort_independence_contract,
+    get_latest_completed_cohort_independence_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -2558,6 +2561,109 @@ def test_recognized_daily_alpha_brief_approval_contract_deterministic_isolated()
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_daily_alpha_brief_approval_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5z: recognized research-only cohort-independence (Block 132) -------------
+
+def test_latest_completed_cohort_independence_contract_label():
+    assert LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT == (
+        "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
+    )
+    assert (
+        get_latest_completed_cohort_independence_contract_label()
+        == LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_cohort_independence_contract():
+    c = get_latest_completed_cohort_independence_contract()
+    assert c["cohort_independence_contract_id"] == (
+        "CRYPTO_D1_COHORT_INDEPENDENCE_CORRELATION_PENALTY_CONTRACT"
+    )
+    assert c["name"] == (
+        "Crypto-D1 Cohort Independence / Correlation Penalty Contract"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_cohort_independence_correlation_penalty_contract"
+    )
+    assert c["schema_constant"] == "COHORT_INDEPENDENCE_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_cohort_independence_correlation_penalty_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_cohort_independence_contract_research_only():
+    c = get_latest_completed_cohort_independence_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_cohort_independence_contract_authorizes_nothing():
+    c = get_latest_completed_cohort_independence_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # the cohort-independence contract is the latest recognized contract, but
+    # registering it is purely additive: its own next step IS the unchanged
+    # global next required action -- the human-controlled real-data QA boundary
+    # decision (NOT a build step).
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "never converts evidence into permission" in reason
+    assert "purely additive latest-completed metadata" in reason
+
+
+def test_recognized_cohort_independence_preserves_prior_truth():
+    # Registering Block 132 must NOT invent a new execution bundle, must NOT
+    # advance the boundary stage, and must NOT disturb the latest bundle or any
+    # prior recognized contract (e.g. the Block 129 approval contract).
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT == (
+        "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
+    )
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_cohort_independence_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_cohort_independence_contract()
+        == get_latest_completed_cohort_independence_contract()
+    )
+    c = get_latest_completed_cohort_independence_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_cohort_independence_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS

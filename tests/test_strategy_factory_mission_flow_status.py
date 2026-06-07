@@ -75,6 +75,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,
     CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,
+    CRYPTO_D1_COHORT_INDEPENDENCE_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -125,6 +127,7 @@ def test_status_schema_is_stable():
         "latest_completed_daily_alpha_brief_research_contract",
         "latest_completed_daily_alpha_brief_review_contract",
         "latest_completed_daily_alpha_brief_approval_contract",
+        "latest_completed_cohort_independence_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -588,6 +591,22 @@ def test_daily_alpha_brief_approval_contract_now_complete():
     assert "never what to trade" in reason
 
 
+def test_cohort_independence_contract_now_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_cohort_independence_correlation_penalty_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 132" in row["reason"]
+    assert CRYPTO_D1_COHORT_INDEPENDENCE_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # a research-only evidence/scoring support contract; it scores, never trades
+    assert "never what to trade" in reason
+    # recognizing it is purely additive -- it does not advance the boundary stage
+    assert "purely additive latest-completed metadata" in reason
+
+
 def test_human_controlled_real_data_qa_boundary_decision_is_next():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["human_controlled_real_data_qa_boundary_decision"]
@@ -850,6 +869,30 @@ def test_latest_completed_daily_alpha_brief_approval_contract_is_block_129():
     # the Block 127 review contract completion is preserved alongside it
     assert s["latest_completed_daily_alpha_brief_review_contract"] == (
         "Block 127 - Crypto-D1 Daily Alpha Brief Review Contract"
+    )
+
+
+def test_latest_completed_cohort_independence_contract_is_block_132():
+    assert LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT == (
+        "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_cohort_independence_contract"] == (
+        LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT
+    )
+    # the recognized cohort-independence contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    # registering Block 132 does not advance the boundary stage or next action
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the Block 129 approval contract completion is preserved alongside it
+    assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
+        "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
     )
 
 
