@@ -184,6 +184,12 @@ from sparta_commander.strategy_factory_crypto_d1_hyperliquid_whale_evidence_cont
 from sparta_commander.strategy_factory_crypto_d1_funding_rate_evidence_contract import (  # noqa: E501
     FUNDING_RATE_EVIDENCE_SCHEMA_VERSION as _FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 123 bitcoin-cycle-timing-evidence contract module imports ONLY
+# __future__, datetime, and typing -- it does not import this registry -- so
+# reading its stable schema constant at module top is cycle-safe.
+from sparta_commander.strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract import (  # noqa: E501
+    BITCOIN_CYCLE_TIMING_EVIDENCE_SCHEMA_VERSION as _BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -247,6 +253,9 @@ __all__ = [
     "LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT",
     "get_latest_completed_funding_rate_evidence_contract",
     "get_latest_completed_funding_rate_evidence_contract_label",
+    "LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT",
+    "get_latest_completed_bitcoin_cycle_timing_evidence_contract",
+    "get_latest_completed_bitcoin_cycle_timing_evidence_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -281,19 +290,21 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # Block 115 BUILT the research-only Strategy Candidate Research *Readiness*
 # Contract (a final readiness paper gate), Block 117 BUILT the research-only
 # External Bot Evidence *Intake* Contract, Block 119 BUILT the research-only
-# Hyperliquid Whale *Evidence* Contract, and Block 121 has now BUILT the
-# research-only Funding Rate *Evidence* Contract that classifies external
-# funding-rate scanner ideas into research-only evidence buckets
-# (useful_for_research, risky_requires_validation, blocked_execution_feature,
-# ignore_or_marketing_claim, needs_independent_confirmation). Recognizing the
-# funding-rate-evidence contract unlocks nothing real: the only next step is the
-# next research-only evidence paper contract -- BUILD a Crypto-D1 Daily Alpha
-# Brief *Research* Contract, still on paper, treating funding-rate signals as
-# external research evidence only and never as execution permission or "free
-# money". No exchange API, futures/perps account access, position opening,
-# hedging, carry-trade/arbitrage execution, live funding monitor, real
-# acquisition, QA, baseline, backtest, paper/live, broker/exchange, or
-# automation is unlocked.
+# Hyperliquid Whale *Evidence* Contract, Block 121 BUILT the research-only
+# Funding Rate *Evidence* Contract, and Block 123 has now BUILT the research-only
+# Bitcoin Cycle Timing *Evidence* Contract -- a higher-level macro timing filter
+# inserted before the Daily Alpha Brief contract -- that converts the BTC
+# 364-day / 1064-day cycle idea into research-only timing evidence (an
+# early/active/late/expired cycle-bottom watch zone and a
+# caution/accumulation-watch/recovery-watch/no-signal evidence stance), under
+# the core rule that cycle timing tells us when to pay attention, not when to
+# buy. Recognizing the bitcoin-cycle-timing-evidence contract unlocks nothing
+# real: the only next step is still the next research-only evidence paper
+# contract -- BUILD a Crypto-D1 Daily Alpha Brief *Research* Contract, still on
+# paper, treating cycle-timing signals as external research evidence only and
+# never as execution permission or a buy instruction. No BTC data fetch, API
+# call, dataset inspection, real acquisition, QA, baseline, backtest, paper/
+# live, broker/exchange, or automation is unlocked.
 CURRENT_STAGE = "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
@@ -515,14 +526,36 @@ _RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL = (
 LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT = (
     _RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL
 )
-# Next required action: the research-only paper chain now continues into the
-# external-evidence sub-chain. With the Block 121 funding-rate-evidence contract
-# complete, the only next step is the next research-only evidence paper contract
-# -- BUILD a Crypto-D1 Daily Alpha Brief *Research* Contract, treating
-# funding-rate signals as external research evidence only and never as execution
-# permission. It is a research-only build step, authorizes nothing, and unlocks
-# nothing real -- real_data_qa stays BLOCKED unless a separate, future,
-# human-approved boundary contract is built.
+# Frozen historical next step for the Block 121 record: BUILD the research-only
+# Bitcoin Cycle Timing *Evidence* Contract, which Block 123 has since completed
+# on paper. Held as a fixed local so the funding-rate record's historical next
+# step is not rewritten when a later evidence contract is inserted before the
+# Daily Alpha Brief contract.
+_FUNDING_RATE_EVIDENCE_CONTRACT_NEXT_ACTION = (
+    "BUILD_CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT"
+)
+# The single recognized latest research-only Bitcoin Cycle Timing *Evidence*
+# contract (Block 123), a higher-level macro timing filter inserted before the
+# Daily Alpha Brief contract. Building the contract is a research-only planning
+# step and creates no execution bundle. It converts the BTC 364-day / 1064-day
+# cycle idea into research-only timing evidence; it authorizes no real-world
+# action, fetches no BTC data, calls no API, inspects no dataset, and unlocks no
+# downstream gate. The label intentionally does not name a trading stage.
+_RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL = (
+    "Block 123 - Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+)
+LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT = (
+    _RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL
+)
+# Next required action: the research-only paper chain continues. With the Block
+# 123 bitcoin-cycle-timing-evidence contract complete (inserted as a macro
+# timing filter before the Daily Alpha Brief contract), the only next step is
+# still the next research-only evidence paper contract -- BUILD a Crypto-D1
+# Daily Alpha Brief *Research* Contract, treating cycle-timing signals as
+# external research evidence only and never as a buy instruction. It is a
+# research-only build step, authorizes nothing, and unlocks nothing real --
+# real_data_qa stays BLOCKED unless a separate, future, human-approved boundary
+# contract is built.
 NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
@@ -2075,7 +2108,7 @@ def _recognized_funding_rate_evidence_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": _FUNDING_RATE_EVIDENCE_CONTRACT_NEXT_ACTION,
         "reason": (
             "Read-only recognition of the Crypto-D1 Funding Rate Evidence "
             "Contract, BUILT in Block 121. It records, on paper, that the "
@@ -2093,8 +2126,8 @@ def _recognized_funding_rate_evidence_contract() -> dict[str, Any]:
             "always requires independent confirmation before it can be used in "
             "any later research protocol; evidence is never converted into "
             "permission. The only next step is to BUILD a research-only Crypto-D1 "
-            "Daily Alpha Brief Research Contract, still on paper, treating "
-            "funding-rate signals as external research evidence only and never as "
+            "Bitcoin Cycle Timing Evidence Contract, still on paper, treating "
+            "cycle-timing signals as external research evidence only and never as "
             "execution permission."
         ),
     }
@@ -2112,6 +2145,103 @@ def get_latest_completed_funding_rate_evidence_contract_label() -> str:
     """Human label for the latest recognized research-only funding-rate-
     evidence contract."""
     return _RECOGNIZED_FUNDING_RATE_EVIDENCE_CONTRACT_LABEL
+
+
+def _recognized_bitcoin_cycle_timing_evidence_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-bitcoin-cycle-timing-
+    evidence-contract record.
+
+    Recognizing the bitcoin-cycle-timing-evidence contract records, on paper,
+    that the Block 123 Crypto-D1 Bitcoin Cycle Timing Evidence Contract is
+    COMPLETE. It is a higher-level macro timing filter inserted before the Daily
+    Alpha Brief contract. It is NOT an execution bundle: it authorizes nothing,
+    executes nothing, and unlocks no real capability. It records only that the
+    research-only paper chain now has a contract that converts the BTC
+    364-day / 1064-day cycle idea into research-only timing evidence -- days
+    since the latest ATH, distance to the ~364-day cycle-bottom window,
+    previous ATH-to-bottom and bottom-to-next-ATH duration comparisons, an
+    early/active/late/expired cycle-bottom watch zone, an optional
+    drawdown-from-ATH, and a caution/accumulation-watch/recovery-watch/no-signal
+    evidence stance -- under the core rule that cycle timing tells us when to pay
+    attention, not when to buy. It fetches no BTC data, calls no API, inspects no
+    dataset, acquires/loads no data, and runs no QA, baseline, backtest,
+    simulation, paper/live, broker/exchange, or automation; every number is
+    computed from static input fields only. A fresh record (with fresh lists) is
+    returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "bitcoin_cycle_timing_evidence_contract_id": (
+            "CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+        ),
+        "label": _RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract"
+        ),
+        "schema_constant": "BITCOIN_CYCLE_TIMING_EVIDENCE_SCHEMA_VERSION",
+        "schema_version": (
+            _BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Bitcoin Cycle Timing "
+            "Evidence Contract, BUILT in Block 123 as a higher-level macro "
+            "timing filter inserted before the Daily Alpha Brief contract. It "
+            "records, on paper, that the research-only contract converting the "
+            "BTC 364-day / 1064-day cycle idea into research-only timing "
+            "evidence (an early/active/late/expired cycle-bottom watch zone and "
+            "a caution/accumulation-watch/recovery-watch/no-signal evidence "
+            "stance) now exists; it authorizes nothing and executes nothing: no "
+            "BTC data fetch, API call, dataset inspection, real data "
+            "acquisition, dataset loading, QA, baseline, backtest, simulation, "
+            "trade signal, order placement, Telegram trade command, paper/live, "
+            "automation, or runtime/registry/dashboard write is unlocked. Under "
+            "the core rule that cycle timing tells us when to pay attention, not "
+            "when to buy, every timing signal is attention-only evidence that "
+            "always requires independent confirmation before it can be used in "
+            "any later research protocol; evidence is never converted into "
+            "permission. The only next step is to BUILD a research-only Crypto-D1 "
+            "Daily Alpha Brief Research Contract, still on paper, treating "
+            "cycle-timing signals as external research evidence only and never as "
+            "execution permission."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_bitcoin_cycle_timing_evidence_contract() -> dict[
+    str, Any
+]:
+    """The latest recognized research-only bitcoin-cycle-timing-evidence-
+    contract record."""
+    return _recognized_bitcoin_cycle_timing_evidence_contract()
+
+
+def get_latest_completed_bitcoin_cycle_timing_evidence_contract_label() -> str:
+    """Human label for the latest recognized research-only bitcoin-cycle-timing-
+    evidence contract."""
+    return _RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:

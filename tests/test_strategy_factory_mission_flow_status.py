@@ -67,6 +67,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     CRYPTO_D1_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT,
     CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,
+    CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -113,6 +115,7 @@ def test_status_schema_is_stable():
         "latest_completed_external_bot_evidence_intake_contract",
         "latest_completed_hyperliquid_whale_evidence_contract",
         "latest_completed_funding_rate_evidence_contract",
+        "latest_completed_bitcoin_cycle_timing_evidence_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -509,6 +512,22 @@ def test_funding_rate_evidence_contract_now_complete():
     assert "never converting funding-rate" in reason
 
 
+def test_bitcoin_cycle_timing_evidence_contract_now_complete():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_bitcoin_cycle_timing_evidence_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 123" in row["reason"]
+    assert CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # core rule: cycle timing is attention-only evidence, never a buy instruction
+    assert "pay attention, not when to buy" in reason
+    assert "independent confirmation" in reason
+    assert "never converts timing evidence into permission" in reason
+
+
 def test_daily_alpha_brief_research_contract_is_next():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["crypto_d1_daily_alpha_brief_research_contract"]
@@ -714,6 +733,27 @@ def test_latest_completed_funding_rate_evidence_contract_is_block_121():
     # the recognized funding-rate-evidence contract unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
+
+
+def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
+    assert LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT == (
+        "Block 123 - Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_bitcoin_cycle_timing_evidence_contract"] == (
+        LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT
+    )
+    # the recognized bitcoin-cycle-timing-evidence contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    # inserting Block 123 did NOT advance the global stage past the daily alpha
+    # brief: it remains the next required contract.
+    assert s["current_stage"] == (
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+    )
+    assert s["next_required_action"] == (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+    )
 
 
 def test_current_stage_is_funding_rate_evidence_complete():

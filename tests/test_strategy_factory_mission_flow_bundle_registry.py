@@ -51,6 +51,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT,
     LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,
     LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT,
+    LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -85,6 +86,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_hyperliquid_whale_evidence_contract_label,
     get_latest_completed_funding_rate_evidence_contract,
     get_latest_completed_funding_rate_evidence_contract_label,
+    get_latest_completed_bitcoin_cycle_timing_evidence_contract,
+    get_latest_completed_bitcoin_cycle_timing_evidence_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -2007,11 +2010,15 @@ def test_recognized_funding_rate_evidence_contract_authorizes_nothing():
     c = get_latest_completed_funding_rate_evidence_contract()
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
-    # the funding-rate contract's own next step is to BUILD the next paper
-    # research contract -- the global next required action (daily alpha brief).
+    # the funding-rate contract's own next step is now pinned to BUILD the
+    # Bitcoin cycle timing evidence contract, which was inserted after it as a
+    # macro timing filter before the global next required action (daily alpha
+    # brief). The funding-rate record therefore no longer points at the global
+    # next required action.
     assert c["next_required_action"] == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+        "BUILD_CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT"
     )
+    assert c["next_required_action"] != NEXT_REQUIRED_ACTION
     reason = c["reason"].lower()
     assert "authorizes nothing" in reason
     assert "executes nothing" in reason
@@ -2053,6 +2060,129 @@ def test_recognized_funding_rate_evidence_contract_deterministic_isolated():
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_funding_rate_evidence_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5p: recognized research-only bitcoin-cycle-timing-evidence (Block 123) ----
+
+def test_latest_completed_bitcoin_cycle_timing_evidence_contract_label():
+    assert LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT == (
+        "Block 123 - Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+    )
+    assert (
+        get_latest_completed_bitcoin_cycle_timing_evidence_contract_label()
+        == LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_bitcoin_cycle_timing_evidence_contract():
+    c = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    assert c["bitcoin_cycle_timing_evidence_contract_id"] == (
+        "CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT"
+    )
+    assert c["name"] == "Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract"
+    )
+    assert c["schema_constant"] == (
+        "BITCOIN_CYCLE_TIMING_EVIDENCE_SCHEMA_VERSION"
+    )
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_bitcoin_cycle_timing_evidence_contract_research_only():
+    c = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_bitcoin_cycle_timing_evidence_contract_authorizes_nothing():
+    c = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # the inserted Bitcoin cycle timing contract's own next step IS the global
+    # next required action: BUILD the daily alpha brief research contract. The
+    # insertion did NOT advance the global stage past the daily alpha brief.
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    # cycle-timing evidence is never converted into permission and needs
+    # independent confirmation
+    assert "never converted" in reason
+    assert "independent confirmation" in reason
+    # core rule is preserved on the record's reason
+    assert "pay attention, not when to buy" in reason
+
+
+def test_recognized_bitcoin_cycle_timing_evidence_contract_preserves_prior_truth():
+    # Inserting the Bitcoin cycle timing contract must NOT invent a new
+    # execution bundle and must NOT disturb the latest bundle / prior contracts.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT == (
+        "Block 121 - Crypto-D1 Funding Rate Evidence Contract"
+    )
+    assert LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT == (
+        "Block 119 - Crypto-D1 Hyperliquid Whale Evidence Contract"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_global_stage_unchanged_after_bitcoin_cycle_timing_insertion():
+    # Inserting Block 123 is an insertion-without-advancing: the global stage
+    # and next required action remain at the daily alpha brief build.
+    assert get_current_stage() == (
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+    )
+    assert get_next_required_action() == (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+    )
+
+
+def test_recognized_funding_rate_next_action_pinned_to_bitcoin_cycle_timing():
+    # After Block 123 was inserted after the funding-rate contract, the
+    # funding-rate record keeps a frozen pin to its real successor: BUILD the
+    # Bitcoin cycle timing evidence contract -- NOT the global next action.
+    c = get_latest_completed_funding_rate_evidence_contract()
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT"
+    )
+    assert c["next_required_action"] != NEXT_REQUIRED_ACTION
+
+
+def test_recognized_bitcoin_cycle_timing_evidence_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+        == get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    )
+    c = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS

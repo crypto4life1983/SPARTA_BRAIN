@@ -140,6 +140,9 @@ from sparta_commander.strategy_factory_crypto_d1_hyperliquid_whale_evidence_cont
 from sparta_commander.strategy_factory_crypto_d1_funding_rate_evidence_contract import (  # noqa: E501
     FUNDING_RATE_EVIDENCE_SCHEMA_VERSION as CRYPTO_D1_FUNDING_RATE_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract import (  # noqa: E501
+    BITCOIN_CYCLE_TIMING_EVIDENCE_SCHEMA_VERSION as CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -157,6 +160,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_external_bot_evidence_intake_contract_label as _registry_latest_external_bot_evidence_intake_contract_label,  # noqa: E501
     get_latest_completed_hyperliquid_whale_evidence_contract_label as _registry_latest_hyperliquid_whale_evidence_contract_label,  # noqa: E501
     get_latest_completed_funding_rate_evidence_contract_label as _registry_latest_funding_rate_evidence_contract_label,  # noqa: E501
+    get_latest_completed_bitcoin_cycle_timing_evidence_contract_label as _registry_latest_bitcoin_cycle_timing_evidence_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -187,6 +191,7 @@ __all__ = [
     "LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT",
     "LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT",
     "LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT",
+    "LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -269,6 +274,9 @@ LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT = (
 )
 LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT = (
     _registry_latest_funding_rate_evidence_contract_label()
+)
+LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT = (
+    _registry_latest_bitcoin_cycle_timing_evidence_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -829,6 +837,28 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "crypto_d1_bitcoin_cycle_timing_evidence_contract",
+        "label": "Crypto-D1 Bitcoin Cycle Timing Evidence Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 123 complete ("
+            + CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION
+            + "). Read-only Bitcoin Cycle Timing Evidence Contract only -- a "
+            "higher-level macro timing filter inserted before the Daily Alpha "
+            "Brief contract. It only converts the BTC 364-day / 1064-day cycle "
+            "idea into research-only timing evidence (an early/active/late/expired "
+            "cycle-bottom watch zone and a caution/accumulation-watch/recovery-"
+            "watch/no-signal evidence stance), under the core rule that cycle "
+            "timing tells us when to pay attention, not when to buy; it requires "
+            "independent confirmation and never converts timing evidence into "
+            "permission or a buy instruction; it authorizes nothing and executes "
+            "nothing: no BTC data fetch, API call, dataset inspection, real data "
+            "acquisition, dataset loading, QA, baseline, backtest, simulation, "
+            "trade signal, order placement, Telegram trade command, paper, live, "
+            "automation, or runtime/registry/dashboard write is unlocked."
+        ),
+    },
+    {
         "id": "crypto_d1_daily_alpha_brief_research_contract",
         "label": "Crypto-D1 Daily Alpha Brief Research Contract",
         "state": STATE_NEXT,
@@ -836,7 +866,7 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
             "Next required action: " + NEXT_REQUIRED_ACTION + ". The research-"
             "only paper chain continues into the external-evidence sub-chain. "
             "The only next step is to BUILD a research-only Crypto-D1 Daily Alpha "
-            "Brief Research Contract, still on paper, treating funding-rate signals "
+            "Brief Research Contract, still on paper, treating cycle-timing signals "
             "as external research evidence only and never as execution permission. "
             "It is a research-only build step: it acquires no data, runs no QA, "
             "baseline, or backtest, and executes nothing. real_data_qa stays "
@@ -985,6 +1015,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_external_bot_evidence_intake_contract": LATEST_COMPLETED_EXTERNAL_BOT_EVIDENCE_INTAKE_CONTRACT,  # noqa: E501
         "latest_completed_hyperliquid_whale_evidence_contract": LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,  # noqa: E501
         "latest_completed_funding_rate_evidence_contract": LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT,  # noqa: E501
+        "latest_completed_bitcoin_cycle_timing_evidence_contract": LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
