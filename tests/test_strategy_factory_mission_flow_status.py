@@ -51,6 +51,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     STRATEGY_CANDIDATE_RESEARCH_PLAN_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT,
     STRATEGY_CANDIDATE_RESEARCH_PLAN_REVIEW_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_RESEARCH_PLAN_APPROVAL_CONTRACT,
+    STRATEGY_CANDIDATE_RESEARCH_PLAN_APPROVAL_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -89,6 +91,7 @@ def test_status_schema_is_stable():
         "latest_completed_family_review_contract",
         "latest_completed_research_plan_contract",
         "latest_completed_research_plan_review_contract",
+        "latest_completed_research_plan_approval_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -275,14 +278,14 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_build_research_plan_approval_contract():
+def test_next_required_action_is_build_research_design_contract():
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_APPROVAL_CONTRACT"
+        "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_DESIGN_CONTRACT"
     )
     # it names a research-only planning step (build a paper contract), not real
     # execution
     assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "RESEARCH_PLAN_APPROVAL_CONTRACT" in NEXT_REQUIRED_ACTION
+    assert "RESEARCH_DESIGN_CONTRACT" in NEXT_REQUIRED_ACTION
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE"):
@@ -292,7 +295,7 @@ def test_next_required_action_is_build_research_plan_approval_contract():
     # building the next contract still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_strategy_candidate_research_plan_approval_contract"]
+    nxt = pipe["crypto_d1_strategy_candidate_research_design_contract"]
     assert nxt["state"] == STATE_NEXT
 
 
@@ -372,9 +375,22 @@ def test_strategy_candidate_research_plan_review_contract_now_complete():
     assert "executes nothing" in reason
 
 
-def test_strategy_candidate_research_plan_approval_contract_is_next():
+def test_strategy_candidate_research_plan_approval_contract_now_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["crypto_d1_strategy_candidate_research_plan_approval_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 107" in row["reason"]
+    assert STRATEGY_CANDIDATE_RESEARCH_PLAN_APPROVAL_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "records" in reason
+    assert "executes nothing" in reason
+
+
+def test_strategy_candidate_research_design_contract_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["crypto_d1_strategy_candidate_research_design_contract"]
     assert row["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in row["reason"]
     reason = row["reason"].lower()
@@ -457,12 +473,26 @@ def test_latest_completed_research_plan_review_contract_is_block_105():
     assert s["executes"] is False
 
 
-def test_current_stage_is_post_research_plan_review_contract():
+def test_latest_completed_research_plan_approval_contract_is_block_107():
+    assert LATEST_COMPLETED_RESEARCH_PLAN_APPROVAL_CONTRACT == (
+        "Block 107 - Crypto-D1 Strategy Candidate Research Plan Approval "
+        "Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_research_plan_approval_contract"] == (
+        LATEST_COMPLETED_RESEARCH_PLAN_APPROVAL_CONTRACT
+    )
+    # the recognized research-plan-approval contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+
+
+def test_current_stage_is_post_research_plan_approval_contract():
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_PLAN_APPROVAL_CONTRACT_REQUIRED"
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_DESIGN_CONTRACT_REQUIRED"
     )
     assert "STRATEGY_CANDIDATE" in CURRENT_STAGE
-    assert "RESEARCH_PLAN_APPROVAL" in CURRENT_STAGE
+    assert "RESEARCH_DESIGN" in CURRENT_STAGE
     assert "CONTRACT_REQUIRED" in CURRENT_STAGE
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
