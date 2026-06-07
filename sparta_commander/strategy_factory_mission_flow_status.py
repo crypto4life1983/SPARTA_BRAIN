@@ -150,6 +150,9 @@ from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_research_cont
 from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_review_contract import (  # noqa: E501
     DAILY_ALPHA_BRIEF_REVIEW_SCHEMA_VERSION as CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_approval_contract import (  # noqa: E501
+    DAILY_ALPHA_BRIEF_APPROVAL_SCHEMA_VERSION as CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -170,6 +173,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_bitcoin_cycle_timing_evidence_contract_label as _registry_latest_bitcoin_cycle_timing_evidence_contract_label,  # noqa: E501
     get_latest_completed_daily_alpha_brief_research_contract_label as _registry_latest_daily_alpha_brief_research_contract_label,  # noqa: E501
     get_latest_completed_daily_alpha_brief_review_contract_label as _registry_latest_daily_alpha_brief_review_contract_label,  # noqa: E501
+    get_latest_completed_daily_alpha_brief_approval_contract_label as _registry_latest_daily_alpha_brief_approval_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -203,6 +207,7 @@ __all__ = [
     "LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT",
     "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT",
     "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT",
+    "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -295,6 +300,9 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT = (
 LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT = (
     _registry_latest_daily_alpha_brief_review_contract_label()
 )
+LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
+    _registry_latest_daily_alpha_brief_approval_contract_label()
+)
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -382,16 +390,23 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
             "lanes), under the core rule that the brief tells us what to watch "
             "and research, never what to trade -- its highest stance is "
             "WATCH / RESEARCH_ONLY and it never produces a buy/sell/long/short/"
-            "entry/exit/order instruction -- and Block 127 has now BUILT the "
+            "entry/exit/order instruction -- Block 127 BUILT the "
             "Daily Alpha Brief Review Contract that reviews whether an assembled "
             "brief is reasonable, still on paper, treating every input as "
             "external research evidence only; its highest verdict is READY for "
-            "human approval and it never produces a trade instruction. The "
-            "only next step is to BUILD a research-only Crypto-D1 Daily Alpha "
-            "Brief Approval Contract, still on paper, that records a human "
-            "approval decision over a reviewed brief; real_data_qa stays BLOCKED "
-            "unless a separate, future, human-approved boundary contract "
-            "authorizes it. "
+            "human approval and it never produces a trade instruction -- and "
+            "Block 129 has now BUILT the Daily Alpha Brief Approval Contract that "
+            "records, on paper, a human approval decision over a reviewed brief; "
+            "its highest verdict is APPROVED, which only files the reviewed brief "
+            "as a research record and never as a trade. With the research-only "
+            "external-evidence sub-chain (research -> review -> approval) now "
+            "complete, the only next step is the human-controlled real-data QA "
+            "boundary decision -- a human judgment about whether to ever cross "
+            "from research-only paper work into real-data QA. That boundary "
+            "decision is not a build step and not an authorization: it fetches no "
+            "data, runs no QA, baseline, or backtest, places no order, and writes "
+            "no runtime artifact; real_data_qa stays BLOCKED unless a separate, "
+            "future, human-approved boundary contract authorizes it. "
             "Nothing is authorized to run: real strategy intake remains paused for "
             "operator review."
         ),
@@ -938,30 +953,43 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_daily_alpha_brief_approval_contract",
         "label": "Crypto-D1 Daily Alpha Brief Approval Contract",
-        "state": STATE_NEXT,
+        "state": STATE_COMPLETE,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". With the Block "
-            "127 daily alpha brief review contract now complete, the only next "
-            "step is to BUILD a research-only Crypto-D1 Daily Alpha Brief Approval "
-            "Contract, still on paper, that records a human approval decision over "
-            "a reviewed brief, treating every input as external research evidence "
-            "only and never as execution permission. It is a research-only build "
-            "step: it acquires no data, runs no QA, baseline, or backtest, and "
-            "executes nothing. real_data_qa stays BLOCKED unless a separate, "
-            "future, human-approved boundary contract authorizes it."
+            "Block 129 complete ("
+            + CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION
+            + "). Read-only Daily Alpha Brief Approval Contract only. It only "
+            "records, on paper, a human approval decision over a reviewed daily "
+            "crypto alpha brief -- derived from already-approved static evidence "
+            "inputs only (the external-bot, hyperliquid-whale, funding-rate, and "
+            "bitcoin-cycle-timing evidence lanes) -- under the core rule that an "
+            "approval only files the reviewed brief as a research record, never "
+            "what to trade. Its highest verdict is APPROVED and it never produces "
+            "a buy/sell/long/short/entry/exit/order instruction; every input is "
+            "treated as external research evidence only, always requires "
+            "independent confirmation, and is never converted into permission. It "
+            "authorizes nothing and executes nothing: no data fetch, API call, "
+            "dataset inspection, real data acquisition, dataset loading, QA, "
+            "baseline, backtest, simulation, trade signal, order placement, "
+            "Telegram trade command, paper/live, automation, or runtime/registry/"
+            "dashboard write is unlocked."
         ),
     },
     {
         "id": "human_controlled_real_data_qa_boundary_decision",
         "label": "Human-Controlled Real Data QA Boundary Decision",
-        "state": STATE_BLOCKED,
+        "state": STATE_NEXT,
         "reason": (
-            "Blocked - the research-only external-evidence sub-chain now precedes "
-            "this boundary. A separate, human-controlled boundary decision remains "
-            "required before the still-blocked real_data_qa boundary; it is not a "
-            "build step, acquires no data, runs no dry run, QA, baseline, or "
-            "backtest, and executes nothing. real_data_qa stays BLOCKED unless a "
-            "separate, future, human-approved boundary contract authorizes it."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". With the Block "
+            "129 daily alpha brief approval contract now complete, the research-"
+            "only external-evidence sub-chain (research -> review -> approval) is "
+            "finished and the only next step is the human-controlled real-data QA "
+            "boundary decision: a human judgment about whether to ever cross from "
+            "research-only paper work into real-data QA. It is NOT a build step "
+            "and NOT an authorization -- it acquires no data, runs no dry run, QA, "
+            "baseline, or backtest, places no order, automates nothing, and writes "
+            "no runtime/registry/dashboard artifact. real_data_qa stays BLOCKED "
+            "unless a separate, future, human-approved boundary contract "
+            "authorizes it."
         ),
     },
     {
@@ -1095,6 +1123,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_bitcoin_cycle_timing_evidence_contract": LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,  # noqa: E501
         "latest_completed_daily_alpha_brief_research_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,  # noqa: E501
         "latest_completed_daily_alpha_brief_review_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,  # noqa: E501
+        "latest_completed_daily_alpha_brief_approval_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

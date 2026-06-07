@@ -73,6 +73,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,
     CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,
+    CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -122,6 +124,7 @@ def test_status_schema_is_stable():
         "latest_completed_bitcoin_cycle_timing_evidence_contract",
         "latest_completed_daily_alpha_brief_research_contract",
         "latest_completed_daily_alpha_brief_review_contract",
+        "latest_completed_daily_alpha_brief_approval_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -308,33 +311,34 @@ def test_latest_completed_bundle_is_bundle54():
     assert get_mission_flow_status()["latest_completed_bundle"] == LATEST_COMPLETED_BUNDLE
 
 
-def test_next_required_action_is_build_daily_alpha_brief_approval_contract():
-    # After Block 128, the only next step is to BUILD the daily alpha brief
-    # *approval* contract -- a research-only paper build. No stale review/
-    # research-build literal remains on the global next action.
+def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision():
+    # After Block 130, the only next step is the human-controlled real-data QA
+    # boundary decision -- a human judgment, NOT a BUILD step and NOT an
+    # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    assert "HUMAN_CONTROLLED" in NEXT_REQUIRED_ACTION
+    assert "BOUNDARY_DECISION" in NEXT_REQUIRED_ACTION
+    assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
-    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "DAILY_ALPHA_BRIEF" in NEXT_REQUIRED_ACTION
-    assert "APPROVAL" in NEXT_REQUIRED_ACTION
-    assert "CONTRACT" in NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
     )
-    assert NEXT_REQUIRED_ACTION != (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
-    )
+    # A boundary decision authorizes nothing real. "QA" is intentionally allowed:
+    # it names the still-blocked real_data_qa gate, not an action that runs QA.
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "ORDER", "TRACK"):
         assert banned not in NEXT_REQUIRED_ACTION, banned
     s = get_mission_flow_status()
     assert s["next_required_action"] == NEXT_REQUIRED_ACTION
-    # the next research-contract build still unlocks nothing real
+    # the boundary decision still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["crypto_d1_daily_alpha_brief_approval_contract"]
+    nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert nxt["state"] == STATE_NEXT
 
 
@@ -570,27 +574,31 @@ def test_daily_alpha_brief_review_contract_now_complete():
     assert "never what to trade" in reason
 
 
-def test_daily_alpha_brief_approval_contract_is_next():
+def test_daily_alpha_brief_approval_contract_now_complete():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     row = pipe["crypto_d1_daily_alpha_brief_approval_contract"]
+    assert row["state"] == STATE_COMPLETE
+    assert "Block 129" in row["reason"]
+    assert CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION in (
+        row["reason"]
+    )
+    reason = row["reason"].lower()
+    assert "executes nothing" in reason
+    # an approval only files the reviewed brief as a research record, never trade
+    assert "never what to trade" in reason
+
+
+def test_human_controlled_real_data_qa_boundary_decision_is_next():
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    row = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert row["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in row["reason"]
     reason = row["reason"].lower()
-    assert "executes nothing" in reason
-    # every input is treated as external research evidence only
-    assert "evidence only" in reason
-    assert "real_data_qa stays" in reason
-
-
-def test_human_controlled_real_data_qa_boundary_decision_now_blocked():
-    pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    row = pipe["human_controlled_real_data_qa_boundary_decision"]
-    assert row["state"] == STATE_BLOCKED
-    reason = row["reason"].lower()
-    assert "executes nothing" in reason
-    # the external-evidence sub-chain now precedes this boundary, which stays
-    # blocked; real_data_qa stays blocked
+    # the boundary decision is NOT a build step and NOT an authorization
+    assert "not a build step" in reason
+    assert "not an authorization" in reason
     assert "boundary" in reason
+    # downstream real_data_qa gate stays blocked
     assert "real_data_qa stays" in reason
 
 
@@ -788,13 +796,13 @@ def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
     # the recognized bitcoin-cycle-timing-evidence contract unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
-    # after Block 128, the global stage has advanced past the daily alpha brief
-    # review build to the daily alpha brief approval build.
+    # after Block 130, the global stage has advanced past the daily alpha brief
+    # approval build to the human-controlled real-data QA boundary decision.
     assert s["current_stage"] == (
-        "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
     )
     assert s["next_required_action"] == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
     )
 
 
@@ -828,14 +836,35 @@ def test_latest_completed_daily_alpha_brief_review_contract_is_block_127():
     )
 
 
-def test_current_stage_is_daily_alpha_brief_approval_required():
-    assert CURRENT_STAGE == "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
-    assert "DAILY_ALPHA_BRIEF" in CURRENT_STAGE
-    assert "APPROVAL" in CURRENT_STAGE
-    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
+def test_latest_completed_daily_alpha_brief_approval_contract_is_block_129():
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT == (
+        "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
+        LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT
+    )
+    # the recognized daily-alpha-brief-approval contract unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    # the Block 127 review contract completion is preserved alongside it
+    assert s["latest_completed_daily_alpha_brief_review_contract"] == (
+        "Block 127 - Crypto-D1 Daily Alpha Brief Review Contract"
+    )
+
+
+def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert "HUMAN_CONTROLLED" in CURRENT_STAGE
+    assert "BOUNDARY_DECISION" in CURRENT_STAGE
+    assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
-    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
+    # A human boundary-decision stage, not execution. "QA" is intentionally
+    # allowed: the stage names the still-blocked real_data_qa gate it *precedes*.
+    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER"):
         assert banned not in CURRENT_STAGE, banned

@@ -54,6 +54,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,
+    LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -94,6 +95,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_daily_alpha_brief_research_contract_label,
     get_latest_completed_daily_alpha_brief_review_contract,
     get_latest_completed_daily_alpha_brief_review_contract_label,
+    get_latest_completed_daily_alpha_brief_approval_contract,
+    get_latest_completed_daily_alpha_brief_approval_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -190,45 +193,50 @@ def test_get_bundle_by_id():
 
 # --- 3: stage / next action match post-protocol-definition state ------------
 
-def test_current_stage_is_daily_alpha_brief_approval_required():
-    # After Block 128 registers the Block 127 daily alpha brief review
-    # contract complete, the backbone advances to the next research-only paper
-    # step: BUILD the daily alpha brief *approval* contract. No stale
-    # "..._REVIEW_CONTRACT_REQUIRED" literal remains on the global stage.
+def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
+    # After Block 130 registers the Block 129 daily alpha brief approval
+    # contract complete, the research-only external-evidence sub-chain
+    # (research -> review -> approval) is finished, so the backbone advances to
+    # the human-controlled real-data QA boundary decision -- NOT another build
+    # step. No stale "..._APPROVAL_CONTRACT_REQUIRED" literal remains.
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
     )
     assert get_current_stage() == CURRENT_STAGE
-    assert "DAILY_ALPHA_BRIEF" in CURRENT_STAGE
-    assert "APPROVAL" in CURRENT_STAGE
-    assert "CONTRACT_REQUIRED" in CURRENT_STAGE
+    assert "HUMAN_CONTROLLED" in CURRENT_STAGE
+    assert "BOUNDARY_DECISION" in CURRENT_STAGE
+    assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
-    # a safe research-only research-contract stage, not execution.
-    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
+    # A human boundary-decision stage, not execution. "QA" is intentionally
+    # allowed here: the stage names the still-blocked real_data_qa gate it
+    # *precedes* -- it does not run QA. Execution verbs stay banned.
+    for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER"):
         assert banned not in CURRENT_STAGE, banned
 
 
-def test_next_required_action_is_build_daily_alpha_brief_approval_contract():
-    # After Block 128, the only next step is to BUILD the daily alpha brief
-    # *approval* contract -- a research-only paper build. No stale
-    # "BUILD_..._REVIEW_CONTRACT" literal remains on the global next action.
+def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision():
+    # After Block 130, the only next step is the human-controlled real-data QA
+    # boundary decision -- a human judgment, NOT a BUILD step and NOT an
+    # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
-    assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "DAILY_ALPHA_BRIEF" in NEXT_REQUIRED_ACTION
-    assert "APPROVAL" in NEXT_REQUIRED_ACTION
-    assert "CONTRACT" in NEXT_REQUIRED_ACTION
+    # it is explicitly NOT a build action
+    assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
+    assert "HUMAN_CONTROLLED" in NEXT_REQUIRED_ACTION
+    assert "BOUNDARY_DECISION" in NEXT_REQUIRED_ACTION
+    assert NEXT_REQUIRED_ACTION != (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+    )
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
     )
-    assert NEXT_REQUIRED_ACTION != (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
-    )
+    # A boundary decision authorizes nothing real. "QA" is intentionally allowed:
+    # it names the still-blocked real_data_qa gate, not an action that runs QA.
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER", "TRACK"):
@@ -2172,14 +2180,18 @@ def test_recognized_bitcoin_cycle_timing_evidence_contract_preserves_prior_truth
 
 
 def test_global_stage_advances_after_daily_alpha_brief_registration():
-    # Registering Block 127 (Block 128) DOES advance the global stage and next
-    # required action past the daily alpha brief review build, to the daily
-    # alpha brief approval build. No stale review/research-build literal remains.
+    # Registering Block 129 (Block 130) DOES advance the global stage and next
+    # required action past the daily alpha brief approval build, to the human-
+    # controlled real-data QA boundary decision. No stale approval/review/
+    # research-build literal remains.
     assert get_current_stage() == (
-        "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
     )
     assert get_next_required_action() == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert get_current_stage() != (
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     )
     assert get_current_stage() != (
         "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
@@ -2379,13 +2391,14 @@ def test_recognized_daily_alpha_brief_review_contract_authorizes_nothing():
     c = get_latest_completed_daily_alpha_brief_review_contract()
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
-    # the daily alpha brief review contract is the latest recognized contract,
-    # so its own next step IS the global next required action: BUILD the daily
-    # alpha brief approval contract.
+    # After Block 129 was registered (Block 130), the review record is no longer
+    # the latest recognized contract: it keeps a frozen pin to its real
+    # successor (BUILD the daily alpha brief approval contract), which is NOT the
+    # now-advanced global next action (the human-controlled boundary decision).
     assert c["next_required_action"] == (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
-    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert c["next_required_action"] != NEXT_REQUIRED_ACTION
     reason = c["reason"].lower()
     assert "authorizes nothing" in reason
     assert "executes nothing" in reason
@@ -2433,6 +2446,118 @@ def test_recognized_daily_alpha_brief_review_contract_deterministic_isolated():
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_daily_alpha_brief_review_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5a: recognized research-only daily-alpha-brief-approval (Block 129) -------
+
+def test_latest_completed_daily_alpha_brief_approval_contract_label():
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT == (
+        "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
+    )
+    assert (
+        get_latest_completed_daily_alpha_brief_approval_contract_label()
+        == LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_daily_alpha_brief_approval_contract():
+    c = get_latest_completed_daily_alpha_brief_approval_contract()
+    assert c["daily_alpha_brief_approval_contract_id"] == (
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+    )
+    assert c["name"] == "Crypto-D1 Daily Alpha Brief Approval Contract"
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_daily_alpha_brief_approval_contract"
+    )
+    assert c["schema_constant"] == "DAILY_ALPHA_BRIEF_APPROVAL_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_daily_alpha_brief_approval_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_daily_alpha_brief_approval_contract_research_only():
+    c = get_latest_completed_daily_alpha_brief_approval_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_daily_alpha_brief_approval_contract_authorizes_nothing():
+    c = get_latest_completed_daily_alpha_brief_approval_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # the daily alpha brief approval contract is the latest recognized contract,
+    # so its own next step IS the global next required action: the human-
+    # controlled real-data QA boundary decision (NOT a build step).
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    # an approval only files the reviewed brief as a research record, never trade
+    assert "never as a trade" in reason
+    assert "never converts evidence into permission" in reason
+
+
+def test_recognized_daily_alpha_brief_approval_preserves_prior_truth():
+    # Registering Block 129 must NOT invent a new execution bundle and must NOT
+    # disturb the latest bundle or any prior recognized contract, including the
+    # Block 127 daily alpha brief review contract.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT == (
+        "Block 127 - Crypto-D1 Daily Alpha Brief Review Contract"
+    )
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT == (
+        "Block 125 - Crypto-D1 Daily Alpha Brief Research Contract"
+    )
+    assert LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT == (
+        "Block 123 - Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_review_next_action_pinned_to_daily_alpha_brief_approval():
+    # After Block 129 was registered, the Block 127 daily-alpha-brief-review
+    # record keeps a frozen pin to its real successor: BUILD the daily alpha
+    # brief approval contract -- NOT the (now advanced) global next action.
+    c = get_latest_completed_daily_alpha_brief_review_contract()
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+    )
+    assert c["next_required_action"] != NEXT_REQUIRED_ACTION
+
+
+def test_recognized_daily_alpha_brief_approval_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_daily_alpha_brief_approval_contract()
+        == get_latest_completed_daily_alpha_brief_approval_contract()
+    )
+    c = get_latest_completed_daily_alpha_brief_approval_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_daily_alpha_brief_approval_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS

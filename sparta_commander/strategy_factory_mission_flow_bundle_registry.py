@@ -202,6 +202,12 @@ from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_research_cont
 from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_review_contract import (  # noqa: E501
     DAILY_ALPHA_BRIEF_REVIEW_SCHEMA_VERSION as _DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 129 daily-alpha-brief-approval contract module imports ONLY
+# __future__ and typing -- it does not import this registry -- so reading its
+# stable schema constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_approval_contract import (  # noqa: E501
+    DAILY_ALPHA_BRIEF_APPROVAL_SCHEMA_VERSION as _DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -274,6 +280,9 @@ __all__ = [
     "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT",
     "get_latest_completed_daily_alpha_brief_review_contract",
     "get_latest_completed_daily_alpha_brief_review_contract_label",
+    "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT",
+    "get_latest_completed_daily_alpha_brief_approval_contract",
+    "get_latest_completed_daily_alpha_brief_approval_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -323,17 +332,21 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # never as execution permission or a buy instruction. No BTC data fetch, API
 # call, dataset inspection, real acquisition, QA, baseline, backtest, paper/
 # live, broker/exchange, or automation is unlocked.
-# Block 125 has BUILT the research-only Crypto-D1 Daily Alpha Brief *Research*
-# Contract, which assembles a daily crypto alpha brief from already-approved
-# static evidence inputs only (its highest stance is WATCH / RESEARCH_ONLY,
-# never a trade). Block 127 has now BUILT the research-only Crypto-D1 Daily
-# Alpha Brief *Review* Contract, which reviews whether an assembled brief is
-# reasonable, still on paper. Recognizing it (Block 128) advances the backbone
-# to the next research-only paper step: BUILD a Crypto-D1 Daily Alpha Brief
-# *Approval* Contract that records, on paper, a human approval decision over a
-# reviewed brief. real_data_qa stays BLOCKED unless a separate, future,
-# human-approved boundary contract authorizes it.
-CURRENT_STAGE = "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
+# Block 127 BUILT the research-only Crypto-D1 Daily Alpha Brief *Review*
+# Contract, which reviews whether an assembled brief is reasonable, still on
+# paper. Block 129 has now BUILT the research-only Crypto-D1 Daily Alpha Brief
+# *Approval* Contract, which records, on paper, a human approval decision over a
+# reviewed brief: its highest stance is WATCH / RESEARCH_ONLY and an APPROVED
+# verdict means ONLY that the reviewed brief may be filed as a research record --
+# never a trade, and never that real-data QA, baseline, backtest, paper, live,
+# broker/exchange, automation, or any runtime/dashboard write is approved.
+# Recognizing it (Block 130) COMPLETES the daily-alpha-brief research-only paper
+# sub-chain (research -> review -> approval) and advances the backbone to the
+# separate, human-controlled real_data_qa boundary decision -- which is NOT a
+# build step and NOT a research-only paper contract. real_data_qa stays BLOCKED,
+# baseline_backtest stays BLOCKED, and the paper/micro-live gates stay LOCKED
+# unless a separate, future, human-approved boundary contract authorizes it.
+CURRENT_STAGE = "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -615,15 +628,38 @@ _RECOGNIZED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_LABEL = (
 LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT = (
     _RECOGNIZED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_LABEL
 )
-# Next required action: the research-only paper chain continues. With the Block
-# 127 daily-alpha-brief-review contract complete, the only next step is the next
-# research-only paper contract -- BUILD a Crypto-D1 Daily Alpha Brief *Approval*
-# Contract that records, on paper, a human approval decision over a reviewed
-# brief, treating every input as external research evidence only and never as a
-# buy instruction. It is a research-only build step, authorizes nothing, and
-# unlocks nothing real -- real_data_qa stays BLOCKED unless a separate, future,
-# human-approved boundary contract is built.
-NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+# Frozen historical next step for the Block 127 record: BUILD the research-only
+# Daily Alpha Brief *Approval* Contract, which Block 129 has since completed on
+# paper. Held as a fixed local so the global NEXT_REQUIRED_ACTION can advance
+# without rewriting the Block 127 record's historical next step.
+_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_NEXT_ACTION = (
+    "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+)
+# The single recognized latest research-only Daily Alpha Brief *Approval*
+# contract (Block 129). Building the contract is a research-only planning step
+# and creates no execution bundle. It records, on paper, a human approval
+# decision over a reviewed daily crypto alpha brief from already-approved static
+# evidence inputs only; it authorizes no real-world action, fetches no data,
+# calls no API, inspects no dataset, and unlocks no downstream gate. APPROVED
+# means only that the reviewed brief may be filed as a research record -- never
+# a trade. The label intentionally does not name a trading stage.
+_RECOGNIZED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_LABEL = (
+    "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
+)
+LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
+    _RECOGNIZED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_LABEL
+)
+# Next required action: with the Block 129 daily-alpha-brief-approval contract
+# complete, the research-only external-evidence sub-chain (research -> review ->
+# approval) is finished. The only next step is the human-controlled real-data QA
+# boundary decision -- a human judgment about whether to ever cross from
+# research-only paper work into real-data QA. This is NOT a build step and NOT an
+# authorization: it does not fetch data, run QA, baseline, backtest, paper/live
+# trade, touch a broker/exchange, automate anything, or write any runtime
+# artifact. real_data_qa stays BLOCKED, baseline stays BLOCKED, and the paper/
+# micro-live gates stay LOCKED unless a separate, future, human-approved boundary
+# contract is built.
+NEXT_REQUIRED_ACTION = "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -2455,7 +2491,7 @@ def _recognized_daily_alpha_brief_review_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": _DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_NEXT_ACTION,
         "reason": (
             "Read-only recognition of the Crypto-D1 Daily Alpha Brief Review "
             "Contract, BUILT in Block 127. It records, on paper, that the "
@@ -2492,6 +2528,101 @@ def get_latest_completed_daily_alpha_brief_review_contract_label() -> str:
     """Human label for the latest recognized research-only daily-alpha-brief-
     review contract."""
     return _RECOGNIZED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_LABEL
+
+
+def _recognized_daily_alpha_brief_approval_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-daily-alpha-brief-
+    approval-contract record.
+
+    Recognizing the daily-alpha-brief-approval contract records, on paper, that
+    the Block 129 Crypto-D1 Daily Alpha Brief Approval Contract is COMPLETE. It
+    is the read-only contract that records a human approval decision over a
+    reviewed daily crypto alpha brief, derived from already-approved static
+    evidence inputs only. It is NOT an execution bundle: it authorizes nothing,
+    executes nothing, and unlocks no real capability. Under its core rule, an
+    APPROVED verdict means only that the reviewed brief may be filed as a
+    research record -- never what to trade; it never produces a buy/sell/long/
+    short/entry/exit/order instruction. It fetches no data, calls no API,
+    inspects no dataset, acquires/loads no data, and runs no QA, baseline,
+    backtest, simulation, paper/live, broker/exchange, or automation; every
+    field is derived from static input only. A fresh record (with fresh lists)
+    is returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "daily_alpha_brief_approval_contract_id": (
+            "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Daily Alpha Brief Approval Contract"
+        ),
+        "label": _RECOGNIZED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_daily_alpha_brief_approval_contract"
+        ),
+        "schema_constant": "DAILY_ALPHA_BRIEF_APPROVAL_SCHEMA_VERSION",
+        "schema_version": (
+            _DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Daily Alpha Brief Approval "
+            "Contract, BUILT in Block 129. It records, on paper, that the "
+            "research-only contract that records a human approval decision over "
+            "a reviewed daily crypto alpha brief -- derived from already-"
+            "approved static evidence inputs only (external-bot, hyperliquid-"
+            "whale, funding-rate, and bitcoin-cycle-timing evidence lanes) -- "
+            "now exists; it authorizes nothing and executes nothing: no data "
+            "fetch, API call, dataset inspection, real data acquisition, dataset "
+            "loading, QA, baseline, backtest, simulation, trade signal, order "
+            "placement, Telegram trade command, paper/live, automation, or "
+            "runtime/registry/dashboard write is unlocked. Under the core rule "
+            "that an approval only files the reviewed brief as a research "
+            "record, never as a trade, its highest verdict is APPROVED; it never "
+            "produces a buy/sell/long/short/entry/exit/order instruction, always "
+            "requires independent confirmation, and never converts evidence into "
+            "permission. With the research-only external-evidence sub-chain "
+            "(research -> review -> approval) now complete, the only next step is "
+            "the human-controlled real-data QA boundary decision: a human "
+            "judgment about whether to ever cross into real-data QA. That "
+            "boundary decision is not a build step and not an authorization; it "
+            "fetches no data, runs no QA/baseline/backtest, places no order, and "
+            "writes no runtime artifact. real_data_qa and baseline stay BLOCKED "
+            "and the paper/micro-live gates stay LOCKED unless a separate, "
+            "future, human-approved boundary contract is built."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_daily_alpha_brief_approval_contract() -> dict[str, Any]:
+    """The latest recognized research-only daily-alpha-brief-approval-contract
+    record."""
+    return _recognized_daily_alpha_brief_approval_contract()
+
+
+def get_latest_completed_daily_alpha_brief_approval_contract_label() -> str:
+    """Human label for the latest recognized research-only daily-alpha-brief-
+    approval contract."""
+    return _RECOGNIZED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
