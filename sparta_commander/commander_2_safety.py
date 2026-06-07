@@ -171,6 +171,7 @@ COMMANDER_2_MODULES = (
     "sparta_commander/strategy_factory_crypto_d1_daily_alpha_brief_research_contract.py",
     "sparta_commander/strategy_factory_crypto_d1_daily_alpha_brief_review_contract.py",
     "sparta_commander/strategy_factory_crypto_d1_daily_alpha_brief_approval_contract.py",
+    "sparta_commander/strategy_factory_crypto_d1_strategy_evidence_scoring_contract.py",
 )
 
 COMMANDER_2_TESTS = (
@@ -315,6 +316,7 @@ COMMANDER_2_TESTS = (
     "tests/test_strategy_factory_crypto_d1_daily_alpha_brief_research_contract.py",
     "tests/test_strategy_factory_crypto_d1_daily_alpha_brief_review_contract.py",
     "tests/test_strategy_factory_crypto_d1_daily_alpha_brief_approval_contract.py",
+    "tests/test_strategy_factory_crypto_d1_strategy_evidence_scoring_contract.py",
 )
 
 # Shared files that were *touched* (additive) and are checked with targeted,
