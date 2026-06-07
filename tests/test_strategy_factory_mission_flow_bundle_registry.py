@@ -52,6 +52,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,
     LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT,
     LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,
+    LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,
     list_registered_bundles,
     list_completed_bundles,
     get_latest_completed_bundle,
@@ -88,6 +89,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_funding_rate_evidence_contract_label,
     get_latest_completed_bitcoin_cycle_timing_evidence_contract,
     get_latest_completed_bitcoin_cycle_timing_evidence_contract_label,
+    get_latest_completed_daily_alpha_brief_research_contract,
+    get_latest_completed_daily_alpha_brief_research_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -184,32 +187,41 @@ def test_get_bundle_by_id():
 
 # --- 3: stage / next action match post-protocol-definition state ------------
 
-def test_current_stage_is_funding_rate_evidence_complete():
+def test_current_stage_is_daily_alpha_brief_review_required():
+    # After Block 126 registers the Block 125 daily alpha brief research
+    # contract complete, the backbone advances to the next research-only paper
+    # step: BUILD the daily alpha brief *review* contract. No stale
+    # "..._RESEARCH_CONTRACT_REQUIRED" literal remains on the global stage.
     assert CURRENT_STAGE == (
-        "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     )
     assert get_current_stage() == CURRENT_STAGE
     assert "DAILY_ALPHA_BRIEF" in CURRENT_STAGE
+    assert "REVIEW" in CURRENT_STAGE
     assert "CONTRACT_REQUIRED" in CURRENT_STAGE
-    # a safe research-only research-contract stage, not execution. (The daily
-    # alpha brief is named only as external research evidence, never permission.)
+    assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+    # a safe research-only research-contract stage, not execution.
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION", "QA",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER"):
         assert banned not in CURRENT_STAGE, banned
 
 
-def test_next_required_action_is_build_daily_alpha_brief_research_contract():
+def test_next_required_action_is_build_daily_alpha_brief_review_contract():
+    # After Block 126, the only next step is to BUILD the daily alpha brief
+    # *review* contract -- a research-only paper build. No stale
+    # "BUILD_..._RESEARCH_CONTRACT" literal remains on the global next action.
     assert NEXT_REQUIRED_ACTION == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
-    # the readiness paper chain continues into the research-only external-evidence
-    # sub-chain; the only next step is to BUILD another paper research contract --
-    # it never authorizes real work and treats funding-rate signals as evidence.
     assert NEXT_REQUIRED_ACTION.startswith("BUILD_")
     assert "DAILY_ALPHA_BRIEF" in NEXT_REQUIRED_ACTION
+    assert "REVIEW" in NEXT_REQUIRED_ACTION
     assert "CONTRACT" in NEXT_REQUIRED_ACTION
+    assert NEXT_REQUIRED_ACTION != (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+    )
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER", "TRACK"):
@@ -2119,13 +2131,14 @@ def test_recognized_bitcoin_cycle_timing_evidence_contract_authorizes_nothing():
     c = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
-    # the inserted Bitcoin cycle timing contract's own next step IS the global
-    # next required action: BUILD the daily alpha brief research contract. The
-    # insertion did NOT advance the global stage past the daily alpha brief.
+    # the Bitcoin cycle timing record keeps its frozen historical next step:
+    # BUILD the daily alpha brief research contract. After Block 126 registered
+    # that contract complete, the global next action advanced past it, so the
+    # pinned record no longer equals the global.
     assert c["next_required_action"] == (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
     )
-    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert c["next_required_action"] != NEXT_REQUIRED_ACTION
     reason = c["reason"].lower()
     assert "authorizes nothing" in reason
     assert "executes nothing" in reason
@@ -2151,14 +2164,18 @@ def test_recognized_bitcoin_cycle_timing_evidence_contract_preserves_prior_truth
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 
 
-def test_global_stage_unchanged_after_bitcoin_cycle_timing_insertion():
-    # Inserting Block 123 is an insertion-without-advancing: the global stage
-    # and next required action remain at the daily alpha brief build.
+def test_global_stage_advances_after_daily_alpha_brief_registration():
+    # Registering Block 125 (Block 126) DOES advance the global stage and next
+    # required action past the daily alpha brief research build, to the daily
+    # alpha brief review build. No stale research-build literal remains.
     assert get_current_stage() == (
-        "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     )
     assert get_next_required_action() == (
-        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
+    )
+    assert get_current_stage() != (
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
     )
 
 
@@ -2183,6 +2200,117 @@ def test_recognized_bitcoin_cycle_timing_evidence_contract_deterministic_isolate
     c["research_universe"].append("TAMPERED")
     c["candidate_family_ids"].append("TAMPERED")
     fresh = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
+
+# --- 5q: recognized research-only daily-alpha-brief-research (Block 125) -------
+
+def test_latest_completed_daily_alpha_brief_research_contract_label():
+    assert LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT == (
+        "Block 125 - Crypto-D1 Daily Alpha Brief Research Contract"
+    )
+    assert (
+        get_latest_completed_daily_alpha_brief_research_contract_label()
+        == LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_daily_alpha_brief_research_contract():
+    c = get_latest_completed_daily_alpha_brief_research_contract()
+    assert c["daily_alpha_brief_research_contract_id"] == (
+        "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+    )
+    assert c["name"] == "Crypto-D1 Daily Alpha Brief Research Contract"
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_daily_alpha_brief_research_contract"
+    )
+    assert c["schema_constant"] == "DAILY_ALPHA_BRIEF_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_daily_alpha_brief_research_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_daily_alpha_brief_research_contract_research_only():
+    c = get_latest_completed_daily_alpha_brief_research_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_daily_alpha_brief_research_contract_authorizes_nothing():
+    c = get_latest_completed_daily_alpha_brief_research_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # the daily alpha brief research contract is the latest recognized contract,
+    # so its own next step IS the global next required action: BUILD the daily
+    # alpha brief review contract.
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    # the brief is what-to-watch evidence, never a trade; highest stance is WATCH
+    assert "what to watch and research, never what to trade" in reason
+    assert "watch / research_only" in reason
+    assert "never converts evidence into permission" in reason
+
+
+def test_recognized_daily_alpha_brief_preserves_prior_truth():
+    # Registering Block 125 must NOT invent a new execution bundle and must NOT
+    # disturb the latest bundle or any prior recognized contract.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT == (
+        "Block 123 - Crypto-D1 Bitcoin Cycle Timing Evidence Contract"
+    )
+    assert LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT == (
+        "Block 121 - Crypto-D1 Funding Rate Evidence Contract"
+    )
+    assert LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT == (
+        "Block 119 - Crypto-D1 Hyperliquid Whale Evidence Contract"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_bitcoin_next_action_pinned_to_daily_alpha_brief_research():
+    # After Block 125 was registered, the Block 123 bitcoin-cycle-timing record
+    # keeps a frozen pin to its real successor: BUILD the daily alpha brief
+    # research contract -- NOT the (now advanced) global next action.
+    c = get_latest_completed_bitcoin_cycle_timing_evidence_contract()
+    assert c["next_required_action"] == (
+        "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+    )
+    assert c["next_required_action"] != NEXT_REQUIRED_ACTION
+
+
+def test_recognized_daily_alpha_brief_research_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_daily_alpha_brief_research_contract()
+        == get_latest_completed_daily_alpha_brief_research_contract()
+    )
+    c = get_latest_completed_daily_alpha_brief_research_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_daily_alpha_brief_research_contract()
     assert fresh["executes"] is False
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS

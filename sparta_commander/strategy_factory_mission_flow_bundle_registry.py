@@ -190,6 +190,12 @@ from sparta_commander.strategy_factory_crypto_d1_funding_rate_evidence_contract 
 from sparta_commander.strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract import (  # noqa: E501
     BITCOIN_CYCLE_TIMING_EVIDENCE_SCHEMA_VERSION as _BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 125 daily-alpha-brief-research contract module imports ONLY
+# __future__ and typing -- it does not import this registry -- so reading its
+# stable schema constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_research_contract import (  # noqa: E501
+    DAILY_ALPHA_BRIEF_SCHEMA_VERSION as _DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -256,6 +262,9 @@ __all__ = [
     "LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT",
     "get_latest_completed_bitcoin_cycle_timing_evidence_contract",
     "get_latest_completed_bitcoin_cycle_timing_evidence_contract_label",
+    "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT",
+    "get_latest_completed_daily_alpha_brief_research_contract",
+    "get_latest_completed_daily_alpha_brief_research_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -305,7 +314,15 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # never as execution permission or a buy instruction. No BTC data fetch, API
 # call, dataset inspection, real acquisition, QA, baseline, backtest, paper/
 # live, broker/exchange, or automation is unlocked.
-CURRENT_STAGE = "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
+# Block 125 has now BUILT the research-only Crypto-D1 Daily Alpha Brief
+# *Research* Contract, which assembles a daily crypto alpha brief from
+# already-approved static evidence inputs only (its highest stance is
+# WATCH / RESEARCH_ONLY, never a trade). Recognizing it (Block 126) advances
+# the backbone to the next research-only paper step: BUILD a Crypto-D1 Daily
+# Alpha Brief *Review* Contract that reviews whether the brief is reasonable,
+# still on paper. real_data_qa stays BLOCKED unless a separate, future,
+# human-approved boundary contract authorizes it.
+CURRENT_STAGE = "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -547,16 +564,35 @@ _RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL = (
 LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT = (
     _RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL
 )
+# Frozen historical next step for the Block 123 record: BUILD the research-only
+# Daily Alpha Brief *Research* Contract, which Block 125 has since completed on
+# paper. Held as a fixed local so the global NEXT_REQUIRED_ACTION can advance
+# without rewriting the Block 123 record's historical next step.
+_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_NEXT_ACTION = (
+    "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+)
+# The single recognized latest research-only Daily Alpha Brief *Research*
+# contract (Block 125). Building the contract is a research-only planning step
+# and creates no execution bundle. It assembles a daily crypto alpha brief from
+# already-approved static evidence inputs only; it authorizes no real-world
+# action, fetches no data, calls no API, inspects no dataset, and unlocks no
+# downstream gate. Its highest stance is WATCH / RESEARCH_ONLY -- never a trade.
+# The label intentionally does not name a trading stage.
+_RECOGNIZED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_LABEL = (
+    "Block 125 - Crypto-D1 Daily Alpha Brief Research Contract"
+)
+LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT = (
+    _RECOGNIZED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_LABEL
+)
 # Next required action: the research-only paper chain continues. With the Block
-# 123 bitcoin-cycle-timing-evidence contract complete (inserted as a macro
-# timing filter before the Daily Alpha Brief contract), the only next step is
-# still the next research-only evidence paper contract -- BUILD a Crypto-D1
-# Daily Alpha Brief *Research* Contract, treating cycle-timing signals as
-# external research evidence only and never as a buy instruction. It is a
-# research-only build step, authorizes nothing, and unlocks nothing real --
-# real_data_qa stays BLOCKED unless a separate, future, human-approved boundary
-# contract is built.
-NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+# 125 daily-alpha-brief-research contract complete, the only next step is the
+# next research-only paper contract -- BUILD a Crypto-D1 Daily Alpha Brief
+# *Review* Contract that reviews whether the assembled brief is reasonable,
+# still on paper, treating every input as external research evidence only and
+# never as a buy instruction. It is a research-only build step, authorizes
+# nothing, and unlocks nothing real -- real_data_qa stays BLOCKED unless a
+# separate, future, human-approved boundary contract is built.
+NEXT_REQUIRED_ACTION = "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT"
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -2202,7 +2238,9 @@ def _recognized_bitcoin_cycle_timing_evidence_contract() -> dict[str, Any]:
         "candidate_family_names": [f["name"] for f in families],
         "stage": CURRENT_STAGE,
         "next_gate": CURRENT_STAGE,
-        "next_required_action": NEXT_REQUIRED_ACTION,
+        "next_required_action": (
+            _BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_NEXT_ACTION
+        ),
         "reason": (
             "Read-only recognition of the Crypto-D1 Bitcoin Cycle Timing "
             "Evidence Contract, BUILT in Block 123 as a higher-level macro "
@@ -2242,6 +2280,96 @@ def get_latest_completed_bitcoin_cycle_timing_evidence_contract_label() -> str:
     """Human label for the latest recognized research-only bitcoin-cycle-timing-
     evidence contract."""
     return _RECOGNIZED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_LABEL
+
+
+def _recognized_daily_alpha_brief_research_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-daily-alpha-brief-
+    research-contract record.
+
+    Recognizing the daily-alpha-brief-research contract records, on paper, that
+    the Block 125 Crypto-D1 Daily Alpha Brief Research Contract is COMPLETE. It
+    is the read-only contract that defines how SPARTA assembles a daily crypto
+    alpha brief from already-approved static evidence inputs only -- the
+    external-bot, hyperliquid-whale, funding-rate, and bitcoin-cycle-timing
+    evidence lanes -- into a deterministic structured brief with an overall
+    research decision and stance. It is NOT an execution bundle: it authorizes
+    nothing, executes nothing, and unlocks no real capability. Under its core
+    rule, the brief tells us what to watch and research, never what to trade;
+    the highest stance it can produce is WATCH / RESEARCH_ONLY and it never
+    produces a buy/sell/long/short/entry/exit/order instruction. It fetches no
+    data, calls no API, inspects no dataset, acquires/loads no data, and runs no
+    QA, baseline, backtest, simulation, paper/live, broker/exchange, or
+    automation; every field is derived from static input only. A fresh record
+    (with fresh lists) is returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "daily_alpha_brief_research_contract_id": (
+            "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Daily Alpha Brief Research Contract"
+        ),
+        "label": _RECOGNIZED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_daily_alpha_brief_research_contract"
+        ),
+        "schema_constant": "DAILY_ALPHA_BRIEF_SCHEMA_VERSION",
+        "schema_version": (
+            _DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Daily Alpha Brief Research "
+            "Contract, BUILT in Block 125. It records, on paper, that the "
+            "research-only contract that assembles a daily crypto alpha brief "
+            "from already-approved static evidence inputs only (external-bot, "
+            "hyperliquid-whale, funding-rate, and bitcoin-cycle-timing evidence "
+            "lanes) now exists; it authorizes nothing and executes nothing: no "
+            "data fetch, API call, dataset inspection, real data acquisition, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "order placement, Telegram trade command, paper/live, automation, or "
+            "runtime/registry/dashboard write is unlocked. Under the core rule "
+            "that the brief tells us what to watch and research, never what to "
+            "trade, the highest stance it can produce is WATCH / RESEARCH_ONLY; "
+            "it never produces a buy/sell/long/short/entry/exit/order "
+            "instruction, always requires independent confirmation, and never "
+            "converts evidence into permission. The only next step is to BUILD a "
+            "research-only Crypto-D1 Daily Alpha Brief Review Contract, still on "
+            "paper, that reviews whether the assembled brief is reasonable."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_daily_alpha_brief_research_contract() -> dict[str, Any]:
+    """The latest recognized research-only daily-alpha-brief-research-contract
+    record."""
+    return _recognized_daily_alpha_brief_research_contract()
+
+
+def get_latest_completed_daily_alpha_brief_research_contract_label() -> str:
+    """Human label for the latest recognized research-only daily-alpha-brief-
+    research contract."""
+    return _RECOGNIZED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:

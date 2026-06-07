@@ -47,6 +47,7 @@ Public API:
   - LATEST_COMPLETED_RESEARCH_PLAN_REVIEW_CONTRACT
   - LATEST_COMPLETED_RESEARCH_PLAN_APPROVAL_CONTRACT
   - LATEST_COMPLETED_RESEARCH_DESIGN_CONTRACT
+  - LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT
   - NEXT_REQUIRED_ACTION
   - human_workflow_lane()
   - machine_pipeline_lane()
@@ -143,6 +144,9 @@ from sparta_commander.strategy_factory_crypto_d1_funding_rate_evidence_contract 
 from sparta_commander.strategy_factory_crypto_d1_bitcoin_cycle_timing_evidence_contract import (  # noqa: E501
     BITCOIN_CYCLE_TIMING_EVIDENCE_SCHEMA_VERSION as CRYPTO_D1_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_research_contract import (  # noqa: E501
+    DAILY_ALPHA_BRIEF_SCHEMA_VERSION as CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -161,6 +165,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_hyperliquid_whale_evidence_contract_label as _registry_latest_hyperliquid_whale_evidence_contract_label,  # noqa: E501
     get_latest_completed_funding_rate_evidence_contract_label as _registry_latest_funding_rate_evidence_contract_label,  # noqa: E501
     get_latest_completed_bitcoin_cycle_timing_evidence_contract_label as _registry_latest_bitcoin_cycle_timing_evidence_contract_label,  # noqa: E501
+    get_latest_completed_daily_alpha_brief_research_contract_label as _registry_latest_daily_alpha_brief_research_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -192,6 +197,7 @@ __all__ = [
     "LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT",
     "LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT",
     "LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT",
+    "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -278,6 +284,9 @@ LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT = (
 LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT = (
     _registry_latest_bitcoin_cycle_timing_evidence_contract_label()
 )
+LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT = (
+    _registry_latest_daily_alpha_brief_research_contract_label()
+)
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -352,17 +361,24 @@ _HUMAN_WORKFLOW: tuple[dict[str, str], ...] = (
             "trading bot / tool / video ideas into research-only evidence buckets, "
             "Block 119 BUILT the Hyperliquid Whale Evidence Contract that "
             "classifies external Hyperliquid whale-tracking ideas into "
-            "research-only evidence buckets, and Block 121 has now BUILT the "
+            "research-only evidence buckets, Block 121 BUILT the "
             "Funding Rate Evidence Contract that classifies external funding-rate "
-            "scanner ideas into research-only evidence buckets (useful_for_research, "
-            "risky_requires_validation, blocked_execution_feature, "
-            "ignore_or_marketing_claim, needs_independent_confirmation), marking "
-            "every execution-capable funding idea blocked, requiring independent "
-            "confirmation, and never converting funding-rate evidence into "
-            "permission or 'free money'. The "
+            "scanner ideas into research-only evidence buckets, Block 123 BUILT "
+            "the Bitcoin Cycle Timing Evidence Contract that converts the BTC "
+            "364-day / 1064-day cycle idea into research-only timing evidence "
+            "under the rule that cycle timing tells us when to pay attention, not "
+            "when to buy, and Block 125 has now BUILT the Daily Alpha Brief "
+            "Research Contract that assembles a daily crypto alpha brief from "
+            "already-approved static evidence inputs only (the external-bot, "
+            "hyperliquid-whale, funding-rate, and bitcoin-cycle-timing evidence "
+            "lanes), under the core rule that the brief tells us what to watch "
+            "and research, never what to trade -- its highest stance is "
+            "WATCH / RESEARCH_ONLY and it never produces a buy/sell/long/short/"
+            "entry/exit/order instruction. The "
             "only next step is to BUILD a research-only Crypto-D1 Daily Alpha "
-            "Brief Research Contract, still on paper, treating funding-rate signals "
-            "as external research evidence only; real_data_qa stays BLOCKED unless a "
+            "Brief Review Contract, still on paper, that reviews whether the "
+            "assembled brief is reasonable, treating every input as external "
+            "research evidence only; real_data_qa stays BLOCKED unless a "
             "separate, future, human-approved boundary contract authorizes it. "
             "Nothing is authorized to run: real strategy intake remains paused for "
             "operator review."
@@ -861,17 +877,41 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_daily_alpha_brief_research_contract",
         "label": "Crypto-D1 Daily Alpha Brief Research Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 125 complete ("
+            + CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_SCHEMA_VERSION
+            + "). Read-only Daily Alpha Brief Research Contract only. It only "
+            "assembles, on paper, a daily crypto alpha brief from already-"
+            "approved static evidence inputs only (the external-bot, hyperliquid-"
+            "whale, funding-rate, and bitcoin-cycle-timing evidence lanes) into a "
+            "deterministic structured brief with an overall research decision and "
+            "stance, under the core rule that the brief tells us what to watch and "
+            "research, never what to trade. Its highest stance is WATCH / "
+            "RESEARCH_ONLY and it never produces a buy/sell/long/short/entry/exit/"
+            "order instruction; every input is treated as external research "
+            "evidence only, always requires independent confirmation, and is never "
+            "converted into permission. It authorizes nothing and executes "
+            "nothing: no data fetch, API call, dataset inspection, real data "
+            "acquisition, dataset loading, QA, baseline, backtest, simulation, "
+            "trade signal, order placement, Telegram trade command, paper/live, "
+            "automation, or runtime/registry/dashboard write is unlocked."
+        ),
+    },
+    {
+        "id": "crypto_d1_daily_alpha_brief_review_contract",
+        "label": "Crypto-D1 Daily Alpha Brief Review Contract",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The research-"
-            "only paper chain continues into the external-evidence sub-chain. "
-            "The only next step is to BUILD a research-only Crypto-D1 Daily Alpha "
-            "Brief Research Contract, still on paper, treating cycle-timing signals "
-            "as external research evidence only and never as execution permission. "
-            "It is a research-only build step: it acquires no data, runs no QA, "
-            "baseline, or backtest, and executes nothing. real_data_qa stays "
-            "BLOCKED unless a separate, future, human-approved boundary contract "
-            "authorizes it."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". With the Block "
+            "125 daily alpha brief research contract now complete, the only next "
+            "step is to BUILD a research-only Crypto-D1 Daily Alpha Brief Review "
+            "Contract, still on paper, that reviews whether the assembled brief "
+            "is reasonable, treating every input as external research evidence "
+            "only and never as execution permission. It is a research-only build "
+            "step: it acquires no data, runs no QA, baseline, or backtest, and "
+            "executes nothing. real_data_qa stays BLOCKED unless a separate, "
+            "future, human-approved boundary contract authorizes it."
         ),
     },
     {
@@ -1016,6 +1056,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_hyperliquid_whale_evidence_contract": LATEST_COMPLETED_HYPERLIQUID_WHALE_EVIDENCE_CONTRACT,  # noqa: E501
         "latest_completed_funding_rate_evidence_contract": LATEST_COMPLETED_FUNDING_RATE_EVIDENCE_CONTRACT,  # noqa: E501
         "latest_completed_bitcoin_cycle_timing_evidence_contract": LATEST_COMPLETED_BITCOIN_CYCLE_TIMING_EVIDENCE_CONTRACT,  # noqa: E501
+        "latest_completed_daily_alpha_brief_research_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
