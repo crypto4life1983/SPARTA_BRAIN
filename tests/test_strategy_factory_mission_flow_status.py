@@ -83,6 +83,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_SCHEMA_VERSION,
     LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER,
     CRYPTO_D1_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_SCHEMA_VERSION,
+    LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET,
+    CRYPTO_D1_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -138,6 +140,7 @@ def test_status_schema_is_stable():
         "latest_completed_real_data_qa_human_approval_packet_contract",
         "latest_completed_real_data_qa_readiness_checklist_contract",
         "latest_completed_overnight_research_autopilot_controller",
+        "latest_completed_real_data_qa_human_approval_packet",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1033,6 +1036,41 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     # the Block 136 readiness checklist completion is preserved alongside it
     assert s["latest_completed_real_data_qa_readiness_checklist_contract"] == (
         "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
+    )
+
+
+def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
+    assert LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET == (
+        "Block 155 - Crypto-D1 Real Data QA Boundary Decision Human Approval "
+        "Packet"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_human_approval_packet"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_real_data_qa_human_approval_packet"
+    ]["state"] == STATE_COMPLETE
+    assert CRYPTO_D1_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_SCHEMA_VERSION in (
+        pipe["crypto_d1_real_data_qa_human_approval_packet"]["reason"]
+    )
+    # recognizing Block 155 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the human-controlled boundary decision remains the next step (still STATE_NEXT)
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # the Block 152 controller completion is preserved alongside it
+    assert s["latest_completed_overnight_research_autopilot_controller"] == (
+        "Block 152 - SPARTA Overnight Research Autopilot Controller"
     )
 
 
