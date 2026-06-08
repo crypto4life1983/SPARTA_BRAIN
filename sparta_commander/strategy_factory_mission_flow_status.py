@@ -171,6 +171,9 @@ from sparta_commander.strategy_factory_overnight_research_autopilot_controller i
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_human_approval_packet import (  # noqa: E501
     PACKET_SCHEMA_VERSION as CRYPTO_D1_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision import (  # noqa: E501
+    DECISION_SCHEMA_VERSION as CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -198,6 +201,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_real_data_qa_readiness_checklist_contract_label as _registry_latest_real_data_qa_readiness_checklist_contract_label,  # noqa: E501
     get_latest_completed_overnight_research_autopilot_controller_label as _registry_latest_overnight_research_autopilot_controller_label,  # noqa: E501
     get_latest_completed_real_data_qa_human_approval_packet_label as _registry_latest_real_data_qa_human_approval_packet_label,  # noqa: E501
+    get_latest_completed_real_data_qa_boundary_decision_label as _registry_latest_real_data_qa_boundary_decision_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -238,6 +242,7 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT",
     "LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER",
     "LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET",
+    "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -350,6 +355,9 @@ LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER = (
 )
 LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET = (
     _registry_latest_real_data_qa_human_approval_packet_label()
+)
+LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION = (
+    _registry_latest_real_data_qa_boundary_decision_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1184,6 +1192,32 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "crypto_d1_human_controlled_real_data_qa_boundary_decision_layer",
+        "label": (
+            "Crypto-D1 Human-Controlled Real Data QA Boundary Decision Layer"
+        ),
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 158 complete ("
+            + CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_SCHEMA_VERSION
+            + "). Read-only DECISION LAYER only -- the pure, research-only, human-"
+            "driven gate at the parked real-data QA boundary. Absent human approval "
+            "it returns HOLD_AWAIT; with the explicit approval token it permits ONLY "
+            "the next read-only planning/packet step (never execution); on forbidden "
+            "flags or mission-flow misalignment it returns BLOCK. It is a decision "
+            "gate, not an actor: it authorizes nothing and executes nothing -- no "
+            "staging, commit, push, data fetch, API call, dataset inspection, real "
+            "data acquisition, dataset loading, QA, baseline, backtest, simulation, "
+            "trade signal, order placement, Telegram trade command, paper/live, "
+            "automation, or runtime/registry/dashboard write is unlocked. The only "
+            "thing a PERMIT outcome grants is the next read-only planning/packet "
+            "step, never an unlock of real_data_qa. Recognizing it is purely "
+            "additive latest-completed metadata: it does not advance the stage past "
+            "the human-controlled real-data QA boundary and must not imply automatic "
+            "execution or auto-push."
+        ),
+    },
+    {
         "id": "human_controlled_real_data_qa_boundary_decision",
         "label": "Human-Controlled Real Data QA Boundary Decision",
         "state": STATE_NEXT,
@@ -1339,6 +1373,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_real_data_qa_readiness_checklist_contract": LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT,  # noqa: E501
         "latest_completed_overnight_research_autopilot_controller": LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER,  # noqa: E501
         "latest_completed_real_data_qa_human_approval_packet": LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET,  # noqa: E501
+        "latest_completed_real_data_qa_boundary_decision": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
