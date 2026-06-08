@@ -59,6 +59,9 @@ Public API:
   - LATEST_COMPLETED_RESEARCH_DESIGN_CONTRACT
   - get_latest_completed_research_design_contract()
   - get_latest_completed_research_design_contract_label()
+  - LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER
+  - get_latest_completed_overnight_research_autopilot_controller()
+  - get_latest_completed_overnight_research_autopilot_controller_label()
 """
 
 from __future__ import annotations
@@ -230,6 +233,14 @@ from sparta_commander.strategy_factory_crypto_d1_real_data_qa_human_approval_pac
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_readiness_checklist_contract import (  # noqa: E501
     RDQ_READINESS_SCHEMA_VERSION as _REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 152 overnight-research-autopilot-controller module imports only
+# __future__, typing, and the Block-151 databento read-only fetch execution
+# contract (which itself imports only __future__ and typing); it does NOT import
+# this registry, so reading its stable schema constant at module top is cycle-safe
+# (no circular import).
+from sparta_commander.strategy_factory_overnight_research_autopilot_controller import (  # noqa: E501
+    CONTROLLER_SCHEMA_VERSION as _OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -317,6 +328,9 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT",
     "get_latest_completed_real_data_qa_readiness_checklist_contract",
     "get_latest_completed_real_data_qa_readiness_checklist_contract_label",
+    "LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER",
+    "get_latest_completed_overnight_research_autopilot_controller",
+    "get_latest_completed_overnight_research_autopilot_controller_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -772,6 +786,28 @@ _RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT = (
     _RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL
+)
+
+# The single recognized latest research-only SPARTA Overnight Research Autopilot
+# Controller (Block 152). It is a research-only PLANNING controller: given a
+# static, caller-supplied status summary it reasons -- on paper only -- over which
+# safe research-only paper bundles to prepare next, which paths each may touch,
+# which scoped tests to run, and a commit/push policy that keeps every commit and
+# every push gated behind explicit per-run human approval. It is a planner, not an
+# actor: it stages nothing, commits nothing, pushes nothing, fetches no data,
+# calls no API, inspects no dataset, runs no QA/baseline/backtest/simulation,
+# touches no broker/exchange/paper/live surface, writes no runtime/dashboard
+# output, and unlocks no downstream gate. Registering it is purely additive
+# latest-completed metadata: it does NOT advance CURRENT_STAGE or
+# NEXT_REQUIRED_ACTION, both of which remain at the human-controlled real-data QA
+# boundary above and must not imply automatic execution or auto-push. real_data_qa
+# and baseline stay BLOCKED and the paper/micro-live gates stay LOCKED unless a
+# separate, future, human-approved step authorizes it.
+_RECOGNIZED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_LABEL = (
+    "Block 152 - SPARTA Overnight Research Autopilot Controller"
+)
+LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER = (
+    _RECOGNIZED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_LABEL
 )
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
@@ -3107,6 +3143,99 @@ def get_latest_completed_real_data_qa_readiness_checklist_contract_label() -> st
     """Human label for the latest recognized research-only Real Data QA readiness-
     checklist contract."""
     return _RECOGNIZED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT_LABEL
+
+
+def _recognized_overnight_research_autopilot_controller() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Overnight Research Autopilot
+    Controller record.
+
+    Recognizing the autopilot controller records, on paper, that the Block 152
+    SPARTA Overnight Research Autopilot Controller is COMPLETE. It is a research-
+    only PLANNING controller that, given a static, caller-supplied status summary,
+    reasons -- on paper only -- over which safe research-only paper bundles to
+    prepare next, which paths each may touch, which scoped tests to run, and a
+    commit/push policy that keeps every commit and every push gated behind explicit
+    per-run human approval. It is NOT an execution bundle: it authorizes nothing,
+    executes nothing, and unlocks no real capability. It stages nothing, commits
+    nothing, pushes nothing, fetches no data, calls no API, inspects no dataset,
+    acquires/loads no data, and runs no QA, baseline, backtest, simulation, paper/
+    live, broker/exchange, or automation; every field is derived from static input
+    only. A fresh record (with fresh lists) is returned every call for mutation
+    isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "overnight_research_autopilot_controller_id": (
+            "SPARTA_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER"
+        ),
+        "name": "SPARTA Overnight Research Autopilot Controller",
+        "label": _RECOGNIZED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_overnight_research_autopilot_controller"
+        ),
+        "schema_constant": "CONTROLLER_SCHEMA_VERSION",
+        "schema_version": (
+            _OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "per_run_push_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the SPARTA Overnight Research Autopilot "
+            "Controller, BUILT in Block 152. It records, on paper, that the "
+            "research-only PLANNING controller -- which reasons over a static "
+            "status summary to plan which safe research-only paper bundles to "
+            "prepare next, the only paths each may touch, the scoped tests to run, "
+            "and a commit/push policy that keeps every commit and every push gated "
+            "behind explicit per-run human approval -- now exists; it authorizes "
+            "nothing and executes nothing: no staging, no commit, no push, no data "
+            "fetch, API call, dataset inspection, real data acquisition, dataset "
+            "loading, QA, baseline, backtest, simulation, trade signal, order "
+            "placement, Telegram trade command, paper/live, automation, or runtime/"
+            "registry/dashboard write is unlocked. It is a planner, not an actor, "
+            "and never converts a research judgment into permission; every prepared "
+            "bundle still requires explicit human approval before any commit and "
+            "explicit per-run human approval before any push, never a buy/sell/long/"
+            "short/entry/exit/order instruction and never an unlock of "
+            "real_data_qa; it always requires independent confirmation. Registering "
+            "it is purely additive latest-completed metadata: it does not advance "
+            "the global stage, which remains the human-controlled real-data QA "
+            "boundary decision and must not imply automatic execution or auto-push. "
+            "real_data_qa and baseline stay BLOCKED and the paper/micro-live gates "
+            "stay LOCKED unless a separate, future, human-approved step provides "
+            "explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_overnight_research_autopilot_controller() -> dict[str, Any]:
+    """The latest recognized research-only Overnight Research Autopilot Controller
+    record."""
+    return _recognized_overnight_research_autopilot_controller()
+
+
+def get_latest_completed_overnight_research_autopilot_controller_label() -> str:
+    """Human label for the latest recognized research-only Overnight Research
+    Autopilot Controller."""
+    return _RECOGNIZED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_LABEL
 
 
 def get_current_stage() -> str:

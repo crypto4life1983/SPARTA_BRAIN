@@ -81,6 +81,8 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT,
     LATEST_COMPLETED_REAL_DATA_QA_READINESS_CHECKLIST_CONTRACT,
     CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT_SCHEMA_VERSION,
+    LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER,
+    CRYPTO_D1_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER_SCHEMA_VERSION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -135,6 +137,7 @@ def test_status_schema_is_stable():
         "latest_completed_real_data_qa_boundary_decision_contract",
         "latest_completed_real_data_qa_human_approval_packet_contract",
         "latest_completed_real_data_qa_readiness_checklist_contract",
+        "latest_completed_overnight_research_autopilot_controller",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -999,6 +1002,37 @@ def test_latest_completed_real_data_qa_readiness_checklist_contract_is_block_136
     # the Phase A approval-packet contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
         "Block 136 - Crypto-D1 Real Data QA Human Approval Packet Contract"
+    )
+
+
+def test_latest_completed_overnight_research_autopilot_controller_is_block_152():
+    assert LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER == (
+        "Block 152 - SPARTA Overnight Research Autopilot Controller"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_overnight_research_autopilot_controller"] == (
+        LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_overnight_research_autopilot_controller"
+    ]["state"] == STATE_COMPLETE
+    # recognizing Block 152 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the human-controlled boundary decision remains the next step (still STATE_NEXT)
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # the Block 136 readiness checklist completion is preserved alongside it
+    assert s["latest_completed_real_data_qa_readiness_checklist_contract"] == (
+        "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
     )
 
 
