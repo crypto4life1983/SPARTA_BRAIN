@@ -1,12 +1,16 @@
 """Tests for the JARVIS Strategy Factory / Mission Flow panel (additive, display-only).
 
-State target: Block 115 static sync. The panel is a read-only map of the
+State target: Block 152 registered sync. The panel is a read-only map of the
 Strategy Factory backbone + fake-only lane + Crypto-D1 contract chain
 (Bundles 42-54) + Strategy Candidate contract chain (Blocks 95-115) being
-complete on paper, with the current gate
-PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE, the next required action
-AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA, and real
-strategy intake still blocked.
+complete on paper, plus the SPARTA Overnight Research Autopilot Controller
+(Block 152) complete and registered (a research-only planner; authorizes
+nothing; no auto-push). The human-lane current gate is still
+PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE; the global chain is
+PARKED at the human-controlled real-data QA boundary (current stage
+HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED, next required action
+HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION), with real strategy intake,
+real_data_qa and baseline still blocked and the paper/micro-live gates locked.
 
 The static panel can drift from backend truth (it is hand-synced markup the
 render loop never targets). To stop that drift from passing silently again,
@@ -118,8 +122,12 @@ def test_block115_vocabulary_present():
         "Baseline Backtest",
         # gate
         "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
-        # next required action (await human-controlled boundary decision)
-        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA",
+        # current stage + next required action (live backend truth)
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED",
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION",
+        # Block 152 overnight research autopilot controller registered complete
+        "SPARTA Overnight Research Autopilot Controller",
+        "Block 152",
     ):
         assert token in block, f"missing Block 115 token: {token}"
 
@@ -261,10 +269,14 @@ def test_strategy_flow_block_is_display_only():
     # no client-side execution / network / control affordances inside the block.
     # NB: nouns like "broker"/"trading"/"live"/"paper" appear in READ-ONLY
     # disclaimers, so we forbid concrete control verbs / surfaces, not nouns.
+    # The Block 152 "Overnight Research Autopilot Controller" is a registered,
+    # research-only PLANNER shown as a read-only completion label, so the bare
+    # noun "autopilot" is allowed; only autopilot ACTIVATION controls are banned.
     for forbidden in (
         "fetch(", "xmlhttprequest", "place_order", "submit_order",
         "execute_trade", "websocket", "eval(", "broker_login",
-        "broker_control", "autopilot", "upload(", "deploy(",
+        "broker_control", "activate_autopilot", "enable_autopilot",
+        "start_autopilot", "autopilot_on", "auto_push", "upload(", "deploy(",
         "enable_live", "go_live",
     ):
         assert forbidden not in block, f"forbidden affordance in panel: {forbidden}"
@@ -313,14 +325,17 @@ def test_current_run_reflects_block115_state():
         "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
         "Operator Review Before Real Strategy Intake",
         "Current stage",
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_AWAIT_HUMAN_BOUNDARY_DECISION",
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED",
         "Latest completed paper gate",
         "Block 115",
         "Block 115 &middot; Crypto-D1 Strategy Candidate Research Readiness Contract",
         "Block 115 research readiness complete; awaiting human-controlled boundary decision before real_data_qa",
-        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA",
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION",
         "Human-Controlled Real Data QA Boundary Decision",
         "Crypto-D1 Intake Reconciliation",
+        # Block 152 overnight research autopilot controller registered complete
+        "Overnight Research Autopilot Controller",
+        "Block 152 &middot; Complete &middot; registered",
     ):
         assert token in block, f"missing Block 115 Current Run token: {token}"
     # stale Block-113-as-latest Current Run framing must be gone
@@ -454,14 +469,15 @@ def test_visible_current_stage_matches_mission_flow_backend():
     assert current[0]["label"] == "Operator Review Before Real Strategy Intake"
 
 
-# --- static fallback aligned to committed Block 115 backend truth -----------
+# --- static fallback aligned to committed Block 152 backend truth -----------
 
-def test_static_fallback_matches_block115_backend_truth():
+def test_static_fallback_matches_block152_backend_truth():
     """The visible static dashboard panel must match the committed backend truth
-    at Block 115: current_stage =
-    CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_AWAIT_HUMAN_BOUNDARY_DECISION,
-    next required action = AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA,
-    latest completed research-readiness = Block 115.
+    at Block 152: the chain is PARKED at the human-controlled real-data QA
+    boundary (current_stage = HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED,
+    next required action = HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION), the
+    latest completed research-readiness gate is still Block 115, and the SPARTA
+    Overnight Research Autopilot Controller (Block 152) is complete + registered.
 
     Skips (rather than errors) if the backend module is not importable, e.g.
     while it is mid-edit (a mid-edit backend can raise NameError, not just
@@ -474,14 +490,16 @@ def test_static_fallback_matches_block115_backend_truth():
         pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
     status = mf.get_mission_flow_status()
     assert status["current_stage"] == (
-        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
-        "AWAIT_HUMAN_BOUNDARY_DECISION"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
     )
     assert status["next_required_action"] == (
-        "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA"
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
     )
     assert status["latest_completed_research_readiness_contract"] == (
         "Block 115 - Crypto-D1 Strategy Candidate Research Readiness Contract"
+    )
+    assert status["latest_completed_overnight_research_autopilot_controller"] == (
+        "Block 152 - SPARTA Overnight Research Autopilot Controller"
     )
     block = _strategy_flow_block(_page())
     # the visible static panel carries Block 115 as the latest completed paper gate
@@ -491,18 +509,62 @@ def test_static_fallback_matches_block115_backend_truth():
     ) in block
     assert 'data-debug="BLOCK_115_COMPLETE"' in block
     assert 'title="Latest completed paper gate: Block 115"' in block
+    # the Block 152 controller is shown complete + registered (research-only)
+    assert "SPARTA Overnight Research Autopilot Controller" in block
+    assert 'data-debug="BLOCK_152_REGISTERED"' in block
+    assert "Block 152 &middot; Complete &middot; registered" in block
     # the visible current stage + next required action match the backend exactly
     assert status["current_stage"] in block
     assert status["next_required_action"] in block
     # the next visible machine step is the human-controlled boundary decision
     assert "Human-Controlled Real Data QA Boundary Decision" in block
     assert "Next &middot; awaiting human decision" in block
+    # registering the controller did NOT advance the boundary: real_data_qa and
+    # baseline stay blocked, the paper/micro-live gates stay locked
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    assert "Locked &middot; human approval required" in block
+    assert "Locked &middot; never automated" in block
     # no stale Block-113-as-latest framing leaks into the visible panel
     assert 'data-debug="BLOCK_113_COMPLETE"' not in block
     assert "BUILD_CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_CONTRACT" not in block
     # no stale Bundle-48-as-latest framing leaks into the visible panel
     assert 'data-debug="BUNDLE_48_COMPLETE"' not in block
     assert "BUILD_CRYPTO_D1_RESEARCH_ONLY_DRY_RUN_PREVIEW_CONTRACT" not in block
+    # no stale Block-115-era stage/action identifiers leak into the visible panel
+    assert "AWAIT_HUMAN_CONTROLLED_BOUNDARY_DECISION_BEFORE_REAL_DATA_QA" not in block
+    assert (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_RESEARCH_READINESS_COMPLETE_"
+        "AWAIT_HUMAN_BOUNDARY_DECISION"
+    ) not in block
+
+
+def test_overnight_research_autopilot_controller_shown_complete_no_activation():
+    """The Block 152 SPARTA Overnight Research Autopilot Controller is shown as a
+    COMPLETE + registered, research-only PLANNER. It must carry no activation /
+    auto-push / execution affordance: it is a read-only completion label only."""
+    block = _strategy_flow_block(_page())
+    # shown complete + registered in the machine lane (Pipeline + Combined views)
+    assert block.count('data-debug="BLOCK_152_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">SPARTA Overnight Research Autopilot Controller</span>'
+        '<span class="nst">Block 152 &middot; Complete &middot; registered</span>'
+    ) >= 2
+    # the read-only posture is explicit in the controller's own tooltip
+    assert "research-only planner; authorizes nothing; no auto-push" in block
+    # no autopilot ACTIVATION / auto-push control surface anywhere in the panel
+    low = block.lower()
+    for forbidden in (
+        "activate_autopilot", "enable_autopilot", "start_autopilot",
+        "autopilot_on", "auto_push", "run_autopilot", "launch_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
 
 
 def test_panel_matches_live_backend_truth():
