@@ -1,0 +1,672 @@
+"""Tests for the Crypto-D1 Read-Only Spot Data Provider Onboarding Contract (Block 146).
+
+The contract EVALUATES candidate READ-ONLY historical SPOT data providers for the
+three missing Crypto-D1 daily pairs (BTCUSD@1d, ETHUSD@1d, SOLUSD@1d) against a
+10-point onboarding checklist and classifies each into one of six categories. It
+is a PURE, stdlib-only reasoning layer: it calls no provider, fetches nothing,
+opens no network, reads no credential / .env, connects no provider, writes nothing
+(no cache, no manifest, no gap report), selects no provider, and unlocks no gate.
+
+These tests assert: schema / constants; mission-flow truth sync against the live
+status module; the ten evaluation criteria; the explicit wrong-instrument
+rejection rules; the six onboarding categories; deterministic evaluation covering
+every category (futures-only -> REJECTED_WRONG_INSTRUMENT, trading API ->
+REJECTED_TRADING_ENDPOINT_RISK, no-spot -> REJECTED_INSUFFICIENT_COVERAGE,
+unclear-license -> REJECTED_LICENSE_OR_SOURCE_UNCLEAR, aggregator ->
+NEEDS_PROVIDER_REVIEW, clean/CSV -> APPROVED_CANDIDATE_FOR_REVIEW); the single
+next recommended action HOLD_FOR_PROVIDER_SELECTION; that the contract chooses /
+calls / fetches nothing; the approved FUTURE-only cache + report paths recorded
+without any write; that every capability flag is False and every gate stays
+locked; that a secret value is never carried; determinism / caller-payload
+isolation; validation tamper rejections; render; AST purity (only __future__ /
+typing / sparta_commander roots, no os / json / network / credential modules, no
+os.environ access, NO open / write_* call); and the two additive
+commander_2_safety allowlist entries.
+"""
+
+from __future__ import annotations
+
+import ast
+import pathlib
+
+from sparta_commander.strategy_factory_crypto_d1_read_only_spot_data_provider_onboarding_contract import (  # noqa: E501
+    CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW,
+    CATEGORY_NEEDS_PROVIDER_REVIEW,
+    CATEGORY_REJECTED_INSUFFICIENT_COVERAGE,
+    CATEGORY_REJECTED_LICENSE_OR_SOURCE_UNCLEAR,
+    CATEGORY_REJECTED_TRADING_ENDPOINT_RISK,
+    CATEGORY_REJECTED_WRONG_INSTRUMENT,
+    DEFAULT_PROVIDER_CANDIDATES,
+    NEXT_RECOMMENDED_ACTION,
+    ONBOARDING_APPROVED_FUTURE_CACHE_PATH,
+    ONBOARDING_APPROVED_FUTURE_REPORT_DIR,
+    ONBOARDING_APPROVED_SYMBOLS,
+    ONBOARDING_APPROVED_TIMEFRAMES,
+    ONBOARDING_CATEGORIES,
+    ONBOARDING_CORE_RULE,
+    ONBOARDING_EVALUATION_CRITERIA,
+    ONBOARDING_LABEL,
+    ONBOARDING_MODE,
+    ONBOARDING_SCHEMA_VERSION,
+    ONBOARDING_STATUS,
+    ONBOARDING_WRONG_INSTRUMENT_REJECTION_RULES,
+    build_crypto_d1_read_only_spot_data_provider_onboarding_contract,
+    evaluate_provider_candidate,
+    render_crypto_d1_read_only_spot_data_provider_onboarding_contract_markdown,
+    validate_crypto_d1_read_only_spot_data_provider_onboarding_contract,
+)
+from sparta_commander.strategy_factory_crypto_d1_databento_read_only_fetch_execution_contract import (  # noqa: E501
+    MISSION_FLOW_CURRENT_STAGE,
+    MISSION_FLOW_NEXT_REQUIRED_ACTION,
+)
+
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+_MODPATH = (
+    _REPO_ROOT
+    / "sparta_commander"
+    / "strategy_factory_crypto_d1_read_only_spot_data_provider_onboarding_contract.py"
+)
+_SAFETY_PATH = _REPO_ROOT / "sparta_commander" / "commander_2_safety.py"
+
+_MODULE_ALLOWLIST_LINE = (
+    "sparta_commander/strategy_factory_crypto_d1_read_only_spot_data_provider_onboarding_contract.py"
+)
+_TEST_ALLOWLIST_LINE = (
+    "tests/test_strategy_factory_crypto_d1_read_only_spot_data_provider_onboarding_contract.py"
+)
+
+_BUILD = build_crypto_d1_read_only_spot_data_provider_onboarding_contract
+_VALIDATE = validate_crypto_d1_read_only_spot_data_provider_onboarding_contract
+_RENDER = render_crypto_d1_read_only_spot_data_provider_onboarding_contract_markdown
+
+
+# --------------------------------------------------------------------------- #
+# Schema / constants
+# --------------------------------------------------------------------------- #
+def test_schema_version_and_labels():
+    assert ONBOARDING_SCHEMA_VERSION == (
+        "strategy_factory_crypto_d1_read_only_spot_data_provider_onboarding_contract.v1"
+    )
+    assert ONBOARDING_LABEL == (
+        "Block 146 - Crypto-D1 Read-Only Spot Data Provider Onboarding Contract"
+    )
+    assert ONBOARDING_STATUS == "PROVIDER_ONBOARDING_PLAN_ONLY"
+    assert ONBOARDING_MODE == "RESEARCH_ONLY"
+    assert "authorizes" in ONBOARDING_CORE_RULE.lower()
+    assert "blocked" in ONBOARDING_CORE_RULE.lower()
+
+
+def test_approved_scope_constants():
+    assert ONBOARDING_APPROVED_SYMBOLS == ("BTCUSD", "ETHUSD", "SOLUSD")
+    assert ONBOARDING_APPROVED_TIMEFRAMES == ("1d",)
+
+
+def test_onboarding_categories_are_the_six_required():
+    assert ONBOARDING_CATEGORIES == (
+        CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW,
+        CATEGORY_NEEDS_PROVIDER_REVIEW,
+        CATEGORY_REJECTED_WRONG_INSTRUMENT,
+        CATEGORY_REJECTED_TRADING_ENDPOINT_RISK,
+        CATEGORY_REJECTED_INSUFFICIENT_COVERAGE,
+        CATEGORY_REJECTED_LICENSE_OR_SOURCE_UNCLEAR,
+    )
+    assert CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW == "APPROVED_CANDIDATE_FOR_REVIEW"
+    assert CATEGORY_NEEDS_PROVIDER_REVIEW == "NEEDS_PROVIDER_REVIEW"
+    assert CATEGORY_REJECTED_WRONG_INSTRUMENT == "REJECTED_WRONG_INSTRUMENT"
+    assert CATEGORY_REJECTED_TRADING_ENDPOINT_RISK == "REJECTED_TRADING_ENDPOINT_RISK"
+    assert CATEGORY_REJECTED_INSUFFICIENT_COVERAGE == "REJECTED_INSUFFICIENT_COVERAGE"
+    assert (
+        CATEGORY_REJECTED_LICENSE_OR_SOURCE_UNCLEAR
+        == "REJECTED_LICENSE_OR_SOURCE_UNCLEAR"
+    )
+
+
+def test_next_recommended_action_is_hold_for_provider_selection():
+    assert NEXT_RECOMMENDED_ACTION == "HOLD_FOR_PROVIDER_SELECTION"
+
+
+def test_evaluation_criteria_cover_the_ten_required_dimensions():
+    blob = " ".join(ONBOARDING_EVALUATION_CRITERIA).lower()
+    assert len(ONBOARDING_EVALUATION_CRITERIA) >= 10
+    assert "btcusd@1d" in blob and "ethusd@1d" in blob and "solusd@1d" in blob
+    assert "read-only historical" in blob
+    assert "trading api" in blob
+    assert "account control" in blob
+    assert "order placement" in blob
+    assert "execution endpoints" in blob
+    assert "license" in blob
+    assert "local cache" in blob
+    assert "manifest" in blob
+    assert "secrets hidden" in blob
+    assert "reviewed before any future api call" in blob
+
+
+def test_wrong_instrument_rejection_rules_name_cme_futures():
+    blob = " ".join(ONBOARDING_WRONG_INSTRUMENT_REJECTION_RULES).lower()
+    assert "cme crypto futures" in blob
+    assert "spot" in blob
+
+
+def test_approved_future_paths_constants():
+    assert ONBOARDING_APPROVED_FUTURE_CACHE_PATH == "data/crypto_d1_spot_cache/"
+    assert ONBOARDING_APPROVED_FUTURE_REPORT_DIR == "reports/research_os/data_qa/"
+
+
+# --------------------------------------------------------------------------- #
+# Mission-flow truth sync
+# --------------------------------------------------------------------------- #
+def test_mission_flow_truth_matches_live_status_module():
+    from sparta_commander import strategy_factory_mission_flow_status as status
+
+    assert MISSION_FLOW_CURRENT_STAGE == status.CURRENT_STAGE
+    assert MISSION_FLOW_NEXT_REQUIRED_ACTION == status.NEXT_REQUIRED_ACTION
+
+
+# --------------------------------------------------------------------------- #
+# Evaluation: deterministic, one bucket per candidate
+# --------------------------------------------------------------------------- #
+def test_futures_only_provider_is_rejected_wrong_instrument():
+    out = evaluate_provider_candidate(
+        {
+            "name": "futures_only",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+            "is_wrong_instrument_substitute": True,
+        }
+    )
+    assert out["category"] == CATEGORY_REJECTED_WRONG_INSTRUMENT
+    assert out["criteria"]["wrong_instrument_substitute"] is True
+
+
+def test_trading_api_provider_is_rejected_trading_endpoint_risk():
+    out = evaluate_provider_candidate(
+        {
+            "name": "exchange_trading_api",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "requires_trading_endpoint": True,
+            "requires_account_endpoint": True,
+            "has_license_metadata": True,
+        }
+    )
+    assert out["category"] == CATEGORY_REJECTED_TRADING_ENDPOINT_RISK
+
+
+def test_order_endpoint_provider_is_rejected_trading_endpoint_risk():
+    out = evaluate_provider_candidate(
+        {
+            "name": "order_capable",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "requires_order_endpoint": True,
+            "has_license_metadata": True,
+        }
+    )
+    assert out["category"] == CATEGORY_REJECTED_TRADING_ENDPOINT_RISK
+
+
+def test_no_spot_coverage_is_rejected_insufficient_coverage():
+    out = evaluate_provider_candidate(
+        {
+            "name": "no_crypto_spot",
+            "read_only_historical": True,
+            "covers_symbols": [],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+        }
+    )
+    assert out["category"] == CATEGORY_REJECTED_INSUFFICIENT_COVERAGE
+
+
+def test_unavailable_provider_is_rejected_insufficient_coverage():
+    out = evaluate_provider_candidate(
+        {
+            "name": "unavailable_account",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+            "available_on_current_account": False,
+        }
+    )
+    assert out["category"] == CATEGORY_REJECTED_INSUFFICIENT_COVERAGE
+
+
+def test_unclear_license_provider_is_rejected_license_or_source_unclear():
+    out = evaluate_provider_candidate(
+        {
+            "name": "unclear_license",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": False,
+        }
+    )
+    assert out["category"] == CATEGORY_REJECTED_LICENSE_OR_SOURCE_UNCLEAR
+
+
+def test_aggregator_provider_needs_review():
+    out = evaluate_provider_candidate(
+        {
+            "name": "aggregator",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+            "requires_source_review": True,
+        }
+    )
+    assert out["category"] == CATEGORY_NEEDS_PROVIDER_REVIEW
+
+
+def test_non_reviewable_provider_needs_review():
+    out = evaluate_provider_candidate(
+        {
+            "name": "not_reviewable",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+            "reviewable_before_api_call": False,
+        }
+    )
+    assert out["category"] == CATEGORY_NEEDS_PROVIDER_REVIEW
+
+
+def test_clean_spot_provider_is_approved_candidate_for_review():
+    out = evaluate_provider_candidate(
+        {
+            "name": "clean_spot",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+        }
+    )
+    assert out["category"] == CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW
+
+
+def test_csv_manual_import_provider_is_approved_candidate_for_review():
+    out = evaluate_provider_candidate(
+        {
+            "name": "csv_manual_import",
+            "kind": "manual_import",
+            "read_only_historical": True,
+            "covers_symbols": ["BTCUSD", "ETHUSD", "SOLUSD"],
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+        }
+    )
+    assert out["category"] == CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW
+
+
+def test_equivalent_spot_usd_flag_satisfies_coverage():
+    out = evaluate_provider_candidate(
+        {
+            "name": "equivalent_pairs",
+            "read_only_historical": True,
+            "covers_symbols": [],
+            "covers_equivalent_spot_usd": True,
+            "daily_timeframe": True,
+            "has_license_metadata": True,
+        }
+    )
+    assert out["category"] == CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW
+
+
+def test_default_candidates_cover_every_category():
+    cats = {
+        evaluate_provider_candidate(c)["category"]
+        for c in DEFAULT_PROVIDER_CANDIDATES
+    }
+    assert cats == set(ONBOARDING_CATEGORIES)
+
+
+def test_evaluation_is_deterministic():
+    for c in DEFAULT_PROVIDER_CANDIDATES:
+        assert evaluate_provider_candidate(c) == evaluate_provider_candidate(c)
+
+
+# --------------------------------------------------------------------------- #
+# Build: happy path is valid and locked
+# --------------------------------------------------------------------------- #
+def test_default_contract_builds_and_validates():
+    contract = _BUILD()
+    assert contract["status"] == "PROVIDER_ONBOARDING_PLAN_ONLY"
+    assert contract["safe"] is True
+    assert contract["this_contract_chooses_provider"] is False
+    assert contract["this_contract_calls_provider"] is False
+    assert contract["this_contract_fetches_data"] is False
+    assert contract["requires_human_provider_selection"] is True
+    assert contract["next_recommended_action"] == "HOLD_FOR_PROVIDER_SELECTION"
+    assert contract["real_data_qa_state"] == "BLOCKED"
+    assert contract["baseline_backtest_state"] == "BLOCKED"
+    assert contract["paper_live_state"] == "LOCKED"
+    assert _VALIDATE(contract)["valid"] is True
+
+
+def test_contract_capability_flags_all_false_and_gates_locked():
+    contract = _BUILD()
+    assert contract["executes"] is False
+    assert contract["performs_data_fetch"] is False
+    assert contract["calls_provider_api"] is False
+    assert contract["connects_provider"] is False
+    assert contract["uses_network"] is False
+    assert contract["chooses_provider"] is False
+    assert contract["selects_provider"] is False
+    assert contract["writes_cache"] is False
+    assert contract["writes_manifest"] is False
+    assert contract["authorizes_nothing"] is True
+    assert contract["real_data_qa_blocked"] is True
+    assert contract["baseline_backtest_blocked"] is True
+    assert contract["paper_trading_gate_locked"] is True
+    assert contract["micro_live_gate_locked"] is True
+    assert contract["unlocks_real_data_qa"] is False
+
+
+def test_contract_spec_carries_required_sections():
+    spec = _BUILD()["onboarding_contract"]
+    assert len(spec["evaluation_criteria"]) >= 10
+    assert spec["wrong_instrument_rejection_rules"]
+    assert spec["ranking_categories"] == list(ONBOARDING_CATEGORIES)
+    assert spec["evaluations"]
+    assert spec["next_recommended_action"] == "HOLD_FOR_PROVIDER_SELECTION"
+    assert spec["approved_future_cache_path"] == ONBOARDING_APPROVED_FUTURE_CACHE_PATH
+    assert spec["approved_future_report_dir"] == ONBOARDING_APPROVED_FUTURE_REPORT_DIR
+    nwc = spec["no_write_confirmation"]
+    assert nwc["writes_cache"] is False
+    assert nwc["writes_manifest"] is False
+    assert nwc["approved_paths_are_future_only"] is True
+    assert nwc["paths_created_now"] is False
+    nuc = spec["no_unlock_confirmation"]
+    assert nuc["unlocks_real_data_qa"] is False
+    assert nuc["real_data_qa_state"] == "BLOCKED"
+
+
+def test_contract_every_default_candidate_is_evaluated():
+    spec = _BUILD()["onboarding_contract"]
+    assert len(spec["evaluations"]) == len(DEFAULT_PROVIDER_CANDIDATES)
+    counts = spec["category_counts"]
+    assert counts[CATEGORY_REJECTED_WRONG_INSTRUMENT] >= 1
+    assert counts[CATEGORY_REJECTED_LICENSE_OR_SOURCE_UNCLEAR] >= 1
+    assert counts[CATEGORY_NEEDS_PROVIDER_REVIEW] >= 1
+    assert counts[CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW] >= 1
+
+
+# --------------------------------------------------------------------------- #
+# Unsafe inputs: forbidden flag / off-boundary mission flow
+# --------------------------------------------------------------------------- #
+def test_forbidden_flag_marks_contract_unsafe():
+    contract = _BUILD({"select_provider_now": True})
+    assert contract["safe"] is False
+    assert "select_provider_now" in contract["forbidden_flag_hits"]
+    # but every real capability flag is still False and gates still locked
+    assert contract["executes"] is False
+    assert contract["selects_provider"] is False
+    assert _VALIDATE(contract)["valid"] is True
+
+
+def test_write_cache_request_marks_contract_unsafe():
+    contract = _BUILD({"write_cache_now": True})
+    assert contract["safe"] is False
+    assert "write_cache_now" in contract["forbidden_flag_hits"]
+
+
+def test_gate_unlock_request_marks_contract_unsafe():
+    contract = _BUILD({"unlock_real_data_qa": True})
+    assert contract["safe"] is False
+    assert "unlock_real_data_qa" in contract["forbidden_flag_hits"]
+
+
+def test_off_boundary_mission_flow_marks_contract_unsafe():
+    contract = _BUILD({"mission_flow_current_stage": "SOMETHING_ELSE"})
+    assert contract["safe"] is False
+    assert contract["mission_flow_aligned"] is False
+
+
+# --------------------------------------------------------------------------- #
+# Secret never carried
+# --------------------------------------------------------------------------- #
+def test_secret_value_in_input_is_never_carried_into_contract():
+    contract = _BUILD({"api_key": "SHOULD-NEVER-APPEAR"})
+    assert "SHOULD-NEVER-APPEAR" not in _RENDER(contract)
+    assert _VALIDATE(contract)["no_secret_value_fields"] is True
+
+
+def test_boolean_secret_flag_is_not_a_secret_value():
+    assert _VALIDATE(_BUILD())["no_secret_value_fields"] is True
+
+
+# --------------------------------------------------------------------------- #
+# Determinism / isolation
+# --------------------------------------------------------------------------- #
+def test_two_builds_are_equivalent():
+    assert _BUILD() == _BUILD()
+
+
+def test_build_does_not_mutate_caller_payload():
+    import copy
+
+    payload = {"mission_flow_current_stage": MISSION_FLOW_CURRENT_STAGE}
+    snapshot = copy.deepcopy(payload)
+    _BUILD(payload)
+    assert payload == snapshot
+
+
+# --------------------------------------------------------------------------- #
+# Validation tamper rejections
+# --------------------------------------------------------------------------- #
+def test_validate_rejects_tampered_executes():
+    contract = _BUILD()
+    contract["executes"] = True
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["flags_false"] is False
+
+
+def test_validate_rejects_chooses_provider_true():
+    contract = _BUILD()
+    contract["this_contract_chooses_provider"] = True
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["this_chooses_false"] is False
+
+
+def test_validate_rejects_calls_provider_true():
+    contract = _BUILD()
+    contract["this_contract_calls_provider"] = True
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["this_calls_false"] is False
+
+
+def test_validate_rejects_fetches_data_true():
+    contract = _BUILD()
+    contract["this_contract_fetches_data"] = True
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["this_fetches_false"] is False
+
+
+def test_validate_rejects_unlocked_gate():
+    contract = _BUILD()
+    contract["real_data_qa_blocked"] = False
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["gates_locked"] is False
+
+
+def test_validate_rejects_unlocked_state():
+    contract = _BUILD()
+    contract["real_data_qa_state"] = "OPEN"
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["states_blocked_locked"] is False
+
+
+def test_validate_rejects_wrong_next_action():
+    contract = _BUILD()
+    contract["next_recommended_action"] = "GO_LIVE"
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["next_action_ok"] is False
+
+
+def test_validate_rejects_cache_write_marked_true():
+    contract = _BUILD()
+    contract["onboarding_contract"]["no_write_confirmation"]["writes_cache"] = True
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["no_write_ok"] is False
+
+
+def test_validate_rejects_futures_misclassified_as_approved():
+    contract = _BUILD()
+    for item in contract["onboarding_contract"]["evaluations"]:
+        if item["criteria"].get("wrong_instrument_substitute") is True:
+            item["category"] = CATEGORY_APPROVED_CANDIDATE_FOR_REVIEW
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["futures_rejected_ok"] is False
+
+
+def test_validate_rejects_secret_value():
+    contract = _BUILD()
+    contract["api_key"] = "leaked-value"
+    verdict = _VALIDATE(contract)
+    assert verdict["valid"] is False
+    assert verdict["no_secret_value_fields"] is False
+
+
+# --------------------------------------------------------------------------- #
+# Render
+# --------------------------------------------------------------------------- #
+def test_render_is_a_readonly_markdown_string():
+    text = _RENDER(_BUILD())
+    assert isinstance(text, str)
+    assert text.startswith(
+        "# Crypto-D1 Read-Only Spot Data Provider Onboarding Contract"
+    )
+    assert "## 1. Onboarding Evaluation Criteria" in text
+    assert "## 2. Wrong-Instrument Rejection Rules" in text
+    assert "## 3. Onboarding Categories" in text
+    assert "## 4. Next Recommended Action" in text
+    assert "HOLD_FOR_PROVIDER_SELECTION" in text
+    assert "data/crypto_d1_spot_cache/" in text
+
+
+def test_render_never_leaks_a_secret():
+    text = _RENDER(_BUILD({"access_token": "TOP-SECRET-VALUE"}))
+    assert "TOP-SECRET-VALUE" not in text
+
+
+# --------------------------------------------------------------------------- #
+# AST purity: __future__ / typing / sparta_commander roots only; no os / json /
+# network / credential modules; no os.environ access; no open / write_* call
+# --------------------------------------------------------------------------- #
+_ALLOWED_IMPORT_ROOTS = {"__future__", "typing", "sparta_commander"}
+_FORBIDDEN_MODULE_TOKENS = {
+    "os",
+    "sys",
+    "json",
+    "subprocess",
+    "socket",
+    "shutil",
+    "pathlib",
+    "requests",
+    "http",
+    "urllib",
+    "importlib",
+    "pandas",
+    "numpy",
+    "ccxt",
+    "databento",
+    "dotenv",
+    "datetime",
+    "time",
+    "random",
+    "pickle",
+    "sqlite3",
+}
+
+
+def _module_ast():
+    return ast.parse(_MODPATH.read_text(encoding="utf-8"))
+
+
+def test_module_imports_are_within_allowed_roots():
+    tree = _module_ast()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name.split(".")[0] in _ALLOWED_IMPORT_ROOTS, alias.name
+        elif isinstance(node, ast.ImportFrom):
+            root = (node.module or "").split(".")[0]
+            assert root in _ALLOWED_IMPORT_ROOTS, node.module
+
+
+def test_module_imports_no_os_network_or_credential_modules():
+    imported_roots = set()
+    for node in ast.walk(_module_ast()):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                imported_roots.add(alias.name.split(".")[0])
+        elif isinstance(node, ast.ImportFrom):
+            imported_roots.add((node.module or "").split(".")[0])
+    assert not (imported_roots & _FORBIDDEN_MODULE_TOKENS), (
+        imported_roots & _FORBIDDEN_MODULE_TOKENS
+    )
+
+
+def test_module_never_reads_environment():
+    for node in ast.walk(_module_ast()):
+        if isinstance(node, ast.Attribute):
+            assert node.attr not in {"environ", "getenv", "environb"}, node.attr
+
+
+def test_module_has_no_eval_exec_import_dunder():
+    for node in ast.walk(_module_ast()):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            assert node.func.id not in {"eval", "exec", "compile", "__import__", "input"}
+
+
+def test_module_has_no_filesystem_write_capability_of_its_own():
+    # The contract must own NO filesystem-write capability: it never calls open,
+    # write_text, write_bytes, or write_json. Asserted both lexically (so the
+    # safety verifier's `filesystem_write` pattern cannot match) and via the AST.
+    src = _MODPATH.read_text(encoding="utf-8")
+    assert "open(" not in src
+    assert ".write_text(" not in src
+    assert ".write_bytes(" not in src
+    assert "write_json(" not in src
+    for node in ast.walk(_module_ast()):
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                assert node.func.id != "open"
+            if isinstance(node.func, ast.Attribute):
+                assert node.func.attr not in {"write_text", "write_bytes", "write_json"}
+
+
+# --------------------------------------------------------------------------- #
+# commander_2_safety allowlist (exactly two additive lines)
+# --------------------------------------------------------------------------- #
+def test_commander_safety_allowlist_includes_the_two_additive_entries():
+    from sparta_commander.commander_2_safety import (
+        COMMANDER_2_MODULES,
+        COMMANDER_2_TESTS,
+    )
+
+    assert _MODULE_ALLOWLIST_LINE in COMMANDER_2_MODULES
+    assert _TEST_ALLOWLIST_LINE in COMMANDER_2_TESTS
+    assert COMMANDER_2_MODULES.count(_MODULE_ALLOWLIST_LINE) == 1
+    assert COMMANDER_2_TESTS.count(_TEST_ALLOWLIST_LINE) == 1
+
+
+def test_commander_safety_only_two_new_lines_for_this_module():
+    src = _SAFETY_PATH.read_text(encoding="utf-8")
+    assert src.count(_MODULE_ALLOWLIST_LINE) == 1
+    assert src.count(_TEST_ALLOWLIST_LINE) == 1
