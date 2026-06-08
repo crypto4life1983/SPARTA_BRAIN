@@ -894,3 +894,119 @@ def test_static_panel_matches_block158_registered_backend_truth():
     ) in block
     assert "Locked &middot; human approval required" in block
     assert "Locked &middot; never automated" in block
+
+
+# --- Bundle 161: Pipeline Coverage Reconciliation (Block 161) ----------------
+
+def test_pipeline_coverage_reconciliation_shown_complete_parked_no_unlock():
+    """The Block 161 Crypto-D1 Pipeline Coverage Reconciliation is shown as a
+    COMPLETE + registered, read-only coverage-metadata row in the machine lane
+    (Pipeline + Combined views) and in the Current Run snapshot. It must make
+    clear the 13 cataloged modules are built/tested/committed but PARKED and NOT
+    active, carry no execution / fetch / QA-run / unlock affordance, and NOT
+    advance the boundary (real_data_qa stays blocked, the boundary stays NEXT)."""
+    block = _strategy_flow_block(_page())
+    # shown complete + registered in BOTH machine lanes (Pipeline + Combined)
+    assert block.count('data-debug="BLOCK_161_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 Pipeline Coverage Reconciliation</span>'
+        '<span class="nst">Block 161 &middot; Complete &middot; registered '
+        '&middot; 13 modules parked &middot; not active</span>'
+    ) >= 2
+    # the parked-not-active posture is explicit in the row's own tooltip
+    assert (
+        "parked behind the human Real Data QA boundary; not active; authorizes "
+        "nothing; no real_data_qa unlock"
+        in block
+    )
+    # surfaced in the Current Run snapshot as a read-only completion row
+    assert (
+        '<span class="k">Pipeline Coverage Reconciliation</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 161 '
+        '&middot; Complete &middot; registered'
+    ) in block
+    # registering the coverage layer did NOT advance the boundary
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    # no execution / unlock / fetch / QA-run control surface anywhere in the panel
+    low = block.lower()
+    for forbidden in (
+        "unlock_real_data_qa", "run_qa", "start_qa", "fetch(",
+        "place_order", "submit_order", "execute_trade", "go_live",
+        "enable_live", "auto_push", "activate_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
+
+
+def test_static_panel_matches_block161_registered_backend_truth():
+    """The visible static panel must match the committed backend truth at Bundle
+    161: the Pipeline Coverage Reconciliation (Block 161) is complete and
+    registered and is the live latest_completed_pipeline_coverage_reconciliation,
+    while the chain stays PARKED at the human-controlled real-data QA boundary
+    (current_stage / next_required_action unchanged, real_data_qa and baseline
+    blocked, paper/micro-live locked).
+
+    Skips (rather than errors) if the backend module is not importable."""
+    try:
+        from sparta_commander import (  # noqa: WPS433 - guarded backend import
+            strategy_factory_mission_flow_status as mf,
+        )
+    except Exception as exc:  # noqa: BLE001 - backend may be broken mid-edit
+        pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
+    status = mf.get_mission_flow_status()
+    assert status["latest_completed_pipeline_coverage_reconciliation"] == (
+        "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
+    )
+    assert status["current_stage"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert status["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the coverage layer is COMPLETE and the boundary lane is still NEXT
+    pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_pipeline_coverage_reconciliation_layer"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == mf.STATE_NEXT
+    # the Block 158 boundary decision completion is preserved alongside Block 161
+    assert status["latest_completed_real_data_qa_boundary_decision"] == (
+        "Block 158 - Crypto-D1 Human-Controlled Real Data QA Boundary Decision"
+    )
+
+    block = _strategy_flow_block(_page())
+    # backend says Block 161 latest -> the panel must show it (anti-drift tripwire)
+    assert block.count('data-debug="BLOCK_161_REGISTERED"') >= 2
+    assert "Crypto-D1 Pipeline Coverage Reconciliation" in block
+    assert (
+        "Block 161 &middot; Complete &middot; registered &middot; 13 modules "
+        "parked &middot; not active"
+    ) in block
+    # the panel must NOT omit the prior Block 158 completion
+    assert block.count('data-debug="BLOCK_158_REGISTERED"') >= 2
+    # the visible current stage + next required action match the backend exactly
+    assert status["current_stage"] in block
+    assert status["next_required_action"] in block
+    # the next visible machine step is still the human-controlled boundary decision
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    # registering the layer did NOT advance the boundary
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    assert "Locked &middot; human approval required" in block
+    assert "Locked &middot; never automated" in block

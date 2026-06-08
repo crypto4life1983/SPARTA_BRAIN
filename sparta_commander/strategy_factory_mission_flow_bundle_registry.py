@@ -353,6 +353,9 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION",
     "get_latest_completed_real_data_qa_boundary_decision",
     "get_latest_completed_real_data_qa_boundary_decision_label",
+    "LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION",
+    "get_latest_completed_pipeline_coverage_reconciliation",
+    "get_latest_completed_pipeline_coverage_reconciliation_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -871,6 +874,160 @@ _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_LABEL = (
 LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION = (
     _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_LABEL
 )
+
+# Block 161 recognition: the Crypto-D1 Pipeline Coverage Reconciliation -- a pure,
+# read-only COVERAGE METADATA layer. The Bundle 160 inventory found that the
+# downstream Crypto-D1 source/provider/fetch/Databento/inventory/data-QA modules
+# below already EXIST, are TESTED, and are COMMITTED, but are NOT registered as
+# active pipeline stages, NOT surfaced, and NOT shown in JARVIS -- the gap was
+# visibility, not authorship. Recognizing this reconciliation records, on paper,
+# that those modules exist and stay PARKED behind the human real-data QA boundary;
+# it does NOT register them as active/executable stages and does NOT approve them
+# for execution. It authorizes nothing and executes nothing: no data fetch, API
+# call, dataset inspection, real data acquisition, dataset loading, QA, baseline,
+# backtest, simulation, broker/exchange/order, paper/live, automation, or runtime/
+# registry/dashboard write is unlocked. Registering it is purely additive latest-
+# completed metadata: it does NOT advance CURRENT_STAGE or NEXT_REQUIRED_ACTION,
+# both of which remain at the human-controlled real-data QA boundary above.
+# real_data_qa and baseline stay BLOCKED and the paper/micro-live gates stay
+# LOCKED; recognizing it is never an unlock of real_data_qa.
+_RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL = (
+    "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
+)
+LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION = (
+    _RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL
+)
+
+# Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
+# 160 inventory, Section B). Each is already built, tested, and committed, but is
+# deliberately NOT an active/executable pipeline stage: it is parked behind the
+# human-controlled real-data QA boundary. This is coverage METADATA only -- listing
+# a module here records that it exists, never that it is approved to run.
+_PARKED_COVERAGE_MODULES: tuple[dict[str, Any], ...] = (
+    {
+        "name": "Crypto-D1 Read-Only Data QA Boundary Plan Contract",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_read_only_data_qa_boundary_plan_contract"
+        ),
+        "category": "data_qa",
+    },
+    {
+        "name": "Crypto-D1 Data QA Contract",
+        "module": "sparta_commander.strategy_factory_data_qa_contract",
+        "category": "data_qa",
+    },
+    {
+        "name": "Crypto-D1 Read-Only Market Data Provider Selection Contract",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_read_only_market_data_provider_selection_contract"
+        ),
+        "category": "provider",
+    },
+    {
+        "name": "Crypto-D1 Read-Only Spot Data Provider Onboarding Contract",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_read_only_spot_data_provider_onboarding_contract"
+        ),
+        "category": "provider",
+    },
+    {
+        "name": "Crypto-D1 Selected Read-Only Spot Provider Human Approval Packet",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_selected_read_only_spot_provider_human_approval_packet"
+        ),
+        "category": "provider",
+    },
+    {
+        "name": "Crypto-D1 Selected Read-Only Spot Provider Client Adapter Contract",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_selected_read_only_spot_provider_client_adapter_contract"
+        ),
+        "category": "provider",
+    },
+    {
+        "name": "Crypto-D1 Selected Read-Only Spot Provider Fetch Runner",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_selected_read_only_spot_provider_fetch_runner"
+        ),
+        "category": "fetch",
+    },
+    {
+        "name": "Crypto-D1 Automated Read-Only Spot Data Source Acquisition Orchestrator",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_automated_read_only_spot_data_source_acquisition_orchestrator"
+        ),
+        "category": "acquisition",
+    },
+    {
+        "name": "Crypto-D1 Databento Missing-Crypto-Data Acquisition Plan Contract",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_databento_missing_crypto_data_acquisition_plan_contract"
+        ),
+        "category": "databento",
+    },
+    {
+        "name": "Crypto-D1 Databento One-Time Fetch Human Approval Packet",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_databento_one_time_fetch_human_approval_packet"
+        ),
+        "category": "databento",
+    },
+    {
+        "name": "Crypto-D1 Databento Read-Only Fetch Execution Contract",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_databento_read_only_fetch_execution_contract"
+        ),
+        "category": "databento",
+    },
+    {
+        "name": "Crypto-D1 Databento Read-Only Fetch Runner",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_databento_read_only_fetch_runner"
+        ),
+        "category": "databento",
+    },
+    {
+        "name": "Crypto-D1 Local Data Inventory Inspector",
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_local_data_inventory_inspector"
+        ),
+        "category": "inventory",
+    },
+)
+
+
+def _parked_coverage_module_record(spec: dict[str, Any]) -> dict[str, Any]:
+    """Build one fresh coverage-metadata record for a parked module.
+
+    Every record asserts the module EXISTS, is TESTED, and is COMMITTED, but is
+    PARKED and NOT active -- it is coverage metadata, never an execution permit.
+    """
+    return {
+        "name": spec["name"],
+        "module": spec["module"],
+        "category": spec["category"],
+        "exists": True,
+        "tested": True,
+        "committed": True,
+        "registered_as_active_stage": False,
+        "parked": True,
+        "active": False,
+        "executes": False,
+        "status": "EXISTS_TESTED_COMMITTED_PARKED_NOT_ACTIVE",
+    }
+
 
 # The completion stage published once Bundle 48 (post-boundary next-step) is
 # registered as complete. Bundle 47 advances into this stage.
@@ -3483,6 +3640,90 @@ def get_latest_completed_real_data_qa_boundary_decision_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 Human-
     Controlled Real Data QA Boundary Decision."""
     return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_LABEL
+
+
+def _recognized_pipeline_coverage_reconciliation() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Pipeline
+    Coverage Reconciliation record.
+
+    This is the Block 161 COVERAGE METADATA layer. The Bundle 160 inventory found
+    that the downstream Crypto-D1 source/provider/fetch/Databento/inventory/data-QA
+    modules cataloged in ``_PARKED_COVERAGE_MODULES`` already EXIST, are TESTED,
+    and are COMMITTED, yet were not registered as active stages, not surfaced, and
+    not shown in JARVIS -- the gap was visibility, not authorship. Recognizing this
+    reconciliation records, on paper, that those modules exist and stay PARKED
+    behind the human real-data QA boundary; it does NOT register them as active or
+    executable stages and does NOT approve them for execution. It is NOT an
+    execution bundle: it authorizes nothing, executes nothing, and unlocks no real
+    capability. It stages nothing, commits nothing, pushes nothing, fetches no
+    data, calls no API, inspects no dataset, acquires/loads no data, and runs no
+    QA, baseline, backtest, simulation, paper/live, broker/exchange, or automation;
+    every field is derived from a static catalog only. A fresh record (with fresh
+    module lists) is returned every call for mutation isolation.
+    """
+    parked = [_parked_coverage_module_record(m) for m in _PARKED_COVERAGE_MODULES]
+    record: dict[str, Any] = {
+        "pipeline_coverage_reconciliation_id": (
+            "CRYPTO_D1_PIPELINE_COVERAGE_RECONCILIATION"
+        ),
+        "name": "Crypto-D1 Pipeline Coverage Reconciliation",
+        "label": _RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "parked_module_count": len(parked),
+        "parked_modules": parked,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Pipeline Coverage "
+            "Reconciliation, BUILT in Block 161. It records, on paper, that the "
+            "downstream Crypto-D1 source/provider/fetch/Databento/inventory/data-QA "
+            "modules cataloged here -- found by the Bundle 160 inventory to already "
+            "EXIST, be TESTED, and be COMMITTED, yet not registered as active "
+            "stages, not surfaced, and not shown in JARVIS -- now have their "
+            "existence reflected as coverage metadata only. The gap was visibility, "
+            "not authorship. These modules stay PARKED behind the human-controlled "
+            "real-data QA boundary and are NOT registered as active or executable "
+            "stages and NOT approved for execution. It authorizes nothing and "
+            "executes nothing: no staging, no commit, no push, no data fetch, API "
+            "call, dataset inspection, real data acquisition, dataset loading, QA, "
+            "baseline, backtest, simulation, trade signal, order placement, Telegram "
+            "trade command, paper/live, automation, or runtime/registry/dashboard "
+            "write is unlocked. It is a coverage map, not an actor, and never "
+            "converts the existence of a parked module into permission to run it; "
+            "listing a module here is never a buy/sell/long/short/entry/exit/order "
+            "instruction and never an unlock of real_data_qa; it always requires "
+            "independent confirmation. Registering it is purely additive latest-"
+            "completed metadata: it does not advance the global stage, which remains "
+            "the human-controlled real-data QA boundary decision and must not imply "
+            "automatic execution or auto-push. real_data_qa and baseline stay "
+            "BLOCKED and the paper/micro-live gates stay LOCKED unless a separate, "
+            "future, human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_pipeline_coverage_reconciliation() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Pipeline Coverage
+    Reconciliation record."""
+    return _recognized_pipeline_coverage_reconciliation()
+
+
+def get_latest_completed_pipeline_coverage_reconciliation_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Pipeline
+    Coverage Reconciliation."""
+    return _RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL
 
 
 def get_current_stage() -> str:

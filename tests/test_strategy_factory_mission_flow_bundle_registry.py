@@ -118,6 +118,9 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION,
     get_latest_completed_real_data_qa_boundary_decision,
     get_latest_completed_real_data_qa_boundary_decision_label,
+    LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION,
+    get_latest_completed_pipeline_coverage_reconciliation,
+    get_latest_completed_pipeline_coverage_reconciliation_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -3231,6 +3234,123 @@ def test_block_158_registration_preserves_prior_truth():
     assert LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET == (
         "Block 155 - Crypto-D1 Real Data QA Boundary Decision Human Approval "
         "Packet"
+    )
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_latest_completed_pipeline_coverage_reconciliation_label():
+    assert LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION == (
+        "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
+    )
+    assert (
+        get_latest_completed_pipeline_coverage_reconciliation_label()
+        == LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION
+    )
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER", "UNLOCK"):
+        assert banned not in (
+            LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION.upper()
+        ), banned
+
+
+def test_registry_recognizes_pipeline_coverage_reconciliation():
+    c = get_latest_completed_pipeline_coverage_reconciliation()
+    assert c["pipeline_coverage_reconciliation_id"] == (
+        "CRYPTO_D1_PIPELINE_COVERAGE_RECONCILIATION"
+    )
+    assert c["name"] == "Crypto-D1 Pipeline Coverage Reconciliation"
+    assert c["label"] == LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION
+    assert c["defined"] is True
+    assert c["complete"] is True
+    # 13 existing-but-parked downstream modules cataloged as coverage metadata.
+    assert c["parked_module_count"] == 13
+    assert len(c["parked_modules"]) == 13
+
+
+def test_recognized_pipeline_coverage_reconciliation_research_only():
+    c = get_latest_completed_pipeline_coverage_reconciliation()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_pipeline_coverage_modules_are_parked_not_active():
+    # Every cataloged module must be EXISTS/TESTED/COMMITTED but PARKED and
+    # NOT an active/executable stage -- coverage metadata, not an execution
+    # permit.
+    c = get_latest_completed_pipeline_coverage_reconciliation()
+    assert c["parked_modules"], "expected a non-empty parked-module catalog"
+    for m in c["parked_modules"]:
+        assert m["exists"] is True, m["name"]
+        assert m["tested"] is True, m["name"]
+        assert m["committed"] is True, m["name"]
+        assert m["registered_as_active_stage"] is False, m["name"]
+        assert m["parked"] is True, m["name"]
+        assert m["active"] is False, m["name"]
+        assert m["executes"] is False, m["name"]
+        assert m["status"] == "EXISTS_TESTED_COMMITTED_PARKED_NOT_ACTIVE", (
+            m["name"]
+        )
+
+
+def test_recognized_pipeline_coverage_reconciliation_authorizes_nothing():
+    c = get_latest_completed_pipeline_coverage_reconciliation()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    assert c["stage"] == CURRENT_STAGE
+    assert c["next_gate"] == CURRENT_STAGE
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "purely additive latest-completed metadata" in reason
+    assert "never an unlock of real_data_qa" in reason
+
+
+def test_recognized_pipeline_coverage_reconciliation_isolated():
+    getter = get_latest_completed_pipeline_coverage_reconciliation
+    assert getter() == getter()
+    c = getter()
+    c["executes"] = True
+    c["parked_module_count"] = 999
+    c["research_universe"].append("TAMPERED")
+    c["parked_modules"][0]["active"] = True
+    c["parked_modules"].append({"name": "TAMPERED"})
+    fresh = getter()
+    assert fresh["executes"] is False
+    assert fresh["parked_module_count"] == 13
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert all(m["active"] is False for m in fresh["parked_modules"])
+    assert len(fresh["parked_modules"]) == 13
+
+
+def test_block_161_registration_preserves_prior_truth():
+    # Registering the Block 161 pipeline coverage reconciliation layer must NOT
+    # advance the boundary stage, must NOT disturb the latest bundle, and must
+    # NOT disturb the Block 152/155/158 recognitions.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_OVERNIGHT_RESEARCH_AUTOPILOT_CONTROLLER == (
+        "Block 152 - SPARTA Overnight Research Autopilot Controller"
+    )
+    assert LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET == (
+        "Block 155 - Crypto-D1 Real Data QA Boundary Decision Human Approval "
+        "Packet"
+    )
+    assert LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION == (
+        "Block 158 - Crypto-D1 Human-Controlled Real Data QA Boundary Decision"
     )
     assert CURRENT_STAGE == (
         "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
