@@ -281,6 +281,12 @@ from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision 
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_readiness_review import (  # noqa: E501
     BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION as _REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 167 public read-only spot source evaluation module imports ONLY
+# __future__ and typing -- it does not import this registry -- so reading its
+# stable schema constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_public_read_only_spot_source_evaluation import (  # noqa: E501
+    SOURCE_EVALUATION_SCHEMA_VERSION as _PUBLIC_SPOT_SOURCE_EVALUATION_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -392,6 +398,9 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW",
     "get_latest_completed_real_data_qa_boundary_readiness_review",
     "get_latest_completed_real_data_qa_boundary_readiness_review_label",
+    "LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION",
+    "get_latest_completed_public_spot_source_evaluation",
+    "get_latest_completed_public_spot_source_evaluation_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1004,6 +1013,18 @@ _RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL = (
 )
 LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW = (
     _RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL
+)
+
+# Block 167 recognizes the research-only public read-only spot SOURCE EVALUATION
+# contract. Like every recognized record this is purely additive latest-completed
+# metadata; it authorizes nothing, calls no endpoint, fetches no URL, and is never
+# an unlock of real_data_qa. Even a READY_FOR_HUMAN_SOURCE_REVIEW result only means
+# the paper description is sound enough for a human to review the source.
+_RECOGNIZED_PUBLIC_SPOT_SOURCE_EVALUATION_LABEL = (
+    "Block 167 - Crypto-D1 Public Read-Only Spot Source Evaluation Contract"
+)
+LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION = (
+    _RECOGNIZED_PUBLIC_SPOT_SOURCE_EVALUATION_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -4193,6 +4214,91 @@ def get_latest_completed_real_data_qa_boundary_readiness_review_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 Real Data QA
     Boundary Readiness Review."""
     return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL
+
+
+def _recognized_public_spot_source_evaluation() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Public Read-Only
+    Spot Source Evaluation contract record.
+
+    This is the Block 167 SOURCE-EVALUATION layer. Recognizing it records, on paper,
+    that the Block 167 contract -- a pure, research-only paper contract that reasons
+    over a static caller-supplied description of a candidate PUBLIC read-only spot
+    data source and returns one of exactly two verdicts (READY_FOR_HUMAN_SOURCE_REVIEW
+    when all ten evaluation items pass and no unsafe flag is set, otherwise
+    HOLD_NEEDS_MORE_PREP) -- now exists. It is NOT an execution bundle: it authorizes
+    nothing, executes nothing, calls no endpoint, fetches no URL, and unlocks no real
+    capability. It stages nothing, commits nothing, pushes nothing, fetches no data,
+    calls no API, opens no network, reads no credential, inspects no dataset, and runs
+    no QA, baseline, backtest, simulation, paper/live, broker/exchange, or automation;
+    every field is derived from static input only. A fresh record is returned every
+    call for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "public_spot_source_evaluation_id": (
+            "CRYPTO_D1_PUBLIC_READ_ONLY_SPOT_SOURCE_EVALUATION"
+        ),
+        "name": "Crypto-D1 Public Read-Only Spot Source Evaluation",
+        "label": _RECOGNIZED_PUBLIC_SPOT_SOURCE_EVALUATION_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_public_read_only_spot_source_evaluation"
+        ),
+        "schema_constant": "SOURCE_EVALUATION_SCHEMA_VERSION",
+        "schema_version": _PUBLIC_SPOT_SOURCE_EVALUATION_SCHEMA_VERSION,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Public Read-Only Spot Source "
+            "Evaluation contract, BUILT in Block 167. It records, on paper, that the "
+            "pure, research-only EVALUATION LAYER -- which reasons over a static "
+            "caller-supplied description of a candidate public read-only spot data "
+            "source and returns one of exactly two verdicts "
+            "(READY_FOR_HUMAN_SOURCE_REVIEW when all ten evaluation items pass and no "
+            "unsafe flag is set, otherwise HOLD_NEEDS_MORE_PREP) -- now exists; it "
+            "authorizes nothing and executes nothing: no staging, no commit, no push, "
+            "no data fetch, API call, endpoint call, URL fetch, network open, "
+            "credential read, dataset inspection, real data acquisition, dataset "
+            "loading, QA, baseline, backtest, simulation, trade signal, order "
+            "placement, Telegram trade command, paper/live, automation, or runtime/"
+            "registry/dashboard write is unlocked. It is a source-evaluation verdict, "
+            "not an actor, and never converts a READY verdict into a selection or an "
+            "execution; even a READY_FOR_HUMAN_SOURCE_REVIEW result only means the "
+            "paper description is sound enough for a human to review the source, "
+            "never a buy/sell/long/short/entry/exit/order instruction and never an "
+            "unlock of real_data_qa; it always requires independent confirmation. "
+            "Registering it is purely additive latest-completed metadata: it does not "
+            "advance the global stage, which remains the human-controlled real-data QA "
+            "boundary decision and must not imply automatic execution or auto-push. "
+            "real_data_qa and baseline stay BLOCKED and the paper/micro-live gates "
+            "stay LOCKED unless a separate, future, human-approved step provides "
+            "explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_public_spot_source_evaluation() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Public Read-Only Spot Source
+    Evaluation record."""
+    return _recognized_public_spot_source_evaluation()
+
+
+def get_latest_completed_public_spot_source_evaluation_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Public
+    Read-Only Spot Source Evaluation."""
+    return _RECOGNIZED_PUBLIC_SPOT_SOURCE_EVALUATION_LABEL
 
 
 def get_current_stage() -> str:
