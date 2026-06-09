@@ -1306,3 +1306,292 @@ def test_static_panel_matches_block166_registered_backend_truth():
     ) in block
     assert "Locked &middot; human approval required" in block
     assert "Locked &middot; never automated" in block
+
+
+def test_boundary_decision_packet_shown_complete_no_unlock():
+    """The Block 170 Crypto-D1 Real Data QA Boundary Decision Packet is shown as a
+    COMPLETE + registered, research-only decision-packet row in the machine lane
+    (Pipeline + Combined views) and in the Current Run snapshot. It must make clear
+    it authorizes nothing and executes nothing, that even its highest option
+    authorizes nothing beyond building another read-only research contract, carry no
+    execution / fetch / QA-run / unlock affordance, and NOT advance the boundary."""
+    block = _strategy_flow_block(_page())
+    assert block.count('data-debug="BLOCK_170_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 Real Data QA Boundary Decision Packet'
+        '</span><span class="nst">Block 170 &middot; Complete &middot; registered '
+        '&middot; boundary decision packet</span>'
+    ) >= 2
+    assert (
+        "research-only decision packet for the parked real data QA boundary; "
+        "offers four read-only decision options that are recommendations only; "
+        "even the highest option authorizes nothing beyond building another "
+        "read-only research contract; authorizes nothing; executes nothing; no "
+        "real_data_qa unlock"
+        in block
+    )
+    assert (
+        '<span class="k">Real Data QA Boundary Decision Packet</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 170 &middot; '
+        'Complete &middot; registered'
+    ) in block
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    low = block.lower()
+    for forbidden in (
+        "unlock_real_data_qa", "run_qa", "start_qa", "fetch(",
+        "place_order", "submit_order", "execute_trade", "go_live",
+        "enable_live", "auto_push", "activate_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
+
+
+def test_plan_only_contract_shown_complete_no_unlock():
+    """The Block 171 Crypto-D1 Real Data QA Plan-Only Contract is shown as a
+    COMPLETE + registered, research-only plan-only row in the machine lane (Pipeline
+    + Combined views) and in the Current Run snapshot. It must make clear the plan is
+    text and scope only, authorizes nothing and executes nothing, carry no execution
+    / fetch / QA-run / unlock affordance, and NOT advance the boundary."""
+    block = _strategy_flow_block(_page())
+    assert block.count('data-debug="BLOCK_171_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 Real Data QA Plan-Only Contract'
+        '</span><span class="nst">Block 171 &middot; Complete &middot; registered '
+        '&middot; plan-only contract</span>'
+    ) >= 2
+    assert (
+        "research-only plan-only contract; drafts a plan -- text and scope only -- "
+        "for a future real data QA step; authorizes nothing; executes nothing; no "
+        "real_data_qa unlock"
+        in block
+    )
+    assert (
+        '<span class="k">Real Data QA Plan-Only Contract</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 171 &middot; '
+        'Complete &middot; registered'
+    ) in block
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    low = block.lower()
+    for forbidden in (
+        "unlock_real_data_qa", "run_qa", "start_qa", "fetch(",
+        "place_order", "submit_order", "execute_trade", "go_live",
+        "enable_live", "auto_push", "activate_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
+
+
+def test_boundary_decision_packet_and_plan_only_render_after_166_before_boundary():
+    """Anti-drift: the Block 170 and Block 171 nodes render AFTER the Block 166
+    readiness-review node, in order 170 < 171 < 172, and all BEFORE the still-NEXT
+    Human-Controlled Real Data QA Boundary Decision node, so the lane is not silently
+    truncated and the boundary remains the next machine step."""
+    block = _strategy_flow_block(_page())
+    b166 = block.find('data-debug="BLOCK_166_REGISTERED"')
+    b170 = block.find('data-debug="BLOCK_170_REGISTERED"')
+    b171 = block.find('data-debug="BLOCK_171_REGISTERED"')
+    b172 = block.find('data-debug="BLOCK_172_REGISTERED"')
+    boundary = block.find(
+        '<span class="nlbl">Human-Controlled Real Data QA Boundary Decision'
+        '</span><span class="nst">Next &middot; awaiting human decision</span>'
+    )
+    assert -1 not in (b166, b170, b171, b172, boundary)
+    assert b166 < b170 < b171 < b172 < boundary, (
+        "the 170/171/172 nodes must sit in order between Block 166 and the boundary"
+    )
+
+
+def test_static_panel_matches_block170_171_registered_backend_truth():
+    """The visible static panel must match the committed backend truth for the Block
+    170 boundary decision packet and Block 171 plan-only contract: both complete and
+    registered and the live latest_completed_* labels, while the chain stays PARKED
+    at the human-controlled real-data QA boundary.
+
+    Skips (rather than errors) if the backend module is not importable."""
+    try:
+        from sparta_commander import (  # noqa: WPS433 - guarded backend import
+            strategy_factory_mission_flow_status as mf,
+        )
+    except Exception as exc:  # noqa: BLE001 - backend may be broken mid-edit
+        pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
+    status = mf.get_mission_flow_status()
+    assert status[
+        "latest_completed_real_data_qa_boundary_decision_packet"
+    ] == ("Block 170 - Crypto-D1 Real Data QA Boundary Decision Packet")
+    assert status[
+        "latest_completed_real_data_qa_plan_only_contract"
+    ] == ("Block 171 - Crypto-D1 Real Data QA Plan-Only Contract")
+    assert status["current_stage"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert status["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_real_data_qa_boundary_decision_packet"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "crypto_d1_real_data_qa_plan_only_contract"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == mf.STATE_NEXT
+
+    block = _strategy_flow_block(_page())
+    assert block.count('data-debug="BLOCK_170_REGISTERED"') >= 2
+    assert block.count('data-debug="BLOCK_171_REGISTERED"') >= 2
+    assert "Crypto-D1 Real Data QA Boundary Decision Packet" in block
+    assert "Crypto-D1 Real Data QA Plan-Only Contract" in block
+    assert status["current_stage"] in block
+    assert status["next_required_action"] in block
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    assert "Locked &middot; human approval required" in block
+    assert "Locked &middot; never automated" in block
+
+
+def test_plan_approval_decision_shown_complete_no_unlock():
+    """The Block 172 Crypto-D1 Real Data QA Plan Approval Decision Contract is shown
+    as a COMPLETE + registered, research-only approval-decision row in the machine
+    lane (Pipeline + Combined views) and in the Current Run snapshot. It must make
+    clear it authorizes nothing and executes nothing, that even its highest grant
+    APPROVE_PLAN_ONLY approves only the plan's text/scope as a future candidate,
+    carry no execution / fetch / QA-run / unlock affordance, and NOT advance the
+    boundary (real_data_qa stays blocked, the boundary decision stays NEXT)."""
+    block = _strategy_flow_block(_page())
+    # shown complete + registered in BOTH machine lanes (Pipeline + Combined)
+    assert block.count('data-debug="BLOCK_172_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 Real Data QA Plan Approval Decision Contract'
+        '</span><span class="nst">Block 172 &middot; Complete &middot; registered '
+        '&middot; plan-only approval decision</span>'
+    ) >= 2
+    # the research-only, authorize-nothing / execute-nothing posture is explicit
+    assert (
+        "research-only approval decision; records a human decision about the "
+        "Block 171 Real Data QA plan-only contract; the highest grant "
+        "APPROVE_PLAN_ONLY approves only the plan text/scope as a future "
+        "candidate; authorizes nothing; executes nothing; no real_data_qa unlock"
+        in block
+    )
+    # surfaced in the Current Run snapshot as a read-only completion row
+    assert (
+        '<span class="k">Real Data QA Plan Approval Decision Contract</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 172 &middot; '
+        'Complete &middot; registered'
+    ) in block
+    # registering the approval decision did NOT advance the boundary
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    # no execution / unlock / fetch / QA-run control surface anywhere in the panel
+    low = block.lower()
+    for forbidden in (
+        "unlock_real_data_qa", "run_qa", "start_qa", "fetch(",
+        "place_order", "submit_order", "execute_trade", "go_live",
+        "enable_live", "auto_push", "activate_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
+
+
+def test_plan_approval_decision_renders_after_block166_before_boundary():
+    """Anti-drift: the Block 172 approval-decision node renders AFTER the Block 166
+    readiness-review node and BEFORE the still-NEXT Human-Controlled Real Data QA
+    Boundary Decision node, so the lane is not silently truncated at 166 and the
+    boundary remains the next machine step."""
+    block = _strategy_flow_block(_page())
+    b166 = block.find('data-debug="BLOCK_166_REGISTERED"')
+    b172 = block.find('data-debug="BLOCK_172_REGISTERED"')
+    boundary = block.find(
+        '<span class="nlbl">Human-Controlled Real Data QA Boundary Decision'
+        '</span><span class="nst">Next &middot; awaiting human decision</span>'
+    )
+    assert -1 not in (b166, b172, boundary)
+    assert b166 < b172 < boundary, (
+        "the approval-decision node must sit between Block 166 and the boundary"
+    )
+
+
+def test_static_panel_matches_block172_registered_backend_truth():
+    """The visible static panel must match the committed backend truth for Bundle
+    173: the Block 172 Crypto-D1 Real Data QA Plan Approval Decision Contract is
+    complete and registered and is the live latest_completed_* label, while the
+    chain stays PARKED at the human-controlled real-data QA boundary (current_stage /
+    next_required_action unchanged, real_data_qa and baseline blocked, paper/
+    micro-live locked).
+
+    Skips (rather than errors) if the backend module is not importable."""
+    try:
+        from sparta_commander import (  # noqa: WPS433 - guarded backend import
+            strategy_factory_mission_flow_status as mf,
+        )
+    except Exception as exc:  # noqa: BLE001 - backend may be broken mid-edit
+        pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
+    status = mf.get_mission_flow_status()
+    assert status[
+        "latest_completed_real_data_qa_plan_approval_decision"
+    ] == ("Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract")
+    assert status["current_stage"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert status["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the approval decision is COMPLETE in the machine pipeline and the boundary
+    # lane is still NEXT in the backend
+    pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_real_data_qa_plan_approval_decision"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == mf.STATE_NEXT
+    # the prior Block 166 completion is preserved alongside Block 172
+    assert status["latest_completed_real_data_qa_boundary_readiness_review"] == (
+        "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
+    )
+
+    block = _strategy_flow_block(_page())
+    # backend says 172 registered -> the panel must show it (anti-drift)
+    assert block.count('data-debug="BLOCK_172_REGISTERED"') >= 2
+    assert "Crypto-D1 Real Data QA Plan Approval Decision Contract" in block
+    # the panel must NOT omit the prior Block 166 completion
+    assert block.count('data-debug="BLOCK_166_REGISTERED"') >= 2
+    # the visible current stage + next required action match the backend exactly
+    assert status["current_stage"] in block
+    assert status["next_required_action"] in block
+    # the next visible machine step is still the human-controlled boundary decision
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    # registering the approval decision did NOT advance the boundary
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    assert "Locked &middot; human approval required" in block
+    assert "Locked &middot; never automated" in block

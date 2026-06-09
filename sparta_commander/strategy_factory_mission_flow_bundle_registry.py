@@ -299,6 +299,28 @@ from sparta_commander.strategy_factory_crypto_d1_concrete_read_only_spot_provide
 from sparta_commander.strategy_factory_crypto_d1_selected_read_only_spot_provider_fetch_runner_dry_run import (  # noqa: E501
     DRY_RUN_SCHEMA_VERSION as _SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 170 real data QA boundary decision packet module imports only
+# __future__, typing, and the pure-stdlib Block 155 human-approval packet contract
+# -- none of which import this registry -- so reading its stable schema constant at
+# module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision_packet import (  # noqa: E501
+    PACKET_SCHEMA_VERSION as _REAL_DATA_QA_BOUNDARY_DECISION_PACKET_SCHEMA_VERSION,  # noqa: E501
+)
+# The Block 171 real data QA plan-only contract module imports only __future__,
+# typing, and the pure-stdlib Block 155 human-approval packet contract -- none of
+# which import this registry -- so reading its stable schema constant at module top
+# is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_plan_only_contract import (  # noqa: E501
+    PLAN_SCHEMA_VERSION as _REAL_DATA_QA_PLAN_ONLY_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
+# The Block 172 real data QA plan approval decision contract module imports only
+# __future__, typing, and pure-stdlib sparta_commander sibling contracts (Block
+# 171 -> Block 155 human-approval packet) -- none of which import this registry --
+# so reading its stable schema constant at module top is cycle-safe (no circular
+# import).
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_plan_approval_decision_contract import (  # noqa: E501
+    DECISION_SCHEMA_VERSION as _REAL_DATA_QA_PLAN_APPROVAL_DECISION_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -419,6 +441,15 @@ __all__ = [
     "LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN",
     "get_latest_completed_selected_spot_provider_fetch_runner_dry_run",
     "get_latest_completed_selected_spot_provider_fetch_runner_dry_run_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET",
+    "get_latest_completed_real_data_qa_boundary_decision_packet",
+    "get_latest_completed_real_data_qa_boundary_decision_packet_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT",
+    "get_latest_completed_real_data_qa_plan_only_contract",
+    "get_latest_completed_real_data_qa_plan_only_contract_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION",
+    "get_latest_completed_real_data_qa_plan_approval_decision",
+    "get_latest_completed_real_data_qa_plan_approval_decision_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1069,6 +1100,43 @@ _RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL = (
 )
 LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN = (
     _RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL
+)
+
+# Block 170 recognizes the research-only Real Data QA BOUNDARY DECISION PACKET: a
+# human-facing read-only decision packet for the parked real data QA boundary. Like
+# every recognized record this is purely additive latest-completed metadata;
+# assembling or reading it authorizes nothing, crosses no boundary, and is never an
+# unlock of real_data_qa.
+_RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET_LABEL = (
+    "Block 170 - Crypto-D1 Real Data QA Boundary Decision Packet"
+)
+LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET = (
+    _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET_LABEL
+)
+
+# Block 171 recognizes the research-only Real Data QA PLAN-ONLY CONTRACT: a
+# read-only contract that drafts a plan (text and scope only) for a future real data
+# QA step. Like every recognized record this is purely additive latest-completed
+# metadata; drafting the plan authorizes nothing, executes nothing, crosses no
+# boundary, and is never an unlock of real_data_qa.
+_RECOGNIZED_REAL_DATA_QA_PLAN_ONLY_CONTRACT_LABEL = (
+    "Block 171 - Crypto-D1 Real Data QA Plan-Only Contract"
+)
+LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT = (
+    _RECOGNIZED_REAL_DATA_QA_PLAN_ONLY_CONTRACT_LABEL
+)
+
+# Block 172 recognizes the research-only Real Data QA PLAN APPROVAL DECISION
+# contract: a read-only approval/denial contract for the Block 171 plan-only
+# contract. Like every recognized record this is purely additive latest-completed
+# metadata; its highest grant (APPROVE_PLAN_ONLY) approves only the plan text/scope
+# as a future candidate, approves no real_data_qa execution, crosses no boundary,
+# and is never an unlock of real_data_qa.
+_RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL = (
+    "Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract"
+)
+LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION = (
+    _RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -4525,6 +4593,268 @@ def get_latest_completed_selected_spot_provider_fetch_runner_dry_run_label() -> 
     """Human label for the latest recognized research-only Crypto-D1 Selected
     Read-Only Spot Provider Fetch Runner Dry Run."""
     return _RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL
+
+
+def _recognized_real_data_qa_boundary_decision_packet() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Real Data QA
+    Boundary Decision Packet record.
+
+    This is the Block 170 BOUNDARY DECISION PACKET layer. Recognizing it records, on
+    paper, that the Block 170 contract -- a pure, research-only read-only packet that
+    assembles, from static input, the human-facing decision packet for the parked
+    real data QA boundary and offers four read-only decision options that are
+    recommendations only -- now exists. Assembling or reading it authorizes nothing
+    and crosses no boundary: even its highest option authorizes nothing beyond
+    building another pure read-only research contract. It is NOT an execution bundle:
+    it authorizes nothing, executes nothing, and unlocks no real capability. It
+    stages nothing, commits nothing, pushes nothing, fetches no data, calls no API,
+    opens no network, reads no credential, inspects no dataset, and runs no QA,
+    baseline, backtest, simulation, paper/live, broker/exchange, or automation; every
+    field is derived from static input only. A fresh record is returned every call
+    for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "real_data_qa_boundary_decision_packet_id": (
+            "CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_PACKET"
+        ),
+        "name": (
+            "Crypto-D1 Real Data QA Boundary Decision Packet"
+        ),
+        "label": _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_boundary_decision_packet"
+        ),
+        "schema_constant": "PACKET_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_BOUNDARY_DECISION_PACKET_SCHEMA_VERSION
+        ),
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Boundary Decision "
+            "Packet, BUILT in Block 170. It records, on paper, that the pure, "
+            "research-only BOUNDARY DECISION PACKET -- which assembles, from static "
+            "input, the human-facing decision packet for the parked real data QA "
+            "boundary and offers four read-only decision options that are "
+            "recommendations only -- now exists; it authorizes nothing and executes "
+            "nothing: no staging, no commit, no push, no data fetch, API call, "
+            "endpoint call, URL fetch, network open, credential read, dataset "
+            "inspection, real data acquisition, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, order placement, Telegram trade "
+            "command, paper/live, automation, or runtime/registry/dashboard write is "
+            "unlocked. It is a decision packet, not an actor, and even its highest "
+            "option authorizes nothing beyond building another pure read-only "
+            "research contract -- never a real_data_qa execution, never a "
+            "buy/sell/long/short/entry/exit/order instruction, never a boundary "
+            "crossing, and never an unlock of real_data_qa; it always requires "
+            "independent confirmation. Registering it is purely additive "
+            "latest-completed metadata: it does not advance the global stage, which "
+            "remains the human-controlled real-data QA boundary decision and must "
+            "not imply automatic execution or auto-push. real_data_qa and baseline "
+            "stay BLOCKED and the paper/micro-live gates stay LOCKED unless a "
+            "separate, future, human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_boundary_decision_packet() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Real Data QA Boundary Decision
+    Packet record."""
+    return _recognized_real_data_qa_boundary_decision_packet()
+
+
+def get_latest_completed_real_data_qa_boundary_decision_packet_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Real Data QA
+    Boundary Decision Packet."""
+    return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET_LABEL
+
+
+def _recognized_real_data_qa_plan_only_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Real Data QA
+    Plan-Only Contract record.
+
+    This is the Block 171 PLAN-ONLY layer. Recognizing it records, on paper, that
+    the Block 171 contract -- a pure, research-only read-only contract that drafts,
+    from static input, a plan (text and scope only) for a future real data QA step
+    -- now exists. Drafting the plan authorizes nothing and crosses no boundary: the
+    plan is text and scope only, a proposal for a future human-approved step. It is
+    NOT an execution bundle: it authorizes nothing, executes nothing, and unlocks no
+    real capability. It stages nothing, commits nothing, pushes nothing, fetches no
+    data, calls no API, opens no network, reads no credential, inspects no dataset,
+    and runs no QA, baseline, backtest, simulation, paper/live, broker/exchange, or
+    automation; every field is derived from static input only. A fresh record is
+    returned every call for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "real_data_qa_plan_only_contract_id": (
+            "CRYPTO_D1_REAL_DATA_QA_PLAN_ONLY_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Real Data QA Plan-Only Contract"
+        ),
+        "label": _RECOGNIZED_REAL_DATA_QA_PLAN_ONLY_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_plan_only_contract"
+        ),
+        "schema_constant": "PLAN_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_PLAN_ONLY_CONTRACT_SCHEMA_VERSION
+        ),
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Plan-Only Contract, "
+            "BUILT in Block 171. It records, on paper, that the pure, research-only "
+            "PLAN-ONLY LAYER -- which drafts, from static input, a plan (text and "
+            "scope only) for a future real data QA step -- now exists; it authorizes "
+            "nothing and executes nothing: no staging, no commit, no push, no data "
+            "fetch, API call, endpoint call, URL fetch, network open, credential "
+            "read, dataset inspection, real data acquisition, dataset loading, QA, "
+            "baseline, backtest, simulation, trade signal, order placement, Telegram "
+            "trade command, paper/live, automation, or runtime/registry/dashboard "
+            "write is unlocked. It is a plan proposal, not an actor: the plan is "
+            "text and scope only -- never a real_data_qa execution, never a "
+            "buy/sell/long/short/entry/exit/order instruction, never a boundary "
+            "crossing, and never an unlock of real_data_qa; it always requires "
+            "independent confirmation. Registering it is purely additive "
+            "latest-completed metadata: it does not advance the global stage, which "
+            "remains the human-controlled real-data QA boundary decision and must "
+            "not imply automatic execution or auto-push. real_data_qa and baseline "
+            "stay BLOCKED and the paper/micro-live gates stay LOCKED unless a "
+            "separate, future, human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_plan_only_contract() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Real Data QA Plan-Only Contract
+    record."""
+    return _recognized_real_data_qa_plan_only_contract()
+
+
+def get_latest_completed_real_data_qa_plan_only_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Real Data QA
+    Plan-Only Contract."""
+    return _RECOGNIZED_REAL_DATA_QA_PLAN_ONLY_CONTRACT_LABEL
+
+
+def _recognized_real_data_qa_plan_approval_decision() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Real Data QA
+    Plan Approval Decision contract record.
+
+    This is the Block 172 APPROVAL-DECISION layer. Recognizing it records, on
+    paper, that the Block 172 contract -- a pure, research-only read-only contract
+    that reasons over a static caller-supplied requested decision and (optional)
+    Block 171 plan-only contract and records exactly one of four decisions
+    (APPROVE_PLAN_ONLY, REJECT_PLAN, REQUEST_PLAN_REVISION, KEEP_BOUNDARY_BLOCKED)
+    about the plan -- now exists. Its single highest grant, APPROVE_PLAN_ONLY,
+    approves ONLY the plan's text and scope as a future candidate; it approves no
+    real_data_qa execution, crosses no boundary, and unlocks no gate. It is NOT an
+    execution bundle: it authorizes nothing, executes nothing, and unlocks no real
+    capability. It stages nothing, commits nothing, pushes nothing, fetches no
+    data, calls no API, opens no network, reads no credential, inspects no dataset,
+    and runs no QA, baseline, backtest, simulation, paper/live, broker/exchange, or
+    automation; every field is derived from static input only. A fresh record is
+    returned every call for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "real_data_qa_plan_approval_decision_id": (
+            "CRYPTO_D1_REAL_DATA_QA_PLAN_APPROVAL_DECISION"
+        ),
+        "name": (
+            "Crypto-D1 Real Data QA Plan Approval Decision Contract"
+        ),
+        "label": _RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_plan_approval_decision_contract"
+        ),
+        "schema_constant": "DECISION_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_PLAN_APPROVAL_DECISION_SCHEMA_VERSION
+        ),
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Plan Approval "
+            "Decision Contract, BUILT in Block 172. It records, on paper, that the "
+            "pure, research-only APPROVAL-DECISION LAYER -- which reasons over a "
+            "static caller-supplied requested decision and an optional Block 171 "
+            "plan-only contract and records exactly one of four decisions "
+            "(APPROVE_PLAN_ONLY, REJECT_PLAN, REQUEST_PLAN_REVISION, "
+            "KEEP_BOUNDARY_BLOCKED) about the plan -- now exists; it authorizes "
+            "nothing and executes nothing: no staging, no commit, no push, no data "
+            "fetch, API call, endpoint call, URL fetch, network open, credential "
+            "read, dataset inspection, real data acquisition, dataset loading, QA, "
+            "baseline, backtest, simulation, trade signal, order placement, "
+            "Telegram trade command, paper/live, automation, or "
+            "runtime/registry/dashboard write is unlocked. It is a plan-approval "
+            "verdict, not an actor, and its single highest grant, APPROVE_PLAN_ONLY, "
+            "approves only the plan's text and scope as a future candidate -- never "
+            "a real_data_qa execution, never a buy/sell/long/short/entry/exit/order "
+            "instruction, never a boundary crossing, and never an unlock of "
+            "real_data_qa; it always requires independent confirmation. Registering "
+            "it is purely additive latest-completed metadata: it does not advance "
+            "the global stage, which remains the human-controlled real-data QA "
+            "boundary decision and must not imply automatic execution or auto-push. "
+            "real_data_qa and baseline stay BLOCKED and the paper/micro-live gates "
+            "stay LOCKED unless a separate, future, human-approved step provides "
+            "explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_plan_approval_decision() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Real Data QA Plan Approval
+    Decision record."""
+    return _recognized_real_data_qa_plan_approval_decision()
+
+
+def get_latest_completed_real_data_qa_plan_approval_decision_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Real Data QA
+    Plan Approval Decision contract."""
+    return _RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL
 
 
 def get_current_stage() -> str:

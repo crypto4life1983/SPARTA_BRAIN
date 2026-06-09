@@ -94,6 +94,9 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION,
     LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC,
     LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN,
+    LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET,
+    LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT,
+    LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -159,6 +162,9 @@ def test_status_schema_is_stable():
         "latest_completed_public_spot_source_evaluation",
         "latest_completed_concrete_spot_provider_adapter_spec",
         "latest_completed_selected_spot_provider_fetch_runner_dry_run",
+        "latest_completed_real_data_qa_boundary_decision_packet",
+        "latest_completed_real_data_qa_plan_only_contract",
+        "latest_completed_real_data_qa_plan_approval_decision",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1260,6 +1266,126 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     # Block 161 completion is preserved
     assert s["latest_completed_pipeline_coverage_reconciliation"] == (
         "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
+    )
+    # downstream gates stay blocked/locked
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
+    assert LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET == (
+        "Block 170 - Crypto-D1 Real Data QA Boundary Decision Packet"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_boundary_decision_packet"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the Block 170 boundary decision packet is recognized as COMPLETE
+    node = pipe["crypto_d1_real_data_qa_boundary_decision_packet"]
+    assert node["state"] == STATE_COMPLETE
+    reason = node["reason"].lower()
+    assert "boundary decision packet" in reason
+    assert "recommendations only" in reason
+    assert "never an unlock of real_data_qa" in reason
+    # recognizing Block 170 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # Block 166 completion is preserved
+    assert s["latest_completed_real_data_qa_boundary_readiness_review"] == (
+        "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
+    )
+    # downstream gates stay blocked/locked
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
+    assert LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT == (
+        "Block 171 - Crypto-D1 Real Data QA Plan-Only Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_plan_only_contract"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the Block 171 plan-only contract is recognized as COMPLETE
+    node = pipe["crypto_d1_real_data_qa_plan_only_contract"]
+    assert node["state"] == STATE_COMPLETE
+    reason = node["reason"].lower()
+    assert "plan-only contract" in reason
+    assert "text and scope only" in reason
+    assert "never an unlock of real_data_qa" in reason
+    # recognizing Block 171 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # Block 170 completion is preserved alongside Block 171
+    assert s["latest_completed_real_data_qa_boundary_decision_packet"] == (
+        "Block 170 - Crypto-D1 Real Data QA Boundary Decision Packet"
+    )
+    # downstream gates stay blocked/locked
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
+    assert LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION == (
+        "Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_plan_approval_decision"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the Block 172 plan approval decision is recognized as COMPLETE
+    node = pipe["crypto_d1_real_data_qa_plan_approval_decision"]
+    assert node["state"] == STATE_COMPLETE
+    reason = node["reason"].lower()
+    assert "plan approval decision" in reason
+    assert "approve_plan_only" in reason
+    assert "request_plan_revision" in reason
+    assert "never an unlock of real_data_qa" in reason
+    # recognizing Block 172 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the approval decision is NOT registered as an active step ahead of the
+    # boundary -- the human-controlled boundary decision itself remains NEXT
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # Block 166 completion is preserved
+    assert s["latest_completed_real_data_qa_boundary_readiness_review"] == (
+        "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
     )
     # downstream gates stay blocked/locked
     assert pipe["real_data_qa"]["state"] == STATE_BLOCKED

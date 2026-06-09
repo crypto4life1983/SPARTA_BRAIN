@@ -219,6 +219,9 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_public_spot_source_evaluation_label as _registry_latest_public_spot_source_evaluation_label,  # noqa: E501
     get_latest_completed_concrete_spot_provider_adapter_spec_label as _registry_latest_concrete_spot_provider_adapter_spec_label,  # noqa: E501
     get_latest_completed_selected_spot_provider_fetch_runner_dry_run_label as _registry_latest_selected_spot_provider_fetch_runner_dry_run_label,  # noqa: E501
+    get_latest_completed_real_data_qa_boundary_decision_packet_label as _registry_latest_real_data_qa_boundary_decision_packet_label,  # noqa: E501
+    get_latest_completed_real_data_qa_plan_only_contract_label as _registry_latest_real_data_qa_plan_only_contract_label,  # noqa: E501
+    get_latest_completed_real_data_qa_plan_approval_decision_label as _registry_latest_real_data_qa_plan_approval_decision_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -267,6 +270,9 @@ __all__ = [
     "LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION",
     "LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC",
     "LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN",
+    "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET",
+    "LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT",
+    "LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -406,6 +412,15 @@ LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC = (
 )
 LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN = (
     _registry_latest_selected_spot_provider_fetch_runner_dry_run_label()
+)
+LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET = (
+    _registry_latest_real_data_qa_boundary_decision_packet_label()
+)
+LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT = (
+    _registry_latest_real_data_qa_plan_only_contract_label()
+)
+LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION = (
+    _registry_latest_real_data_qa_plan_approval_decision_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1470,6 +1485,82 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "crypto_d1_real_data_qa_boundary_decision_packet",
+        "label": (
+            "Crypto-D1 Real Data QA Boundary Decision Packet"
+        ),
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 170 complete. Read-only BOUNDARY DECISION PACKET only -- a pure, "
+            "research-only contract that assembles, from static input, the "
+            "human-facing decision packet for the parked real data QA boundary and "
+            "offers four read-only decision options that are recommendations only. "
+            "It is a decision packet, not an actor: it authorizes nothing and "
+            "executes nothing -- no staging, commit, push, data fetch, API call, "
+            "endpoint call, URL fetch, network open, credential read, dataset "
+            "inspection, real data acquisition, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, order placement, Telegram trade "
+            "command, paper/live, automation, or runtime/registry/dashboard write "
+            "is unlocked. Even its highest option authorizes nothing beyond building "
+            "another pure read-only research contract; it is never an unlock of "
+            "real_data_qa, never an approval of real_data_qa execution, and never a "
+            "boundary crossing. Recognizing it is purely additive latest-completed "
+            "metadata: it does not advance the stage past the human-controlled "
+            "real-data QA boundary and must not imply automatic execution or "
+            "auto-push."
+        ),
+    },
+    {
+        "id": "crypto_d1_real_data_qa_plan_only_contract",
+        "label": (
+            "Crypto-D1 Real Data QA Plan-Only Contract"
+        ),
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 171 complete. Read-only PLAN-ONLY contract only -- a pure, "
+            "research-only contract that drafts, from static input, a plan (text and "
+            "scope only) for a future real data QA step. It is a plan proposal, not "
+            "an actor: it authorizes nothing and executes nothing -- no staging, "
+            "commit, push, data fetch, API call, endpoint call, URL fetch, network "
+            "open, credential read, dataset inspection, real data acquisition, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "order placement, Telegram trade command, paper/live, automation, or "
+            "runtime/registry/dashboard write is unlocked. The plan is text and "
+            "scope only; it is never an unlock of real_data_qa, never an approval of "
+            "real_data_qa execution, and never a boundary crossing. Recognizing it "
+            "is purely additive latest-completed metadata: it does not advance the "
+            "stage past the human-controlled real-data QA boundary and must not "
+            "imply automatic execution or auto-push."
+        ),
+    },
+    {
+        "id": "crypto_d1_real_data_qa_plan_approval_decision",
+        "label": (
+            "Crypto-D1 Real Data QA Plan Approval Decision Contract"
+        ),
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 172 complete. Read-only PLAN APPROVAL DECISION only -- a pure, "
+            "research-only contract that reasons over a static caller-supplied "
+            "requested decision and an optional Block 171 plan-only contract and "
+            "records exactly one of four decisions (APPROVE_PLAN_ONLY, REJECT_PLAN, "
+            "REQUEST_PLAN_REVISION, KEEP_BOUNDARY_BLOCKED) about the plan. It is a "
+            "plan-approval verdict, not an actor: it authorizes nothing and "
+            "executes nothing -- no staging, commit, push, data fetch, API call, "
+            "endpoint call, URL fetch, network open, credential read, dataset "
+            "inspection, real data acquisition, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, order placement, Telegram trade "
+            "command, paper/live, automation, or runtime/registry/dashboard write "
+            "is unlocked. Its single highest grant, APPROVE_PLAN_ONLY, approves "
+            "only the plan's text and scope as a future candidate; it is never an "
+            "unlock of real_data_qa, never an approval of real_data_qa execution, "
+            "and never a boundary crossing. Recognizing it is purely additive "
+            "latest-completed metadata: it does not advance the stage past the "
+            "human-controlled real-data QA boundary and must not imply automatic "
+            "execution or auto-push."
+        ),
+    },
+    {
         "id": "human_controlled_real_data_qa_boundary_decision",
         "label": "Human-Controlled Real Data QA Boundary Decision",
         "state": STATE_NEXT,
@@ -1634,6 +1725,9 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_public_spot_source_evaluation": LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION,  # noqa: E501
         "latest_completed_concrete_spot_provider_adapter_spec": LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC,  # noqa: E501
         "latest_completed_selected_spot_provider_fetch_runner_dry_run": LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN,  # noqa: E501
+        "latest_completed_real_data_qa_boundary_decision_packet": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_PACKET,  # noqa: E501
+        "latest_completed_real_data_qa_plan_only_contract": LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT,  # noqa: E501
+        "latest_completed_real_data_qa_plan_approval_decision": LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
