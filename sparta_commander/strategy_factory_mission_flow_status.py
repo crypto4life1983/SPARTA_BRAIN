@@ -218,6 +218,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_real_data_qa_boundary_readiness_review_label as _registry_latest_real_data_qa_boundary_readiness_review_label,  # noqa: E501
     get_latest_completed_public_spot_source_evaluation_label as _registry_latest_public_spot_source_evaluation_label,  # noqa: E501
     get_latest_completed_concrete_spot_provider_adapter_spec_label as _registry_latest_concrete_spot_provider_adapter_spec_label,  # noqa: E501
+    get_latest_completed_selected_spot_provider_fetch_runner_dry_run_label as _registry_latest_selected_spot_provider_fetch_runner_dry_run_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -265,6 +266,7 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW",
     "LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION",
     "LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC",
+    "LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -401,6 +403,9 @@ LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION = (
 )
 LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC = (
     _registry_latest_concrete_spot_provider_adapter_spec_label()
+)
+LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN = (
+    _registry_latest_selected_spot_provider_fetch_runner_dry_run_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1436,6 +1441,35 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "crypto_d1_selected_spot_provider_fetch_runner_dry_run",
+        "label": (
+            "Crypto-D1 Selected Read-Only Spot Provider Fetch Runner Dry Run"
+        ),
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 169 complete. Read-only DRY RUN only -- a pure, research-only "
+            "paper contract that reasons over a static caller-supplied description "
+            "of a dry run of the selected read-only spot provider fetch runner, "
+            "exercised only against an in-memory FAKE provider (aligned with the "
+            "Block 151 read-only spot adapter rules), and returns one of exactly "
+            "two verdicts (READY_FOR_HUMAN_DRY_RUN_REVIEW when all ten dry-run "
+            "items pass and no unsafe flag is set, otherwise HOLD_NEEDS_MORE_PREP). "
+            "It is a dry-run-review verdict, not an actor: it authorizes nothing "
+            "and executes nothing -- no staging, commit, push, real provider "
+            "injection, data fetch, API call, endpoint call, URL fetch, network "
+            "open, credential read, dataset inspection, real data acquisition, "
+            "dataset loading, QA, baseline, backtest, simulation, trade signal, "
+            "order placement, Telegram trade command, paper/live, automation, or "
+            "runtime/registry/dashboard write is unlocked. Even a READY verdict "
+            "only means the paper dry run is sound enough for a human to review the "
+            "exercise; it is never an unlock of real_data_qa and never a boundary "
+            "crossing. Recognizing it is purely additive latest-completed "
+            "metadata: it does not advance the stage past the human-controlled "
+            "real-data QA boundary and must not imply automatic execution or "
+            "auto-push."
+        ),
+    },
+    {
         "id": "human_controlled_real_data_qa_boundary_decision",
         "label": "Human-Controlled Real Data QA Boundary Decision",
         "state": STATE_NEXT,
@@ -1599,6 +1633,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_real_data_qa_boundary_readiness_review": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW,  # noqa: E501
         "latest_completed_public_spot_source_evaluation": LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION,  # noqa: E501
         "latest_completed_concrete_spot_provider_adapter_spec": LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC,  # noqa: E501
+        "latest_completed_selected_spot_provider_fetch_runner_dry_run": LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

@@ -293,6 +293,12 @@ from sparta_commander.strategy_factory_crypto_d1_public_read_only_spot_source_ev
 from sparta_commander.strategy_factory_crypto_d1_concrete_read_only_spot_provider_adapter_spec import (  # noqa: E501
     ADAPTER_SPEC_SCHEMA_VERSION as _CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 169 selected read-only spot provider fetch runner dry-run module imports
+# ONLY __future__ and typing -- it does not import this registry -- so reading its
+# stable schema constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_selected_read_only_spot_provider_fetch_runner_dry_run import (  # noqa: E501
+    DRY_RUN_SCHEMA_VERSION as _SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -410,6 +416,9 @@ __all__ = [
     "LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC",
     "get_latest_completed_concrete_spot_provider_adapter_spec",
     "get_latest_completed_concrete_spot_provider_adapter_spec_label",
+    "LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN",
+    "get_latest_completed_selected_spot_provider_fetch_runner_dry_run",
+    "get_latest_completed_selected_spot_provider_fetch_runner_dry_run_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1047,6 +1056,19 @@ _RECOGNIZED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC_LABEL = (
 )
 LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC = (
     _RECOGNIZED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC_LABEL
+)
+
+# Block 169 recognizes the research-only selected read-only spot provider fetch
+# runner DRY RUN contract. Like every recognized record this is purely additive
+# latest-completed metadata; it authorizes nothing, injects no real provider, calls
+# no endpoint, fetches no URL, acquires no real data, and is never an unlock of
+# real_data_qa. Even a READY_FOR_HUMAN_DRY_RUN_REVIEW result only means the paper
+# dry run is sound enough for a human to review the exercise.
+_RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL = (
+    "Block 169 - Crypto-D1 Selected Read-Only Spot Provider Fetch Runner Dry Run"
+)
+LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN = (
+    _RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -4409,6 +4431,100 @@ def get_latest_completed_concrete_spot_provider_adapter_spec_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 Concrete
     Read-Only Spot Provider Adapter Spec."""
     return _RECOGNIZED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC_LABEL
+
+
+def _recognized_selected_spot_provider_fetch_runner_dry_run() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Selected
+    Read-Only Spot Provider Fetch Runner Dry Run contract record.
+
+    This is the Block 169 DRY-RUN layer. Recognizing it records, on paper, that the
+    Block 169 contract -- a pure, research-only paper contract that reasons over a
+    static caller-supplied description of a dry run of the selected read-only spot
+    provider fetch runner, exercised ONLY against an in-memory FAKE provider
+    (aligned with the Block 151 read-only spot adapter rules), and returns one of
+    exactly two verdicts (READY_FOR_HUMAN_DRY_RUN_REVIEW when all ten dry-run items
+    pass and no unsafe flag is set, otherwise HOLD_NEEDS_MORE_PREP) -- now exists.
+    It is NOT an execution bundle: it authorizes nothing, executes nothing, injects
+    no real provider, calls no endpoint, fetches no URL, acquires no real data, and
+    unlocks no real capability. It stages nothing, commits nothing, pushes nothing,
+    fetches no data, calls no API, opens no network, reads no credential, inspects
+    no dataset, and runs no QA, baseline, backtest, simulation, paper/live,
+    broker/exchange, or automation; every field is derived from static input only.
+    A fresh record is returned every call for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "selected_spot_provider_fetch_runner_dry_run_id": (
+            "CRYPTO_D1_SELECTED_READ_ONLY_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN"
+        ),
+        "name": (
+            "Crypto-D1 Selected Read-Only Spot Provider Fetch Runner Dry Run"
+        ),
+        "label": _RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_selected_read_only_spot_provider_fetch_runner_dry_run"
+        ),
+        "schema_constant": "DRY_RUN_SCHEMA_VERSION",
+        "schema_version": (
+            _SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_SCHEMA_VERSION
+        ),
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Selected Read-Only Spot "
+            "Provider Fetch Runner Dry Run contract, BUILT in Block 169. It "
+            "records, on paper, that the pure, research-only DRY-RUN LAYER -- which "
+            "reasons over a static caller-supplied description of a dry run of the "
+            "selected read-only spot provider fetch runner, exercised only against "
+            "an in-memory FAKE provider (aligned with the Block 151 read-only spot "
+            "adapter rules), and returns one of exactly two verdicts "
+            "(READY_FOR_HUMAN_DRY_RUN_REVIEW when all ten dry-run items pass and no "
+            "unsafe flag is set, otherwise HOLD_NEEDS_MORE_PREP) -- now exists; it "
+            "authorizes nothing and executes nothing: no staging, no commit, no "
+            "push, no real provider injection, no data fetch, API call, endpoint "
+            "call, URL fetch, network open, credential read, dataset inspection, "
+            "real data acquisition, dataset loading, QA, baseline, backtest, "
+            "simulation, trade signal, order placement, Telegram trade command, "
+            "paper/live, automation, or runtime/registry/dashboard write is "
+            "unlocked. It is a dry-run-review verdict, not an actor, and never "
+            "converts a READY verdict into a run or an execution; even a "
+            "READY_FOR_HUMAN_DRY_RUN_REVIEW result only means the paper dry run is "
+            "sound enough for a human to review the exercise, never a "
+            "buy/sell/long/short/entry/exit/order instruction and never an unlock "
+            "of real_data_qa; it always requires independent confirmation. "
+            "Registering it is purely additive latest-completed metadata: it does "
+            "not advance the global stage, which remains the human-controlled "
+            "real-data QA boundary decision and must not imply automatic execution "
+            "or auto-push. real_data_qa and baseline stay BLOCKED and the "
+            "paper/micro-live gates stay LOCKED unless a separate, future, "
+            "human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_selected_spot_provider_fetch_runner_dry_run() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Selected Read-Only Spot
+    Provider Fetch Runner Dry Run record."""
+    return _recognized_selected_spot_provider_fetch_runner_dry_run()
+
+
+def get_latest_completed_selected_spot_provider_fetch_runner_dry_run_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Selected
+    Read-Only Spot Provider Fetch Runner Dry Run."""
+    return _RECOGNIZED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN_LABEL
 
 
 def get_current_stage() -> str:

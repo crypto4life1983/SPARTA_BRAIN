@@ -93,6 +93,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW,
     LATEST_COMPLETED_PUBLIC_SPOT_SOURCE_EVALUATION,
     LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC,
+    LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -157,6 +158,7 @@ def test_status_schema_is_stable():
         "latest_completed_real_data_qa_boundary_readiness_review",
         "latest_completed_public_spot_source_evaluation",
         "latest_completed_concrete_spot_provider_adapter_spec",
+        "latest_completed_selected_spot_provider_fetch_runner_dry_run",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1342,6 +1344,49 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     # Block 167 completion is preserved
     assert s["latest_completed_public_spot_source_evaluation"] == (
         "Block 167 - Crypto-D1 Public Read-Only Spot Source Evaluation Contract"
+    )
+    # downstream gates stay blocked/locked
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_169():
+    assert LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN == (
+        "Block 169 - Crypto-D1 Selected Read-Only Spot Provider Fetch Runner Dry "
+        "Run"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_selected_spot_provider_fetch_runner_dry_run"] == (
+        LATEST_COMPLETED_SELECTED_SPOT_PROVIDER_FETCH_RUNNER_DRY_RUN
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the Block 169 dry run is recognized as COMPLETE
+    node = pipe["crypto_d1_selected_spot_provider_fetch_runner_dry_run"]
+    assert node["state"] == STATE_COMPLETE
+    reason = node["reason"].lower()
+    assert "dry run" in reason
+    assert "ready_for_human_dry_run_review" in reason
+    assert "hold_needs_more_prep" in reason
+    assert "never an unlock of real_data_qa" in reason
+    # recognizing Block 169 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the dry run is NOT registered as an active step ahead of the boundary --
+    # the human-controlled boundary decision itself remains NEXT
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # Block 168 completion is preserved
+    assert s["latest_completed_concrete_spot_provider_adapter_spec"] == (
+        "Block 168 - Crypto-D1 Concrete Read-Only Spot Provider Adapter Spec"
     )
     # downstream gates stay blocked/locked
     assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
