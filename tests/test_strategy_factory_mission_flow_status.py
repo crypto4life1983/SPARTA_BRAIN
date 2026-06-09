@@ -168,6 +168,7 @@ def test_status_schema_is_stable():
         "latest_completed_real_data_qa_plan_approval_decision",
         "latest_completed_real_data_qa_boundary_final_decision",
         "latest_completed_real_data_qa_pass_receipt",
+        "latest_completed_baseline_backtest_prep_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",

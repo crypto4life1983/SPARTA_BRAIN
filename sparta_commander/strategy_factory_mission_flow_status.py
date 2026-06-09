@@ -186,6 +186,9 @@ from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision 
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_pass_receipt import (  # noqa: E501
     get_qa_pass_receipt_label as _qa_pass_receipt_label,
 )
+from sparta_commander.strategy_factory_crypto_d1_baseline_backtest_prep_contract import (  # noqa: E501
+    get_baseline_backtest_prep_label as _baseline_prep_label,
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -279,6 +282,7 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION",
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION",
     "LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT",
+    "LATEST_COMPLETED_BASELINE_BACKTEST_PREP_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -436,6 +440,7 @@ LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION = (
 # baseline_backtest stay BLOCKED, and paper / micro-live stay LOCKED, until a
 # separate explicit human baseline-prep policy decision.
 LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT = _qa_pass_receipt_label()
+LATEST_COMPLETED_BASELINE_BACKTEST_PREP_CONTRACT = _baseline_prep_label()
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -1776,6 +1781,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_real_data_qa_plan_approval_decision": LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION,  # noqa: E501
         "latest_completed_real_data_qa_boundary_final_decision": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION,  # noqa: E501
         "latest_completed_real_data_qa_pass_receipt": LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT,  # noqa: E501
+        "latest_completed_baseline_backtest_prep_contract": LATEST_COMPLETED_BASELINE_BACKTEST_PREP_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
