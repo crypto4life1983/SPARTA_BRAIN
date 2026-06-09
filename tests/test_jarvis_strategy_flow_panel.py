@@ -1010,3 +1010,163 @@ def test_static_panel_matches_block161_registered_backend_truth():
     ) in block
     assert "Locked &middot; human approval required" in block
     assert "Locked &middot; never automated" in block
+
+
+# --- Bundle 165: Evidence side-lane contracts (Blocks 162 & 163) -------------
+
+def test_evidence_sidelane_contracts_shown_complete_no_unlock():
+    """The Block 162 Strategy Candidate Ranking Contract and the Block 163
+    External Human Trader Evidence Contract are shown as COMPLETE + registered,
+    research-only evidence/research SIDE-LANE contracts in the machine lane
+    (Pipeline + Combined views) and in the Current Run snapshot. They must make
+    clear they authorize nothing and execute nothing, carry no execution / fetch
+    / QA-run / unlock affordance, and NOT advance the boundary (real_data_qa
+    stays blocked, the boundary decision stays NEXT)."""
+    block = _strategy_flow_block(_page())
+    # shown complete + registered in BOTH machine lanes (Pipeline + Combined)
+    assert block.count('data-debug="BLOCK_162_REGISTERED"') >= 2
+    assert block.count('data-debug="BLOCK_163_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 Strategy Candidate Ranking Contract</span>'
+        '<span class="nst">Block 162 &middot; Complete &middot; registered '
+        '&middot; evidence side-lane</span>'
+    ) >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 External Human Trader Evidence Contract'
+        '</span><span class="nst">Block 163 &middot; Complete &middot; registered '
+        '&middot; evidence side-lane</span>'
+    ) >= 2
+    # the research-only, authorize-nothing / execute-nothing posture is explicit
+    assert (
+        "research-only evidence/scoring side-lane; ranks already-scored strategy "
+        "candidates into a review shortlist; authorizes nothing; executes "
+        "nothing; no real_data_qa unlock"
+        in block
+    )
+    assert (
+        "research-only evidence-intake side-lane; logs an external human-trader "
+        "call as an observation only; never counts as proof; authorizes nothing; "
+        "executes nothing; no real_data_qa unlock"
+        in block
+    )
+    # surfaced in the Current Run snapshot as read-only completion rows
+    assert (
+        '<span class="k">Strategy Candidate Ranking Contract</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 162 &middot; '
+        'Complete &middot; registered'
+    ) in block
+    assert (
+        '<span class="k">External Human Trader Evidence Contract</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 163 &middot; '
+        'Complete &middot; registered'
+    ) in block
+    # registering the evidence side-lane contracts did NOT advance the boundary:
+    # the boundary decision is still NEXT and real_data_qa / baseline stay blocked
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    # no execution / unlock / fetch / QA-run control surface anywhere in the panel
+    low = block.lower()
+    for forbidden in (
+        "unlock_real_data_qa", "run_qa", "start_qa", "fetch(",
+        "place_order", "submit_order", "execute_trade", "go_live",
+        "enable_live", "auto_push", "activate_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
+
+
+def test_evidence_sidelane_render_after_block161_before_boundary():
+    """Anti-drift: the Block 162/163 evidence side-lane nodes render AFTER the
+    Block 161 coverage node and BEFORE the still-NEXT Human-Controlled Real Data
+    QA Boundary Decision node, so the lane is not silently truncated at 161 and
+    the boundary remains the next machine step."""
+    block = _strategy_flow_block(_page())
+    b161 = block.find('data-debug="BLOCK_161_REGISTERED"')
+    b162 = block.find('data-debug="BLOCK_162_REGISTERED"')
+    b163 = block.find('data-debug="BLOCK_163_REGISTERED"')
+    boundary = block.find(
+        '<span class="nlbl">Human-Controlled Real Data QA Boundary Decision'
+        '</span><span class="nst">Next &middot; awaiting human decision</span>'
+    )
+    assert -1 not in (b161, b162, b163, boundary)
+    assert b161 < b162 < b163 < boundary, (
+        "evidence side-lane nodes must sit between Block 161 and the boundary"
+    )
+
+
+def test_static_panel_matches_block162_163_registered_backend_truth():
+    """The visible static panel must match the committed backend truth for
+    Bundle 164: the Block 162 Strategy Candidate Ranking Contract and the Block
+    163 External Human Trader Evidence Contract are complete and registered and
+    are the live latest_completed_* labels, while the chain stays PARKED at the
+    human-controlled real-data QA boundary (current_stage / next_required_action
+    unchanged, real_data_qa and baseline blocked, paper/micro-live locked).
+
+    Skips (rather than errors) if the backend module is not importable."""
+    try:
+        from sparta_commander import (  # noqa: WPS433 - guarded backend import
+            strategy_factory_mission_flow_status as mf,
+        )
+    except Exception as exc:  # noqa: BLE001 - backend may be broken mid-edit
+        pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
+    status = mf.get_mission_flow_status()
+    assert status["latest_completed_strategy_candidate_ranking_contract"] == (
+        "Block 162 - Crypto-D1 Strategy Candidate Ranking Contract"
+    )
+    assert status["latest_completed_external_human_trader_evidence_contract"] == (
+        "Block 163 - Crypto-D1 External Human Trader Evidence Contract"
+    )
+    assert status["current_stage"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert status["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # both evidence side-lane contracts are COMPLETE in the machine pipeline and
+    # the boundary lane is still NEXT in the backend
+    pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_strategy_candidate_ranking_contract"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "crypto_d1_external_human_trader_evidence_contract"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == mf.STATE_NEXT
+    # the prior Block 161 completion is preserved alongside Blocks 162/163
+    assert status["latest_completed_pipeline_coverage_reconciliation"] == (
+        "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
+    )
+
+    block = _strategy_flow_block(_page())
+    # backend says 162/163 registered -> the panel must show them (anti-drift)
+    assert block.count('data-debug="BLOCK_162_REGISTERED"') >= 2
+    assert block.count('data-debug="BLOCK_163_REGISTERED"') >= 2
+    assert "Crypto-D1 Strategy Candidate Ranking Contract" in block
+    assert "Crypto-D1 External Human Trader Evidence Contract" in block
+    # the panel must NOT omit the prior Block 161 completion
+    assert block.count('data-debug="BLOCK_161_REGISTERED"') >= 2
+    # the visible current stage + next required action match the backend exactly
+    assert status["current_stage"] in block
+    assert status["next_required_action"] in block
+    # the next visible machine step is still the human-controlled boundary decision
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    # registering the evidence side-lane contracts did NOT advance the boundary
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    assert "Locked &middot; human approval required" in block
+    assert "Locked &middot; never automated" in block
