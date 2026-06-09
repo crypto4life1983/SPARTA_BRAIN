@@ -90,6 +90,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION,
     CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_SCHEMA_VERSION,
     LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION,
+    LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -151,6 +152,7 @@ def test_status_schema_is_stable():
         "latest_completed_real_data_qa_human_approval_packet",
         "latest_completed_real_data_qa_boundary_decision",
         "latest_completed_pipeline_coverage_reconciliation",
+        "latest_completed_real_data_qa_boundary_readiness_review",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1210,6 +1212,48 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     )
     assert s["latest_completed_real_data_qa_boundary_decision"] == (
         "Block 158 - Crypto-D1 Human-Controlled Real Data QA Boundary Decision"
+    )
+    # downstream gates stay blocked/locked
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
+    assert LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW == (
+        "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_real_data_qa_boundary_readiness_review"] == (
+        LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW
+    )
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the Block 166 boundary-readiness review is recognized as COMPLETE
+    node = pipe["crypto_d1_real_data_qa_boundary_readiness_review"]
+    assert node["state"] == STATE_COMPLETE
+    reason = node["reason"].lower()
+    assert "readiness review" in reason
+    assert "ready_for_human_boundary_decision" in reason
+    assert "hold_needs_more_prep" in reason
+    assert "never an unlock of real_data_qa" in reason
+    # recognizing Block 166 unlocks nothing real and does not advance the boundary
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the review is NOT registered as an active step ahead of the boundary --
+    # the human-controlled boundary decision itself remains NEXT
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_NEXT
+    # Block 161 completion is preserved
+    assert s["latest_completed_pipeline_coverage_reconciliation"] == (
+        "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
     )
     # downstream gates stay blocked/locked
     assert pipe["real_data_qa"]["state"] == STATE_BLOCKED

@@ -124,6 +124,9 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION,
     get_latest_completed_pipeline_coverage_reconciliation,
     get_latest_completed_pipeline_coverage_reconciliation_label,
+    LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW,
+    get_latest_completed_real_data_qa_boundary_readiness_review,
+    get_latest_completed_real_data_qa_boundary_readiness_review_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -3439,6 +3442,78 @@ def test_recognized_pipeline_coverage_reconciliation_isolated():
     assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
     assert all(m["active"] is False for m in fresh["parked_modules"])
     assert len(fresh["parked_modules"]) == 13
+
+
+def test_latest_completed_real_data_qa_boundary_readiness_review_label():
+    assert LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW == (
+        "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
+    )
+    assert (
+        get_latest_completed_real_data_qa_boundary_readiness_review_label()
+        == LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW
+    )
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER", "UNLOCK"):
+        assert banned not in (
+            LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW.upper()
+        ), banned
+
+
+def test_registry_recognizes_real_data_qa_boundary_readiness_review():
+    c = get_latest_completed_real_data_qa_boundary_readiness_review()
+    assert c["real_data_qa_boundary_readiness_review_id"] == (
+        "CRYPTO_D1_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW"
+    )
+    assert c["name"] == "Crypto-D1 Real Data QA Boundary Readiness Review"
+    assert c["label"] == LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["schema_constant"] == "BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_real_data_qa_boundary_readiness_review.v1"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_real_data_qa_boundary_readiness_review"
+    )
+
+
+def test_recognized_real_data_qa_boundary_readiness_review_research_only():
+    c = get_latest_completed_real_data_qa_boundary_readiness_review()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_real_data_qa_boundary_readiness_review_authorizes_nothing():
+    c = get_latest_completed_real_data_qa_boundary_readiness_review()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    assert c["stage"] == CURRENT_STAGE
+    assert c["next_gate"] == CURRENT_STAGE
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "purely additive latest-completed metadata" in reason
+    assert "never an unlock of real_data_qa" in reason
+
+
+def test_recognized_real_data_qa_boundary_readiness_review_isolated():
+    getter = get_latest_completed_real_data_qa_boundary_readiness_review
+    assert getter() == getter()
+    c = getter()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    fresh = getter()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
 
 
 def test_block_161_registration_preserves_prior_truth():

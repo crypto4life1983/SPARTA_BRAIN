@@ -275,6 +275,12 @@ from sparta_commander.strategy_factory_crypto_d1_real_data_qa_human_approval_pac
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision import (  # noqa: E501
     DECISION_SCHEMA_VERSION as _REAL_DATA_QA_BOUNDARY_DECISION_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 166 real-data-QA boundary-decision readiness-review module imports
+# ONLY __future__ and typing -- it does not import this registry -- so reading its
+# stable schema constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_readiness_review import (  # noqa: E501
+    BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION as _REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -383,6 +389,9 @@ __all__ = [
     "LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION",
     "get_latest_completed_pipeline_coverage_reconciliation",
     "get_latest_completed_pipeline_coverage_reconciliation_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW",
+    "get_latest_completed_real_data_qa_boundary_readiness_review",
+    "get_latest_completed_real_data_qa_boundary_readiness_review_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -975,6 +984,26 @@ _RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL = (
 )
 LATEST_COMPLETED_PIPELINE_COVERAGE_RECONCILIATION = (
     _RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL
+)
+
+# Block 166 read-only recognition of the Crypto-D1 Real Data QA Boundary Decision
+# Readiness Review -- the paper review that confirms, on a static caller-supplied
+# summary, whether the ten boundary-readiness protections are in place so a human
+# MAY be asked to make the parked real-data QA boundary decision. It authorizes
+# nothing and executes nothing: no data fetch, API call, dataset inspection, real
+# data acquisition, dataset loading, QA, baseline, backtest, simulation, broker/
+# exchange/order, paper/live, automation, or runtime/registry/dashboard write is
+# unlocked. Registering it is purely additive latest-completed metadata: it does
+# NOT advance CURRENT_STAGE or NEXT_REQUIRED_ACTION, both of which remain at the
+# human-controlled real-data QA boundary above. real_data_qa and baseline stay
+# BLOCKED and the paper/micro-live gates stay LOCKED; recognizing it is never an
+# unlock of real_data_qa, and even a READY review only means the prep is sound
+# enough to put the decision in front of a human.
+_RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL = (
+    "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
+)
+LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW = (
+    _RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -4079,6 +4108,91 @@ def get_latest_completed_pipeline_coverage_reconciliation_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 Pipeline
     Coverage Reconciliation."""
     return _RECOGNIZED_PIPELINE_COVERAGE_RECONCILIATION_LABEL
+
+
+def _recognized_real_data_qa_boundary_readiness_review() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Real Data QA
+    Boundary Decision Readiness Review record.
+
+    This is the Block 166 READINESS-REVIEW layer. Recognizing it records, on paper,
+    that the Block 166 review -- a pure, research-only paper review that reasons over
+    a static caller-supplied summary and returns one of exactly two verdicts
+    (READY_FOR_HUMAN_BOUNDARY_DECISION when all ten boundary-readiness protections
+    are in place and no unsafe flag is set, otherwise HOLD_NEEDS_MORE_PREP) -- now
+    exists. It is NOT an execution bundle: it authorizes nothing, executes nothing,
+    and unlocks no real capability. It stages nothing, commits nothing, pushes
+    nothing, fetches no data, calls no API, inspects no dataset, acquires/loads no
+    data, and runs no QA, baseline, backtest, simulation, paper/live, broker/
+    exchange, or automation; every field is derived from static input only. A fresh
+    record is returned every call for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "real_data_qa_boundary_readiness_review_id": (
+            "CRYPTO_D1_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW"
+        ),
+        "name": "Crypto-D1 Real Data QA Boundary Readiness Review",
+        "label": _RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_boundary_readiness_review"
+        ),
+        "schema_constant": "BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_SCHEMA_VERSION
+        ),
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Boundary "
+            "Readiness Review, BUILT in Block 166. It records, on paper, that the "
+            "pure, research-only REVIEW LAYER -- which reasons over a static "
+            "caller-supplied summary of the parked boundary and returns one of "
+            "exactly two verdicts (READY_FOR_HUMAN_BOUNDARY_DECISION when all ten "
+            "boundary-readiness protections are in place and no unsafe flag is set, "
+            "otherwise HOLD_NEEDS_MORE_PREP) -- now exists; it authorizes nothing "
+            "and executes nothing: no staging, no commit, no push, no data fetch, "
+            "API call, dataset inspection, real data acquisition, dataset loading, "
+            "QA, baseline, backtest, simulation, trade signal, order placement, "
+            "Telegram trade command, paper/live, automation, or runtime/registry/"
+            "dashboard write is unlocked. It is a readiness verdict, not an actor, "
+            "and never converts a READY verdict into a decision or an execution; "
+            "even a READY_FOR_HUMAN_BOUNDARY_DECISION result only means the prep is "
+            "sound enough to put the decision in front of a human, never a buy/sell/"
+            "long/short/entry/exit/order instruction and never an unlock of "
+            "real_data_qa; it always requires independent confirmation. Registering "
+            "it is purely additive latest-completed metadata: it does not advance "
+            "the global stage, which remains the human-controlled real-data QA "
+            "boundary decision and must not imply automatic execution or auto-push. "
+            "real_data_qa and baseline stay BLOCKED and the paper/micro-live gates "
+            "stay LOCKED unless a separate, future, human-approved step provides "
+            "explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_boundary_readiness_review() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Real Data QA Boundary
+    Readiness Review record."""
+    return _recognized_real_data_qa_boundary_readiness_review()
+
+
+def get_latest_completed_real_data_qa_boundary_readiness_review_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Real Data QA
+    Boundary Readiness Review."""
+    return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_READINESS_REVIEW_LABEL
 
 
 def get_current_stage() -> str:
