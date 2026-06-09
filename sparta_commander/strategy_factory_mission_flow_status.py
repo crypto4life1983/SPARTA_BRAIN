@@ -153,6 +153,9 @@ from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_review_contra
 from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_approval_contract import (  # noqa: E501
     DAILY_ALPHA_BRIEF_APPROVAL_SCHEMA_VERSION as CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_strategy_evidence_scoring_contract import (  # noqa: E501
+    STRATEGY_EVIDENCE_SCORING_SCHEMA_VERSION as CRYPTO_D1_STRATEGY_EVIDENCE_SCORING_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 from sparta_commander.strategy_factory_crypto_d1_cohort_independence_correlation_penalty_contract import (  # noqa: E501
     COHORT_INDEPENDENCE_SCHEMA_VERSION as CRYPTO_D1_COHORT_INDEPENDENCE_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
@@ -195,6 +198,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_daily_alpha_brief_research_contract_label as _registry_latest_daily_alpha_brief_research_contract_label,  # noqa: E501
     get_latest_completed_daily_alpha_brief_review_contract_label as _registry_latest_daily_alpha_brief_review_contract_label,  # noqa: E501
     get_latest_completed_daily_alpha_brief_approval_contract_label as _registry_latest_daily_alpha_brief_approval_contract_label,  # noqa: E501
+    get_latest_completed_strategy_evidence_scoring_contract_label as _registry_latest_strategy_evidence_scoring_contract_label,  # noqa: E501
     get_latest_completed_cohort_independence_contract_label as _registry_latest_cohort_independence_contract_label,  # noqa: E501
     get_latest_completed_real_data_qa_boundary_decision_contract_label as _registry_latest_real_data_qa_boundary_decision_contract_label,  # noqa: E501
     get_latest_completed_real_data_qa_human_approval_packet_contract_label as _registry_latest_real_data_qa_human_approval_packet_contract_label,  # noqa: E501
@@ -339,6 +343,9 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT = (
 )
 LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
     _registry_latest_daily_alpha_brief_approval_contract_label()
+)
+LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT = (
+    _registry_latest_strategy_evidence_scoring_contract_label()
 )
 LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT = (
     _registry_latest_cohort_independence_contract_label()
@@ -1036,6 +1043,31 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "crypto_d1_strategy_evidence_scoring_contract",
+        "label": "Crypto-D1 Strategy Evidence Scoring Contract",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Block 131 complete ("
+            + CRYPTO_D1_STRATEGY_EVIDENCE_SCORING_CONTRACT_SCHEMA_VERSION
+            + "). Read-only Strategy Evidence Scoring Contract only -- a "
+            "research-only evidence/scoring support contract. It only assigns, on "
+            "paper, a static evidence summary for a strategy candidate exactly one "
+            "outcome (BLOCK > NEEDS_MORE_DATA > KEEP_WATCH > PROMOTE_TO_REVIEW), "
+            "under the core rule that it scores evidence, never what to trade. Its "
+            "highest outcome is PROMOTE_TO_REVIEW and it never produces a buy/sell/"
+            "long/short/entry/exit/order instruction; every input is treated as "
+            "static research evidence only, always requires independent "
+            "confirmation, and is never converted into permission. It authorizes "
+            "nothing and executes nothing: no data fetch, API call, dataset "
+            "inspection, real data acquisition, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, order placement, Telegram trade "
+            "command, paper/live, automation, or runtime/registry/dashboard write "
+            "is unlocked. Recognizing it is purely additive latest-completed "
+            "metadata: it does not advance the stage past the human-controlled "
+            "real-data QA boundary."
+        ),
+    },
+    {
         "id": "crypto_d1_cohort_independence_correlation_penalty_contract",
         "label": "Crypto-D1 Cohort Independence / Correlation Penalty Contract",
         "state": STATE_COMPLETE,
@@ -1395,6 +1427,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_daily_alpha_brief_research_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,  # noqa: E501
         "latest_completed_daily_alpha_brief_review_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,  # noqa: E501
         "latest_completed_daily_alpha_brief_approval_contract": LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,  # noqa: E501
+        "latest_completed_strategy_evidence_scoring_contract": LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT,  # noqa: E501
         "latest_completed_cohort_independence_contract": LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,  # noqa: E501
         "latest_completed_real_data_qa_boundary_decision_contract": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_real_data_qa_human_approval_packet_contract": LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT,  # noqa: E501

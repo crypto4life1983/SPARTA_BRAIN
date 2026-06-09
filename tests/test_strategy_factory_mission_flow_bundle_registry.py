@@ -55,6 +55,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT,
     LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT,
+    LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT,
     LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT,
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_DECISION_CONTRACT,
     LATEST_COMPLETED_REAL_DATA_QA_HUMAN_APPROVAL_PACKET_CONTRACT,
@@ -102,6 +103,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_daily_alpha_brief_review_contract_label,
     get_latest_completed_daily_alpha_brief_approval_contract,
     get_latest_completed_daily_alpha_brief_approval_contract_label,
+    get_latest_completed_strategy_evidence_scoring_contract,
+    get_latest_completed_strategy_evidence_scoring_contract_label,
     get_latest_completed_cohort_independence_contract,
     get_latest_completed_cohort_independence_contract_label,
     get_latest_completed_real_data_qa_boundary_decision_contract,
@@ -2588,6 +2591,107 @@ def test_recognized_daily_alpha_brief_approval_contract_deterministic_isolated()
 
 
 # --- 5z: recognized research-only cohort-independence (Block 132) -------------
+
+def test_latest_completed_strategy_evidence_scoring_contract_label():
+    assert LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT == (
+        "Block 131 - Crypto-D1 Strategy Evidence Scoring Contract"
+    )
+    assert (
+        get_latest_completed_strategy_evidence_scoring_contract_label()
+        == LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT
+    )
+    # the label does not name a trading-execution stage
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER"):
+        assert banned not in (
+            LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT.upper()
+        ), banned
+
+
+def test_registry_recognizes_strategy_evidence_scoring_contract():
+    c = get_latest_completed_strategy_evidence_scoring_contract()
+    assert c["strategy_evidence_scoring_contract_id"] == (
+        "CRYPTO_D1_STRATEGY_EVIDENCE_SCORING_CONTRACT"
+    )
+    assert c["name"] == (
+        "Crypto-D1 Strategy Evidence Scoring Contract"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_strategy_evidence_scoring_contract"
+    )
+    assert c["schema_constant"] == "STRATEGY_EVIDENCE_SCORING_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_strategy_evidence_scoring_contract.v1"
+    )
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["validates_protocol_id"] == (
+        "CRYPTO_D1_STRATEGY_CANDIDATE_PROTOCOL_V1"
+    )
+
+
+def test_recognized_strategy_evidence_scoring_contract_research_only():
+    c = get_latest_completed_strategy_evidence_scoring_contract()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_strategy_evidence_scoring_contract_authorizes_nothing():
+    c = get_latest_completed_strategy_evidence_scoring_contract()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    # the evidence-scoring contract is a recognized contract, but registering it
+    # is purely additive: its own next step IS the unchanged global next required
+    # action -- the human-controlled real-data QA boundary decision (NOT a build
+    # step).
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "never converts evidence into permission" in reason
+    assert "purely additive latest-completed metadata" in reason
+
+
+def test_recognized_strategy_evidence_scoring_preserves_prior_truth():
+    # Registering Block 131 must NOT invent a new execution bundle, must NOT
+    # advance the boundary stage, and must NOT disturb the latest bundle or any
+    # prior recognized contract.
+    assert get_latest_completed_bundle()["bundle_number"] == 54
+    assert LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT == (
+        "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
+    )
+    assert CURRENT_STAGE == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert NEXT_REQUIRED_ACTION == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    nums = sorted(b["bundle_number"] for b in list_registered_bundles())
+    assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+
+
+def test_recognized_strategy_evidence_scoring_contract_deterministic_isolated():
+    assert (
+        get_latest_completed_strategy_evidence_scoring_contract()
+        == get_latest_completed_strategy_evidence_scoring_contract()
+    )
+    c = get_latest_completed_strategy_evidence_scoring_contract()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    c["candidate_family_ids"].append("TAMPERED")
+    fresh = get_latest_completed_strategy_evidence_scoring_contract()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+    assert fresh["candidate_family_ids"] == _EXPECTED_FAMILY_IDS
+
 
 def test_latest_completed_cohort_independence_contract_label():
     assert LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT == (

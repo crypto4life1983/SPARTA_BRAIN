@@ -211,6 +211,12 @@ from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_review_contra
 from sparta_commander.strategy_factory_crypto_d1_daily_alpha_brief_approval_contract import (  # noqa: E501
     DAILY_ALPHA_BRIEF_APPROVAL_SCHEMA_VERSION as _DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 131 strategy-evidence-scoring contract module imports ONLY __future__
+# and typing -- it does not import this registry -- so reading its stable schema
+# constant at module top is cycle-safe (no circular import).
+from sparta_commander.strategy_factory_crypto_d1_strategy_evidence_scoring_contract import (  # noqa: E501
+    STRATEGY_EVIDENCE_SCORING_SCHEMA_VERSION as _STRATEGY_EVIDENCE_SCORING_CONTRACT_SCHEMA_VERSION,  # noqa: E501
+)
 # The Block 132 cohort-independence / correlation-penalty contract module imports
 # ONLY __future__ and typing -- it does not import this registry -- so reading its
 # stable schema constant at module top is cycle-safe (no circular import).
@@ -332,6 +338,9 @@ __all__ = [
     "LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT",
     "get_latest_completed_daily_alpha_brief_approval_contract",
     "get_latest_completed_daily_alpha_brief_approval_contract_label",
+    "LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT",
+    "get_latest_completed_strategy_evidence_scoring_contract",
+    "get_latest_completed_strategy_evidence_scoring_contract_label",
     "LATEST_COMPLETED_COHORT_INDEPENDENCE_CONTRACT",
     "get_latest_completed_cohort_independence_contract",
     "get_latest_completed_cohort_independence_contract_label",
@@ -733,6 +742,22 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
 # micro-live gates stay LOCKED unless a separate, future, human-approved boundary
 # contract is built.
 NEXT_REQUIRED_ACTION = "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+
+# The single recognized latest research-only Strategy Evidence Scoring contract
+# (Block 131). It is a research-only evidence/scoring support contract: on paper,
+# it assigns a static evidence summary exactly one outcome (BLOCK > NEEDS_MORE_
+# DATA > KEEP_WATCH > PROMOTE_TO_REVIEW). It supports a research judgment only; it
+# authorizes nothing, fetches no data, calls no API, inspects no dataset, and
+# unlocks no downstream gate. Registering it is purely additive latest-completed
+# metadata: it does NOT advance CURRENT_STAGE or NEXT_REQUIRED_ACTION, both of
+# which remain at the human-controlled real-data QA boundary above. real_data_qa
+# and baseline stay BLOCKED and the paper/micro-live gates stay LOCKED.
+_RECOGNIZED_STRATEGY_EVIDENCE_SCORING_CONTRACT_LABEL = (
+    "Block 131 - Crypto-D1 Strategy Evidence Scoring Contract"
+)
+LATEST_COMPLETED_STRATEGY_EVIDENCE_SCORING_CONTRACT = (
+    _RECOGNIZED_STRATEGY_EVIDENCE_SCORING_CONTRACT_LABEL
+)
 
 # The single recognized latest research-only Cohort Independence / Correlation
 # Penalty contract (Block 132). It is a research-only evidence/scoring support
@@ -2991,6 +3016,96 @@ def get_latest_completed_daily_alpha_brief_approval_contract_label() -> str:
     """Human label for the latest recognized research-only daily-alpha-brief-
     approval contract."""
     return _RECOGNIZED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_LABEL
+
+
+def _recognized_strategy_evidence_scoring_contract() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized-strategy-evidence-scoring-
+    contract record.
+
+    Recognizing the strategy-evidence-scoring contract records, on paper, that the
+    Block 131 Crypto-D1 Strategy Evidence Scoring Contract is COMPLETE. It is a
+    research-only evidence/scoring support contract: given a static evidence
+    summary for a strategy candidate, it assigns exactly one outcome (BLOCK >
+    NEEDS_MORE_DATA > KEEP_WATCH > PROMOTE_TO_REVIEW). It is NOT an execution
+    bundle: it authorizes nothing, executes nothing, and unlocks no real
+    capability. It fetches no data, calls no API, inspects no dataset,
+    acquires/loads no data, and runs no QA, baseline, backtest, simulation,
+    paper/live, broker/exchange, or automation; every field is derived from static
+    input only. Its highest outcome, PROMOTE_TO_REVIEW, is a research-support
+    signal only -- never a trade, order, or authorization. A fresh record (with
+    fresh lists) is returned every call for mutation isolation.
+    """
+    families = _protocol_candidate_families()
+    record: dict[str, Any] = {
+        "strategy_evidence_scoring_contract_id": (
+            "CRYPTO_D1_STRATEGY_EVIDENCE_SCORING_CONTRACT"
+        ),
+        "name": (
+            "Crypto-D1 Strategy Evidence Scoring Contract"
+        ),
+        "label": _RECOGNIZED_STRATEGY_EVIDENCE_SCORING_CONTRACT_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_strategy_evidence_scoring_contract"
+        ),
+        "schema_constant": "STRATEGY_EVIDENCE_SCORING_SCHEMA_VERSION",
+        "schema_version": (
+            _STRATEGY_EVIDENCE_SCORING_CONTRACT_SCHEMA_VERSION
+        ),
+        "validates_protocol_id": _PROTOCOL_ID,
+        "validates_protocol_name": _PROTOCOL_NAME,
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "candidate_family_ids": [f["family_id"] for f in families],
+        "candidate_family_names": [f["name"] for f in families],
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Strategy Evidence Scoring "
+            "Contract, BUILT in Block 131. It records, on paper, that the "
+            "research-only evidence/scoring support contract -- which assigns a "
+            "static evidence summary for a strategy candidate exactly one outcome "
+            "(BLOCK > NEEDS_MORE_DATA > KEEP_WATCH > PROMOTE_TO_REVIEW) -- now "
+            "exists; it authorizes nothing and executes nothing: no data fetch, "
+            "API call, dataset inspection, real data acquisition, dataset loading, "
+            "QA, baseline, backtest, simulation, trade signal, order placement, "
+            "Telegram trade command, paper/live, automation, or runtime/registry/"
+            "dashboard write is unlocked. Its highest outcome is a research-support "
+            "signal (PROMOTE_TO_REVIEW), never a buy/sell/long/short/entry/exit/"
+            "order instruction; it always requires independent confirmation and "
+            "never converts evidence into permission. Registering it is purely "
+            "additive latest-completed metadata: it does not advance the global "
+            "stage. The only next step remains the human-controlled real-data QA "
+            "boundary decision -- a human judgment about whether to ever cross into "
+            "real-data QA -- which is not a build step and not an authorization. "
+            "real_data_qa and baseline stay BLOCKED and the paper/micro-live gates "
+            "stay LOCKED unless a separate, future, human-approved boundary "
+            "contract is built."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_strategy_evidence_scoring_contract() -> dict[str, Any]:
+    """The latest recognized research-only strategy-evidence-scoring-contract
+    record."""
+    return _recognized_strategy_evidence_scoring_contract()
+
+
+def get_latest_completed_strategy_evidence_scoring_contract_label() -> str:
+    """Human label for the latest recognized research-only strategy-evidence-
+    scoring contract."""
+    return _RECOGNIZED_STRATEGY_EVIDENCE_SCORING_CONTRACT_LABEL
 
 
 def _recognized_cohort_independence_contract() -> dict[str, Any]:
