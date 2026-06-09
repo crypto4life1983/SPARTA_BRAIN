@@ -321,6 +321,14 @@ from sparta_commander.strategy_factory_crypto_d1_real_data_qa_plan_only_contract
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_plan_approval_decision_contract import (  # noqa: E501
     DECISION_SCHEMA_VERSION as _REAL_DATA_QA_PLAN_APPROVAL_DECISION_SCHEMA_VERSION,  # noqa: E501
 )
+# The Block 174 real data QA boundary final decision contract module imports only
+# __future__, typing, and pure-stdlib sparta_commander sibling contracts (Blocks
+# 170 / 171 / 172 -> Block 155 human-approval packet) -- none of which import this
+# registry -- so reading its stable schema constant at module top is cycle-safe (no
+# circular import).
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_final_decision_contract import (  # noqa: E501
+    DECISION_SCHEMA_VERSION as _REAL_DATA_QA_BOUNDARY_FINAL_DECISION_SCHEMA_VERSION,  # noqa: E501
+)
 # NOTE: the Bundle 48 post-boundary next-step contract module imports
 # CURRENT_STAGE / NEXT_REQUIRED_ACTION from THIS registry, so importing its
 # schema constant at module top would create a circular import. It is therefore
@@ -450,6 +458,9 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION",
     "get_latest_completed_real_data_qa_plan_approval_decision",
     "get_latest_completed_real_data_qa_plan_approval_decision_label",
+    "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION",
+    "get_latest_completed_real_data_qa_boundary_final_decision",
+    "get_latest_completed_real_data_qa_boundary_final_decision_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1137,6 +1148,22 @@ _RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL = (
 )
 LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION = (
     _RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL
+)
+
+# Block 174 recognizes the research-only Real Data QA BOUNDARY FINAL DECISION
+# contract: a read-only finalization contract recording one human decision after
+# reviewing the Block 170 packet, the Block 171 plan, and the Block 172 plan
+# approval decision. Like every recognized record this is purely additive
+# latest-completed metadata; its highest grant
+# (AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT) authorizes only the drafting
+# of the next read-only preparation contract as a future candidate, approves no
+# real_data_qa execution, crosses no boundary, and is never an unlock of
+# real_data_qa.
+_RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL = (
+    "Block 174 - Crypto-D1 Real Data QA Boundary Final Decision Contract"
+)
+LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION = (
+    _RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -4855,6 +4882,100 @@ def get_latest_completed_real_data_qa_plan_approval_decision_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 Real Data QA
     Plan Approval Decision contract."""
     return _RECOGNIZED_REAL_DATA_QA_PLAN_APPROVAL_DECISION_LABEL
+
+
+def _recognized_real_data_qa_boundary_final_decision() -> dict[str, Any]:
+    """Build (fresh each call) the read-only recognized Crypto-D1 Real Data QA
+    Boundary Final Decision contract record.
+
+    This is the Block 174 FINALIZATION layer. Recognizing it records, on paper,
+    that the Block 174 contract -- a pure, research-only read-only contract that
+    reasons over the static caller-supplied Block 170 packet, Block 171 plan, and
+    Block 172 plan approval decision, and records exactly one of four final
+    decisions (AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT,
+    REQUEST_MORE_RESEARCH, REJECT_REAL_DATA_QA_PATH_FOR_NOW,
+    KEEP_REAL_DATA_QA_BLOCKED) -- now exists. Its single highest grant,
+    AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT, authorizes ONLY the
+    drafting of the next read-only preparation contract as a future candidate; it
+    approves no real_data_qa execution, crosses no boundary, and unlocks no gate. It
+    is NOT an execution bundle: it authorizes nothing, executes nothing, and unlocks
+    no real capability. It stages nothing, commits nothing, pushes nothing, fetches
+    no data, calls no API, opens no network, reads no credential, inspects no
+    dataset, and runs no QA, baseline, backtest, simulation, paper/live,
+    broker/exchange, or automation; every field is derived from static input only. A
+    fresh record is returned every call for mutation isolation.
+    """
+    record: dict[str, Any] = {
+        "real_data_qa_boundary_final_decision_id": (
+            "CRYPTO_D1_REAL_DATA_QA_BOUNDARY_FINAL_DECISION"
+        ),
+        "name": (
+            "Crypto-D1 Real Data QA Boundary Final Decision Contract"
+        ),
+        "label": _RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL,
+        "module": (
+            "sparta_commander."
+            "strategy_factory_crypto_d1_real_data_qa_boundary_final_decision_contract"
+        ),
+        "schema_constant": "DECISION_SCHEMA_VERSION",
+        "schema_version": (
+            _REAL_DATA_QA_BOUNDARY_FINAL_DECISION_SCHEMA_VERSION
+        ),
+        "mode": REGISTRY_MODE,
+        "defined": True,
+        "complete": True,
+        "read_only": True,
+        "executes": False,
+        "human_approval_required": True,
+        "requires_independent_confirmation": True,
+        "research_universe": [str(a) for a in _PROTOCOL_UNIVERSE],
+        "market_type": _PROTOCOL_MARKET_TYPE,
+        "timeframe": _PROTOCOL_TIMEFRAME,
+        "stage": CURRENT_STAGE,
+        "next_gate": CURRENT_STAGE,
+        "next_required_action": NEXT_REQUIRED_ACTION,
+        "reason": (
+            "Read-only recognition of the Crypto-D1 Real Data QA Boundary Final "
+            "Decision Contract, BUILT in Block 174. It records, on paper, that the "
+            "pure, research-only FINALIZATION LAYER -- which reasons over the static "
+            "caller-supplied Block 170 packet, Block 171 plan, and Block 172 plan "
+            "approval decision and records exactly one of four final decisions "
+            "(AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT, "
+            "REQUEST_MORE_RESEARCH, REJECT_REAL_DATA_QA_PATH_FOR_NOW, "
+            "KEEP_REAL_DATA_QA_BLOCKED) -- now exists; it authorizes nothing and "
+            "executes nothing: no staging, no commit, no push, no data fetch, API "
+            "call, endpoint call, URL fetch, network open, credential read, dataset "
+            "inspection, real data acquisition, dataset loading, QA, baseline, "
+            "backtest, simulation, trade signal, order placement, Telegram trade "
+            "command, paper/live, automation, or runtime/registry/dashboard write is "
+            "unlocked. It is a finalization verdict, not an actor, and its single "
+            "highest grant, AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT, "
+            "authorizes only the drafting of the next read-only preparation contract "
+            "as a future candidate -- never a real_data_qa execution, never a "
+            "buy/sell/long/short/entry/exit/order instruction, never a boundary "
+            "crossing, and never an unlock of real_data_qa; it always requires "
+            "independent confirmation. Registering it is purely additive "
+            "latest-completed metadata: it does not advance the global stage, which "
+            "remains the human-controlled real-data QA boundary decision and must "
+            "not imply automatic execution or auto-push. real_data_qa and baseline "
+            "stay BLOCKED and the paper/micro-live gates stay LOCKED unless a "
+            "separate, future, human-approved step provides explicit authorization."
+        ),
+    }
+    record.update(_BUNDLE_LOCKED_CAPABILITIES)
+    return record
+
+
+def get_latest_completed_real_data_qa_boundary_final_decision() -> dict[str, Any]:
+    """The latest recognized research-only Crypto-D1 Real Data QA Boundary Final
+    Decision record."""
+    return _recognized_real_data_qa_boundary_final_decision()
+
+
+def get_latest_completed_real_data_qa_boundary_final_decision_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 Real Data QA
+    Boundary Final Decision contract."""
+    return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL
 
 
 def get_current_stage() -> str:

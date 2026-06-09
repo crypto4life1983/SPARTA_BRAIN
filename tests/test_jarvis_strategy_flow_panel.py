@@ -1595,3 +1595,138 @@ def test_static_panel_matches_block172_registered_backend_truth():
     ) in block
     assert "Locked &middot; human approval required" in block
     assert "Locked &middot; never automated" in block
+
+
+def test_boundary_final_decision_shown_complete_no_unlock():
+    """The Block 174 Crypto-D1 Real Data QA Boundary Final Decision Contract is shown
+    as a COMPLETE + registered, research-only finalization row in the machine lane
+    (Pipeline + Combined views) and in the Current Run snapshot. It must make clear it
+    authorizes nothing and executes nothing, that even its highest grant
+    AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT authorizes only drafting the
+    next read-only preparation contract as a future candidate, carry no execution /
+    fetch / QA-run / unlock affordance, and NOT advance the boundary (real_data_qa
+    stays blocked, the boundary decision stays NEXT)."""
+    block = _strategy_flow_block(_page())
+    # shown complete + registered in BOTH machine lanes (Pipeline + Combined)
+    assert block.count('data-debug="BLOCK_174_REGISTERED"') >= 2
+    assert block.count(
+        '<span class="nlbl">Crypto-D1 Real Data QA Boundary Final Decision Contract'
+        '</span><span class="nst">Block 174 &middot; Complete &middot; registered '
+        '&middot; boundary final decision</span>'
+    ) >= 2
+    # the research-only, authorize-nothing / execute-nothing posture is explicit
+    assert (
+        "research-only finalization; records one human decision after reviewing "
+        "the Block 170 packet, Block 171 plan, and Block 172 plan approval "
+        "decision; the highest grant AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_"
+        "CONTRACT authorizes only drafting the next read-only preparation contract "
+        "as a future candidate; authorizes nothing; executes nothing; no "
+        "real_data_qa unlock"
+        in block
+    )
+    # surfaced in the Current Run snapshot as a read-only completion row
+    assert (
+        '<span class="k">Real Data QA Boundary Final Decision Contract</span>'
+        '<span class="v"><span class="jv-led ok"></span>Block 174 &middot; '
+        'Complete &middot; registered'
+    ) in block
+    # registering the final decision did NOT advance the boundary
+    assert "Next &middot; awaiting human decision" in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    # no execution / unlock / fetch / QA-run control surface anywhere in the panel
+    low = block.lower()
+    for forbidden in (
+        "unlock_real_data_qa", "run_qa", "start_qa", "fetch(",
+        "place_order", "submit_order", "execute_trade", "go_live",
+        "enable_live", "auto_push", "activate_autopilot",
+    ):
+        assert forbidden not in low, f"forbidden control surface: {forbidden}"
+
+
+def test_boundary_final_decision_renders_after_block172_before_boundary():
+    """Anti-drift: the Block 174 final-decision node renders AFTER the Block 172
+    approval-decision node and BEFORE the still-NEXT Human-Controlled Real Data QA
+    Boundary Decision node, so the lane is not silently truncated at 172 and the
+    boundary remains the next machine step."""
+    block = _strategy_flow_block(_page())
+    b172 = block.find('data-debug="BLOCK_172_REGISTERED"')
+    b174 = block.find('data-debug="BLOCK_174_REGISTERED"')
+    boundary = block.find(
+        '<span class="nlbl">Human-Controlled Real Data QA Boundary Decision'
+        '</span><span class="nst">Next &middot; awaiting human decision</span>'
+    )
+    assert -1 not in (b172, b174, boundary)
+    assert b172 < b174 < boundary, (
+        "the final-decision node must sit between Block 172 and the boundary"
+    )
+
+
+def test_static_panel_matches_block174_registered_backend_truth():
+    """The visible static panel must match the committed backend truth for Bundle
+    174: the Block 174 Crypto-D1 Real Data QA Boundary Final Decision Contract is
+    complete and registered and is the live latest_completed_* label, while the chain
+    stays PARKED at the human-controlled real-data QA boundary (current_stage /
+    next_required_action unchanged, real_data_qa and baseline blocked, paper/
+    micro-live locked).
+
+    Skips (rather than errors) if the backend module is not importable."""
+    try:
+        from sparta_commander import (  # noqa: WPS433 - guarded backend import
+            strategy_factory_mission_flow_status as mf,
+        )
+    except Exception as exc:  # noqa: BLE001 - backend may be broken mid-edit
+        pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
+    status = mf.get_mission_flow_status()
+    assert status[
+        "latest_completed_real_data_qa_boundary_final_decision"
+    ] == ("Block 174 - Crypto-D1 Real Data QA Boundary Final Decision Contract")
+    assert status["current_stage"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+    )
+    assert status["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    # the final decision is COMPLETE in the machine pipeline and the boundary lane
+    # is still NEXT in the backend
+    pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
+    assert pipe[
+        "crypto_d1_real_data_qa_boundary_final_decision"
+    ]["state"] == mf.STATE_COMPLETE
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == mf.STATE_NEXT
+    # the prior Block 172 completion is preserved alongside Block 174
+    assert status["latest_completed_real_data_qa_plan_approval_decision"] == (
+        "Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract"
+    )
+
+    block = _strategy_flow_block(_page())
+    # backend says 174 registered -> the panel must show it (anti-drift)
+    assert block.count('data-debug="BLOCK_174_REGISTERED"') >= 2
+    assert "Crypto-D1 Real Data QA Boundary Final Decision Contract" in block
+    # the panel must NOT omit the prior Block 172 completion
+    assert block.count('data-debug="BLOCK_172_REGISTERED"') >= 2
+    # the visible current stage + next required action match the backend exactly
+    assert status["current_stage"] in block
+    assert status["next_required_action"] in block
+    # the next visible machine step is still the human-controlled boundary decision
+    assert "Human-Controlled Real Data QA Boundary Decision" in block
+    assert "Next &middot; awaiting human decision" in block
+    # registering the final decision did NOT advance the boundary
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Real Data QA</span><span class="nst">Blocked'
+    ) in block
+    assert (
+        'is-blocked"><span class="ndot"></span>'
+        '<span class="nlbl">Baseline Backtest</span><span class="nst">Blocked'
+    ) in block
+    assert "Locked &middot; human approval required" in block
+    assert "Locked &middot; never automated" in block
