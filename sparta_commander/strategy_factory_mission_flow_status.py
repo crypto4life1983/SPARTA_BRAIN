@@ -183,6 +183,9 @@ from sparta_commander.strategy_factory_crypto_d1_real_data_qa_human_approval_pac
 from sparta_commander.strategy_factory_crypto_d1_real_data_qa_boundary_decision import (  # noqa: E501
     DECISION_SCHEMA_VERSION as CRYPTO_D1_REAL_DATA_QA_BOUNDARY_DECISION_SCHEMA_VERSION,  # noqa: E501
 )
+from sparta_commander.strategy_factory_crypto_d1_real_data_qa_pass_receipt import (  # noqa: E501
+    get_qa_pass_receipt_label as _qa_pass_receipt_label,
+)
 from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # noqa: E501
     get_current_stage as _registry_current_stage,
     get_latest_completed_bundle_label as _registry_latest_bundle_label,
@@ -275,6 +278,7 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT",
     "LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION",
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION",
+    "LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -427,6 +431,11 @@ LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION = (
 LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION = (
     _registry_latest_real_data_qa_boundary_final_decision_label()
 )
+# Surfaces that the Manual CSV Real Data QA run produced PASS evidence. This is a
+# read-only receipt: it records PASS but moves NO gate -- real_data_qa and
+# baseline_backtest stay BLOCKED, and paper / micro-live stay LOCKED, until a
+# separate explicit human baseline-prep policy decision.
+LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT = _qa_pass_receipt_label()
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -1651,7 +1660,10 @@ _BLOCKED_GATES: tuple[dict[str, str], ...] = (
         "id": "real_data_qa",
         "label": "Real Data QA",
         "state": STATE_BLOCKED,
-        "reason": "No real data acquired; QA never run.",
+        "reason": (
+            "Manual CSV QA produced PASS evidence (BTC/ETH/SOL); gate stays "
+            "BLOCKED pending a separate human baseline-prep policy decision."
+        ),
     },
     {
         "id": "baseline_backtest",
@@ -1763,6 +1775,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_real_data_qa_plan_only_contract": LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT,  # noqa: E501
         "latest_completed_real_data_qa_plan_approval_decision": LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION,  # noqa: E501
         "latest_completed_real_data_qa_boundary_final_decision": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION,  # noqa: E501
+        "latest_completed_real_data_qa_pass_receipt": LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
