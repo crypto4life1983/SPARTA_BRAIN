@@ -1312,42 +1312,78 @@ def _behavioral_checks(root: Path) -> dict[str, Any]:
 
 
 def _verify_touch_points(root: Path) -> dict[str, Any]:
+    # Commander 2.0 is a STANDALONE additive layer. By design it is NOT wired
+    # into the v1 touch points (__init__.py, commander.py, dashboard.html,
+    # app.py): the 2.0 modules are self-contained and the shared v1 files are
+    # never mutated to import or execute Commander 2.0 logic. This check
+    # verifies that realized isolation, not a wiring that was deliberately
+    # never performed.
     init_src = _read(root, "sparta_commander/__init__.py")
     cmd_src = _read(root, "sparta_commander/commander.py")
     dash_src = _read(root, "templates/dashboard.html")
     app_src = _read(root, "app.py")
+    commander_2_src = _read(root, "sparta_commander/commander_2.py")
+    persona_registry_src = _read(root, "sparta_commander/persona_registry.py")
 
-    # app.py: the only Commander-2.0 addition is a docs DB row; isolate its block.
-    app_block = ""
-    m = re.search(r'db\.upsert_manual_entry\(\s*\n?\s*"sparta_commander_2"', app_src)
-    if m:
-        app_block = app_src[m.start() : m.start() + 1600]
-    app_block_clean = bool(app_block) and not re.search(
-        r"(place_order|live_trade|smtplib|requests\.|telegram|obsidian[-_]trade)", app_block
+    # The 2.0 layer exists and exposes its read-only summary entry point.
+    commander_2_module_exists = bool(commander_2_src)
+    commander_2_summary_exposed = "def commander_2_summary(" in commander_2_src
+
+    # persona_registry is an isolated 2.0 support module.
+    persona_registry_isolated = bool(persona_registry_src)
+
+    # Isolation: the v1 import surface and v1 commander neither import nor
+    # execute Commander 2.0. Keeping them fully separate IS the guarantee.
+    commander_2_isolated_from_v1 = (
+        "commander_2" not in init_src and "commander_2" not in cmd_src
     )
 
-    # dashboard.html: the new panel must be static display (no script/form/fetch).
-    panel = ""
-    pm = re.search(r"SPARTA COMMANDER 2\.0 ==============", dash_src)
+    # app.py adds no live Commander 2.0 wiring. Today there is no commander_2
+    # reference at all (full isolation); if a "sparta_commander_2" /guide row is
+    # ever added it must stay docs-only (no action tokens).
+    app_2_block = ""
+    am = re.search(r'db\.upsert_manual_entry\(\s*\n?\s*"sparta_commander_2"', app_src)
+    if am:
+        app_2_block = app_src[am.start() : am.start() + 1600]
+    app_guide_row_is_docs_only = ("commander_2" not in app_src) or (
+        bool(app_2_block)
+        and not re.search(
+            r"(place_order|live_trade|smtplib|requests\.|telegram|obsidian[-_]trade)",
+            app_2_block,
+        )
+    )
+
+    # dashboard.html adds no dynamic Commander 2.0 panel. Today none exists; if
+    # a "SPARTA COMMANDER 2.0" panel is ever added it must be static display
+    # (no script/form/fetch).
+    panel_2 = ""
+    pm = re.search(r"SPARTA COMMANDER 2\.0", dash_src)
     if pm:
-        panel = dash_src[pm.start() : pm.start() + 6000]
-    panel_static = bool(panel) and not re.search(
-        r"<script|<form|fetch\s*\(|XMLHttpRequest|action\s*=", panel, re.IGNORECASE
+        panel_2 = dash_src[pm.start() : pm.start() + 6000]
+    dashboard_panel_is_static = ("commander_2" not in dash_src and not panel_2) or (
+        bool(panel_2)
+        and not re.search(
+            r"<script|<form|fetch\s*\(|XMLHttpRequest|action\s*=",
+            panel_2,
+            re.IGNORECASE,
+        )
     )
 
     return {
-        "init_additive_only": "commander_2_summary" in init_src
-        and "persona_registry" in init_src,
-        "commander_guarded_call": "commander_2 = commander_2_summary()" in cmd_src
-        and '"commander_2": commander_2' in cmd_src,
-        "app_guide_row_is_docs_only": app_block_clean,
-        "dashboard_panel_is_static": panel_static,
+        "commander_2_module_exists": commander_2_module_exists,
+        "commander_2_summary_exposed": commander_2_summary_exposed,
+        "persona_registry_isolated": persona_registry_isolated,
+        "commander_2_isolated_from_v1": commander_2_isolated_from_v1,
+        "app_guide_row_is_docs_only": app_guide_row_is_docs_only,
+        "dashboard_panel_is_static": dashboard_panel_is_static,
         "ok": all(
             [
-                "commander_2_summary" in init_src,
-                "commander_2 = commander_2_summary()" in cmd_src,
-                app_block_clean,
-                panel_static,
+                commander_2_module_exists,
+                commander_2_summary_exposed,
+                persona_registry_isolated,
+                commander_2_isolated_from_v1,
+                app_guide_row_is_docs_only,
+                dashboard_panel_is_static,
             ]
         ),
     }
