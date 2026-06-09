@@ -202,6 +202,7 @@ COMMANDER_2_MODULES = (
     "sparta_commander/strategy_factory_crypto_d1_selected_read_only_spot_provider_fetch_runner_dry_run.py",
     "sparta_commander/strategy_factory_crypto_d1_real_data_qa_boundary_decision_packet.py",
     "sparta_commander/strategy_factory_crypto_d1_real_data_qa_plan_only_contract.py",
+    "sparta_commander/strategy_factory_crypto_d1_real_data_qa_plan_approval_decision_contract.py",
 )
 
 COMMANDER_2_TESTS = (
@@ -377,6 +378,7 @@ COMMANDER_2_TESTS = (
     "tests/test_strategy_factory_crypto_d1_selected_read_only_spot_provider_fetch_runner_dry_run.py",
     "tests/test_strategy_factory_crypto_d1_real_data_qa_boundary_decision_packet.py",
     "tests/test_strategy_factory_crypto_d1_real_data_qa_plan_only_contract.py",
+    "tests/test_strategy_factory_crypto_d1_real_data_qa_plan_approval_decision_contract.py",
 )
 
 # Shared files that were *touched* (additive) and are checked with targeted,
