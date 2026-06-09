@@ -130,6 +130,9 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_real_data_qa_boundary_readiness_review_label,
     get_latest_completed_public_spot_source_evaluation,
     get_latest_completed_public_spot_source_evaluation_label,
+    LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC,
+    get_latest_completed_concrete_spot_provider_adapter_spec,
+    get_latest_completed_concrete_spot_provider_adapter_spec_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -3582,6 +3585,78 @@ def test_recognized_public_spot_source_evaluation_authorizes_nothing():
 
 def test_recognized_public_spot_source_evaluation_isolated():
     getter = get_latest_completed_public_spot_source_evaluation
+    assert getter() == getter()
+    c = getter()
+    c["executes"] = True
+    c["research_universe"].append("TAMPERED")
+    fresh = getter()
+    assert fresh["executes"] is False
+    assert fresh["research_universe"] == ["BTC", "ETH", "SOL"]
+
+
+def test_latest_completed_concrete_spot_provider_adapter_spec_label():
+    assert LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC == (
+        "Block 168 - Crypto-D1 Concrete Read-Only Spot Provider Adapter Spec"
+    )
+    assert (
+        get_latest_completed_concrete_spot_provider_adapter_spec_label()
+        == LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC
+    )
+    for banned in ("BACKTEST", "PAPER", "LIVE", "BROKER", "EXCHANGE",
+                   "EXECUTION", "ORDER", "UNLOCK"):
+        assert banned not in (
+            LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC.upper()
+        ), banned
+
+
+def test_registry_recognizes_concrete_spot_provider_adapter_spec():
+    c = get_latest_completed_concrete_spot_provider_adapter_spec()
+    assert c["concrete_spot_provider_adapter_spec_id"] == (
+        "CRYPTO_D1_CONCRETE_READ_ONLY_SPOT_PROVIDER_ADAPTER_SPEC"
+    )
+    assert c["name"] == "Crypto-D1 Concrete Read-Only Spot Provider Adapter Spec"
+    assert c["label"] == LATEST_COMPLETED_CONCRETE_SPOT_PROVIDER_ADAPTER_SPEC
+    assert c["defined"] is True
+    assert c["complete"] is True
+    assert c["schema_constant"] == "ADAPTER_SPEC_SCHEMA_VERSION"
+    assert c["schema_version"] == (
+        "strategy_factory_crypto_d1_concrete_read_only_spot_provider_adapter_spec.v1"
+    )
+    assert c["module"] == (
+        "sparta_commander."
+        "strategy_factory_crypto_d1_concrete_read_only_spot_provider_adapter_spec"
+    )
+
+
+def test_recognized_concrete_spot_provider_adapter_spec_research_only():
+    c = get_latest_completed_concrete_spot_provider_adapter_spec()
+    assert c["mode"] == "RESEARCH_ONLY"
+    assert c["read_only"] is True
+    assert c["executes"] is False
+    assert c["human_approval_required"] is True
+    assert c["requires_independent_confirmation"] is True
+
+
+def test_recognized_concrete_spot_provider_adapter_spec_authorizes_nothing():
+    c = get_latest_completed_concrete_spot_provider_adapter_spec()
+    for flag in _CAPABILITY_FLAGS:
+        assert c[flag] is False, flag
+    assert c["next_required_action"] == (
+        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+    )
+    assert c["next_required_action"] == NEXT_REQUIRED_ACTION
+    assert not c["next_required_action"].startswith("BUILD_")
+    assert c["stage"] == CURRENT_STAGE
+    assert c["next_gate"] == CURRENT_STAGE
+    reason = c["reason"].lower()
+    assert "authorizes nothing" in reason
+    assert "executes nothing" in reason
+    assert "purely additive latest-completed metadata" in reason
+    assert "never an unlock of real_data_qa" in reason
+
+
+def test_recognized_concrete_spot_provider_adapter_spec_isolated():
+    getter = get_latest_completed_concrete_spot_provider_adapter_spec
     assert getter() == getter()
     c = getter()
     c["executes"] = True
