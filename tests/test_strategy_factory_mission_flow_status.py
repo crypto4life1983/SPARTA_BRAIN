@@ -141,6 +141,8 @@ def test_status_schema_is_stable():
         "latest_completed_daily_alpha_brief_review_contract",
         "latest_completed_daily_alpha_brief_approval_contract",
         "latest_completed_strategy_evidence_scoring_contract",
+        "latest_completed_strategy_candidate_ranking_contract",
+        "latest_completed_external_human_trader_evidence_contract",
         "latest_completed_cohort_independence_contract",
         "latest_completed_real_data_qa_boundary_decision_contract",
         "latest_completed_real_data_qa_human_approval_packet_contract",
