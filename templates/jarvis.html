@@ -842,6 +842,17 @@
                 aria-label="Speak to fill the question box">Speak to fill</span>
           <span class="jv-detail" id="jvVoiceStatus" aria-live="polite">Idle.</span>
         </div>
+        <!-- Clap-to-wake. Opt-in toggle: while armed, a local Web Audio analyser
+             listens for TWO sharp claps within a second and then triggers the
+             SAME start() the "Speak to fill" click runs. No new capability, no
+             execution, no audio stored or sent anywhere — detection is local
+             peak analysis only. Off by default; the mic stays open only while
+             armed, and only while this tab is open and visible. -->
+        <div class="jv-voice-row">
+          <span class="jv-voice-ctl" id="jvClapBtn" role="button" tabindex="0"
+                aria-pressed="false" aria-label="Toggle clap to wake">Clap to wake: Off</span>
+          <span class="jv-detail" id="jvClapStatus" aria-live="polite">Off. Double-clap wake is opt-in; the mic stays open only while armed.</span>
+        </div>
 
         <!-- Step 36: optional Voice output. Reads the LAST returned answer (or
              refusal text) aloud, only when the operator clicks. Off by default,
@@ -1822,6 +1833,29 @@
     }).then(function(r){ return r.json(); });
   }
 
+  // Speak an INAUDIBLE warm-up utterance so the engine's audio device is no
+  // longer cold when the real answer plays. Chrome/Edge clip the start of the
+  // first utterance after the engine has been idle (cold audio device), which
+  // made the opening words ("Good morning Mahmoud") play quiet even though a
+  // lead pause was already prepended. The silent primer takes that clip on
+  // throwaway silence. Safe to call repeatedly; makes no sound, carries no
+  // keepalive, and leaves no queue residue worth tracking.
+  function jvPrimeSynth(synth){
+    try {
+      if(!synth || typeof window.SpeechSynthesisUtterance === 'undefined'){ return; }
+      // Must be a REAL word, not whitespace: Chrome skips empty/whitespace-only
+      // utterances entirely, so a ' ' primer never warms the engine and the
+      // real answer stays the clipped first utterance. A real word at volume 0
+      // is silent but still forces the audio pipeline to spin up.
+      var p = new SpeechSynthesisUtterance('ready');
+      if(jvVoice){ p.voice = jvVoice; p.lang = jvVoice.lang || 'en-US'; }
+      else { p.lang = 'en-US'; }
+      p.volume = 0;
+      p.rate = 1;
+      synth.speak(p);
+    } catch(e){ /* best-effort warm-up */ }
+  }
+
   // Read text aloud as a SINGLE utterance. Root cause of the "quiet first word"
   // bug: Chrome/Edge fade up the START of every utterance, so splitting an
   // answer into several utterances made the opening word of each chunk too
@@ -1844,7 +1878,7 @@
     var done = false, keepAlive = null;
     function stopKeepAlive(){ if(keepAlive){ clearInterval(keepAlive); keepAlive = null; } }
     function finish(){ if(done){ return; } done = true; stopKeepAlive(); if(onEnd){ onEnd(); } }
-    function enqueue(){
+    function speakContent(){
       var u = new SpeechSynthesisUtterance('. . . , , , , ' + clean);
       if(jvVoice){ u.voice = jvVoice; u.lang = jvVoice.lang || 'en-US'; }
       else { u.lang = 'en-US'; }
@@ -1858,6 +1892,15 @@
         if(synth.speaking){ try { synth.resume(); } catch(e){ /* ignore */ } }
         else { stopKeepAlive(); }
       }, 10000);
+    }
+    function enqueue(){
+      // Warm the engine with an inaudible primer, then wait a beat in REAL time
+      // before speaking the content. Queueing primer+content back-to-back made
+      // Chrome/Edge swallow the opening words ("Good morning Mahmoud"); the
+      // real-time gap lets the cold-start onset clip spend itself on the primer
+      // and finish, so the answer starts clean and full-volume.
+      jvPrimeSynth(synth);
+      setTimeout(speakContent, 300);
     }
     if(synth.speaking || synth.pending){
       try { synth.cancel(); } catch(e){ /* nothing queued */ }
@@ -1891,6 +1934,9 @@
   function jvRunConversation(transcript, setStatus){
     var askOut = document.getElementById('jvAskOut');
     setStatus('Asking read-only…');
+    // Warm the speech engine during the network round-trip so the first words
+    // of the spoken answer are not clipped by a cold start.
+    jvPrimeSynth(window.speechSynthesis);
     jvPostQuestion(transcript)
       .then(function(d){
         if(askOut){ renderAsk(askOut, d); }
@@ -1944,6 +1990,10 @@
     conv.addEventListener('keydown', function(e){
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); apply('conversation'); }
     });
+    // Conversation is the default mode (operator preference): speak, JARVIS
+    // auto-asks read-only and reads the answer aloud. Preview stays one click
+    // away. Same classifier gate either way; nothing executed, traded, stored.
+    apply('conversation');
   }
 
   // Step 31: strictly read-only ask wiring. Posts ONLY the question field to
@@ -2061,8 +2111,22 @@
 
     var rec = new Recognition();
     rec.lang = 'en-US';
-    rec.interimResults = false;
+    // Continuous capture with interim results: the default single-shot mode
+    // submitted the transcript at the FIRST pause, cutting the operator off
+    // mid-sentence whenever they took a breath. Now we keep listening and only
+    // send after ~2.5s of silence (or stop after 12s of no speech at all).
+    rec.interimResults = true;
+    rec.continuous = true;
     rec.maxAlternatives = 1;
+    var SILENCE_MS = 2500;
+    var NO_SPEECH_MS = 12000;
+    var finalText = '';
+    var silenceTimer = null;
+    var noSpeechTimer = null;
+    function clearVoiceTimers(){
+      if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
+      if(noSpeechTimer){ clearTimeout(noSpeechTimer); noSpeechTimer = null; }
+    }
     var listening = false;
     // True once a conversation turn has been kicked off from a transcript, so
     // onend does not clear the busy guard mid-turn (the turn clears it itself).
@@ -2129,28 +2193,54 @@
 
     rec.onstart = function(){
       listening = true;
+      finalText = '';
       btn.classList.add('is-listening');
       setStatus(jvVoiceMode === 'conversation'
-        ? 'Listening… ask your read-only question; I will answer aloud.'
-        : 'Listening… speak your read-only question.');
+        ? 'Listening… take your time — I send only after you pause ~2.5s, then answer aloud.'
+        : 'Listening… take your time — I send only after you pause for ~2.5 seconds.');
+      // If nothing at all is heard, stop instead of listening forever.
+      noSpeechTimer = setTimeout(function(){
+        if(!finalText){ try { rec.stop(); } catch(err){ /* already stopped */ } }
+      }, NO_SPEECH_MS);
     };
     rec.onerror = function(e){
       listening = false;
       convStarted = false;
       jvVoiceBusy = false;
+      finalText = '';
+      clearVoiceTimers();
       btn.classList.remove('is-listening');
       setStatus(explainError(e && e.error));
     };
+    rec.onresult = function(e){
+      // Accumulate ALL final segments across pauses; show finals + interim live
+      // so the operator sees the capture build. Submission happens only in
+      // onend, after the silence window stops the recognizer.
+      var interim = '';
+      try {
+        for(var i = e.resultIndex; i < e.results.length; i++){
+          var t = (e.results[i][0].transcript || '');
+          if(e.results[i].isFinal){ finalText += t + ' '; }
+          else { interim += t; }
+        }
+      } catch(err){ /* malformed event — keep what we have */ }
+      var shown = (finalText + ' ' + interim).replace(/\s+/g, ' ').trim();
+      if(shown){
+        input.value = shown;
+        setStatus('Heard so far — keep talking, or pause ~2.5s to send.');
+      }
+      if(noSpeechTimer){ clearTimeout(noSpeechTimer); noSpeechTimer = null; }
+      if(silenceTimer){ clearTimeout(silenceTimer); }
+      silenceTimer = setTimeout(function(){
+        try { rec.stop(); } catch(err){ /* already stopped */ }
+      }, SILENCE_MS);
+    };
     rec.onend = function(){
       listening = false;
+      clearVoiceTimers();
       btn.classList.remove('is-listening');
-      // In conversation mode the turn continues (ask + read-aloud) after the
-      // mic ends, so the turn clears the busy guard itself. Otherwise clear now.
-      if(!convStarted){ jvVoiceBusy = false; }
-    };
-    rec.onresult = function(e){
-      var transcript = '';
-      try { transcript = (e.results[0][0].transcript || '').trim(); } catch(err) { transcript = ''; }
+      var transcript = (finalText || '').replace(/\s+/g, ' ').trim();
+      finalText = '';
       if(transcript){
         // Both modes fill the question box first, so the operator always sees
         // the captured text. No storage.
@@ -2164,9 +2254,12 @@
         } else {
           setStatus('Transcript ready — review it, then click "Ask read-only".');
         }
-      } else {
+      } else if(!convStarted){
         setStatus('No speech detected. Try again or type your question.');
       }
+      // In conversation mode the turn continues (ask + read-aloud) after the
+      // mic ends, so the turn clears the busy guard itself. Otherwise clear now.
+      if(!convStarted){ jvVoiceBusy = false; }
     };
 
     // Best-effort, non-blocking permission hint. The Permissions API (NOT the
@@ -2195,6 +2288,112 @@
     btn.addEventListener('keydown', function(e){
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); start(); }
     });
+
+    // Clap-to-wake (opt-in). While armed, a local Web Audio analyser watches the
+    // mic for TWO sharp claps within a second, then triggers the SAME start()
+    // the "Speak to fill" click runs — no new capability, nothing stored or
+    // sent. Arming is itself a click, which satisfies the browser's
+    // user-gesture rule for the mic. Detection pauses while a capture or
+    // read-aloud is in flight so JARVIS's own voice can never wake it. A clap
+    // is recognised by its impulsiveness (very high peak with low sustained
+    // energy — high crest factor), which speech and music fail; double-clap is
+    // required to avoid door-slam / keyboard false triggers.
+    var clapBtn = document.getElementById('jvClapBtn');
+    var clapStatus = document.getElementById('jvClapStatus');
+    if(clapBtn && clapStatus && navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+      var clapArmed = false, clapStream = null, clapCtx = null, clapRaf = 0;
+      var lastClapAt = 0, prevClapAt = 0;
+      function setClap(msg){ clapStatus.textContent = msg; }
+      function disarmClap(){
+        clapArmed = false;
+        if(clapRaf){ cancelAnimationFrame(clapRaf); clapRaf = 0; }
+        if(clapStream){
+          try { clapStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){ /* already stopped */ }
+          clapStream = null;
+        }
+        if(clapCtx){ try { clapCtx.close(); } catch(e){ /* already closed */ } clapCtx = null; }
+        clapBtn.classList.remove('is-listening');
+        clapBtn.setAttribute('aria-pressed', 'false');
+        clapBtn.textContent = 'Clap to wake: Off';
+        setClap('Off. Double-clap wake is opt-in; the mic stays open only while armed.');
+      }
+      function armClap(){
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream){
+          clapStream = stream;
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          clapCtx = new Ctx();
+          var src = clapCtx.createMediaStreamSource(stream);
+          var an = clapCtx.createAnalyser();
+          an.fftSize = 2048;
+          src.connect(an);
+          var buf = new Uint8Array(an.fftSize);
+          clapArmed = true;
+          clapBtn.classList.add('is-listening');
+          clapBtn.setAttribute('aria-pressed', 'true');
+          clapBtn.textContent = 'Clap to wake: On';
+          setClap('Armed. Double-clap (two claps within a second) and I will start listening.');
+          prevClapAt = 0; lastClapAt = 0;
+          function tick(){
+            if(!clapArmed){ return; }
+            clapRaf = requestAnimationFrame(tick);
+            // Pause while a voice turn or read-aloud is running so JARVIS's own
+            // audio (or the active capture) can never re-trigger the wake.
+            if(listening || jvVoiceBusy ||
+               (window.speechSynthesis && window.speechSynthesis.speaking)){ return; }
+            an.getByteTimeDomainData(buf);
+            var peak = 0, sum = 0;
+            for(var i = 0; i < buf.length; i++){
+              var v = Math.abs(buf[i] - 128) / 128;
+              if(v > peak){ peak = v; }
+              sum += v * v;
+            }
+            var rms = Math.sqrt(sum / buf.length);
+            var now = performance.now();
+            if(peak >= 0.5 && peak >= rms * 2.5 && (now - lastClapAt) > 180){
+              prevClapAt = lastClapAt;
+              lastClapAt = now;
+              var gap = lastClapAt - prevClapAt;
+              if(prevClapAt > 0 && gap <= 1000){
+                prevClapAt = 0; lastClapAt = 0;
+                setClap('Double-clap heard — waking the mic.');
+                start();
+              } else {
+                setClap('Clap heard — clap once more within a second to wake.');
+              }
+            }
+          }
+          tick();
+        }).catch(function(){
+          disarmClap();
+          setClap('Could not open the microphone for clap detection. Check the mic permission, then try again.');
+        });
+      }
+      function toggleClap(){
+        if(clapArmed){ disarmClap(); }
+        else { setClap('Arming…'); armClap(); }
+      }
+      clapBtn.addEventListener('click', toggleClap);
+      clapBtn.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleClap(); }
+      });
+      // Auto-arm on load when the mic permission is ALREADY granted, so
+      // clap-to-wake is on by default (operator preference). First-time
+      // visitors still arm with a click — the permission prompt needs a user
+      // gesture. If the browser suspends the AudioContext before any
+      // interaction (autoplay policy), the next click anywhere resumes it.
+      if(navigator.permissions && navigator.permissions.query){
+        try {
+          navigator.permissions.query({ name: 'microphone' }).then(function(p){
+            if(p.state === 'granted' && !clapArmed){ armClap(); }
+          }).catch(function(){ /* permission name unsupported — stay off */ });
+        } catch(err){ /* older browser — stay off */ }
+      }
+      document.addEventListener('click', function(){
+        if(clapCtx && clapCtx.state === 'suspended'){
+          try { clapCtx.resume(); } catch(e){ /* ignore */ }
+        }
+      });
+    }
   }
 
   // Step 36: optional read-aloud of the LAST returned answer (or refusal text).
