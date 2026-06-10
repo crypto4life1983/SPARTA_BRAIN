@@ -243,6 +243,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_rc2_cross_policy_results_review_contract_label as _registry_latest_rc2_cross_policy_results_review_contract_label,  # noqa: E501
     get_latest_completed_rc2_cross_policy_human_evidence_decision_contract_label as _registry_latest_rc2_cross_policy_human_evidence_decision_contract_label,  # noqa: E501
     get_latest_completed_rc3_failure_mode_characterization_research_contract_label as _registry_latest_rc3_failure_mode_characterization_research_contract_label,  # noqa: E501
+    get_latest_completed_rc3_findings_human_decision_contract_label as _registry_latest_rc3_findings_human_decision_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -311,6 +312,7 @@ __all__ = [
     "LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT",
     "LATEST_COMPLETED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT",
     "LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT",
+    "LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -602,6 +604,17 @@ LATEST_COMPLETED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT = (
 # stay BLOCKED, paper / micro-live / live stay LOCKED.
 LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT = (
     _registry_latest_rc3_failure_mode_characterization_research_contract_label()
+)
+# Block 189: the human's RC3 FINDINGS DECISION is now recorded as additive
+# latest-completed evidence. The resume-policy research thread is CLOSED WITH
+# LESSONS, fresh evidence is structurally required before any reconsideration,
+# NO successors were selected (RP4/RP5 stay evidence only), and
+# DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. The surfaced next step is
+# simply awaiting a new, separate, explicit human research directive -- never
+# promotion and never execution. Recognizing it moves NO gate: real_data_qa and
+# baseline_backtest stay BLOCKED, paper / micro-live / live stay LOCKED.
+LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT = (
+    _registry_latest_rc3_findings_human_decision_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1907,22 +1920,39 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_rc3_findings_decision",
         "label": "Crypto-D1 V2 RC3 Findings Decision",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the Block 189 read-only human decision contract "
+            "recorded the human's judgment over the RC3 findings: the "
+            "resume-policy research thread is closed with lessons, fresh "
+            "evidence is required before any reconsideration, no successors "
+            "were selected (RP4/RP5 stay evidence only), and "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. It unlocked "
+            "nothing: real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "crypto_d1_await_new_human_research_directive",
+        "label": "Crypto-D1 V2 Awaiting New Human Research Directive",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 188 "
-            "read-only RC3 failure-mode characterization is complete: on the "
-            "committed evidence all four failure modes are SUPPORTED -- "
-            "volatility-cooldown overfit, regime sensitivity, "
-            "delayed/over-filtered re-entry, and ranking instability -- "
-            "explaining why the RC1 leader failed out of sample while simpler "
-            "re-entry rules held up. The strongest candidates (RP4/RP5) remain "
-            "evidence only, NOT selected successors. The human-gated next step "
-            "is a HUMAN DECISION over the RC3 findings only -- research only, "
-            "not promotion and not trading execution, with "
-            "DO_NOT_PROMOTE_RESUME_POLICY_YET preserved. This row is NOT a "
-            "build step and NOT an authorization -- it acquires no data, runs "
-            "no dry run, QA, baseline, backtest, simulation, replay, or "
-            "optimization, places no order, automates nothing, and writes no "
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 189 "
+            "human decision is recorded: the resume-policy research thread is "
+            "CLOSED WITH LESSONS (in-sample leadership is not out-of-sample "
+            "edge; complex fitted triggers underperform simple rules; "
+            "successor selection from the same windows repeats the overfit; "
+            "genuinely fresh evidence is required before any promotion "
+            "discussion). FRESH EVIDENCE is required before any "
+            "reconsideration; NO successors were selected -- the strongest "
+            "candidates (RP4/RP5) stay evidence only, NOT selected successors "
+            "-- and DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. The "
+            "pipeline now simply awaits a new, separate, explicit HUMAN "
+            "research directive -- research only, not promotion and not "
+            "trading execution. This row is NOT a build step and NOT an "
+            "authorization -- it acquires no data, runs no dry run, QA, "
+            "baseline, backtest, simulation, replay, or optimization, places "
+            "no order, automates nothing, and writes no "
             "runtime/registry/dashboard artifact. It unlocks nothing: "
             "real_data_qa and baseline_backtest stay BLOCKED and the "
             "paper/micro-live/live gates stay LOCKED unless a separate, "
@@ -2115,6 +2145,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_rc2_cross_policy_results_review_contract": LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT,  # noqa: E501
         "latest_completed_rc2_cross_policy_human_evidence_decision_contract": LATEST_COMPLETED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_rc3_failure_mode_characterization_research_contract": LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT,  # noqa: E501
+        "latest_completed_rc3_findings_human_decision_contract": LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

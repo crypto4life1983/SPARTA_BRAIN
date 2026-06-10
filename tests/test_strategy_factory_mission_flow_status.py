@@ -112,6 +112,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT,
     LATEST_COMPLETED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT,
     LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT,
+    LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -197,6 +198,7 @@ def test_status_schema_is_stable():
         "latest_completed_rc2_cross_policy_results_review_contract",
         "latest_completed_rc2_cross_policy_human_evidence_decision_contract",
         "latest_completed_rc3_failure_mode_characterization_research_contract",
+        "latest_completed_rc3_findings_human_decision_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -258,6 +260,9 @@ def test_resume_policy_chain_recognized_as_latest_completed_evidence():
     assert LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT == (
         "Block 188 - Crypto-D1 V2 RC3 Failure-Mode Characterization Research Contract"
     )
+    assert LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT == (
+        "Block 189 - Crypto-D1 V2 RC3 Findings Human Decision Contract"
+    )
     s = get_mission_flow_status()
     assert s["latest_completed_resume_policy_research_plan_contract"] == (
         LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT
@@ -300,6 +305,9 @@ def test_resume_policy_chain_recognized_as_latest_completed_evidence():
     )
     assert s["latest_completed_rc3_failure_mode_characterization_research_contract"] == (
         LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT
+    )
+    assert s["latest_completed_rc3_findings_human_decision_contract"] == (
+        LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT
     )
     # recognizing the chain unlocks nothing real
     assert all(v is False for v in safety_flags().values())
@@ -487,12 +495,12 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     # simulation results -- a human judgment, NOT a BUILD step and NOT an
     # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    # a human decision over research findings, not an execution / authorization
-    assert "RC3" in NEXT_REQUIRED_ACTION
-    assert "FINDINGS" in NEXT_REQUIRED_ACTION
+    # an idle, human-gated wait state, not an execution / authorization
+    assert "RESEARCH" in NEXT_REQUIRED_ACTION
+    assert "DIRECTIVE" in NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
@@ -543,8 +551,12 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active STATE_NEXT step
-    nxt = pipe["crypto_d1_rc3_findings_decision"]
+    # the RC3 findings decision is now complete
+    assert pipe[
+        "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active STATE_NEXT step
+    nxt = pipe["crypto_d1_await_new_human_research_directive"]
     assert nxt["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in nxt["reason"]
     # the QA boundary decision remains its own separate BLOCKED step
@@ -875,6 +887,9 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     ]["state"] == STATE_COMPLETE
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert nxt["state"] == STATE_BLOCKED
@@ -882,7 +897,7 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     assert all(v is False for v in safety_flags().values())
 
 
-def test_rc3_findings_decision_is_next_and_qa_boundary_is_blocked():
+def test_await_new_directive_is_next_and_qa_boundary_is_blocked():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     # the full RC1, RC2, and RC3 characterization chains are now complete
     assert (
@@ -912,26 +927,29 @@ def test_rc3_findings_decision_is_next_and_qa_boundary_is_blocked():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step
-    nxt = pipe["crypto_d1_rc3_findings_decision"]
+    assert (
+        pipe["crypto_d1_rc3_findings_decision"]["state"] == STATE_COMPLETE
+    )
+    # awaiting a new human research directive is the active next step
+    nxt = pipe["crypto_d1_await_new_human_research_directive"]
     assert nxt["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in nxt["reason"]
     nxt_reason = nxt["reason"].lower()
     # it is NOT a build step and NOT an authorization, and unlocks nothing
     assert "not a build step" in nxt_reason
     assert "not an authorization" in nxt_reason
-    # it is only a human decision over the RC3 findings, never promotion/execution
-    assert "human decision" in nxt_reason
+    # the resume-policy research thread is clearly closed with lessons
+    assert "closed with lessons" in nxt_reason
+    # fresh evidence is required before any reconsideration
+    assert "fresh evidence" in nxt_reason
+    assert "reconsideration" in nxt_reason
+    # no successors were selected; RP4/RP5 stay evidence only
+    assert "no successors were selected" in nxt_reason
+    assert "not selected successors" in nxt_reason
+    # idle wait state: never promotion or execution
     assert "not promotion" in nxt_reason
     assert "not trading execution" in nxt_reason
-    # the four supported failure modes are surfaced honestly
-    assert "volatility-cooldown overfit" in nxt_reason
-    assert "regime sensitivity" in nxt_reason
-    assert "delayed/over-filtered re-entry" in nxt_reason
-    assert "ranking instability" in nxt_reason
-    # RP4/RP5 remain evidence only, not selected successors
-    assert "not selected successors" in nxt_reason
-    # the DO_NOT_PROMOTE decision is preserved, never overturned by the findings
+    # the DO_NOT_PROMOTE decision is preserved, never overturned by the closure
     assert "do_not_promote_resume_policy_yet" in nxt_reason
     # the QA boundary decision is now a separate, later, BLOCKED step
     row = pipe["human_controlled_real_data_qa_boundary_decision"]
@@ -1142,10 +1160,10 @@ def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
     # after Block 130, the global stage has advanced past the daily alpha brief
     # approval build to the human-controlled real-data QA boundary decision.
     assert s["current_stage"] == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert s["next_required_action"] == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
 
 
@@ -1209,10 +1227,10 @@ def test_latest_completed_strategy_evidence_scoring_contract_is_block_131():
     assert s["executes"] is False
     # registering Block 131 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1233,10 +1251,10 @@ def test_latest_completed_cohort_independence_contract_is_block_132():
     assert s["executes"] is False
     # registering Block 132 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the Block 129 approval contract completion is preserved alongside it
     assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
@@ -1257,10 +1275,10 @@ def test_latest_completed_real_data_qa_boundary_decision_contract_is_block_134()
     assert s["executes"] is False
     # registering Block 134 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1284,10 +1302,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_contract_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the Block 134 boundary-decision contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_boundary_decision_contract"] == (
@@ -1311,10 +1329,10 @@ def test_latest_completed_real_data_qa_readiness_checklist_contract_is_block_136
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the Phase A approval-packet contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
@@ -1338,10 +1356,10 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1379,9 +1397,13 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1413,10 +1435,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1454,9 +1476,13 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1490,10 +1516,10 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1531,9 +1557,13 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1574,10 +1604,10 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the coverage layer is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1616,9 +1646,13 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1663,10 +1697,10 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the review is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1705,9 +1739,13 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1744,10 +1782,10 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     assert pipe[
         "crypto_d1_resume_policy_results_review"
@@ -1784,9 +1822,13 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1823,10 +1865,10 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     assert pipe[
         "crypto_d1_resume_policy_results_review"
@@ -1863,9 +1905,13 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1903,10 +1949,10 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the approval decision is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1945,9 +1991,13 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1985,10 +2035,10 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the final decision is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2027,9 +2077,13 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2067,10 +2121,10 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the source evaluation is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2109,9 +2163,13 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2149,10 +2207,10 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the adapter spec is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2191,9 +2249,13 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2232,10 +2294,10 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS"
+        "AWAIT_NEW_HUMAN_RESEARCH_DIRECTIVE"
     )
     # the dry run is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2274,9 +2336,13 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert pipe[
         "crypto_d1_rc3_failure_mode_characterization_research_approval"
     ]["state"] == STATE_COMPLETE
-    # the RC3 findings decision is the active next step (STATE_NEXT)
+    # the RC3 findings decision is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc3_findings_decision"
+    ]["state"] == STATE_COMPLETE
+    # awaiting a new human research directive is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2295,10 +2361,10 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
 
 def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
     assert CURRENT_STAGE == (
-        "HUMAN_DECISION_ON_RC3_FINDINGS_REQUIRED"
+        "RESUME_POLICY_RESEARCH_THREAD_CLOSED_AWAITING_NEW_HUMAN_DIRECTIVE"
     )
-    assert "RC3" in CURRENT_STAGE
-    assert "FINDINGS" in CURRENT_STAGE
+    assert "RESUME_POLICY" in CURRENT_STAGE
+    assert "THREAD_CLOSED" in CURRENT_STAGE
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
