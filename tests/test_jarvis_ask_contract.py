@@ -871,6 +871,40 @@ def test_ci_trading_24h_keeps_broker_paper_live_locked():
 
 @requires_ask
 @pytest.mark.parametrize("q", [
+    "do we have a winning trade lately?",
+    "any winners lately?",
+    "any winning trades?",
+    "any profit lately?",
+    "are we profitable?",
+    "what's our pnl?",
+    "what was our best trade?",
+    "any losing trades recently?",
+    "any recent trades?",
+])
+def test_ci_trade_performance_questions_answer_honestly(q):
+    # Performance/recency questions must be answered (not refused) and route to
+    # the honest read-only recap: it states no live/paper trades and no
+    # performance, keeps research framing, hides raw posture flags by default,
+    # and invents no performance figure.
+    c = _client()
+    body = c.post(_ASK_PATH, json={"question": q}).json()
+    assert body["refused"] is False, f"{q!r} must be answerable read-only"
+    assert body["safety_class"] == "SAFE_INFO"
+    ans = body["answer"].lower()
+    assert "no live or paper trades" in ans
+    assert "research" in ans
+    for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
+                 "broker_control=false"):
+        assert flag not in ans, f"{q!r} executive answer must hide {flag}"
+    for banned in _CI_BANNED_PERF:
+        assert banned not in ans, f"{q!r} answer must not invent {banned!r}"
+    assert "trading_detail" in body["sources_used"]
+    for field in _FORBIDDEN_RESPONSE_FIELDS:
+        assert field not in body
+
+
+@requires_ask
+@pytest.mark.parametrize("q", [
     "what is the Strategy Factory status?",
     "factory status",
     "strategy factory progress",

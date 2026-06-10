@@ -313,6 +313,30 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bwhat\s+can\s+(?:sparta|you)\b",
     r"\bwhat\s+do\s+you\s+do\b",
     r"\bwhole\s+system\b",
+    # JARVIS Trade Performance & Recency Phrasing v1 — read-only "did we win /
+    # any profit / best trade / how did we do / anything lately" questions.
+    # These route to the honest read-only recap (no live/paper trades, research
+    # only). Forbidden trading/execution/mutation is still matched FIRST, so
+    # action-mixed phrases ("any winners then buy NQ") stay refused. Recognising
+    # them only means JARVIS will *answer* read-only — it never implies a trade,
+    # a fill, or any performance figure exists.
+    r"\bwinning\b",
+    r"\bwinners?\b",
+    r"\bany\s+wins?\b",
+    r"\bwon\s+(?:any|a)\b",
+    r"\bprofit",
+    r"\bprofitable\b",
+    r"\bpnl\b",
+    r"\bp\s*&\s*l\b",
+    r"\blos(?:s|ses|ing)\s+trade",
+    r"\bbest\s+trade",
+    r"\bworst\s+trade",
+    r"\bhow\s+did\s+we\s+do\b",
+    r"\bany\s+trades?\b",
+    r"\brecent\s+trades?\b",
+    r"\btrades?\s+lately\b",
+    r"\blately\b",
+    r"\brecently\b",
 ))
 
 _SAFE_GROUPS = (

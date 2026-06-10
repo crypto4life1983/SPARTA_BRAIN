@@ -10315,39 +10315,78 @@ def _jarvis_conversational_answer(q: str):
             "and counts.",
             ["trading_detail", "candidate_registry"])
 
-    # --- last-24h trading recap / "what happened with our trades" ---------
+    # --- trade recap / "any winning trades lately" / "what happened with our
+    # trades" --------------------------------------------------------------
+    # Honest, warm read-only recap. There are no live or paper trades, so there
+    # is no win/loss/performance to report — JARVIS says so plainly, then
+    # surfaces the REAL recent activity (latest research checkpoint, candidates
+    # under review, latest research reports on disk). It invents no performance
+    # and echoes no decision verdict that could read as a performance/approval
+    # claim: any detail bit containing a forbidden token is dropped, so the
+    # read-only contract holds even on live data.
     _has_trade = ("trad" in q or "trade" in q or "trades" in q)
     _time_words = ("24 hour", "24 hours", "24h", "last 24", "past 24", "last day",
                    "past day", "yesterday", "overnight", "today", "last night",
                    "recap")
+    _recency_words = ("lately", "recent", "recently")
+    _perf_words = ("winning", "winner", "winners", "wins", "won", "profit",
+                   "profitable", "pnl", "p&l", "loss", "losses", "losing",
+                   "best trade", "worst trade", "how did we do", "made money")
     if (("happened" in q and _has_trade)
             or (_has_trade and any(w in q for w in _time_words))
+            or (_has_trade and any(w in q for w in _recency_words))
+            or any(w in q for w in _perf_words)
             or "our trades" in q or "my trades" in q):
         status = _agg()
         td = _sub(status, "trading_detail")
-        reports = td.get("latest_reports") if isinstance(td.get("latest_reports"), list) else []
+        fs = _sub(status, "factory_status")
+        cr = _sub(status, "candidate_registry")
+        reports = (td.get("latest_reports")
+                   if isinstance(td.get("latest_reports"), list) else [])
         names = ", ".join(r.get("name", "?") for r in reports[:3]
                           if isinstance(r, dict))
+        cand_n = (cr.get("candidate_count")
+                  if isinstance(cr.get("candidate_count"), int)
+                  else len(cr.get("candidates") or []))
+        decs = (fs.get("latest_decisions")
+                if isinstance(fs.get("latest_decisions"), list) else [])
+        top = next((d for d in decs if isinstance(d, dict)), None)
+
+        # Build the "what's real lately" detail, then drop any bit that contains
+        # a forbidden performance/verdict token so the recap can never read as a
+        # performance or approval claim, even on live data.
+        _banned = ("profit", "pnl", "win rate", "return of", "% return",
+                   "ready to trade", "validated", "approved", "made $", "earned")
+        _bits = []
+        if top and top.get("name"):
+            _bits.append(f"latest research checkpoint: {top.get('name')}")
+        if isinstance(cand_n, int) and cand_n > 0:
+            _bits.append(f"{cand_n} strategy candidate(s) under review")
+        if names:
+            _bits.append(f"most recent research reports on disk: {names}")
+        _bits = [b for b in _bits if not any(t in b.lower() for t in _banned)]
+        real = (" What's real lately: " + "; ".join(_bits) + "."
+                if _bits else
+                " What's real lately: only committed read-only research activity "
+                "— nothing has reached paper or live trading.")
+
         if _operator:
-            recent = (f"The most recent committed research reports on disk are: "
-                      f"{names}. " if names
-                      else "No trading research reports were found on disk. ")
             return (
-                "Read-only trading update: no live or paper trades have been placed "
-                "in the last 24 hours, or at any time — trading is observation-only "
-                f"({_LOCKED_POSTURE}), so there are no fills and no realized "
-                "performance to report. " + recent + "JARVIS only reads committed "
-                "research artifacts; it runs no backtest, places no orders, and "
-                "authorizes nothing.",
-                ["trading_detail"])
+                "Honest read-only trading recap, Mahmoud: no live or paper trades "
+                "have been placed in the last 24 hours, or at any time — trading is "
+                f"observation-only ({_LOCKED_POSTURE}), so there are no fills and "
+                "no realized performance to report." + real + " JARVIS only reads "
+                "committed research artifacts; it runs no backtest, places no "
+                "orders, and authorizes nothing.",
+                ["trading_detail", "factory_status", "candidate_registry"])
         return (
-            "Read-only trading update: no live or paper trades have been placed in "
-            "the last 24 hours, or at any time — trading remains in research mode, "
-            "so there is no performance to report. JARVIS only reads committed "
-            "research artifacts; it runs no backtest, places no orders, and "
-            "authorizes nothing. Ask for operator mode or technical details for the "
-            "exact posture and report names.",
-            ["trading_detail"])
+            "Straight answer, Mahmoud: no wins or losses yet — no live or paper "
+            "trades have been placed, by design, so there's no performance to "
+            "report. The research side is moving, though." + real + " I only read "
+            "committed research artifacts; I run no backtest, place no orders, and "
+            "authorize nothing. Ask for operator mode if you want the exact posture "
+            "and report names.",
+            ["trading_detail", "factory_status", "candidate_registry"])
 
     # --- warnings / what-needs-attention ----------------------------------
     if "needs attention" in q or "what needs" in q or "attention" in q:
@@ -10392,10 +10431,11 @@ def _jarvis_conversational_answer(q: str):
         status = _agg()
         state, headline, warns = _snapshot_line(status)
         return (
-            f"I'm online and read-only. Commander snapshot is {state} — {headline} "
-            f"({len(warns)} warning(s)). Trading stays observation-only "
-            f"({_LOCKED_POSTURE}). Ask me for a morning briefing, trading status, "
-            "Strategy Factory status, or what needs attention.",
+            f"Doing well, Mahmoud — thanks for asking. I'm online and read-only, "
+            f"keeping watch. The commander snapshot is {state} — {headline} "
+            f"({len(warns)} warning(s)), and trading stays observation-only "
+            f"({_LOCKED_POSTURE}). Want a morning briefing, the trading recap, the "
+            "Strategy Factory status, or what needs attention?",
             ["commander_snapshot", "trading_detail"])
 
     # --- greeting ---------------------------------------------------------
@@ -10404,11 +10444,11 @@ def _jarvis_conversational_answer(q: str):
         status = _agg()
         state, _headline, warns = _snapshot_line(status)
         return (
-            "Hello — JARVIS online and read-only. Right now the commander snapshot "
-            f"is {state} with {len(warns)} warning(s), and trading is "
-            f"observation-only ({_LOCKED_POSTURE}). I can give you a morning "
-            "briefing, the trading status, the Strategy Factory status, the SPARTA "
-            "Brain status, or tell you what needs attention — just ask.",
+            "Hey Mahmoud — JARVIS here, online and read-only. Right now the "
+            f"commander snapshot is {state} with {len(warns)} warning(s), and "
+            f"trading stays observation-only ({_LOCKED_POSTURE}). Want a morning "
+            "briefing, the trading recap, the Strategy Factory status, the SPARTA "
+            "Brain status, or what needs attention? Just say the word.",
             ["commander_snapshot", "trading_detail"])
 
     # --- Workflow Health Translation v1 — pipeline / workflow / "is it working" --
