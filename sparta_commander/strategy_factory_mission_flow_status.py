@@ -235,6 +235,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_resume_policy_human_review_decision_contract_label as _registry_latest_resume_policy_human_review_decision_contract_label,  # noqa: E501
     get_latest_completed_post_resume_policy_research_continuation_plan_contract_label as _registry_latest_post_resume_policy_research_continuation_plan_contract_label,  # noqa: E501
     get_latest_completed_rc1_out_of_sample_robustness_research_contract_label as _registry_latest_rc1_out_of_sample_robustness_research_contract_label,  # noqa: E501
+    get_latest_completed_rc1_out_of_sample_replay_runner_contract_label as _registry_latest_rc1_out_of_sample_replay_runner_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -295,6 +296,7 @@ __all__ = [
     "LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT",
     "LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT",
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT",
+    "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -494,6 +496,16 @@ LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT = (
 # research-only replay, never promotion and never execution.
 LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT = (
     _registry_latest_rc1_out_of_sample_robustness_research_contract_label()
+)
+# Block 181: the RC1 out-of-sample replay RUNNER is now recorded as additive
+# latest-completed evidence. It is the double-gated, dry-run-verified runner for
+# the Block 180 spec; recognizing it runs nothing and does NOT advance the stage:
+# the next step stays the human-approved research-only PERSISTED replay run --
+# not promotion and not trading execution. DO_NOT_PROMOTE_RESUME_POLICY_YET
+# stays preserved; real_data_qa and baseline_backtest stay BLOCKED, paper /
+# micro-live / live stay LOCKED.
+LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT = (
+    _registry_latest_rc1_out_of_sample_replay_runner_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1716,16 +1728,19 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
             "it fixed one truly held-out 2020 window plus honestly-typed "
             "boundary-straddle windows for the evidence-leading resume policy "
             "with parameters UNCHANGED, preserving "
-            "DO_NOT_PROMOTE_RESUME_POLICY_YET. The human-gated next step is "
-            "only the choice to run a later research-only simulated replay over "
-            "those fixed windows -- research only, not promotion and not "
-            "execution. This row is NOT a build step and NOT an authorization "
-            "-- it acquires no data, runs no dry run, QA, baseline, backtest, "
-            "simulation, or optimization, places no order, automates nothing, "
-            "and writes no runtime/registry/dashboard artifact. It unlocks "
-            "nothing: real_data_qa and baseline_backtest stay BLOCKED and the "
-            "paper/micro-live/live gates stay LOCKED unless a separate, future, "
-            "human-approved contract authorizes a crossing."
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET. The Block 181 double-gated, "
+            "dry-run-verified replay RUNNER for that spec is also built and "
+            "recognized; no replay report has been persisted yet. The "
+            "human-gated next step is only the research-only PERSISTED replay "
+            "run over those fixed windows -- research only, not promotion and "
+            "not trading execution. This row is NOT a build step and NOT an "
+            "authorization -- it acquires no data, runs no dry run, QA, "
+            "baseline, backtest, simulation, or optimization, places no order, "
+            "automates nothing, and writes no runtime/registry/dashboard "
+            "artifact. It unlocks nothing: real_data_qa and baseline_backtest "
+            "stay BLOCKED and the paper/micro-live/live gates stay LOCKED "
+            "unless a separate, future, human-approved contract authorizes a "
+            "crossing."
         ),
     },
     {
@@ -1906,6 +1921,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_resume_policy_human_review_decision_contract": LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_post_resume_policy_research_continuation_plan_contract": LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT,  # noqa: E501
         "latest_completed_rc1_out_of_sample_robustness_research_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT,  # noqa: E501
+        "latest_completed_rc1_out_of_sample_replay_runner_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

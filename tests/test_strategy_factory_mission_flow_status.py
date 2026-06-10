@@ -104,6 +104,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT,
     LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT,
     LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT,
+    LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -181,6 +182,7 @@ def test_status_schema_is_stable():
         "latest_completed_resume_policy_human_review_decision_contract",
         "latest_completed_post_resume_policy_research_continuation_plan_contract",
         "latest_completed_rc1_out_of_sample_robustness_research_contract",
+        "latest_completed_rc1_out_of_sample_replay_runner_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -218,6 +220,9 @@ def test_resume_policy_chain_recognized_as_latest_completed_evidence():
     assert LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT == (
         "Block 180 - Crypto-D1 V2 RC1 Out-of-Sample Robustness Research Contract"
     )
+    assert LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT == (
+        "Block 181 - Crypto-D1 V2 RC1 Out-of-Sample Replay Runner Contract"
+    )
     s = get_mission_flow_status()
     assert s["latest_completed_resume_policy_research_plan_contract"] == (
         LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT
@@ -236,6 +241,9 @@ def test_resume_policy_chain_recognized_as_latest_completed_evidence():
     )
     assert s["latest_completed_rc1_out_of_sample_robustness_research_contract"] == (
         LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT
+    )
+    assert s["latest_completed_rc1_out_of_sample_replay_runner_contract"] == (
+        LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT
     )
     # recognizing the chain unlocks nothing real
     assert all(v is False for v in safety_flags().values())

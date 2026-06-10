@@ -473,6 +473,8 @@ __all__ = [
     "get_latest_completed_post_resume_policy_research_continuation_plan_contract_label",
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT",
     "get_latest_completed_rc1_out_of_sample_robustness_research_contract_label",
+    "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT",
+    "get_latest_completed_rc1_out_of_sample_replay_runner_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1265,6 +1267,23 @@ _RECOGNIZED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT = (
     _RECOGNIZED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT_LABEL
+)
+
+# Block 181 recognizes the research-only Crypto-D1 V2 RC1 OUT-OF-SAMPLE REPLAY
+# RUNNER contract: the double-gated, dry-run-verified runner that can replay the
+# evidence-leading resume policy (parameters UNCHANGED) over the fixed Block 180
+# windows in SIMULATED mode only. Recognizing it does NOT run anything and does
+# NOT advance the stage: the next step stays the human-approved research-only
+# PERSISTED replay run -- not promotion and not trading execution -- and
+# DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. Like every recognized record
+# this is purely additive latest-completed metadata: it writes nothing, promotes
+# nothing, and is never an unlock of real_data_qa, baseline, paper, micro-live,
+# or live.
+_RECOGNIZED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT_LABEL = (
+    "Block 181 - Crypto-D1 V2 RC1 Out-of-Sample Replay Runner Contract"
+)
+LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT = (
+    _RECOGNIZED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -5113,6 +5132,12 @@ def get_latest_completed_rc1_out_of_sample_robustness_research_contract_label() 
     """Human label for the latest recognized research-only Crypto-D1 V2
     RC1 Out-of-Sample Robustness Research contract."""
     return _RECOGNIZED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT_LABEL
+
+
+def get_latest_completed_rc1_out_of_sample_replay_runner_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    RC1 Out-of-Sample Replay Runner contract."""
+    return _RECOGNIZED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
