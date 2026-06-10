@@ -630,15 +630,61 @@ def _ffmpeg_exe() -> str:
 
 
 def _normalize_voice_audio(path: Path) -> None:
-    """Denoise and normalize every voice line without trimming spoken tails."""
+    """Denoise and normalize every voice line without trimming spoken tails.
+
+    Two-pass loudnorm: measure first, then apply a LINEAR (static) gain. A
+    single-pass loudnorm runs in dynamic mode and ramps its gain over the first
+    ~1-2s of the clip, which made every line start quiet and pumping. Linear
+    mode applies one constant gain across the whole line, so the level is right
+    from the first sample. A short leading silence pad lets the adaptive
+    denoiser warm up on silence instead of garbling the opening word."""
+    ff = _ffmpeg_exe()
+    # Shared pre-loudnorm chain: 150ms head-silence pad, band-limit, denoise.
+    # Both passes use the SAME chain so the measurement matches the applied gain.
+    pre = "adelay=150|150,highpass=f=80,lowpass=f=12000,afftdn=nf=-25"
+    target = "I=-14:LRA=8:TP=-1.5"
     try:
         tmp = path.with_suffix(".norm_tmp.mp3")
+
+        # ── Pass 1: measure loudness (prints JSON, writes no file).
+        measured = None
+        try:
+            p1 = subprocess.run(
+                [ff, "-i", str(path), "-af",
+                 f"{pre},loudnorm={target}:print_format=json",
+                 "-f", "null", "-"],
+                capture_output=True, text=True, timeout=30,
+            )
+            blob = (p1.stderr or "") + (p1.stdout or "")
+            m = re.search(r"\{[^{}]+\}", blob)
+            if m:
+                data = json.loads(m.group(0))
+                vals = {k: float(data[k]) for k in
+                        ("input_i", "input_tp", "input_lra",
+                         "input_thresh", "target_offset")}
+                if all(math.isfinite(v) for v in vals.values()):
+                    measured = vals
+        except Exception:
+            measured = None
+
+        # ── Pass 2: apply. Linear gain when measurement succeeded; otherwise
+        # fall back to single-pass (still padded + denoised) so the line is
+        # never left un-normalized.
+        if measured is not None:
+            af = (
+                f"{pre},loudnorm={target}"
+                f":measured_I={measured['input_i']}"
+                f":measured_TP={measured['input_tp']}"
+                f":measured_LRA={measured['input_lra']}"
+                f":measured_thresh={measured['input_thresh']}"
+                f":offset={measured['target_offset']}:linear=true"
+            )
+        else:
+            af = f"{pre},loudnorm={target}"
+
         cmd = [
-            _ffmpeg_exe(), "-y", "-i", str(path),
-            "-af", (
-                "highpass=f=80,lowpass=f=12000,afftdn=nf=-25,"
-                "loudnorm=I=-14:LRA=8:TP=-1.5"
-            ),
+            ff, "-y", "-i", str(path),
+            "-af", af,
             "-c:a", "libmp3lame", "-q:a", "4",
             str(tmp),
         ]
