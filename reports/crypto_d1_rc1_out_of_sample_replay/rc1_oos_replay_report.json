@@ -1,0 +1,295 @@
+{
+  "schema_version": "strategy_factory_crypto_d1_rc1_out_of_sample_replay_runner.v1",
+  "label": "Crypto-D1 V2 RC1 Out-of-Sample REPLAY Runner (READ-ONLY, NO LIVE MONEY)",
+  "mode": "RESEARCH_ONLY",
+  "authorization": "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY",
+  "human_decision": "DO_NOT_PROMOTE_RESUME_POLICY_YET",
+  "config": {
+    "selected_variant_id": "V2_trend_plus_cash_regime",
+    "description": "Trend filter plus a portfolio-level cash regime on weak breadth.",
+    "controls": [
+      "trend_filter",
+      "cash_regime"
+    ],
+    "strategy_parameters": {
+      "trend_filter": {
+        "sma_window_days": 200
+      },
+      "cash_regime": {
+        "min_sleeves_in_trend": 2,
+        "total_sleeves": 3
+      }
+    },
+    "paper_account": {
+      "account_type": "SIMULATED_PAPER",
+      "real_money": false,
+      "broker_connected": false,
+      "exchange_connected": false,
+      "starting_equity": 10000.0,
+      "quote_currency": "USDT",
+      "universe": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "data_source": "QA_PASSED_LOCAL_CSV_ONLY",
+      "fill_model": "SIMULATED_NEXT_DAILY_CLOSE",
+      "assumed_fee_rate": 0.001,
+      "assumed_slippage_rate": 0.0005,
+      "rebalance_frequency": "DAILY_SIGNAL_EVAL"
+    },
+    "risk_limits": {
+      "long_only": true,
+      "allow_leverage": false,
+      "allow_shorting": false,
+      "allow_margin": false,
+      "max_gross_exposure": 1.0,
+      "max_weight_per_asset": 0.5,
+      "trend_filter_sma_days": 200,
+      "min_sleeves_in_trend_to_invest": 2,
+      "total_sleeves": 3,
+      "daily_loss_limit": -0.1,
+      "hard_drawdown_kill": -0.5
+    },
+    "kill_switch": {
+      "drawdown_kill_threshold": -0.5,
+      "daily_loss_halt_threshold": -0.1,
+      "data_staleness_halt_hours": 48,
+      "error_halt": true,
+      "manual_kill_enabled": true,
+      "on_kill_action": "FLATTEN_TO_CASH_AND_HALT",
+      "auto_resume": false,
+      "requires_human_to_resume": true
+    },
+    "logging": {
+      "log_dir": "reports/crypto_d1_paper_prep",
+      "log_format": "jsonl",
+      "log_each_evaluation": true,
+      "required_log_fields": [
+        "timestamp",
+        "date",
+        "in_trend_by_symbol",
+        "sleeves_in_trend",
+        "target_weights",
+        "simulated_fills",
+        "equity",
+        "cash",
+        "drawdown",
+        "kill_switch_state",
+        "notes"
+      ],
+      "daily_report": true,
+      "report_fields": [
+        "equity_curve",
+        "daily_return",
+        "max_drawdown",
+        "positions",
+        "simulated_trades",
+        "kill_switch_events"
+      ],
+      "writes_real_orders": false
+    },
+    "no_live_money_guardrails": {
+      "no_live_money": true,
+      "no_real_account": true,
+      "no_broker_connection": true,
+      "no_exchange_connection": true,
+      "no_network": true,
+      "no_credentials": true,
+      "no_real_order_execution": true,
+      "simulated_orders_only": true,
+      "requires_separate_human_command_to_run": true,
+      "live_gate_locked": true,
+      "micro_live_gate_locked": true
+    }
+  },
+  "uses_real_money": false,
+  "connects_broker": false,
+  "connects_exchange": false,
+  "executes_real_orders": false,
+  "simulated_orders_only": true,
+  "uses_network": false,
+  "uses_credentials": false,
+  "ran_optimization": false,
+  "ran_parameter_search": false,
+  "parameters_changed_based_on_results": false,
+  "used_lookahead": false,
+  "used_leverage": false,
+  "used_shorting": false,
+  "used_margin": false,
+  "uses_only_qa_passed_inputs": true,
+  "manual_csv_only": true,
+  "promotes_resume_policy": false,
+  "paper_trading_gate_locked": true,
+  "micro_live_gate_locked": true,
+  "live_gate_locked": true,
+  "unlocks_downstream_gate": false,
+  "authorizes_live_trading": false,
+  "next_required_action": "HUMAN_REVIEW_OF_RC1_OUT_OF_SAMPLE_RESULTS",
+  "verdict": "RC1_OUT_OF_SAMPLE_REPLAYS_COMPLETE",
+  "blockers": [],
+  "selected_variant_id": "V2_trend_plus_cash_regime",
+  "paper_prep_verdict": "READY",
+  "rc1_spec_verdict": "RC1_OUT_OF_SAMPLE_SPEC_READY",
+  "policy_id": "RP6_resume_after_volatility_cools",
+  "policy_parameters_changed": false,
+  "window_results": [
+    {
+      "window_id": "OOS_W1_2020_early_held_out",
+      "window": "2020-01-01..2020-08-10",
+      "window_type": "held_out_early_history",
+      "symbols": [
+        "BTC",
+        "ETH"
+      ],
+      "evaluated": true,
+      "metrics": {
+        "starting_equity": 10000.0,
+        "final_equity": 14773.581750767999,
+        "total_return": 0.4773581750767999,
+        "max_drawdown": -0.04977948716298386,
+        "sharpe_ratio": 3.1592797457844632,
+        "annualized_volatility": 0.21004080777720363,
+        "trading_days": 223,
+        "entry_date": "2020-01-01",
+        "exit_date": "2020-08-10",
+        "simulated_trades": 24,
+        "total_simulated_costs": 20.95149307212493,
+        "real_orders_placed": 0,
+        "num_kill_events": 0,
+        "num_resume_events": 0,
+        "halted_at_end": false,
+        "kill_events": [],
+        "resume_events": [],
+        "post_resume_max_drawdown": 0.0
+      }
+    },
+    {
+      "window_id": "OOS_W2_2021H2_2022H1_straddle",
+      "window": "2021-07-01..2022-06-30",
+      "window_type": "boundary_straddling_robustness",
+      "symbols": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "evaluated": true,
+      "metrics": {
+        "starting_equity": 10000.0,
+        "final_equity": 13207.501002136514,
+        "total_return": 0.32075010021365147,
+        "max_drawdown": -0.45352348057217995,
+        "sharpe_ratio": 0.8147966009964137,
+        "annualized_volatility": 0.4954683187525656,
+        "trading_days": 365,
+        "entry_date": "2021-07-01",
+        "exit_date": "2022-06-30",
+        "simulated_trades": 151,
+        "total_simulated_costs": 427.30518236516195,
+        "real_orders_placed": 0,
+        "num_kill_events": 1,
+        "num_resume_events": 1,
+        "halted_at_end": false,
+        "kill_events": [
+          {
+            "date": "2021-09-20",
+            "reason": "daily_loss_halt",
+            "drawdown": -0.21962861996423866,
+            "daily_return": -0.10862794942950849,
+            "equity_at_halt": 18833.881265555574
+          }
+        ],
+        "resume_events": [
+          {
+            "date": "2021-10-22",
+            "days_halted": 33,
+            "breadth": 3
+          }
+        ],
+        "post_resume_max_drawdown": -0.41414130557488493
+      }
+    },
+    {
+      "window_id": "OOS_W3_2022H2_2023H1_straddle",
+      "window": "2022-07-01..2023-06-30",
+      "window_type": "boundary_straddling_robustness",
+      "symbols": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "evaluated": true,
+      "metrics": {
+        "starting_equity": 10000.0,
+        "final_equity": 13432.15429404413,
+        "total_return": 0.34321542940441296,
+        "max_drawdown": -0.23864212360354253,
+        "sharpe_ratio": 1.0252304066458267,
+        "annualized_volatility": 0.3467251038583764,
+        "trading_days": 365,
+        "entry_date": "2022-07-01",
+        "exit_date": "2023-06-30",
+        "simulated_trades": 169,
+        "total_simulated_costs": 107.12985751352065,
+        "real_orders_placed": 0,
+        "num_kill_events": 0,
+        "num_resume_events": 0,
+        "halted_at_end": false,
+        "kill_events": [],
+        "resume_events": [],
+        "post_resume_max_drawdown": 0.0
+      }
+    },
+    {
+      "window_id": "OOS_W4_2024H2_2025H1_straddle",
+      "window": "2024-07-01..2025-06-30",
+      "window_type": "boundary_straddling_robustness",
+      "symbols": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "evaluated": true,
+      "metrics": {
+        "starting_equity": 10000.0,
+        "final_equity": 9656.174233504364,
+        "total_return": -0.03438257664956368,
+        "max_drawdown": -0.25898247616354064,
+        "sharpe_ratio": 0.10169181215380958,
+        "annualized_volatility": 0.38168414628742925,
+        "trading_days": 365,
+        "entry_date": "2024-07-01",
+        "exit_date": "2025-06-30",
+        "simulated_trades": 169,
+        "total_simulated_costs": 310.97556468358,
+        "real_orders_placed": 0,
+        "num_kill_events": 0,
+        "num_resume_events": 0,
+        "halted_at_end": false,
+        "kill_events": [],
+        "resume_events": [],
+        "post_resume_max_drawdown": 0.0
+      }
+    }
+  ],
+  "in_sample_reference": {
+    "policy_id": "RP6_resume_after_volatility_cools",
+    "reentry_exposure": "FULL",
+    "mean_total_return": 1.5537974266863281,
+    "min_total_return": -0.1975154633517764,
+    "worst_max_drawdown": -0.3236050060713733,
+    "mean_sharpe_ratio": 0.5736829903450252,
+    "regimes_evaluated": 4
+  },
+  "risk_notes": [
+    "held_out_window_uses_btc_eth_only_sol_starts_2020_08_11",
+    "held_out_window_sma_warmup_limits_exposure_no_pre_2020_history",
+    "boundary_straddling_windows_are_window_robustness_not_strictly_out_of_sample",
+    "results_are_research_evidence_only_promotion_requires_separate_human_command"
+  ],
+  "files_read": [
+    ".\\data/crypto_d1_spot/raw\\BTC_1d.csv",
+    ".\\data/crypto_d1_spot/raw\\ETH_1d.csv",
+    ".\\data/crypto_d1_spot/raw\\SOL_1d.csv"
+  ]
+}

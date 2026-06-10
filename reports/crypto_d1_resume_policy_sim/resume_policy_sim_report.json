@@ -1,0 +1,1714 @@
+{
+  "schema_version": "strategy_factory_crypto_d1_resume_policy_simulation_runner.v1",
+  "label": "Crypto-D1 V2 Resume-Policy SIMULATION Runner (READ-ONLY, NO LIVE MONEY)",
+  "mode": "RESEARCH_ONLY",
+  "authorization": "APPROVE_RESUME_POLICY_SIMULATION_RERUN_READ_ONLY",
+  "config": {
+    "selected_variant_id": "V2_trend_plus_cash_regime",
+    "description": "Trend filter plus a portfolio-level cash regime on weak breadth.",
+    "controls": [
+      "trend_filter",
+      "cash_regime"
+    ],
+    "strategy_parameters": {
+      "trend_filter": {
+        "sma_window_days": 200
+      },
+      "cash_regime": {
+        "min_sleeves_in_trend": 2,
+        "total_sleeves": 3
+      }
+    },
+    "paper_account": {
+      "account_type": "SIMULATED_PAPER",
+      "real_money": false,
+      "broker_connected": false,
+      "exchange_connected": false,
+      "starting_equity": 10000.0,
+      "quote_currency": "USDT",
+      "universe": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "data_source": "QA_PASSED_LOCAL_CSV_ONLY",
+      "fill_model": "SIMULATED_NEXT_DAILY_CLOSE",
+      "assumed_fee_rate": 0.001,
+      "assumed_slippage_rate": 0.0005,
+      "rebalance_frequency": "DAILY_SIGNAL_EVAL"
+    },
+    "risk_limits": {
+      "long_only": true,
+      "allow_leverage": false,
+      "allow_shorting": false,
+      "allow_margin": false,
+      "max_gross_exposure": 1.0,
+      "max_weight_per_asset": 0.5,
+      "trend_filter_sma_days": 200,
+      "min_sleeves_in_trend_to_invest": 2,
+      "total_sleeves": 3,
+      "daily_loss_limit": -0.1,
+      "hard_drawdown_kill": -0.5
+    },
+    "kill_switch": {
+      "drawdown_kill_threshold": -0.5,
+      "daily_loss_halt_threshold": -0.1,
+      "data_staleness_halt_hours": 48,
+      "error_halt": true,
+      "manual_kill_enabled": true,
+      "on_kill_action": "FLATTEN_TO_CASH_AND_HALT",
+      "auto_resume": false,
+      "requires_human_to_resume": true
+    },
+    "logging": {
+      "log_dir": "reports/crypto_d1_paper_prep",
+      "log_format": "jsonl",
+      "log_each_evaluation": true,
+      "required_log_fields": [
+        "timestamp",
+        "date",
+        "in_trend_by_symbol",
+        "sleeves_in_trend",
+        "target_weights",
+        "simulated_fills",
+        "equity",
+        "cash",
+        "drawdown",
+        "kill_switch_state",
+        "notes"
+      ],
+      "daily_report": true,
+      "report_fields": [
+        "equity_curve",
+        "daily_return",
+        "max_drawdown",
+        "positions",
+        "simulated_trades",
+        "kill_switch_events"
+      ],
+      "writes_real_orders": false
+    },
+    "no_live_money_guardrails": {
+      "no_live_money": true,
+      "no_real_account": true,
+      "no_broker_connection": true,
+      "no_exchange_connection": true,
+      "no_network": true,
+      "no_credentials": true,
+      "no_real_order_execution": true,
+      "simulated_orders_only": true,
+      "requires_separate_human_command_to_run": true,
+      "live_gate_locked": true,
+      "micro_live_gate_locked": true
+    }
+  },
+  "uses_real_money": false,
+  "connects_broker": false,
+  "connects_exchange": false,
+  "executes_real_orders": false,
+  "simulated_orders_only": true,
+  "uses_network": false,
+  "uses_credentials": false,
+  "ran_optimization": false,
+  "ran_parameter_search": false,
+  "parameters_changed_based_on_results": false,
+  "used_lookahead": false,
+  "used_leverage": false,
+  "used_shorting": false,
+  "used_margin": false,
+  "uses_only_qa_passed_inputs": true,
+  "manual_csv_only": true,
+  "paper_trading_gate_locked": true,
+  "micro_live_gate_locked": true,
+  "live_gate_locked": true,
+  "unlocks_downstream_gate": false,
+  "authorizes_live_trading": false,
+  "next_required_action": "HUMAN_APPROVED_RESUME_POLICY_RESULTS_REVIEW",
+  "verdict": "RESUME_POLICY_RERUNS_COMPLETE",
+  "blockers": [],
+  "selected_variant_id": "V2_trend_plus_cash_regime",
+  "paper_prep_verdict": "READY",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL"
+  ],
+  "data_window": {
+    "entry_date": "2020-08-11",
+    "exit_date": "2026-06-08",
+    "trading_days": 2128
+  },
+  "regimes": [
+    {
+      "regime_id": "2021_bull_then_may_crash",
+      "window": "2020-08-11..2021-12-31"
+    },
+    {
+      "regime_id": "2022_bear",
+      "window": "2022-01-01..2022-12-31"
+    },
+    {
+      "regime_id": "2023_2024_recovery",
+      "window": "2023-01-01..2024-12-31"
+    },
+    {
+      "regime_id": "2025_2026_recent",
+      "window": "2025-01-01..2026-06-08"
+    }
+  ],
+  "policy_results": [
+    {
+      "policy_id": "RP1_wait_7d_trend_on",
+      "description": "Resume after >= 7 days halted, only if the 200-day trend filter is back on for >= 2 of 3 sleeves.",
+      "reentry_exposure": "FULL",
+      "regime_results": [
+        {
+          "regime_id": "2021_bull_then_may_crash",
+          "window": "2020-08-11..2021-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 11410.253214777742,
+            "total_return": 0.14102532147777413,
+            "max_drawdown": -0.6072663027149994,
+            "sharpe_ratio": 0.45431159317448955,
+            "annualized_volatility": 0.49841907054817175,
+            "trading_days": 508,
+            "entry_date": "2020-08-11",
+            "exit_date": "2021-12-31",
+            "simulated_trades": 159,
+            "total_simulated_costs": 1024.9866328565518,
+            "real_orders_placed": 0,
+            "num_kill_events": 29,
+            "num_resume_events": 29,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2021-05-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.32158555847147063,
+                "daily_return": -0.2653919074370691,
+                "equity_at_halt": 16089.123962696049
+              },
+              {
+                "date": "2021-05-28",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.3709441608131848,
+                "daily_return": -0.13068906852833595,
+                "equity_at_halt": 14918.550089641943
+              },
+              {
+                "date": "2021-06-21",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5801510017164451,
+                "daily_return": -0.20269956647735832,
+                "equity_at_halt": 9957.046160187007
+              },
+              {
+                "date": "2021-06-28",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5633553441367619,
+                "daily_return": 0.04313113959785908,
+                "equity_at_halt": 10355.34635966223
+              },
+              {
+                "date": "2021-07-05",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5852307543962314,
+                "daily_return": -0.047240695402012145,
+                "equity_at_halt": 9836.553038027616
+              },
+              {
+                "date": "2021-07-12",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.606092918649054,
+                "daily_return": -0.047440457980539974,
+                "equity_at_halt": 9341.791699619045
+              },
+              {
+                "date": "2021-07-24",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.6009841087574028,
+                "daily_return": 0.016017748334585358,
+                "equity_at_halt": 9462.952226231042
+              },
+              {
+                "date": "2021-07-31",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5695484187913236,
+                "daily_return": 0.08202910156853949,
+                "equity_at_halt": 10208.473872982488
+              },
+              {
+                "date": "2021-08-07",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.551172139861639,
+                "daily_return": 0.04582800472174231,
+                "equity_at_halt": 10644.27999087628
+              },
+              {
+                "date": "2021-08-14",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5597639466091424,
+                "daily_return": -0.016191437414282972,
+                "equity_at_halt": 10440.517608412216
+              },
+              {
+                "date": "2021-08-21",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5743316796574234,
+                "daily_return": -0.03018123932551564,
+                "equity_at_halt": 10095.032909254634
+              },
+              {
+                "date": "2021-08-28",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5640974477102634,
+                "daily_return": 0.027124182576792277,
+                "equity_at_halt": 10337.746483822883
+              },
+              {
+                "date": "2021-09-04",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5750372012584164,
+                "daily_return": -0.022163335199552492,
+                "equity_at_halt": 10078.301145146423
+              },
+              {
+                "date": "2021-09-11",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5731156783788203,
+                "daily_return": 0.007544310407343158,
+                "equity_at_halt": 10123.872143508119
+              },
+              {
+                "date": "2021-09-18",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5490832060824198,
+                "daily_return": 0.05947579756879939,
+                "equity_at_halt": 10693.820875968715
+              },
+              {
+                "date": "2021-09-25",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5559260469974794,
+                "daily_return": -0.01221215724706326,
+                "equity_at_halt": 10531.53628125998
+              },
+              {
+                "date": "2021-10-02",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5485494635845269,
+                "daily_return": 0.019670198798024785,
+                "equity_at_halt": 10706.478078584467
+              },
+              {
+                "date": "2021-10-09",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5485411529082715,
+                "daily_return": 0.0030274476375009574,
+                "equity_at_halt": 10706.674779138315
+              },
+              {
+                "date": "2021-10-16",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.55854625483796,
+                "daily_return": -0.019219378969629664,
+                "equity_at_halt": 10469.395978641129
+              },
+              {
+                "date": "2021-10-23",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.550118674523828,
+                "daily_return": 0.022157033366015932,
+                "equity_at_halt": 10669.26315639213
+              },
+              {
+                "date": "2021-10-30",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5591963608490149,
+                "daily_return": -0.017229694648944527,
+                "equity_at_halt": 10453.978291434696
+              },
+              {
+                "date": "2021-11-06",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5438900115372416,
+                "daily_return": 0.03783728907405104,
+                "equity_at_halt": 10816.980794539446
+              },
+              {
+                "date": "2021-11-13",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.536626571169774,
+                "daily_return": 0.018981617467016543,
+                "equity_at_halt": 10989.238134349602
+              },
+              {
+                "date": "2021-11-20",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5276976822456777,
+                "daily_return": 0.022336281775879874,
+                "equity_at_halt": 11200.993315541335
+              },
+              {
+                "date": "2021-11-27",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5238393168405938,
+                "daily_return": 0.011202829307328521,
+                "equity_at_halt": 11292.496985669026
+              },
+              {
+                "date": "2021-12-04",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5503447574618687,
+                "daily_return": -0.05282340181580236,
+                "equity_at_halt": 10663.899571108383
+              },
+              {
+                "date": "2021-12-11",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5329466188130687,
+                "daily_return": 0.04181775747702221,
+                "equity_at_halt": 11076.511420686742
+              },
+              {
+                "date": "2021-12-18",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.519604302411981,
+                "daily_return": 0.03166189778922912,
+                "equity_at_halt": 11392.933937852893
+              },
+              {
+                "date": "2021-12-25",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5181512159108768,
+                "daily_return": 0.006042829031281061,
+                "equity_at_halt": 11427.394306237098
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2021-05-25",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-06-03",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-06-27",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-04",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-11",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-23",
+                "days_halted": 12,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-30",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-08-06",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-08-13",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-08-20",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-08-27",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-09-03",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-09-10",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-09-17",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-09-24",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-10-01",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-10-08",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-10-15",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-10-22",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-10-29",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-11-05",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-11-12",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-11-19",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-11-26",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-12-03",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-12-10",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-12-17",
+                "days_halted": 7,
+                "breadth": 2
+              },
+              {
+                "date": "2021-12-24",
+                "days_halted": 7,
+                "breadth": 3
+              },
+              {
+                "date": "2021-12-31",
+                "days_halted": 7,
+                "breadth": 2
+              }
+            ],
+            "post_resume_max_drawdown": -0.4835976066087909
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2022_bear",
+          "window": "2022-01-01..2022-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 8024.845366482236,
+            "total_return": -0.1975154633517764,
+            "max_drawdown": -0.19690377835070094,
+            "sharpe_ratio": -1.8703568681473175,
+            "annualized_volatility": 0.1135283425447162,
+            "trading_days": 365,
+            "entry_date": "2022-01-01",
+            "exit_date": "2022-12-31",
+            "simulated_trades": 7,
+            "total_simulated_costs": 27.748380238969844,
+            "real_orders_placed": 0,
+            "num_kill_events": 0,
+            "num_resume_events": 0,
+            "halted_at_end": false,
+            "kill_events": [],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2023_2024_recovery",
+          "window": "2023-01-01..2024-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 37778.70108196201,
+            "total_return": 2.7778701081962014,
+            "max_drawdown": -0.3719619789981743,
+            "sharpe_ratio": 1.5745973964394635,
+            "annualized_volatility": 0.5016984692728563,
+            "trading_days": 731,
+            "entry_date": "2023-01-01",
+            "exit_date": "2024-12-31",
+            "simulated_trades": 588,
+            "total_simulated_costs": 1261.1550903258135,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2024-03-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.12900939054557192,
+                "daily_return": -0.10663335662265994,
+                "equity_at_halt": 39558.063307459524
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2024-03-25",
+                "days_halted": 7,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.30147611627653503
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2025_2026_recent",
+          "window": "2025-01-01..2026-06-08",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 10118.486054066907,
+            "total_return": 0.011848605406690638,
+            "max_drawdown": -0.26578027437948815,
+            "sharpe_ratio": 0.1894008925787772,
+            "annualized_volatility": 0.3192365970999598,
+            "trading_days": 524,
+            "entry_date": "2025-01-01",
+            "exit_date": "2026-06-08",
+            "simulated_trades": 174,
+            "total_simulated_costs": 299.57171343125344,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2025-10-10",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.15601999908080633,
+                "daily_return": -0.11447166573288725,
+                "equity_at_halt": 10793.39905817531
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2025-10-16",
+                "days_halted": 7,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.12744243375211384
+          },
+          "evaluated": true
+        }
+      ],
+      "aggregate": {
+        "regimes_evaluated": 4,
+        "mean_total_return": 0.6833071429322224,
+        "min_total_return": -0.1975154633517764,
+        "worst_max_drawdown": -0.6072663027149994,
+        "mean_sharpe_ratio": 0.0869882535113532
+      }
+    },
+    {
+      "policy_id": "RP2_wait_14d_trend_on",
+      "description": "Resume after >= 14 days halted, only if trend filter is back on for >= 2 of 3 sleeves.",
+      "reentry_exposure": "FULL",
+      "regime_results": [
+        {
+          "regime_id": "2021_bull_then_may_crash",
+          "window": "2020-08-11..2021-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 11600.562867327482,
+            "total_return": 0.1600562867327482,
+            "max_drawdown": -0.5384812579718461,
+            "sharpe_ratio": 0.47857462754182567,
+            "annualized_volatility": 0.5091080186547298,
+            "trading_days": 508,
+            "entry_date": "2020-08-11",
+            "exit_date": "2021-12-31",
+            "simulated_trades": 163,
+            "total_simulated_costs": 590.2097796923135,
+            "real_orders_placed": 0,
+            "num_kill_events": 13,
+            "num_resume_events": 12,
+            "halted_at_end": true,
+            "kill_events": [
+              {
+                "date": "2021-05-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.32158555847147063,
+                "daily_return": -0.2653919074370691,
+                "equity_at_halt": 16089.123962696049
+              },
+              {
+                "date": "2021-06-21",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.46552460118019623,
+                "daily_return": -0.2026995664773582,
+                "equity_at_halt": 12675.500571133778
+              },
+              {
+                "date": "2021-07-10",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5112326516590214,
+                "daily_return": -0.03279731023927146,
+                "equity_at_halt": 11591.498966770501
+              },
+              {
+                "date": "2021-07-24",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5048923761324942,
+                "daily_return": 0.016017748334585136,
+                "equity_at_halt": 11741.837591757569
+              },
+              {
+                "date": "2021-08-08",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5078126017881615,
+                "daily_return": -0.04653475668045903,
+                "equity_at_halt": 11672.606995965896
+              },
+              {
+                "date": "2021-08-22",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5094246986518745,
+                "daily_return": -0.00027835008094356795,
+                "equity_at_halt": 11634.349843778746
+              },
+              {
+                "date": "2021-09-07",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5020836261533912,
+                "daily_return": -0.05974380340839158,
+                "equity_at_halt": 11808.473575354605
+              },
+              {
+                "date": "2021-09-21",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5371023388125442,
+                "daily_return": -0.06753507224972133,
+                "equity_at_halt": 10977.952702562492
+              },
+              {
+                "date": "2021-10-05",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5279046571501451,
+                "daily_return": 0.02293877809359479,
+                "equity_at_halt": 11196.084769554815
+              },
+              {
+                "date": "2021-10-19",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5193657560279594,
+                "daily_return": 0.021150639024935858,
+                "equity_at_halt": 11398.590982467009
+              },
+              {
+                "date": "2021-11-16",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5139964175422177,
+                "daily_return": -0.07126319635144263,
+                "equity_at_halt": 11525.953954708024
+              },
+              {
+                "date": "2021-11-30",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5074863692404217,
+                "daily_return": 0.01644212560842484,
+                "equity_at_halt": 11680.319168376252
+              },
+              {
+                "date": "2021-12-29",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5108496936131771,
+                "daily_return": -0.040335327597669446,
+                "equity_at_halt": 11600.562867327482
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2021-06-01",
+                "days_halted": 14,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-04",
+                "days_halted": 14,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-23",
+                "days_halted": 14,
+                "breadth": 2
+              },
+              {
+                "date": "2021-08-06",
+                "days_halted": 14,
+                "breadth": 2
+              },
+              {
+                "date": "2021-08-21",
+                "days_halted": 14,
+                "breadth": 3
+              },
+              {
+                "date": "2021-09-04",
+                "days_halted": 14,
+                "breadth": 3
+              },
+              {
+                "date": "2021-09-20",
+                "days_halted": 14,
+                "breadth": 2
+              },
+              {
+                "date": "2021-10-04",
+                "days_halted": 14,
+                "breadth": 3
+              },
+              {
+                "date": "2021-10-18",
+                "days_halted": 14,
+                "breadth": 3
+              },
+              {
+                "date": "2021-11-01",
+                "days_halted": 14,
+                "breadth": 3
+              },
+              {
+                "date": "2021-11-29",
+                "days_halted": 14,
+                "breadth": 3
+              },
+              {
+                "date": "2021-12-13",
+                "days_halted": 14,
+                "breadth": 2
+              }
+            ],
+            "post_resume_max_drawdown": -0.4257206750935091
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2022_bear",
+          "window": "2022-01-01..2022-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 8024.845366482236,
+            "total_return": -0.1975154633517764,
+            "max_drawdown": -0.19690377835070094,
+            "sharpe_ratio": -1.8703568681473175,
+            "annualized_volatility": 0.1135283425447162,
+            "trading_days": 365,
+            "entry_date": "2022-01-01",
+            "exit_date": "2022-12-31",
+            "simulated_trades": 7,
+            "total_simulated_costs": 27.748380238969844,
+            "real_orders_placed": 0,
+            "num_kill_events": 0,
+            "num_resume_events": 0,
+            "halted_at_end": false,
+            "kill_events": [],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2023_2024_recovery",
+          "window": "2023-01-01..2024-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 37903.32443541866,
+            "total_return": 2.790332443541866,
+            "max_drawdown": -0.3698902242254065,
+            "sharpe_ratio": 1.5814647371231783,
+            "annualized_volatility": 0.5000352560433596,
+            "trading_days": 731,
+            "entry_date": "2023-01-01",
+            "exit_date": "2024-12-31",
+            "simulated_trades": 581,
+            "total_simulated_costs": 1261.0964153182679,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2024-03-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.12900939054557192,
+                "daily_return": -0.10663335662265994,
+                "equity_at_halt": 39558.063307459524
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2024-04-01",
+                "days_halted": 14,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.28838851331120685
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2025_2026_recent",
+          "window": "2025-01-01..2026-06-08",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 9918.131464391085,
+            "total_return": -0.00818685356089155,
+            "max_drawdown": -0.26578027437948815,
+            "sharpe_ratio": 0.14375001887685301,
+            "annualized_volatility": 0.3156386093129559,
+            "trading_days": 524,
+            "entry_date": "2025-01-01",
+            "exit_date": "2026-06-08",
+            "simulated_trades": 167,
+            "total_simulated_costs": 255.21652251907088,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2025-10-10",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.15601999908080633,
+                "daily_return": -0.11447166573288725,
+                "equity_at_halt": 10793.39905817531
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2025-10-23",
+                "days_halted": 14,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.12744243375211428
+          },
+          "evaluated": true
+        }
+      ],
+      "aggregate": {
+        "regimes_evaluated": 4,
+        "mean_total_return": 0.6861716033404865,
+        "min_total_return": -0.1975154633517764,
+        "worst_max_drawdown": -0.5384812579718461,
+        "mean_sharpe_ratio": 0.08335812884863486
+      }
+    },
+    {
+      "policy_id": "RP3_wait_30d_trend_on",
+      "description": "Resume after >= 30 days halted, only if trend filter is back on for >= 2 of 3 sleeves.",
+      "reentry_exposure": "FULL",
+      "regime_results": [
+        {
+          "regime_id": "2021_bull_then_may_crash",
+          "window": "2020-08-11..2021-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 22274.273556614226,
+            "total_return": 1.2274273556614226,
+            "max_drawdown": -0.5046199058311829,
+            "sharpe_ratio": 1.297880955761427,
+            "annualized_volatility": 0.5791757944965029,
+            "trading_days": 508,
+            "entry_date": "2020-08-11",
+            "exit_date": "2021-12-31",
+            "simulated_trades": 222,
+            "total_simulated_costs": 646.440333748475,
+            "real_orders_placed": 0,
+            "num_kill_events": 3,
+            "num_resume_events": 3,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2021-05-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.32158555847147063,
+                "daily_return": -0.2653919074370691,
+                "equity_at_halt": 16089.123962696049
+              },
+              {
+                "date": "2021-06-21",
+                "reason": "hard_drawdown_kill",
+                "drawdown": -0.5031409949437431,
+                "daily_return": -0.2026995664773582,
+                "equity_at_halt": 11783.398480585387
+              },
+              {
+                "date": "2021-09-20",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.21962861996423844,
+                "daily_return": -0.1086279494295086,
+                "equity_at_halt": 24758.409937448603
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2021-06-17",
+                "days_halted": 30,
+                "breadth": 2
+              },
+              {
+                "date": "2021-07-23",
+                "days_halted": 33,
+                "breadth": 2
+              },
+              {
+                "date": "2021-10-19",
+                "days_halted": 30,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.3020114387726519
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2022_bear",
+          "window": "2022-01-01..2022-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 8024.845366482236,
+            "total_return": -0.1975154633517764,
+            "max_drawdown": -0.19690377835070094,
+            "sharpe_ratio": -1.8703568681473175,
+            "annualized_volatility": 0.1135283425447162,
+            "trading_days": 365,
+            "entry_date": "2022-01-01",
+            "exit_date": "2022-12-31",
+            "simulated_trades": 7,
+            "total_simulated_costs": 27.748380238969844,
+            "real_orders_placed": 0,
+            "num_kill_events": 0,
+            "num_resume_events": 0,
+            "halted_at_end": false,
+            "kill_events": [],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2023_2024_recovery",
+          "window": "2023-01-01..2024-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 47222.21902445627,
+            "total_return": 3.722221902445628,
+            "max_drawdown": -0.28838851331120774,
+            "sharpe_ratio": 1.8377284482054983,
+            "annualized_volatility": 0.4865263369565044,
+            "trading_days": 731,
+            "entry_date": "2023-01-01",
+            "exit_date": "2024-12-31",
+            "simulated_trades": 565,
+            "total_simulated_costs": 1444.1841934254542,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2024-03-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.12900939054557192,
+                "daily_return": -0.10663335662265994,
+                "equity_at_halt": 39558.063307459524
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2024-04-17",
+                "days_halted": 30,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.28838851331120774
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2025_2026_recent",
+          "window": "2025-01-01..2026-06-08",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 10793.39905817531,
+            "total_return": 0.07933990581753103,
+            "max_drawdown": -0.26578027437948815,
+            "sharpe_ratio": 0.3311404975242753,
+            "annualized_volatility": 0.3049603839908579,
+            "trading_days": 524,
+            "entry_date": "2025-01-01",
+            "exit_date": "2026-06-08",
+            "simulated_trades": 155,
+            "total_simulated_costs": 202.05683055761705,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 0,
+            "halted_at_end": true,
+            "kill_events": [
+              {
+                "date": "2025-10-10",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.15601999908080633,
+                "daily_return": -0.11447166573288725,
+                "equity_at_halt": 10793.39905817531
+              }
+            ],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        }
+      ],
+      "aggregate": {
+        "regimes_evaluated": 4,
+        "mean_total_return": 1.2078684251432013,
+        "min_total_return": -0.1975154633517764,
+        "worst_max_drawdown": -0.5046199058311829,
+        "mean_sharpe_ratio": 0.3990982583359708
+      }
+    },
+    {
+      "policy_id": "RP4_breadth_2of3_above_sma200",
+      "description": "Resume as soon as >= 2 of 3 assets close above their 200-day SMA (no minimum wait).",
+      "reentry_exposure": "FULL",
+      "regime_results": [
+        {
+          "regime_id": "2021_bull_then_may_crash",
+          "window": "2020-08-11..2021-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 30426.259824569264,
+            "total_return": 2.0426259824569266,
+            "max_drawdown": -0.4952203893458156,
+            "sharpe_ratio": 1.42007972139685,
+            "annualized_volatility": 0.7811557868374375,
+            "trading_days": 508,
+            "entry_date": "2020-08-11",
+            "exit_date": "2021-12-31",
+            "simulated_trades": 306,
+            "total_simulated_costs": 1052.0558465283214,
+            "real_orders_placed": 0,
+            "num_kill_events": 7,
+            "num_resume_events": 7,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2021-05-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.32158555847147063,
+                "daily_return": -0.2653919074370691,
+                "equity_at_halt": 16089.123962696049
+              },
+              {
+                "date": "2021-05-21",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.27586462986414484,
+                "daily_return": -0.10892910083272755,
+                "equity_at_halt": 17173.406368326803
+              },
+              {
+                "date": "2021-05-22",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.3698214722746216,
+                "daily_return": -0.1271322734895255,
+                "equity_at_halt": 14945.136924230495
+              },
+              {
+                "date": "2021-05-23",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.46629593250020407,
+                "daily_return": -0.15054202913115777,
+                "equity_at_halt": 12657.174826745519
+              },
+              {
+                "date": "2021-05-28",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.3782459471787588,
+                "daily_return": -0.13068906852831497,
+                "equity_at_halt": 14745.382528270135
+              },
+              {
+                "date": "2021-06-21",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.4711871980469817,
+                "daily_return": -0.2026995664773582,
+                "equity_at_halt": 12541.207673878767
+              },
+              {
+                "date": "2021-09-20",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.21962861996423888,
+                "daily_return": -0.10862794942950849,
+                "equity_at_halt": 25228.184732798392
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2021-05-19",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-05-21",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-05-22",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-05-23",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-05-28",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-06-21",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-09-20",
+                "days_halted": 1,
+                "breadth": 2
+              }
+            ],
+            "post_resume_max_drawdown": -0.3788663818297652
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2022_bear",
+          "window": "2022-01-01..2022-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 8024.845366482236,
+            "total_return": -0.1975154633517764,
+            "max_drawdown": -0.19690377835070094,
+            "sharpe_ratio": -1.8703568681473175,
+            "annualized_volatility": 0.1135283425447162,
+            "trading_days": 365,
+            "entry_date": "2022-01-01",
+            "exit_date": "2022-12-31",
+            "simulated_trades": 7,
+            "total_simulated_costs": 27.748380238969844,
+            "real_orders_placed": 0,
+            "num_kill_events": 0,
+            "num_resume_events": 0,
+            "halted_at_end": false,
+            "kill_events": [],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2023_2024_recovery",
+          "window": "2023-01-01..2024-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 42559.38869620385,
+            "total_return": 3.255938869620385,
+            "max_drawdown": -0.30147611627653537,
+            "sharpe_ratio": 1.6718662071467811,
+            "annualized_volatility": 0.5108685902925778,
+            "trading_days": 731,
+            "entry_date": "2023-01-01",
+            "exit_date": "2024-12-31",
+            "simulated_trades": 594,
+            "total_simulated_costs": 1366.3067927207333,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2024-03-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.12900939054557192,
+                "daily_return": -0.10663335662265994,
+                "equity_at_halt": 39558.063307459524
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2024-03-19",
+                "days_halted": 1,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.30147611627653537
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2025_2026_recent",
+          "window": "2025-01-01..2026-06-08",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 9980.193408772837,
+            "total_return": -0.0019806591227162773,
+            "max_drawdown": -0.26578027437948815,
+            "sharpe_ratio": 0.16546642304310613,
+            "annualized_volatility": 0.3321674753253629,
+            "trading_days": 524,
+            "entry_date": "2025-01-01",
+            "exit_date": "2026-06-08",
+            "simulated_trades": 180,
+            "total_simulated_costs": 299.9730691918095,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2025-10-10",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.15601999908080633,
+                "daily_return": -0.11447166573288725,
+                "equity_at_halt": 10793.39905817531
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2025-10-10",
+                "days_halted": 1,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.14153482706244247
+          },
+          "evaluated": true
+        }
+      ],
+      "aggregate": {
+        "regimes_evaluated": 4,
+        "mean_total_return": 1.2747671824007047,
+        "min_total_return": -0.1975154633517764,
+        "worst_max_drawdown": -0.4952203893458156,
+        "mean_sharpe_ratio": 0.34676387085985494
+      }
+    },
+    {
+      "policy_id": "RP5_half_then_full_on_confirmation",
+      "description": "Resume at HALF exposure once breadth returns, then scale to FULL after 5 confirming days.",
+      "reentry_exposure": "HALF_THEN_FULL",
+      "regime_results": [
+        {
+          "regime_id": "2021_bull_then_may_crash",
+          "window": "2020-08-11..2021-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 32511.664289086035,
+            "total_return": 2.2511664289086033,
+            "max_drawdown": -0.45845301097590196,
+            "sharpe_ratio": 1.5493329567243714,
+            "annualized_volatility": 0.7156670492135816,
+            "trading_days": 508,
+            "entry_date": "2020-08-11",
+            "exit_date": "2021-12-31",
+            "simulated_trades": 303,
+            "total_simulated_costs": 961.2757320403559,
+            "real_orders_placed": 0,
+            "num_kill_events": 4,
+            "num_resume_events": 4,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2021-05-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.32158555847147063,
+                "daily_return": -0.2653919074370691,
+                "equity_at_halt": 16089.123962696049
+              },
+              {
+                "date": "2021-05-28",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.2881734567104912,
+                "daily_return": -0.13068906852831497,
+                "equity_at_halt": 16881.521924872388
+              },
+              {
+                "date": "2021-06-21",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.41559633242480043,
+                "daily_return": -0.20269956647735843,
+                "equity_at_halt": 13859.588371100244
+              },
+              {
+                "date": "2021-09-20",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.21962861996423844,
+                "daily_return": -0.10862794942950837,
+                "equity_at_halt": 27065.767301663956
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2021-05-19",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-05-28",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-06-21",
+                "days_halted": 1,
+                "breadth": 2
+              },
+              {
+                "date": "2021-09-20",
+                "days_halted": 1,
+                "breadth": 2
+              }
+            ],
+            "post_resume_max_drawdown": -0.38371049545040126
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2022_bear",
+          "window": "2022-01-01..2022-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 8024.845366482236,
+            "total_return": -0.1975154633517764,
+            "max_drawdown": -0.19690377835070094,
+            "sharpe_ratio": -1.8703568681473175,
+            "annualized_volatility": 0.1135283425447162,
+            "trading_days": 365,
+            "entry_date": "2022-01-01",
+            "exit_date": "2022-12-31",
+            "simulated_trades": 7,
+            "total_simulated_costs": 27.748380238969844,
+            "real_orders_placed": 0,
+            "num_kill_events": 0,
+            "num_resume_events": 0,
+            "halted_at_end": false,
+            "kill_events": [],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2023_2024_recovery",
+          "window": "2023-01-01..2024-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 41902.34948437843,
+            "total_return": 3.190234948437843,
+            "max_drawdown": -0.3034099137394378,
+            "sharpe_ratio": 1.6695744417564948,
+            "annualized_volatility": 0.5053130045031639,
+            "trading_days": 731,
+            "entry_date": "2023-01-01",
+            "exit_date": "2024-12-31",
+            "simulated_trades": 594,
+            "total_simulated_costs": 1352.9580496678216,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2024-03-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.12900939054557192,
+                "daily_return": -0.10663335662265994,
+                "equity_at_halt": 39558.063307459524
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2024-03-19",
+                "days_halted": 1,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.3014761162765345
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2025_2026_recent",
+          "window": "2025-01-01..2026-06-08",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 9743.891288460447,
+            "total_return": -0.025610871153955328,
+            "max_drawdown": -0.26578027437948815,
+            "sharpe_ratio": 0.11024113778944454,
+            "annualized_volatility": 0.3242359675491689,
+            "trading_days": 524,
+            "entry_date": "2025-01-01",
+            "exit_date": "2026-06-08",
+            "simulated_trades": 180,
+            "total_simulated_costs": 297.8460218949588,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2025-10-10",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.15601999908080633,
+                "daily_return": -0.11447166573288725,
+                "equity_at_halt": 10793.39905817531
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2025-10-10",
+                "days_halted": 1,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.13108008399953341
+          },
+          "evaluated": true
+        }
+      ],
+      "aggregate": {
+        "regimes_evaluated": 4,
+        "mean_total_return": 1.3045687607101786,
+        "min_total_return": -0.1975154633517764,
+        "worst_max_drawdown": -0.45845301097590196,
+        "mean_sharpe_ratio": 0.36469791703074833
+      }
+    },
+    {
+      "policy_id": "RP6_resume_after_volatility_cools",
+      "description": "Resume only when 30-day realized volatility falls back to/below its pre-halt median, with breadth >= 2.",
+      "reentry_exposure": "FULL",
+      "regime_results": [
+        {
+          "regime_id": "2021_bull_then_may_crash",
+          "window": "2020-08-11..2021-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 40342.368651392,
+            "total_return": 3.0342368651391993,
+            "max_drawdown": -0.3236050060713733,
+            "sharpe_ratio": 2.014650327418418,
+            "annualized_volatility": 0.5862257057647067,
+            "trading_days": 508,
+            "entry_date": "2020-08-11",
+            "exit_date": "2021-12-31",
+            "simulated_trades": 244,
+            "total_simulated_costs": 922.3374327513494,
+            "real_orders_placed": 0,
+            "num_kill_events": 2,
+            "num_resume_events": 2,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2021-05-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.32158555847147063,
+                "daily_return": -0.2653919074370691,
+                "equity_at_halt": 16089.123962696049
+              },
+              {
+                "date": "2021-09-20",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.219628619964239,
+                "daily_return": -0.10862794942950849,
+                "equity_at_halt": 33450.208299152386
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2021-07-25",
+                "days_halted": 68,
+                "breadth": 2
+              },
+              {
+                "date": "2021-09-20",
+                "days_halted": 1,
+                "breadth": 2
+              }
+            ],
+            "post_resume_max_drawdown": -0.3013684005715761
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2022_bear",
+          "window": "2022-01-01..2022-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 8024.845366482236,
+            "total_return": -0.1975154633517764,
+            "max_drawdown": -0.19690377835070094,
+            "sharpe_ratio": -1.8703568681473175,
+            "annualized_volatility": 0.1135283425447162,
+            "trading_days": 365,
+            "entry_date": "2022-01-01",
+            "exit_date": "2022-12-31",
+            "simulated_trades": 7,
+            "total_simulated_costs": 27.748380238969844,
+            "real_orders_placed": 0,
+            "num_kill_events": 0,
+            "num_resume_events": 0,
+            "halted_at_end": false,
+            "kill_events": [],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2023_2024_recovery",
+          "window": "2023-01-01..2024-12-31",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 42991.28399140359,
+            "total_return": 3.2991283991403586,
+            "max_drawdown": -0.28530732542363146,
+            "sharpe_ratio": 1.819298004584725,
+            "annualized_volatility": 0.45850066077890583,
+            "trading_days": 731,
+            "entry_date": "2023-01-01",
+            "exit_date": "2024-12-31",
+            "simulated_trades": 502,
+            "total_simulated_costs": 1313.5107811444116,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 1,
+            "halted_at_end": false,
+            "kill_events": [
+              {
+                "date": "2024-03-19",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.12900939054557192,
+                "daily_return": -0.10663335662265994,
+                "equity_at_halt": 39558.063307459524
+              }
+            ],
+            "resume_events": [
+              {
+                "date": "2024-06-19",
+                "days_halted": 93,
+                "breadth": 3
+              }
+            ],
+            "post_resume_max_drawdown": -0.21204823802521033
+          },
+          "evaluated": true
+        },
+        {
+          "regime_id": "2025_2026_recent",
+          "window": "2025-01-01..2026-06-08",
+          "metrics": {
+            "starting_equity": 10000.0,
+            "final_equity": 10793.39905817531,
+            "total_return": 0.07933990581753103,
+            "max_drawdown": -0.26578027437948815,
+            "sharpe_ratio": 0.3311404975242753,
+            "annualized_volatility": 0.3049603839908579,
+            "trading_days": 524,
+            "entry_date": "2025-01-01",
+            "exit_date": "2026-06-08",
+            "simulated_trades": 155,
+            "total_simulated_costs": 202.05683055761705,
+            "real_orders_placed": 0,
+            "num_kill_events": 1,
+            "num_resume_events": 0,
+            "halted_at_end": true,
+            "kill_events": [
+              {
+                "date": "2025-10-10",
+                "reason": "daily_loss_halt",
+                "drawdown": -0.15601999908080633,
+                "daily_return": -0.11447166573288725,
+                "equity_at_halt": 10793.39905817531
+              }
+            ],
+            "resume_events": [],
+            "post_resume_max_drawdown": 0.0
+          },
+          "evaluated": true
+        }
+      ],
+      "aggregate": {
+        "regimes_evaluated": 4,
+        "mean_total_return": 1.5537974266863281,
+        "min_total_return": -0.1975154633517764,
+        "worst_max_drawdown": -0.3236050060713733,
+        "mean_sharpe_ratio": 0.5736829903450252
+      }
+    }
+  ],
+  "rankings": {
+    "best_by_mean_return": "RP6_resume_after_volatility_cools",
+    "best_by_worst_drawdown": "RP6_resume_after_volatility_cools",
+    "best_by_mean_sharpe": "RP6_resume_after_volatility_cools"
+  },
+  "files_read": [
+    ".\\data/crypto_d1_spot/raw\\BTC_1d.csv",
+    ".\\data/crypto_d1_spot/raw\\ETH_1d.csv",
+    ".\\data/crypto_d1_spot/raw\\SOL_1d.csv"
+  ]
+}
