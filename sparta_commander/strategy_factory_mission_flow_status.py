@@ -237,6 +237,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_rc1_out_of_sample_robustness_research_contract_label as _registry_latest_rc1_out_of_sample_robustness_research_contract_label,  # noqa: E501
     get_latest_completed_rc1_out_of_sample_replay_runner_contract_label as _registry_latest_rc1_out_of_sample_replay_runner_contract_label,  # noqa: E501
     get_latest_completed_rc1_out_of_sample_results_review_contract_label as _registry_latest_rc1_out_of_sample_results_review_contract_label,  # noqa: E501
+    get_latest_completed_rc1_oos_human_evidence_decision_contract_label as _registry_latest_rc1_oos_human_evidence_decision_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -299,6 +300,7 @@ __all__ = [
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT",
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT",
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT",
+    "LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -518,6 +520,18 @@ LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT = (
 # baseline_backtest stay BLOCKED, paper / micro-live / live stay LOCKED.
 LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT = (
     _registry_latest_rc1_out_of_sample_results_review_contract_label()
+)
+# Block 183: the human's RC1 OUT-OF-SAMPLE EVIDENCE DECISION is now recorded as
+# additive latest-completed evidence. The human acknowledged the useful held-out
+# survival AND the material degradation versus in-sample, kept
+# DO_NOT_PROMOTE_RESUME_POLICY_YET, and selected the next research direction:
+# RC2 cross-policy stability (re-rank the fixed candidate set over the SAME
+# fixed out-of-sample windows, no fitting). The surfaced next step is the
+# human-approved, research-only RC2 work -- never promotion and never
+# execution. Recognizing it moves NO gate: real_data_qa and baseline_backtest
+# stay BLOCKED, paper / micro-live / live stay LOCKED.
+LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT = (
+    _registry_latest_rc1_oos_human_evidence_decision_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1747,24 +1761,39 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_rc1_out_of_sample_evidence_decision",
         "label": "Crypto-D1 V2 RC1 Out-of-Sample Evidence Decision",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the Block 183 read-only human evidence decision "
+            "contract recorded the human's judgment over the RC1 out-of-sample "
+            "evidence: useful held-out survival acknowledged, material "
+            "degradation versus in-sample acknowledged, decision kept at "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET, and the selected research "
+            "direction is RC2 cross-policy stability. It unlocked nothing: "
+            "real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "crypto_d1_rc2_cross_policy_stability_research_approval",
+        "label": "Crypto-D1 V2 RC2 Cross-Policy Stability Research Approval",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 182 "
-            "read-only RC1 out-of-sample results review is complete: the "
-            "held-out 2020 window was useful evidence (the policy survived "
-            "unseen history) but performance MATERIALLY DEGRADED versus "
-            "in-sample, and the review's promotion decision is structurally "
-            "DO_NOT_PROMOTE_RESUME_POLICY_YET. The human-gated next step is a "
-            "HUMAN EVIDENCE DECISION only -- a human judgment over the RC1 "
-            "out-of-sample evidence, research only, not promotion and not "
-            "trading execution. This row is NOT a build step and NOT an "
-            "authorization -- it acquires no data, runs no dry run, QA, "
-            "baseline, backtest, simulation, replay, or optimization, places "
-            "no order, automates nothing, and writes no "
-            "runtime/registry/dashboard artifact. It unlocks nothing: "
-            "real_data_qa and baseline_backtest stay BLOCKED and the "
-            "paper/micro-live/live gates stay LOCKED unless a separate, "
-            "future, human-approved contract authorizes a crossing."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 183 "
+            "human evidence decision selected RC2 as the next research "
+            "direction: re-rank the FIXED resume-policy candidate set "
+            "(RP1..RP6, parameters UNCHANGED, no fitting) over the SAME fixed "
+            "out-of-sample windows to test whether the evidence leader is a "
+            "stable leader. RC2 is RESEARCH-ONLY and HUMAN-APPROVED: the "
+            "human-gated next step is only the choice to build/run that "
+            "research via separate explicit commands -- not promotion and not "
+            "trading execution, with DO_NOT_PROMOTE_RESUME_POLICY_YET "
+            "preserved. This row is NOT a build step and NOT an authorization "
+            "-- it acquires no data, runs no dry run, QA, baseline, backtest, "
+            "simulation, replay, or optimization, places no order, automates "
+            "nothing, and writes no runtime/registry/dashboard artifact. It "
+            "unlocks nothing: real_data_qa and baseline_backtest stay BLOCKED "
+            "and the paper/micro-live/live gates stay LOCKED unless a "
+            "separate, future, human-approved contract authorizes a crossing."
         ),
     },
     {
@@ -1947,6 +1976,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_rc1_out_of_sample_robustness_research_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT,  # noqa: E501
         "latest_completed_rc1_out_of_sample_replay_runner_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT,  # noqa: E501
         "latest_completed_rc1_out_of_sample_results_review_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT,  # noqa: E501
+        "latest_completed_rc1_oos_human_evidence_decision_contract": LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
