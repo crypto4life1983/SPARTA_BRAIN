@@ -105,6 +105,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT,
     LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT,
     LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT,
+    LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -183,6 +184,7 @@ def test_status_schema_is_stable():
         "latest_completed_post_resume_policy_research_continuation_plan_contract",
         "latest_completed_rc1_out_of_sample_robustness_research_contract",
         "latest_completed_rc1_out_of_sample_replay_runner_contract",
+        "latest_completed_rc1_out_of_sample_results_review_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -223,6 +225,9 @@ def test_resume_policy_chain_recognized_as_latest_completed_evidence():
     assert LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT == (
         "Block 181 - Crypto-D1 V2 RC1 Out-of-Sample Replay Runner Contract"
     )
+    assert LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT == (
+        "Block 182 - Crypto-D1 V2 RC1 Out-of-Sample Results Review Contract"
+    )
     s = get_mission_flow_status()
     assert s["latest_completed_resume_policy_research_plan_contract"] == (
         LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT
@@ -244,6 +249,9 @@ def test_resume_policy_chain_recognized_as_latest_completed_evidence():
     )
     assert s["latest_completed_rc1_out_of_sample_replay_runner_contract"] == (
         LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT
+    )
+    assert s["latest_completed_rc1_out_of_sample_results_review_contract"] == (
+        LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT
     )
     # recognizing the chain unlocks nothing real
     assert all(v is False for v in safety_flags().values())
@@ -431,7 +439,7 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     # simulation results -- a human judgment, NOT a BUILD step and NOT an
     # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
     # a human-gated research-only replay choice, not an execution / authorization
@@ -463,8 +471,12 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active STATE_NEXT human step
-    nxt = pipe["crypto_d1_rc1_out_of_sample_replay_approval"]
+    # the RC1 out-of-sample replay approval is now complete
+    assert (
+        pipe["crypto_d1_rc1_out_of_sample_replay_approval"]["state"] == STATE_COMPLETE
+    )
+    # the RC1 out-of-sample evidence decision is the active STATE_NEXT human step
+    nxt = pipe["crypto_d1_rc1_out_of_sample_evidence_decision"]
     assert nxt["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in nxt["reason"]
     # the QA boundary decision remains its own separate BLOCKED step
@@ -777,6 +789,9 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     ]["state"] == STATE_COMPLETE
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert nxt["state"] == STATE_BLOCKED
@@ -784,9 +799,10 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     assert all(v is False for v in safety_flags().values())
 
 
-def test_rc1_replay_approval_is_next_and_qa_boundary_is_blocked():
+def test_rc1_evidence_decision_is_next_and_qa_boundary_is_blocked():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    # the resume-policy review chain and the direction selection are now complete
+    # the resume-policy review chain, direction selection, and replay approval
+    # are now complete
     assert (
         pipe["crypto_d1_resume_policy_results_review"]["state"] == STATE_COMPLETE
     )
@@ -796,18 +812,24 @@ def test_rc1_replay_approval_is_next_and_qa_boundary_is_blocked():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active human-gated next step
-    nxt = pipe["crypto_d1_rc1_out_of_sample_replay_approval"]
+    assert (
+        pipe["crypto_d1_rc1_out_of_sample_replay_approval"]["state"] == STATE_COMPLETE
+    )
+    # the RC1 out-of-sample evidence decision is the active human-gated next step
+    nxt = pipe["crypto_d1_rc1_out_of_sample_evidence_decision"]
     assert nxt["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in nxt["reason"]
     nxt_reason = nxt["reason"].lower()
     # it is NOT a build step and NOT an authorization, and unlocks nothing
     assert "not a build step" in nxt_reason
     assert "not an authorization" in nxt_reason
-    # it is only a research-only replay choice, never promotion or execution
+    # it is only a human evidence decision, never promotion or execution
+    assert "human evidence decision" in nxt_reason
     assert "not promotion" in nxt_reason
-    # the DO_NOT_PROMOTE decision is preserved, never overturned by the spec
+    # the DO_NOT_PROMOTE decision is preserved, never overturned by the review
     assert "do_not_promote_resume_policy_yet" in nxt_reason
+    # the review honestly recorded the out-of-sample degradation
+    assert "materially degraded" in nxt_reason
     # the QA boundary decision is now a separate, later, BLOCKED step
     row = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert row["state"] == STATE_BLOCKED
@@ -1017,10 +1039,10 @@ def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
     # after Block 130, the global stage has advanced past the daily alpha brief
     # approval build to the human-controlled real-data QA boundary decision.
     assert s["current_stage"] == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert s["next_required_action"] == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
 
 
@@ -1084,10 +1106,10 @@ def test_latest_completed_strategy_evidence_scoring_contract_is_block_131():
     assert s["executes"] is False
     # registering Block 131 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1108,10 +1130,10 @@ def test_latest_completed_cohort_independence_contract_is_block_132():
     assert s["executes"] is False
     # registering Block 132 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the Block 129 approval contract completion is preserved alongside it
     assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
@@ -1132,10 +1154,10 @@ def test_latest_completed_real_data_qa_boundary_decision_contract_is_block_134()
     assert s["executes"] is False
     # registering Block 134 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1159,10 +1181,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_contract_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the Block 134 boundary-decision contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_boundary_decision_contract"] == (
@@ -1186,10 +1208,10 @@ def test_latest_completed_real_data_qa_readiness_checklist_contract_is_block_136
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the Phase A approval-packet contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
@@ -1213,10 +1235,10 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1230,9 +1252,13 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1264,10 +1290,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1281,9 +1307,13 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1317,10 +1347,10 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1334,9 +1364,13 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1377,10 +1411,10 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the coverage layer is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1395,9 +1429,13 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1442,10 +1480,10 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the review is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1460,9 +1498,13 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1499,10 +1541,10 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     assert pipe[
         "crypto_d1_resume_policy_results_review"
@@ -1515,9 +1557,13 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1554,10 +1600,10 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     assert pipe[
         "crypto_d1_resume_policy_results_review"
@@ -1570,9 +1616,13 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1610,10 +1660,10 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the approval decision is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1628,9 +1678,13 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1668,10 +1722,10 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the final decision is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1686,9 +1740,13 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1726,10 +1784,10 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the source evaluation is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1744,9 +1802,13 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1784,10 +1846,10 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the adapter spec is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1802,9 +1864,13 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1843,10 +1909,10 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE"
     )
     # the dry run is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1861,9 +1927,13 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert pipe[
         "crypto_d1_post_resume_policy_research_continuation_direction_selection"
     ]["state"] == STATE_COMPLETE
-    # the RC1 out-of-sample replay approval is the active next step (STATE_NEXT)
+    # the RC1 out-of-sample replay approval is now complete (STATE_COMPLETE)
     assert pipe[
         "crypto_d1_rc1_out_of_sample_replay_approval"
+    ]["state"] == STATE_COMPLETE
+    # the RC1 out-of-sample evidence decision is the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_rc1_out_of_sample_evidence_decision"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1882,7 +1952,7 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
 
 def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
     assert CURRENT_STAGE == (
-        "HUMAN_APPROVED_RC1_OUT_OF_SAMPLE_REPLAY_REQUIRED"
+        "HUMAN_DECISION_ON_RC1_OUT_OF_SAMPLE_EVIDENCE_REQUIRED"
     )
     assert "RC1" in CURRENT_STAGE
     assert "OUT_OF_SAMPLE" in CURRENT_STAGE
