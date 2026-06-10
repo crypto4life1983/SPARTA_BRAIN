@@ -481,6 +481,8 @@ __all__ = [
     "get_latest_completed_rc1_oos_human_evidence_decision_contract_label",
     "LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT",
     "get_latest_completed_rc2_cross_policy_stability_research_contract_label",
+    "LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT",
+    "get_latest_completed_rc2_cross_policy_replay_runner_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1340,6 +1342,23 @@ _RECOGNIZED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT = (
     _RECOGNIZED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT_LABEL
+)
+
+# Block 185 recognizes the research-only Crypto-D1 V2 RC2 CROSS-POLICY REPLAY
+# RUNNER contract: the double-gated, dry-run-verified runner that can replay ALL
+# six fixed candidates (RP1..RP6, parameters UNCHANGED) over the fixed Block 184
+# windows in SIMULATED mode only, ranking them as pure reporting. Recognizing it
+# does NOT run anything and does NOT advance the stage: the next step stays the
+# human-approved research-only PERSISTED replay run -- not promotion and not
+# trading execution -- and DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved.
+# Like every recognized record this is purely additive latest-completed
+# metadata: it writes nothing, promotes nothing, and is never an unlock of
+# real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT_LABEL = (
+    "Block 185 - Crypto-D1 V2 RC2 Cross-Policy Replay Runner Contract"
+)
+LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT = (
+    _RECOGNIZED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -5212,6 +5231,12 @@ def get_latest_completed_rc2_cross_policy_stability_research_contract_label() ->
     """Human label for the latest recognized research-only Crypto-D1 V2
     RC2 Cross-Policy Stability Research contract."""
     return _RECOGNIZED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT_LABEL
+
+
+def get_latest_completed_rc2_cross_policy_replay_runner_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    RC2 Cross-Policy Replay Runner contract."""
+    return _RECOGNIZED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:

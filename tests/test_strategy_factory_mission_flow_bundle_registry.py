@@ -168,6 +168,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_rc1_oos_human_evidence_decision_contract_label,
     LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT,
     get_latest_completed_rc2_cross_policy_stability_research_contract_label,
+    LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT,
+    get_latest_completed_rc2_cross_policy_replay_runner_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -3918,6 +3920,13 @@ def test_latest_completed_resume_policy_chain_labels():
         get_latest_completed_rc2_cross_policy_stability_research_contract_label()
         == LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT
     )
+    assert LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT == (
+        "Block 185 - Crypto-D1 V2 RC2 Cross-Policy Replay Runner Contract"
+    )
+    assert (
+        get_latest_completed_rc2_cross_policy_replay_runner_contract_label()
+        == LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT
+    )
     # recognizing the chain names no execution capability
     for label in (
         LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT,
@@ -3930,6 +3939,7 @@ def test_latest_completed_resume_policy_chain_labels():
         LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT,
         LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT,
         LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT,
+        LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT,
     ):
         for banned in ("PAPER", "LIVE", "BROKER", "EXCHANGE", "EXECUTION",
                        "ORDER", "UNLOCK", "PROMOTE"):
