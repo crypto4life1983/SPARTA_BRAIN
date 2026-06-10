@@ -98,6 +98,9 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_REAL_DATA_QA_PLAN_ONLY_CONTRACT,
     LATEST_COMPLETED_REAL_DATA_QA_PLAN_APPROVAL_DECISION,
     LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION,
+    LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT,
+    LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT,
+    LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -169,6 +172,9 @@ def test_status_schema_is_stable():
         "latest_completed_real_data_qa_boundary_final_decision",
         "latest_completed_real_data_qa_pass_receipt",
         "latest_completed_baseline_backtest_prep_contract",
+        "latest_completed_resume_policy_research_plan_contract",
+        "latest_completed_resume_policy_simulation_runner_contract",
+        "latest_completed_resume_policy_results_review_contract",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -182,6 +188,38 @@ def test_status_schema_is_stable():
     assert isinstance(s["blocked_gates"], list)
     assert isinstance(s["safety"], dict)
     assert isinstance(s["safety_posture"], dict)
+
+
+def test_resume_policy_chain_recognized_as_latest_completed_evidence():
+    # The research-only Resume-Policy chain (Blocks 175-177) is surfaced as
+    # additive latest-completed evidence -- three separate fields for traceability.
+    # Recognizing it unlocks nothing: gates stay BLOCKED/LOCKED.
+    assert LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT == (
+        "Block 175 - Crypto-D1 V2 Resume-Policy Research & Simulation Plan Contract"
+    )
+    assert LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT == (
+        "Block 176 - Crypto-D1 V2 Resume-Policy Simulation Runner Contract"
+    )
+    assert LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT == (
+        "Block 177 - Crypto-D1 V2 Resume-Policy Results Review / Decision Contract"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_resume_policy_research_plan_contract"] == (
+        LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT
+    )
+    assert s["latest_completed_resume_policy_simulation_runner_contract"] == (
+        LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT
+    )
+    assert s["latest_completed_resume_policy_results_review_contract"] == (
+        LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT
+    )
+    # recognizing the chain unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
 
 
 def test_lane_rows_have_stable_keys():
@@ -356,15 +394,16 @@ def test_latest_completed_bundle_is_bundle54():
 
 
 def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision():
-    # After Block 130, the only next step is the human-controlled real-data QA
-    # boundary decision -- a human judgment, NOT a BUILD step and NOT an
+    # After the research-only Resume-Policy chain (Blocks 175-177) is recognized
+    # complete, the only next step is the human review of the resume-policy
+    # simulation results -- a human judgment, NOT a BUILD step and NOT an
     # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "HUMAN_CONTROLLED" in NEXT_REQUIRED_ACTION
-    assert "BOUNDARY_DECISION" in NEXT_REQUIRED_ACTION
+    assert "HUMAN_REVIEW" in NEXT_REQUIRED_ACTION
+    assert "RESUME_POLICY" in NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
@@ -382,8 +421,14 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     # the boundary decision still unlocks nothing real
     assert all(v is False for v in safety_flags().values())
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
-    nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
+    # the resume-policy results review is the active STATE_NEXT human step
+    nxt = pipe["crypto_d1_resume_policy_results_review"]
     assert nxt["state"] == STATE_NEXT
+    assert NEXT_REQUIRED_ACTION in nxt["reason"]
+    # the QA boundary decision is demoted to its own separate BLOCKED step
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_BLOCKED
 
 
 def test_next_protocol_definition_now_complete():
@@ -678,20 +723,31 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     assert "never what to trade and never an unlock" in reason
     # recognizing it is purely additive -- it does not advance the boundary stage
     assert "purely additive latest-completed metadata" in reason
-    # the boundary decision itself stays the STATE_NEXT human step (unchanged)
+    # the resume-policy results review is the STATE_NEXT human step; the QA
+    # boundary decision is demoted to its own separate BLOCKED step
+    assert pipe["crypto_d1_resume_policy_results_review"]["state"] == STATE_NEXT
     nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
-    assert nxt["state"] == STATE_NEXT
+    assert nxt["state"] == STATE_BLOCKED
     # recognizing the contract unlocks nothing real
     assert all(v is False for v in safety_flags().values())
 
 
-def test_human_controlled_real_data_qa_boundary_decision_is_next():
+def test_resume_policy_results_review_is_next_and_qa_boundary_is_blocked():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the resume-policy results review is the active human-gated next step
+    nxt = pipe["crypto_d1_resume_policy_results_review"]
+    assert nxt["state"] == STATE_NEXT
+    assert NEXT_REQUIRED_ACTION in nxt["reason"]
+    nxt_reason = nxt["reason"].lower()
+    # it is NOT a build step and NOT an authorization, and unlocks nothing
+    assert "not a build step" in nxt_reason
+    assert "not an authorization" in nxt_reason
+    assert "do_not_promote_resume_policy_yet" in nxt_reason
+    # the QA boundary decision is now a separate, later, BLOCKED step
     row = pipe["human_controlled_real_data_qa_boundary_decision"]
-    assert row["state"] == STATE_NEXT
-    assert NEXT_REQUIRED_ACTION in row["reason"]
+    assert row["state"] == STATE_BLOCKED
     reason = row["reason"].lower()
-    # the boundary decision is NOT a build step and NOT an authorization
+    # its safety body is preserved verbatim
     assert "not a build step" in reason
     assert "not an authorization" in reason
     assert "boundary" in reason
@@ -896,10 +952,10 @@ def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
     # after Block 130, the global stage has advanced past the daily alpha brief
     # approval build to the human-controlled real-data QA boundary decision.
     assert s["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert s["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
 
 
@@ -963,10 +1019,10 @@ def test_latest_completed_strategy_evidence_scoring_contract_is_block_131():
     assert s["executes"] is False
     # registering Block 131 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -987,10 +1043,10 @@ def test_latest_completed_cohort_independence_contract_is_block_132():
     assert s["executes"] is False
     # registering Block 132 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the Block 129 approval contract completion is preserved alongside it
     assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
@@ -1011,10 +1067,10 @@ def test_latest_completed_real_data_qa_boundary_decision_contract_is_block_134()
     assert s["executes"] is False
     # registering Block 134 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1038,10 +1094,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_contract_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the Block 134 boundary-decision contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_boundary_decision_contract"] == (
@@ -1065,10 +1121,10 @@ def test_latest_completed_real_data_qa_readiness_checklist_contract_is_block_136
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the Phase A approval-packet contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
@@ -1092,15 +1148,19 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
-    # the human-controlled boundary decision remains the next step (still STATE_NEXT)
+    # the resume-policy results review is now the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # the Block 136 readiness checklist completion is preserved alongside it
     assert s["latest_completed_real_data_qa_readiness_checklist_contract"] == (
         "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
@@ -1127,15 +1187,19 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
-    # the human-controlled boundary decision remains the next step (still STATE_NEXT)
+    # the resume-policy results review is now the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # the Block 152 controller completion is preserved alongside it
     assert s["latest_completed_overnight_research_autopilot_controller"] == (
         "Block 152 - SPARTA Overnight Research Autopilot Controller"
@@ -1164,15 +1228,19 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
-    # the human-controlled boundary decision itself remains NEXT (still awaiting)
+    # the resume-policy results review is now the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 152 controller and Block 155 packet completions are preserved
     assert s["latest_completed_overnight_research_autopilot_controller"] == (
         "Block 152 - SPARTA Overnight Research Autopilot Controller"
@@ -1208,16 +1276,20 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the coverage layer is NOT registered as an active step ahead of the
-    # boundary -- the human-controlled boundary decision itself remains NEXT
+    # boundary -- the resume-policy results review is now the active next step
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 152/155/158 completions are preserved
     assert s["latest_completed_overnight_research_autopilot_controller"] == (
         "Block 152 - SPARTA Overnight Research Autopilot Controller"
@@ -1257,16 +1329,20 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the review is NOT registered as an active step ahead of the boundary --
-    # the human-controlled boundary decision itself remains NEXT
+    # the resume-policy results review is now the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 161 completion is preserved
     assert s["latest_completed_pipeline_coverage_reconciliation"] == (
         "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
@@ -1298,14 +1374,18 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     assert pipe[
-        "human_controlled_real_data_qa_boundary_decision"
+        "crypto_d1_resume_policy_results_review"
     ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_BLOCKED
     # Block 166 completion is preserved
     assert s["latest_completed_real_data_qa_boundary_readiness_review"] == (
         "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
@@ -1337,14 +1417,18 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     assert pipe[
-        "human_controlled_real_data_qa_boundary_decision"
+        "crypto_d1_resume_policy_results_review"
     ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_BLOCKED
     # Block 170 completion is preserved alongside Block 171
     assert s["latest_completed_real_data_qa_boundary_decision_packet"] == (
         "Block 170 - Crypto-D1 Real Data QA Boundary Decision Packet"
@@ -1377,16 +1461,20 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the approval decision is NOT registered as an active step ahead of the
-    # boundary -- the human-controlled boundary decision itself remains NEXT
+    # boundary -- the resume-policy results review is now the active next step
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 166 completion is preserved
     assert s["latest_completed_real_data_qa_boundary_readiness_review"] == (
         "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
@@ -1419,16 +1507,20 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the final decision is NOT registered as an active step ahead of the
-    # boundary -- the human-controlled boundary decision itself remains NEXT
+    # boundary -- the resume-policy results review is now the active next step
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 172 completion is preserved
     assert s["latest_completed_real_data_qa_plan_approval_decision"] == (
         "Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract"
@@ -1461,16 +1553,20 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the source evaluation is NOT registered as an active step ahead of the
-    # boundary -- the human-controlled boundary decision itself remains NEXT
+    # boundary -- the resume-policy results review is now the active next step
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 166 completion is preserved
     assert s["latest_completed_real_data_qa_boundary_readiness_review"] == (
         "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
@@ -1503,16 +1599,20 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the adapter spec is NOT registered as an active step ahead of the boundary --
-    # the human-controlled boundary decision itself remains NEXT
+    # the resume-policy results review is now the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 167 completion is preserved
     assert s["latest_completed_public_spot_source_evaluation"] == (
         "Block 167 - Crypto-D1 Public Read-Only Spot Source Evaluation Contract"
@@ -1546,16 +1646,20 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
     )
     # the dry run is NOT registered as an active step ahead of the boundary --
-    # the human-controlled boundary decision itself remains NEXT
+    # the resume-policy results review is now the active next step (STATE_NEXT)
+    assert pipe[
+        "crypto_d1_resume_policy_results_review"
+    ]["state"] == STATE_NEXT
+    # the QA boundary decision is demoted to its own separate BLOCKED step
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == STATE_NEXT
+    ]["state"] == STATE_BLOCKED
     # Block 168 completion is preserved
     assert s["latest_completed_concrete_spot_provider_adapter_spec"] == (
         "Block 168 - Crypto-D1 Concrete Read-Only Spot Provider Adapter Spec"
@@ -1569,15 +1673,14 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
 
 def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
     assert CURRENT_STAGE == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
     )
-    assert "HUMAN_CONTROLLED" in CURRENT_STAGE
-    assert "BOUNDARY_DECISION" in CURRENT_STAGE
+    assert "HUMAN_REVIEW" in CURRENT_STAGE
+    assert "RESUME_POLICY" in CURRENT_STAGE
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"
-    # A human boundary-decision stage, not execution. "QA" is intentionally
-    # allowed: the stage names the still-blocked real_data_qa gate it *precedes*.
+    # A human review stage over research-only resume-policy results, not execution.
     for banned in ("ACQUIRE", "FETCH", "EXECUTE", "EXECUTION",
                    "BACKTEST", "BASELINE", "PAPER", "LIVE", "BROKER",
                    "EXCHANGE", "AUTOMATION", "ORDER"):

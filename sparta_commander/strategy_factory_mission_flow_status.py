@@ -229,6 +229,9 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_real_data_qa_plan_only_contract_label as _registry_latest_real_data_qa_plan_only_contract_label,  # noqa: E501
     get_latest_completed_real_data_qa_plan_approval_decision_label as _registry_latest_real_data_qa_plan_approval_decision_label,  # noqa: E501
     get_latest_completed_real_data_qa_boundary_final_decision_label as _registry_latest_real_data_qa_boundary_final_decision_label,  # noqa: E501
+    get_latest_completed_resume_policy_research_plan_contract_label as _registry_latest_resume_policy_research_plan_contract_label,  # noqa: E501
+    get_latest_completed_resume_policy_simulation_runner_contract_label as _registry_latest_resume_policy_simulation_runner_contract_label,  # noqa: E501
+    get_latest_completed_resume_policy_results_review_contract_label as _registry_latest_resume_policy_results_review_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -283,6 +286,9 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION",
     "LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT",
     "LATEST_COMPLETED_BASELINE_BACKTEST_PREP_CONTRACT",
+    "LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT",
+    "LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT",
+    "LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -441,6 +447,21 @@ LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION = (
 # separate explicit human baseline-prep policy decision.
 LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT = _qa_pass_receipt_label()
 LATEST_COMPLETED_BASELINE_BACKTEST_PREP_CONTRACT = _baseline_prep_label()
+# Surfaces the completed research-only Crypto-D1 V2 Resume-Policy chain
+# (research/simulation plan -> simulation runner -> results review) as additive
+# latest-completed evidence. Each is read-only research: it moves NO gate --
+# real_data_qa and baseline_backtest stay BLOCKED, paper / micro-live / live stay
+# LOCKED -- and the only surfaced next step is the human review of the
+# resume-policy simulation results.
+LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT = (
+    _registry_latest_resume_policy_research_plan_contract_label()
+)
+LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT = (
+    _registry_latest_resume_policy_simulation_runner_contract_label()
+)
+LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT = (
+    _registry_latest_resume_policy_results_review_contract_label()
+)
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
 # --- human workflow lane ---------------------------------------------------
@@ -1609,15 +1630,33 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
-        "id": "human_controlled_real_data_qa_boundary_decision",
-        "label": "Human-Controlled Real Data QA Boundary Decision",
+        "id": "crypto_d1_resume_policy_results_review",
+        "label": "Crypto-D1 V2 Resume-Policy Results Review / Decision",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". With the Block "
-            "129 daily alpha brief approval contract now complete, the research-"
-            "only external-evidence sub-chain (research -> review -> approval) is "
-            "finished and the only next step is the human-controlled real-data QA "
-            "boundary decision: a human judgment about whether to ever cross from "
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 175 "
+            "resume-policy research & simulation plan, Block 176 simulation "
+            "runner, and Block 177 results-review / decision contracts are now "
+            "complete, so the human-gated next step is a read-only human review "
+            "of the resume-policy SIMULATION results as research evidence only. "
+            "It is NOT a build step and NOT an authorization -- it acquires no "
+            "data, runs no dry run, QA, baseline, backtest, or simulation, "
+            "places no order, automates nothing, and writes no "
+            "runtime/registry/dashboard artifact. The review records "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET and unlocks nothing: real_data_qa "
+            "and baseline_backtest stay BLOCKED and the paper/micro-live/live "
+            "gates stay LOCKED unless a separate, future, human-approved "
+            "contract authorizes a crossing."
+        ),
+    },
+    {
+        "id": "human_controlled_real_data_qa_boundary_decision",
+        "label": "Human-Controlled Real Data QA Boundary Decision",
+        "state": STATE_BLOCKED,
+        "reason": (
+            "Blocked - this is a separate, later human-controlled decision and "
+            "is NOT the active next step while the resume-policy results review "
+            "is pending. It is a human judgment about whether to ever cross from "
             "research-only paper work into real-data QA. It is NOT a build step "
             "and NOT an authorization -- it acquires no data, runs no dry run, QA, "
             "baseline, or backtest, places no order, automates nothing, and writes "
@@ -1782,6 +1821,9 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_real_data_qa_boundary_final_decision": LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION,  # noqa: E501
         "latest_completed_real_data_qa_pass_receipt": LATEST_COMPLETED_REAL_DATA_QA_PASS_RECEIPT,  # noqa: E501
         "latest_completed_baseline_backtest_prep_contract": LATEST_COMPLETED_BASELINE_BACKTEST_PREP_CONTRACT,  # noqa: E501
+        "latest_completed_resume_policy_research_plan_contract": LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT,  # noqa: E501
+        "latest_completed_resume_policy_simulation_runner_contract": LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT,  # noqa: E501
+        "latest_completed_resume_policy_results_review_contract": LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

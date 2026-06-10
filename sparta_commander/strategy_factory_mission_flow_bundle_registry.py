@@ -461,6 +461,12 @@ __all__ = [
     "LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION",
     "get_latest_completed_real_data_qa_boundary_final_decision",
     "get_latest_completed_real_data_qa_boundary_final_decision_label",
+    "LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT",
+    "get_latest_completed_resume_policy_research_plan_contract_label",
+    "LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT",
+    "get_latest_completed_resume_policy_simulation_runner_contract_label",
+    "LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT",
+    "get_latest_completed_resume_policy_results_review_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -524,7 +530,7 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # build step and NOT a research-only paper contract. real_data_qa stays BLOCKED,
 # baseline_backtest stays BLOCKED, and the paper/micro-live gates stay LOCKED
 # unless a separate, future, human-approved boundary contract authorizes it.
-CURRENT_STAGE = "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+CURRENT_STAGE = "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -837,7 +843,7 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
 # artifact. real_data_qa stays BLOCKED, baseline stays BLOCKED, and the paper/
 # micro-live gates stay LOCKED unless a separate, future, human-approved boundary
 # contract is built.
-NEXT_REQUIRED_ACTION = "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+NEXT_REQUIRED_ACTION = "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
 
 # The single recognized latest research-only Strategy Evidence Scoring contract
 # (Block 131). It is a research-only evidence/scoring support contract: on paper,
@@ -1164,6 +1170,48 @@ _RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL = (
 )
 LATEST_COMPLETED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION = (
     _RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL
+)
+
+# Block 175 recognizes the research-only Crypto-D1 V2 Resume-Policy RESEARCH &
+# SIMULATION PLAN contract: a plan-only module that enumerates six resume-policy
+# candidates and the four regimes to cover and RUNS NOTHING -- no simulation, no
+# backtest, no optimization, no parameter search, no data fetch, no broker, no
+# exchange, no order. Like every recognized record this is purely additive
+# latest-completed metadata: it authorizes nothing, crosses no boundary, and is
+# never an unlock of real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT_LABEL = (
+    "Block 175 - Crypto-D1 V2 Resume-Policy Research & Simulation Plan Contract"
+)
+LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT = (
+    _RECOGNIZED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT_LABEL
+)
+
+# Block 176 recognizes the research-only Crypto-D1 V2 Resume-Policy SIMULATION
+# RUNNER contract: a read-only runner that evaluates resume policies over the
+# FIXED regime windows on QA-passed LOCAL CSV only, placing ZERO real orders and
+# unlocking no gate. Like every recognized record this is purely additive
+# latest-completed metadata: it uses no real money, connects no broker/exchange,
+# runs no optimization or parameter search, and is never an unlock of
+# real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT_LABEL = (
+    "Block 176 - Crypto-D1 V2 Resume-Policy Simulation Runner Contract"
+)
+LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT = (
+    _RECOGNIZED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT_LABEL
+)
+
+# Block 177 recognizes the research-only Crypto-D1 V2 Resume-Policy RESULTS REVIEW
+# / DECISION contract: a read-only reviewer that reads resume-policy simulation
+# results as research evidence only and emits DO_NOT_PROMOTE_RESUME_POLICY_YET,
+# always requiring separate human review before any execution promotion. Like
+# every recognized record this is purely additive latest-completed metadata: it
+# approves nothing for execution, promotes no gate, and is never an unlock of
+# real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT_LABEL = (
+    "Block 177 - Crypto-D1 V2 Resume-Policy Results Review / Decision Contract"
+)
+LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT = (
+    _RECOGNIZED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -4976,6 +5024,24 @@ def get_latest_completed_real_data_qa_boundary_final_decision_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 Real Data QA
     Boundary Final Decision contract."""
     return _RECOGNIZED_REAL_DATA_QA_BOUNDARY_FINAL_DECISION_LABEL
+
+
+def get_latest_completed_resume_policy_research_plan_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    Resume-Policy Research & Simulation Plan contract."""
+    return _RECOGNIZED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT_LABEL
+
+
+def get_latest_completed_resume_policy_simulation_runner_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    Resume-Policy Simulation Runner contract."""
+    return _RECOGNIZED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT_LABEL
+
+
+def get_latest_completed_resume_policy_results_review_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    Resume-Policy Results Review / Decision contract."""
+    return _RECOGNIZED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
