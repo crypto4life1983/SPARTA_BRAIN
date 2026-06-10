@@ -10006,6 +10006,16 @@ def _jarvis_conversational_answer(q: str):
     """
     import re as _re
 
+    # Strip a leading vocative ("jarvis, ..." / "hey jarvis ...") BEFORE any
+    # intent matching: addressing JARVIS by name was making every "what is X"
+    # question contain the token "jarvis", so the chief-of-staff demo branch
+    # answered with the product pitch instead of routing X. "what is jarvis"
+    # still works — there the name is the subject, not a leading address. If
+    # the question is ONLY the name, keep it (it reads as a hail/greeting).
+    _stripped = _re.sub(r"^\s*(?:hey\s+|ok\s+|okay\s+)?jarvis\b[\s,!.:;-]*", "", q)
+    if _stripped.strip():
+        q = _stripped
+
     def _agg() -> dict:
         d = _jarvis_safe(api_jarvis_status)
         return d if isinstance(d, dict) else {}
@@ -10111,15 +10121,15 @@ def _jarvis_conversational_answer(q: str):
     def _exec_blocker_phrase(state: str, warns: list) -> str:
         st = (state or "unknown").lower()
         if st in ("red", "error", "critical", "down", "alert"):
-            return ("Blocker level: elevated — some items currently need attention "
-                    "before work continues smoothly.")
+            return ("There are some real blockers right now — a few items need "
+                    "attention before work continues smoothly.")
         if warns:
-            return ("Blocker level: low — a few maintenance items are under review, "
-                    "but nothing is blocking progress.")
+            return ("Nothing is actually blocking us — a few maintenance items "
+                    "are under review, that's all.")
         if st in ("green", "ok", "okay", "healthy", "ready", "good"):
-            return "Blocker level: none — there are no blockers and work is on track."
-        return ("Blocker level: unknown — current state could not be confirmed from "
-                "read-only data.")
+            return "No blockers at all — work is on track."
+        return ("I can't confirm the blocker picture from read-only data right "
+                "now, so I'll call it unknown rather than guess.")
 
     def _exec_trading_phrase(cand_n) -> str:
         # Executive (default) trading status: research-framed, customer/investor
@@ -10168,6 +10178,13 @@ def _jarvis_conversational_answer(q: str):
     # executive summary, and "tell me more" all produce the structured
     # read-only briefing: greeting -> system health -> Strategy Factory ->
     # trading research -> warnings -> recommended next action.
+    # Generic "update" asks ("the update for today", "any updates", "daily
+    # update") get the executive briefing — but ONLY when no specific frame
+    # (trading / strategy / factory / pipeline / workflow / project) is named,
+    # so those keep routing to their dedicated branches below.
+    _generic_update = ("update" in q and not any(
+        t in q for t in ("trad", "strateg", "factory", "pipeline",
+                         "workflow", "project")))
     _is_briefing = (
         "good morning" in q
         or "morning briefing" in q
@@ -10178,6 +10195,7 @@ def _jarvis_conversational_answer(q: str):
         or "executive summary" in q
         or ("summar" in q and "system" in q)
         or "tell me more" in q
+        or _generic_update
     )
     if _is_briefing:
         status = _agg()
@@ -10304,15 +10322,18 @@ def _jarvis_conversational_answer(q: str):
                   else len(cr.get("candidates") or []))
         if _operator:
             return (
-                "Trading status (read-only, operator detail). "
-                + _operator_trading_phrase(cand_n) + " This reports observed "
-                "state only and authorizes no action.",
+                "Here's the full trading picture, Mahmoud (read-only, operator "
+                "detail). " + _operator_trading_phrase(cand_n) + " That's the "
+                "deliberate posture, observation-only by design. This reports "
+                "observed state only and authorizes no action.",
                 ["trading_detail", "candidate_registry"])
         return (
-            "Trading status (read-only). " + _exec_trading_phrase(cand_n) + " "
-            "This reports observed state only and authorizes no action. "
-            "Ask for operator mode or technical details for the exact posture "
-            "and counts.",
+            "Here's where trading stands, Mahmoud (read-only). "
+            + _exec_trading_phrase(cand_n) +
+            " None of that is a setback — it's the plan: we stay in research "
+            "until the evidence is strong enough to act on. This reports "
+            "observed state only and authorizes no action. Just say the word if "
+            "you want operator mode or the exact posture and counts.",
             ["trading_detail", "candidate_registry"])
 
     # --- trade recap / "any winning trades lately" / "what happened with our
@@ -10490,8 +10511,8 @@ def _jarvis_conversational_answer(q: str):
                        "candidate_registry", "trading_detail"]
         if _operator:
             return (
-                "Workflow health (read-only, operator detail). System core is "
-                f"{sc.get('state', 'unknown')}, server "
+                "Here's the full workflow picture, Mahmoud (read-only, operator "
+                f"detail). System core is {sc.get('state', 'unknown')}, server "
                 f"{sc.get('server', 'unknown')}. Commander snapshot is {state} — "
                 f"{headline} ({len(warns)} warning(s)). " + _factory_phrase(fs) + " "
                 f"Trading research status: {cand_n} research candidate(s) tracked. "
@@ -10503,17 +10524,17 @@ def _jarvis_conversational_answer(q: str):
                 "authorizes no action.",
                 _wf_sources)
         return (
-            "Workflow health (read-only). Overall: SPARTA Brain is online and the "
-            "workflow is operating. " + _exec_health_phrase(state) + " "
-            "What's working: the dashboard, the read-only status pipeline, and "
-            "Strategy Factory research are all running. "
-            + _exec_research_phrase(fs) + " What needs attention: "
-            + _exec_attention_phrase(warns) + " " + _exec_blocker_phrase(state, warns)
-            + " All trading remains observation-only — no live or paper trades were "
-            "executed, so there is no performance to report. Recommended next step: "
-            f"{_first_action(status)} This reports observed state only and authorizes "
-            "no action. Ask for operator mode or technical details for the exact "
-            "figures.",
+            "Here's the workflow picture, Mahmoud (read-only). The core loop is "
+            "healthy — SPARTA Brain is online, and the dashboard, the read-only "
+            "status pipeline, and Strategy Factory research are all running. "
+            + _exec_health_phrase(state) + " " + _exec_research_phrase(fs) + " "
+            "On the attention side: " + _exec_attention_phrase(warns) + " "
+            + _exec_blocker_phrase(state, warns) +
+            " All trading remains observation-only — no live or paper trades were "
+            "executed, so there is no performance to report. If I were to point "
+            f"you anywhere next: {_first_action(status)} This reports observed "
+            "state only and authorizes no action. Say the word if you want "
+            "operator mode or the exact figures.",
             _wf_sources)
 
     # --- general system / overall status (not trading/factory/change paths) ---

@@ -214,6 +214,18 @@ _SAFE_INFO = tuple(re.compile(p) for p in (
     r"\bhow\s+you\s+doing\b",
     r"\bbrief(?:ing)?\b",
     r"\bbrief\s+me\b",
+    # Generic "update" briefing phrasings ("the update for today", "any
+    # updates", "what's the update", "daily update"). Noun-form only — action
+    # verbs like "update the config" match none of these and stay refused
+    # fail-closed; forbidden patterns are still matched FIRST.
+    r"\bupdate\s+for\s+today\b",
+    r"\btoday'?s\s+update\b",
+    r"\b(?:daily|morning|latest)\s+updates?\b",
+    r"\bany\s+updates?\b",
+    r"\bwhat'?s\s+the\s+update\b",
+    r"\bwhat\s+is\s+the\s+update\b",
+    r"\b(?:tell|give)\s+me\s+(?:the|an|a)\s+update\b",
+    r"\bupdates?\s+(?:for|on)\s+today\b",
     r"\bstrategy\s+factory\b",
     r"\bfactory\s+(?:status|state|update|report|reports|progress|overview|summary)\b",
     r"\b(?:status|state|update|overview|progress)\b.*\bfactory\b",

@@ -21,6 +21,7 @@ so knowledge-map answers satisfy the JARVIS no-fake-performance contract.
 """
 from __future__ import annotations
 
+import re
 from typing import Optional, Tuple, List, Dict
 
 
@@ -241,7 +242,7 @@ _DEFINITIONAL = (
 )
 
 _STATUS_WORDS = ("status", "progress", "how is", "how's", "hows", "how are",
-                 "update on", "state of")
+                 "update", "state of")
 
 # Non-definitional inquiry phrasings ("what automation do we have", "what
 # dashboards exist", "tell me about the affiliate system") that still ask
@@ -408,6 +409,11 @@ def build_knowledge_map_answer(q: str, operator: bool = False,
     status branches keep their behavior. Read-only; reads no live state.
     """
     q = (q or "").lower()
+    # Strip a leading vocative ("Jarvis, ..." / "hey jarvis ...") BEFORE keyword
+    # matching, so addressing JARVIS by name does not make every definitional
+    # question match the 'jarvis' module keyword. "what is jarvis" still works:
+    # there the name is the subject, not a leading address.
+    q = re.sub(r"^\s*(?:hey\s+|ok\s+|okay\s+)?jarvis\b[\s,!.:;-]*", "", q)
     operator = operator or wants_operator(q)
     demo = demo or wants_demo(q)
 

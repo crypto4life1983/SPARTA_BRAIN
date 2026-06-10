@@ -1722,12 +1722,13 @@ def test_wh_workflow_health_is_executive_by_default(q):
     assert body["refused"] is False, f"{q!r} must answer read-only, not refuse"
     assert body["safety_class"] in ("SAFE_INFO", "SAFE_EXPLAIN")
     ans = body["answer"].lower()
-    # Chief-of-Staff workflow spine.
-    assert "workflow health" in ans
-    assert "what's working" in ans
-    assert "what needs attention" in ans
-    assert "blocker level" in ans
-    assert "recommended next step" in ans
+    # Chief-of-Staff workflow spine (warm executive voice): overview -> what is
+    # running -> attention items -> blocker read -> suggested next step.
+    assert "workflow picture" in ans
+    assert "all running" in ans
+    assert "attention side" in ans
+    assert "block" in ans
+    assert "point you anywhere next" in ans
     # Trading-safety phrasing kept; raw posture flags hidden in executive mode.
     assert "no live or paper trades" in ans
     for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
@@ -1747,9 +1748,9 @@ def test_wh_exact_failed_phrase_is_answered():
     assert body["refused"] is False
     assert body["safety_class"] == "SAFE_INFO"
     ans = body["answer"].lower()
-    assert "workflow health" in ans
-    assert "blocker level" in ans
-    assert "recommended next step" in ans
+    assert "workflow picture" in ans
+    assert "block" in ans
+    assert "point you anywhere next" in ans
     assert "no live or paper trades" in ans
 
 
@@ -1778,7 +1779,7 @@ def test_wh_operator_mode_shows_technical(q):
     assert body["refused"] is False
     assert body["safety_class"] == "SAFE_INFO"
     low = body["answer"].lower()
-    assert "workflow health" in low
+    assert "workflow picture" in low
     assert "observation-only" in low
     for flag in ("read_only=true", "paper_ready=false", "live_ready=false",
                  "broker_control=false"):
@@ -1893,7 +1894,7 @@ def test_op_operator_workflow_status_exposes_technical(q):
     assert body["refused"] is False, f"{q!r} must answer read-only"
     assert body["safety_class"] == "SAFE_INFO"
     low = body["answer"].lower()
-    assert "workflow health" in low
+    assert "workflow picture" in low
     assert "operator detail" in low
     for flag in _OP_POSTURE_FLAGS:
         assert flag in low, f"{q!r} operator answer must expose {flag}"
