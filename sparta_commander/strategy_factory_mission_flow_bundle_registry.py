@@ -485,6 +485,8 @@ __all__ = [
     "get_latest_completed_rc2_cross_policy_replay_runner_contract_label",
     "LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT",
     "get_latest_completed_rc2_cross_policy_results_review_contract_label",
+    "LATEST_COMPLETED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT",
+    "get_latest_completed_rc2_cross_policy_human_evidence_decision_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -548,7 +550,7 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # build step and NOT a research-only paper contract. real_data_qa stays BLOCKED,
 # baseline_backtest stays BLOCKED, and the paper/micro-live gates stay LOCKED
 # unless a separate, future, human-approved boundary contract authorizes it.
-CURRENT_STAGE = "HUMAN_DECISION_ON_RC2_CROSS_POLICY_EVIDENCE_REQUIRED"
+CURRENT_STAGE = "RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -861,7 +863,7 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
 # artifact. real_data_qa stays BLOCKED, baseline stays BLOCKED, and the paper/
 # micro-live gates stay LOCKED unless a separate, future, human-approved boundary
 # contract is built.
-NEXT_REQUIRED_ACTION = "HUMAN_DECISION_ON_RC2_CROSS_POLICY_EVIDENCE"
+NEXT_REQUIRED_ACTION = "HUMAN_APPROVED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH"
 
 # The single recognized latest research-only Strategy Evidence Scoring contract
 # (Block 131). It is a research-only evidence/scoring support contract: on paper,
@@ -1378,6 +1380,26 @@ _RECOGNIZED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT = (
     _RECOGNIZED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
+)
+
+# Block 187 recognizes the research-only Crypto-D1 V2 RC2 CROSS-POLICY HUMAN
+# EVIDENCE DECISION contract: a read-only record of the human's decision over
+# the Block 186 review. It acknowledged the RC1 leader's out-of-sample failure,
+# explicitly kept the strongest candidates (RP4/RP5 on the committed evidence)
+# as EVIDENCE ONLY -- NOT selected successors, with successors_selected
+# structurally False -- recorded the decision (always
+# DO_NOT_PROMOTE_RESUME_POLICY_YET), and selected the next research direction:
+# RC3 failure-mode characterization -- a purely descriptive, human-approved,
+# research-only study of WHY the leader failed and WHY the others looked
+# better, over already-persisted evidence. Like every recognized record this is
+# purely additive latest-completed metadata: it writes nothing, promotes
+# nothing, and is never an unlock of real_data_qa, baseline, paper, micro-live,
+# or live.
+_RECOGNIZED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT_LABEL = (
+    "Block 187 - Crypto-D1 V2 RC2 Cross-Policy Human Evidence Decision Contract"
+)
+LATEST_COMPLETED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT = (
+    _RECOGNIZED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -5262,6 +5284,12 @@ def get_latest_completed_rc2_cross_policy_results_review_contract_label() -> str
     """Human label for the latest recognized research-only Crypto-D1 V2
     RC2 Cross-Policy Results Review contract."""
     return _RECOGNIZED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
+
+
+def get_latest_completed_rc2_cross_policy_human_evidence_decision_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    RC2 Cross-Policy Human Evidence Decision contract."""
+    return _RECOGNIZED_RC2_CROSS_POLICY_HUMAN_EVIDENCE_DECISION_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
