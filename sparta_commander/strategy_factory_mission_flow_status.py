@@ -232,6 +232,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_resume_policy_research_plan_contract_label as _registry_latest_resume_policy_research_plan_contract_label,  # noqa: E501
     get_latest_completed_resume_policy_simulation_runner_contract_label as _registry_latest_resume_policy_simulation_runner_contract_label,  # noqa: E501
     get_latest_completed_resume_policy_results_review_contract_label as _registry_latest_resume_policy_results_review_contract_label,  # noqa: E501
+    get_latest_completed_resume_policy_human_review_decision_contract_label as _registry_latest_resume_policy_human_review_decision_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -289,6 +290,7 @@ __all__ = [
     "LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT",
     "LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT",
     "LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT",
+    "LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -461,6 +463,14 @@ LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT = (
 )
 LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT = (
     _registry_latest_resume_policy_results_review_contract_label()
+)
+# Block 178: the human review decision over the resume-policy results is now
+# recorded as additive latest-completed evidence. The recorded human decision is
+# DO_NOT_PROMOTE_RESUME_POLICY_YET; recognizing it moves NO gate -- real_data_qa
+# and baseline_backtest stay BLOCKED, paper / micro-live / live stay LOCKED -- and
+# the surfaced next step is a research-only continuation, never execution.
+LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT = (
+    _registry_latest_resume_policy_human_review_decision_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1632,21 +1642,35 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_resume_policy_results_review",
         "label": "Crypto-D1 V2 Resume-Policy Results Review / Decision",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the Block 177 read-only resume-policy results-review / "
+            "decision contract recorded DO_NOT_PROMOTE_RESUME_POLICY_YET over the "
+            "Block 176 simulation evidence. It acquired no data, ran no QA, "
+            "baseline, backtest, or simulation, placed no order, automated "
+            "nothing, and wrote no runtime/registry/dashboard artifact. It "
+            "unlocked nothing: real_data_qa and baseline_backtest stay BLOCKED "
+            "and the paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "crypto_d1_resume_policy_human_review_recorded",
+        "label": "Crypto-D1 V2 Resume-Policy Human Review Recorded / Research Continuation",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 175 "
-            "resume-policy research & simulation plan, Block 176 simulation "
-            "runner, and Block 177 results-review / decision contracts are now "
-            "complete, so the human-gated next step is a read-only human review "
-            "of the resume-policy SIMULATION results as research evidence only. "
-            "It is NOT a build step and NOT an authorization -- it acquires no "
-            "data, runs no dry run, QA, baseline, backtest, or simulation, "
-            "places no order, automates nothing, and writes no "
-            "runtime/registry/dashboard artifact. The review records "
-            "DO_NOT_PROMOTE_RESUME_POLICY_YET and unlocks nothing: real_data_qa "
-            "and baseline_backtest stay BLOCKED and the paper/micro-live/live "
-            "gates stay LOCKED unless a separate, future, human-approved "
-            "contract authorizes a crossing."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 178 "
+            "read-only human review decision contract is complete: a human "
+            "reviewed the resume-policy SIMULATION results (RP6 leads all "
+            "categories) and recorded DO_NOT_PROMOTE_RESUME_POLICY_YET. The "
+            "human-gated next step is therefore a safe, research-only "
+            "continuation -- either continue research or request a separate, "
+            "future, explicit human approval. It is NOT a build step and NOT an "
+            "authorization -- it acquires no data, runs no dry run, QA, baseline, "
+            "backtest, or simulation, places no order, automates nothing, and "
+            "writes no runtime/registry/dashboard artifact. It unlocks nothing: "
+            "real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED unless a separate, future, "
+            "human-approved contract authorizes a crossing."
         ),
     },
     {
@@ -1824,6 +1848,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_resume_policy_research_plan_contract": LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT,  # noqa: E501
         "latest_completed_resume_policy_simulation_runner_contract": LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT,  # noqa: E501
         "latest_completed_resume_policy_results_review_contract": LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT,  # noqa: E501
+        "latest_completed_resume_policy_human_review_decision_contract": LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

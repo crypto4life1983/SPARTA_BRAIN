@@ -154,6 +154,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_resume_policy_simulation_runner_contract_label,
     LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT,
     get_latest_completed_resume_policy_results_review_contract_label,
+    LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT,
+    get_latest_completed_resume_policy_human_review_decision_contract_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -256,7 +258,7 @@ def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
     # simulation results -- NOT another build step. No stale
     # "..._APPROVAL_CONTRACT_REQUIRED" literal remains.
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert get_current_stage() == CURRENT_STAGE
     assert "HUMAN_REVIEW" in CURRENT_STAGE
@@ -278,13 +280,14 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     # simulation results -- a human judgment, NOT a BUILD step and NOT an
     # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert get_next_required_action() == NEXT_REQUIRED_ACTION
     # it is explicitly NOT a build action
     assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
-    assert "HUMAN_REVIEW" in NEXT_REQUIRED_ACTION
-    assert "RESUME_POLICY" in NEXT_REQUIRED_ACTION
+    # a safe research-only continuation, not an execution / authorization
+    assert "RESEARCH" in NEXT_REQUIRED_ACTION
+    assert "APPROVAL" in NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
@@ -2240,10 +2243,10 @@ def test_global_stage_advances_after_daily_alpha_brief_registration():
     # controlled real-data QA boundary decision. No stale approval/review/
     # research-build literal remains.
     assert get_current_stage() == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert get_next_required_action() == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert get_current_stage() != (
         "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
@@ -2562,7 +2565,7 @@ def test_recognized_daily_alpha_brief_approval_contract_authorizes_nothing():
     # so its own next step IS the global next required action: the human-
     # controlled real-data QA boundary decision (NOT a build step).
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -2677,7 +2680,7 @@ def test_recognized_strategy_evidence_scoring_contract_authorizes_nothing():
     # action -- the human-controlled real-data QA boundary decision (NOT a build
     # step).
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -2697,10 +2700,10 @@ def test_recognized_strategy_evidence_scoring_preserves_prior_truth():
         "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -2778,7 +2781,7 @@ def test_recognized_cohort_independence_contract_authorizes_nothing():
     # global next required action -- the human-controlled real-data QA boundary
     # decision (NOT a build step).
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -2798,10 +2801,10 @@ def test_recognized_cohort_independence_preserves_prior_truth():
         "Block 129 - Crypto-D1 Daily Alpha Brief Approval Contract"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -2878,7 +2881,7 @@ def test_recognized_real_data_qa_boundary_decision_contract_authorizes_nothing()
     # global next required action -- the human-controlled real-data QA boundary
     # decision (NOT a build step).
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -2900,10 +2903,10 @@ def test_recognized_real_data_qa_boundary_decision_preserves_prior_truth():
         "Block 132 - Crypto-D1 Cohort Independence / Correlation Penalty Contract"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -2976,7 +2979,7 @@ def test_recognized_real_data_qa_human_approval_packet_contract_authorizes_nothi
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3039,7 +3042,7 @@ def test_recognized_real_data_qa_readiness_checklist_contract_authorizes_nothing
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3075,10 +3078,10 @@ def test_block_136_registration_preserves_prior_truth():
         "Block 134 - Crypto-D1 Real Data QA Boundary Decision Contract"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -3135,7 +3138,7 @@ def test_recognized_overnight_research_autopilot_controller_authorizes_nothing()
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3170,10 +3173,10 @@ def test_block_152_registration_preserves_prior_truth():
         "Block 136 - Crypto-D1 Real Data QA Readiness Checklist Contract"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -3232,7 +3235,7 @@ def test_recognized_real_data_qa_human_approval_packet_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3267,10 +3270,10 @@ def test_block_155_registration_preserves_prior_truth():
         "Block 152 - SPARTA Overnight Research Autopilot Controller"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -3328,7 +3331,7 @@ def test_recognized_real_data_qa_boundary_decision_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3368,10 +3371,10 @@ def test_block_158_registration_preserves_prior_truth():
         "Packet"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
@@ -3439,7 +3442,7 @@ def test_recognized_pipeline_coverage_reconciliation_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3517,7 +3520,7 @@ def test_recognized_real_data_qa_boundary_readiness_review_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3589,7 +3592,7 @@ def test_recognized_real_data_qa_boundary_decision_packet_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3661,7 +3664,7 @@ def test_recognized_real_data_qa_plan_only_contract_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3733,7 +3736,7 @@ def test_recognized_real_data_qa_plan_approval_decision_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3805,7 +3808,7 @@ def test_recognized_real_data_qa_boundary_final_decision_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3854,11 +3857,19 @@ def test_latest_completed_resume_policy_chain_labels():
         get_latest_completed_resume_policy_results_review_contract_label()
         == LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT
     )
+    assert LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT == (
+        "Block 178 - Crypto-D1 V2 Resume-Policy Human Review Decision Contract"
+    )
+    assert (
+        get_latest_completed_resume_policy_human_review_decision_contract_label()
+        == LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT
+    )
     # recognizing the chain names no execution capability
     for label in (
         LATEST_COMPLETED_RESUME_POLICY_RESEARCH_PLAN_CONTRACT,
         LATEST_COMPLETED_RESUME_POLICY_SIMULATION_RUNNER_CONTRACT,
         LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT,
+        LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT,
     ):
         for banned in ("PAPER", "LIVE", "BROKER", "EXCHANGE", "EXECUTION",
                        "ORDER", "UNLOCK", "PROMOTE"):
@@ -3913,7 +3924,7 @@ def test_recognized_public_spot_source_evaluation_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -3985,7 +3996,7 @@ def test_recognized_concrete_spot_provider_adapter_spec_authorizes_nothing():
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -4062,7 +4073,7 @@ def test_recognized_selected_spot_provider_fetch_runner_dry_run_authorizes_nothi
     for flag in _CAPABILITY_FLAGS:
         assert c[flag] is False, flag
     assert c["next_required_action"] == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     assert c["next_required_action"] == NEXT_REQUIRED_ACTION
     assert not c["next_required_action"].startswith("BUILD_")
@@ -4102,10 +4113,10 @@ def test_block_161_registration_preserves_prior_truth():
         "Block 158 - Crypto-D1 Human-Controlled Real Data QA Boundary Decision"
     )
     assert CURRENT_STAGE == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+        "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+        "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
     )
     nums = sorted(b["bundle_number"] for b in list_registered_bundles())
     assert nums == [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]

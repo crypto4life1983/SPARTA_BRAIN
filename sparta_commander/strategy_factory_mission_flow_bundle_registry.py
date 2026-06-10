@@ -467,6 +467,8 @@ __all__ = [
     "get_latest_completed_resume_policy_simulation_runner_contract_label",
     "LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT",
     "get_latest_completed_resume_policy_results_review_contract_label",
+    "LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT",
+    "get_latest_completed_resume_policy_human_review_decision_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -530,7 +532,7 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # build step and NOT a research-only paper contract. real_data_qa stays BLOCKED,
 # baseline_backtest stays BLOCKED, and the paper/micro-live gates stay LOCKED
 # unless a separate, future, human-approved boundary contract authorizes it.
-CURRENT_STAGE = "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS_REQUIRED"
+CURRENT_STAGE = "RESUME_POLICY_HUMAN_REVIEW_RECORDED_RESEARCH_CONTINUATION"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -843,7 +845,7 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
 # artifact. real_data_qa stays BLOCKED, baseline stays BLOCKED, and the paper/
 # micro-live gates stay LOCKED unless a separate, future, human-approved boundary
 # contract is built.
-NEXT_REQUIRED_ACTION = "HUMAN_REVIEW_OF_RESUME_POLICY_SIMULATION_RESULTS"
+NEXT_REQUIRED_ACTION = "CONTINUE_RESEARCH_OR_REQUEST_SEPARATE_HUMAN_APPROVAL"
 
 # The single recognized latest research-only Strategy Evidence Scoring contract
 # (Block 131). It is a research-only evidence/scoring support contract: on paper,
@@ -1212,6 +1214,21 @@ _RECOGNIZED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT = (
     _RECOGNIZED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
+)
+
+# Block 178 recognizes the research-only Crypto-D1 V2 Resume-Policy HUMAN REVIEW
+# DECISION contract: a read-only record of a human's review over the Block 177
+# results-review output. Its recorded human decision is always
+# DO_NOT_PROMOTE_RESUME_POLICY_YET and it carries only a research-direction
+# recommendation; any later promotion path it documents is inert metadata that
+# authorizes nothing. Like every recognized record this is purely additive
+# latest-completed metadata: it writes nothing, promotes nothing, and is never an
+# unlock of real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT_LABEL = (
+    "Block 178 - Crypto-D1 V2 Resume-Policy Human Review Decision Contract"
+)
+LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT = (
+    _RECOGNIZED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -5042,6 +5059,12 @@ def get_latest_completed_resume_policy_results_review_contract_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 V2
     Resume-Policy Results Review / Decision contract."""
     return _RECOGNIZED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
+
+
+def get_latest_completed_resume_policy_human_review_decision_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    Resume-Policy Human Review Decision contract."""
+    return _RECOGNIZED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
