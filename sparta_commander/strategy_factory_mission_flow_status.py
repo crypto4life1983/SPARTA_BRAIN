@@ -238,6 +238,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_rc1_out_of_sample_replay_runner_contract_label as _registry_latest_rc1_out_of_sample_replay_runner_contract_label,  # noqa: E501
     get_latest_completed_rc1_out_of_sample_results_review_contract_label as _registry_latest_rc1_out_of_sample_results_review_contract_label,  # noqa: E501
     get_latest_completed_rc1_oos_human_evidence_decision_contract_label as _registry_latest_rc1_oos_human_evidence_decision_contract_label,  # noqa: E501
+    get_latest_completed_rc2_cross_policy_stability_research_contract_label as _registry_latest_rc2_cross_policy_stability_research_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -301,6 +302,7 @@ __all__ = [
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT",
     "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT",
     "LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT",
+    "LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -532,6 +534,17 @@ LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT = (
 # stay BLOCKED, paper / micro-live / live stay LOCKED.
 LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT = (
     _registry_latest_rc1_oos_human_evidence_decision_contract_label()
+)
+# Block 184: the RC2 CROSS-POLICY STABILITY research spec is now recorded as
+# additive latest-completed evidence. It fixes a pre-registered comparison of
+# the six fixed candidates (RP1..RP6, parameters verbatim from Block 175, no
+# fitting) over the SAME fixed out-of-sample windows RC1 used, and PRESERVES
+# DO_NOT_PROMOTE_RESUME_POLICY_YET. The surfaced next step is only the
+# human-approved, research-only replay over that fixed set -- never promotion
+# and never trading execution. Recognizing it moves NO gate: real_data_qa and
+# baseline_backtest stay BLOCKED, paper / micro-live / live stay LOCKED.
+LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT = (
+    _registry_latest_rc2_cross_policy_stability_research_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1776,16 +1789,30 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_rc2_cross_policy_stability_research_approval",
         "label": "Crypto-D1 V2 RC2 Cross-Policy Stability Research Approval",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the human approved the RC2 direction and the Block 184 "
+            "read-only RC2 cross-policy stability spec recorded the fixed, "
+            "pre-registered comparison plan: RP1..RP6 verbatim from Block 175 "
+            "(parameters UNCHANGED, no fitting) over the SAME fixed "
+            "out-of-sample windows RC1 used, with the RC1 leader's status as "
+            "the question, not the assumption. "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. It unlocked "
+            "nothing: real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "crypto_d1_rc2_cross_policy_replay_approval",
+        "label": "Crypto-D1 V2 RC2 Cross-Policy Replay Approval",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 183 "
-            "human evidence decision selected RC2 as the next research "
-            "direction: re-rank the FIXED resume-policy candidate set "
-            "(RP1..RP6, parameters UNCHANGED, no fitting) over the SAME fixed "
-            "out-of-sample windows to test whether the evidence leader is a "
-            "stable leader. RC2 is RESEARCH-ONLY and HUMAN-APPROVED: the "
-            "human-gated next step is only the choice to build/run that "
-            "research via separate explicit commands -- not promotion and not "
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 184 "
+            "read-only RC2 cross-policy stability spec is complete; no RC2 "
+            "replay has been run or persisted yet. The human-gated next step "
+            "is only the HUMAN-APPROVED, RESEARCH-ONLY replay over the fixed "
+            "RP1..RP6 candidate set (parameters UNCHANGED, no fitting) across "
+            "the same fixed out-of-sample windows -- not promotion and not "
             "trading execution, with DO_NOT_PROMOTE_RESUME_POLICY_YET "
             "preserved. This row is NOT a build step and NOT an authorization "
             "-- it acquires no data, runs no dry run, QA, baseline, backtest, "
@@ -1977,6 +2004,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_rc1_out_of_sample_replay_runner_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_REPLAY_RUNNER_CONTRACT,  # noqa: E501
         "latest_completed_rc1_out_of_sample_results_review_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_RESULTS_REVIEW_CONTRACT,  # noqa: E501
         "latest_completed_rc1_oos_human_evidence_decision_contract": LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT,  # noqa: E501
+        "latest_completed_rc2_cross_policy_stability_research_contract": LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
