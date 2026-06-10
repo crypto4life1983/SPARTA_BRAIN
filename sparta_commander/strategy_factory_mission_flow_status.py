@@ -240,6 +240,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_rc1_oos_human_evidence_decision_contract_label as _registry_latest_rc1_oos_human_evidence_decision_contract_label,  # noqa: E501
     get_latest_completed_rc2_cross_policy_stability_research_contract_label as _registry_latest_rc2_cross_policy_stability_research_contract_label,  # noqa: E501
     get_latest_completed_rc2_cross_policy_replay_runner_contract_label as _registry_latest_rc2_cross_policy_replay_runner_contract_label,  # noqa: E501
+    get_latest_completed_rc2_cross_policy_results_review_contract_label as _registry_latest_rc2_cross_policy_results_review_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -305,6 +306,7 @@ __all__ = [
     "LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT",
     "LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT",
     "LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT",
+    "LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -557,6 +559,18 @@ LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT = (
 # baseline_backtest stay BLOCKED, paper / micro-live / live stay LOCKED.
 LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT = (
     _registry_latest_rc2_cross_policy_replay_runner_contract_label()
+)
+# Block 186: the RC2 CROSS-POLICY RESULTS REVIEW is now recorded as additive
+# latest-completed evidence. It reviewed the persisted RC2 replay report and
+# recorded the LEADERSHIP FLIP: the RC1 leader leads ZERO out-of-sample ranking
+# categories while other fixed candidates (RP4/RP5) lead every category -- as
+# research evidence only, NOT selected successors. The review's promotion
+# decision is structurally DO_NOT_PROMOTE_RESUME_POLICY_YET and the surfaced
+# next step is a HUMAN EVIDENCE DECISION only -- never promotion and never
+# execution. Recognizing it moves NO gate: real_data_qa and baseline_backtest
+# stay BLOCKED, paper / micro-live / live stay LOCKED.
+LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT = (
+    _registry_latest_rc2_cross_policy_results_review_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1817,24 +1831,40 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_rc2_cross_policy_replay_approval",
         "label": "Crypto-D1 V2 RC2 Cross-Policy Replay Approval",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the human approved the RC2 replay, the Block 185 "
+            "runner persisted the simulated cross-policy report over the fixed "
+            "Block 184 windows with RP1..RP6 parameters UNCHANGED, and the "
+            "Block 186 read-only results review scored it. No real order was "
+            "placed; DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. It "
+            "unlocked nothing: real_data_qa and baseline_backtest stay BLOCKED "
+            "and the paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "crypto_d1_rc2_cross_policy_evidence_decision",
+        "label": "Crypto-D1 V2 RC2 Cross-Policy Evidence Decision",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 184 "
-            "read-only RC2 cross-policy stability spec is complete and the "
-            "Block 185 double-gated, dry-run-verified replay RUNNER for it is "
-            "also built and recognized; no RC2 replay report has been "
-            "persisted yet. The human-gated next step is only the "
-            "HUMAN-APPROVED, RESEARCH-ONLY PERSISTED replay run over the fixed "
-            "RP1..RP6 candidate set (parameters UNCHANGED, no fitting) across "
-            "the same fixed out-of-sample windows -- not promotion and not "
-            "trading execution, with DO_NOT_PROMOTE_RESUME_POLICY_YET "
-            "preserved. This row is NOT a build step and NOT an authorization "
-            "-- it acquires no data, runs no dry run, QA, baseline, backtest, "
-            "simulation, replay, or optimization, places no order, automates "
-            "nothing, and writes no runtime/registry/dashboard artifact. It "
-            "unlocks nothing: real_data_qa and baseline_backtest stay BLOCKED "
-            "and the paper/micro-live/live gates stay LOCKED unless a "
-            "separate, future, human-approved contract authorizes a crossing."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 186 "
+            "read-only RC2 cross-policy results review is complete: the RC1 "
+            "leader FAILED out-of-sample leadership (it leads ZERO "
+            "out-of-sample ranking categories) while other fixed candidates "
+            "(RP4/RP5 on the committed evidence) lead every category -- as "
+            "research evidence only, NOT selected successors. The review's "
+            "promotion decision is structurally "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET. The human-gated next step is a "
+            "HUMAN EVIDENCE DECISION only -- a human judgment over the RC2 "
+            "cross-policy evidence, research only, not promotion and not "
+            "trading execution. This row is NOT a build step and NOT an "
+            "authorization -- it acquires no data, runs no dry run, QA, "
+            "baseline, backtest, simulation, replay, or optimization, places "
+            "no order, automates nothing, and writes no "
+            "runtime/registry/dashboard artifact. It unlocks nothing: "
+            "real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED unless a separate, "
+            "future, human-approved contract authorizes a crossing."
         ),
     },
     {
@@ -2020,6 +2050,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_rc1_oos_human_evidence_decision_contract": LATEST_COMPLETED_RC1_OOS_HUMAN_EVIDENCE_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_rc2_cross_policy_stability_research_contract": LATEST_COMPLETED_RC2_CROSS_POLICY_STABILITY_RESEARCH_CONTRACT,  # noqa: E501
         "latest_completed_rc2_cross_policy_replay_runner_contract": LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT,  # noqa: E501
+        "latest_completed_rc2_cross_policy_results_review_contract": LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

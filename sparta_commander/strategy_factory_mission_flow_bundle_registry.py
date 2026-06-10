@@ -483,6 +483,8 @@ __all__ = [
     "get_latest_completed_rc2_cross_policy_stability_research_contract_label",
     "LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT",
     "get_latest_completed_rc2_cross_policy_replay_runner_contract_label",
+    "LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT",
+    "get_latest_completed_rc2_cross_policy_results_review_contract_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -546,7 +548,7 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # build step and NOT a research-only paper contract. real_data_qa stays BLOCKED,
 # baseline_backtest stays BLOCKED, and the paper/micro-live gates stay LOCKED
 # unless a separate, future, human-approved boundary contract authorizes it.
-CURRENT_STAGE = "HUMAN_APPROVED_RC2_CROSS_POLICY_REPLAY_REQUIRED"
+CURRENT_STAGE = "HUMAN_DECISION_ON_RC2_CROSS_POLICY_EVIDENCE_REQUIRED"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -859,7 +861,7 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
 # artifact. real_data_qa stays BLOCKED, baseline stays BLOCKED, and the paper/
 # micro-live gates stay LOCKED unless a separate, future, human-approved boundary
 # contract is built.
-NEXT_REQUIRED_ACTION = "HUMAN_APPROVED_RC2_CROSS_POLICY_REPLAY"
+NEXT_REQUIRED_ACTION = "HUMAN_DECISION_ON_RC2_CROSS_POLICY_EVIDENCE"
 
 # The single recognized latest research-only Strategy Evidence Scoring contract
 # (Block 131). It is a research-only evidence/scoring support contract: on paper,
@@ -1359,6 +1361,23 @@ _RECOGNIZED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT_LABEL = (
 )
 LATEST_COMPLETED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT = (
     _RECOGNIZED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT_LABEL
+)
+
+# Block 186 recognizes the research-only Crypto-D1 V2 RC2 CROSS-POLICY RESULTS
+# REVIEW contract: a read-only review of the persisted RC2 replay report. It
+# recorded the LEADERSHIP FLIP on the committed evidence -- the RC1 leader leads
+# ZERO out-of-sample ranking categories while other fixed candidates (RP4/RP5)
+# lead every category -- as research evidence only, NOT selected successors, and
+# its promotion decision is structurally always DO_NOT_PROMOTE_RESUME_POLICY_YET.
+# The surfaced next step is a HUMAN EVIDENCE DECISION only -- never promotion
+# and never execution. Like every recognized record this is purely additive
+# latest-completed metadata: it writes nothing, promotes nothing, and is never
+# an unlock of real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT_LABEL = (
+    "Block 186 - Crypto-D1 V2 RC2 Cross-Policy Results Review Contract"
+)
+LATEST_COMPLETED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT = (
+    _RECOGNIZED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
 )
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
@@ -5237,6 +5256,12 @@ def get_latest_completed_rc2_cross_policy_replay_runner_contract_label() -> str:
     """Human label for the latest recognized research-only Crypto-D1 V2
     RC2 Cross-Policy Replay Runner contract."""
     return _RECOGNIZED_RC2_CROSS_POLICY_REPLAY_RUNNER_CONTRACT_LABEL
+
+
+def get_latest_completed_rc2_cross_policy_results_review_contract_label() -> str:
+    """Human label for the latest recognized research-only Crypto-D1 V2
+    RC2 Cross-Policy Results Review contract."""
+    return _RECOGNIZED_RC2_CROSS_POLICY_RESULTS_REVIEW_CONTRACT_LABEL
 
 
 def get_current_stage() -> str:
