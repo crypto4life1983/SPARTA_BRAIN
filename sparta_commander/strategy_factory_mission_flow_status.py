@@ -234,6 +234,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_resume_policy_results_review_contract_label as _registry_latest_resume_policy_results_review_contract_label,  # noqa: E501
     get_latest_completed_resume_policy_human_review_decision_contract_label as _registry_latest_resume_policy_human_review_decision_contract_label,  # noqa: E501
     get_latest_completed_post_resume_policy_research_continuation_plan_contract_label as _registry_latest_post_resume_policy_research_continuation_plan_contract_label,  # noqa: E501
+    get_latest_completed_rc1_out_of_sample_robustness_research_contract_label as _registry_latest_rc1_out_of_sample_robustness_research_contract_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -293,6 +294,7 @@ __all__ = [
     "LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT",
     "LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT",
     "LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT",
+    "LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -482,6 +484,16 @@ LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT = (
 # a research-continuation direction, never execution.
 LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT = (
     _registry_latest_post_resume_policy_research_continuation_plan_contract_label()
+)
+# Block 180: the RC1 out-of-sample robustness research spec is now recorded as
+# additive latest-completed evidence. It fixes evaluation windows for the
+# evidence-leading resume policy with parameters UNCHANGED and PRESERVES
+# DO_NOT_PROMOTE_RESUME_POLICY_YET; recognizing it moves NO gate -- real_data_qa
+# and baseline_backtest stay BLOCKED, paper / micro-live / live stay LOCKED -- and
+# the surfaced next step is only the human-gated choice to run a later
+# research-only replay, never promotion and never execution.
+LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT = (
+    _registry_latest_rc1_out_of_sample_robustness_research_contract_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1682,21 +1694,38 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_post_resume_policy_research_continuation_direction_selection",
         "label": "Crypto-D1 V2 Post Resume-Policy Research Continuation Direction Selection",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the human selected the RC1 out-of-sample robustness "
+            "direction from the Block 179 plan and the Block 180 read-only RC1 "
+            "spec contract recorded it while preserving "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET. It acquired no data, ran no QA, "
+            "baseline, backtest, simulation, or optimization, placed no order, "
+            "automated nothing, and wrote no runtime/registry/dashboard "
+            "artifact. It unlocked nothing: real_data_qa and baseline_backtest "
+            "stay BLOCKED and the paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "crypto_d1_rc1_out_of_sample_replay_approval",
+        "label": "Crypto-D1 V2 RC1 Out-of-Sample Replay Approval",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 179 "
-            "read-only post resume-policy research continuation plan contract is "
-            "complete: it laid out fixed, human-gated, observation-only research "
-            "directions over already-existing evidence while preserving "
-            "DO_NOT_PROMOTE_RESUME_POLICY_YET. The human-gated next step is a "
-            "human selecting which research-continuation direction to pursue -- "
-            "research only, never execution. It is NOT a build step and NOT an "
-            "authorization -- it acquires no data, runs no dry run, QA, baseline, "
-            "backtest, simulation, or optimization, places no order, automates "
-            "nothing, and writes no runtime/registry/dashboard artifact. It "
-            "unlocks nothing: real_data_qa and baseline_backtest stay BLOCKED "
-            "and the paper/micro-live/live gates stay LOCKED unless a separate, "
-            "future, human-approved contract authorizes a crossing."
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 180 "
+            "read-only RC1 out-of-sample robustness research spec is complete: "
+            "it fixed one truly held-out 2020 window plus honestly-typed "
+            "boundary-straddle windows for the evidence-leading resume policy "
+            "with parameters UNCHANGED, preserving "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET. The human-gated next step is "
+            "only the choice to run a later research-only simulated replay over "
+            "those fixed windows -- research only, not promotion and not "
+            "execution. This row is NOT a build step and NOT an authorization "
+            "-- it acquires no data, runs no dry run, QA, baseline, backtest, "
+            "simulation, or optimization, places no order, automates nothing, "
+            "and writes no runtime/registry/dashboard artifact. It unlocks "
+            "nothing: real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED unless a separate, future, "
+            "human-approved contract authorizes a crossing."
         ),
     },
     {
@@ -1876,6 +1905,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_resume_policy_results_review_contract": LATEST_COMPLETED_RESUME_POLICY_RESULTS_REVIEW_CONTRACT,  # noqa: E501
         "latest_completed_resume_policy_human_review_decision_contract": LATEST_COMPLETED_RESUME_POLICY_HUMAN_REVIEW_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_post_resume_policy_research_continuation_plan_contract": LATEST_COMPLETED_POST_RESUME_POLICY_RESEARCH_CONTINUATION_PLAN_CONTRACT,  # noqa: E501
+        "latest_completed_rc1_out_of_sample_robustness_research_contract": LATEST_COMPLETED_RC1_OUT_OF_SAMPLE_ROBUSTNESS_RESEARCH_CONTRACT,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
