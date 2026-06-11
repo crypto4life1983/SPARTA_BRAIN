@@ -115,6 +115,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT,
     LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT,
     LATEST_COMPLETED_AUTOMATION_ROADMAP,
+    LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -203,6 +204,7 @@ def test_status_schema_is_stable():
         "latest_completed_rc3_findings_human_decision_contract",
         "latest_completed_fresh_evidence_validation_design_contract",
         "latest_completed_automation_roadmap",
+        "latest_completed_arbitrage_lane_chain",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1040,6 +1042,50 @@ def test_latest_completed_automation_roadmap_is_links_l1_l6():
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
     ]["state"] == STATE_BLOCKED
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_arbitrage_lane_chain_is_seq_0_5():
+    assert LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN == (
+        "Seq 0-5 - Arbitrage Factory V1 Lane Contract Chain Complete "
+        "(Research Only)"
+    )
+    assert "Research Only" in LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN
+    for banned in ("PROMOTE", "UNLOCK"):
+        assert banned not in LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN.upper(), banned
+    s = get_mission_flow_status()
+    assert s["latest_completed_arbitrage_lane_chain"] == (
+        LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN
+    )
+    # recognizing the lane chain unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the lane chain row is COMPLETE; its reason carries the lane constitution
+    lane_row = pipe["arbitrage_factory_v1_lane_chain"]
+    assert lane_row["state"] == STATE_COMPLETE
+    lane_reason = lane_row["reason"].lower()
+    assert "alerts/reports only" in lane_reason
+    assert "execution absent by construction" in lane_reason
+    assert "no exchange credentials ever" in lane_reason
+    assert "never a trade signal" in lane_reason
+    assert "all 12 coherence checks pass" in lane_reason
+    assert "unlocked nothing" in lane_reason
+    # the scanner build is its own separate BLOCKED step
+    scan_row = pipe["arbitrage_factory_v1_scanner_build"]
+    assert scan_row["state"] == STATE_BLOCKED
+    scan_reason = scan_row["reason"].lower()
+    assert "not built" in scan_reason
+    assert "per-run human" in scan_reason
+    assert "not a build step" in scan_reason
+    assert "not an authorization" in scan_reason
+    assert "unlocks nothing" in scan_reason
+    # the global next step is unchanged: the roadmap human review
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == STATE_NEXT
+    # trading gates unmoved
     assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
     assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
     assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED

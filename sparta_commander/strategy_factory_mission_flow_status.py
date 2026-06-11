@@ -246,6 +246,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_rc3_findings_human_decision_contract_label as _registry_latest_rc3_findings_human_decision_contract_label,  # noqa: E501
     get_latest_completed_fresh_evidence_validation_design_contract_label as _registry_latest_fresh_evidence_validation_design_contract_label,  # noqa: E501
     get_latest_completed_automation_roadmap_label as _registry_latest_automation_roadmap_label,  # noqa: E501
+    get_latest_completed_arbitrage_lane_chain_label as _registry_latest_arbitrage_lane_chain_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -317,6 +318,7 @@ __all__ = [
     "LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT",
     "LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT",
     "LATEST_COMPLETED_AUTOMATION_ROADMAP",
+    "LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -643,6 +645,14 @@ LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT = (
 # orchestrator) needs its own separate human approval.
 LATEST_COMPLETED_AUTOMATION_ROADMAP = (
     _registry_latest_automation_roadmap_label()
+)
+# Seq 0-5: the completed Arbitrage Factory V1 lane contract chain (readiness,
+# scanner spec, data contract, fee/slippage model, alert/report schema, lane
+# review ACCEPTED). Registering it moves NO gate: the scanner build remains a
+# separate, future, human-approved block, every future run needs its own
+# per-run approval, and execution is absent from the lane by construction.
+LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN = (
+    _registry_latest_arbitrage_lane_chain_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -2027,6 +2037,44 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "arbitrage_factory_v1_lane_chain",
+        "label": "Arbitrage Factory V1 Lane Contract Chain (Seq 0-5)",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the second research lane's full paper chain is built, "
+            "reviewed, and ACCEPTED: seq 0 readiness (alerts/reports only, "
+            "execution absent by construction, no exchange credentials ever), "
+            "seq 1 scanner SPEC (frozen IO, refuse-by-default, per-run human "
+            "approval), seq 2 data contract (operator-staged shapes; "
+            "account/credential/position fields refused), seq 3 fee/slippage "
+            "model (honest net edge; costs never default to zero; "
+            "PASS/WATCH/FAIL readiness never a trade signal), seq 4 "
+            "alert/report schema (verdicts must agree with the model; net "
+            "edge must match the cost breakdown; mandatory disclaimer), and "
+            "seq 5 lane review (all 12 coherence checks pass). It unlocked "
+            "nothing: the scanner build stays BLOCKED as its own future "
+            "human-approved block, real_data_qa and baseline_backtest stay "
+            "BLOCKED, and the paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "arbitrage_factory_v1_scanner_build",
+        "label": "Arbitrage Factory V1 Scanner Build",
+        "state": STATE_BLOCKED,
+        "reason": (
+            "Blocked - the actual scanner is NOT built. Building it is a "
+            "separate, future, human-approved block under the frozen seq-1 "
+            "spec, and even then every run needs its own per-run human "
+            "approval, writes only under reports/arbitrage_factory_v1/, and "
+            "produces alerts/reports only. This row is NOT a build step and "
+            "NOT an authorization -- it acquires no data, runs no scan, "
+            "places no order, automates nothing, and writes no "
+            "runtime/registry/dashboard artifact. It unlocks nothing: "
+            "execution is absent from the lane by construction and the "
+            "paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
         "id": "human_controlled_real_data_qa_boundary_decision",
         "label": "Human-Controlled Real Data QA Boundary Decision",
         "state": STATE_BLOCKED,
@@ -2215,6 +2263,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_rc3_findings_human_decision_contract": LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_fresh_evidence_validation_design_contract": LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT,  # noqa: E501
         "latest_completed_automation_roadmap": LATEST_COMPLETED_AUTOMATION_ROADMAP,  # noqa: E501
+        "latest_completed_arbitrage_lane_chain": LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

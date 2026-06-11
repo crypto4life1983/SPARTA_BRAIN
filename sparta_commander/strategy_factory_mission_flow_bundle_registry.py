@@ -495,6 +495,8 @@ __all__ = [
     "get_latest_completed_fresh_evidence_validation_design_contract_label",
     "LATEST_COMPLETED_AUTOMATION_ROADMAP",
     "get_latest_completed_automation_roadmap_label",
+    "LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN",
+    "get_latest_completed_arbitrage_lane_chain_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1493,6 +1495,31 @@ _RECOGNIZED_AUTOMATION_ROADMAP_LABEL = (
     "Links L1-L6 - Strategy Factory Automation Roadmap Complete (Design Only)"
 )
 LATEST_COMPLETED_AUTOMATION_ROADMAP = _RECOGNIZED_AUTOMATION_ROADMAP_LABEL
+
+# Seq 0-5 recognize the completed ARBITRAGE FACTORY V1 lane contract chain: the
+# second research lane's full paper chain, built under signed batch
+# batch_aeb83ad9d637 and explicit human approvals -- seq 0 readiness (lane
+# constitution: alerts/reports only, execution absent by construction, no
+# exchange credentials ever), seq 1 scanner SPEC (frozen IO, refuse-by-default,
+# per-run human approval), seq 2 data contract (operator-staged CSV shapes,
+# venue labels are not connections, account/credential/order/position fields
+# refused outright), seq 3 fee/slippage model (honest net edge: taker both
+# legs, full half-spread, depth-capped slippage, costs never default to zero,
+# PASS/WATCH/FAIL readiness never a trade signal), seq 4 alert/report schema
+# (verdicts must agree with the seq-3 model, net edge must match the cost
+# breakdown, mandatory disclaimer, trade-instruction language refused), and
+# seq 5 lane review (ACCEPTED: all 12 coherence checks pass). Registering the
+# chain unlocks nothing real: the actual scanner BUILD remains a separate,
+# future, human-approved block under the frozen seq-1 spec, and even then
+# every run needs its own per-run human approval. Like every recognized record
+# this is purely additive latest-completed metadata: it writes nothing,
+# promotes nothing, and is never an unlock of real_data_qa, baseline, paper,
+# micro-live, or live.
+_RECOGNIZED_ARBITRAGE_LANE_CHAIN_LABEL = (
+    "Seq 0-5 - Arbitrage Factory V1 Lane Contract Chain Complete "
+    "(Research Only)"
+)
+LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN = _RECOGNIZED_ARBITRAGE_LANE_CHAIN_LABEL
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
 # 160 inventory, Section B). Each is already built, tested, and committed, but is
@@ -5406,6 +5433,13 @@ def get_latest_completed_automation_roadmap_label() -> str:
     """Human label for the recognized, completed Strategy Factory Automation
     Roadmap (links L1-L6, read-only designs only; trading stays locked)."""
     return _RECOGNIZED_AUTOMATION_ROADMAP_LABEL
+
+
+def get_latest_completed_arbitrage_lane_chain_label() -> str:
+    """Human label for the recognized, completed Arbitrage Factory V1 lane
+    contract chain (seq 0-5, research only; the scanner build stays a
+    separate, future, human-approved block)."""
+    return _RECOGNIZED_ARBITRAGE_LANE_CHAIN_LABEL
 
 
 def get_current_stage() -> str:
