@@ -499,6 +499,8 @@ __all__ = [
     "get_latest_completed_arbitrage_lane_chain_label",
     "LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD",
     "get_latest_completed_arbitrage_scanner_build_label",
+    "LATEST_COMPLETED_PM_LANE_CHAIN",
+    "get_latest_completed_pm_lane_chain_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1544,6 +1546,30 @@ _RECOGNIZED_ARBITRAGE_SCANNER_BUILD_LABEL = (
 LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD = (
     _RECOGNIZED_ARBITRAGE_SCANNER_BUILD_LABEL
 )
+
+# Seq 0-5 recognize the completed PREDICTION MARKET FACTORY V1 lane contract
+# chain -- SPARTA's third research lane, for Polymarket-style markets, fully
+# separate from Arbitrage Factory V1 and Crypto-D1. The paper chain: seq 0
+# readiness (constitution: alerts/reports only, no wallet/key/login/account
+# ever, execution absent by construction), seq 1 scanner SPEC (frozen IO,
+# per-run human approval, scanner NOT built), seq 2 data contract (six
+# operator-staged dataset shapes; wallet/account/order/position fields refuse
+# outright; probabilities must lie in [0,1]), seq 3 cost & settlement model
+# (net edge charges spread, fee, gas-as-assumption, settlement, liquidity
+# penalty, and resolution risk; PASS bar 25 bps; doubt is FAIL), seq 4
+# alert/report schema (verdicts must equal the model classification, net edge
+# must match the cost stack, mandatory disclaimer, trade language refused),
+# and seq 5 lane review (ACCEPTED: all 10 coherence checks pass). The lane
+# AUTHORIZES NOTHING LIVE: no scanner exists, no data is staged, every future
+# run would need its own per-run human approval, and recognizing the chain is
+# purely additive latest-completed metadata -- it writes nothing, promotes
+# nothing, and is never an unlock of real_data_qa, baseline, paper,
+# micro-live, or live.
+_RECOGNIZED_PM_LANE_CHAIN_LABEL = (
+    "Seq 0-5 - Prediction Market Factory V1 Lane Contract Chain Complete "
+    "(Research Only)"
+)
+LATEST_COMPLETED_PM_LANE_CHAIN = _RECOGNIZED_PM_LANE_CHAIN_LABEL
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
 # 160 inventory, Section B). Each is already built, tested, and committed, but is
@@ -5470,6 +5496,13 @@ def get_latest_completed_arbitrage_scanner_build_label() -> str:
     """Human label for the recognized, completed Arbitrage Factory V1 scanner
     build (research only; every run still needs per-run human approval)."""
     return _RECOGNIZED_ARBITRAGE_SCANNER_BUILD_LABEL
+
+
+def get_latest_completed_pm_lane_chain_label() -> str:
+    """Human label for the recognized, completed Prediction Market Factory V1
+    lane contract chain (seq 0-5, research only; the lane authorizes nothing
+    live and the scanner stays a separate, future, human-approved block)."""
+    return _RECOGNIZED_PM_LANE_CHAIN_LABEL
 
 
 def get_current_stage() -> str:

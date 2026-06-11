@@ -248,6 +248,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_automation_roadmap_label as _registry_latest_automation_roadmap_label,  # noqa: E501
     get_latest_completed_arbitrage_lane_chain_label as _registry_latest_arbitrage_lane_chain_label,  # noqa: E501
     get_latest_completed_arbitrage_scanner_build_label as _registry_latest_arbitrage_scanner_build_label,  # noqa: E501
+    get_latest_completed_pm_lane_chain_label as _registry_latest_pm_lane_chain_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -321,6 +322,7 @@ __all__ = [
     "LATEST_COMPLETED_AUTOMATION_ROADMAP",
     "LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN",
     "LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD",
+    "LATEST_COMPLETED_PM_LANE_CHAIN",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -661,6 +663,14 @@ LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN = (
 # report stays behind RUN_ARBITRAGE_SCAN_WITH_REPORT. Moves NO gate.
 LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD = (
     _registry_latest_arbitrage_scanner_build_label()
+)
+# Seq 0-5: the completed Prediction Market Factory V1 lane contract chain
+# (readiness, scanner spec, data contract, cost & settlement model,
+# alert/report schema, lane review ACCEPTED 10/10). The lane authorizes
+# NOTHING LIVE: no scanner exists, no data is staged, and recognizing it
+# moves NO gate.
+LATEST_COMPLETED_PM_LANE_CHAIN = (
+    _registry_latest_pm_lane_chain_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -2109,6 +2119,45 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
         ),
     },
     {
+        "id": "prediction_market_factory_v1_lane_chain",
+        "label": "Prediction Market Factory V1 Lane Contract Chain (Seq 0-5)",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - SPARTA's third research lane's full paper chain is "
+            "built, reviewed, and ACCEPTED (10/10 coherence checks): seq 0 "
+            "readiness (alerts/reports only, no wallet/key/login/account "
+            "ever, execution absent by construction), seq 1 scanner SPEC "
+            "(frozen IO, per-run human approval; the scanner is NOT built), "
+            "seq 2 data contract (operator-staged shapes; "
+            "wallet/account/position fields refused; probabilities bounded), "
+            "seq 3 cost & settlement model (spread, fee, gas-as-assumption, "
+            "settlement, liquidity penalty, resolution risk all charged; "
+            "doubt is FAIL; never a trade signal), seq 4 alert/report schema "
+            "(verdicts must equal the model classification; net edge must "
+            "match the cost stack; mandatory disclaimer), and seq 5 lane "
+            "review ACCEPTED. The lane AUTHORIZES NOTHING LIVE. It unlocked "
+            "nothing: real_data_qa and baseline_backtest stay BLOCKED and "
+            "the paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "prediction_market_factory_v1_scanner_build",
+        "label": "Prediction Market Factory V1 Scanner Build",
+        "state": STATE_BLOCKED,
+        "reason": (
+            "Blocked - the PM scanner is NOT built and no PM data is staged. "
+            "Building it is a separate, future, human-approved block under "
+            "the frozen PM seq-1 spec, and even then every run needs its own "
+            "per-run human approval, writes only under "
+            "reports/prediction_market_factory_v1/, and produces "
+            "alerts/reports only. This row is NOT a build step and NOT an "
+            "authorization -- it acquires no data, runs no scan, places no "
+            "order, touches no wallet, automates nothing, and writes no "
+            "runtime/registry/dashboard artifact. It unlocks nothing: the "
+            "paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
         "id": "human_controlled_real_data_qa_boundary_decision",
         "label": "Human-Controlled Real Data QA Boundary Decision",
         "state": STATE_BLOCKED,
@@ -2299,6 +2348,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_automation_roadmap": LATEST_COMPLETED_AUTOMATION_ROADMAP,  # noqa: E501
         "latest_completed_arbitrage_lane_chain": LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,  # noqa: E501
         "latest_completed_arbitrage_scanner_build": LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD,  # noqa: E501
+        "latest_completed_pm_lane_chain": LATEST_COMPLETED_PM_LANE_CHAIN,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

@@ -186,6 +186,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_arbitrage_lane_chain_label,
     LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD,
     get_latest_completed_arbitrage_scanner_build_label,
+    LATEST_COMPLETED_PM_LANE_CHAIN,
+    get_latest_completed_pm_lane_chain_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -4089,6 +4091,29 @@ def test_latest_completed_arbitrage_scanner_build_is_registered():
     assert posture["executes"] is False
     assert posture["unlocks_automation"] is False
     assert posture["unlocks_paper_live"] is False
+
+
+def test_latest_completed_pm_lane_chain_is_registered():
+    assert LATEST_COMPLETED_PM_LANE_CHAIN == (
+        "Seq 0-5 - Prediction Market Factory V1 Lane Contract Chain Complete "
+        "(Research Only)"
+    )
+    assert (
+        get_latest_completed_pm_lane_chain_label()
+        == LATEST_COMPLETED_PM_LANE_CHAIN
+    )
+    assert "Research Only" in LATEST_COMPLETED_PM_LANE_CHAIN
+    for banned in ("PAPER", "LIVE", "BROKER", "EXECUTION",
+                   "ORDER", "UNLOCK", "PROMOTE"):
+        assert banned not in LATEST_COMPLETED_PM_LANE_CHAIN.upper(), banned
+    # registering the PM lane does NOT move the global stage
+    assert get_current_stage() == "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
+    assert get_next_required_action() == "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
+    posture = get_registry_safety_posture()
+    assert posture["executes"] is False
+    assert posture["unlocks_automation"] is False
+    assert posture["unlocks_paper_live"] is False
+    assert posture["unlocks_broker_exchange"] is False
 
 
 def test_latest_completed_public_spot_source_evaluation_label():

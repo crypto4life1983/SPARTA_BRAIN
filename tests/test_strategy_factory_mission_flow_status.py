@@ -117,6 +117,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_AUTOMATION_ROADMAP,
     LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,
     LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD,
+    LATEST_COMPLETED_PM_LANE_CHAIN,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -207,6 +208,7 @@ def test_status_schema_is_stable():
         "latest_completed_automation_roadmap",
         "latest_completed_arbitrage_lane_chain",
         "latest_completed_arbitrage_scanner_build",
+        "latest_completed_pm_lane_chain",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1116,6 +1118,49 @@ def test_latest_completed_arbitrage_scanner_build_registered():
     assert "run_arbitrage_scan_with_report" in rep_row["reason"].lower()
     assert "untracked operational data" in rep_row["reason"].lower()
     # global stage unchanged; gates unmoved
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == STATE_NEXT
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_pm_lane_chain_is_seq_0_5():
+    assert LATEST_COMPLETED_PM_LANE_CHAIN == (
+        "Seq 0-5 - Prediction Market Factory V1 Lane Contract Chain Complete "
+        "(Research Only)"
+    )
+    assert "Research Only" in LATEST_COMPLETED_PM_LANE_CHAIN
+    for banned in ("PROMOTE", "UNLOCK"):
+        assert banned not in LATEST_COMPLETED_PM_LANE_CHAIN.upper(), banned
+    s = get_mission_flow_status()
+    assert s["latest_completed_pm_lane_chain"] == LATEST_COMPLETED_PM_LANE_CHAIN
+    # recognizing the lane chain unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    lane_row = pipe["prediction_market_factory_v1_lane_chain"]
+    assert lane_row["state"] == STATE_COMPLETE
+    reason = lane_row["reason"].lower()
+    # the lane is registered only because seq 5 was ACCEPTED, and it never
+    # misrepresents itself as live-capable
+    assert "lane review accepted" in reason
+    assert "authorizes nothing live" in reason
+    assert "the scanner is not built" in reason
+    assert "no wallet/key/login/account" in reason
+    assert "never a trade signal" in reason
+    assert "unlocked nothing" in reason
+    # the PM scanner build is its own separate BLOCKED step
+    scan_row = pipe["prediction_market_factory_v1_scanner_build"]
+    assert scan_row["state"] == STATE_BLOCKED
+    scan_reason = scan_row["reason"].lower()
+    assert "not built" in scan_reason
+    assert "per-run human" in scan_reason
+    assert "not a build step" in scan_reason
+    assert "not an authorization" in scan_reason
+    assert "touches no wallet" in scan_reason
+    assert "unlocks nothing" in scan_reason
+    # the global next step is unchanged; trading gates unmoved
     assert pipe["strategy_factory_roadmap_human_review"]["state"] == STATE_NEXT
     assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
     assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
