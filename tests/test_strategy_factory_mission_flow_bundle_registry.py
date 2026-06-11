@@ -184,6 +184,8 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (
     get_latest_completed_automation_roadmap_label,
     LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,
     get_latest_completed_arbitrage_lane_chain_label,
+    LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD,
+    get_latest_completed_arbitrage_scanner_build_label,
     get_current_stage,
     get_next_required_action,
     get_registry_safety_posture,
@@ -4064,6 +4066,29 @@ def test_latest_completed_arbitrage_lane_chain_is_seq_0_5():
     assert posture["unlocks_automation"] is False
     assert posture["unlocks_paper_live"] is False
     assert posture["unlocks_broker_exchange"] is False
+
+
+def test_latest_completed_arbitrage_scanner_build_is_registered():
+    assert LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD == (
+        "Scanner Build - Arbitrage Factory V1 Scanner Complete "
+        "(Research Only, Per-Run Approval)"
+    )
+    assert (
+        get_latest_completed_arbitrage_scanner_build_label()
+        == LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD
+    )
+    assert "Research Only" in LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD
+    assert "Per-Run Approval" in LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD
+    for banned in ("PAPER", "LIVE", "BROKER", "EXECUTION",
+                   "ORDER", "UNLOCK", "PROMOTE"):
+        assert banned not in LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD.upper(), banned
+    # the global stage is unchanged by this registration
+    assert get_current_stage() == "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
+    assert get_next_required_action() == "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
+    posture = get_registry_safety_posture()
+    assert posture["executes"] is False
+    assert posture["unlocks_automation"] is False
+    assert posture["unlocks_paper_live"] is False
 
 
 def test_latest_completed_public_spot_source_evaluation_label():

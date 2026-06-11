@@ -247,6 +247,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_fresh_evidence_validation_design_contract_label as _registry_latest_fresh_evidence_validation_design_contract_label,  # noqa: E501
     get_latest_completed_automation_roadmap_label as _registry_latest_automation_roadmap_label,  # noqa: E501
     get_latest_completed_arbitrage_lane_chain_label as _registry_latest_arbitrage_lane_chain_label,  # noqa: E501
+    get_latest_completed_arbitrage_scanner_build_label as _registry_latest_arbitrage_scanner_build_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -319,6 +320,7 @@ __all__ = [
     "LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT",
     "LATEST_COMPLETED_AUTOMATION_ROADMAP",
     "LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN",
+    "LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -653,6 +655,12 @@ LATEST_COMPLETED_AUTOMATION_ROADMAP = (
 # per-run approval, and execution is absent from the lane by construction.
 LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN = (
     _registry_latest_arbitrage_lane_chain_label()
+)
+# The scanner BUILD is complete (dry scan FAIL/FAIL, research-only, nothing
+# written); every RUN stays per-run human-approved and the first persisted
+# report stays behind RUN_ARBITRAGE_SCAN_WITH_REPORT. Moves NO gate.
+LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD = (
+    _registry_latest_arbitrage_scanner_build_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -2060,17 +2068,43 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "arbitrage_factory_v1_scanner_build",
         "label": "Arbitrage Factory V1 Scanner Build",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the scanner is built under the frozen seq-1 spec, "
+            "gated on the seq 0-5 lane review, refuse-by-default. Its first "
+            "dry scan (write=False) honestly produced FAIL/FAIL: today's "
+            "micro-edges die under the full conservative cost stack, every "
+            "alert is research-only with the mandatory disclaimer, and no "
+            "report was written. It unlocked nothing: every run still needs "
+            "its own per-run human approval, execution is absent from the "
+            "lane by construction, and the paper/micro-live/live gates stay "
+            "LOCKED."
+        ),
+    },
+    {
+        "id": "arbitrage_factory_v1_scanner_run",
+        "label": "Arbitrage Factory V1 Scanner Run (Per-Run Approval)",
         "state": STATE_BLOCKED,
         "reason": (
-            "Blocked - the actual scanner is NOT built. Building it is a "
-            "separate, future, human-approved block under the frozen seq-1 "
-            "spec, and even then every run needs its own per-run human "
-            "approval, writes only under reports/arbitrage_factory_v1/, and "
-            "produces alerts/reports only. This row is NOT a build step and "
-            "NOT an authorization -- it acquires no data, runs no scan, "
-            "places no order, automates nothing, and writes no "
-            "runtime/registry/dashboard artifact. It unlocks nothing: "
-            "execution is absent from the lane by construction and the "
+            "Blocked - every scanner run requires its own per-run human "
+            "approval; no scheduler exists and none may. This row is NOT a "
+            "build step and NOT an authorization -- it acquires no data, "
+            "runs no scan, places no order, automates nothing, and writes "
+            "nothing. It unlocks nothing: the paper/micro-live/live gates "
+            "stay LOCKED."
+        ),
+    },
+    {
+        "id": "arbitrage_factory_v1_persisted_report",
+        "label": "Arbitrage Factory V1 First Persisted Report",
+        "state": STATE_BLOCKED,
+        "reason": (
+            "Blocked - reports/arbitrage_factory_v1/ does not exist; the "
+            "first persisted report pair stays behind an explicit "
+            "RUN_ARBITRAGE_SCAN_WITH_REPORT approval (one report per "
+            "approved run, exclusive-create, never overwritten, alerts "
+            "only with the mandatory research-only disclaimer). Staged CSVs "
+            "remain untracked operational data. It unlocks nothing: the "
             "paper/micro-live/live gates stay LOCKED."
         ),
     },
@@ -2264,6 +2298,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_fresh_evidence_validation_design_contract": LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT,  # noqa: E501
         "latest_completed_automation_roadmap": LATEST_COMPLETED_AUTOMATION_ROADMAP,  # noqa: E501
         "latest_completed_arbitrage_lane_chain": LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,  # noqa: E501
+        "latest_completed_arbitrage_scanner_build": LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),

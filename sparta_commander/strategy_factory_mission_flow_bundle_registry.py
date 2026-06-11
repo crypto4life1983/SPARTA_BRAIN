@@ -497,6 +497,8 @@ __all__ = [
     "get_latest_completed_automation_roadmap_label",
     "LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN",
     "get_latest_completed_arbitrage_lane_chain_label",
+    "LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD",
+    "get_latest_completed_arbitrage_scanner_build_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -1520,6 +1522,28 @@ _RECOGNIZED_ARBITRAGE_LANE_CHAIN_LABEL = (
     "(Research Only)"
 )
 LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN = _RECOGNIZED_ARBITRAGE_LANE_CHAIN_LABEL
+
+# The Arbitrage Factory V1 SCANNER BUILD is recognized COMPLETE: built under
+# the frozen seq-1 spec, gated on the seq 0-5 lane review, refuse-by-default.
+# Its first dry scan (write=False, nothing written) honestly produced
+# FAIL/FAIL: today's micro-edges (0.27 bps funding, 4.9 bps basis) die under
+# the full conservative cost stack (80 bps round-trip taker + spread +
+# slippage + funding + withdrawal). Every alert carries the mandatory
+# research-only disclaimer and is validated by the seq-4 schema before a run
+# may complete. Recognizing the build unlocks nothing: every scanner RUN
+# still requires its own per-run human approval, the first persisted report
+# stays behind RUN_ARBITRAGE_SCAN_WITH_REPORT, reports/arbitrage_factory_v1/
+# does not exist yet, and staged CSVs remain untracked operational data.
+# Like every recognized record this is purely additive latest-completed
+# metadata: it writes nothing, promotes nothing, and is never an unlock of
+# real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_ARBITRAGE_SCANNER_BUILD_LABEL = (
+    "Scanner Build - Arbitrage Factory V1 Scanner Complete "
+    "(Research Only, Per-Run Approval)"
+)
+LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD = (
+    _RECOGNIZED_ARBITRAGE_SCANNER_BUILD_LABEL
+)
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
 # 160 inventory, Section B). Each is already built, tested, and committed, but is
@@ -5440,6 +5464,12 @@ def get_latest_completed_arbitrage_lane_chain_label() -> str:
     contract chain (seq 0-5, research only; the scanner build stays a
     separate, future, human-approved block)."""
     return _RECOGNIZED_ARBITRAGE_LANE_CHAIN_LABEL
+
+
+def get_latest_completed_arbitrage_scanner_build_label() -> str:
+    """Human label for the recognized, completed Arbitrage Factory V1 scanner
+    build (research only; every run still needs per-run human approval)."""
+    return _RECOGNIZED_ARBITRAGE_SCANNER_BUILD_LABEL
 
 
 def get_current_stage() -> str:

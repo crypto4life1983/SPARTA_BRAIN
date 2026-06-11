@@ -116,6 +116,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT,
     LATEST_COMPLETED_AUTOMATION_ROADMAP,
     LATEST_COMPLETED_ARBITRAGE_LANE_CHAIN,
+    LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -205,6 +206,7 @@ def test_status_schema_is_stable():
         "latest_completed_fresh_evidence_validation_design_contract",
         "latest_completed_automation_roadmap",
         "latest_completed_arbitrage_lane_chain",
+        "latest_completed_arbitrage_scanner_build",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -1074,18 +1076,47 @@ def test_latest_completed_arbitrage_lane_chain_is_seq_0_5():
     assert "never a trade signal" in lane_reason
     assert "all 12 coherence checks pass" in lane_reason
     assert "unlocked nothing" in lane_reason
-    # the scanner build is its own separate BLOCKED step
+    # the scanner build is now COMPLETE; runs and reports stay BLOCKED
     scan_row = pipe["arbitrage_factory_v1_scanner_build"]
-    assert scan_row["state"] == STATE_BLOCKED
+    assert scan_row["state"] == STATE_COMPLETE
     scan_reason = scan_row["reason"].lower()
-    assert "not built" in scan_reason
+    assert "frozen seq-1 spec" in scan_reason
+    assert "fail/fail" in scan_reason
     assert "per-run human" in scan_reason
-    assert "not a build step" in scan_reason
-    assert "not an authorization" in scan_reason
-    assert "unlocks nothing" in scan_reason
+    assert "unlocked nothing" in scan_reason
+    assert pipe["arbitrage_factory_v1_scanner_run"]["state"] == STATE_BLOCKED
+    assert pipe["arbitrage_factory_v1_persisted_report"]["state"] == STATE_BLOCKED
     # the global next step is unchanged: the roadmap human review
     assert pipe["strategy_factory_roadmap_human_review"]["state"] == STATE_NEXT
     # trading gates unmoved
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
+
+
+def test_latest_completed_arbitrage_scanner_build_registered():
+    assert LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD == (
+        "Scanner Build - Arbitrage Factory V1 Scanner Complete "
+        "(Research Only, Per-Run Approval)"
+    )
+    s = get_mission_flow_status()
+    assert s["latest_completed_arbitrage_scanner_build"] == (
+        LATEST_COMPLETED_ARBITRAGE_SCANNER_BUILD
+    )
+    assert all(v is False for v in safety_flags().values())
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    assert pipe["arbitrage_factory_v1_scanner_build"]["state"] == STATE_COMPLETE
+    run_row = pipe["arbitrage_factory_v1_scanner_run"]
+    assert run_row["state"] == STATE_BLOCKED
+    assert "per-run human" in run_row["reason"].lower()
+    assert "no scheduler" in run_row["reason"].lower()
+    rep_row = pipe["arbitrage_factory_v1_persisted_report"]
+    assert rep_row["state"] == STATE_BLOCKED
+    assert "run_arbitrage_scan_with_report" in rep_row["reason"].lower()
+    assert "untracked operational data" in rep_row["reason"].lower()
+    # global stage unchanged; gates unmoved
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == STATE_NEXT
     assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
     assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
     assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
