@@ -114,6 +114,7 @@ from sparta_commander.strategy_factory_mission_flow_status import (
     LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT,
     LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT,
     LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT,
+    LATEST_COMPLETED_AUTOMATION_ROADMAP,
     NEXT_REQUIRED_ACTION,
     human_workflow_lane,
     machine_pipeline_lane,
@@ -201,6 +202,7 @@ def test_status_schema_is_stable():
         "latest_completed_rc3_failure_mode_characterization_research_contract",
         "latest_completed_rc3_findings_human_decision_contract",
         "latest_completed_fresh_evidence_validation_design_contract",
+        "latest_completed_automation_roadmap",
         "next_required_action",
         "safety_posture",
         "human_workflow",
@@ -503,12 +505,12 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     # simulation results -- a human judgment, NOT a BUILD step and NOT an
     # authorization. No stale "BUILD_..._APPROVAL_CONTRACT" literal remains.
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert not NEXT_REQUIRED_ACTION.startswith("BUILD_")
     # an idle wait state for future evidence, not an execution / authorization
-    assert "FRESH_EVIDENCE" in NEXT_REQUIRED_ACTION
-    assert "ACCRUAL" in NEXT_REQUIRED_ACTION
+    assert "COMPLETED" in NEXT_REQUIRED_ACTION
+    assert "ROADMAP" in NEXT_REQUIRED_ACTION
     assert NEXT_REQUIRED_ACTION != (
         "BUILD_CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT"
     )
@@ -567,8 +569,12 @@ def test_next_required_action_is_human_controlled_real_data_qa_boundary_decision
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active STATE_NEXT step
-    nxt = pipe["crypto_d1_await_fresh_evidence_accrual"]
+    # awaiting fresh evidence accrual continues in the background (COMPLETE)
+    assert pipe[
+        "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    # the roadmap human review is the active STATE_NEXT step
+    nxt = pipe["strategy_factory_roadmap_human_review"]
     assert nxt["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in nxt["reason"]
     # the QA boundary decision remains its own separate BLOCKED step
@@ -905,6 +911,9 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     ]["state"] == STATE_COMPLETE
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     nxt = pipe["human_controlled_real_data_qa_boundary_decision"]
     assert nxt["state"] == STATE_BLOCKED
@@ -912,7 +921,7 @@ def test_real_data_qa_boundary_decision_contract_now_complete():
     assert all(v is False for v in safety_flags().values())
 
 
-def test_await_fresh_evidence_is_next_and_qa_boundary_is_blocked():
+def test_roadmap_human_review_is_next_and_qa_boundary_is_blocked():
     pipe = {r["id"]: r for r in machine_pipeline_lane()}
     # the full RC1, RC2, and RC3 characterization chains are now complete
     assert (
@@ -948,34 +957,54 @@ def test_await_fresh_evidence_is_next_and_qa_boundary_is_blocked():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step
-    nxt = pipe["crypto_d1_await_fresh_evidence_accrual"]
+    # awaiting fresh evidence accrual continues in the background (COMPLETE)
+    bg = pipe["crypto_d1_await_fresh_evidence_accrual"]
+    assert bg["state"] == STATE_COMPLETE
+    bg_reason = bg["reason"].lower()
+    # the frozen wait terms are preserved on the completed row
+    assert "continues in the background" in bg_reason
+    assert "post-2026-06-08" in bg_reason
+    assert "manually staged" in bg_reason
+    assert "180 days" in bg_reason
+    assert "365" in bg_reason
+    assert "return > 0" in bg_reason
+    assert "-35%" in bg_reason
+    assert "sharpe >= 0.8" in bg_reason
+    assert "top-half stability" in bg_reason
+    assert "promotes nothing" in bg_reason
+    assert "do_not_promote_resume_policy_yet" in bg_reason
+    # the roadmap human review is the active next step
+    nxt = pipe["strategy_factory_roadmap_human_review"]
     assert nxt["state"] == STATE_NEXT
     assert NEXT_REQUIRED_ACTION in nxt["reason"]
     nxt_reason = nxt["reason"].lower()
     # it is NOT a build step and NOT an authorization, and unlocks nothing
     assert "not a build step" in nxt_reason
     assert "not an authorization" in nxt_reason
-    # waiting for future, post-cutoff, manually staged daily candles
-    assert "post-2026-06-08" in nxt_reason
-    assert "manually staged" in nxt_reason
-    # criteria are frozen before qualifying data exists
-    assert "frozen before any qualifying data exists" in nxt_reason
-    # window length: 180 minimum, 365 preferred
-    assert "180 days" in nxt_reason
-    assert "365" in nxt_reason
-    # frozen pass bars surfaced
-    assert "return > 0" in nxt_reason
-    assert "-35%" in nxt_reason
-    assert "sharpe >= 0.8" in nxt_reason
-    assert "top-half stability" in nxt_reason
-    # passing promotes nothing; only qualifies for a separate human reconsideration
-    assert "promotes nothing" in nxt_reason
-    assert "reconsideration" in nxt_reason
-    # idle wait state: never promotion or execution
+    assert "unlocks nothing" in nxt_reason
+    # all six roadmap links are surfaced as complete read-only designs
+    assert "links l1-l6 are complete" in nxt_reason
+    assert "intake-to-orchestrator adapter" in nxt_reason
+    assert "unsigned lane-aware" in nxt_reason
+    assert "one human signature" in nxt_reason
+    assert "no scheduler built" in nxt_reason
+    assert "nothing sent" in nxt_reason
+    assert "no runtime ui edit" in nxt_reason
+    # the control chain is complete but trading remains locked
+    assert "paperwork/control chain is complete" in nxt_reason
+    assert "trading remains locked" in nxt_reason
+    # the four future blocks each need their own separate human approval
+    assert "own separate human approval" in nxt_reason
+    assert "dashboard/jarvis wiring" in nxt_reason
+    assert "manual-start notification transport" in nxt_reason
+    assert "scheduler build under the l4 rules" in nxt_reason
+    assert "umbrella strategy research orchestrator" in nxt_reason
+    # the crypto-d1 fresh-evidence wait continues in the background
+    assert "continues in the background under the frozen block 190 bars" in nxt_reason
+    # never promotion or execution
     assert "not promotion" in nxt_reason
     assert "not trading execution" in nxt_reason
-    # the DO_NOT_PROMOTE decision is preserved, never overturned by the design
+    # the DO_NOT_PROMOTE decision is preserved, never overturned by the roadmap
     assert "do_not_promote_resume_policy_yet" in nxt_reason
     # the QA boundary decision is now a separate, later, BLOCKED step
     row = pipe["human_controlled_real_data_qa_boundary_decision"]
@@ -987,6 +1016,34 @@ def test_await_fresh_evidence_is_next_and_qa_boundary_is_blocked():
     assert "boundary" in reason
     # downstream real_data_qa gate stays blocked
     assert "real_data_qa stays" in reason
+
+
+def test_latest_completed_automation_roadmap_is_links_l1_l6():
+    assert LATEST_COMPLETED_AUTOMATION_ROADMAP == (
+        "Links L1-L6 - Strategy Factory Automation Roadmap Complete "
+        "(Design Only)"
+    )
+    # design-only label: never a promotion and never an unlock
+    assert "Design Only" in LATEST_COMPLETED_AUTOMATION_ROADMAP
+    for banned in ("PROMOTE", "UNLOCK"):
+        assert banned not in LATEST_COMPLETED_AUTOMATION_ROADMAP.upper(), banned
+    s = get_mission_flow_status()
+    assert s["latest_completed_automation_roadmap"] == (
+        LATEST_COMPLETED_AUTOMATION_ROADMAP
+    )
+    # recognizing the completed roadmap unlocks nothing real
+    assert all(v is False for v in safety_flags().values())
+    assert s["executes"] is False
+    pipe = {r["id"]: r for r in machine_pipeline_lane()}
+    # the roadmap human review is the active next step; gates stay shut
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == STATE_NEXT
+    assert pipe[
+        "human_controlled_real_data_qa_boundary_decision"
+    ]["state"] == STATE_BLOCKED
+    assert pipe["real_data_qa"]["state"] == STATE_BLOCKED
+    assert pipe["baseline_backtest"]["state"] == STATE_BLOCKED
+    assert pipe["paper_trading_gate"]["state"] == STATE_LOCKED
+    assert pipe["micro_live_gate"]["state"] == STATE_LOCKED
 
 
 def test_latest_completed_protocol_contract_is_block_97():
@@ -1186,10 +1243,10 @@ def test_latest_completed_bitcoin_cycle_timing_evidence_contract_is_block_123():
     # after Block 130, the global stage has advanced past the daily alpha brief
     # approval build to the human-controlled real-data QA boundary decision.
     assert s["current_stage"] == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert s["next_required_action"] == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
 
 
@@ -1253,10 +1310,10 @@ def test_latest_completed_strategy_evidence_scoring_contract_is_block_131():
     assert s["executes"] is False
     # registering Block 131 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1277,10 +1334,10 @@ def test_latest_completed_cohort_independence_contract_is_block_132():
     assert s["executes"] is False
     # registering Block 132 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the Block 129 approval contract completion is preserved alongside it
     assert s["latest_completed_daily_alpha_brief_approval_contract"] == (
@@ -1301,10 +1358,10 @@ def test_latest_completed_real_data_qa_boundary_decision_contract_is_block_134()
     assert s["executes"] is False
     # registering Block 134 does not advance the boundary stage or next action
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the Block 132 cohort contract completion is preserved alongside it
     assert s["latest_completed_cohort_independence_contract"] == (
@@ -1328,10 +1385,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_contract_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the Block 134 boundary-decision contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_boundary_decision_contract"] == (
@@ -1355,10 +1412,10 @@ def test_latest_completed_real_data_qa_readiness_checklist_contract_is_block_136
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the Phase A approval-packet contract completion is preserved alongside it
     assert s["latest_completed_real_data_qa_human_approval_packet_contract"] == (
@@ -1382,10 +1439,10 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1431,9 +1488,13 @@ def test_latest_completed_overnight_research_autopilot_controller_is_block_152()
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1465,10 +1526,10 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1514,9 +1575,13 @@ def test_latest_completed_real_data_qa_human_approval_packet_is_block_155():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1550,10 +1615,10 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the resume-policy results review is now complete (STATE_COMPLETE)
     assert pipe[
@@ -1599,9 +1664,13 @@ def test_latest_completed_real_data_qa_boundary_decision_is_block_158():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1642,10 +1711,10 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the coverage layer is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1692,9 +1761,13 @@ def test_latest_completed_pipeline_coverage_reconciliation_is_block_161():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1739,10 +1812,10 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the review is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -1789,9 +1862,13 @@ def test_latest_completed_real_data_qa_boundary_readiness_review_is_block_166():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1828,10 +1905,10 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert pipe[
         "crypto_d1_resume_policy_results_review"
@@ -1876,9 +1953,13 @@ def test_latest_completed_real_data_qa_boundary_decision_packet_is_block_170():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -1915,10 +1996,10 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert pipe[
         "crypto_d1_resume_policy_results_review"
@@ -1963,9 +2044,13 @@ def test_latest_completed_real_data_qa_plan_only_contract_is_block_171():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2003,10 +2088,10 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the approval decision is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2053,9 +2138,13 @@ def test_latest_completed_real_data_qa_plan_approval_decision_is_block_172():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2093,10 +2182,10 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the final decision is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2143,9 +2232,13 @@ def test_latest_completed_real_data_qa_boundary_final_decision_is_block_174():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2183,10 +2276,10 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the source evaluation is NOT registered as an active step ahead of the
     # boundary -- the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2233,9 +2326,13 @@ def test_latest_completed_public_spot_source_evaluation_is_block_167():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2273,10 +2370,10 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the adapter spec is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2323,9 +2420,13 @@ def test_latest_completed_concrete_spot_provider_adapter_spec_is_block_168():
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2364,10 +2465,10 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert all(v is False for v in safety_flags().values())
     assert s["executes"] is False
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert NEXT_REQUIRED_ACTION == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the dry run is NOT registered as an active step ahead of the boundary --
     # the resume-policy results review is now complete (STATE_COMPLETE)
@@ -2414,9 +2515,13 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
     assert pipe[
         "crypto_d1_await_new_human_research_directive"
     ]["state"] == STATE_COMPLETE
-    # awaiting fresh evidence accrual is the active next step (STATE_NEXT)
+    # awaiting fresh evidence accrual continues in the background
+    # (STATE_COMPLETE); the roadmap human review is the active step (STATE_NEXT)
     assert pipe[
         "crypto_d1_await_fresh_evidence_accrual"
+    ]["state"] == STATE_COMPLETE
+    assert pipe[
+        "strategy_factory_roadmap_human_review"
     ]["state"] == STATE_NEXT
     # the QA boundary decision remains its own separate BLOCKED step
     assert pipe[
@@ -2435,10 +2540,10 @@ def test_latest_completed_selected_spot_provider_fetch_runner_dry_run_is_block_1
 
 def test_current_stage_is_human_controlled_real_data_qa_boundary_decision():
     assert CURRENT_STAGE == (
-        "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
-    assert "FRESH_EVIDENCE" in CURRENT_STAGE
-    assert "ACCRUAL" in CURRENT_STAGE
+    assert "COMPLETED" in CURRENT_STAGE
+    assert "ROADMAP" in CURRENT_STAGE
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_REVIEW_CONTRACT_REQUIRED"
     assert CURRENT_STAGE != "CRYPTO_D1_DAILY_ALPHA_BRIEF_RESEARCH_CONTRACT_REQUIRED"

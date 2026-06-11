@@ -493,6 +493,8 @@ __all__ = [
     "get_latest_completed_rc3_findings_human_decision_contract_label",
     "LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT",
     "get_latest_completed_fresh_evidence_validation_design_contract_label",
+    "LATEST_COMPLETED_AUTOMATION_ROADMAP",
+    "get_latest_completed_automation_roadmap_label",
 ]
 
 REGISTRY_VERSION = "v1"
@@ -556,7 +558,7 @@ REGISTRY_MODE = "RESEARCH_ONLY"
 # build step and NOT a research-only paper contract. real_data_qa stays BLOCKED,
 # baseline_backtest stays BLOCKED, and the paper/micro-live gates stay LOCKED
 # unless a separate, future, human-approved boundary contract authorizes it.
-CURRENT_STAGE = "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+CURRENT_STAGE = "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
 # The single recognized latest research-only protocol (Block 95). The registry
 # tracks completed bundles by number and this one recognized protocol
 # separately; DEFINING a protocol is a research-only planning step and creates
@@ -869,7 +871,7 @@ LATEST_COMPLETED_DAILY_ALPHA_BRIEF_APPROVAL_CONTRACT = (
 # artifact. real_data_qa stays BLOCKED, baseline stays BLOCKED, and the paper/
 # micro-live gates stay LOCKED unless a separate, future, human-approved boundary
 # contract is built.
-NEXT_REQUIRED_ACTION = "AWAIT_FRESH_EVIDENCE_ACCRUAL"
+NEXT_REQUIRED_ACTION = "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
 
 # The single recognized latest research-only Strategy Evidence Scoring contract
 # (Block 131). It is a research-only evidence/scoring support contract: on paper,
@@ -1467,6 +1469,30 @@ _RECOGNIZED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT_LABEL = (
 LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT = (
     _RECOGNIZED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT_LABEL
 )
+
+# Links L1-L6 recognize the completed Strategy Factory Automation Roadmap: the
+# read-only research paperwork/control chain that connects idea intake to
+# human-facing reporting, designed and live on remote as six contracts.
+# L1 intake-to-orchestrator adapter (idea triage to an in-memory proposal),
+# L2 unsigned lane-aware approval packet schema (packets are born unsigned),
+# L3 batch approval (ONE human signature per fully enumerated chain; deviation
+# voids the batch), L4 research cycle scheduler SPEC ONLY (a bounded rulebook;
+# no scheduler, daemon, cron, worker, or loop was built), L5 result
+# notification/reporting payloads ONLY (nothing is ever sent), and L6
+# dashboard/JARVIS sync display model ONLY (no runtime UI edit; no control in
+# the model can trigger work). The automated research paperwork/control chain
+# is COMPLETE; trading remains LOCKED and execution remains unenumerable by
+# construction. Future pending blocks, each requiring its own separate human
+# approval: (1) real dashboard/JARVIS wiring, (2) a manual-start notification
+# transport behind the existing hardened Telegram boundary, (3) the actual
+# scheduler build under the L4 rules, and (4) an umbrella Strategy Research
+# Orchestrator. Like every recognized record this is purely additive
+# latest-completed metadata: it writes nothing, promotes nothing, and is never
+# an unlock of real_data_qa, baseline, paper, micro-live, or live.
+_RECOGNIZED_AUTOMATION_ROADMAP_LABEL = (
+    "Links L1-L6 - Strategy Factory Automation Roadmap Complete (Design Only)"
+)
+LATEST_COMPLETED_AUTOMATION_ROADMAP = _RECOGNIZED_AUTOMATION_ROADMAP_LABEL
 
 # Static catalog of the existing-but-parked downstream Crypto-D1 modules (Bundle
 # 160 inventory, Section B). Each is already built, tested, and committed, but is
@@ -5374,6 +5400,12 @@ def get_latest_completed_fresh_evidence_validation_design_contract_label() -> st
     """Human label for the latest recognized research-only Crypto-D1 V2
     Fresh-Evidence Validation Design contract."""
     return _RECOGNIZED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT_LABEL
+
+
+def get_latest_completed_automation_roadmap_label() -> str:
+    """Human label for the recognized, completed Strategy Factory Automation
+    Roadmap (links L1-L6, read-only designs only; trading stays locked)."""
+    return _RECOGNIZED_AUTOMATION_ROADMAP_LABEL
 
 
 def get_current_stage() -> str:

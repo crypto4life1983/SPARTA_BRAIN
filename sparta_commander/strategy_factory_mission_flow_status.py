@@ -245,6 +245,7 @@ from sparta_commander.strategy_factory_mission_flow_bundle_registry import (  # 
     get_latest_completed_rc3_failure_mode_characterization_research_contract_label as _registry_latest_rc3_failure_mode_characterization_research_contract_label,  # noqa: E501
     get_latest_completed_rc3_findings_human_decision_contract_label as _registry_latest_rc3_findings_human_decision_contract_label,  # noqa: E501
     get_latest_completed_fresh_evidence_validation_design_contract_label as _registry_latest_fresh_evidence_validation_design_contract_label,  # noqa: E501
+    get_latest_completed_automation_roadmap_label as _registry_latest_automation_roadmap_label,  # noqa: E501
     get_next_required_action as _registry_next_required_action,
 )
 
@@ -315,6 +316,7 @@ __all__ = [
     "LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT",
     "LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT",
     "LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT",
+    "LATEST_COMPLETED_AUTOMATION_ROADMAP",
     "NEXT_REQUIRED_ACTION",
     "human_workflow_lane",
     "machine_pipeline_lane",
@@ -631,6 +633,16 @@ LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT = (
 # live stay LOCKED.
 LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT = (
     _registry_latest_fresh_evidence_validation_design_contract_label()
+)
+# Links L1-L6: the completed Strategy Factory Automation Roadmap -- the
+# read-only research paperwork/control chain (intake adapter, unsigned packet
+# schema, batch approval, cycle scheduler SPEC only, report payloads only,
+# dashboard/JARVIS display model only). Recognizing it moves NO gate: trading
+# remains LOCKED, no scheduler/transport/UI wiring exists, and every future
+# block (real wiring, manual-start transport, scheduler build, umbrella
+# orchestrator) needs its own separate human approval.
+LATEST_COMPLETED_AUTOMATION_ROADMAP = (
+    _registry_latest_automation_roadmap_label()
 )
 NEXT_REQUIRED_ACTION = _registry_next_required_action()
 
@@ -1966,25 +1978,50 @@ _MACHINE_PIPELINE: tuple[dict[str, str], ...] = (
     {
         "id": "crypto_d1_await_fresh_evidence_accrual",
         "label": "Crypto-D1 V2 Awaiting Fresh Evidence Accrual",
+        "state": STATE_COMPLETE,
+        "reason": (
+            "Complete - the Block 190 fresh-evidence wait is registered and "
+            "continues in the background: the criteria are FROZEN before any "
+            "qualifying data exists, post-2026-06-08 manually staged daily "
+            "candles only (no fetch ever), minimum window 180 days, 365 "
+            "preferred. Frozen pass bars (ALL must pass): return > 0, worst "
+            "drawdown not worse than -35%, Sharpe >= 0.8, and top-half "
+            "stability versus all six fixed candidates, with one look per "
+            "window. Passing PROMOTES NOTHING: it only qualifies a candidate "
+            "for a separate future human reconsideration decision, with "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET preserved. It unlocked nothing: "
+            "real_data_qa and baseline_backtest stay BLOCKED and the "
+            "paper/micro-live/live gates stay LOCKED."
+        ),
+    },
+    {
+        "id": "strategy_factory_roadmap_human_review",
+        "label": "Strategy Factory Roadmap Human Review",
         "state": STATE_NEXT,
         "reason": (
-            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Block 190 "
-            "read-only fresh-evidence validation design is complete: the "
-            "criteria are FROZEN before any qualifying data exists. The system "
-            "now simply WAITS for future, post-2026-06-08, manually staged "
-            "daily candles to accrue -- minimum window 180 days, 365 "
-            "preferred, no fetch ever. Frozen pass bars (ALL must pass): "
-            "return > 0, worst drawdown not worse than -35%, Sharpe >= 0.8, "
-            "and top-half stability versus all six fixed candidates, with one "
-            "look per window. Passing PROMOTES NOTHING: it only qualifies a "
-            "candidate for a separate future human reconsideration decision, "
-            "with DO_NOT_PROMOTE_RESUME_POLICY_YET preserved -- not promotion "
-            "and not trading execution. This row is NOT a build step and NOT "
-            "an authorization -- it acquires no data, runs no dry run, QA, "
-            "baseline, backtest, simulation, replay, or optimization, places "
-            "no order, automates nothing, and writes no "
-            "runtime/registry/dashboard artifact. It unlocks nothing: "
-            "real_data_qa and baseline_backtest stay BLOCKED and the "
+            "Next required action: " + NEXT_REQUIRED_ACTION + ". The Strategy "
+            "Factory Automation Roadmap links L1-L6 are COMPLETE as read-only "
+            "designs, live on remote: L1 intake-to-orchestrator adapter (idea "
+            "triage to an in-memory proposal), L2 unsigned lane-aware "
+            "approval packet schema, L3 batch approval (one human signature "
+            "per fully enumerated chain; deviation voids the batch), L4 "
+            "research cycle scheduler SPEC only (no scheduler built), L5 "
+            "result notification payloads only (nothing sent), and L6 "
+            "dashboard/JARVIS sync display model only (no runtime UI edit). "
+            "The automated research paperwork/control chain is complete; "
+            "trading remains LOCKED. Future pending blocks, each needing its "
+            "own separate human approval: (1) real dashboard/JARVIS wiring, "
+            "(2) a manual-start notification transport, (3) the actual "
+            "scheduler build under the L4 rules, and (4) an umbrella Strategy "
+            "Research Orchestrator. Fresh-evidence accrual for Crypto-D1 "
+            "continues in the background under the frozen Block 190 bars. "
+            "This row is NOT a build step and NOT an authorization -- not "
+            "promotion and not trading execution; it acquires no data, runs "
+            "no dry run, QA, baseline, backtest, simulation, replay, scanner, "
+            "or optimization, places no order, automates nothing, sends "
+            "nothing, and writes no runtime/registry/dashboard artifact; "
+            "DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. It unlocks "
+            "nothing: real_data_qa and baseline_backtest stay BLOCKED and the "
             "paper/micro-live/live gates stay LOCKED unless a separate, "
             "future, human-approved contract authorizes a crossing."
         ),
@@ -2177,6 +2214,7 @@ def get_mission_flow_status() -> dict[str, Any]:
         "latest_completed_rc3_failure_mode_characterization_research_contract": LATEST_COMPLETED_RC3_FAILURE_MODE_CHARACTERIZATION_RESEARCH_CONTRACT,  # noqa: E501
         "latest_completed_rc3_findings_human_decision_contract": LATEST_COMPLETED_RC3_FINDINGS_HUMAN_DECISION_CONTRACT,  # noqa: E501
         "latest_completed_fresh_evidence_validation_design_contract": LATEST_COMPLETED_FRESH_EVIDENCE_VALIDATION_DESIGN_CONTRACT,  # noqa: E501
+        "latest_completed_automation_roadmap": LATEST_COMPLETED_AUTOMATION_ROADMAP,  # noqa: E501
         "next_required_action": NEXT_REQUIRED_ACTION,
         "safety_posture": dict(MISSION_FLOW_SAFETY_POSTURE),
         "human_workflow": human_workflow_lane(),
