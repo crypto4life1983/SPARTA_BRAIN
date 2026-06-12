@@ -82,10 +82,25 @@ def task_integrity_audit():
 
 def task_certification_sweep():
     verdicts = {}
+    # The original staged-files review certifies the FIRST 12-file snapshot
+    # only. The human-approved batch2 append (126 more files in the same
+    # directory) makes that snapshot contract reject BY DESIGN, so REJECTED
+    # is the documented expected verdict; byte-integrity of the original 12
+    # files is proven separately by the integrity_audit task.
     from sparta_commander.ny_session_fvg_choch_real_candle_staged_files_review_contract import (
         build_staged_files_review)
-    verdicts["staged_files"] = build_staged_files_review(
-        REPO_ROOT, tracked_paths=[]).get("verdict")
+    verdicts["staged_files_original_snapshot_superseded"] = (
+        build_staged_files_review(
+            REPO_ROOT, tracked_paths=[]).get("verdict"))
+    from sparta_commander.ny_session_fvg_choch_additional_session_days_staged_candles_review import (
+        build_additional_session_days_review)
+    verdicts["staged_files_batch2_append_policy"] = (
+        build_additional_session_days_review().get("verdict"))
+    from sparta_commander.ny_session_fvg_choch_accepted_labels_human_review_contract import (
+        build_accepted_labels_human_review)
+    verdicts["staged_files_current_state_batch2_manifest"] = (
+        build_accepted_labels_human_review(
+            REPO_ROOT, tracked_paths=[]).get("verdict"))
     from sparta_commander.ny_session_fvg_choch_v3_result_and_candidate_rejection_record_contract import (
         build_rejection_record)
     verdicts["candidate_1_rejection"] = build_rejection_record(
@@ -103,7 +118,12 @@ def task_certification_sweep():
     verdicts["candidate_2_rejection"] = build_bp_v2_rejection_record(
         REPO_ROOT, tracked_paths=[]).get("verdict")
     expected = {
-        "staged_files": "REAL_CANDLE_STAGED_FILES_ACCEPTED_FOR_DETECTOR_RUN",
+        "staged_files_original_snapshot_superseded":
+            "REAL_CANDLE_STAGED_FILES_REJECTED",
+        "staged_files_batch2_append_policy":
+            "NY_FVG_CHOCH_ADDITIONAL_SESSION_DAYS_REVIEW_READY",
+        "staged_files_current_state_batch2_manifest":
+            "ACCEPTED_LABELS_HUMAN_REVIEW_APPROVED_FOR_REPLAY_DECISION",
         "candidate_1_rejection":
             "V3_RESULT_FROZEN_AND_CANDIDATE_REJECTED_KEPT_ON_RECORD",
         "bp_labels":
