@@ -250,3 +250,44 @@ def test_label_action_and_no_scheduler_imports():
     assert not any(call.func.attr == "open" if isinstance(call.func, ast.Attribute)
                    else getattr(call.func, "id", "") == "open"
                    for call in ast.walk(tree) if isinstance(call, ast.Call))
+
+def _load_runner_module():
+    import importlib.util
+    import pathlib
+    runner_path = (pathlib.Path(oa.__file__).resolve().parents[1]
+                   / "tools" / "overnight_autopilot_run_once.py")
+    spec = importlib.util.spec_from_file_location("oa_runner", runner_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_runner_reseed_requeues_defaults_and_preserves_proposals():
+    runner = _load_runner_module()
+    proposal = {"task_id": "human_idea_1", "task_type": "detection_run",
+                "status": "proposal_for_human",
+                "params": {"note": "needs HUMAN_APPROVED gate"}}
+    proposal_frozen = dict(proposal, params=dict(proposal["params"]))
+    queue = [dict(task, status="done") for task in runner.DEFAULT_QUEUE]
+    queue.append(proposal)
+    reseeded = runner.reseed_queue(queue)
+    defaults = [t for t in reseeded
+                if t["task_id"] != proposal["task_id"]]
+    assert len(defaults) == 4
+    assert all(t["status"] == "queued" for t in defaults)
+    assert {t["task_type"] for t in defaults} == set(oa.ALLOWED_TASK_TYPES)
+    kept = [t for t in reseeded if t["task_id"] == proposal["task_id"]]
+    assert kept == [proposal_frozen]  # untouched, byte-for-byte
+    # a default task missing from the file is restored as queued
+    partial = [dict(runner.DEFAULT_QUEUE[0], status="done")]
+    restored = runner.reseed_queue(partial)
+    assert len(restored) == 4
+    assert all(t["status"] == "queued" for t in restored)
+    # reseeded forbidden proposals are STILL not executable afterwards
+    for task in reseeded:
+        check = oa.validate_queue_task(task)
+        if task["task_id"] == proposal["task_id"]:
+            assert check["executable"] is False
+            assert check["is_human_proposal"] is True
+        else:
+            assert check["executable"] is True

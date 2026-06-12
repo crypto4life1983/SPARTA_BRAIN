@@ -65,6 +65,28 @@ _EXTRA_PINNED = {
 }
 
 
+def reseed_queue(queue):
+    """Re-seed the 4 default safe tasks to "queued" at the start of every
+    one-shot run, so nightly runs never no-op after night 1.
+    proposal_for_human entries are preserved exactly; nothing else in the
+    queue is touched."""
+    reseeded = set()
+    for task in queue:
+        if not isinstance(task, dict):
+            continue
+        if task.get("status") == "proposal_for_human":
+            continue
+        for default in DEFAULT_QUEUE:
+            if (task.get("task_id") == default["task_id"]
+                    and task.get("task_type") == default["task_type"]):
+                task["status"] = "queued"
+                reseeded.add(default["task_id"])
+    for default in DEFAULT_QUEUE:
+        if default["task_id"] not in reseeded:
+            queue.append(dict(default))
+    return queue
+
+
 def task_integrity_audit():
     check = verify_append_only_integrity(
         observe_baseline_integrity(REPO_ROOT))
@@ -188,7 +210,8 @@ def main() -> int:
     reports_dir = pathlib.Path(REPO_ROOT) / REPORTS_DIR
     reports_dir.mkdir(parents=True, exist_ok=True)
     if queue_file.is_file():
-        queue = json.loads(queue_file.read_text(encoding="utf-8"))
+        queue = reseed_queue(
+            json.loads(queue_file.read_text(encoding="utf-8")))
     else:
         queue = [dict(task) for task in DEFAULT_QUEUE]
         queue_file.parent.mkdir(parents=True, exist_ok=True)
