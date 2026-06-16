@@ -52,3 +52,6 @@ reports/strategy_factory_routines/strategy_queue/
 reports/strategy_factory_routines/weekly_review/
 reports/strategy_factory_routines/next_bundle/
 reports/strategy_factory_routines/candidate_registry/
+
+# Autopilot morning report — generated runtime status surface (regenerable)
+reports/autopilot_morning/
