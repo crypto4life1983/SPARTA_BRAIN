@@ -394,6 +394,12 @@
       <div class="jv-loading">Computing&hellip;</div>
     </div>
 
+    <div class="jv-panel jv-wide" id="pAutopilotMorning">
+      <h2><span class="ic">&#x1F319;</span>Autopilot Morning Report
+        <a class="jv-tag t-cache" href="/jarvis/autopilot-morning" style="text-decoration:none">OPEN</a></h2>
+      <div class="jv-loading">Reading latest morning report&hellip;</div>
+    </div>
+
     <div class="jv-section"><span class="lbl">Safety &amp; Reliability</span><span class="ln"></span><span class="sub">gates, posture &amp; cached health</span></div>
 
     <div class="jv-panel" id="pSafety">
@@ -947,6 +953,23 @@
     }
   }
 
+  // Autopilot Morning Report: read-only fetch of the server-rendered panel.
+  // Server returns {html: "..."} or a NO_REPORT panel; we inject as-is.
+  function loadAutopilotMorning(){
+    fetch('/api/jarvis/autopilot-morning').then(function(r){ return r.json(); })
+      .then(function(am){
+        if(am && typeof am.html === 'string' && am.html){
+          setPanel('pAutopilotMorning', am.html);
+        } else {
+          setPanel('pAutopilotMorning',
+            '<div class="jv-detail">No morning report generated yet.</div>');
+        }
+      }).catch(function(){
+        setPanel('pAutopilotMorning',
+          '<div class="jv-detail">No morning report generated yet.</div>');
+      });
+  }
+
   function render(d){
     // Strategy Factory Mission Flow (DISPLAY-ONLY) is a static map rendered
     // directly in the #pStrategyFlow markup above, trued to the registered
@@ -1197,6 +1220,10 @@
       return '<li>'+esc(a)+'</li>';
     }).join('') + '</ul></div>';
     setPanel('pNext', naUl);
+
+    // Autopilot Morning Report — independent read-only fetch from its own
+    // endpoint (keeps the /api/jarvis/status shape unchanged).
+    loadAutopilotMorning();
 
     // Health Report (cached, read-only — never executed from this page)
     var hr = d.health_report || {};

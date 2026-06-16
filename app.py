@@ -9464,6 +9464,15 @@ def _jarvis_mission_flow_status() -> dict:
     return get_mission_flow_status()
 
 
+def _jarvis_autopilot_morning() -> dict:
+    """READ-ONLY. Surface the overnight autopilot morning report
+    (reports/autopilot_morning/latest.json) for the JARVIS console. It reads
+    only; runs nothing; trades nothing; never claims paper/live readiness.
+    Shows 'No morning report generated yet.' when the report is absent."""
+    import jarvis_autopilot_morning_panel as _amp
+    return _amp.get_autopilot_morning_panel()
+
+
 @app.get("/api/jarvis/status")
 def api_jarvis_status():
     """Read-only aggregate feed for the JARVIS console. Every section is
@@ -9548,6 +9557,38 @@ def api_jarvis_status():
         "freshness_guard": freshness_guard,
         "recommended_next_actions": list(_JARVIS_NEXT_ACTIONS),
     }
+
+
+@app.get("/api/jarvis/autopilot-morning")
+def api_jarvis_autopilot_morning():
+    """READ-ONLY JSON for the autopilot morning report panel."""
+    return _jarvis_safe(_jarvis_autopilot_morning)
+
+
+@app.get("/jarvis/autopilot-morning", response_class=HTMLResponse)
+def page_jarvis_autopilot_morning():
+    """Standalone read-only page rendering the overnight autopilot morning
+    report (no execution affordances, no paper/live claim)."""
+    panel = _jarvis_safe(_jarvis_autopilot_morning)
+    body = panel.get("html", "") if isinstance(panel, dict) else ""
+    page = (
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        "<title>JARVIS — Autopilot Morning Report</title><style>"
+        "body{background:#06121f;color:#cfe6ff;font-family:ui-monospace,"
+        "monospace;padding:24px;line-height:1.5}h1{font-size:16px;"
+        "letter-spacing:.12em;color:#9fe9ff}.jv-am-h{margin-top:14px;"
+        "font-weight:600;color:#bfe3ff}.jv-am-list{margin:4px 0 0 18px}"
+        ".jv-detail{color:#8fb4cc}.jv-am-status{font-size:15px;"
+        "font-weight:700;margin-bottom:6px}.jv-am-ok{color:#5fffa0}"
+        ".jv-am-warn{color:#ffd166}.jv-am-bad{color:#ff6b6b}"
+        ".jv-am-muted{color:#8aa6bb}.jv-am-paste code{background:#0a2236;"
+        "padding:2px 7px;border-radius:5px;color:#eaffd6}"
+        ".jv-am-foot{margin-top:16px;color:#6f8aa0;font-size:12px}"
+        "a{color:#7fd4ff}</style></head><body>"
+        "<h1>JARVIS — AUTOPILOT MORNING REPORT</h1>" + (body or "") +
+        "<p class='jv-am-foot'>Read-only. <a href='/jarvis'>← back to JARVIS"
+        "</a></p></body></html>")
+    return HTMLResponse(page, status_code=200)
 
 
 @app.get("/jarvis", response_class=HTMLResponse)
