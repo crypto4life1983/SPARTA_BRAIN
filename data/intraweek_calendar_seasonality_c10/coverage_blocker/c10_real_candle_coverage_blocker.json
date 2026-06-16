@@ -1,0 +1,54 @@
+{
+  "blocker_reason": "pushed C10 detector requires in-sample selection window 2019-01-01..2022-12-31; canonical staged source data/crypto_d1_spot/raw/BTC_1d.csv begins 2020-01-01, so the required 2019 in-sample coverage is missing. Final detection refused; no scan executed; no setup claims produced. Stage full 2019 daily data via a separately approved data step to proceed.",
+  "candidate_family": "intraweek_calendar_seasonality_drift",
+  "candidate_id": "INTRAWEEK_CALENDAR_SEASONALITY_DRIFT_V1",
+  "coverage": {
+    "actual_source_start": "2020-01-01",
+    "in_sample_coverage_present": false,
+    "missing_2019_in_sample_coverage": true,
+    "required_in_sample_start": "2019-01-01",
+    "required_in_sample_window": [
+      "2019-01-01",
+      "2022-12-31"
+    ],
+    "required_out_of_sample_window": [
+      "2023-01-01",
+      "2025-12-31"
+    ],
+    "status": "BLOCKED_MISSING_REQUIRED_IN_SAMPLE_COVERAGE"
+  },
+  "direction": "long_only",
+  "no_accepted_or_rejected_setup_claims": true,
+  "real_candle_detection_completed": false,
+  "scope": "real_candle_detection_coverage_gate_only_no_scan_no_replay_no_pnl_no_trading",
+  "scope_locks": {
+    "c10_contract_not_weakened_for_missing_2019": true,
+    "frozen_regime_inputs_source_not_used": true,
+    "no_api": true,
+    "no_broker": true,
+    "no_credentials": true,
+    "no_downstream_gates_unlocked": true,
+    "no_edit_token_consumed": true,
+    "no_exchange": true,
+    "no_fetch": true,
+    "no_live_trading": true,
+    "no_micro_live": true,
+    "no_network": true,
+    "no_paper_trading": true,
+    "no_pnl": true,
+    "no_relabel": true,
+    "no_replay": true,
+    "no_scheduler": true,
+    "no_wallet": true
+  },
+  "source": {
+    "first_date": "2020-01-01",
+    "last_date": "2026-06-08",
+    "row_count": 2351,
+    "sha256": "69a9bdb12ee84331d499d71b762d3d4532083fceaa5e25bb4afc65fbdec846d7",
+    "source_path": "data/crypto_d1_spot/raw/BTC_1d.csv"
+  },
+  "status": "BLOCKED_MISSING_REQUIRED_IN_SAMPLE_COVERAGE",
+  "symbol": "BTCUSD",
+  "timeframe": "1d"
+}
