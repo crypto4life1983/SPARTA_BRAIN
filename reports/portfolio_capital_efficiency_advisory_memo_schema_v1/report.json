@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "layer": "portfolio_capital_efficiency_advisory_memo_schema_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "capital_deployment_enabled": false,
+  "phase": "P5_advisory_memo_schema",
+  "build_date": "2026-06-16",
+  "companions": [
+    "reports/portfolio_capital_efficiency_protocol_v1/",
+    "reports/portfolio_capital_efficiency_input_contract_v1/",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/",
+    "reports/portfolio_capital_efficiency_allocation_baseline_spec_v1/",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/"
+  ],
+  "what_was_built": [
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/advisory_memo_schema.json (machine-readable P5 schema: 10 required memo sections, 5 allowed WATCH/undefined classifications, enumerated forbidden_verdict_language, verdict_language_rules, memo_global_rules; memo_produced_in_this_bundle=false)",
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/advisory_memo_schema.md (human-readable schema)",
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/report.json (this build report)",
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/report.md (build report)",
+    "tools/portfolio_capital_efficiency_advisory_memo_schema_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_portfolio_capital_efficiency_advisory_memo_schema.py (29 tests covering schema + safety + allowed/forbidden verdict language + C10 deferral + validator failure modes + P0..P4 companions)"
+  ],
+  "files_changed": [
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/advisory_memo_schema.json",
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/advisory_memo_schema.md",
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/report.json",
+    "reports/portfolio_capital_efficiency_advisory_memo_schema_v1/report.md",
+    "tools/portfolio_capital_efficiency_advisory_memo_schema_check.py",
+    "tests/test_portfolio_capital_efficiency_advisory_memo_schema.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md",
+    "brain_memory/logs/system_changes.md"
+  ],
+  "memo_sections_defined": [
+    "admissible_frozen_inputs_summary",
+    "inadmissible_deferred_inputs_summary",
+    "per_strategy_standalone_summary",
+    "overlap_correlation_summary",
+    "allocation_baseline_comparison",
+    "capital_efficiency_ranking",
+    "basket_usefulness_classification",
+    "risk_warnings_and_limitations",
+    "operator_decision_checklist",
+    "no_action_recommendation"
+  ],
+  "allowed_classifications": [
+    "watch_only_useful_candidate",
+    "watch_only_basket_candidate",
+    "watch_only_redundant_candidate",
+    "watch_only_inadmissible",
+    "undefined_insufficient_data"
+  ],
+  "forbidden_verdict_language": [
+    "PASS", "ACTIVE", "STRONG",
+    "approved for paper trading", "approved for live trading",
+    "profit guarantee", "capital deployment instruction",
+    "broker/order/credential logic"
+  ],
+  "spec_only_record": {
+    "compute_enabled": false,
+    "capital_deployment_enabled": false,
+    "memo_produced_in_this_bundle": false,
+    "every_memo_section_produced_in_this_bundle_false": true,
+    "no_real_results_computed": true,
+    "no_real_memo_produced": true,
+    "allowed_classifications_exhaustive_five": true,
+    "no_action_default_on_missing_or_undefined": true,
+    "verdict_ceiling_watch_max": true
+  },
+  "c10_deferral_record": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "c10_reported_as": "watch_only_inadmissible while deferred",
+    "c10_files_read": false,
+    "c10_files_edited": false,
+    "c10_files_staged": false,
+    "c10_working_tree_state": "untouched (pre-existing M on tools/c10_real_candle_detection_once.py and tests/test_c10_real_candle_detection_once_runner_purity.py left exactly as found)",
+    "note": "C10 becomes eligible only once it has its own FROZEN, committed replay artifact admitted under P1; never the working tree."
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "ten_flags_pinned_false": [
+      "compute_enabled",
+      "capital_deployment_enabled",
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "live_capital_allocation_enabled",
+      "position_sizing_execution_enabled",
+      "backtest_enabled"
+    ],
+    "allowed_classifications_exactly_five": true,
+    "forbidden_verdict_language_enumerated": true,
+    "distinction_phrases_required_in_md": [
+      "Advisory-only",
+      "No real results are computed in this bundle.",
+      "A capital-efficiency score does not imply future returns.",
+      "An advisory allocation is not an execution instruction.",
+      "Candidate #10 remains deferred and is not connected by this schema."
+    ]
+  },
+  "tests_run": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_portfolio_capital_efficiency_advisory_memo_schema.py tests/test_portfolio_capital_efficiency_overlap_correlation_method.py tests/test_portfolio_capital_efficiency_allocation_baseline_spec.py tests/test_portfolio_capital_efficiency_metric_spec.py tests/test_portfolio_capital_efficiency_input_contract.py tests/test_portfolio_capital_efficiency_protocol.py --rootdir=tests -q",
+      "result": "160 passed in 1.45s (29 P5 + 28 P4 + 28 P3 + 26 P2 + 24 P1 + 25 P0)"
+    }
+  ],
+  "json_validity": {
+    "portfolio_capital_efficiency_advisory_memo_schema_check_validate": "validate: OK",
+    "portfolio_capital_efficiency_overlap_correlation_method_check_validate": "validate: OK (P4 companion unaffected)",
+    "portfolio_capital_efficiency_allocation_baseline_spec_check_validate": "validate: OK (P3 companion unaffected)",
+    "portfolio_capital_efficiency_metric_spec_check_validate": "validate: OK (P2 companion unaffected)",
+    "portfolio_capital_efficiency_input_contract_check_validate": "validate: OK (P1 companion unaffected)",
+    "portfolio_capital_efficiency_protocol_check_validate": "validate: OK (P0 companion unaffected)"
+  },
+  "registry_integration": {
+    "status": "deferred_not_wired",
+    "note": "Shared tools/strategy_candidate_registry.py intentionally NOT modified (additive-only / surgical)."
+  },
+  "spec_ladder_status": "P0 -> P1 -> P2 -> P3 -> P4 -> P5 spec ladder COMPLETE. The only remaining step is a separately-authorized COMPUTE bundle (and optional P1 amendment for per-trade/per-period frozen series).",
+  "recommended_next_bundle": [
+    "A separately-authorized COMPUTE bundle that runs P2 metrics + P3 baselines + P4 measures over FROZEN admissible inputs and emits a memo conforming to this P5 schema",
+    "Optional P1 Input Contract amendment that formally admits the FROZEN per-trade / per-period series the P4 measures require; spec only"
+  ],
+  "no_profit_claim": [
+    "This schema does not imply edge and does not allocate or deploy capital.",
+    "A defined memo section does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "No allocation is authorized by this schema alone."
+  ]
+}

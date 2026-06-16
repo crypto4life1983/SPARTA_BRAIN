@@ -1,0 +1,197 @@
+{
+  "allocation_baseline_spec_id": "portfolio_capital_efficiency_allocation_baseline_spec_v1",
+  "title": "SPARTA Portfolio Capital-Efficiency Allocation Baseline Spec v1",
+  "version": "1.0",
+  "kind": "allocation_baseline_spec",
+  "phase": "P3_allocation_baseline_spec",
+  "read_only": true,
+
+  "research_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "capital_deployment_enabled": false,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "live_capital_allocation_enabled": false,
+  "position_sizing_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "portfolio_capital_efficiency",
+  "lane_status_self_declared": "WATCH",
+
+  "companion_documents": {
+    "portfolio_capital_efficiency_protocol_v1_json": "reports/portfolio_capital_efficiency_protocol_v1/protocol.json",
+    "portfolio_capital_efficiency_input_contract_v1_json": "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.json",
+    "portfolio_capital_efficiency_metric_spec_v1_json": "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.json"
+  },
+
+  "research_objective": "Pin the EXACT method, inputs, and constraints for each Portfolio Capital-Efficiency allocation baseline -- the reference models a future advisory memo would compare. This bundle is spec/framework-only: it defines HOW each baseline WOULD assign advisory research weights over FROZEN admissible strategies (per the P1 Input Contract, using the P2 metrics); it computes NO real allocation, deploys NO capital, and produces NO real portfolio result. Computation is a separate, separately-authorized bundle.",
+
+  "verdict_ceiling_rules": {
+    "max_surfaced_verdict": "WATCH",
+    "pass_active_strong_forbidden": true,
+    "rationale": "Downstream, advisory allocation baselines inherit the upstream registries' WATCH ceiling and must never imply readiness not earned."
+  },
+
+  "c10_boundary": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "note": "This spec does not read, connect to, or depend on Candidate #10 indicator results. C10 remains deferred until it has its own FROZEN, committed replay artifact; only then does it become an ordinary admissible strategy under the P1 rules. Never the working tree."
+  },
+
+  "shared_symbols": {
+    "S_admissible": "Set of strategies admissible under the P1 Input Contract (committed + frozen + checksummed + version-pinned, WATCH-ceiled).",
+    "S_inadmissible": "Set of strategies that are inadmissible (unfrozen / uncommitted / unpinned / bypassed-verdict); these receive weight 0 by rule.",
+    "w_i": "Advisory research weight of strategy i (never an execution size). 0 <= w_i; sum over all strategies + cash bucket == 1.",
+    "sigma_i": "standalone_risk of strategy i (P1 frozen field).",
+    "L": "Pre-declared concentration cap in (0, 1] (operator scalar constant; never inferred).",
+    "B": "Pre-declared total capital-at-risk envelope (operator scalar constant; never inferred).",
+    "w_cash": "Weight of the cash / unallocated bucket; absorbs any residual and is the full allocation when no strategy qualifies.",
+    "MCE_i": "marginal_capital_efficiency rank of strategy i, supplied by the P2 metric (+ future P4 correlation); RANKING ONLY."
+  },
+
+  "allocation_baselines": [
+    {
+      "id": "equal_weight",
+      "label": "Equal weight per admissible strategy",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "status": "reference",
+      "method": "For each strategy i in S_admissible: w_i = 1 / |S_admissible|. Strategies in S_inadmissible get w_i = 0. If S_admissible is empty, the whole allocation falls to w_cash (see cash_unallocated_bucket).",
+      "inputs": ["S_admissible"],
+      "constraints": ["weights_sum_to_one_incl_cash", "long_only", "inadmissible_weight_zero", "concentration_cap_L"],
+      "validation_rules": [
+        "Only P1-admissible strategies receive weight; inadmissible strategies are zero by rule.",
+        "If |S_admissible| would push any w_i above L, the capped_concentration baseline applies instead and the excess routes to cash."
+      ]
+    },
+    {
+      "id": "equal_risk",
+      "label": "Equal risk per strategy (inverse-volatility / risk parity)",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "status": "reference",
+      "method": "For each strategy i in S_admissible with sigma_i > 0: raw_i = 1 / sigma_i ; w_i = raw_i / sum_{j in S_admissible} raw_j. Inadmissible strategies get w_i = 0. A strategy with missing or non-positive sigma_i is UNDEFINED and excluded (flagged), never assigned an inferred risk.",
+      "inputs": ["S_admissible", "standalone_risk"],
+      "constraints": ["weights_sum_to_one_incl_cash", "long_only", "inadmissible_weight_zero", "concentration_cap_L", "capital_at_risk_budget_B"],
+      "validation_rules": [
+        "sigma_i must come from a FROZEN admissible report (P1 standalone_risk).",
+        "sigma_i <= 0 or missing => strategy excluded + flagged (UNDEFINED over silent default).",
+        "Risk-parity weights remain subject to the concentration cap L and the budget B."
+      ]
+    },
+    {
+      "id": "capped_concentration",
+      "label": "Capped concentration per strategy",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "status": "reference",
+      "method": "Start from a base allocation (equal_weight or equal_risk). Clip each w_i to the pre-declared cap L: w_i' = min(w_i, L). Re-distribute the clipped excess across uncapped admissible strategies pro-rata, iterating until no strategy exceeds L. Any residual that cannot be placed without breaching L routes to w_cash.",
+      "inputs": ["base_allocation", "pre_declared_concentration_cap_L"],
+      "constraints": ["weights_sum_to_one_incl_cash", "long_only", "no_grouping_share_exceeds_L", "inadmissible_weight_zero"],
+      "validation_rules": [
+        "L is operator-declared in (0, 1]; never inferred from data.",
+        "Per-candidate, per-asset, and per-family shares all respect L (uses the P2 concentration_limit definition).",
+        "Unplaceable residual goes to cash, never silently over-concentrated."
+      ]
+    },
+    {
+      "id": "zero_for_inadmissible",
+      "label": "Zero allocation for inadmissible / unfrozen strategies",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "status": "hard_constraint",
+      "method": "For every strategy i in S_inadmissible (unfrozen, uncommitted, unpinned, or surfacing a bypassed PASS/ACTIVE/STRONG verdict): w_i = 0, unconditionally. This rule overrides every other baseline.",
+      "inputs": ["S_inadmissible"],
+      "constraints": ["inadmissible_weight_zero_is_absolute"],
+      "validation_rules": [
+        "No baseline may assign positive weight to an inadmissible strategy.",
+        "Candidate #10 is currently inadmissible (deferred, not frozen) and therefore receives weight 0 under this rule.",
+        "Admissibility is decided solely by the P1 Input Contract."
+      ]
+    },
+    {
+      "id": "ranking_only_marginal_efficiency",
+      "label": "Ranking-only allocation using future marginal capital efficiency",
+      "computed_in_this_bundle": false,
+      "ranking_only": true,
+      "status": "WATCH_only",
+      "method": "Rank admissible strategies by MCE_i (P2 marginal_capital_efficiency, descending). The ranking informs a HUMAN ordering of which strategies merit more research attention; it is NEVER converted into automatic weights or execution sizes. Any weights a human later assigns from this ranking still pass through zero_for_inadmissible + capped_concentration + the budget B.",
+      "inputs": ["S_admissible", "marginal_capital_efficiency_rank"],
+      "constraints": ["ranking_only_never_auto_sizes", "inadmissible_weight_zero", "concentration_cap_L"],
+      "validation_rules": [
+        "RANKING ONLY: produces an ordering, not weights; never auto-sizes capital.",
+        "MCE_i is supplied by the P2 metric (+ future P4 correlation); not computed in this bundle.",
+        "Inherits the WATCH ceiling; never surfaces PASS/ACTIVE/STRONG."
+      ]
+    },
+    {
+      "id": "cash_unallocated_bucket",
+      "label": "Cash / unallocated bucket when no strategy qualifies",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "status": "hard_constraint",
+      "method": "A cash / unallocated bucket with weight w_cash absorbs every residual: w_cash = 1 - sum_i w_i over all strategies. If S_admissible is empty (no strategy qualifies), w_cash = 1 (full unallocated). w_cash is never negative.",
+      "inputs": ["all_strategy_weights"],
+      "constraints": ["w_cash_non_negative", "weights_sum_to_one_incl_cash", "full_cash_when_no_admissible_strategy"],
+      "validation_rules": [
+        "When no strategy is admissible, the entire advisory allocation is cash (w_cash = 1) -- the framework never forces capital onto an unqualified strategy.",
+        "w_cash absorbs clipped concentration excess and budget headroom; it is never negative.",
+        "Cash is an advisory placeholder, not a deployed cash position."
+      ]
+    }
+  ],
+
+  "allocation_constraints": {
+    "weights_sum_to_one_incl_cash": "Sum of all strategy weights + w_cash == 1.",
+    "long_only_research_weights": "No negative advisory weights at this stage (no shorting the bench); 0 <= w_i.",
+    "inadmissible_weight_zero": "Every P1-inadmissible strategy receives weight 0 (zero_for_inadmissible rule is absolute).",
+    "concentration_cap_L_enforced": "No candidate / asset / family grouping share exceeds the pre-declared cap L (P2 concentration_limit).",
+    "capital_at_risk_budget_B_respected": "Total advisory capital-at-risk stays within B (P2 capital_at_risk_budget); excess routes to cash.",
+    "frozen_admissible_inputs_only": "All inputs are FROZEN admissible fields per P1; live / networked / uncommitted inputs are inadmissible.",
+    "no_lookahead": "No baseline uses information unavailable at the decision time of the underlying frozen report.",
+    "reproducibility": "Same frozen inputs + same pre-declared constants reproduce the same advisory weights bit-for-bit.",
+    "no_real_allocation_in_this_bundle": "This bundle computes NO real allocation, deploys NO capital, and emits NO real portfolio result."
+  },
+
+  "pass_watch_fail_rules": {
+    "PASS": "A future allocation run is PASS-grade FOR REVIEW only when: it uses a defined baseline; every input is FROZEN + admissible (P1); inadmissible strategies are zero; weights (incl. cash) sum to one and are long-only; no grouping breaches L; total capital-at-risk stays within B; the marginal-efficiency baseline is used for ranking only; outputs respect the WATCH ceiling; and the run reproduces bit-for-bit. PASS means 'advisory weights fit for human review', never 'deploy' or 'execute'.",
+    "WATCH": "Allocation computable but borderline (thin admissible set, much weight routed to cash, an accepted UNDEFINED/excluded strategy, sparse P4 correlation for the ranking); documented and re-checked.",
+    "FAIL": "Any inadmissible strategy gets positive weight; weights do not sum to one or go negative; a grouping breaches L; the budget B is exceeded without routing to cash; the marginal-efficiency ranking was used to auto-size; or the WATCH ceiling was bypassed."
+  },
+
+  "required_future_artifacts": [
+    "Portfolio Capital-Efficiency Overlap/Correlation Method v1 (P4) -- supplies rho_ij used by equal_risk refinements + the marginal-efficiency ranking; spec only.",
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- finalises the advisory report schema that hosts these baselines; spec only.",
+    "A separately-authorized COMPUTE bundle that actually runs these baselines over frozen admissible inputs and emits an advisory allocation report.",
+    "Lane closeout memo if the capital-efficiency idea PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Advisory-only. Allocation baseline spec / framework only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No live capital allocation. No capital deployment. No paper-order execution. No order placement. No order sizing for execution.",
+    "No scheduler / background daemon. No external network calls in this spec's runtime.",
+    "No real allocation computed in this bundle. No real portfolio result produced. No data fetch, no detector, no replay, no backtest.",
+    "Do not modify paper / live execution files. Do not read Candidate #10 working-tree files, tests, labels, replay, or detector.",
+    "Candidate #10 remains deferred and is not connected by this spec; C10 must finish and freeze by itself first.",
+    "Consume only FROZEN, committed, admissible artifacts; never live positions or uncommitted working trees.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this spec alone.",
+    "A capital-efficiency score does not imply future returns. An advisory allocation is not an execution instruction. No allocation is authorized by this spec alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This spec does not imply edge and does not allocate or deploy capital.",
+    "A defined allocation baseline does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No allocation is authorized by this spec alone (a separate compute bundle requires its own authorization)."
+  ]
+}

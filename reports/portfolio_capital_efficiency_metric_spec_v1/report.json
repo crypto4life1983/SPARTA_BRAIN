@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "layer": "portfolio_capital_efficiency_metric_spec_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "phase": "P2_efficiency_metric_spec",
+  "build_date": "2026-06-16",
+  "companions": [
+    "reports/portfolio_capital_efficiency_protocol_v1/",
+    "reports/portfolio_capital_efficiency_input_contract_v1/"
+  ],
+  "what_was_built": [
+    "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.json (machine-readable P2 metric spec: 5 metrics with formula + inputs + units + range + validation_rules, shared symbols, input_field_dependencies, global metric_validation_rules, advisory_report_schema; all computed_in_this_bundle=false)",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.md (human-readable spec)",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/report.json (this build report)",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/report.md (build report)",
+    "tools/portfolio_capital_efficiency_metric_spec_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_portfolio_capital_efficiency_metric_spec.py (26 tests covering schema + safety + spec-only + C10 deferral + validator failure modes + P0/P1 companions)"
+  ],
+  "files_changed": [
+    "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.json",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.md",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/report.json",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/report.md",
+    "tools/portfolio_capital_efficiency_metric_spec_check.py",
+    "tests/test_portfolio_capital_efficiency_metric_spec.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md",
+    "brain_memory/logs/system_changes.md"
+  ],
+  "metrics_defined": [
+    "capital_at_risk_budget (utilisation = sum_i w_i*sigma_i / B; constraint <= B)",
+    "candidate_overlap (weighted Jaccard over asset/regime/direction; range [0,1])",
+    "diversification_ratio (DR = sum_i w_i*sigma_i / sigma_p; range >= 1)",
+    "concentration_limit (share_g vs pre-declared cap L; breach => FAIL)",
+    "marginal_capital_efficiency (MCE_i = e_i / mrc_i; RANKING ONLY)"
+  ],
+  "spec_only_record": {
+    "compute_enabled": false,
+    "every_metric_computed_in_this_bundle_false": true,
+    "advisory_report_schema_produced_in_this_bundle": false,
+    "no_real_portfolio_result_produced": true,
+    "marginal_capital_efficiency_ranking_only": true,
+    "pre_declared_constants_never_fit": ["B", "L", "overlap_dimension_weights"],
+    "undefined_over_silent_default": true
+  },
+  "c10_deferral_record": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "c10_files_read": false,
+    "c10_files_edited": false,
+    "c10_files_staged": false,
+    "c10_working_tree_state": "untouched (pre-existing M on tools/c10_real_candle_detection_once.py and tests/test_c10_real_candle_detection_once_runner_purity.py left exactly as found)",
+    "note": "C10 remains deferred until it has its own FROZEN, committed replay artifact; only then admissible under P1 rules."
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "nine_flags_pinned_false": [
+      "compute_enabled",
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "live_capital_allocation_enabled",
+      "position_sizing_execution_enabled",
+      "backtest_enabled"
+    ],
+    "verdict_ceiling_watch_max": true,
+    "pass_active_strong_forbidden": true,
+    "distinction_phrases_required_in_md": [
+      "Advisory-only",
+      "No metric is computed in this bundle.",
+      "A capital-efficiency score does not imply future returns.",
+      "An advisory allocation is not an execution instruction.",
+      "Candidate #10 remains deferred and is not connected by this spec."
+    ]
+  },
+  "tests_run": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_portfolio_capital_efficiency_metric_spec.py tests/test_portfolio_capital_efficiency_input_contract.py tests/test_portfolio_capital_efficiency_protocol.py --rootdir=tests -q",
+      "result": "75 passed in 0.72s (26 P2 + 24 P1 + 25 P0)"
+    }
+  ],
+  "json_validity": {
+    "portfolio_capital_efficiency_metric_spec_check_validate": "validate: OK",
+    "portfolio_capital_efficiency_input_contract_check_validate": "validate: OK (P1 companion unaffected)",
+    "portfolio_capital_efficiency_protocol_check_validate": "validate: OK (P0 companion unaffected)"
+  },
+  "registry_integration": {
+    "status": "deferred_not_wired",
+    "note": "Shared tools/strategy_candidate_registry.py intentionally NOT modified (additive-only / surgical)."
+  },
+  "recommended_next_bundle": [
+    "Portfolio Capital-Efficiency Allocation Baseline Spec v1 (P3) -- equal-weight / inverse-vol / capped-weight reference models + concentration cap; spec only",
+    "Portfolio Capital-Efficiency Overlap/Correlation Method v1 (P4) -- supplies rho_ij used by diversification_ratio + marginal_capital_efficiency; spec only",
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- finalises advisory_report_schema; spec only"
+  ],
+  "no_profit_claim": [
+    "This spec does not imply edge and does not allocate capital.",
+    "A defined formula does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "No allocation is authorized by this spec alone."
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "layer": "portfolio_capital_efficiency_input_contract_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "phase": "P1_input_contract",
+  "build_date": "2026-06-16",
+  "companion_p0": "reports/portfolio_capital_efficiency_protocol_v1/",
+  "what_was_built": [
+    "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.json (machine-readable P1 input contract: admissible frozen input classes, required fields, admissibility + freeze rules, verdict ceiling, C10 deferral)",
+    "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.md (human-readable contract)",
+    "reports/portfolio_capital_efficiency_input_contract_v1/report.json (this build report)",
+    "reports/portfolio_capital_efficiency_input_contract_v1/report.md (build report)",
+    "tools/portfolio_capital_efficiency_input_contract_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_portfolio_capital_efficiency_input_contract.py (24 tests covering schema + safety + C10 deferral + validator failure modes + P0 companion)"
+  ],
+  "files_changed": [
+    "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.json",
+    "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.md",
+    "reports/portfolio_capital_efficiency_input_contract_v1/report.json",
+    "reports/portfolio_capital_efficiency_input_contract_v1/report.md",
+    "tools/portfolio_capital_efficiency_input_contract_check.py",
+    "tests/test_portfolio_capital_efficiency_input_contract.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md",
+    "brain_memory/logs/system_changes.md"
+  ],
+  "framework_only_record": {
+    "framework_only": true,
+    "reads_no_input_in_runtime": true,
+    "computes_nothing": true,
+    "connects_to_no_indicator_results": true,
+    "note": "P1 defines the portfolio input framework only. No concrete candidate output (C10 or otherwise) is connected, read, or evaluated."
+  },
+  "c10_deferral_record": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "blocked_until": "Candidate #10 finishes and freezes by itself first (its own lane produces a committed, checksummed replay/verdict artifact).",
+    "when_admissible": "Once C10 has a FROZEN, committed replay output, it becomes an ordinary read-only bench input under the same admissibility_rules -- usable to evaluate overlap, correlation, and capital efficiency. Frozen committed form only; never the working tree.",
+    "c10_files_read_for_mutation": false,
+    "c10_files_edited": false,
+    "c10_files_staged": false,
+    "c10_working_tree_state": "untouched (pre-existing M on tools/c10_real_candle_detection_once.py and tests/test_c10_real_candle_detection_once_runner_purity.py left exactly as found)"
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "eight_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "live_capital_allocation_enabled",
+      "position_sizing_execution_enabled",
+      "backtest_enabled"
+    ],
+    "advisory_only": true,
+    "framework_only": true,
+    "frozen_committed_inputs_only": true,
+    "all_admissible_classes_read_only_and_frozen": true,
+    "verdict_ceiling_watch_max": true,
+    "pass_active_strong_forbidden": true,
+    "live_positions_and_balances_inadmissible": true,
+    "uncommitted_working_tree_inadmissible": true,
+    "c10_deferred_not_connected": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data", "allocate capital now", "increase position size",
+      "execute this allocation", "connect c10 now"
+    ],
+    "distinction_phrases_required_in_md": [
+      "Advisory-only",
+      "No allocation is authorized by this contract alone.",
+      "Candidate #10 frozen replay outputs are a deferred future input and are not connected by this contract.",
+      "A capital-efficiency score does not imply future returns."
+    ]
+  },
+  "tests_run": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_portfolio_capital_efficiency_input_contract.py tests/test_portfolio_capital_efficiency_protocol.py --rootdir=tests -q",
+      "result": "49 passed in 0.51s (24 P1 + 25 P0)"
+    }
+  ],
+  "json_validity": {
+    "portfolio_capital_efficiency_input_contract_check_validate": "validate: OK",
+    "portfolio_capital_efficiency_protocol_check_validate": "validate: OK (P0 companion unaffected)"
+  },
+  "registry_integration": {
+    "status": "deferred_not_wired",
+    "note": "Shared tools/strategy_candidate_registry.py intentionally NOT modified (additive-only / surgical). Lane self-declares WATCH inside its own contract.json."
+  },
+  "recommended_next_bundle": [
+    "Portfolio Capital-Efficiency Metric Spec v1 (P2) -- pin exact formulas + inputs per metric; spec only, nothing computed",
+    "Portfolio Capital-Efficiency Allocation Baseline Spec v1 (P3) -- reference models + concentration cap; spec only",
+    "Portfolio Capital-Efficiency Overlap/Correlation Method v1 (P4) -- redundancy estimation method; spec only"
+  ],
+  "no_profit_claim": [
+    "This contract does not imply edge and does not allocate capital.",
+    "Clean, frozen inputs do not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "No allocation is authorized by this contract alone."
+  ]
+}

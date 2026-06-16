@@ -1,0 +1,221 @@
+{
+  "metric_spec_id": "portfolio_capital_efficiency_metric_spec_v1",
+  "title": "SPARTA Portfolio Capital-Efficiency Metric Spec v1",
+  "version": "1.0",
+  "kind": "metric_spec",
+  "phase": "P2_efficiency_metric_spec",
+  "read_only": true,
+
+  "research_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "live_capital_allocation_enabled": false,
+  "position_sizing_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "portfolio_capital_efficiency",
+  "lane_status_self_declared": "WATCH",
+
+  "companion_documents": {
+    "portfolio_capital_efficiency_protocol_v1_json": "reports/portfolio_capital_efficiency_protocol_v1/protocol.json",
+    "portfolio_capital_efficiency_input_contract_v1_json": "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.json"
+  },
+
+  "research_objective": "Pin the EXACT formula, required inputs, units, range, and validation rules for each Portfolio Capital-Efficiency metric defined (definition-only) in the P0 protocol, plus the schema of the future advisory report. This bundle is spec/framework-only: it defines HOW each metric WOULD be computed from FROZEN admissible inputs (per the P1 Input Contract); it computes NO metric and produces NO real portfolio result. Computation is a separate, separately-authorized bundle.",
+
+  "verdict_ceiling_rules": {
+    "max_surfaced_verdict": "WATCH",
+    "pass_active_strong_forbidden": true,
+    "rationale": "Downstream, advisory metrics inherit the upstream registries' WATCH ceiling and must never imply readiness not earned."
+  },
+
+  "c10_boundary": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "note": "This spec does not read, connect to, or depend on Candidate #10 indicator results. C10 remains deferred until it has its own FROZEN, committed replay artifact; only then does it become an ordinary admissible input under the P1 rules. Never the working tree."
+  },
+
+  "shared_symbols": {
+    "w_i": "Proposed research weight of candidate i (advisory, never an execution size). 0 <= w_i, sum_i w_i = 1 within a portfolio set.",
+    "sigma_i": "standalone_risk of candidate i, taken from its FROZEN per-strategy report (P1 field standalone_risk).",
+    "rho_ij": "Pairwise correlation estimate between candidates i and j, supplied by the P4 Overlap/Correlation Method (NOT estimated in this bundle).",
+    "sigma_p": "Portfolio standalone-risk aggregate: sigma_p = sqrt( sum_i sum_j w_i * w_j * rho_ij * sigma_i * sigma_j ).",
+    "e_i": "frozen_cost_aware_expectancy of candidate i, taken from its FROZEN per-strategy report (P1 field frozen_cost_aware_expectancy).",
+    "B": "Pre-declared total research capital-at-risk envelope (operator scalar constant; never inferred from data).",
+    "L": "Pre-declared concentration cap (operator scalar constant in (0, 1]; never inferred from data)."
+  },
+
+  "metrics": [
+    {
+      "id": "capital_at_risk_budget",
+      "label": "Capital-at-risk budget utilisation",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "formula": "car_i = w_i * sigma_i ; utilisation = ( sum_i car_i ) / B ; CONSTRAINT: sum_i car_i <= B.",
+      "inputs": ["pre_declared_total_risk_envelope", "w_i", "standalone_risk"],
+      "units": "fraction of the pre-declared budget B (dimensionless, 0..1+ where >1 means the budget is breached).",
+      "range": "[0, +inf); a future advisory allocation is FAIL if utilisation > 1 (budget breached).",
+      "validation_rules": [
+        "B must be operator-declared and strictly positive; never inferred from data.",
+        "If B is missing or <= 0, the metric is UNDEFINED and flagged, never defaulted.",
+        "sigma_i must come from a FROZEN admissible report (P1 standalone_risk)."
+      ]
+    },
+    {
+      "id": "candidate_overlap",
+      "label": "Pairwise candidate overlap / redundancy",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "formula": "For dimensions D in {asset, regime, direction} with sets A_i^D drawn from P1 exposure fields, jaccard_D(i,j) = |A_i^D ∩ A_j^D| / |A_i^D ∪ A_j^D| ; overlap(i,j) = ( w_asset*jaccard_asset + w_regime*jaccard_regime + w_dir*jaccard_dir ) / ( w_asset + w_regime + w_dir ). Dimension weights w_asset/w_regime/w_dir are pre-declared operator constants.",
+      "inputs": ["asset_exposure", "regime_exposure", "direction"],
+      "units": "dimensionless similarity in [0, 1] (1 = fully redundant exposure).",
+      "range": "[0, 1].",
+      "validation_rules": [
+        "Dimension weights are pre-declared constants; never fit to data.",
+        "If a union |A_i^D ∪ A_j^D| is empty for a dimension, that dimension's jaccard is UNDEFINED and EXCLUDED from the weighted average (never treated as 0 or 1).",
+        "Exposure sets come from FROZEN admissible reports (P1 asset/regime/direction fields)."
+      ]
+    },
+    {
+      "id": "diversification_ratio",
+      "label": "Diversification ratio",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "formula": "DR = ( sum_i w_i * sigma_i ) / sigma_p , where sigma_p = sqrt( sum_i sum_j w_i * w_j * rho_ij * sigma_i * sigma_j ).",
+      "inputs": ["w_i", "standalone_risk", "correlation_estimate_from_P4"],
+      "units": "dimensionless ratio (>= 1).",
+      "range": "[1, +inf); higher = capital spread across less-correlated edges.",
+      "validation_rules": [
+        "rho_ij is supplied by the P4 Overlap/Correlation Method; this spec does NOT estimate correlations.",
+        "If sigma_p == 0 (degenerate), DR is UNDEFINED and flagged, never set to +inf.",
+        "sigma_i must come from FROZEN admissible reports."
+      ]
+    },
+    {
+      "id": "concentration_limit",
+      "label": "Concentration limit / breach check",
+      "computed_in_this_bundle": false,
+      "ranking_only": false,
+      "formula": "For each grouping G in {candidate, asset, family}: share_g = ( sum_{k in g} w_k ) / ( sum_all w ) ; BREACH if any share_g > L.",
+      "inputs": ["per_candidate_weight", "per_asset_weight", "per_family_weight", "pre_declared_concentration_cap"],
+      "units": "fraction in [0, 1] per grouping; compared against the pre-declared cap L.",
+      "range": "[0, 1]; a future advisory allocation is FAIL if any grouping's share > L.",
+      "validation_rules": [
+        "L is operator-declared in (0, 1]; never inferred from data.",
+        "Per-asset / per-family aggregation uses the FROZEN asset_exposure field; an unmapped candidate is flagged, never silently grouped.",
+        "A breach is FAIL, not a down-weight signal."
+      ]
+    },
+    {
+      "id": "marginal_capital_efficiency",
+      "label": "Marginal capital efficiency (ranking only)",
+      "computed_in_this_bundle": false,
+      "ranking_only": true,
+      "formula": "mrc_i = ( w_i * sum_j w_j * rho_ij * sigma_i * sigma_j ) / sigma_p  (marginal risk contribution of candidate i) ; MCE_i = e_i / mrc_i.",
+      "inputs": ["frozen_cost_aware_expectancy", "w_i", "standalone_risk", "correlation_estimate_from_P4"],
+      "units": "after-cost expectancy per unit of marginal portfolio risk (dimensionless ratio used for RANKING only).",
+      "range": "real-valued; used ONLY to rank candidates for human review.",
+      "validation_rules": [
+        "RANKING ONLY: MCE is never converted into an auto-sizing or execution instruction.",
+        "If mrc_i == 0, MCE_i is UNDEFINED and flagged, never set to +inf.",
+        "e_i must come from a FROZEN admissible report; a candidate whose report surfaces a bypassed PASS/ACTIVE/STRONG verdict is inadmissible."
+      ]
+    }
+  ],
+
+  "input_field_dependencies": {
+    "capital_at_risk_budget": ["standalone_risk", "operator:pre_declared_total_risk_envelope"],
+    "candidate_overlap": ["asset_exposure", "regime_exposure", "direction"],
+    "diversification_ratio": ["standalone_risk", "P4:correlation_estimate"],
+    "concentration_limit": ["asset_exposure", "operator:pre_declared_concentration_cap"],
+    "marginal_capital_efficiency": ["frozen_cost_aware_expectancy", "standalone_risk", "P4:correlation_estimate"],
+    "note": "All non-operator, non-P4 inputs are FROZEN admissible fields defined in the P1 Input Contract (required_fields_per_input). Operator-prefixed inputs are pre-declared scalar constants. P4-prefixed inputs come from the future Overlap/Correlation Method bundle."
+  },
+
+  "metric_validation_rules": {
+    "frozen_admissible_inputs_only": "Every metric input (other than operator-declared constants) must be a FROZEN admissible field per the P1 Input Contract; live, networked, or uncommitted inputs are inadmissible.",
+    "no_lookahead": "No metric may use information not available at the decision time of the underlying frozen report.",
+    "reproducibility": "Same frozen inputs + same pre-declared constants reproduce the same metric value bit-for-bit on a second offline run.",
+    "units_declared_per_metric": "Each metric declares its units + range; no unitless magic numbers.",
+    "pre_declared_constants_never_fit": "B, L, and the overlap dimension weights are operator-declared constants and are NEVER fit, tuned, or inferred from data.",
+    "undefined_over_silent_default": "Any division-by-zero or empty-set case yields an explicit UNDEFINED+flag, never a silent 0 / 1 / +inf.",
+    "marginal_efficiency_ranking_only": "marginal_capital_efficiency is a ranking aid for human review only; it is never converted into an auto-sizing or execution instruction.",
+    "verdict_ceiling_inherited": "Every metric output carries the WATCH ceiling; PASS/ACTIVE/STRONG are never surfaced.",
+    "no_real_result_in_this_bundle": "This bundle computes NO metric and emits NO real portfolio result; it is spec-only."
+  },
+
+  "advisory_report_schema": {
+    "note": "Schema of the FUTURE advisory report (shaped in P5, produced only under a separate compute authorization). Defined here so metric outputs have a fixed home. NOT produced in this bundle.",
+    "produced_in_this_bundle": false,
+    "portfolio_level_fields": [
+      "report_id",
+      "lane",
+      "verdict_ceiled",
+      "pre_declared_total_risk_envelope_B",
+      "pre_declared_concentration_cap_L",
+      "capital_at_risk_utilisation",
+      "diversification_ratio",
+      "concentration_breaches",
+      "input_provenance",
+      "caveats"
+    ],
+    "per_candidate_fields": [
+      "candidate_id",
+      "verdict_ceiled",
+      "proposed_research_weight_w_i",
+      "standalone_risk_sigma_i",
+      "max_pairwise_overlap",
+      "marginal_capital_efficiency_rank",
+      "rationale",
+      "caveat",
+      "dataset_freeze_ref",
+      "contract_version_pin"
+    ],
+    "every_row_requires_rationale_and_caveat": true,
+    "every_row_inherits_watch_ceiling": true
+  },
+
+  "pass_watch_fail_rules": {
+    "PASS": "A future metric computation is PASS-grade FOR REVIEW only when: every input is FROZEN + admissible (P1); all pre-declared constants are operator-supplied; every metric respects its units/range + UNDEFINED handling; marginal_capital_efficiency is used for ranking only; outputs respect the WATCH ceiling; and the run reproduces bit-for-bit. PASS means 'metrics fit for human review', never 'allocate' or 'execute'.",
+    "WATCH": "Metrics computable but at least one is borderline (sparse correlation coverage from P4, thin candidate set, a flagged UNDEFINED case the operator accepts); documented and re-checked.",
+    "FAIL": "Any input is inadmissible/unfrozen; a pre-declared constant was fit to data; a division-by-zero was silently defaulted; marginal efficiency was used to auto-size; a budget/concentration breach was ignored; or the WATCH ceiling was bypassed."
+  },
+
+  "required_future_artifacts": [
+    "Portfolio Capital-Efficiency Allocation Baseline Spec v1 (P3) -- reference models (equal-weight / inverse-vol / capped-weight) + concentration cap; spec only.",
+    "Portfolio Capital-Efficiency Overlap/Correlation Method v1 (P4) -- supplies rho_ij used by diversification_ratio + marginal_capital_efficiency; spec only.",
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- finalises the advisory_report_schema; spec only.",
+    "A separately-authorized COMPUTE bundle that actually runs these formulas over frozen admissible inputs and emits an advisory report.",
+    "Lane closeout memo if the capital-efficiency idea PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Advisory-only. Metric spec / framework only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No live capital allocation. No paper-order execution. No order placement. No order sizing for execution.",
+    "No scheduler / background daemon. No external network calls in this spec's runtime.",
+    "No metric computed in this bundle. No real portfolio result produced. No data fetch, no detector, no replay, no backtest.",
+    "Do not modify paper / live execution files. Do not read Candidate #10 working-tree files, tests, labels, replay, or detector.",
+    "Candidate #10 remains deferred and is not connected by this spec; C10 must finish and freeze by itself first.",
+    "Consume only FROZEN, committed, admissible artifacts; never live positions or uncommitted working trees.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this spec alone.",
+    "A capital-efficiency score does not imply future returns. An advisory allocation is not an execution instruction. No allocation is authorized by this spec alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This spec does not imply edge and does not allocate capital.",
+    "A defined formula does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No allocation is authorized by this spec alone (a separate compute bundle requires its own authorization)."
+  ]
+}

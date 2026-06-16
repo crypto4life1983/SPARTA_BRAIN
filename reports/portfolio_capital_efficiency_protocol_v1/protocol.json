@@ -1,0 +1,132 @@
+{
+  "protocol_id": "portfolio_capital_efficiency_protocol_v1",
+  "title": "SPARTA Portfolio Capital-Efficiency Protocol Memo v1",
+  "version": "1.0",
+  "kind": "research_protocol",
+  "read_only": true,
+
+  "research_only": true,
+  "advisory_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "live_capital_allocation_enabled": false,
+  "position_sizing_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "portfolio_capital_efficiency",
+  "lane_status_self_declared": "WATCH",
+  "lane_history_note": "This v1 memo OPENS a NEW research lane that studies how research capital-at-risk could be allocated ACROSS SPARTA's existing strategy bench. It does NOT propose, change, or execute any allocation. It consumes only FROZEN, committed research artifacts (read-only). It never reads live positions, broker balances, or in-flight working-tree state of any candidate.",
+
+  "purpose": "Define -- specification only -- how SPARTA will study capital efficiency across its bench of researched strategy candidates: diversification, overlap/redundancy, concentration limits, and capital-at-risk budgeting. The output of the FULL lane (future, separately authorized) is an ADVISORY memo only; no capital is ever allocated, sized, or executed by this lane.",
+
+  "scope": {
+    "in_scope": [
+      "Read-only analysis of FROZEN, committed research artifacts (e.g., strategy_report_registry / strategy_candidate_registry outputs, frozen per-strategy backtest report.json verdicts).",
+      "Defining capital-efficiency metrics on paper (formulas + inputs named, NOT computed in this bundle).",
+      "Defining baseline allocation models on paper (equal-weight, inverse-volatility, capped-weight) as research reference points only.",
+      "Defining the shape of a future ADVISORY allocation memo (per-candidate suggested research weight + rationale + caveats)."
+    ],
+    "out_of_scope": [
+      "Live capital. Real broker/exchange balances. Real positions.",
+      "Position sizing for execution. Order sizing. Order placement.",
+      "Any change to live or paper trading logic or execution files.",
+      "Computing any metric or allocation in this bundle (P0 is specification only).",
+      "Reading, modifying, or depending on any in-flight (uncommitted) candidate working-tree state."
+    ]
+  },
+
+  "c10_boundary": {
+    "must_not_touch_c10": true,
+    "note": "This lane MUST NOT read-for-mutation, edit, stage, or depend on the in-flight Candidate #10 (intraweek calendar seasonality) files, tests, labels, replay, detector, or working-tree state. If C10 ever produces a FROZEN, committed verdict artifact, that frozen artifact may later be treated like any other read-only bench input -- but only the committed/frozen form, never the working tree."
+  },
+
+  "input_sources": [
+    {"id": "strategy_report_registry", "form": "frozen committed report.json artifacts under reports/", "access": "read_only", "note": "Verdicts are verdict-ceilinged to WATCH by the upstream registry; this lane inherits that ceiling and never surfaces PASS/ACTIVE/STRONG."},
+    {"id": "strategy_candidate_registry", "form": "frozen committed candidate status summaries", "access": "read_only", "note": "Candidate status / evidence_level descriptions only; never live positions."},
+    {"id": "frozen_backtest_reports", "form": "committed per-strategy report.json with PASS/WATCH/FAIL verdict + cost-aware stats", "access": "read_only", "note": "Only datasets that were FROZEN with checksums upstream are admissible; manually edited or uncommitted artifacts are inadmissible."}
+  ],
+
+  "inadmissible_inputs": [
+    "Live broker / exchange balances or positions.",
+    "Any uncommitted working-tree artifact (including in-flight C10).",
+    "Any dataset that was not frozen with checksums upstream.",
+    "Any number sourced from a live network fetch."
+  ],
+
+  "capital_efficiency_metrics": [
+    {"id": "capital_at_risk_budget", "label": "Capital-at-risk budget", "definition_only": true, "summary": "A pre-declared total research capital-at-risk envelope that any future advisory allocation must sum within. Defined here; never sized or executed.", "inputs": ["pre_declared_total_risk_envelope"]},
+    {"id": "candidate_overlap", "label": "Candidate overlap / redundancy", "definition_only": true, "summary": "Pairwise similarity of two candidates' signal exposure (same asset / same regime / same direction) used to flag redundant capital. Estimation method is defined in a later phase; NOT computed here.", "inputs": ["candidate_asset_exposure", "candidate_regime_exposure", "candidate_direction"]},
+    {"id": "diversification_ratio", "label": "Diversification ratio", "definition_only": true, "summary": "Ratio of weighted-average standalone risk to combined portfolio risk; higher means capital is spread across less-correlated edges. Defined; never computed in this bundle.", "inputs": ["per_candidate_standalone_risk", "candidate_correlation_estimate"]},
+    {"id": "concentration_limit", "label": "Concentration limit", "definition_only": true, "summary": "Maximum share of the capital-at-risk budget any single candidate / asset / family may hold in a future advisory allocation.", "inputs": ["per_candidate_weight", "per_asset_weight", "per_family_weight"]},
+    {"id": "marginal_capital_efficiency", "label": "Marginal capital efficiency", "definition_only": true, "summary": "Advisory return-per-unit-of-marginal-risk a candidate adds to the bench, used only to RANK candidates for human review -- never to auto-size capital.", "inputs": ["frozen_cost_aware_expectancy", "marginal_risk_contribution"]}
+  ],
+
+  "allocation_baselines": [
+    {"id": "equal_weight", "label": "Equal-weight reference", "summary": "Every admissible candidate receives the same research weight. Reference baseline only.", "status": "reference"},
+    {"id": "inverse_volatility", "label": "Inverse-volatility reference", "summary": "Weight inversely proportional to each candidate's frozen standalone risk. Reference baseline only.", "status": "reference"},
+    {"id": "capped_weight", "label": "Capped-weight reference", "summary": "Equal- or inverse-vol weighting subject to the concentration_limit cap. Reference baseline only.", "status": "reference"},
+    {"id": "discretionary_human", "label": "Discretionary human allocation", "summary": "Operator allocates by judgment using the advisory memo. This lane informs, it does not decide.", "status": "WATCH_only"}
+  ],
+
+  "validation_phases": [
+    {"phase": "P0_protocol", "purpose": "This bundle. Lock language, scope, capital boundaries, kill rules. No data, no compute, no allocation."},
+    {"phase": "P1_input_contract", "purpose": "Define which FROZEN committed artifacts this lane may read + the admissibility/freeze rules. Spec only; no read run."},
+    {"phase": "P2_efficiency_metric_spec", "purpose": "Pin exact formulas + inputs for each capital-efficiency metric. Spec only; no metric computed."},
+    {"phase": "P3_allocation_baseline_spec", "purpose": "Pin the equal-weight / inverse-vol / capped-weight reference models + the concentration-limit cap. Spec only; no weights computed."},
+    {"phase": "P4_overlap_correlation_spec", "purpose": "Pin the overlap / correlation / redundancy estimation method + its data requirements. Spec only; no estimate computed."},
+    {"phase": "P5_advisory_report_shape", "purpose": "Pin the schema of the future ADVISORY allocation memo (per-candidate suggested research weight + rationale + caveats). Spec only."},
+    {"phase": "P6_robustness_sensitivity", "purpose": "Define how an advisory allocation's stability is stress-tested against estimation error (correlation drift, expectancy decay). Spec; compute requires separate authorization."},
+    {"phase": "P7_paper_allocation_simulation", "purpose": "Paper allocation SIMULATION ONLY (no broker, no order, no live capital) -- and ONLY if a SEPARATE future authorization grants this phase."},
+    {"phase": "P8_live_capital_allocation", "purpose": "EXPLICITLY OUT OF SCOPE for this protocol stack. Allocating real capital requires a SEPARATE far-future protocol + authorizations after evidence exists."}
+  ],
+
+  "pass_watch_fail_rules": {
+    "PASS": "A future ADVISORY allocation is PASS-grade for review only when: it draws solely on FROZEN admissible inputs; it respects the pre-declared capital-at-risk budget and concentration limits; it is stable under the P6 estimation-error stress; it does not concentrate the bench into a single asset / family / regime; every weight carries a written rationale + caveat; and no rule was changed mid-study. PASS means 'fit for human review', NEVER 'execute'.",
+    "WATCH": "Advisory allocation shows a plausible efficiency improvement but at least one of: high sensitivity to correlation/expectancy estimation error; reliance on a thin set of candidates; concentration near a limit; inputs only partially frozen. Stays advisory; flagged for caution.",
+    "FAIL": "Allocation depends on inadmissible/unfrozen inputs; breaches the capital-at-risk budget or a concentration limit; collapses under estimation-error stress; or implicitly assumes execution. FAIL allocations are discarded, not down-weighted."
+  },
+
+  "kill_conditions": [
+    "Any input is sourced from live balances, live positions, a network fetch, or an uncommitted working tree (including in-flight C10).",
+    "An advisory allocation is treated, described, or wired as if it were an execution instruction.",
+    "A concentration limit or the capital-at-risk budget is silently exceeded.",
+    "A metric or weight is computed inside the P0/spec bundles (compute belongs to separately authorized later phases).",
+    "Upstream verdict ceiling (WATCH max) is bypassed so PASS/ACTIVE/STRONG leaks into an allocation.",
+    "Results cannot be reproduced bit-for-bit from the named frozen inputs by a second offline run."
+  ],
+
+  "required_future_artifacts": [
+    "Portfolio Capital-Efficiency Input Contract v1 (P1) -- which frozen artifacts are admissible + freeze rules. Spec only.",
+    "Portfolio Capital-Efficiency Metric Spec v1 (P2) -- exact formulas + inputs. Spec only.",
+    "Portfolio Capital-Efficiency Allocation Baseline Spec v1 (P3) -- reference models + concentration cap. Spec only.",
+    "Portfolio Capital-Efficiency Overlap/Correlation Method v1 (P4) -- redundancy estimation method. Spec only.",
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- shape of the human-review allocation memo.",
+    "Lane closeout memo if the capital-efficiency idea PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Advisory-only. Protocol / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No live capital allocation. No paper-order execution. No order placement. No order sizing for execution.",
+    "No scheduler / background daemon. No external network calls in this protocol's runtime.",
+    "No data fetch in this bundle. No metric computed in this bundle. No allocation computed in this bundle.",
+    "Do not modify paper / live execution files. Do not touch Candidate #10 files, tests, labels, replay, detector, or working-tree state.",
+    "Consume only FROZEN, committed, admissible artifacts; never live positions or uncommitted working trees.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this protocol alone.",
+    "A capital-efficiency score does not imply future returns. An advisory allocation is not an execution instruction. No allocation is authorized by this protocol alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This protocol does not imply edge and does not allocate capital.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No paper or live capital allocation is authorized.",
+    "No allocation is authorized by this protocol alone (P5+ outputs require their own separate authorization)."
+  ]
+}

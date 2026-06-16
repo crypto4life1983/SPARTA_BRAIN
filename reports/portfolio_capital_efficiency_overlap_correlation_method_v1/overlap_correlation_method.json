@@ -1,0 +1,262 @@
+{
+  "method_id": "portfolio_capital_efficiency_overlap_correlation_method_v1",
+  "title": "SPARTA Portfolio Capital-Efficiency Overlap/Correlation Method v1",
+  "version": "1.0",
+  "kind": "overlap_correlation_method",
+  "phase": "P4_overlap_correlation_method",
+  "read_only": true,
+
+  "research_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "live_capital_allocation_enabled": false,
+  "position_sizing_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "portfolio_capital_efficiency",
+  "lane_status_self_declared": "WATCH",
+
+  "companion_documents": {
+    "portfolio_capital_efficiency_protocol_v1_json": "reports/portfolio_capital_efficiency_protocol_v1/protocol.json",
+    "portfolio_capital_efficiency_input_contract_v1_json": "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.json",
+    "portfolio_capital_efficiency_metric_spec_v1_json": "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.json",
+    "portfolio_capital_efficiency_allocation_baseline_spec_v1_json": "reports/portfolio_capital_efficiency_allocation_baseline_spec_v1/allocation_baseline_spec.json"
+  },
+
+  "research_objective": "Pin the EXACT method, inputs, units, range, and validation rules for measuring overlap, correlation, redundancy, and independence between any two FROZEN admissible strategies -- the rho_ij and redundancy signals consumed by the P2 metrics (diversification_ratio, marginal_capital_efficiency) and the P3 baselines (equal_risk refinement, marginal-efficiency ranking). This bundle is spec/framework-only: it defines HOW each measure WOULD be computed from FROZEN per-trade / per-period series; it computes NO real overlap, NO real correlation, and produces NO real portfolio result. Computation is a separate, separately-authorized bundle.",
+
+  "verdict_ceiling_rules": {
+    "max_surfaced_verdict": "WATCH",
+    "pass_active_strong_forbidden": true,
+    "rationale": "Downstream, advisory overlap/correlation measures inherit the upstream registries' WATCH ceiling and must never imply readiness not earned."
+  },
+
+  "c10_boundary": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "note": "This method does not read, connect to, or depend on Candidate #10 indicator results, replay, or working-tree state. C10's per-trade / per-period series are exactly the shape these measures consume, but C10 is DEFERRED: it becomes eligible only once it has its own FROZEN, committed replay artifact admitted under the P1 Input Contract. Never the working tree."
+  },
+
+  "required_frozen_series": {
+    "note": "These measures need richer FROZEN per-trade / per-period series than the P1 summary fields -- supplied by a committed, checksummed replay artifact (admissible only when frozen + committed). A future P1 amendment or the frozen replay artifact itself admits these series. No live strategy results are ever read.",
+    "series": [
+      {"id": "in_position_flag_t", "desc": "Per-bar boolean: strategy i in a position at time t (from frozen replay)."},
+      {"id": "capital_at_risk_t", "desc": "Per-bar capital-at-risk of strategy i at time t (from frozen replay)."},
+      {"id": "symbol_t", "desc": "Per-trade / per-bar symbol exposure (from frozen replay)."},
+      {"id": "direction_t", "desc": "Per-trade / per-bar direction: long / short / flat (from frozen replay)."},
+      {"id": "period_return_r_t", "desc": "Per-period (e.g., daily) return stream of strategy i (from frozen replay)."},
+      {"id": "drawdown_flag_t", "desc": "Per-period boolean: strategy i in a drawdown window at time t (from frozen replay)."}
+    ]
+  },
+
+  "shared_symbols": {
+    "i_j": "Two distinct FROZEN admissible strategies being compared.",
+    "T_common": "Aligned common time index over which both strategies have frozen series (intersection of their frozen windows).",
+    "N_min": "Pre-declared minimum aligned-sample count required before any correlation/overlap is defined (operator constant; never inferred).",
+    "rho_ij": "Pearson correlation of the two frozen period-return streams over T_common; the value consumed by P2 + P3.",
+    "tau_low": "Pre-declared low redundancy threshold for the independent class (operator constant).",
+    "tau_high": "Pre-declared high redundancy threshold for the redundant class (operator constant).",
+    "rho_low": "Pre-declared low absolute-correlation threshold for the independent class (operator constant)."
+  },
+
+  "methods": [
+    {
+      "id": "trade_time_overlap_pct",
+      "label": "Trade-time overlap percentage",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "overlap_time(i,j) = |{ t in T_common : in_position_i(t) AND in_position_j(t) }| / |{ t in T_common : in_position_i(t) OR in_position_j(t) }|  (Jaccard over in-position time).",
+      "inputs": ["in_position_flag_t"],
+      "units": "fraction of in-position time, dimensionless.",
+      "range": "[0, 1]; 1 = always in a position at the same time.",
+      "validation_rules": [
+        "Computed only over the aligned T_common.",
+        "If the union (either-in-position) set is empty, the measure is UNDEFINED and flagged, never 0.",
+        "Inputs are FROZEN per-bar in-position flags from a committed replay artifact."
+      ]
+    },
+    {
+      "id": "simultaneous_capital_at_risk_overlap",
+      "label": "Simultaneous capital-at-risk overlap",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "car_overlap(i,j) = ( sum_{t in T_common} min(car_i(t), car_j(t)) ) / ( sum_{t in T_common} max(car_i(t), car_j(t)) ).",
+      "inputs": ["capital_at_risk_t"],
+      "units": "fraction of capital-at-risk, dimensionless.",
+      "range": "[0, 1]; 1 = identical capital-at-risk timing + magnitude.",
+      "validation_rules": [
+        "Computed only over the aligned T_common.",
+        "If sum of max(car) over T_common is 0, the measure is UNDEFINED and flagged, never 0.",
+        "Inputs are FROZEN per-bar capital-at-risk series from a committed replay artifact."
+      ]
+    },
+    {
+      "id": "same_symbol_overlap",
+      "label": "Same-symbol overlap",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "same_symbol(i,j) = |{ t in T_common : in_position_i(t) AND in_position_j(t) AND symbol_i(t) == symbol_j(t) }| / |{ t in T_common : in_position_i(t) AND in_position_j(t) }|.",
+      "inputs": ["in_position_flag_t", "symbol_t"],
+      "units": "fraction of simultaneous in-position time on the same symbol, dimensionless.",
+      "range": "[0, 1].",
+      "validation_rules": [
+        "Denominator is the simultaneous in-position time; if it is empty, UNDEFINED and flagged.",
+        "Symbols use the SPARTA canonical mapping; an unmapped symbol is flagged, never silently matched.",
+        "Inputs are FROZEN per-bar symbol exposure from a committed replay artifact."
+      ]
+    },
+    {
+      "id": "same_direction_overlap",
+      "label": "Same-direction overlap",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "same_dir(i,j) = |{ t : simultaneous same-symbol AND direction_i(t) == direction_j(t) }| / |{ t : simultaneous same-symbol }|. Opposite-direction simultaneous same-symbol exposure is reported separately as a hedging_offset flag.",
+      "inputs": ["direction_t", "symbol_t", "in_position_flag_t"],
+      "units": "fraction of simultaneous same-symbol time in the same direction, dimensionless.",
+      "range": "[0, 1]; opposite direction (hedging) flagged separately, never folded silently.",
+      "validation_rules": [
+        "Denominator is the simultaneous same-symbol time; if empty, UNDEFINED and flagged.",
+        "Opposite-direction overlap is surfaced as a hedging_offset flag, not netted into the score.",
+        "Inputs are FROZEN per-bar direction from a committed replay artifact."
+      ]
+    },
+    {
+      "id": "return_stream_correlation",
+      "label": "Return-stream correlation (rho_ij)",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "rho_ij = cov(r_i, r_j) / ( sd(r_i) * sd(r_j) ) computed over T_common with at least N_min aligned periods. This rho_ij is the value consumed by P2 (diversification_ratio, marginal_capital_efficiency) and P3 (equal_risk refinement, ranking).",
+      "inputs": ["period_return_r_t"],
+      "units": "Pearson correlation coefficient, dimensionless.",
+      "range": "[-1, 1].",
+      "validation_rules": [
+        "Computed only over the aligned T_common with at least N_min periods; otherwise UNDEFINED and flagged.",
+        "If sd(r_i) == 0 or sd(r_j) == 0, rho_ij is UNDEFINED and flagged, never set to 0.",
+        "No lookahead: returns are the frozen per-period series; windows are not re-fit.",
+        "Inputs are FROZEN per-period return streams from a committed replay artifact."
+      ]
+    },
+    {
+      "id": "drawdown_period_overlap",
+      "label": "Drawdown-period overlap",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "dd_overlap(i,j) = |{ t in T_common : drawdown_i(t) AND drawdown_j(t) }| / |{ t in T_common : drawdown_i(t) OR drawdown_j(t) }|  (Jaccard over drawdown-period time).",
+      "inputs": ["drawdown_flag_t"],
+      "units": "fraction of drawdown time, dimensionless.",
+      "range": "[0, 1]; 1 = strategies bleed in the same windows.",
+      "validation_rules": [
+        "Computed only over the aligned T_common.",
+        "If neither strategy is ever in drawdown over T_common, the measure is UNDEFINED and flagged, never 0.",
+        "Inputs are FROZEN per-period drawdown flags from a committed replay artifact."
+      ]
+    },
+    {
+      "id": "redundancy_score",
+      "label": "Redundancy score",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "redundancy(i,j) = ( w_tt*trade_time_overlap + w_car*car_overlap + w_sym*same_symbol + w_dir*same_dir + w_rho*max(rho_ij, 0) + w_dd*dd_overlap ) / ( w_tt + w_car + w_sym + w_dir + w_rho + w_dd ). Component weights are pre-declared operator constants. Only the positive part of rho_ij contributes to redundancy (negative correlation is diversifying, not redundant).",
+      "inputs": ["trade_time_overlap_pct", "simultaneous_capital_at_risk_overlap", "same_symbol_overlap", "same_direction_overlap", "return_stream_correlation", "drawdown_period_overlap"],
+      "units": "composite redundancy in [0, 1], dimensionless.",
+      "range": "[0, 1]; 1 = fully redundant pair.",
+      "validation_rules": [
+        "Component weights are pre-declared constants; never fit to data.",
+        "Any UNDEFINED component is EXCLUDED from the weighted average (weights renormalised over defined components); if ALL components are UNDEFINED, redundancy is UNDEFINED.",
+        "Only max(rho_ij, 0) feeds redundancy; negative correlation routes to diversification, not redundancy."
+      ]
+    },
+    {
+      "id": "diversification_benefit_score",
+      "label": "Diversification benefit score",
+      "computed_in_this_bundle": false,
+      "symmetric": true,
+      "formula": "diversification_benefit(i,j) = 1 - redundancy(i,j). Reported alongside the P2 diversification_ratio for the full portfolio; higher = adding j given i is more diversifying.",
+      "inputs": ["redundancy_score"],
+      "units": "complement of redundancy in [0, 1], dimensionless.",
+      "range": "[0, 1]; 1 = maximally diversifying (independent).",
+      "validation_rules": [
+        "If redundancy(i,j) is UNDEFINED, diversification_benefit is UNDEFINED, never defaulted to 1.",
+        "This is an advisory signal, not a profit estimate."
+      ]
+    }
+  ],
+
+  "independence_classification": {
+    "computed_in_this_bundle": false,
+    "classes": [
+      {"class": "independent", "rule": "redundancy(i,j) <= tau_low AND |rho_ij| <= rho_low (both defined)."},
+      {"class": "partial_overlap", "rule": "tau_low < redundancy(i,j) <= tau_high (defined)."},
+      {"class": "redundant", "rule": "redundancy(i,j) > tau_high (defined)."},
+      {"class": "undefined", "rule": "redundancy(i,j) is UNDEFINED, or rho_ij is UNDEFINED where the independent test needs it, or fewer than N_min aligned periods. NEVER silently coerced to another class."}
+    ],
+    "thresholds_are_pre_declared_operator_constants": true,
+    "thresholds": ["tau_low", "tau_high", "rho_low", "N_min"],
+    "validation_rules": [
+      "tau_low < tau_high; both in [0, 1]; rho_low in [0, 1]; N_min a positive integer. All pre-declared; never fit.",
+      "The 'undefined' class is mandatory: insufficient data or an UNDEFINED redundancy/correlation classifies as undefined, never as independent or redundant.",
+      "Classification inherits the WATCH ceiling; it never surfaces PASS/ACTIVE/STRONG."
+    ]
+  },
+
+  "downstream_consumers": {
+    "P2_metric_spec": "rho_ij feeds diversification_ratio + marginal_capital_efficiency; redundancy/overlap inform candidate_overlap context.",
+    "P3_allocation_baseline_spec": "rho_ij + redundancy inform equal_risk refinements and the ranking_only_marginal_efficiency ordering.",
+    "note": "These are spec dependencies only; no value is computed or passed in this bundle."
+  },
+
+  "method_validation_rules": {
+    "frozen_admissible_inputs_only": "Every input is a FROZEN per-trade / per-period series from a committed, checksummed replay artifact admissible under P1; live strategy results, networked data, and uncommitted working trees are inadmissible.",
+    "aligned_common_window_required": "Every pairwise measure is computed only over the aligned T_common; mismatched windows are never zero-padded or forward-filled.",
+    "minimum_sample_size": "No correlation/overlap is defined on fewer than N_min aligned periods; below N_min the measure (and any dependent classification) is UNDEFINED.",
+    "no_lookahead": "Series are used as frozen; no window is re-fit and no future information leaks across the decision time.",
+    "reproducibility": "Same frozen series + same pre-declared constants reproduce the same measures bit-for-bit on a second offline run.",
+    "pre_declared_constants_never_fit": "Component weights, tau_low, tau_high, rho_low, and N_min are operator-declared constants and are NEVER fit, tuned, or inferred from data.",
+    "undefined_over_silent_default": "Any empty-set, zero-variance, or insufficient-sample case yields an explicit UNDEFINED+flag, never a silent 0 / 1 / +inf.",
+    "negative_correlation_is_diversifying": "Negative return correlation reduces redundancy and increases diversification benefit; it is never treated as overlap.",
+    "no_real_overlap_or_correlation_in_this_bundle": "This bundle computes NO real overlap and NO real correlation; it is spec-only."
+  },
+
+  "pass_watch_fail_rules": {
+    "PASS": "A future overlap/correlation computation is PASS-grade FOR REVIEW only when: every input is a FROZEN admissible per-trade/per-period series (P1); measures use the aligned T_common with at least N_min periods; pre-declared constants are operator-supplied; UNDEFINED handling is respected; the independence class is one of {independent, partial_overlap, redundant, undefined}; outputs respect the WATCH ceiling; and the run reproduces bit-for-bit. PASS means 'measures fit for human review', never 'allocate' or 'execute'.",
+    "WATCH": "Measures computable but borderline (short aligned window near N_min, several UNDEFINED components accepted by the operator, sparse drawdown overlap); documented and re-checked.",
+    "FAIL": "Any input is inadmissible/unfrozen/live; a window was zero-padded or forward-filled; a pre-declared constant was fit to data; a zero-variance correlation was silently set to 0; an UNDEFINED case was coerced to a definite class; or the WATCH ceiling was bypassed."
+  },
+
+  "required_future_artifacts": [
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- finalises the advisory report schema that hosts these overlap/correlation measures + the independence classification; spec only.",
+    "A possible P1 Input Contract amendment that formally admits the FROZEN per-trade / per-period series these measures require; spec only.",
+    "A separately-authorized COMPUTE bundle that actually runs these measures over frozen admissible series and emits rho_ij + redundancy + classifications.",
+    "Lane closeout memo if the capital-efficiency idea PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Advisory-only. Overlap/correlation method spec / framework only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No live capital allocation. No paper-order execution. No order placement. No order sizing for execution.",
+    "No scheduler / background daemon. No external network calls in this method's runtime.",
+    "No real overlap or correlation computed in this bundle. No real portfolio result produced. No data fetch, no detector, no replay, no backtest.",
+    "Do not read live strategy results. Do not read, edit, stage, or modify Candidate #10 files, tests, artifacts, labels, replay, detector, or working-tree state.",
+    "Candidate #10 remains deferred and is not connected by this method; C10 must finish and freeze by itself first.",
+    "Consume only FROZEN, committed, admissible artifacts; never live positions or uncommitted working trees.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this method alone.",
+    "A capital-efficiency score does not imply future returns. An advisory allocation is not an execution instruction. No allocation is authorized by this method alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This method does not imply edge and does not allocate capital.",
+    "A defined overlap or correlation measure does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No allocation is authorized by this method alone (a separate compute bundle requires its own authorization)."
+  ]
+}

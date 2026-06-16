@@ -1,0 +1,194 @@
+{
+  "advisory_memo_schema_id": "portfolio_capital_efficiency_advisory_memo_schema_v1",
+  "title": "SPARTA Portfolio Capital-Efficiency Advisory Memo Schema v1",
+  "version": "1.0",
+  "kind": "advisory_memo_schema",
+  "phase": "P5_advisory_memo_schema",
+  "read_only": true,
+
+  "research_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "capital_deployment_enabled": false,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "live_capital_allocation_enabled": false,
+  "position_sizing_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "portfolio_capital_efficiency",
+  "lane_status_self_declared": "WATCH",
+
+  "companion_documents": {
+    "portfolio_capital_efficiency_protocol_v1_json": "reports/portfolio_capital_efficiency_protocol_v1/protocol.json",
+    "portfolio_capital_efficiency_input_contract_v1_json": "reports/portfolio_capital_efficiency_input_contract_v1/input_contract.json",
+    "portfolio_capital_efficiency_metric_spec_v1_json": "reports/portfolio_capital_efficiency_metric_spec_v1/metric_spec.json",
+    "portfolio_capital_efficiency_allocation_baseline_spec_v1_json": "reports/portfolio_capital_efficiency_allocation_baseline_spec_v1/allocation_baseline_spec.json",
+    "portfolio_capital_efficiency_overlap_correlation_method_v1_json": "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/overlap_correlation_method.json"
+  },
+
+  "research_objective": "Pin the EXACT structure of the FUTURE Portfolio Capital-Efficiency advisory memo -- its required sections and the allowed verdict language -- so a later, separately-authorized COMPUTE bundle has a fixed, safe home for its outputs. This bundle is spec/framework-only: it defines the report SHAPE; it computes NO real results, produces NO real memo, suggests NO allocation, and connects NO indicator results.",
+
+  "memo_produced_in_this_bundle": false,
+
+  "verdict_ceiling_rules": {
+    "max_surfaced_verdict": "WATCH",
+    "pass_active_strong_forbidden": true,
+    "rationale": "The advisory memo is downstream and human-review-only; it inherits the upstream registries' WATCH ceiling and never surfaces PASS / ACTIVE / STRONG on any candidate or basket."
+  },
+
+  "c10_boundary": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "note": "This schema does not read, connect to, or depend on Candidate #10 indicator results, replay, or working-tree state. In any future memo, C10 is reported under the inadmissible/deferred-inputs summary (classification watch_only_inadmissible) until it has its own FROZEN, committed replay artifact admitted under P1. Never the working tree."
+  },
+
+  "memo_sections": [
+    {
+      "id": "admissible_frozen_inputs_summary",
+      "title": "Admissible frozen inputs summary",
+      "purpose": "List every FROZEN, committed, admissible strategy artifact the memo drew on, with dataset_freeze_ref + contract_version_pin.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["strategy_id", "dataset_freeze_ref", "contract_version_pin", "verdict_ceiled", "input_provenance"]
+    },
+    {
+      "id": "inadmissible_deferred_inputs_summary",
+      "title": "Inadmissible / deferred inputs summary",
+      "purpose": "List every strategy excluded as inadmissible or deferred (unfrozen / uncommitted / unpinned / bypassed-verdict), including Candidate #10 while it remains deferred.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["strategy_id", "reason_inadmissible_or_deferred", "connection_status", "classification"]
+    },
+    {
+      "id": "per_strategy_standalone_summary",
+      "title": "Per-strategy standalone summary",
+      "purpose": "Per admissible strategy: standalone risk, frozen cost-aware expectancy (ranking context), asset/regime/direction exposure -- all from frozen reports.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["strategy_id", "standalone_risk", "frozen_cost_aware_expectancy", "asset_exposure", "regime_exposure", "direction", "verdict_ceiled"]
+    },
+    {
+      "id": "overlap_correlation_summary",
+      "title": "Overlap / correlation summary",
+      "purpose": "Pairwise overlap, correlation (rho_ij), redundancy, diversification benefit, and the independence classification per the P4 method.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["pair", "trade_time_overlap_pct", "return_stream_correlation_rho_ij", "redundancy_score", "diversification_benefit_score", "independence_class"]
+    },
+    {
+      "id": "allocation_baseline_comparison",
+      "title": "Allocation baseline comparison",
+      "purpose": "Advisory research weights under each P3 baseline (equal_weight / equal_risk / capped_concentration), with inadmissible strategies at zero and the cash bucket shown.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["strategy_id", "equal_weight", "equal_risk", "capped_concentration", "cash_bucket_weight", "concentration_breaches"]
+    },
+    {
+      "id": "capital_efficiency_ranking",
+      "title": "Capital efficiency ranking",
+      "purpose": "Ranking-only ordering by marginal capital efficiency (P2 / P3) for human review; never auto-sizes.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["rank", "strategy_id", "marginal_capital_efficiency_rank", "ranking_only_note"]
+    },
+    {
+      "id": "basket_usefulness_classification",
+      "title": "Basket usefulness classification",
+      "purpose": "Classify each candidate / basket using ONLY the allowed WATCH/undefined classifications.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["strategy_or_basket_id", "classification", "rationale", "caveat"]
+    },
+    {
+      "id": "risk_warnings_and_limitations",
+      "title": "Risk warnings and limitations",
+      "purpose": "Explicit caveats: estimation error, thin samples, regime dependence, frozen-input staleness, no-profit-claim restatement.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["warning", "affected_strategies_or_baskets", "severity_note"]
+    },
+    {
+      "id": "operator_decision_checklist",
+      "title": "Operator decision checklist",
+      "purpose": "Human-review checklist; the operator decides. The memo informs, it does not decide or execute.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["checklist_item", "status_for_operator_to_fill"]
+    },
+    {
+      "id": "no_action_recommendation",
+      "title": "No-action recommendation when inputs are missing or undefined",
+      "purpose": "When admissible inputs are missing or any required measure is UNDEFINED / insufficient, the memo's recommendation is explicitly NO ACTION (no allocation suggested), classification undefined_insufficient_data.",
+      "produced_in_this_bundle": false,
+      "required_fields": ["trigger_condition", "recommendation_is_no_action", "classification"]
+    }
+  ],
+
+  "allowed_classifications": [
+    {"id": "watch_only_useful_candidate", "tier": "WATCH", "meaning": "Admissible candidate that looks individually useful for further research; WATCH only, never PASS/ACTIVE/STRONG."},
+    {"id": "watch_only_basket_candidate", "tier": "WATCH", "meaning": "Admissible candidate that adds diversification benefit to a basket (low redundancy); WATCH only."},
+    {"id": "watch_only_redundant_candidate", "tier": "WATCH", "meaning": "Admissible candidate that is highly redundant with the existing bench (high overlap/correlation); WATCH only, flagged for de-prioritisation."},
+    {"id": "watch_only_inadmissible", "tier": "WATCH", "meaning": "Strategy excluded as inadmissible or deferred (unfrozen / uncommitted / bypassed-verdict), including Candidate #10 while deferred; carries zero advisory weight."},
+    {"id": "undefined_insufficient_data", "tier": "UNDEFINED", "meaning": "Required inputs missing or a required measure UNDEFINED / insufficient; the memo recommends NO ACTION."}
+  ],
+
+  "forbidden_verdict_language": [
+    "PASS",
+    "ACTIVE",
+    "STRONG",
+    "approved for paper trading",
+    "approved for live trading",
+    "profit guarantee",
+    "capital deployment instruction",
+    "broker/order/credential logic"
+  ],
+
+  "verdict_language_rules": {
+    "allowed_classifications_are_exhaustive": "A memo may use ONLY the five allowed_classifications; no other verdict label is permitted on any candidate or basket.",
+    "forbidden_verdict_language_never_asserted": "None of the forbidden_verdict_language strings may be asserted as a verdict, recommendation, or approval anywhere in a produced memo.",
+    "watch_ceiling_inherited": "Every classification is WATCH-tier or UNDEFINED; PASS / ACTIVE / STRONG are forbidden on candidates and baskets.",
+    "no_execution_language": "No memo may contain a capital-deployment instruction, an order/broker/credential instruction, or any 'approved for paper/live trading' statement.",
+    "no_action_default_on_missing_or_undefined": "Missing admissible inputs or any UNDEFINED required measure forces the undefined_insufficient_data classification and a NO ACTION recommendation."
+  },
+
+  "memo_global_rules": {
+    "every_candidate_row_requires_rationale_and_caveat": true,
+    "every_row_inherits_watch_ceiling": true,
+    "frozen_admissible_inputs_only": "The memo reports only on FROZEN admissible artifacts (P1); live positions, networked data, and uncommitted working trees are never reported as results.",
+    "reproducibility": "Given the same frozen inputs + pre-declared constants, a future memo reproduces bit-for-bit.",
+    "no_real_results_in_this_bundle": "This bundle defines the memo SHAPE only; it computes no real results and produces no real memo."
+  },
+
+  "pass_watch_fail_rules": {
+    "PASS": "A future memo is PASS-grade FOR REVIEW only when: it populates every required section; uses ONLY the allowed_classifications; asserts none of the forbidden_verdict_language; draws solely on FROZEN admissible inputs; defaults to no_action on missing/UNDEFINED inputs; respects the WATCH ceiling; and reproduces bit-for-bit. (Here PASS labels SCHEMA fitness for human review, never a candidate verdict and never 'deploy' or 'execute'.)",
+    "WATCH": "Memo populated but borderline (much weight in cash, several UNDEFINED measures, thin admissible set); documented and re-checked.",
+    "FAIL": "A required section is missing; a non-allowed classification or any forbidden_verdict_language is used; an inadmissible strategy is given positive advisory weight; missing/UNDEFINED inputs did not force no_action; or the WATCH ceiling was bypassed."
+  },
+
+  "required_future_artifacts": [
+    "A separately-authorized COMPUTE bundle that actually runs the P2 metrics + P3 baselines + P4 measures over FROZEN admissible inputs and emits a memo conforming to THIS schema.",
+    "A possible P1 Input Contract amendment that formally admits the FROZEN per-trade / per-period series the P4 measures require; spec only.",
+    "Lane closeout memo if the capital-efficiency idea PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Advisory-only. Advisory memo schema / framework only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No live capital allocation. No capital deployment. No paper-order execution. No order placement. No order sizing for execution.",
+    "No scheduler / background daemon. No external network calls in this schema's runtime.",
+    "No real results computed in this bundle. No real memo produced. No data fetch, no detector, no replay, no backtest.",
+    "A memo may use ONLY the five allowed classifications; PASS / ACTIVE / STRONG and any 'approved for paper/live trading', profit-guarantee, capital-deployment, or broker/order/credential language are forbidden.",
+    "Do not read live strategy results. Do not read, edit, stage, or modify Candidate #10 files, tests, artifacts, labels, replay, detector, or working-tree state.",
+    "Candidate #10 remains deferred and is not connected by this schema; C10 must finish and freeze by itself first.",
+    "Consume only FROZEN, committed, admissible artifacts; never live positions or uncommitted working trees.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this schema alone.",
+    "A capital-efficiency score does not imply future returns. An advisory allocation is not an execution instruction. No allocation is authorized by this schema alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This schema does not imply edge and does not allocate or deploy capital.",
+    "A defined memo section does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No allocation is authorized by this schema alone (a separate compute bundle requires its own authorization)."
+  ]
+}

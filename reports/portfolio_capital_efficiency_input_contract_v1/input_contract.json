@@ -1,0 +1,156 @@
+{
+  "input_contract_id": "portfolio_capital_efficiency_input_contract_v1",
+  "title": "SPARTA Portfolio Capital-Efficiency Input Contract v1",
+  "version": "1.0",
+  "kind": "input_contract",
+  "phase": "P1_input_contract",
+  "read_only": true,
+
+  "research_only": true,
+  "advisory_only": true,
+  "data_fetch_enabled": false,
+  "exchange_connection_enabled": false,
+  "live_trading_enabled": false,
+  "broker_control_enabled": false,
+  "paper_order_execution_enabled": false,
+  "live_capital_allocation_enabled": false,
+  "position_sizing_execution_enabled": false,
+  "backtest_enabled": false,
+  "scheduler_enabled": false,
+  "network_calls_enabled": false,
+  "credentials_required": false,
+
+  "lane": "portfolio_capital_efficiency",
+  "lane_status_self_declared": "WATCH",
+
+  "companion_documents": {
+    "portfolio_capital_efficiency_protocol_v1_json": "reports/portfolio_capital_efficiency_protocol_v1/protocol.json",
+    "portfolio_capital_efficiency_protocol_v1_md": "reports/portfolio_capital_efficiency_protocol_v1/protocol.md"
+  },
+
+  "research_objective": "Define exactly which FROZEN, committed research artifacts the Portfolio Capital-Efficiency lane MAY read, and the admissibility / freeze rules they must satisfy, BEFORE any capital-efficiency metric is computed (P2) or any advisory allocation is shaped (P5). This contract is framework-only: it reads nothing in its runtime, computes nothing, connects to no indicator results, and authorizes no allocation. It is the written input specification that any future, separately-authorized read/compute bundle must satisfy.",
+
+  "framework_only": true,
+  "framework_only_note": "This bundle defines the portfolio input FRAMEWORK only. It does NOT connect to, depend on, or evaluate any specific candidate's indicator results yet -- including Candidate #10. Connecting concrete frozen outputs is a separate, separately-authorized step.",
+
+  "admissible_input_classes": [
+    {
+      "id": "strategy_report_registry_output",
+      "form": "committed report.json artifacts under reports/ as normalized by tools/strategy_report_registry.py",
+      "access": "read_only",
+      "frozen_required": true,
+      "note": "Verdicts are verdict-ceilinged to WATCH upstream; this lane inherits that ceiling and never surfaces PASS/ACTIVE/STRONG."
+    },
+    {
+      "id": "strategy_candidate_registry_output",
+      "form": "committed candidate status summaries from tools/strategy_candidate_registry.py",
+      "access": "read_only",
+      "frozen_required": true,
+      "note": "Candidate status / evidence_level descriptions only; never live positions or balances."
+    },
+    {
+      "id": "frozen_per_strategy_backtest_report",
+      "form": "committed per-strategy report.json carrying PASS/WATCH/FAIL verdict + cost-aware stats over a frozen, checksummed dataset",
+      "access": "read_only",
+      "frozen_required": true,
+      "note": "Only datasets frozen with checksums upstream are admissible; the report must cite its dataset version and the upstream data-contract version."
+    }
+  ],
+
+  "required_fields_per_input": [
+    {"field": "candidate_id", "purpose": "Stable identity to key allocation weights against."},
+    {"field": "verdict_ceiled", "purpose": "Upstream verdict, ceilinged to WATCH max; PASS/ACTIVE/STRONG are inadmissible if surfaced."},
+    {"field": "asset_exposure", "purpose": "Which asset(s) the candidate trades -- input to candidate_overlap + concentration_limit."},
+    {"field": "regime_exposure", "purpose": "Which market regime(s) the candidate depends on -- input to candidate_overlap + diversification_ratio."},
+    {"field": "direction", "purpose": "Long / short / both -- input to candidate_overlap."},
+    {"field": "frozen_cost_aware_expectancy", "purpose": "After-cost expectancy from the frozen report -- input to marginal_capital_efficiency (ranking only, never auto-sizing)."},
+    {"field": "standalone_risk", "purpose": "Per-candidate standalone risk from the frozen report -- input to diversification_ratio + inverse-vol baseline."},
+    {"field": "dataset_freeze_ref", "purpose": "sha256 / freeze record of the dataset the report ran on -- admissibility gate."},
+    {"field": "contract_version_pin", "purpose": "The upstream data-contract version the dataset was validated under -- provenance gate."}
+  ],
+
+  "admissibility_rules": {
+    "must_be_committed": "Only committed artifacts are admissible; any uncommitted working-tree file is inadmissible.",
+    "must_be_frozen_with_checksum": "The underlying dataset must have been FROZEN with a sha256 / checksum upstream; reports over mutable data are inadmissible.",
+    "must_cite_dataset_and_contract_version": "Each admissible report must cite both its dataset version and the upstream data-contract version it was validated under.",
+    "verdict_ceiling_inherited": "Any raw verdict of PASS/ACTIVE/STRONG is treated as tampering and clamped to WATCH; the lane never surfaces PASS/ACTIVE/STRONG.",
+    "no_live_positions_or_balances": "No input may be sourced from live broker/exchange balances or live positions.",
+    "no_network_sourced_numbers": "No input may be sourced from a live network fetch in this lane's runtime.",
+    "reproducibility": "The same named frozen inputs must reproduce the same lane read bit-for-bit on a second offline run."
+  },
+
+  "deferred_inputs": [
+    {
+      "id": "c10_frozen_replay_output",
+      "label": "Candidate #10 (intraweek calendar seasonality) frozen replay outputs",
+      "connection_status": "deferred_not_connected",
+      "blocked_until": "Candidate #10 finishes and freezes by itself first (its own lane produces a committed, checksummed replay/verdict artifact).",
+      "when_admissible": "Once C10 has a FROZEN, committed replay output, it becomes an ordinary read-only bench input subject to the SAME admissibility_rules as any other frozen per-strategy report -- used to evaluate overlap, correlation, and capital efficiency. Never the working tree; only the frozen committed form.",
+      "note": "This contract does NOT connect to, read, or depend on C10 indicator results. C10 must complete and freeze on its own track first."
+    }
+  ],
+
+  "c10_boundary": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "note": "This lane MUST NOT read-for-mutation, edit, stage, or depend on the in-flight Candidate #10 files, tests, labels, replay, detector, or working-tree state. C10 indicator results are NOT connected by this contract. Only a future FROZEN, committed C10 replay output may later be read, under the standard admissibility_rules."
+  },
+
+  "inadmissible_inputs": [
+    "Live broker / exchange balances or positions.",
+    "Any uncommitted working-tree artifact (including the in-flight Candidate #10 files, labels, replay, and detector).",
+    "Any dataset that was not frozen with a checksum upstream.",
+    "Any number sourced from a live network fetch.",
+    "Any report surfacing a raw PASS/ACTIVE/STRONG verdict that bypasses the WATCH ceiling.",
+    "Any synthetic / mock-valued stand-in used in place of a real frozen report for an evidence claim."
+  ],
+
+  "verdict_ceiling_rules": {
+    "max_surfaced_verdict": "WATCH",
+    "pass_active_strong_forbidden": true,
+    "rationale": "The lane is downstream and advisory; it inherits the upstream registries' verdict ceiling and must never imply readiness it has not earned."
+  },
+
+  "freeze_requirements": {
+    "input_must_be_committed": true,
+    "input_dataset_must_be_checksummed": true,
+    "input_must_pin_contract_version": true,
+    "no_mutable_inputs": true,
+    "any_input_revision_creates_new_version": "A revised upstream artifact is a new version; the lane never reads a silently-edited artifact in place."
+  },
+
+  "pass_watch_fail_rules": {
+    "PASS": "Every admissible input cited by a future lane read is committed + frozen + checksummed, exposes all required_fields_per_input, cites its dataset + contract version, respects the WATCH ceiling, and reproduces bit-for-bit. PASS means 'inputs are fit for a future read', never 'allocate'.",
+    "WATCH": "Inputs are satisfied but at least one is borderline (thin field coverage, marginal freeze provenance accepted by the operator); documented and re-checked before any compute phase.",
+    "FAIL": "Any input is uncommitted, unfrozen, lacks a dataset/contract-version pin, surfaces a bypassed PASS/ACTIVE/STRONG verdict, is sourced from live balances/positions/network, or cannot be reproduced bit-for-bit."
+  },
+
+  "required_future_artifacts": [
+    "Portfolio Capital-Efficiency Metric Spec v1 (P2) -- exact formulas + inputs per metric; spec only, nothing computed.",
+    "Portfolio Capital-Efficiency Allocation Baseline Spec v1 (P3) -- reference models + concentration cap; spec only.",
+    "Portfolio Capital-Efficiency Overlap/Correlation Method v1 (P4) -- redundancy estimation method; spec only.",
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- shape of the human-review allocation memo.",
+    "Lane closeout memo if the capital-efficiency idea PARKs / RETIREs."
+  ],
+
+  "safety_boundaries": [
+    "Research-only. Advisory-only. Input contract / specification only.",
+    "No broker control, no exchange connection, no API keys, no .env, no credential handling.",
+    "No live trading. No live capital allocation. No paper-order execution. No order placement. No order sizing for execution.",
+    "No scheduler / background daemon. No external network calls in this contract's runtime.",
+    "No input is read in this bundle. No metric computed in this bundle. No allocation computed in this bundle.",
+    "Do not modify paper / live execution files. Do not touch Candidate #10 files, tests, labels, replay, detector, or working-tree state.",
+    "Candidate #10 indicator results are NOT connected by this contract; C10 must finish and freeze by itself first.",
+    "Consume only FROZEN, committed, admissible artifacts; never live positions or uncommitted working trees.",
+    "Do not claim profitability. Do not claim live-readiness. Do not claim STRONG evidence from this contract alone.",
+    "A capital-efficiency score does not imply future returns. An advisory allocation is not an execution instruction. No allocation is authorized by this contract alone."
+  ],
+
+  "no_profit_claim_policy": [
+    "This contract does not imply edge and does not allocate capital.",
+    "Clean, frozen inputs do not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No allocation is authorized by this contract alone (P2+ outputs require their own separate authorization)."
+  ]
+}

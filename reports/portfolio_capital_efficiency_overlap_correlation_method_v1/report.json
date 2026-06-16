@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "layer": "portfolio_capital_efficiency_overlap_correlation_method_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "advisory_only": true,
+  "framework_only": true,
+  "compute_enabled": false,
+  "phase": "P4_overlap_correlation_method",
+  "build_date": "2026-06-16",
+  "companions": [
+    "reports/portfolio_capital_efficiency_protocol_v1/",
+    "reports/portfolio_capital_efficiency_input_contract_v1/",
+    "reports/portfolio_capital_efficiency_metric_spec_v1/",
+    "reports/portfolio_capital_efficiency_allocation_baseline_spec_v1/"
+  ],
+  "what_was_built": [
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/overlap_correlation_method.json (machine-readable P4 method: 8 overlap/correlation measures + independence classification + required frozen series + global validation rules; all computed_in_this_bundle=false)",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/overlap_correlation_method.md (human-readable method spec)",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/report.json (this build report)",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/report.md (build report)",
+    "tools/portfolio_capital_efficiency_overlap_correlation_method_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_portfolio_capital_efficiency_overlap_correlation_method.py (28 tests covering schema + safety + spec-only + C10 deferral + validator failure modes + P0/P1/P2/P3 companions)"
+  ],
+  "files_changed": [
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/overlap_correlation_method.json",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/overlap_correlation_method.md",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/report.json",
+    "reports/portfolio_capital_efficiency_overlap_correlation_method_v1/report.md",
+    "tools/portfolio_capital_efficiency_overlap_correlation_method_check.py",
+    "tests/test_portfolio_capital_efficiency_overlap_correlation_method.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/next_actions.md",
+    "brain_memory/logs/system_changes.md"
+  ],
+  "methods_defined": [
+    "trade_time_overlap_pct (Jaccard over in-position time)",
+    "simultaneous_capital_at_risk_overlap (sum min/sum max of car series)",
+    "same_symbol_overlap (fraction of simultaneous in-position time on same canonical symbol)",
+    "same_direction_overlap (fraction same-direction; opposite => hedging_offset flag)",
+    "return_stream_correlation (Pearson rho_ij over aligned T_common >= N_min; consumed by P2+P3)",
+    "drawdown_period_overlap (Jaccard over drawdown windows)",
+    "redundancy_score (pre-declared-weighted blend; only max(rho,0) feeds it)",
+    "diversification_benefit_score (1 - redundancy)"
+  ],
+  "independence_classification": ["independent", "partial_overlap", "redundant", "undefined"],
+  "spec_only_record": {
+    "compute_enabled": false,
+    "every_method_computed_in_this_bundle_false": true,
+    "independence_classification_computed_in_this_bundle_false": true,
+    "no_real_overlap_computed": true,
+    "no_real_correlation_computed": true,
+    "no_real_portfolio_result_produced": true,
+    "reads_no_live_strategy_results": true,
+    "pre_declared_constants_never_fit": ["component_weights", "tau_low", "tau_high", "rho_low", "N_min"],
+    "undefined_class_mandatory": true,
+    "negative_correlation_is_diversifying_not_overlap": true
+  },
+  "c10_deferral_record": {
+    "must_not_touch_c10": true,
+    "connection_status": "deferred_not_connected",
+    "c10_files_read": false,
+    "c10_files_edited": false,
+    "c10_files_staged": false,
+    "c10_working_tree_state": "untouched (pre-existing M on tools/c10_real_candle_detection_once.py and tests/test_c10_real_candle_detection_once_runner_purity.py left exactly as found)",
+    "note": "C10's per-trade/per-period series are exactly the shape these measures consume, but C10 is deferred -- eligible only once it has its own FROZEN, committed replay artifact admitted under P1."
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "nine_flags_pinned_false": [
+      "compute_enabled",
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "live_capital_allocation_enabled",
+      "position_sizing_execution_enabled",
+      "backtest_enabled"
+    ],
+    "verdict_ceiling_watch_max": true,
+    "pass_active_strong_forbidden": true,
+    "distinction_phrases_required_in_md": [
+      "Advisory-only",
+      "No real overlap or correlation is computed in this bundle.",
+      "A capital-efficiency score does not imply future returns.",
+      "An advisory allocation is not an execution instruction.",
+      "Candidate #10 remains deferred and is not connected by this method."
+    ]
+  },
+  "tests_run": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_portfolio_capital_efficiency_overlap_correlation_method.py tests/test_portfolio_capital_efficiency_allocation_baseline_spec.py tests/test_portfolio_capital_efficiency_metric_spec.py tests/test_portfolio_capital_efficiency_input_contract.py tests/test_portfolio_capital_efficiency_protocol.py --rootdir=tests -q",
+      "result": "131 passed in 1.08s (28 P4 + 28 P3 + 26 P2 + 24 P1 + 25 P0)"
+    }
+  ],
+  "json_validity": {
+    "portfolio_capital_efficiency_overlap_correlation_method_check_validate": "validate: OK",
+    "portfolio_capital_efficiency_allocation_baseline_spec_check_validate": "validate: OK (P3 companion unaffected)",
+    "portfolio_capital_efficiency_metric_spec_check_validate": "validate: OK (P2 companion unaffected)",
+    "portfolio_capital_efficiency_input_contract_check_validate": "validate: OK (P1 companion unaffected)",
+    "portfolio_capital_efficiency_protocol_check_validate": "validate: OK (P0 companion unaffected)"
+  },
+  "registry_integration": {
+    "status": "deferred_not_wired",
+    "note": "Shared tools/strategy_candidate_registry.py intentionally NOT modified (additive-only / surgical)."
+  },
+  "recommended_next_bundle": [
+    "Portfolio Capital-Efficiency Advisory Memo Schema v1 (P5) -- finalises the advisory report schema hosting these overlap/correlation measures + the independence classification; spec only",
+    "P1 Input Contract amendment that formally admits the FROZEN per-trade / per-period series these measures require; spec only",
+    "A separately-authorized COMPUTE bundle that actually runs these measures over frozen admissible series"
+  ],
+  "no_profit_claim": [
+    "This method does not imply edge and does not allocate capital.",
+    "A defined overlap or correlation measure does not imply profit.",
+    "A capital-efficiency score does not imply future returns.",
+    "No allocation is authorized by this method alone."
+  ]
+}

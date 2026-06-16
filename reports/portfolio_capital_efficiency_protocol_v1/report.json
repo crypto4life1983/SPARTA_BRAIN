@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "layer": "portfolio_capital_efficiency_protocol_v1",
+  "kind": "build_report",
+  "read_only": true,
+  "advisory_only": true,
+  "build_date": "2026-06-16",
+  "what_was_built": [
+    "reports/portfolio_capital_efficiency_protocol_v1/protocol.json (machine-readable Portfolio Capital-Efficiency protocol: lane scope, C10 boundary, frozen-only input sources, 5 capital-efficiency metrics [definition-only], 4 allocation baselines, P0..P8 phases, PASS/WATCH/FAIL, kill conditions, no-profit-claim policy)",
+    "reports/portfolio_capital_efficiency_protocol_v1/protocol.md (human-readable protocol memo)",
+    "reports/portfolio_capital_efficiency_protocol_v1/report.json (this build report)",
+    "reports/portfolio_capital_efficiency_protocol_v1/report.md (build report)",
+    "tools/portfolio_capital_efficiency_protocol_check.py (stdlib-only validator; validate / show CLI)",
+    "tests/test_portfolio_capital_efficiency_protocol.py (25 tests covering schema + safety + C10 boundary + validator failure modes)"
+  ],
+  "files_changed": [
+    "reports/portfolio_capital_efficiency_protocol_v1/protocol.json",
+    "reports/portfolio_capital_efficiency_protocol_v1/protocol.md",
+    "reports/portfolio_capital_efficiency_protocol_v1/report.json",
+    "reports/portfolio_capital_efficiency_protocol_v1/report.md",
+    "tools/portfolio_capital_efficiency_protocol_check.py",
+    "tests/test_portfolio_capital_efficiency_protocol.py",
+    "brain_memory/projects/trading_bot/decisions.md",
+    "brain_memory/projects/trading_bot/lessons.md",
+    "brain_memory/projects/trading_bot/next_actions.md",
+    "brain_memory/logs/system_changes.md"
+  ],
+  "scope_summary": {
+    "lane": "portfolio_capital_efficiency",
+    "lane_status_self_declared": "WATCH",
+    "advisory_only": true,
+    "input_access": "read_only / frozen-committed-artifacts only",
+    "capital_efficiency_metrics": [
+      "capital_at_risk_budget",
+      "candidate_overlap",
+      "diversification_ratio",
+      "concentration_limit",
+      "marginal_capital_efficiency"
+    ],
+    "allocation_baselines": ["equal_weight", "inverse_volatility", "capped_weight", "discretionary_human(WATCH_only)"],
+    "validation_phases": ["P0_protocol", "P1_input_contract", "P2_efficiency_metric_spec", "P3_allocation_baseline_spec", "P4_overlap_correlation_spec", "P5_advisory_report_shape", "P6_robustness_sensitivity", "P7_paper_allocation_simulation", "P8_live_capital_allocation"]
+  },
+  "safety_guarantees": {
+    "stdlib_only_validator": true,
+    "no_network_imports_in_validator": true,
+    "no_broker_or_exchange_imports": true,
+    "no_credentials_or_env_reads": true,
+    "no_subprocess": true,
+    "eight_flags_pinned_false": [
+      "data_fetch_enabled",
+      "exchange_connection_enabled",
+      "live_trading_enabled",
+      "broker_control_enabled",
+      "paper_order_execution_enabled",
+      "live_capital_allocation_enabled",
+      "position_sizing_execution_enabled",
+      "backtest_enabled"
+    ],
+    "advisory_only": true,
+    "frozen_committed_inputs_only": true,
+    "live_positions_and_balances_inadmissible": true,
+    "uncommitted_working_tree_inadmissible": true,
+    "c10_boundary_pinned_must_not_touch": true,
+    "discretionary_human_allocation_WATCH_only": true,
+    "all_nine_validation_phases_P0_P8_present": true,
+    "forbidden_capability_phrase_scan_md_and_json": [
+      "guaranteed profit", "risk-free profit", "guaranteed alpha",
+      "live-ready", "production-ready", "live trading enabled",
+      "this is profitable", "we have an edge",
+      "place the order", "place an order", "connect to exchange",
+      "fetch live data", "allocate capital now", "increase position size",
+      "execute this allocation"
+    ],
+    "distinction_phrases_required_in_md": [
+      "A capital-efficiency score does not imply future returns",
+      "An advisory allocation is not an execution instruction",
+      "No allocation is authorized by this protocol alone",
+      "Advisory-only"
+    ]
+  },
+  "c10_protection_record": {
+    "must_not_touch_c10": true,
+    "c10_files_read_for_mutation": false,
+    "c10_files_edited": false,
+    "c10_files_staged": false,
+    "c10_working_tree_state": "untouched (pre-existing M on tools/c10_real_candle_detection_once.py and tests/test_c10_real_candle_detection_once_runner_purity.py left exactly as found)",
+    "lane_consumes_only_frozen_committed_artifacts": true
+  },
+  "registry_integration": {
+    "status": "deferred_not_wired",
+    "note": "This bundle intentionally did NOT modify tools/strategy_candidate_registry.py or any shared registry logic, to honor the additive-only / surgical-change scope. The lane self-declares WATCH inside its own protocol.json (lane_status_self_declared). Wiring a candidate seed into the shared registry is a separate, separately-authorized step."
+  },
+  "tests_run": [
+    {
+      "command": ".venv/Scripts/python.exe -m pytest tests/test_portfolio_capital_efficiency_protocol.py --rootdir=tests -q",
+      "result": "25 passed in 0.23s"
+    }
+  ],
+  "json_validity": {
+    "portfolio_capital_efficiency_protocol_check_validate": "validate: OK"
+  },
+  "recommended_next_bundle": [
+    "Portfolio Capital-Efficiency Input Contract v1 (P1) -- which frozen artifacts are admissible + freeze rules; spec only, no read run",
+    "Portfolio Capital-Efficiency Metric Spec v1 (P2) -- exact formulas + inputs per metric; spec only, nothing computed",
+    "Portfolio Capital-Efficiency Allocation Baseline Spec v1 (P3) -- reference models + concentration cap; spec only"
+  ],
+  "no_profit_claim": [
+    "This protocol does not imply edge and does not allocate capital.",
+    "A capital-efficiency score does not imply future returns.",
+    "An advisory allocation memo is a human-review aid, never an execution instruction.",
+    "No allocation is authorized by this protocol alone."
+  ]
+}
