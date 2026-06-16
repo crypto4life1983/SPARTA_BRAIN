@@ -7,9 +7,14 @@
 # the ONE-SHOT runner (tools/overnight_autopilot_run_once.py) and exits.
 #
 # The runner is research-only: no trading, no credentials, no network,
-# no commit, no push. It writes a morning report under
+# no commit, no push. It writes a per-run record under
 # data/overnight_autopilot/reports/ naming exactly what ran and the next
 # human gate.
+#
+# WIRING: the scheduled action runs a thin wrapper
+# (tools\run_overnight_autopilot_and_report.bat) which runs the one-shot
+# runner and THEN ALWAYS refreshes the human-readable morning report
+# (reports\autopilot_morning\latest.{md,json}) -- even if the run failed.
 #
 # To remove:  Unregister-ScheduledTask -TaskName "SPARTA_Overnight_Autopilot" -Confirm:$false
 
@@ -20,14 +25,24 @@ $repoRoot = "C:\SPARTA_BRAIN"
 $python = Join-Path $repoRoot ".venv\Scripts\python.exe"
 if (-not (Test-Path $python)) { $python = "python" }
 $runner = Join-Path $repoRoot "tools\overnight_autopilot_run_once.py"
+$wrapper = Join-Path $repoRoot "tools\run_overnight_autopilot_and_report.bat"
+$reportGen = Join-Path $repoRoot "tools\sparta_autopilot_morning_report.py"
 
 if (-not (Test-Path $runner)) {
     throw "Runner not found at $runner - aborting."
 }
+if (-not (Test-Path $wrapper)) {
+    throw "Wrapper not found at $wrapper - aborting."
+}
+if (-not (Test-Path $reportGen)) {
+    throw "Morning report generator not found at $reportGen - aborting."
+}
 
+# The action runs the wrapper (.bat) via cmd.exe /c. The wrapper runs the
+# one-shot runner and THEN ALWAYS refreshes the morning report.
 $action = New-ScheduledTaskAction `
-    -Execute $python `
-    -Argument "`"$runner`"" `
+    -Execute "cmd.exe" `
+    -Argument "/c `"$wrapper`"" `
     -WorkingDirectory $repoRoot
 
 $trigger = New-ScheduledTaskTrigger -Daily -At 2:00AM
@@ -43,9 +58,12 @@ Register-ScheduledTask `
     -Action $action `
     -Trigger $trigger `
     -Settings $settings `
-    -Description "SPARTA research-only overnight autopilot. One-shot queue processor: integrity audit, contract certification sweep, safety test report, seed brief draft. No trading capability, no commit, no push. Installed manually by the human." | Out-Null
+    -Description "SPARTA research-only overnight autopilot. Runs a thin wrapper that executes the one-shot queue processor (integrity audit, contract certification sweep, safety test report, seed brief draft) and THEN always refreshes the morning report (reports\autopilot_morning\latest.md/json), even on failure. No trading capability, no commit, no push. Installed manually by the human." | Out-Null
 
-Write-Host "Registered scheduled task '$taskName' (daily 02:00, one-shot runner)."
-Write-Host "Runner: $python $runner"
-Write-Host "Reports: $repoRoot\data\overnight_autopilot\reports\"
+Write-Host "Registered scheduled task '$taskName' (daily 02:00, wrapper: run + report)."
+Write-Host "Wrapper: cmd.exe /c $wrapper"
+Write-Host "Runner:  $python $runner"
+Write-Host "Report:  $python $reportGen generate"
+Write-Host "Per-run records: $repoRoot\data\overnight_autopilot\reports\"
+Write-Host "Morning report:  $repoRoot\reports\autopilot_morning\latest.md"
 Write-Host "Remove with: Unregister-ScheduledTask -TaskName '$taskName' -Confirm:`$false"
