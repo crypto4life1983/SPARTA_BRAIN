@@ -14,8 +14,11 @@ Verifies the runner:
   - performs no replay / relabel / PnL / trading / scheduler action;
   - has side effects only inside the __main__ block;
   - BLOCKS final detection (no scan, no setup claims) when the
-    required 2019 in-sample coverage is missing -- the actual state of
-    the staged data today."""
+    required 2019 in-sample coverage is missing;
+  - on the COVERED success path freezes a deterministic, SHA-pinned
+    per-setup labels artifact + summary artifact under
+    detector_labels/ (separate from the coverage_blocker artifact) that
+    is recount-sufficient for a later labels review."""
 
 from __future__ import annotations
 
@@ -247,3 +250,165 @@ def test_runner_blocks_when_2019_in_sample_coverage_missing():
     assert empty["in_sample_coverage_present"] is False
     assert empty["status"] == (
         "BLOCKED_MISSING_REQUIRED_IN_SAMPLE_COVERAGE")
+
+
+# ---- success-path frozen detector_labels artifact ------------------------
+
+def test_runner_success_path_writes_detector_labels_artifacts():
+    """Source-level proof the covered path freezes labels + summary
+    artifacts under detector_labels/ via the deterministic writer."""
+    src = _src()
+    assert "DETECTOR_LABELS_DIR" in src
+    assert "detector_labels" in src
+    assert "_dump_json(LABELS_PATH" in src
+    assert "_dump_json(SUMMARY_PATH" in src
+    assert "build_detection_artifacts" in src
+    # deterministic write: sorted keys, no wall-clock timestamp.
+    assert "sort_keys=True" in src
+    assert "deterministic_no_wallclock_timestamp" in src
+
+
+def test_runner_blocker_path_separate_from_labels_path():
+    mod = _runner_module()
+    assert "coverage_blocker" in str(mod.BLOCKER_PATH)
+    assert "detector_labels" in str(mod.LABELS_PATH)
+    assert "detector_labels" in str(mod.SUMMARY_PATH)
+    assert "coverage_blocker" not in str(mod.LABELS_PATH)
+    assert "coverage_blocker" not in str(mod.SUMMARY_PATH)
+    assert mod.LABELS_PATH != mod.BLOCKER_PATH
+    assert mod.SUMMARY_PATH != mod.BLOCKER_PATH
+    assert mod.LABELS_PATH != mod.SUMMARY_PATH
+    assert mod.MIN_LABELS_REVIEW_THRESHOLD == 100
+
+
+def _fake_detection_inputs():
+    source_meta = {
+        "source_path": "data/crypto_d1_spot/raw/BTC_1d.csv",
+        "row_count": 2716,
+        "first_date": "2019-01-01",
+        "last_date": "2026-06-08",
+        "sha256": "043fb722b35e738a0c2050f9388defc7ca99322ed2f1539897"
+                  "46ee28bbb89b88",
+    }
+    selection = {
+        "favorable_weekday_bucket": 5,
+        "favorable_weekday_bucket_cardinality": 1,
+        "per_weekday_mean_bps": {1: 42.44, 2: 34.28, 3: 28.65,
+                                 4: 61.30, 5: 83.90, 6: 34.67,
+                                 7: 69.50},
+        "per_weekday_sample_count": {1: 208, 2: 208, 3: 208, 4: 208,
+                                     5: 208, 6: 208, 7: 208},
+        "selection_metric": "highest_in_sample_mean",
+        "floor_bps": 81.0,
+        "cleared_81_bps_floor": True,
+        "bucket_value_is_data_determined_not_hardcoded": True,
+        "selected_on_in_sample_window_only": True,
+        "in_sample_window": ["2019-01-01", "2022-12-31"],
+    }
+    a1 = {"setup_id": "BTCUSD_2023-01-06",
+          "status": "accepted_for_replay_review", "entry_index": 10,
+          "entry_date": "2023-01-06", "entry_price": 17000.0,
+          "trigger_iso_weekday": 5, "favorable_weekday_bucket": 5,
+          "rejection_reasons": []}
+    a2 = {"setup_id": "BTCUSD_2023-01-13",
+          "status": "accepted_for_replay_review", "entry_index": 17,
+          "entry_date": "2023-01-13", "entry_price": 19000.0,
+          "trigger_iso_weekday": 5, "favorable_weekday_bucket": 5,
+          "rejection_reasons": []}
+    rej = {"setup_id": "BTCUSD_2023-01-20",
+           "status": "rejected_geometry_floor", "entry_index": 24,
+           "entry_date": "2023-01-20",
+           "rejection_reasons": ["all_variant_target_distances_below_81"]}
+    setups = [a1, a2, rej]
+    cluster = {"kept": [a1, a2], "dropped": [],
+               "anti_cluster_min_bar_gap": 5,
+               "tie_breaker": "keep_the_earlier_event_drop_the_later_one",
+               "anti_cluster_does_not_consume_edit_token": True}
+    adequacy = {"accepted_count": 2,
+                "minimum_required_at_labels_review_gate": 100,
+                "below_minimum_at_dry_run": True,
+                "enforced_at_labels_review_gate_only": True,
+                "does_not_consume_edit_token": True}
+    return source_meta, selection, setups, cluster, adequacy
+
+
+def test_build_artifacts_pins_source_sha_range_rowcount():
+    mod = _runner_module()
+    sm, sel, setups, cluster, adeq = _fake_detection_inputs()
+    labels, summary = mod.build_detection_artifacts(
+        source_meta=sm, selection=sel, setups=setups, cluster=cluster,
+        adequacy=adeq, sha_before="abc123", sha_after="abc123")
+    for art in (labels, summary):
+        assert art["source_path"] == sm["source_path"]
+        assert art["source_sha256_before"] == "abc123"
+        assert art["source_sha256_after"] == "abc123"
+        assert art["source_unchanged_during_detection"] is True
+        assert art["source_first_date"] == "2019-01-01"
+        assert art["source_last_date"] == "2026-06-08"
+        assert art["source_row_count"] == 2716
+        assert art["in_sample_selection_window"] == [
+            "2019-01-01", "2022-12-31"]
+        assert art["out_of_sample_window"] == [
+            "2023-01-01", "2025-12-31"]
+        assert art["favorable_weekday_bucket"] == 5
+        assert art["per_weekday_in_sample_mean_bps"][5] == 83.90
+        assert art["minimum_labels_review_threshold"] == 100
+
+
+def test_build_artifacts_let_labels_review_recount_without_stdout():
+    """The artifact alone must let a labels review recount accepted /
+    dropped totals; here 2 accepted / 0 dropped, recounted purely from
+    the frozen per-setup records (a scaled-down stand-in for the real
+    156 / 0 run)."""
+    mod = _runner_module()
+    sm, sel, setups, cluster, adeq = _fake_detection_inputs()
+    labels, summary = mod.build_detection_artifacts(
+        source_meta=sm, selection=sel, setups=setups, cluster=cluster,
+        adequacy=adeq, sha_before="x", sha_after="x")
+    recount_accepted = len(labels["accepted_setups_post_anti_cluster"])
+    recount_dropped = len(labels["anti_cluster_dropped"])
+    assert recount_accepted == 2
+    assert recount_dropped == 0
+    assert labels["accepted_post_anti_cluster"] == recount_accepted
+    assert labels["anti_cluster_dropped_count"] == recount_dropped
+    assert summary["accepted_post_anti_cluster"] == recount_accepted
+    assert summary["anti_cluster_dropped_count"] == recount_dropped
+    assert labels["attempts"] == 3
+    assert labels["accepted_pre_anti_cluster"] == 2
+    assert labels["status_breakdown"] == {
+        "accepted_for_replay_review": 2, "rejected_geometry_floor": 1}
+    assert all(r["status"] == "accepted_for_replay_review"
+               for r in labels["accepted_setups_post_anti_cluster"])
+    # accepted records carry recountable per-setup identity fields.
+    for r in labels["accepted_setups_post_anti_cluster"]:
+        assert r["setup_id"]
+        assert r["favorable_weekday_bucket"] == 5
+        assert r["trigger_iso_weekday"] == 5
+
+
+def test_build_artifacts_make_no_pnl_replay_or_trading_claims():
+    mod = _runner_module()
+    sm, sel, setups, cluster, adeq = _fake_detection_inputs()
+    labels, summary = mod.build_detection_artifacts(
+        source_meta=sm, selection=sel, setups=setups, cluster=cluster,
+        adequacy=adeq, sha_before="x", sha_after="x")
+    for art in (labels, summary):
+        assert art["no_replay"] is True
+        assert art["no_pnl"] is True
+        assert art["no_trading"] is True
+        assert art["scope_locks"]["no_replay"] is True
+        assert art["scope_locks"]["no_pnl"] is True
+        assert art["scope_locks"]["no_live_trading"] is True
+        assert art["deterministic_no_wallclock_timestamp"] is True
+
+
+def test_summary_references_labels_path_like_c4_c9_pattern():
+    mod = _runner_module()
+    sm, sel, setups, cluster, adeq = _fake_detection_inputs()
+    _labels, summary = mod.build_detection_artifacts(
+        source_meta=sm, selection=sel, setups=setups, cluster=cluster,
+        adequacy=adeq, sha_before="x", sha_after="x")
+    assert summary["labels_path"].endswith(".json")
+    assert "detector_labels" in summary["labels_path"]
+    assert summary["artifact_schema_version"] == "c10_detector_summary_v1"
+    assert _labels["artifact_schema_version"] == "c10_detector_labels_v1"

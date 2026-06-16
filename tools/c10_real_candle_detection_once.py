@@ -73,6 +73,23 @@ OUT_DIR = (REPO_ROOT / "data" / "intraweek_calendar_seasonality_c10"
            / "coverage_blocker")
 BLOCKER_PATH = OUT_DIR / "c10_real_candle_coverage_blocker.json"
 
+# Success-path frozen detector artifacts (separate dir from the blocker;
+# the covered detection path writes per-setup labels + a summary here so a
+# later labels review can recount/certify WITHOUT reading stdout).
+DETECTOR_LABELS_DIR = (REPO_ROOT / "data"
+                       / "intraweek_calendar_seasonality_c10"
+                       / "detector_labels")
+OOS_SAMPLE_TAG = "%s_%s" % (REQUIRED_OUT_OF_SAMPLE_WINDOW[0],
+                            REQUIRED_OUT_OF_SAMPLE_WINDOW[1])
+LABELS_PATH = (DETECTOR_LABELS_DIR
+               / ("c10_detector_labels_%s.json" % OOS_SAMPLE_TAG))
+SUMMARY_PATH = (DETECTOR_LABELS_DIR
+                / ("c10_detector_summary_%s.json" % OOS_SAMPLE_TAG))
+MIN_LABELS_REVIEW_THRESHOLD = (
+    c10d.SAMPLE_SIZE_ADEQUACY_THRESHOLD_MIN_ACCEPTED)
+ARTIFACT_SCHEMA_VERSION_LABELS = "c10_detector_labels_v1"
+ARTIFACT_SCHEMA_VERSION_SUMMARY = "c10_detector_summary_v1"
+
 STATUS_BLOCKED = "BLOCKED_MISSING_REQUIRED_IN_SAMPLE_COVERAGE"
 STATUS_COVERAGE_OK = "REQUIRED_IN_SAMPLE_COVERAGE_PRESENT"
 
@@ -161,11 +178,85 @@ def load_bars_from_csv(path: Path) -> list:
     return sorted(bars, key=lambda b: b["date"])
 
 
-def run_detection_when_covered(path: Path) -> dict:
-    """The full deterministic detection path, GATED behind coverage. It
-    is unreachable today because required 2019 in-sample coverage is
-    missing; it exists so the runner is complete once 2019 data is
-    staged through a separately approved step."""
+def _dump_json(path: Path, obj: dict) -> str:
+    """Write a deterministic (sorted-key, no wall-clock) JSON artifact and
+    return its SHA-256. Side effect confined to the given path."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(obj, f, indent=2, sort_keys=True)
+    return compute_sha256(path)
+
+
+def build_detection_artifacts(*, source_meta: dict, selection: dict,
+                              setups: list, cluster: dict,
+                              adequacy: dict, sha_before: str,
+                              sha_after: str) -> tuple:
+    """Pure: assemble the (labels, summary) artifact dicts from an
+    already-computed detection result. No I/O. Recount-sufficient -- the
+    labels artifact carries every per-setup record plus the aggregate
+    counts a labels review needs to re-derive accepted/dropped totals
+    without reading stdout. Deterministic: no wall-clock timestamp."""
+    accepted_post = list(cluster["kept"])
+    dropped = list(cluster["dropped"])
+    accepted_pre = [s for s in setups
+                    if s.get("status") == "accepted_for_replay_review"]
+    status_breakdown: dict = {}
+    for s in setups:
+        st = s.get("status")
+        status_breakdown[st] = status_breakdown.get(st, 0) + 1
+    common = {
+        "candidate_id": CANDIDATE_ID,
+        "candidate_family": CANDIDATE_FAMILY,
+        "symbol": SYMBOL, "timeframe": TIMEFRAME, "direction": DIRECTION,
+        "source_path": source_meta["source_path"],
+        "source_sha256_before": sha_before,
+        "source_sha256_after": sha_after,
+        "source_unchanged_during_detection": sha_before == sha_after,
+        "source_first_date": source_meta["first_date"],
+        "source_last_date": source_meta["last_date"],
+        "source_row_count": source_meta["row_count"],
+        "in_sample_selection_window": list(REQUIRED_IN_SAMPLE_WINDOW),
+        "out_of_sample_window": list(REQUIRED_OUT_OF_SAMPLE_WINDOW),
+        "sample_tag": OOS_SAMPLE_TAG,
+        "favorable_weekday_bucket":
+            selection["favorable_weekday_bucket"],
+        "per_weekday_in_sample_mean_bps":
+            selection["per_weekday_mean_bps"],
+        "attempts": len(setups),
+        "accepted_pre_anti_cluster": len(accepted_pre),
+        "accepted_post_anti_cluster": len(accepted_post),
+        "anti_cluster_dropped_count": len(dropped),
+        "anti_cluster_min_bar_gap": cluster["anti_cluster_min_bar_gap"],
+        "anti_cluster_tie_breaker": cluster["tie_breaker"],
+        "anti_cluster_does_not_consume_edit_token":
+            cluster["anti_cluster_does_not_consume_edit_token"],
+        "minimum_labels_review_threshold": MIN_LABELS_REVIEW_THRESHOLD,
+        "sample_size_adequacy": adequacy,
+        "status_breakdown": status_breakdown,
+        "deterministic_no_wallclock_timestamp": True,
+        "no_replay": True, "no_pnl": True, "no_trading": True,
+        "scope_locks": SCOPE_LOCKS,
+    }
+    labels = dict(common)
+    labels["artifact_schema_version"] = ARTIFACT_SCHEMA_VERSION_LABELS
+    labels["selection"] = selection
+    labels["accepted_setups_post_anti_cluster"] = accepted_post
+    labels["anti_cluster_dropped"] = dropped
+    summary = dict(common)
+    summary["artifact_schema_version"] = ARTIFACT_SCHEMA_VERSION_SUMMARY
+    summary["scope"] = ("real_candle_detection_only_no_replay_no_pnl"
+                        "_no_trading")
+    summary["labels_path"] = str(
+        LABELS_PATH.relative_to(REPO_ROOT)).replace("\\", "/")
+    return labels, summary
+
+
+def run_detection_when_covered(path: Path, source_meta: dict) -> dict:
+    """The full deterministic detection path, GATED behind coverage.
+    Scans the OOS window, freezes the per-setup labels + summary
+    artifacts under detector_labels/, and returns a COMPACT result
+    (counts + artifact paths/SHAs) -- the full per-setup list lives in
+    the frozen artifact, not in stdout."""
     sha_before = compute_sha256(path)
     bars = load_bars_from_csv(path)
     selection = c10d.select_favorable_weekday_bucket(bars)
@@ -181,12 +272,29 @@ def run_detection_when_covered(path: Path) -> dict:
     sha_after = compute_sha256(path)
     if sha_before != sha_after:
         raise RuntimeError("staged_source_data_mutated_during_scan")
+    labels, summary = build_detection_artifacts(
+        source_meta=source_meta, selection=selection, setups=setups,
+        cluster=cluster, adequacy=adequacy,
+        sha_before=sha_before, sha_after=sha_after)
+    labels_sha = _dump_json(LABELS_PATH, labels)
+    summary["labels_sha256"] = labels_sha
+    summary_sha = _dump_json(SUMMARY_PATH, summary)
+    accepted_pre = [s for s in setups
+                    if s.get("status") == "accepted_for_replay_review"]
     return {
         "selection": selection,
         "attempts": len(setups),
+        "accepted_pre_anti_cluster": len(accepted_pre),
         "accepted_post_anti_cluster": len(cluster["kept"]),
+        "anti_cluster_dropped": len(cluster["dropped"]),
         "sample_size_adequacy": adequacy,
         "source_unchanged_during_detection": True,
+        "labels_artifact_path": str(
+            LABELS_PATH.relative_to(REPO_ROOT)).replace("\\", "/"),
+        "labels_artifact_sha256": labels_sha,
+        "summary_artifact_path": str(
+            SUMMARY_PATH.relative_to(REPO_ROOT)).replace("\\", "/"),
+        "summary_artifact_sha256": summary_sha,
     }
 
 
@@ -230,10 +338,12 @@ def main() -> dict:
         for key, value in report.items():
             print("%s = %r" % (key, value))
         return report
-    # Unreachable today: required coverage present -> run detection.
-    report.update(run_detection_when_covered(SOURCE_FILE))
+    # Required coverage present -> run detection and freeze artifacts.
+    report.update(run_detection_when_covered(SOURCE_FILE, source))
     report["real_candle_detection_completed"] = True
     report["no_accepted_or_rejected_setup_claims"] = False
+    report["scope"] = ("real_candle_detection_scan_freezes_detector_labels"
+                       "_artifacts_no_replay_no_pnl_no_trading")
     for key, value in report.items():
         print("%s = %r" % (key, value))
     return report

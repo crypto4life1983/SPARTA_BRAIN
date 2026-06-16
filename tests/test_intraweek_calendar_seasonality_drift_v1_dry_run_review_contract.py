@@ -20,30 +20,70 @@ from __future__ import annotations
 
 import ast
 import copy
+import inspect
+import sys
 
 import sparta_commander.intraweek_calendar_seasonality_drift_v1_dry_run_review_contract as c10r
 
-# The dominant cost of this suite is ONE full synthetic-dry-run + scan
-# recompute (`_recompute_live_dry_run`, ~1.5-2h of CPU). We pay it
-# EXACTLY ONCE and reuse the result everywhere:
-#   * `_LIVE` holds the single live recompute.
-#   * `_R` is the real, chain-gated review record. It is built while
-#     the heavy recompute is temporarily redirected to return the
-#     cached `_LIVE`, so the build STILL runs every upstream chain gate
-#     and the real certification step -- it just does not recompute the
-#     dry-run a second time.
-# This removes the duplicate multi-hour rebuilds that previously made
-# the full suite run >4h and never complete: the drift test now
-# certifies the cached `_LIVE` directly, and the chain-certification
-# test reads `_R`. No assertion or coverage is weakened.
+# `_LIVE` holds the single genuine synthetic-dry-run + scan recompute
+# (`_recompute_live_dry_run`); the drift-certification tests certify it
+# directly, so it is computed ONCE here before any memoization.
 _LIVE = c10r._recompute_live_dry_run()
 
-_orig_recompute = c10r._recompute_live_dry_run
-c10r._recompute_live_dry_run = lambda: _LIVE
+# The shared build_* contract gates (C10 sub-gates + the V5/V4/V3 rejected-
+# family blacklists, the C9/C8/C7 dry-run-review chains, Overnight Autopilot
+# V2, Recommendation V1, the Autopilot Loop, and the proposal drafter) are NOT
+# memoized in production, so the chain is re-evaluated EXPONENTIALLY (each gate
+# re-runs its predecessors in full). For the SINGLE record build below we wrap
+# every zero-argument build_* gate (and the _recompute_live_dry_run leaves)
+# across all loaded sparta_commander modules in a once-per-original, deepcopy-
+# returning cache, so each unique gate is computed EXACTLY ONCE -> the tree
+# collapses to linear. All monkeypatches are restored in the finally. Gates are
+# pure + deterministic, so the built record is IDENTICAL and every caller still
+# gets an independent deep copy; production code is untouched; arg-taking
+# builds pass straight through, never cached.
+def _install_pure_gate_memoization():
+    cache: dict = {}
+    wrappers: dict = {}
+    restore: list = []
+
+    def _make(orig):
+        def _wrapped(*args, **kwargs):
+            if args or kwargs:
+                return orig(*args, **kwargs)
+            oid = id(orig)
+            if oid not in cache:
+                cache[oid] = orig()
+            return copy.deepcopy(cache[oid])
+        return _wrapped
+
+    def _is_target(fn) -> bool:
+        return inspect.isfunction(fn) and (
+            fn.__name__.startswith("build_")
+            or fn.__name__ == "_recompute_live_dry_run")
+
+    for _mname, _mod in list(sys.modules.items()):
+        if _mod is None or not _mname.startswith("sparta_commander"):
+            continue
+        for _orig in list(vars(_mod).values()):
+            if _is_target(_orig) and id(_orig) not in wrappers:
+                wrappers[id(_orig)] = _make(_orig)
+    for _mname, _mod in list(sys.modules.items()):
+        if _mod is None or not _mname.startswith("sparta_commander"):
+            continue
+        for _attr, _val in list(vars(_mod).items()):
+            if inspect.isfunction(_val) and id(_val) in wrappers:
+                restore.append((_mod, _attr, _val))
+                setattr(_mod, _attr, wrappers[id(_val)])
+    return restore
+
+
+_memo_restore = _install_pure_gate_memoization()
 try:
     _R = c10r.build_candidate_10_dry_run_review()
 finally:
-    c10r._recompute_live_dry_run = _orig_recompute
+    for _mod, _attr, _orig in _memo_restore:
+        setattr(_mod, _attr, _orig)
 
 
 def _tamper(field_path, new_value):

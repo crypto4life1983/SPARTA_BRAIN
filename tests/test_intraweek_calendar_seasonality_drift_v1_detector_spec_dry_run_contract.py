@@ -30,12 +30,67 @@ from __future__ import annotations
 
 import ast
 import copy
+import inspect
+import sys
 
 import sparta_commander.intraweek_calendar_seasonality_drift_v1_detector_spec_dry_run_contract as c10d
 import sparta_commander.intraweek_calendar_seasonality_drift_v1_family_proposal_contract as c10p
 import sparta_commander.intraweek_calendar_seasonality_drift_v1_spec_review_contract as c10s
 
-_R = c10d.build_candidate_10_detector_spec_dry_run()
+# The shared build_* contract gates (C10 sub-gates + the V5/V4/V3 rejected-
+# family blacklists, the C9/C8/C7 dry-run-review chains, Overnight Autopilot
+# V2, Recommendation V1, the Autopilot Loop, and the proposal drafter) are NOT
+# memoized in production, so the chain is re-evaluated EXPONENTIALLY (each gate
+# re-runs its predecessors in full). For the SINGLE record build below we wrap
+# every zero-argument build_* gate (and the _recompute_live_dry_run leaves)
+# across all loaded sparta_commander modules in a once-per-original, deepcopy-
+# returning cache, so each unique gate is computed EXACTLY ONCE -> the tree
+# collapses to linear. All monkeypatches are restored in the finally. Gates are
+# pure + deterministic, so the built record is IDENTICAL and every caller still
+# gets an independent deep copy; production code is untouched; arg-taking
+# builds pass straight through, never cached.
+def _install_pure_gate_memoization():
+    cache: dict = {}
+    wrappers: dict = {}
+    restore: list = []
+
+    def _make(orig):
+        def _wrapped(*args, **kwargs):
+            if args or kwargs:
+                return orig(*args, **kwargs)
+            oid = id(orig)
+            if oid not in cache:
+                cache[oid] = orig()
+            return copy.deepcopy(cache[oid])
+        return _wrapped
+
+    def _is_target(fn) -> bool:
+        return inspect.isfunction(fn) and (
+            fn.__name__.startswith("build_")
+            or fn.__name__ == "_recompute_live_dry_run")
+
+    for _mname, _mod in list(sys.modules.items()):
+        if _mod is None or not _mname.startswith("sparta_commander"):
+            continue
+        for _orig in list(vars(_mod).values()):
+            if _is_target(_orig) and id(_orig) not in wrappers:
+                wrappers[id(_orig)] = _make(_orig)
+    for _mname, _mod in list(sys.modules.items()):
+        if _mod is None or not _mname.startswith("sparta_commander"):
+            continue
+        for _attr, _val in list(vars(_mod).items()):
+            if inspect.isfunction(_val) and id(_val) in wrappers:
+                restore.append((_mod, _attr, _val))
+                setattr(_mod, _attr, wrappers[id(_val)])
+    return restore
+
+
+_memo_restore = _install_pure_gate_memoization()
+try:
+    _R = c10d.build_candidate_10_detector_spec_dry_run()
+finally:
+    for _mod, _attr, _orig in _memo_restore:
+        setattr(_mod, _attr, _orig)
 
 
 def _record():
@@ -79,9 +134,16 @@ def test_chain_blocks_when_ledger_breaks():
     finally:
         mod.C1_STATUS = original
     assert mod.C1_STATUS == "REJECTED_KEPT_ON_RECORD"
-    # chain heals after restore
-    assert mod.build_candidate_10_detector_spec_contract()[
-        "verdict"] == mod.VERDICT_C10D_READY
+    # chain heals after restore -- memoized so the deep, shared gate chain is
+    # not re-evaluated exponentially (same once-per-gate pattern as the _R
+    # build above). The assertion and its target gate are unchanged.
+    _heal_restore = _install_pure_gate_memoization()
+    try:
+        assert mod.build_candidate_10_detector_spec_contract()[
+            "verdict"] == mod.VERDICT_C10D_READY
+    finally:
+        for _m, _a, _o in _heal_restore:
+            setattr(_m, _a, _o)
 
 
 # ---- frozen numerics ------------------------------------------------------
