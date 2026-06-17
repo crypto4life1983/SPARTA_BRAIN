@@ -721,7 +721,7 @@ def test_step47_status_shape_unchanged_after_compare_ask(monkeypatch, tmp_path):
     c.post(_ASK_PATH, json={"question": "what changed since last snapshot?"})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 29
+    assert len(after) == 33
     assert after["read_only"] is True
 
 
@@ -1002,7 +1002,7 @@ def test_ci_conversation_does_not_change_status_shape():
         c.post(_ASK_PATH, json={"question": q})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 29
+    assert len(after) == 33
     assert after["read_only"] is True
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
@@ -1214,7 +1214,7 @@ def test_eb_briefing_does_not_change_status_shape():
         c.post(_ASK_PATH, json={"question": q})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 29
+    assert len(after) == 33
     assert after["read_only"] is True
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
@@ -1543,7 +1543,7 @@ def test_cos_does_not_change_status_shape():
         c.post(_ASK_PATH, json={"question": q})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 29
+    assert len(after) == 33
     assert after["read_only"] is True
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
@@ -1659,7 +1659,7 @@ def test_tet_keeps_trading_flags_locked_and_shape():
         c.post(_ASK_PATH, json={"question": q})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 29
+    assert len(after) == 33
     assert after["read_only"] is True
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
@@ -1827,7 +1827,7 @@ def test_wh_keeps_trading_flags_locked_and_shape():
         c.post(_ASK_PATH, json={"question": q})
     after = c.get("/api/jarvis/status").json()
     assert set(before) == set(after)
-    assert len(after) == 29
+    assert len(after) == 33
     assert after["read_only"] is True
     td = after.get("trading_detail", {})
     for flag in ("paper_ready", "live_ready", "broker_control"):
