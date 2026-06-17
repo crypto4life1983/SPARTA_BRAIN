@@ -71,3 +71,7 @@ data/lead_lag_propagation_continuation_c13/
 # Candidate #14 conviction-bar follow-through — gitignored detector labels /
 # replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
 data/conviction_bar_follow_through_c14/
+
+# Candidate #15 slow vol-targeted time-series momentum — gitignored detector
+# labels / replay artifacts (real-candle outputs; SHA-pinned in review contracts)
+data/slow_vol_targeted_time_series_momentum_c15/
