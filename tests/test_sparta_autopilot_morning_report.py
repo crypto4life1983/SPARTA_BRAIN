@@ -251,3 +251,26 @@ def test_tool_subprocess_only_calls_git():
             if "subprocess" in seg and "check_output" in seg:
                 assert '["git"]' in seg or "[\"git\"] + args" in seg \
                     or '"git"' in seg, seg
+
+
+# --- live candidate-status ledger (not the synthetic fixture) --------------- #
+
+def test_live_ledger_reflects_c10_c11_c12_all_closed():
+    """gather_candidate_status() reads the committed rejection-record contracts;
+    after C10/C11/C12 all closed it must NOT show C11 as 'PROPOSED' and must
+    include C12 -- all REJECTED_KEPT_ON_RECORD, inactive, no open gate."""
+    status = mr.gather_candidate_status()
+    for key, family in (("C10", "intraweek_calendar_seasonality_drift"),
+                        ("C11", "cross_asset_dispersion_reversion"),
+                        ("C12", "failed_breakdown_reclaim_reversal")):
+        assert key in status, key
+        c = status[key]
+        assert c["family"] == family, key
+        assert c["status"] == "REJECTED_KEPT_ON_RECORD", key
+        assert c["active"] is False, key
+        assert c["next_action"].startswith("NONE"), key
+    # no stale 'PROPOSED' wording, and no false open human gate
+    assert "PROPOSED" not in json.dumps(status)
+    gate = mr._open_human_gate(status)
+    assert gate["candidate"] is None
+    assert gate["action"] == "NONE"

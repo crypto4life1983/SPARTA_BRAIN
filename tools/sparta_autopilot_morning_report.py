@@ -363,12 +363,22 @@ def gather_candidate_status() -> dict:
     except Exception:  # noqa: BLE001
         pass
     try:
-        import sparta_commander.cross_asset_dispersion_reversion_v1_family_proposal_contract as c11p  # noqa: E501
+        import sparta_commander.cross_asset_dispersion_reversion_v1_rejection_record_contract as c11rj  # noqa: E501
         status["C11"] = {
-            "family": c11p.CANDIDATE_FAMILY,
-            "status": "PROPOSED (proposal-only, awaiting human decision)",
+            "family": c11rj.CANDIDATE_FAMILY,
+            "status": c11rj.REJECTION_STATUS,
             "active": False,
-            "next_action": c11p.NEXT_REQUIRED_ACTION,
+            "next_action": "NONE (closed, kept on record as research lesson)",
+        }
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        import sparta_commander.failed_breakdown_reclaim_reversal_v1_rejection_record_contract as c12rj  # noqa: E501
+        status["C12"] = {
+            "family": c12rj.CANDIDATE_FAMILY,
+            "status": c12rj.REJECTION_STATUS,
+            "active": False,
+            "next_action": "NONE (closed, kept on record as research lesson)",
         }
     except Exception:  # noqa: BLE001
         pass
