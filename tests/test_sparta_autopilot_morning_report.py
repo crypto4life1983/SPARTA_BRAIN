@@ -274,3 +274,26 @@ def test_live_ledger_reflects_c10_c11_c12_all_closed():
     gate = mr._open_human_gate(status)
     assert gate["candidate"] is None
     assert gate["action"] == "NONE"
+
+
+# --- generated latest artifacts are regenerable output, not source-of-truth - #
+
+def test_latest_artifacts_gitignored_and_not_tracked():
+    """reports/autopilot_morning/latest.{md,json} are REGENERABLE report output:
+    they must stay gitignored and must NEVER be tracked source-of-truth."""
+    import subprocess
+    rel_md = mr.OUT_MD.relative_to(_REPO_ROOT).as_posix()
+    rel_json = mr.OUT_JSON.relative_to(_REPO_ROOT).as_posix()
+    assert rel_md == "reports/autopilot_morning/latest.md"
+    assert rel_json == "reports/autopilot_morning/latest.json"
+    # NOT tracked (the whole dir must carry no tracked files)
+    tracked = subprocess.run(
+        ["git", "ls-files", "reports/autopilot_morning/"],
+        cwd=_REPO_ROOT, capture_output=True, text=True).stdout.split()
+    assert tracked == [], tracked
+    # gitignored (check-ignore echoes each ignored path, rc 0)
+    ci = subprocess.run(
+        ["git", "check-ignore", rel_md, rel_json],
+        cwd=_REPO_ROOT, capture_output=True, text=True)
+    assert ci.returncode == 0
+    assert rel_md in ci.stdout and rel_json in ci.stdout
