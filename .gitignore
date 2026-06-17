@@ -67,3 +67,7 @@ data/failed_breakdown_reclaim_reversal_c12/
 # Candidate #13 lead-lag propagation continuation — gitignored detector labels /
 # replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
 data/lead_lag_propagation_continuation_c13/
+
+# Candidate #14 conviction-bar follow-through — gitignored detector labels /
+# replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
+data/conviction_bar_follow_through_c14/
