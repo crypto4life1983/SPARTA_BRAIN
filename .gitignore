@@ -63,3 +63,7 @@ data/cross_asset_dispersion_reversion_c11/
 # Candidate #12 failed-breakdown reclaim reversal — gitignored detector labels /
 # replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
 data/failed_breakdown_reclaim_reversal_c12/
+
+# Candidate #13 lead-lag propagation continuation — gitignored detector labels /
+# replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
+data/lead_lag_propagation_continuation_c13/
