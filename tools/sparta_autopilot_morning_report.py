@@ -329,7 +329,7 @@ def render_markdown(report: dict) -> str:
                      "before any auto-advance.")
     if ap.get("next_safe_action") == "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL":
         lines.append("- candidate source EXCLUDES all %s rejected/closed "
-                     "families (C1–C13)."
+                     "families (C1–C14)."
                      % ap.get("excluded_rejected_families_count"))
     lines.append("- planner executes nothing (read-only; no build / labels / "
                  "replay / portfolio / paper / live).")

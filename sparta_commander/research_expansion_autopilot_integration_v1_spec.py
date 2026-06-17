@@ -74,8 +74,8 @@ PROPOSED_SARA_LEDGER_CHANGE = {
         "(excluded_rejected_families_count == 18 -> 19)"),
     "additive_only": False,
     "touches_execution_surface": False,
-    "applied": False,
-    "requires_separate_token": "UPDATE_SARA_REJECTED_LEDGER_ADD_C14",
+    "applied": True,  # APPLIED via UPDATE_SARA_REJECTED_LEDGER_ADD_C14
+    "applied_via_token": "UPDATE_SARA_REJECTED_LEDGER_ADD_C14",
 }
 
 _CAPABILITY_FLAGS_FALSE = (
@@ -95,18 +95,21 @@ _CAPABILITY_FLAGS_FALSE = (
 
 
 def reconcile_rejected_ledger() -> dict[str, Any]:
-    """Pure reconciliation proving the canonical 19-family ledger == SARA's 18
-    (C1-C13) PLUS conviction_bar_follow_through (C14). No I/O."""
+    """Pure reconciliation proving the canonical 19-family ledger == SARA's ledger
+    once conviction_bar_follow_through (C14) is included. Robust whether SARA still
+    holds 18 (C1-C13, C14 pending) or already holds 19 (C1-C14, bump applied) --
+    no duplicate C14 is ever introduced. No I/O."""
     sara = list(_sara.DEFAULT_REJECTED_FAMILIES)
     canonical = list(CANONICAL_REJECTED_FAMILIES)
     extra = [f for f in canonical if f not in sara]
+    sara_with_c14 = sorted(set(sara) | {"conviction_bar_follow_through"})
     return {
         "sara_count": len(sara),
         "canonical_count": len(canonical),
         "missing_from_sara": extra,
         "c14_in_canonical": "conviction_bar_follow_through" in canonical,
-        "reconciles_with_c14_added":
-            sorted(sara + ["conviction_bar_follow_through"]) == sorted(canonical),
+        "c14_in_sara": "conviction_bar_follow_through" in sara,
+        "reconciles_with_c14_added": sara_with_c14 == sorted(set(canonical)),
     }
 
 
@@ -286,7 +289,11 @@ def build_integration_spec(repo_root: Any = ".",
             "morning_report": dict(PROPOSED_MORNING_REPORT_CHANGE),
             "sara_ledger": dict(PROPOSED_SARA_LEDGER_CHANGE),
         },
-        "proposed_changes_applied": False,
+        # The SARA ledger bump (18->19, C14) is APPLIED; the morning-report §14
+        # wiring is still PENDING -- so not ALL proposed changes are applied yet.
+        "all_proposed_changes_applied": False,
+        "sara_ledger_change_applied": True,
+        "morning_report_change_applied": False,
         "human_review_required": True,
         "current_loop_stage": "integration_spec",
         "next_required_action":
@@ -327,13 +334,17 @@ def validate_integration_spec(record: dict[str, Any]) -> dict[str, Any]:
     if recon.get("reconciles_with_c14_added") is not True:
         failures.append("ledger_does_not_reconcile_with_c14")
 
-    if record.get("proposed_changes_applied") is not False:
-        failures.append("proposed_changes_must_not_be_applied")
+    # The morning-report §14 wiring must still be pending; the SARA ledger bump
+    # (C14) is applied. Not ALL proposed changes are applied yet.
+    if record.get("all_proposed_changes_applied") is not False:
+        failures.append("morning_report_change_must_still_be_pending")
     pc = record.get("proposed_changes") or {}
-    for key in ("morning_report", "sara_ledger"):
-        ch = pc.get(key) or {}
-        if ch.get("applied") is not False:
-            failures.append("proposed_change_applied_%s" % key)
+    mr = pc.get("morning_report") or {}
+    if mr.get("applied") is not False:
+        failures.append("morning_report_change_applied_too_early")
+    sl = pc.get("sara_ledger") or {}
+    if sl.get("applied") is not True:
+        failures.append("sara_ledger_change_not_applied")
 
     locks = record.get("scope_locks") or {}
     for key in ("no_build", "no_write", "no_execute", "no_labels", "no_replay",

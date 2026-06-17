@@ -109,21 +109,23 @@ def test_refuses_proposing_a_rejected_family():
     for fam in ("intraweek_calendar_seasonality_drift",         # C10
                 "cross_asset_dispersion_reversion",             # C11
                 "failed_breakdown_reclaim_reversal",            # C12
-                "lead_lag_propagation_continuation"):           # C13
+                "lead_lag_propagation_continuation",            # C13
+                "conviction_bar_follow_through"):               # C14
         d = _decide(sara.STAGE_NONE, proposed_family=fam)
         assert d["next_safe_action"] == sara.ACTION_HALT_FAMILY_REJECTED, fam
         assert d["auto_advanceable"] is False
         assert d["is_hard_stop"] is True
 
 
-def test_default_ledger_contains_c10_c11_c12_c13():
+def test_default_ledger_contains_c10_c11_c12_c13_c14():
     led = sara.DEFAULT_REJECTED_FAMILIES
     for fam in ("intraweek_calendar_seasonality_drift",
                 "cross_asset_dispersion_reversion",
                 "failed_breakdown_reclaim_reversal",
-                "lead_lag_propagation_continuation"):
+                "lead_lag_propagation_continuation",
+                "conviction_bar_follow_through"):
         assert fam in led, fam
-    assert len(led) == 18
+    assert len(led) == 19
 
 
 # ---- forbidden gates: any labels/replay/etc stage -> hard stop -------------

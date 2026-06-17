@@ -66,28 +66,43 @@ def test_canonical_ledger_is_19_and_reconciles():
     assert _R["canonical_rejected_families_count"] == 19
     assert _R["canonical_includes_c14"] is True
     recon = _R["rejected_ledger_reconciliation"]
-    assert recon["sara_count"] == 18
+    # SARA's ledger bump (18 -> 19, C14) has been applied; canonical == SARA, no
+    # duplicate C14. Reconciliation holds either way.
+    assert recon["sara_count"] == 19
     assert recon["canonical_count"] == 19
-    assert recon["missing_from_sara"] == ["conviction_bar_follow_through"]
+    assert recon["c14_in_sara"] is True
+    assert recon["missing_from_sara"] == []
     assert recon["reconciles_with_c14_added"] is True
     bad = dict(_R)
     bad["canonical_rejected_families_count"] = 18
     assert rei.validate_integration_spec(bad)["valid"] is False
 
 
-# ---- proposed wiring changes are DECLARED, not applied ---------------------
+# ---- wiring changes: SARA ledger APPLIED, morning-report still PENDING ------
 
-def test_proposed_changes_declared_not_applied():
-    assert _R["proposed_changes_applied"] is False
+def test_sara_ledger_applied_morning_report_still_pending():
+    assert _R["all_proposed_changes_applied"] is False
+    assert _R["sara_ledger_change_applied"] is True
+    assert _R["morning_report_change_applied"] is False
     pc = _R["proposed_changes"]
+    # morning-report §14 wiring still pending (not applied)
     assert pc["morning_report"]["applied"] is False
     assert pc["morning_report"]["additive_only"] is True
-    assert pc["sara_ledger"]["applied"] is False
-    assert pc["sara_ledger"]["requires_separate_token"] == (
+    # SARA ledger bump applied via its token
+    assert pc["sara_ledger"]["applied"] is True
+    assert pc["sara_ledger"]["applied_via_token"] == (
         "UPDATE_SARA_REJECTED_LEDGER_ADD_C14")
+    # tampering: marking all changes applied (i.e. morning-report applied) is bad
     bad = dict(_R)
-    bad["proposed_changes_applied"] = True
+    bad["all_proposed_changes_applied"] = True
     assert rei.validate_integration_spec(bad)["valid"] is False
+    # tampering: SARA ledger change must remain applied (cannot be cleared)
+    bad2 = dict(_R)
+    bad2["proposed_changes"] = {
+        "morning_report": dict(_R["proposed_changes"]["morning_report"]),
+        "sara_ledger": {**_R["proposed_changes"]["sara_ledger"], "applied": False},
+    }
+    assert rei.validate_integration_spec(bad2)["valid"] is False
 
 
 # ---- the combined planner: actionable only at the open proposal gate -------
