@@ -59,3 +59,7 @@ reports/autopilot_morning/
 # Candidate #11 cross-asset dispersion reversion — gitignored detector labels /
 # replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
 data/cross_asset_dispersion_reversion_c11/
+
+# Candidate #12 failed-breakdown reclaim reversal — gitignored detector labels /
+# replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
+data/failed_breakdown_reclaim_reversal_c12/
