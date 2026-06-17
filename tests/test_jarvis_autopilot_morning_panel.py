@@ -171,3 +171,46 @@ def test_panel_flags_no_paper_live_readiness():
     for rep in (_success_report(), None):
         assert panel.build_autopilot_morning_panel(rep)[
             "no_paper_live_readiness_claim"] is True
+
+
+# --- Safe Research Autopilot v1 planner output in the JARVIS panel ---------- #
+
+def test_panel_surfaces_autopilot_plan_recommendation():
+    rep = _success_report()
+    rep["autopilot_plan"] = {
+        "next_safe_action": "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL",
+        "would_auto_advance": True, "is_hard_stop": False,
+        "stopped_before": None, "requires_human_approval": False,
+        "recommended_token": "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL_ONLY",
+        "reason": "no active candidate; recommend opening next proposal",
+        "planner_is_read_only": True, "planner_executes_nothing": True,
+    }
+    p = panel.build_autopilot_morning_panel(rep)
+    assert p["autopilot_plan"]["next_safe_action"] == (
+        "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL")
+    html = p["html"]
+    assert "Safe Research Autopilot" in html
+    assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" in html
+    assert "executes nothing" in html
+
+
+def test_panel_surfaces_autopilot_hard_stop_before_labels():
+    rep = _success_report()
+    rep["autopilot_plan"] = {
+        "next_safe_action": "STOP_BEFORE_REAL_CANDLE_LABELS",
+        "would_auto_advance": False, "is_hard_stop": True,
+        "stopped_before": "real_candle_labels",
+        "requires_human_approval": True,
+        "recommended_token":
+            "HUMAN_DECISION_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT",
+        "reason": "detector dry-run ready; next gate is real-candle labels",
+        "planner_is_read_only": True, "planner_executes_nothing": True,
+    }
+    html = panel.build_autopilot_morning_panel(rep)["html"]
+    assert "Hard-stops before: real_candle_labels" in html
+    assert "HUMAN_DECISION_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" in html
+
+
+def test_missing_report_panel_has_empty_autopilot_plan():
+    p = panel.build_autopilot_morning_panel(None)
+    assert p["autopilot_plan"] == {}

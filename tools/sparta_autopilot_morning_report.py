@@ -36,6 +36,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+import sparta_commander.safe_research_autopilot_v1_contract as _sara  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -173,6 +174,39 @@ def _what_to_do_next(run_status, gate, candidate_status) -> str:
                gate.get("reject_text_to_paste")))
 
 
+def _autopilot_plan(candidate_status: dict, git_summary: dict) -> dict:
+    """Pure, READ-ONLY. Derive the chain state + repo cleanliness from the
+    already-gathered inputs and ask the Safe Research Autopilot v1 PLANNER for
+    its recommended next safe action. Executes nothing -- the planner only emits
+    a recommendation; no build/labels/replay/commit happens here."""
+    cstat = candidate_status or {}
+    active = sorted(k for k, c in cstat.items()
+                    if c.get("active")
+                    and not str(c.get("status", "")).startswith("REJECTED"))
+    if active:
+        key = active[-1]
+        c = cstat[key]
+        chain_state = {"active_candidate": key,
+                       "stage": c.get("autopilot_stage", "unknown_gate"),
+                       "proposed_family": c.get("family")}
+    else:
+        chain_state = {"active_candidate": None, "stage": _sara.STAGE_NONE,
+                       "proposed_family": None}
+    gs = git_summary or {}
+    repo_state = {"clean": bool(gs.get("clean", False)),
+                  "uncommitted_candidate_artifacts":
+                      bool(gs.get("staged")) or bool(gs.get("modified"))}
+    decision = _sara.decide_next_safe_action(chain_state, repo_state)
+    plan = _sara.summarize_for_morning_report(decision)
+    plan["chain_stage"] = chain_state["stage"]
+    plan["recommended_token"] = decision.get("recommended_token")
+    plan["excluded_rejected_families_count"] = len(
+        _sara.DEFAULT_REJECTED_FAMILIES)
+    plan["planner_is_read_only"] = True
+    plan["planner_executes_nothing"] = True
+    return plan
+
+
 def build_morning_report(run_state, git_summary: dict,
                          candidate_status: dict,
                          report_generated_at=None) -> dict:
@@ -199,6 +233,7 @@ def build_morning_report(run_state, git_summary: dict,
         "ahead_behind": git_summary.get("ahead_behind") if git_summary else None,
         "error_summary": list(rs.get("errors") or []),
         "what_to_do_next": _what_to_do_next(run_status, gate, candidate_status),
+        "autopilot_plan": _autopilot_plan(candidate_status, git_summary),
         "capability_flags": dict(CAPABILITY_FLAGS),
         "no_paper_live_readiness_claim": True,
     }
@@ -276,6 +311,28 @@ def render_markdown(report: dict) -> str:
                  else "- (no errors)")
     lines.append("## 12. What I should do next")
     lines.append("> %s" % r["what_to_do_next"])
+    lines.append("## 13. Safe Research Autopilot recommendation "
+                 "(planner-only, read-only)")
+    ap = r.get("autopilot_plan") or {}
+    lines.append("- recommendation: **%s**" % ap.get("next_safe_action"))
+    lines.append("- decision: %s" % ap.get("decision"))
+    lines.append("- reason: %s" % ap.get("reason"))
+    lines.append("- auto-advanceable: %s | requires human: %s | hard stop: %s"
+                 % (ap.get("would_auto_advance"),
+                    ap.get("requires_human_approval"), ap.get("is_hard_stop")))
+    if ap.get("stopped_before"):
+        lines.append("- **hard-stops before:** `%s`" % ap.get("stopped_before"))
+    if ap.get("recommended_token"):
+        lines.append("  - paste: `%s`" % ap.get("recommended_token"))
+    if ap.get("next_safe_action") == "STOP_DIRTY_REPO":
+        lines.append("- ⚠️ **DIRTY REPO** — commit/clean the working tree "
+                     "before any auto-advance.")
+    if ap.get("next_safe_action") == "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL":
+        lines.append("- candidate source EXCLUDES all %s rejected/closed "
+                     "families (C1–C13)."
+                     % ap.get("excluded_rejected_families_count"))
+    lines.append("- planner executes nothing (read-only; no build / labels / "
+                 "replay / portfolio / paper / live).")
     lines.append("")
     return "\n".join(lines) + "\n"
 

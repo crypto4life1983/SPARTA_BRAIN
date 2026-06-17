@@ -71,6 +71,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
                                 "candidate": None},
             "git_status_summary": None,
             "ahead_behind": None,
+            "autopilot_plan": {},
             "full_report_path": LATEST_MD_REL,
             "no_paper_live_readiness_claim": True,
         }
@@ -106,6 +107,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
         },
         "git_status_summary": report.get("git_status_summary"),
         "ahead_behind": report.get("ahead_behind"),
+        "autopilot_plan": report.get("autopilot_plan") or {},
         "full_report_path": LATEST_MD_REL,
         "no_paper_live_readiness_claim": True,
     }
@@ -198,7 +200,24 @@ def render_autopilot_morning_html(panel: dict) -> str:
                  % (_esc(gs.get("branch")), _esc(gs.get("staged")),
                     _esc(gs.get("modified")), _esc(gs.get("untracked")),
                     _esc(ab.get("ahead")), _esc(ab.get("behind"))))
-    # 10. path to full report
+    # 11. Safe Research Autopilot recommendation (planner-only, read-only)
+    ap = panel.get("autopilot_plan") or {}
+    if ap:
+        parts.append('<div class="jv-am-h">Safe Research Autopilot '
+                     '(planner-only)</div>')
+        parts.append('<div class="jv-detail">Recommends: <b>%s</b></div>'
+                     % _esc(ap.get("next_safe_action")))
+        parts.append('<div class="jv-detail">%s</div>' % _esc(ap.get("reason")))
+        if ap.get("stopped_before"):
+            parts.append('<div class="jv-detail jv-am-gate">Hard-stops before: '
+                         '%s</div>' % _esc(ap.get("stopped_before")))
+        if ap.get("recommended_token"):
+            parts.append('<div class="jv-am-paste">Next → paste: '
+                         '<code>%s</code></div>'
+                         % _esc(ap.get("recommended_token")))
+        parts.append('<div class="jv-detail">planner read-only · executes '
+                     'nothing</div>')
+    # 12. path to full report
     parts.append('<div class="jv-detail">Full report: %s</div>'
                  % _esc(panel.get("full_report_path")))
     parts.append('<div class="jv-am-foot">Research-only status surface. '

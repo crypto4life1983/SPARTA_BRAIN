@@ -241,6 +241,79 @@ def test_tool_has_no_broker_exchange_order_imports():
         assert tok not in src, tok
 
 
+# --- Safe Research Autopilot v1 planner integration (read-only) ------------- #
+
+def _all_rejected_status():
+    return {
+        "C10": {"family": "intraweek_calendar_seasonality_drift",
+                "status": "REJECTED_KEPT_ON_RECORD", "active": False,
+                "next_action": "NONE (closed)"},
+        "C13": {"family": "lead_lag_propagation_continuation",
+                "status": "REJECTED_KEPT_ON_RECORD", "active": False,
+                "next_action": "NONE (closed)"},
+    }
+
+
+def test_autopilot_plan_recommends_open_proposal_when_all_rejected():
+    report = mr.build_morning_report(_success_run_state(), _git_summary(),
+                                     _all_rejected_status())
+    ap = report["autopilot_plan"]
+    assert ap["next_safe_action"] == "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL"
+    assert ap["would_auto_advance"] is True
+    assert ap["planner_is_read_only"] is True
+    assert ap["excluded_rejected_families_count"] == 18
+    md = mr.render_markdown(report)
+    assert "Safe Research Autopilot" in md
+    assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" in md
+    assert "EXCLUDES" in md
+
+
+def test_autopilot_plan_dirty_repo_shows_stop_prominently():
+    dirty = dict(_git_summary())
+    dirty.update({"clean": False, "modified": 3})
+    report = mr.build_morning_report(_success_run_state(), dirty,
+                                     _all_rejected_status())
+    ap = report["autopilot_plan"]
+    assert ap["next_safe_action"] == "STOP_DIRTY_REPO"
+    assert ap["would_auto_advance"] is False
+    assert "DIRTY REPO" in mr.render_markdown(report)
+
+
+def test_autopilot_plan_detector_stage_hard_stops_before_labels():
+    cs = {"C14": {"family": "some_new_family", "status": "DETECTOR_DRY_RUN_READY",
+                  "active": True, "autopilot_stage": "detector_dry_run_ready",
+                  "next_action": "HUMAN_DECISION_C14_ADVANCE_TO_REAL_CANDLE_LABELS"}}
+    report = mr.build_morning_report(_success_run_state(), _git_summary(), cs)
+    ap = report["autopilot_plan"]
+    assert ap["next_safe_action"] == "STOP_BEFORE_REAL_CANDLE_LABELS"
+    assert ap["would_auto_advance"] is False
+    assert ap["stopped_before"] == "real_candle_labels"
+    md = mr.render_markdown(report)
+    assert "hard-stops before" in md
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS" in md
+
+
+def test_autopilot_plan_never_auto_advances_labels_or_replay():
+    for stage in ("real_candle_labels", "labels_pending", "replay",
+                  "replay_pending", "robustness", "portfolio_compute",
+                  "paper_trading", "live_trading"):
+        cs = {"CXX": {"family": "f", "status": "IN_PROGRESS", "active": True,
+                      "autopilot_stage": stage, "next_action": "x"}}
+        report = mr.build_morning_report(_success_run_state(), _git_summary(),
+                                         cs)
+        ap = report["autopilot_plan"]
+        assert ap["would_auto_advance"] is False, stage
+        assert ap["next_safe_action"] in (
+            "HARD_STOP_FORBIDDEN_GATE", "STOP_BEFORE_REAL_CANDLE_LABELS"), stage
+
+
+def test_autopilot_plan_present_in_report_keys():
+    report = mr.build_morning_report(_success_run_state(), _git_summary(),
+                                     _all_rejected_status())
+    assert "autopilot_plan" in report
+    assert report["autopilot_plan"]["planner_executes_nothing"] is True
+
+
 def test_tool_subprocess_only_calls_git():
     """The only subprocess use is read-only git; no other executable."""
     src = TOOL_FILE.read_text(encoding="utf-8")
