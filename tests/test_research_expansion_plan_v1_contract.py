@@ -84,14 +84,15 @@ def test_durable_idea_outranks_timing_only_idea():
 # ---- anti-loop -------------------------------------------------------------
 
 def test_anti_loop_refuses_rejected_family():
-    for fam in ("conviction_bar_follow_through", "lead_lag_propagation_continuation",
+    for fam in ("slow_vol_targeted_time_series_momentum",  # C15
+                "conviction_bar_follow_through", "lead_lag_propagation_continuation",
                 "intraweek_calendar_seasonality_drift"):
         s = rep.score_candidate_idea({
             "family": fam, "distinct_edge_axis": True,
             "materially_different_from_all_rejected": True,
             "durability_proxy": 0.9})
         assert s["buildable"] is False
-        assert s["reason"] == "family_in_rejected_ledger_C1_to_C14"
+        assert s["reason"] == "family_in_rejected_ledger_C1_to_C15"
 
 
 def test_anti_loop_requires_material_difference():
@@ -124,6 +125,7 @@ def test_anti_loop_requires_distinct_edge_axis():
 # ---- rejected ledger + lessons (learning data) -----------------------------
 
 def test_rejected_ledger_has_19_families_including_c14():
+    # the FROZEN historical C1-C14 ledger (referenced by the pushed C15 chain)
     led = _R["rejected_families_c1_to_c14"]
     assert len(led) == 19
     for fam in ("intraweek_calendar_seasonality_drift",
@@ -133,6 +135,22 @@ def test_rejected_ledger_has_19_families_including_c14():
                 "conviction_bar_follow_through"):
         assert fam in led
     assert "single_bar_conviction_continuation" in _R["rejected_family_lessons"]
+
+
+def test_current_rejected_ledger_is_20_including_c15():
+    # the CURRENT canonical ledger used for forward anti-loop now includes C15
+    cur = _R["rejected_families_current"]
+    assert len(cur) == 20
+    assert _R["rejected_families_count"] == 20
+    assert "slow_vol_targeted_time_series_momentum" in cur
+    assert "conviction_bar_follow_through" in cur
+    assert "slow_time_series_momentum_carry" in _R["rejected_family_lessons"]
+    # the C15 family is refused by the scorer's default anti-loop
+    s = rep.score_candidate_idea({
+        "family": "slow_vol_targeted_time_series_momentum",
+        "distinct_edge_axis": True,
+        "materially_different_from_all_rejected": True, "durability_proxy": 0.9})
+    assert s["buildable"] is False
 
 
 # ---- portfolio objective: declared, not computed ---------------------------

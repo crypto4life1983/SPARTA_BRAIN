@@ -44,10 +44,11 @@ import sparta_commander.safe_research_autopilot_v1_contract as _sara
 REI_SCHEMA_VERSION = 1
 REI_MODE = "RESEARCH_ONLY"
 
-# The canonical rejected/closed ledger for the EXPANDED system = REP's 19 (C1-C14;
-# it already includes conviction_bar_follow_through / C14). The integrated planner
-# uses THIS for anti-loop so C14 can never be re-proposed.
-CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C14)
+# The canonical rejected/closed ledger for the EXPANDED system = REP's CURRENT
+# 20-family ledger (C1-C15; it includes conviction_bar_follow_through / C14 AND
+# slow_vol_targeted_time_series_momentum / C15). The integrated planner uses THIS
+# for anti-loop so neither C14 nor C15 can ever be re-proposed.
+CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C15)
 
 # The integrated batch may ONLY ever feed SARA's lowest-risk build gate.
 INTEGRATION_FEEDS_ONLY = _sara.ACTION_BUILD_PROPOSAL
@@ -65,17 +66,19 @@ PROPOSED_MORNING_REPORT_CHANGE = {
 }
 PROPOSED_SARA_LEDGER_CHANGE = {
     "file": "sparta_commander/safe_research_autopilot_v1_contract.py",
-    "change": ("bump DEFAULT_REJECTED_FAMILIES 18 -> 19 by appending "
-               "'conviction_bar_follow_through' (C14) so the single-chain planner "
-               "also refuses to re-propose C14"),
+    "change": ("bump DEFAULT_REJECTED_FAMILIES 18 -> 20 by appending "
+               "'conviction_bar_follow_through' (C14) then "
+               "'slow_vol_targeted_time_series_momentum' (C15) so the single-chain "
+               "planner also refuses to re-propose C14 or C15"),
     "tests_that_would_update": (
-        "tests/test_safe_research_autopilot_v1_contract.py (len == 18 -> 19)",
+        "tests/test_safe_research_autopilot_v1_contract.py (len 18 -> 19 -> 20)",
         "tests/test_sparta_autopilot_morning_report.py "
-        "(excluded_rejected_families_count == 18 -> 19)"),
+        "(excluded_rejected_families_count 18 -> 19 -> 20)"),
     "additive_only": False,
     "touches_execution_surface": False,
-    "applied": True,  # APPLIED via UPDATE_SARA_REJECTED_LEDGER_ADD_C14
+    "applied": True,  # APPLIED via UPDATE_SARA_REJECTED_LEDGER_ADD_C14 then _C15
     "applied_via_token": "UPDATE_SARA_REJECTED_LEDGER_ADD_C14",
+    "also_applied_via_token": "UPDATE_REJECTED_LEDGERS_ADD_C15",
 }
 
 _CAPABILITY_FLAGS_FALSE = (
@@ -95,21 +98,26 @@ _CAPABILITY_FLAGS_FALSE = (
 
 
 def reconcile_rejected_ledger() -> dict[str, Any]:
-    """Pure reconciliation proving the canonical 19-family ledger == SARA's ledger
-    once conviction_bar_follow_through (C14) is included. Robust whether SARA still
-    holds 18 (C1-C13, C14 pending) or already holds 19 (C1-C14, bump applied) --
-    no duplicate C14 is ever introduced. No I/O."""
+    """Pure reconciliation proving the canonical C1-C15 (20-family) ledger == SARA's
+    ledger -- both now include conviction_bar_follow_through (C14) AND
+    slow_vol_targeted_time_series_momentum (C15), with no duplicates. Generic: it
+    reconciles by set equality, so it holds as the ledger grows. No I/O."""
     sara = list(_sara.DEFAULT_REJECTED_FAMILIES)
     canonical = list(CANONICAL_REJECTED_FAMILIES)
-    extra = [f for f in canonical if f not in sara]
-    sara_with_c14 = sorted(set(sara) | {"conviction_bar_follow_through"})
+    missing_from_sara = [f for f in canonical if f not in sara]
+    extra_in_sara = [f for f in sara if f not in canonical]
     return {
         "sara_count": len(sara),
         "canonical_count": len(canonical),
-        "missing_from_sara": extra,
+        "missing_from_sara": missing_from_sara,
+        "extra_in_sara": extra_in_sara,
         "c14_in_canonical": "conviction_bar_follow_through" in canonical,
         "c14_in_sara": "conviction_bar_follow_through" in sara,
-        "reconciles_with_c14_added": sara_with_c14 == sorted(set(canonical)),
+        "c15_in_canonical": "slow_vol_targeted_time_series_momentum" in canonical,
+        "c15_in_sara": "slow_vol_targeted_time_series_momentum" in sara,
+        "reconciles": sorted(set(sara)) == sorted(set(canonical)),
+        # back-compat alias (the C14-applied invariant still holds within the set)
+        "reconciles_with_c14_added": sorted(set(sara)) == sorted(set(canonical)),
     }
 
 
@@ -284,6 +292,8 @@ def build_integration_spec(repo_root: Any = ".",
         "canonical_rejected_families_count": len(CANONICAL_REJECTED_FAMILIES),
         "canonical_includes_c14":
             "conviction_bar_follow_through" in CANONICAL_REJECTED_FAMILIES,
+        "canonical_includes_c15":
+            "slow_vol_targeted_time_series_momentum" in CANONICAL_REJECTED_FAMILIES,
         "rejected_ledger_reconciliation": recon,
         "proposed_changes": {
             "morning_report": dict(PROPOSED_MORNING_REPORT_CHANGE),
@@ -326,13 +336,15 @@ def validate_integration_spec(record: dict[str, Any]) -> dict[str, Any]:
     if record.get("batch_feeds_only") != INTEGRATION_FEEDS_ONLY:
         failures.append("batch_feeds_more_than_proposal_gate")
 
-    if record.get("canonical_rejected_families_count") != 19:
-        failures.append("canonical_ledger_not_19")
+    if record.get("canonical_rejected_families_count") != 20:
+        failures.append("canonical_ledger_not_20")
     if record.get("canonical_includes_c14") is not True:
         failures.append("canonical_missing_c14")
+    if record.get("canonical_includes_c15") is not True:
+        failures.append("canonical_missing_c15")
     recon = record.get("rejected_ledger_reconciliation") or {}
-    if recon.get("reconciles_with_c14_added") is not True:
-        failures.append("ledger_does_not_reconcile_with_c14")
+    if recon.get("reconciles") is not True:
+        failures.append("ledger_does_not_reconcile")
 
     # The morning-report §14 wiring must still be pending; the SARA ledger bump
     # (C14) is applied. Not ALL proposed changes are applied yet.
