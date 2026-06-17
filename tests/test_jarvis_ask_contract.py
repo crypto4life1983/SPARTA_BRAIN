@@ -976,7 +976,8 @@ def test_ci_no_new_routes_or_execution_added():
     ask_routes = [r for r in c.app.routes
                   if getattr(r, "path", "").startswith("/api/jarvis/")]
     paths = sorted({getattr(r, "path", "") for r in ask_routes})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
 
 
 @requires_ask
@@ -1187,7 +1188,8 @@ def test_eb_no_new_routes_or_execution_added():
     c = _client()
     paths = sorted({getattr(r, "path", "") for r in c.app.routes
                     if getattr(r, "path", "").startswith("/api/jarvis/")})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
 
 
 @requires_ask
@@ -1366,7 +1368,8 @@ def test_et_modes_add_no_routes_and_write_nothing():
     c = _client()
     paths = sorted({getattr(r, "path", "") for r in c.app.routes
                     if getattr(r, "path", "").startswith("/api/jarvis/")})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
     for q in ("good morning", "operator mode", "what is the status",
               "morning briefing, show technical details", "diagnostics"):
         c.post(_ASK_PATH, json={"question": q})
@@ -1526,7 +1529,8 @@ def test_cos_adds_no_routes_and_writes_nothing():
     c = _client()
     paths = sorted({getattr(r, "path", "") for r in c.app.routes
                     if getattr(r, "path", "").startswith("/api/jarvis/")})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
     for q in ("what is the priority", "big picture", "what is SPARTA Brain",
               "are we ready to demo", "explain where we are"):
         c.post(_ASK_PATH, json={"question": q})
@@ -1676,7 +1680,8 @@ def test_tet_adds_no_routes_and_writes_nothing():
     c = _client()
     paths = sorted({getattr(r, "path", "") for r in c.app.routes
                     if getattr(r, "path", "").startswith("/api/jarvis/")})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
     for q in _TET_TRADING_QUESTIONS:
         c.post(_ASK_PATH, json={"question": q})
     assert _data_listing() == before, "trading translation must not write files"
@@ -1844,7 +1849,8 @@ def test_wh_adds_no_routes_and_writes_nothing():
     c = _client()
     paths = sorted({getattr(r, "path", "") for r in c.app.routes
                     if getattr(r, "path", "").startswith("/api/jarvis/")})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
     for q in _WH_QUESTIONS:
         c.post(_ASK_PATH, json={"question": q})
     assert _data_listing() == before, "workflow translation must not write files"
@@ -2095,7 +2101,8 @@ def test_km_adds_no_routes_and_writes_nothing():
     c = _client()
     paths = sorted({getattr(r, "path", "") for r in c.app.routes
                     if getattr(r, "path", "").startswith("/api/jarvis/")})
-    assert paths == ["/api/jarvis/ask", "/api/jarvis/status"], paths
+    assert paths == ["/api/jarvis/ask", "/api/jarvis/autopilot-morning",
+                     "/api/jarvis/status"], paths
     before = _data_listing()
     top_before = {p.name for p in _REPO_ROOT.iterdir()}
     for q, _ in _KM_MODULE_QUESTIONS:
