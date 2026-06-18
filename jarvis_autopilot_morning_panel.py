@@ -76,6 +76,14 @@ def automation_readiness_block() -> dict[str, Any]:
                 (lane.get("active_candidate_detail") or {}).get("assets") or [],
             "active_candidate_timeframe":
                 (lane.get("active_candidate_detail") or {}).get("timeframe"),
+            "active_candidate_synthetic_fixtures_only":
+                (lane.get("active_candidate_detail") or {}).get(
+                    "synthetic_fixtures_only"),
+            "active_candidate_dry_run_all_checks_pass":
+                (lane.get("active_candidate_detail") or {}).get(
+                    "dry_run_all_checks_pass"),
+            "active_candidate_dry_run_summary":
+                (lane.get("active_candidate_detail") or {}).get("dry_run_summary"),
             "open_candidate_gate": lane.get("open_candidate_gate"),
             "candidate_lane": lane.get("candidate_lane") or [],
             "safety_locks": {
@@ -340,6 +348,13 @@ def _render_automation_readiness_html(panel: dict) -> str:
                      % (_esc(ar.get("active_candidate_method")),
                         _esc(", ".join(ar.get("active_candidate_assets") or [])),
                         _esc(ar.get("active_candidate_timeframe"))))
+        if ar.get("active_candidate_dry_run_summary"):
+            parts.append('<div class="jv-detail">Detector dry-run: synthetic '
+                         'fixtures only <b>%s</b> · all checks pass <b>%s</b></div>'
+                         % (_esc(ar.get("active_candidate_synthetic_fixtures_only")),
+                            _esc(ar.get("active_candidate_dry_run_all_checks_pass"))))
+            parts.append('<div class="jv-detail">%s</div>'
+                         % _esc(ar.get("active_candidate_dry_run_summary")))
     parts.append('<div class="jv-detail">Next required action: <code>%s</code></div>'
                  % _esc(ar.get("next_required_action")))
     parts.append(_render_human_gate_workflow_html(panel))

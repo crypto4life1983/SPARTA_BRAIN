@@ -67,11 +67,11 @@ def test_morning_report_sections_agree_no_candidate_drift():
     # (5) §13 clean-tree plan now defers to the active C17 candidate gate
     assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
     # (6) §14 shows C17 active
     assert ar["active_candidate"] == "C17"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
     md = mr.render_markdown(report)
     assert "ACTIVE CANDIDATE" in md
     # (7) no next-candidate drift on any surface

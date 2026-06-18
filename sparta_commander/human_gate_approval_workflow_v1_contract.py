@@ -62,6 +62,24 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no paper/live/broker/order code",
         ),
     },
+    "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT": {
+        "recommended_decision": (
+            "ADVANCE C17 TO REAL-CANDLE LABELS / REVIEW (FROZEN LOCAL DATA ONLY)"),
+        "stage_after_approval": "real_candle_labels_review",
+        "allows": (
+            "build the real-candle labels/review contract ONLY IF existing frozen "
+            "local data is used",
+            "label/review preparation only",
+            "research-only validation",
+        ),
+        "forbids": (
+            "no new data fetch",
+            "no replay/backtest/PnL",
+            "no optimization",
+            "no paper/live/broker/order code",
+            "no auto-trading",
+        ),
+    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (
@@ -271,21 +289,20 @@ def validate_human_gate_workflow(record: dict[str, Any]) -> dict[str, Any]:
         if "Do not commit or push" not in txt:
             failures.append("approval_text_missing_stop_guard")
 
-    # allows (research-only build) + forbids (full set)
+    # allows (research-only) + forbids -- gate-INVARIANT checks (hold at every
+    # gate; gate-specific allow/forbid wording lives in _GATE_SPECS).
     allows = record.get("approval_allows") or []
-    if not any("detector-spec" in a for a in allows):
-        failures.append("allows_missing_detector_spec")
-    if not any("dry-run" in a for a in allows):
-        failures.append("allows_missing_dry_run")
+    if not allows:
+        failures.append("allows_empty")
     if not any("research-only validation" in a for a in allows):
         failures.append("allows_missing_validation")
     forbids = " || ".join(record.get("approval_forbids") or []).lower()
-    for must in ("data fetch", "label", "replay", "optimization",
+    # every gate must forbid: real data fetch, replay/backtest/PnL, optimization,
+    # and paper/live/broker/order.
+    for must in ("data fetch", "replay", "optimization",
                  "paper/live/broker/order"):
         if must not in forbids:
             failures.append("forbids_missing_%s" % must.split("/")[0].strip())
-    if "detection" not in forbids:
-        failures.append("forbids_missing_detection")
 
     # advances nothing
     if record.get("would_auto_advance") is not False:

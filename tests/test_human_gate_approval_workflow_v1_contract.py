@@ -18,7 +18,7 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 
 _R = hgw.build_human_gate_workflow()
 
-GATE = "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"
+GATE = "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"
 
 
 # ---- core: research-only, pure, validates ----------------------------------
@@ -35,11 +35,12 @@ def test_workflow_research_only_and_validates():
 def test_mirrors_lane_current_gate():
     ls = lane.get_lane_status()
     assert _R["active_candidate"] == "C17" == ls["active_candidate"]
-    assert _R["current_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert _R["current_stage_label"] == "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
     assert _R["current_human_gate"] == GATE == ls["next_required_action"]
     assert _R["gate_recognized"] is True
-    # tamper: a stale gate must fail validation
-    bad = {**_R, "current_human_gate": "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"}
+    # tamper: a stale gate (the already-cleared detector-spec gate) must fail
+    bad = {**_R, "current_human_gate":
+           "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"}
     assert hgw.validate_human_gate_workflow(bad)["valid"] is False
 
 
@@ -47,8 +48,8 @@ def test_mirrors_lane_current_gate():
 
 def test_recommended_decision():
     assert _R["recommended_decision"] == (
-        "ADVANCE C17 TO DETECTOR SPEC + SYNTHETIC DRY-RUN")
-    assert _R["stage_after_approval"] == "detector_spec_dry_run"
+        "ADVANCE C17 TO REAL-CANDLE LABELS / REVIEW (FROZEN LOCAL DATA ONLY)")
+    assert _R["stage_after_approval"] == "real_candle_labels_review"
 
 
 # ---- 5 exact copyable approval text ----------------------------------------
@@ -57,21 +58,22 @@ def test_copyable_approval_text():
     txt = _R["approval_text_to_paste"]
     assert txt
     assert GATE in txt
-    assert "ADVANCE C17 TO DETECTOR SPEC + SYNTHETIC DRY-RUN" in txt
+    assert "ADVANCE C17 TO REAL-CANDLE LABELS" in txt
     assert "risk_adjusted_portfolio_construction_vol_targeted_allocation_v1" in txt
-    assert "SPEC_FROZEN_FOR_HUMAN_REVIEW -> detector_spec_dry_run" in txt
+    assert ("DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW -> real_candle_labels_review"
+            in txt)
     assert "Do not commit or push" in txt
     # a reject alternative is also generated
     assert _R["reject_text_to_paste"] and GATE in _R["reject_text_to_paste"]
     assert "REJECT" in _R["reject_text_to_paste"]
 
 
-# ---- 6 what the approval allows --------------------------------------------
+# ---- 6 what the approval allows (frozen local data only) -------------------
 
 def test_approval_allows():
     allows = _R["approval_allows"]
-    assert any("detector-spec" in a for a in allows)
-    assert any("dry-run" in a for a in allows)
+    assert any("frozen local data" in a for a in allows)
+    assert any("label/review preparation" in a for a in allows)
     assert any("research-only validation" in a for a in allows)
 
 
@@ -79,9 +81,8 @@ def test_approval_allows():
 
 def test_approval_forbids():
     forbids = " || ".join(_R["approval_forbids"]).lower()
-    for must in ("no real data fetch", "no real-candle detection", "no labels",
-                 "no replay/backtest/pnl", "no optimization",
-                 "no paper/live/broker/order code"):
+    for must in ("no new data fetch", "no replay/backtest/pnl", "no optimization",
+                 "no paper/live/broker/order code", "no auto-trading"):
         assert must in forbids, must
 
 
@@ -99,13 +100,13 @@ def test_does_not_auto_advance():
         assert hgw.validate_human_gate_workflow(bad)["valid"] is False, bad_key
 
 
-# ---- 6/7 C17 remains SPEC_FROZEN; downstream locked ------------------------
+# ---- 6/7 C17 remains DETECTOR_DRY_RUN frozen; downstream locked ------------
 
-def test_c17_remains_spec_frozen_and_downstream_locked():
-    # the workflow does not change the lane: C17 still SPEC_FROZEN
+def test_c17_remains_detector_dry_run_frozen_and_downstream_locked():
+    # the workflow does not change the lane: C17 still DETECTOR_DRY_RUN frozen
     ls = lane.get_lane_status()
     assert (ls["active_candidate_detail"]["verdict"]
-            == "C17_SPEC_FROZEN_FOR_HUMAN_REVIEW")
+            == "C17_DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW")
     assert _R["downstream_gates_locked"] is True
     sl = _R["safety_locks"]
     assert sl["real_data_qa"] == "BLOCKED"
@@ -168,7 +169,7 @@ def test_summarize_for_panel():
     assert s["active_candidate"] == "C17"
     assert s["current_human_gate"] == GATE
     assert s["recommended_decision"] == (
-        "ADVANCE C17 TO DETECTOR SPEC + SYNTHETIC DRY-RUN")
+        "ADVANCE C17 TO REAL-CANDLE LABELS / REVIEW (FROZEN LOCAL DATA ONLY)")
     assert GATE in s["approval_text_to_paste"]
     assert s["would_auto_advance"] is False
     assert s["ready_for_commit"] is False

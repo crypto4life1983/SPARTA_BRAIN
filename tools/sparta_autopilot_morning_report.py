@@ -417,6 +417,12 @@ def render_markdown(report: dict) -> str:
                  % (ar.get("active_candidate_method"),
                     ", ".join(ar.get("active_candidate_assets") or []),
                     ar.get("active_candidate_timeframe")))
+    if ar.get("active_candidate_dry_run_summary"):
+        lines.append("- detector dry-run: synthetic fixtures only: %s | all "
+                     "checks pass: %s"
+                     % (ar.get("active_candidate_synthetic_fixtures_only"),
+                        ar.get("active_candidate_dry_run_all_checks_pass")))
+        lines.append("  - %s" % ar.get("active_candidate_dry_run_summary"))
     lines.append("- **next required action:** `%s`"
                  % ar.get("next_required_action"))
     lines.append("- automation-readiness next: %s | recommends a new candidate: "

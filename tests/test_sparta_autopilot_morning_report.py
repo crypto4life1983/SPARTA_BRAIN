@@ -262,7 +262,7 @@ def test_autopilot_plan_idle_defers_to_c17_active_gate():
     ap = report["autopilot_plan"]
     assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
     assert ap["would_auto_advance"] is False
     assert ap["active_candidate"] == "C17"
     assert ap["next_is_new_candidate"] is False
@@ -270,7 +270,7 @@ def test_autopilot_plan_idle_defers_to_c17_active_gate():
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
-    assert "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" in md
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" in md
 
 
 def test_morning_report_shows_c17_active_candidate_section():
@@ -281,31 +281,36 @@ def test_morning_report_shows_c17_active_candidate_section():
     assert ar["rejected_ledger_count"] == 21
     assert ar["active_candidate"] == "C17"
     assert ar["open_candidate_gate"] is True
-    assert ar["next_stage"] == "c17_detector_spec_dry_run_decision"
+    assert ar["next_stage"] == "c17_real_candle_labels_decision"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
     assert ar["next_is_automation_readiness"] is False
     assert ar["next_is_new_candidate"] is False
     assert ar["surfaces_agree"] is True
-    # the spec stage / method / assets / timeframe are surfaced in the block
-    assert ar["active_candidate_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    # the stage / method / assets / timeframe + dry-run summary are in the block
+    assert ar["active_candidate_stage_label"] == "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
     assert ar["active_candidate_method"] == "volatility_targeted_risk_parity_allocation"
     assert ar["active_candidate_assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
     assert ar["active_candidate_timeframe"] == "D1"
+    assert ar["active_candidate_synthetic_fixtures_only"] is True
+    assert ar["active_candidate_dry_run_all_checks_pass"] is True
+    assert ar["active_candidate_dry_run_summary"]
     md = mr.render_markdown(report)
     assert "ACTIVE CANDIDATE" in md
     assert "Risk-adjusted portfolio construction" in md
-    # spec stage / method / assets / timeframe rendered into §14
-    assert "SPEC_FROZEN_FOR_HUMAN_REVIEW" in md
+    # stage / method / assets / timeframe + detector dry-run summary rendered §14
+    assert "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW" in md
     assert "volatility_targeted_risk_parity_allocation" in md
     assert "BTCUSD, ETHUSD, SOLUSD" in md
-    assert "C17_SPEC_FROZEN_FOR_HUMAN_REVIEW" in md
-    # the next gate is the detector-spec decision, NOT the old proposal gate
-    assert "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" in md
-    assert "ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" not in md
+    assert "C17_DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW" in md
+    assert "detector dry-run: synthetic fixtures only" in md.lower()
+    assert "SYNTHETIC" in md   # from the dry-run summary line
+    # the next gate is the real-candle-labels decision, NOT the cleared spec gate
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" in md
+    assert "ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" not in md
     # the what-to-do-next line points at the C17 decision, not automation readiness
     assert "ACTIVE open candidate" in report["what_to_do_next"]
-    assert "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" in report["what_to_do_next"]
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" in report["what_to_do_next"]
 
 
 def test_morning_report_shows_next_strategy_memo_as_provenance():

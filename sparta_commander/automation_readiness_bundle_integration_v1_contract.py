@@ -122,9 +122,10 @@ def build_automation_readiness_integration() -> dict[str, Any]:
             "Candidate-lane directive integration v1 (READ-ONLY, RESEARCH ONLY). "
             "Connects the candidate-research-lane status into the coordinator/"
             "morning/autopilot surfaces so they AGREE on the current directive. "
-            "Candidate #17 is the ACTIVE open candidate with a frozen candidate "
-            "SPEC awaiting the human detector-spec decision. Executes nothing; "
-            "overnight/morning automation stays research-only and human-gated."),
+            "Candidate #17 is the ACTIVE open candidate with a frozen detector spec "
+            "+ SYNTHETIC dry-run awaiting the human real-candle-labels decision. "
+            "Executes nothing; overnight/morning automation stays research-only and "
+            "human-gated."),
         # the aligned directive (follows the lane)
         "next_required_action": token,
         "next_stage": lane.get("next_stage"),
@@ -138,6 +139,11 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         "active_candidate_method": det.get("method"),
         "active_candidate_assets": det.get("assets"),
         "active_candidate_timeframe": det.get("timeframe"),
+        "active_candidate_synthetic_fixtures_only":
+            det.get("synthetic_fixtures_only"),
+        "active_candidate_dry_run_all_checks_pass":
+            det.get("dry_run_all_checks_pass"),
+        "active_candidate_dry_run_summary": det.get("dry_run_summary"),
         "open_candidate_gate": lane.get("open_candidate_gate"),
         "requires_human_approval": True,
         # C16 completion + ledger
@@ -200,6 +206,11 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "active_candidate_method": r["active_candidate_method"],
         "active_candidate_assets": r["active_candidate_assets"],
         "active_candidate_timeframe": r["active_candidate_timeframe"],
+        "active_candidate_synthetic_fixtures_only":
+            r["active_candidate_synthetic_fixtures_only"],
+        "active_candidate_dry_run_all_checks_pass":
+            r["active_candidate_dry_run_all_checks_pass"],
+        "active_candidate_dry_run_summary": r["active_candidate_dry_run_summary"],
         "open_candidate_gate": r["open_candidate_gate"],
         "next_stage": r["next_stage"],
         "next_required_action": r["next_required_action"],
@@ -231,10 +242,10 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
         failures.append("coordinator_does_not_match_lane_directive")
 
     # the integration follows the lane's CURRENT directive: Candidate #17 is the
-    # active open candidate with a frozen candidate SPEC awaiting the human
-    # detector-spec decision.
+    # active open candidate with a frozen detector spec + SYNTHETIC dry-run awaiting
+    # the human real-candle-labels decision.
     if record.get("next_required_action") != (
-            "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"):
+            "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"):
         failures.append("next_action_not_c17_gate")
     if record.get("active_candidate") != "C17":
         failures.append("active_candidate_not_c17")
