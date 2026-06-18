@@ -38,6 +38,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 import sparta_commander.safe_research_autopilot_v1_contract as _sara  # noqa: E402,E501
 import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari  # noqa: E402,E501
+import sparta_commander.automation_readiness_next_strategy_research_memo_v1_contract as _memo  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -226,6 +227,28 @@ def _autopilot_plan(candidate_status: dict, git_summary: dict) -> dict:
     return plan
 
 
+def _next_strategy_memo() -> dict:
+    """Pure, READ-ONLY. Compact display block from the committed next-strategy
+    research memo contract. Creates no candidate; executes nothing. Never raises."""
+    try:
+        m = _memo.build_next_strategy_research_memo()
+        return {
+            "recommended_direction": (m.get("recommended_direction") or {}).get(
+                "name"),
+            "recommended_direction_key": m.get("recommended_direction_key"),
+            "ranked_directions": [d.get("name")
+                                  for d in m.get("next_research_directions") or []],
+            "why_recommended_is_different": m.get("why_recommended_is_different"),
+            "creates_candidate_id": m.get("creates_candidate_id"),
+            "rejected_ledger_count": m.get("rejected_ledger_count"),
+            "human_approval_before_candidate":
+                m.get("human_approval_before_candidate"),
+            "next_required_action": m.get("next_required_action"),
+        }
+    except Exception:  # noqa: BLE001 — report must never crash
+        return {}
+
+
 def build_morning_report(run_state, git_summary: dict,
                          candidate_status: dict,
                          report_generated_at=None) -> dict:
@@ -254,6 +277,7 @@ def build_morning_report(run_state, git_summary: dict,
         "what_to_do_next": _what_to_do_next(run_status, gate, candidate_status),
         "autopilot_plan": _autopilot_plan(candidate_status, git_summary),
         "automation_readiness": _ari.summarize_for_morning_report(),
+        "next_strategy_memo": _next_strategy_memo(),
         "capability_flags": dict(CAPABILITY_FLAGS),
         "no_paper_live_readiness_claim": True,
     }
@@ -366,6 +390,23 @@ def render_markdown(report: dict) -> str:
     lines.append("- overnight automation research-only: %s | real-data-QA & "
                  "replay BLOCKED, paper / micro-live / live LOCKED."
                  % ar.get("overnight_automation_research_only"))
+    lines.append("## 15. Next-strategy research memo (research-only, no candidate)")
+    nm = r.get("next_strategy_memo") or {}
+    lines.append("- **recommended next direction:** %s (`%s`)"
+                 % (nm.get("recommended_direction"),
+                    nm.get("recommended_direction_key")))
+    for i, d in enumerate(nm.get("ranked_directions") or []):
+        lines.append("  %d. %s" % (i + 1, d))
+    if nm.get("why_recommended_is_different"):
+        lines.append("- why different from C1–C16: %s"
+                     % nm.get("why_recommended_is_different"))
+    lines.append("- creates a candidate yet: %s (no C17) | rejected ledger: %s"
+                 % (nm.get("creates_candidate_id"),
+                    nm.get("rejected_ledger_count")))
+    lines.append("- required human gate before any candidate: `%s`"
+                 % nm.get("human_approval_before_candidate"))
+    lines.append("- next required action stays: `%s`"
+                 % nm.get("next_required_action"))
     lines.append("")
     return "\n".join(lines) + "\n"
 

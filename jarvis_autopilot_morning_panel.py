@@ -28,6 +28,7 @@ from typing import Any
 
 import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as _lane
 import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari
+import sparta_commander.automation_readiness_next_strategy_research_memo_v1_contract as _memo
 
 REPO_ROOT = Path(__file__).resolve().parent
 LATEST_JSON_REL = "reports/autopilot_morning/latest.json"
@@ -75,6 +76,28 @@ def automation_readiness_block() -> dict[str, Any]:
                 "rejected_ledger_count": None, "next_required_action": None,
                 "section14_present": False, "candidate_lane": [],
                 "safety_locks": {}}
+
+
+def next_strategy_memo_block() -> dict[str, Any]:
+    """Pure, READ-ONLY. Compact display block from the committed next-strategy
+    research memo contract. Creates no candidate; executes nothing. Never raises."""
+    try:
+        m = _memo.build_next_strategy_research_memo()
+        return {
+            "available": True,
+            "recommended_direction": (m.get("recommended_direction") or {}).get(
+                "name"),
+            "recommended_direction_key": m.get("recommended_direction_key"),
+            "ranked_directions": [d.get("name")
+                                  for d in m.get("next_research_directions") or []],
+            "why_recommended_is_different": m.get("why_recommended_is_different"),
+            "creates_candidate_id": m.get("creates_candidate_id"),
+            "human_approval_before_candidate":
+                m.get("human_approval_before_candidate"),
+            "next_required_action": m.get("next_required_action"),
+        }
+    except Exception:  # noqa: BLE001 — view must never crash the console
+        return {"available": False}
 
 
 def _drift_warning(report) -> bool:
@@ -137,6 +160,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
             "ahead_behind": None,
             "autopilot_plan": {},
             "automation_readiness": automation_readiness_block(),
+            "next_strategy_memo": next_strategy_memo_block(),
             "drift_warning": False,
             "git_dirty_warning": False,
             "run_id": None,
@@ -181,6 +205,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
         "ahead_behind": report.get("ahead_behind"),
         "autopilot_plan": report.get("autopilot_plan") or {},
         "automation_readiness": automation_readiness_block(),
+        "next_strategy_memo": next_strategy_memo_block(),
         "drift_warning": _drift_warning(report),
         "git_dirty_warning": (report.get("git_status_summary") or {}).get(
             "clean") is False,
@@ -251,6 +276,29 @@ def _render_automation_readiness_html(panel: dict) -> str:
                  % (_esc(locks.get("real_data_qa")), _esc(locks.get("replay")),
                     _esc(locks.get("paper_trading")), _esc(locks.get("micro_live")),
                     _esc(locks.get("live_trading"))))
+    # next-strategy research memo (research-only; creates NO candidate)
+    nm = panel.get("next_strategy_memo") or {}
+    if nm.get("available"):
+        parts.append('<div class="jv-am-h">Next-strategy research memo '
+                     '(research-only · no candidate)</div>')
+        parts.append('<div class="jv-detail">Recommended next direction: '
+                     '<b>%s</b> (<code>%s</code>)</div>'
+                     % (_esc(nm.get("recommended_direction")),
+                        _esc(nm.get("recommended_direction_key"))))
+        ranked = nm.get("ranked_directions") or []
+        if ranked:
+            rows = "".join("<li>%s</li>" % _esc(d) for d in ranked)
+            parts.append('<div class="jv-detail">Ranked directions:</div>'
+                         '<ul class="jv-am-list">%s</ul>' % rows)
+        if nm.get("why_recommended_is_different"):
+            parts.append('<div class="jv-detail">Why it avoids C1–C16 failure '
+                         'modes: %s</div>'
+                         % _esc(nm.get("why_recommended_is_different")))
+        parts.append('<div class="jv-detail">Creates a candidate yet: <b>%s</b> '
+                     '(no C17)</div>' % _esc(nm.get("creates_candidate_id")))
+        parts.append('<div class="jv-am-paste">Before any candidate → human gate: '
+                     '<code>%s</code></div>'
+                     % _esc(nm.get("human_approval_before_candidate")))
     return "".join(parts)
 
 

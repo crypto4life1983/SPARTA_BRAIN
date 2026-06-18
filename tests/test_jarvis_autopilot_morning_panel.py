@@ -319,3 +319,32 @@ def test_no_next_candidate_drift_on_aligned_success_report():
     # the real aligned morning report carries no next-candidate token in its plan
     p = panel.build_autopilot_morning_panel(_success_report())
     assert p["drift_warning"] is False
+
+
+# --- next-strategy research memo on the panel ------------------------------- #
+
+def test_panel_shows_next_strategy_memo():
+    p = panel.build_autopilot_morning_panel(_success_report())
+    nm = p["next_strategy_memo"]
+    assert nm["available"] is True
+    assert nm["recommended_direction_key"] == (
+        "risk_adjusted_portfolio_construction_vol_targeted_allocation")
+    assert "Risk-adjusted portfolio construction" in nm["recommended_direction"]
+    assert len(nm["ranked_directions"]) >= 3
+    assert nm["creates_candidate_id"] is False
+    assert nm["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    h = p["html"]
+    assert "Next-strategy research memo" in h
+    assert "Risk-adjusted portfolio construction" in h
+    assert "no C17" in h
+    assert ("HUMAN_DECISION_APPROVE_NEXT_RESEARCH_DIRECTION_THEN_BUILD_CANDIDATE"
+            "_PROPOSAL") in h
+
+
+def test_no_report_still_shows_next_strategy_memo():
+    p = panel.build_autopilot_morning_panel(None)
+    nm = p["next_strategy_memo"]
+    assert nm["available"] is True
+    assert nm["recommended_direction_key"] == (
+        "risk_adjusted_portfolio_construction_vol_targeted_allocation")
+    assert "Next-strategy research memo" in p["html"]

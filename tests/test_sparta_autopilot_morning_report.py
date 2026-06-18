@@ -289,6 +289,26 @@ def test_morning_report_shows_automation_readiness_section():
     assert "AUTOMATION READINESS" in report["what_to_do_next"]
 
 
+def test_morning_report_shows_next_strategy_memo():
+    report = mr.build_morning_report(_success_run_state(), _git_summary(),
+                                     _all_rejected_status())
+    nm = report["next_strategy_memo"]
+    assert nm["recommended_direction_key"] == (
+        "risk_adjusted_portfolio_construction_vol_targeted_allocation")
+    assert "Risk-adjusted portfolio construction" in nm["recommended_direction"]
+    assert len(nm["ranked_directions"]) >= 3
+    assert nm["creates_candidate_id"] is False
+    assert nm["rejected_ledger_count"] == 21
+    assert nm["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert nm["human_approval_before_candidate"] == (
+        "HUMAN_DECISION_APPROVE_NEXT_RESEARCH_DIRECTION_THEN_BUILD_CANDIDATE_PROPOSAL")
+    md = mr.render_markdown(report)
+    assert "Next-strategy research memo" in md
+    assert "risk_adjusted_portfolio_construction_vol_targeted_allocation" in md
+    assert "no C17" in md
+    assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
+
+
 def test_autopilot_plan_dirty_repo_shows_stop_prominently():
     dirty = dict(_git_summary())
     dirty.update({"clean": False, "modified": 3})
