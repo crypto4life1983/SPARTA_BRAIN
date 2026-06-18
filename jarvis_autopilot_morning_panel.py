@@ -29,6 +29,7 @@ from typing import Any
 import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as _lane
 import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari
 import sparta_commander.automation_readiness_next_strategy_research_memo_v1_contract as _memo
+import sparta_commander.human_gate_approval_workflow_v1_contract as _hgw
 
 REPO_ROOT = Path(__file__).resolve().parent
 LATEST_JSON_REL = "reports/autopilot_morning/latest.json"
@@ -91,6 +92,18 @@ def automation_readiness_block() -> dict[str, Any]:
                 "rejected_ledger_count": None, "next_required_action": None,
                 "section14_present": False, "candidate_lane": [],
                 "safety_locks": {}}
+
+
+def human_gate_workflow_block() -> dict[str, Any]:
+    """Pure, READ-ONLY. The human-gate approval workflow: the exact copyable text
+    for the lane's CURRENT open human gate, what it allows/forbids, and a future-
+    ready commit field. Computed from the committed lane-status + workflow
+    contracts -- independent of latest.json and git state. Advances nothing,
+    builds nothing, runs nothing. Never raises."""
+    try:
+        return {"available": True, **_hgw.summarize_for_panel()}
+    except Exception:  # noqa: BLE001 — view must never crash the console
+        return {"available": False}
 
 
 def next_strategy_memo_block() -> dict[str, Any]:
@@ -175,6 +188,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
             "ahead_behind": None,
             "autopilot_plan": {},
             "automation_readiness": automation_readiness_block(),
+            "human_gate_workflow": human_gate_workflow_block(),
             "next_strategy_memo": next_strategy_memo_block(),
             "drift_warning": False,
             "git_dirty_warning": False,
@@ -220,6 +234,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
         "ahead_behind": report.get("ahead_behind"),
         "autopilot_plan": report.get("autopilot_plan") or {},
         "automation_readiness": automation_readiness_block(),
+        "human_gate_workflow": human_gate_workflow_block(),
         "next_strategy_memo": next_strategy_memo_block(),
         "drift_warning": _drift_warning(report),
         "git_dirty_warning": (report.get("git_status_summary") or {}).get(
@@ -244,6 +259,50 @@ def _li(items) -> str:
         return '<div class="jv-detail">(none)</div>'
     return ('<ul class="jv-am-list">'
             + "".join("<li>%s</li>" % _esc(i) for i in items) + "</ul>")
+
+
+def _render_human_gate_workflow_html(panel: dict) -> str:
+    """Pure. The human-gate approval workflow: the exact copyable text for the
+    lane's CURRENT open human gate, what it allows/forbids, the bypass guard, and
+    the future-ready ready-for-commit field. Generates text only; advances
+    nothing."""
+    w = panel.get("human_gate_workflow") or {}
+    if not w.get("available"):
+        return ""
+    parts = ['<div class="jv-am-h jv-am-gate">Human-gate approval workflow</div>']
+    parts.append('<div class="jv-detail">Active candidate: <b>%s</b> · stage: '
+                 '<b>%s</b></div>'
+                 % (_esc(w.get("active_candidate")),
+                    _esc(w.get("current_stage_label"))))
+    parts.append('<div class="jv-detail">Current human gate: <code>%s</code></div>'
+                 % _esc(w.get("current_human_gate")))
+    parts.append('<div class="jv-detail">Recommended safe next decision: '
+                 '<b>%s</b></div>' % _esc(w.get("recommended_decision")))
+    if w.get("approval_text_to_paste"):
+        parts.append('<div class="jv-am-paste">Advance → copy &amp; paste:'
+                     '<pre class="jv-paste-pre">%s</pre></div>'
+                     % _esc(w.get("approval_text_to_paste")))
+    if w.get("reject_text_to_paste"):
+        parts.append('<div class="jv-am-paste">Reject → copy &amp; paste:'
+                     '<pre class="jv-paste-pre">%s</pre></div>'
+                     % _esc(w.get("reject_text_to_paste")))
+    parts.append('<div class="jv-detail">This approval ALLOWS:</div>'
+                 + _li(w.get("approval_allows")))
+    parts.append('<div class="jv-detail">This approval does NOT allow:</div>'
+                 + _li(w.get("approval_forbids")))
+    # ready-for-commit (future-ready; empty until a unit is built)
+    if w.get("ready_for_commit") and w.get("commit_approval_text"):
+        parts.append('<div class="jv-am-paste">Ready for commit → paste:'
+                     '<pre class="jv-paste-pre">%s</pre></div>'
+                     % _esc(w.get("commit_approval_text")))
+    else:
+        parts.append('<div class="jv-detail">Ready-for-commit: <b>none yet</b> '
+                     '(no unit built; appears here once a unit is committed-ready).'
+                     '</div>')
+    # bypass guard
+    parts.append('<div class="jv-detail jv-am-gate">⚠ %s</div>'
+                 % _esc(w.get("gate_bypass_warning")))
+    return "".join(parts)
 
 
 def _render_automation_readiness_html(panel: dict) -> str:
@@ -283,6 +342,7 @@ def _render_automation_readiness_html(panel: dict) -> str:
                         _esc(ar.get("active_candidate_timeframe"))))
     parts.append('<div class="jv-detail">Next required action: <code>%s</code></div>'
                  % _esc(ar.get("next_required_action")))
+    parts.append(_render_human_gate_workflow_html(panel))
     parts.append('<div class="jv-detail">§13 (clean tree) recommends: <b>%s</b> · '
                  '§14 present: %s · surfaces agree: %s · recommends new candidate: '
                  '%s</div>'

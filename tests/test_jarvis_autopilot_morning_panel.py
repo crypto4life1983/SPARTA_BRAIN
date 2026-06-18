@@ -257,6 +257,35 @@ def test_panel_shows_c17_active_next_action():
     assert "ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" not in h
 
 
+def test_panel_shows_human_gate_approval_workflow():
+    p = panel.build_autopilot_morning_panel(_success_report())
+    w = p["human_gate_workflow"]
+    assert w["available"] is True
+    assert w["active_candidate"] == "C17"
+    assert w["current_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert w["current_human_gate"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+    assert w["recommended_decision"] == (
+        "ADVANCE C17 TO DETECTOR SPEC + SYNTHETIC DRY-RUN")
+    assert w["would_auto_advance"] is False
+    assert w["ready_for_commit"] is False
+    assert w["commit_approval_text"] is None
+    h = p["html"]
+    # dashboard exposes the gate, the copyable approval text, allows + forbids,
+    # the bypass guard, and the future-ready ready-for-commit field
+    assert "Human-gate approval workflow" in h
+    assert "ADVANCE C17 TO DETECTOR SPEC + SYNTHETIC DRY-RUN" in h
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" in h
+    assert "Do not commit or push" in h          # copyable approval text body
+    assert "build the detector-spec contract" in h
+    assert "no real data fetch" in h
+    assert "no paper/live/broker/order code" in h
+    assert "BYPASS" in h
+    assert "Ready-for-commit" in h
+    # never advances; old proposal gate not surfaced as current
+    assert "ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" not in h
+
+
 def test_panel_shows_safety_locks():
     p = panel.build_autopilot_morning_panel(_success_report())
     sl = p["safety_locks"]
