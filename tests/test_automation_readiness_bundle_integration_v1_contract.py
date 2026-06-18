@@ -40,11 +40,16 @@ def test_next_directive_is_c17_spec_decision():
     assert _R["active_candidate"] == "C17"
     assert _R["open_candidate_gate"] is True
     assert _R["next_is_automation_readiness"] is False
-    assert _R["next_stage"] == "c17_candidate_spec_decision"
+    assert _R["next_stage"] == "c17_detector_spec_dry_run_decision"
     assert _R["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert "Risk-adjusted portfolio construction" in _R["active_candidate_label"]
-    assert _R["active_candidate_verdict"] == "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+    assert _R["active_candidate_verdict"] == "C17_SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert _R["active_candidate_stage"] == "candidate_spec"
+    assert _R["active_candidate_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert _R["active_candidate_method"] == "volatility_targeted_risk_parity_allocation"
+    assert _R["active_candidate_assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
+    assert _R["active_candidate_timeframe"] == "D1"
 
 
 # ---- 3. no new candidate recommended on any surface ------------------------
@@ -93,7 +98,7 @@ def test_surfaces_agree_on_c17_directive():
     assert _R["surfaces_agree"] is True
     assert _R["all_tokens_match"] is True
     s = _R["surfaces"]
-    token = "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+    token = "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"
     assert s["lane_status_next"] == token
     assert s["coordinator_command"] == token
     assert s["lane_morning_next"] == token
@@ -118,7 +123,7 @@ def test_coordinator_idle_defers_to_lane_c17_gate():
                                "next_action": "NONE__C16_CLOSED", "shipped": True}}})
     assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
     assert d["next_safe_command"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert d["next_research_recommended"] is False
     assert d["detected_gate"] == "active_candidate_open_gate"
 
@@ -132,9 +137,13 @@ def test_summarize_for_morning_report():
     assert summ["rejected_ledger_count"] == 21
     assert summ["active_candidate"] == "C17"
     assert summ["open_candidate_gate"] is True
-    assert summ["next_stage"] == "c17_candidate_spec_decision"
+    assert summ["active_candidate_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert summ["active_candidate_method"] == "volatility_targeted_risk_parity_allocation"
+    assert summ["active_candidate_assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
+    assert summ["active_candidate_timeframe"] == "D1"
+    assert summ["next_stage"] == "c17_detector_spec_dry_run_decision"
     assert summ["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert summ["next_is_automation_readiness"] is False
     assert summ["next_is_new_candidate"] is False
     assert summ["surfaces_agree"] is True

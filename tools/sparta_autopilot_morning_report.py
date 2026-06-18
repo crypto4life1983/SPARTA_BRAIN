@@ -172,10 +172,10 @@ def _what_to_do_next(run_status, gate, candidate_status) -> str:
         if ls.get("open_candidate_gate") is True:
             det = ls.get("active_candidate_detail") or {}
             return ("Last run was %s.%s Candidate %s is the ACTIVE open candidate "
-                    "(%s) — a frozen proposal awaiting your decision. To advance, "
-                    "paste: %s ."
+                    "(%s) at %s — awaiting your decision. To advance, paste: %s ."
                     % (run_status.lower(), closed_note, ls.get("active_candidate"),
-                       det.get("label"), ls.get("next_required_action")))
+                       det.get("label"), det.get("stage_label"),
+                       ls.get("next_required_action")))
         return ("Last run was %s. No open human decision right now.%s The "
                 "candidate-research lane is at AUTOMATION READINESS (research-only, "
                 "human-gated). To proceed, paste: %s ."
@@ -238,8 +238,8 @@ def _autopilot_plan(candidate_status: dict, git_summary: dict) -> dict:
             plan["decision"] = "ACTIVE_CANDIDATE_GATE"
             plan["would_auto_advance"] = False
             plan["active_candidate"] = ls.get("active_candidate")
-            plan["reason"] = ("candidate %s is an open frozen proposal; recommend "
-                              "its human decision (advance to spec or reject)"
+            plan["reason"] = ("candidate %s is an open frozen artifact; recommend "
+                              "its human decision (advance or reject)"
                               % ls.get("active_candidate"))
         elif ls.get("next_is_automation_readiness") is True:
             plan["next_safe_action"] = "RECOMMEND_AUTOMATION_READINESS_STEP"
@@ -409,9 +409,14 @@ def render_markdown(report: dict) -> str:
                     ar.get("rejected_ledger_count")))
     lines.append("- **active candidate:** %s — %s"
                  % (ar.get("active_candidate"), ar.get("active_candidate_label")))
-    lines.append("- verdict: `%s` | open candidate gate: %s"
-                 % (ar.get("active_candidate_verdict"),
+    lines.append("- stage: **%s** | verdict: `%s` | open candidate gate: %s"
+                 % (ar.get("active_candidate_stage_label"),
+                    ar.get("active_candidate_verdict"),
                     ar.get("open_candidate_gate")))
+    lines.append("- method: `%s` | assets: %s | timeframe: %s"
+                 % (ar.get("active_candidate_method"),
+                    ", ".join(ar.get("active_candidate_assets") or []),
+                    ar.get("active_candidate_timeframe")))
     lines.append("- **next required action:** `%s`"
                  % ar.get("next_required_action"))
     lines.append("- automation-readiness next: %s | recommends a new candidate: "

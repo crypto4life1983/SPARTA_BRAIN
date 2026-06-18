@@ -234,16 +234,27 @@ def test_panel_shows_c17_active_next_action():
     assert ar["active_candidate"] == "C17"
     assert ar["open_candidate_gate"] is True
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert ar["section13_recommendation_when_clean"] == "RECOMMEND_GATE_DECISION"
     assert ar["section14_present"] is True
     assert ar["surfaces_agree"] is True
     assert ar["next_is_new_candidate"] is False
     assert ar["next_is_automation_readiness"] is False
+    assert ar["active_candidate_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert ar["active_candidate_method"] == "volatility_targeted_risk_parity_allocation"
+    assert ar["active_candidate_assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
+    assert ar["active_candidate_timeframe"] == "D1"
     h = p["html"]
-    assert "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in h
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" in h
     assert "ACTIVE CANDIDATE" in h
     assert "Risk-adjusted portfolio construction" in h
+    # spec stage / method / assets / timeframe rendered into the panel
+    assert "SPEC_FROZEN_FOR_HUMAN_REVIEW" in h
+    assert "volatility_targeted_risk_parity_allocation" in h
+    assert "BTCUSD, ETHUSD, SOLUSD" in h
+    assert "D1" in h
+    # the old proposal gate must not appear as the current directive
+    assert "ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" not in h
 
 
 def test_panel_shows_safety_locks():
@@ -309,7 +320,7 @@ def test_no_report_still_shows_c16_and_c17_active():
     assert ar["rejected_ledger_count"] == 21
     assert ar["active_candidate"] == "C17"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert "ACTIVE CANDIDATE" in p["html"]
 
 

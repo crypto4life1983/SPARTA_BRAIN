@@ -67,6 +67,14 @@ def automation_readiness_block() -> dict[str, Any]:
                 (lane.get("active_candidate_detail") or {}).get("label"),
             "active_candidate_verdict":
                 (lane.get("active_candidate_detail") or {}).get("verdict"),
+            "active_candidate_stage_label":
+                (lane.get("active_candidate_detail") or {}).get("stage_label"),
+            "active_candidate_method":
+                (lane.get("active_candidate_detail") or {}).get("method"),
+            "active_candidate_assets":
+                (lane.get("active_candidate_detail") or {}).get("assets") or [],
+            "active_candidate_timeframe":
+                (lane.get("active_candidate_detail") or {}).get("timeframe"),
             "open_candidate_gate": lane.get("open_candidate_gate"),
             "candidate_lane": lane.get("candidate_lane") or [],
             "safety_locks": {
@@ -262,11 +270,17 @@ def _render_automation_readiness_html(panel: dict) -> str:
                     _esc(ar.get("rejected_ledger_count"))))
     if ar.get("active_candidate"):
         parts.append('<div class="jv-detail">Active candidate: <b>%s</b> — %s '
-                     '(verdict <code>%s</code>, open gate %s)</div>'
+                     '(stage <b>%s</b>, verdict <code>%s</code>, open gate %s)</div>'
                      % (_esc(ar.get("active_candidate")),
                         _esc(ar.get("active_candidate_label")),
+                        _esc(ar.get("active_candidate_stage_label")),
                         _esc(ar.get("active_candidate_verdict")),
                         _esc(ar.get("open_candidate_gate"))))
+        parts.append('<div class="jv-detail">Method: <code>%s</code> · assets: '
+                     '<b>%s</b> · timeframe: <b>%s</b></div>'
+                     % (_esc(ar.get("active_candidate_method")),
+                        _esc(", ".join(ar.get("active_candidate_assets") or [])),
+                        _esc(ar.get("active_candidate_timeframe"))))
     parts.append('<div class="jv-detail">Next required action: <code>%s</code></div>'
                  % _esc(ar.get("next_required_action")))
     parts.append('<div class="jv-detail">§13 (clean tree) recommends: <b>%s</b> · '

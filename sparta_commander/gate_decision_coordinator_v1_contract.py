@@ -212,8 +212,8 @@ def coordinate(state: dict) -> dict[str, Any]:
             rec_kind = REC_GATE_DECISION
             detected_gate = "active_candidate_open_gate"
             command = _lane_status.get("next_required_action")
-            reason = ("candidate %s is an open frozen proposal on the lane; "
-                      "recommend its human decision (advance to spec or reject)"
+            reason = ("candidate %s is an open frozen artifact on the lane; "
+                      "recommend its human decision (advance or reject)"
                       % _lane_status.get("active_candidate"))
         elif _lane_status.get("next_is_automation_readiness") is True:
             rec_kind = REC_AUTOMATION_READINESS

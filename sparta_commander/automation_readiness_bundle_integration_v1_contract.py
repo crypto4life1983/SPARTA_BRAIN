@@ -122,9 +122,9 @@ def build_automation_readiness_integration() -> dict[str, Any]:
             "Candidate-lane directive integration v1 (READ-ONLY, RESEARCH ONLY). "
             "Connects the candidate-research-lane status into the coordinator/"
             "morning/autopilot surfaces so they AGREE on the current directive. "
-            "Candidate #17 is now the ACTIVE open candidate (frozen proposal) "
-            "awaiting the human spec decision. Executes nothing; overnight/morning "
-            "automation stays research-only and human-gated."),
+            "Candidate #17 is the ACTIVE open candidate with a frozen candidate "
+            "SPEC awaiting the human detector-spec decision. Executes nothing; "
+            "overnight/morning automation stays research-only and human-gated."),
         # the aligned directive (follows the lane)
         "next_required_action": token,
         "next_stage": lane.get("next_stage"),
@@ -133,6 +133,11 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         "active_candidate": lane.get("active_candidate"),
         "active_candidate_label": det.get("label"),
         "active_candidate_verdict": det.get("verdict"),
+        "active_candidate_stage": det.get("stage"),
+        "active_candidate_stage_label": det.get("stage_label"),
+        "active_candidate_method": det.get("method"),
+        "active_candidate_assets": det.get("assets"),
+        "active_candidate_timeframe": det.get("timeframe"),
         "open_candidate_gate": lane.get("open_candidate_gate"),
         "requires_human_approval": True,
         # C16 completion + ledger
@@ -190,6 +195,11 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "active_candidate": r["active_candidate"],
         "active_candidate_label": r["active_candidate_label"],
         "active_candidate_verdict": r["active_candidate_verdict"],
+        "active_candidate_stage": r["active_candidate_stage"],
+        "active_candidate_stage_label": r["active_candidate_stage_label"],
+        "active_candidate_method": r["active_candidate_method"],
+        "active_candidate_assets": r["active_candidate_assets"],
+        "active_candidate_timeframe": r["active_candidate_timeframe"],
         "open_candidate_gate": r["open_candidate_gate"],
         "next_stage": r["next_stage"],
         "next_required_action": r["next_required_action"],
@@ -221,9 +231,10 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
         failures.append("coordinator_does_not_match_lane_directive")
 
     # the integration follows the lane's CURRENT directive: Candidate #17 is the
-    # active open candidate awaiting the human spec decision.
+    # active open candidate with a frozen candidate SPEC awaiting the human
+    # detector-spec decision.
     if record.get("next_required_action") != (
-            "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"):
+            "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"):
         failures.append("next_action_not_c17_gate")
     if record.get("active_candidate") != "C17":
         failures.append("active_candidate_not_c17")

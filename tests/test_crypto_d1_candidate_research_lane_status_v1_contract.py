@@ -62,17 +62,24 @@ def test_c17_is_active_open_candidate():
     assert _R["next_is_automation_readiness"] is False
     assert _R["automation_readiness_was_prior_stage"] is True
     assert _R["next_is_new_candidate"] is False
-    assert _R["next_stage"] == "c17_candidate_spec_decision"
+    assert _R["next_stage"] == "c17_detector_spec_dry_run_decision"
     assert _R["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     det = _R["active_candidate_detail"]
     assert det["family"] == "risk_adjusted_portfolio_construction_vol_targeted_allocation"
     assert det["name"] == "risk_adjusted_portfolio_construction_vol_targeted_allocation_v1"
-    assert det["verdict"] == "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
-    assert det["next_action"] == "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
-    # C17 present in the candidate lane as an active frozen proposal
+    # C17 has advanced through the human spec gate: spec is frozen for review
+    assert det["verdict"] == "C17_SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert det["stage"] == "candidate_spec"
+    assert det["stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert det["method"] == "volatility_targeted_risk_parity_allocation"
+    assert det["assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
+    assert det["timeframe"] == "D1"
+    assert det["next_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+    # C17 present in the candidate lane as an active frozen SPEC
     c17 = next(c for c in _R["candidate_lane"] if c["candidate"] == "C17")
-    assert c17["state"] == "PROPOSED_FROZEN_FOR_HUMAN_REVIEW"
+    assert c17["state"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
     # tamper: cannot fall back to automation readiness / no active candidate
     bad = {**_R, "next_is_automation_readiness": True}
     assert lane.validate_lane_status(bad)["valid"] is False
@@ -139,13 +146,18 @@ def test_summarize_for_morning_report():
     assert summ["rejected_ledger_count"] == 21
     assert summ["active_candidate"] == "C17"
     assert summ["open_candidate_gate"] is True
-    assert summ["active_candidate_verdict"] == "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+    assert summ["active_candidate_verdict"] == "C17_SPEC_FROZEN_FOR_HUMAN_REVIEW"
     assert "Risk-adjusted portfolio construction" in summ["active_candidate_label"]
-    assert summ["next_stage"] == "c17_candidate_spec_decision"
+    assert summ["active_candidate_stage"] == "candidate_spec"
+    assert summ["active_candidate_stage_label"] == "SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert summ["active_candidate_method"] == "volatility_targeted_risk_parity_allocation"
+    assert summ["active_candidate_assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
+    assert summ["active_candidate_timeframe"] == "D1"
+    assert summ["next_stage"] == "c17_detector_spec_dry_run_decision"
     assert summ["next_is_automation_readiness"] is False
     assert summ["next_is_new_candidate"] is False
     assert summ["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert summ["overnight_automation_research_only"] is True
     assert summ["executes_nothing"] is True
 
