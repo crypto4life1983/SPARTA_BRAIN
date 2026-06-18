@@ -214,3 +214,108 @@ def test_panel_surfaces_autopilot_hard_stop_before_labels():
 def test_missing_report_panel_has_empty_autopilot_plan():
     p = panel.build_autopilot_morning_panel(None)
     assert p["autopilot_plan"] == {}
+
+
+# --- C16 / ledger-21 / automation-readiness / safety locks alignment -------- #
+
+def test_panel_shows_c16_complete_and_ledger_21():
+    p = panel.build_autopilot_morning_panel(_success_report())
+    ar = p["automation_readiness"]
+    assert ar["c16_lifecycle_complete"] is True
+    assert ar["rejected_ledger_count"] == 21
+    h = p["html"]
+    assert "AUTOMATION READINESS" in h
+    assert "21" in h
+
+
+def test_panel_shows_automation_readiness_next_action():
+    p = panel.build_autopilot_morning_panel(_success_report())
+    ar = p["automation_readiness"]
+    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert ar["section13_recommendation_when_clean"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
+    assert ar["section14_present"] is True
+    assert ar["surfaces_agree"] is True
+    assert ar["next_is_new_candidate"] is False
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in p["html"]
+
+
+def test_panel_shows_safety_locks():
+    p = panel.build_autopilot_morning_panel(_success_report())
+    sl = p["safety_locks"]
+    assert sl["real_data_qa"] == "BLOCKED"
+    assert sl["replay"] == "BLOCKED"
+    assert sl["paper_trading"] == "LOCKED"
+    assert sl["micro_live"] == "LOCKED"
+    assert sl["live_trading"] == "LOCKED"
+    assert "Safety locks" in p["html"]
+
+
+def test_panel_not_only_c10_c12_shows_full_lane():
+    # the committed lane truth exposes C13-C16, independent of the stale
+    # latest.json candidate_status (which only carried C10-C12).
+    p = panel.build_autopilot_morning_panel(_success_report())
+    lane = {c["candidate"] for c in p["automation_readiness"]["candidate_lane"]}
+    assert {"C13", "C14", "C15", "C16"}.issubset(lane)
+    h = p["html"]
+    for cid in ("C13", "C14", "C15", "C16"):
+        assert cid in h
+    assert "cointegration_pairs_market_neutral" in h
+
+
+def test_panel_drift_warning_when_next_candidate_token_appears():
+    rep = _success_report()
+    rep["autopilot_plan"] = {
+        "next_safe_action": "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL",
+        "recommended_token": "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL_ONLY"}
+    p = panel.build_autopilot_morning_panel(rep)
+    assert p["drift_warning"] is True
+    assert "NEXT-CANDIDATE DRIFT" in p["html"]
+    # an aligned report (automation readiness) -> no drift warning
+    rep2 = _success_report()
+    rep2["autopilot_plan"] = {
+        "next_safe_action": "RECOMMEND_AUTOMATION_READINESS_STEP",
+        "recommended_token": "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"}
+    rep2["what_to_do_next"] = "next stage is automation readiness"
+    p2 = panel.build_autopilot_morning_panel(rep2)
+    assert p2["drift_warning"] is False
+
+
+def test_panel_dirty_tree_warns_but_does_not_hide_c16():
+    rep = _success_report()
+    rep["git_status_summary"] = {"branch": "master", "staged": 0, "modified": 3,
+                                 "untracked": 0, "clean": False}
+    p = panel.build_autopilot_morning_panel(rep)
+    assert p["git_dirty_warning"] is True
+    h = p["html"]
+    assert "DIRTY" in h
+    # C16 / automation-readiness status still fully visible despite the dirty tree
+    assert p["automation_readiness"]["c16_lifecycle_complete"] is True
+    assert p["automation_readiness"]["rejected_ledger_count"] == 21
+    assert "AUTOMATION READINESS" in h
+
+
+def test_no_report_still_shows_c16_automation_readiness():
+    p = panel.build_autopilot_morning_panel(None)
+    ar = p["automation_readiness"]
+    assert ar["c16_lifecycle_complete"] is True
+    assert ar["rejected_ledger_count"] == 21
+    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert "AUTOMATION READINESS" in p["html"]
+
+
+def test_panel_run_metadata_and_seed_brief_path():
+    rep = _success_report()
+    rep["files_created_or_changed"] = [
+        "C:/SPARTA_BRAIN/data/overnight_autopilot/reports/"
+        "seed_brief_draft_20260618T050002Z.md"]
+    p = panel.build_autopilot_morning_panel(rep)
+    assert p["latest_run_record_id"] == rep["run_id"]
+    assert "seed_brief_draft" in (p["seed_brief_path"] or "")
+    assert "Latest seed brief" in p["html"]
+    assert rep["run_id"] in p["html"]
+
+
+def test_no_next_candidate_drift_on_aligned_success_report():
+    # the real aligned morning report carries no next-candidate token in its plan
+    p = panel.build_autopilot_morning_panel(_success_report())
+    assert p["drift_warning"] is False
