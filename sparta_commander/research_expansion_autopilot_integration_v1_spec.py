@@ -45,10 +45,11 @@ REI_SCHEMA_VERSION = 1
 REI_MODE = "RESEARCH_ONLY"
 
 # The canonical rejected/closed ledger for the EXPANDED system = REP's CURRENT
-# 20-family ledger (C1-C15; it includes conviction_bar_follow_through / C14 AND
-# slow_vol_targeted_time_series_momentum / C15). The integrated planner uses THIS
-# for anti-loop so neither C14 nor C15 can ever be re-proposed.
-CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C15)
+# 21-family ledger (C1-C16; it includes conviction_bar_follow_through / C14,
+# slow_vol_targeted_time_series_momentum / C15, AND cointegration_pairs_market_
+# neutral / C16). The integrated planner uses THIS for anti-loop so none of C14,
+# C15, or C16 can ever be re-proposed.
+CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C16)
 
 # The integrated batch may ONLY ever feed SARA's lowest-risk build gate.
 INTEGRATION_FEEDS_ONLY = _sara.ACTION_BUILD_PROPOSAL
@@ -115,6 +116,8 @@ def reconcile_rejected_ledger() -> dict[str, Any]:
         "c14_in_sara": "conviction_bar_follow_through" in sara,
         "c15_in_canonical": "slow_vol_targeted_time_series_momentum" in canonical,
         "c15_in_sara": "slow_vol_targeted_time_series_momentum" in sara,
+        "c16_in_canonical": "cointegration_pairs_market_neutral" in canonical,
+        "c16_in_sara": "cointegration_pairs_market_neutral" in sara,
         "reconciles": sorted(set(sara)) == sorted(set(canonical)),
         # back-compat alias (the C14-applied invariant still holds within the set)
         "reconciles_with_c14_added": sorted(set(sara)) == sorted(set(canonical)),
@@ -294,6 +297,8 @@ def build_integration_spec(repo_root: Any = ".",
             "conviction_bar_follow_through" in CANONICAL_REJECTED_FAMILIES,
         "canonical_includes_c15":
             "slow_vol_targeted_time_series_momentum" in CANONICAL_REJECTED_FAMILIES,
+        "canonical_includes_c16":
+            "cointegration_pairs_market_neutral" in CANONICAL_REJECTED_FAMILIES,
         "rejected_ledger_reconciliation": recon,
         "proposed_changes": {
             "morning_report": dict(PROPOSED_MORNING_REPORT_CHANGE),
@@ -336,12 +341,14 @@ def validate_integration_spec(record: dict[str, Any]) -> dict[str, Any]:
     if record.get("batch_feeds_only") != INTEGRATION_FEEDS_ONLY:
         failures.append("batch_feeds_more_than_proposal_gate")
 
-    if record.get("canonical_rejected_families_count") != 20:
-        failures.append("canonical_ledger_not_20")
+    if record.get("canonical_rejected_families_count") != 21:
+        failures.append("canonical_ledger_not_21")
     if record.get("canonical_includes_c14") is not True:
         failures.append("canonical_missing_c14")
     if record.get("canonical_includes_c15") is not True:
         failures.append("canonical_missing_c15")
+    if record.get("canonical_includes_c16") is not True:
+        failures.append("canonical_missing_c16")
     recon = record.get("rejected_ledger_reconciliation") or {}
     if recon.get("reconciles") is not True:
         failures.append("ledger_does_not_reconcile")

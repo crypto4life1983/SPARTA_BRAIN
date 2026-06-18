@@ -210,7 +210,7 @@ def test_integrates_with_existing_pieces_does_not_replace():
     assert d["does_not_replace_autopilot_or_orchestrator"] is True
     assert d["replaces_autopilot_or_orchestrator"] is False
     # canonical ledger is reused, not redefined (20 = C1-C15)
-    assert gdc.EXPECTED_LEDGER_COUNT == 20
+    assert gdc.EXPECTED_LEDGER_COUNT == 21
 
 
 def test_capability_flags_all_false_and_tamper_rejected():

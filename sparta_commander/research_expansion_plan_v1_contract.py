@@ -76,7 +76,15 @@ REJECTED_FAMILIES_C1_TO_C15 = REJECTED_FAMILIES_C1_TO_C14 + (
     "slow_vol_targeted_time_series_momentum",      # C15
 )
 
-# --- learning data distilled from C1-C15 (why each broad mechanism failed) ---
+# --- the CURRENT canonical rejected ledger (C1-C16; used for FORWARD anti-loop).
+# The C1-C15 tuple above is kept FROZEN because the (already pushed) C16 chain
+# legitimately references it as it was when C16 was still an open candidate. New
+# proposals must use this 21-family ledger so C16 is never re-proposed.
+REJECTED_FAMILIES_C1_TO_C16 = REJECTED_FAMILIES_C1_TO_C15 + (
+    "cointegration_pairs_market_neutral",          # C16
+)
+
+# --- learning data distilled from C1-C16 (why each broad mechanism failed) ---
 REJECTED_FAMILY_LESSONS = {
     "calendar_seasonality": "C10: undifferentiated long-drift dressed as a "
                             "Friday calendar edge; never a date/weekday trigger.",
@@ -93,6 +101,11 @@ REJECTED_FAMILY_LESSONS = {
         "C15: net-positive and BEAT random-entry, but LOST to buy-and-hold with a "
         "net-negative bear regime and short side -- long-bull crypto carry that "
         "underperforms buy-and-hold is not a durable edge.",
+    "cointegration_pairs_market_neutral":
+        "C16: market-neutrality avoided the C14/C15 carry trap, but crypto-D1 "
+        "cointegration is too INTERMITTENT (43 labels < 100) and a level-OLS hedge "
+        "is not return-beta-neutral out of sample (net beta 2.82 > 0.10) -- "
+        "rejected at the labels stage before replay.",
 }
 
 # --- THE C14 LESSON (preserved + operationalized) ---------------------------
@@ -207,7 +220,7 @@ def score_candidate_idea(idea: dict, rejected_families: Any = None) -> dict[str,
     weighted score that puts DURABILITY above TIMING (the C14 lesson). Builds
     nothing; recommends nothing executable."""
     rejected = set(rejected_families if rejected_families is not None
-                   else REJECTED_FAMILIES_C1_TO_C15)
+                   else REJECTED_FAMILIES_C1_TO_C16)
     family = idea.get("family")
     out: dict[str, Any] = {
         "family": family, "buildable": False, "priority_score": 0.0,
@@ -217,7 +230,7 @@ def score_candidate_idea(idea: dict, rejected_families: Any = None) -> dict[str,
 
     # Anti-loop gate 1: never re-propose a rejected/closed family.
     if family in rejected:
-        out["reason"] = "family_in_rejected_ledger_C1_to_C15"
+        out["reason"] = "family_in_rejected_ledger_C1_to_C16"
         return out
     # Anti-loop gate 2: must be materially different from ALL rejected families.
     if idea.get("materially_different_from_all_rejected") is not True:
@@ -318,8 +331,8 @@ def build_research_expansion_plan(repo_root: Any = ".",
         "human_gated_stages": list(HUMAN_GATED_STAGES),
         "real_data_stages": list(REAL_DATA_STAGES),
         "rejected_families_c1_to_c14": list(REJECTED_FAMILIES_C1_TO_C14),
-        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C15),
-        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C15),
+        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C16),
+        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C16),
         "rejected_family_lessons": dict(REJECTED_FAMILY_LESSONS),
         "c14_lesson": C14_LESSON,
         "priority_weights": dict(PRIORITY_WEIGHTS),
@@ -411,14 +424,17 @@ def validate_research_expansion_plan(record: dict[str, Any]) -> dict[str, Any]:
     if len(led) != 19:
         failures.append("rejected_ledger_count_unexpected")
 
-    # CURRENT canonical ledger (C1-C15) used for forward anti-loop: must add C15.
+    # CURRENT canonical ledger (C1-C16) used for forward anti-loop: must add C16
+    # (and still contain C15).
     cur = record.get("rejected_families_current") or []
+    if "cointegration_pairs_market_neutral" not in cur:
+        failures.append("current_ledger_missing_c16")
     if "slow_vol_targeted_time_series_momentum" not in cur:
         failures.append("current_ledger_missing_c15")
-    if len(cur) != 20:
+    if len(cur) != 21:
         failures.append("current_ledger_count_unexpected")
-    if record.get("rejected_families_count") != 20:
-        failures.append("rejected_families_count_not_20")
+    if record.get("rejected_families_count") != 21:
+        failures.append("rejected_families_count_not_21")
 
     # Portfolio objective declared, NOT computed.
     po = record.get("portfolio_objective") or {}

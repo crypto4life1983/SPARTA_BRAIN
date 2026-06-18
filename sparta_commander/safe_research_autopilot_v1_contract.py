@@ -78,7 +78,7 @@ STOP_ACTIONS = (
     ACTION_HALT_FAMILY_REJECTED, ACTION_HARD_STOP_FORBIDDEN)
 ALL_EMITTABLE_ACTIONS = AUTO_ADVANCE_ACTIONS + STOP_ACTIONS
 
-# --- full rejected/closed ledger C1-C15 (planner must never re-propose these) -
+# --- full rejected/closed ledger C1-C16 (planner must never re-propose these) -
 DEFAULT_REJECTED_FAMILIES = (
     "ny_session_fvg_choch",
     "ny_session_fvg_choch_v3",
@@ -100,6 +100,7 @@ DEFAULT_REJECTED_FAMILIES = (
     "lead_lag_propagation_continuation",           # C13
     "conviction_bar_follow_through",               # C14 (kept on record)
     "slow_vol_targeted_time_series_momentum",      # C15 (kept on record)
+    "cointegration_pairs_market_neutral",          # C16 (kept on record)
 )
 
 _CAPABILITY_FLAGS_FALSE = (
@@ -197,7 +198,7 @@ def decide_next_safe_action(chain_state: dict, repo_state: dict,
             r["is_hard_stop"] = True
             r["recommended_token"] = "HALT_PROPOSED_FAMILY_IS_REJECTED"
             r["reason"] = ("proposed family %r is in the rejected/closed ledger "
-                           "(C1-C15); refuse to re-propose" % fam)
+                           "(C1-C16); refuse to re-propose" % fam)
             return r
         r["decision"] = "AUTO_ADVANCE_RESEARCH_BUILD"
         r["next_safe_action"] = ACTION_BUILD_PROPOSAL

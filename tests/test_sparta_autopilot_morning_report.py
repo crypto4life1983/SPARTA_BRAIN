@@ -261,7 +261,7 @@ def test_autopilot_plan_recommends_open_proposal_when_all_rejected():
     assert ap["next_safe_action"] == "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL"
     assert ap["would_auto_advance"] is True
     assert ap["planner_is_read_only"] is True
-    assert ap["excluded_rejected_families_count"] == 20
+    assert ap["excluded_rejected_families_count"] == 21
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" in md
