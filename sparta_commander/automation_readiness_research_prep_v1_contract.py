@@ -33,7 +33,7 @@ ARP_VERSION = "v1"
 ARP_MODE = "RESEARCH_ONLY"
 ARP_LANE = "crypto_d1_auto_research"
 
-NEXT_REQUIRED_ACTION = _lane.NEXT_REQUIRED_ACTION  # BUILD_AUTOMATION_..._ONLY
+NEXT_REQUIRED_ACTION = _lane.AUTOMATION_READINESS_TOKEN  # this stage's action
 # The value the overnight runner's run-record next_human_gate must now carry
 # (kept in sync; verified against tools/overnight_autopilot_run_once.py by test).
 RUN_RECORD_NEXT_HUMAN_GATE = NEXT_REQUIRED_ACTION

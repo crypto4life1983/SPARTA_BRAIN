@@ -70,7 +70,7 @@ ALL_RECOMMENDATION_KINDS = (
 # The candidate-research-lane directive (authoritative): post-C16 the idle/default
 # recommendation must NOT drift back to "next candidate research" -- it is
 # automation readiness.
-AUTOMATION_READINESS_TOKEN = _lane.NEXT_REQUIRED_ACTION  # BUILD_AUTOMATION_..._ONLY
+AUTOMATION_READINESS_TOKEN = _lane.AUTOMATION_READINESS_TOKEN  # stable prior-stage token
 
 # Substrings the coordinator must NEVER emit in a recommended command.
 FORBIDDEN_COMMAND_SUBSTRINGS = (
@@ -201,18 +201,27 @@ def coordinate(state: dict) -> dict[str, Any]:
         reason = ("candidate %s is at an open gate; recommend the human paste its "
                   "decision token (advance/reject stays human-gated)"
                   % nxt["candidate"])
-    # 5) clean + synced + ledger ok + no open gate -> defer to the candidate-
-    #    research-lane directive. Post-C16 that directive is AUTOMATION READINESS,
-    #    so the idle/default recommendation does NOT drift back to next-candidate.
+    # 5) clean + synced + ledger ok + no open gate IN STATE -> defer to the
+    #    candidate-research-lane directive (authoritative). If the lane has an
+    #    ACTIVE open candidate (e.g. C17 frozen proposal), recommend its human
+    #    decision; else if the lane is at automation readiness, recommend that;
+    #    else fall back to next-candidate research.
     else:
         _lane_status = _lane.get_lane_status()
-        if _lane_status.get("next_is_automation_readiness") is True:
+        if _lane_status.get("open_candidate_gate") is True:
+            rec_kind = REC_GATE_DECISION
+            detected_gate = "active_candidate_open_gate"
+            command = _lane_status.get("next_required_action")
+            reason = ("candidate %s is an open frozen proposal on the lane; "
+                      "recommend its human decision (advance to spec or reject)"
+                      % _lane_status.get("active_candidate"))
+        elif _lane_status.get("next_is_automation_readiness") is True:
             rec_kind = REC_AUTOMATION_READINESS
             detected_gate = "candidate_lane_complete_automation_readiness"
             command = AUTOMATION_READINESS_TOKEN
             reason = ("repo is clean and synced and no candidate gate is open; the "
-                      "candidate-research lane is COMPLETE through C16, so the next "
-                      "stage is AUTOMATION READINESS, not another candidate")
+                      "candidate-research lane is at AUTOMATION READINESS, not "
+                      "another candidate")
         else:
             rec_kind = REC_NEXT_CANDIDATE
             detected_gate = "clean_synced_idle"

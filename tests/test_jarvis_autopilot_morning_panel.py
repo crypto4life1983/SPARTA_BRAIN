@@ -224,19 +224,26 @@ def test_panel_shows_c16_complete_and_ledger_21():
     assert ar["c16_lifecycle_complete"] is True
     assert ar["rejected_ledger_count"] == 21
     h = p["html"]
-    assert "AUTOMATION READINESS" in h
+    assert "ACTIVE CANDIDATE" in h
     assert "21" in h
 
 
-def test_panel_shows_automation_readiness_next_action():
+def test_panel_shows_c17_active_next_action():
     p = panel.build_autopilot_morning_panel(_success_report())
     ar = p["automation_readiness"]
-    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-    assert ar["section13_recommendation_when_clean"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
+    assert ar["active_candidate"] == "C17"
+    assert ar["open_candidate_gate"] is True
+    assert ar["next_required_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    assert ar["section13_recommendation_when_clean"] == "RECOMMEND_GATE_DECISION"
     assert ar["section14_present"] is True
     assert ar["surfaces_agree"] is True
     assert ar["next_is_new_candidate"] is False
-    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in p["html"]
+    assert ar["next_is_automation_readiness"] is False
+    h = p["html"]
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in h
+    assert "ACTIVE CANDIDATE" in h
+    assert "Risk-adjusted portfolio construction" in h
 
 
 def test_panel_shows_safety_locks():
@@ -288,19 +295,22 @@ def test_panel_dirty_tree_warns_but_does_not_hide_c16():
     assert p["git_dirty_warning"] is True
     h = p["html"]
     assert "DIRTY" in h
-    # C16 / automation-readiness status still fully visible despite the dirty tree
+    # C16 / active-candidate status still fully visible despite the dirty tree
     assert p["automation_readiness"]["c16_lifecycle_complete"] is True
     assert p["automation_readiness"]["rejected_ledger_count"] == 21
-    assert "AUTOMATION READINESS" in h
+    assert p["automation_readiness"]["active_candidate"] == "C17"
+    assert "ACTIVE CANDIDATE" in h
 
 
-def test_no_report_still_shows_c16_automation_readiness():
+def test_no_report_still_shows_c16_and_c17_active():
     p = panel.build_autopilot_morning_panel(None)
     ar = p["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
     assert ar["rejected_ledger_count"] == 21
-    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-    assert "AUTOMATION READINESS" in p["html"]
+    assert ar["active_candidate"] == "C17"
+    assert ar["next_required_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    assert "ACTIVE CANDIDATE" in p["html"]
 
 
 def test_panel_run_metadata_and_seed_brief_path():
@@ -332,13 +342,11 @@ def test_panel_shows_next_strategy_memo():
     assert "Risk-adjusted portfolio construction" in nm["recommended_direction"]
     assert len(nm["ranked_directions"]) >= 3
     assert nm["creates_candidate_id"] is False
-    assert nm["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     h = p["html"]
     assert "Next-strategy research memo" in h
+    assert "led to C17" in h
     assert "Risk-adjusted portfolio construction" in h
-    assert "no C17" in h
-    assert ("HUMAN_DECISION_APPROVE_NEXT_RESEARCH_DIRECTION_THEN_BUILD_CANDIDATE"
-            "_PROPOSAL") in h
+    assert "created no candidate" in h
 
 
 def test_no_report_still_shows_next_strategy_memo():

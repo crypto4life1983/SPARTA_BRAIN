@@ -81,10 +81,13 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         {"clean": True, "uncommitted_candidate_artifacts": False})
     sara_generic_idle_action = sara_idle.get("next_safe_action")
 
-    token = AUTOMATION_READINESS_TOKEN
+    # The CURRENT lane directive (authoritative). Post-C16 this was automation
+    # readiness; once Candidate #17 was proposed it became the C17 human spec
+    # decision (an open candidate gate). The integration follows the lane.
+    token = lane.get("next_required_action")
     surfaces = {
         "lane_status_next": lane.get("next_required_action"),
-        "coordinator_idle_command": coord.get("next_safe_command"),
+        "coordinator_command": coord.get("next_safe_command"),
         "lane_morning_next": lane_morning.get("next_required_action"),
         "coordinator_recommendation_kind": coord.get("recommendation_kind"),
     }
@@ -104,28 +107,33 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         and lane.get("replay_state") == _lane.STATE_BLOCKED
         and lane.get("paper_trading_state") == _lane.STATE_LOCKED
         and lane.get("live_trading_state") == _lane.STATE_LOCKED)
-    coordinator_is_automation_readiness = (
-        coord.get("recommendation_kind") == _gdc.REC_AUTOMATION_READINESS)
+    coordinator_matches_lane_directive = (
+        coord.get("next_safe_command") == token)
     surfaces_agree = (all_tokens_match and no_new_candidate and research_only
-                      and downstream_locked and coordinator_is_automation_readiness
+                      and downstream_locked and coordinator_matches_lane_directive
                       and lane.get("c16_lifecycle_complete") is True
                       and lane.get("rejected_ledger_count") == 21)
+    det = lane.get("active_candidate_detail") or {}
 
     record: dict[str, Any] = {
         "version": ARI_VERSION, "mode": ARI_MODE, "lane": ARI_LANE,
         "is_pure_integration_only": True,
         "label": (
-            "Automation Readiness bundle/surface integration v1 (READ-ONLY, "
-            "RESEARCH ONLY). Connects the candidate-research-lane status into the "
-            "coordinator/morning/autopilot surfaces so the system moves from "
-            "C16-complete to AUTOMATION READINESS, not another candidate. Executes "
-            "nothing; overnight/morning automation stays research-only and "
-            "human-gated."),
-        # the aligned directive
+            "Candidate-lane directive integration v1 (READ-ONLY, RESEARCH ONLY). "
+            "Connects the candidate-research-lane status into the coordinator/"
+            "morning/autopilot surfaces so they AGREE on the current directive. "
+            "Candidate #17 is now the ACTIVE open candidate (frozen proposal) "
+            "awaiting the human spec decision. Executes nothing; overnight/morning "
+            "automation stays research-only and human-gated."),
+        # the aligned directive (follows the lane)
         "next_required_action": token,
-        "next_stage": "automation_readiness",
-        "next_is_automation_readiness": True,
+        "next_stage": lane.get("next_stage"),
+        "next_is_automation_readiness": lane.get("next_is_automation_readiness"),
         "next_is_new_candidate": False,
+        "active_candidate": lane.get("active_candidate"),
+        "active_candidate_label": det.get("label"),
+        "active_candidate_verdict": det.get("verdict"),
+        "open_candidate_gate": lane.get("open_candidate_gate"),
         "requires_human_approval": True,
         # C16 completion + ledger
         "c16_lifecycle_complete": lane.get("c16_lifecycle_complete"),
@@ -137,7 +145,7 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         "no_new_candidate_recommended": no_new_candidate,
         "automation_research_only": research_only,
         "downstream_blocked_and_locked": downstream_locked,
-        "coordinator_idle_is_automation_readiness": coordinator_is_automation_readiness,
+        "coordinator_matches_lane_directive": coordinator_matches_lane_directive,
         # SARA generic idle is overridden by the lane directive
         "sara_generic_idle_action": sara_generic_idle_action,
         "sara_generic_idle_overridden_by_lane_directive": True,
@@ -176,11 +184,16 @@ def summarize_for_morning_report() -> dict[str, Any]:
     """Pure aligned morning-report / autopilot block. Read-only; executes nothing."""
     r = build_automation_readiness_integration()
     return {
-        "section": "automation_readiness",
+        "section": "candidate_lane_directive",
         "c16_lifecycle_complete": r["c16_lifecycle_complete"],
         "rejected_ledger_count": r["rejected_ledger_count"],
+        "active_candidate": r["active_candidate"],
+        "active_candidate_label": r["active_candidate_label"],
+        "active_candidate_verdict": r["active_candidate_verdict"],
+        "open_candidate_gate": r["open_candidate_gate"],
         "next_stage": r["next_stage"],
         "next_required_action": r["next_required_action"],
+        "next_is_automation_readiness": r["next_is_automation_readiness"],
         "next_is_new_candidate": r["next_is_new_candidate"],
         "surfaces_agree": r["surfaces_agree"],
         "overnight_automation_research_only": r["overnight_automation_research_only"],
@@ -204,13 +217,20 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
         failures.append("surfaces_do_not_agree")
     if record.get("all_tokens_match") is not True:
         failures.append("tokens_do_not_match")
-    if record.get("coordinator_idle_is_automation_readiness") is not True:
-        failures.append("coordinator_idle_not_automation_readiness")
+    if record.get("coordinator_matches_lane_directive") is not True:
+        failures.append("coordinator_does_not_match_lane_directive")
 
-    if record.get("next_required_action") != AUTOMATION_READINESS_TOKEN:
-        failures.append("next_action_not_automation_readiness")
-    if record.get("next_is_automation_readiness") is not True:
-        failures.append("next_not_automation_readiness")
+    # the integration follows the lane's CURRENT directive: Candidate #17 is the
+    # active open candidate awaiting the human spec decision.
+    if record.get("next_required_action") != (
+            "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"):
+        failures.append("next_action_not_c17_gate")
+    if record.get("active_candidate") != "C17":
+        failures.append("active_candidate_not_c17")
+    if record.get("open_candidate_gate") is not True:
+        failures.append("open_candidate_gate_expected")
+    if record.get("next_is_automation_readiness") is not False:
+        failures.append("must_not_be_automation_readiness_while_c17_open")
     if record.get("next_is_new_candidate") is not False:
         failures.append("next_must_not_be_new_candidate")
     if record.get("no_new_candidate_recommended") is not True:

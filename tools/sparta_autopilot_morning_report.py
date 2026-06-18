@@ -39,6 +39,7 @@ if str(REPO_ROOT) not in sys.path:
 import sparta_commander.safe_research_autopilot_v1_contract as _sara  # noqa: E402,E501
 import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari  # noqa: E402,E501
 import sparta_commander.automation_readiness_next_strategy_research_memo_v1_contract as _memo  # noqa: E402,E501
+import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as _lane  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -167,11 +168,19 @@ def _what_to_do_next(run_status, gate, candidate_status) -> str:
     closed_note = (" Closed/rejected: %s." % ", ".join(sorted(closed))
                    if closed else "")
     if gate.get("action", "NONE").startswith("NONE"):
+        ls = _lane.get_lane_status()
+        if ls.get("open_candidate_gate") is True:
+            det = ls.get("active_candidate_detail") or {}
+            return ("Last run was %s.%s Candidate %s is the ACTIVE open candidate "
+                    "(%s) — a frozen proposal awaiting your decision. To advance, "
+                    "paste: %s ."
+                    % (run_status.lower(), closed_note, ls.get("active_candidate"),
+                       det.get("label"), ls.get("next_required_action")))
         return ("Last run was %s. No open human decision right now.%s The "
-                "candidate-research lane is COMPLETE through C16; the next stage "
-                "is AUTOMATION READINESS (research-only, human-gated). To proceed, "
-                "paste: BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY ."
-                % (run_status.lower(), closed_note))
+                "candidate-research lane is at AUTOMATION READINESS (research-only, "
+                "human-gated). To proceed, paste: %s ."
+                % (run_status.lower(), closed_note,
+                   _lane.AUTOMATION_READINESS_TOKEN))
     return ("Last run was %s.%s The open decision is %s on %s. "
             "To advance, paste: %s . To reject, paste: %s ."
             % (run_status.lower(), closed_note, gate["action"],
@@ -216,14 +225,30 @@ def _autopilot_plan(candidate_status: dict, git_summary: dict) -> dict:
     # active-candidate chain stops are preserved unchanged.
     plan["is_automation_readiness"] = False
     plan["next_is_new_candidate"] = False
+    plan["active_candidate"] = None
+    # When the only thing the generic planner would do is open a NEW candidate
+    # proposal (the clean idle case), DEFER to the authoritative candidate-research
+    # lane directive: an active open candidate (C17) -> its human spec decision;
+    # else automation readiness; else (no directive) leave the build-proposal.
     if plan.get("next_safe_action") == _sara.ACTION_BUILD_PROPOSAL:
-        plan["next_safe_action"] = "RECOMMEND_AUTOMATION_READINESS_STEP"
-        plan["recommended_token"] = _ari.AUTOMATION_READINESS_TOKEN
-        plan["decision"] = "AUTOMATION_READINESS"
-        plan["would_auto_advance"] = False
-        plan["is_automation_readiness"] = True
-        plan["reason"] = ("candidate-research lane complete through C16; the next "
-                          "stage is automation readiness, not another candidate")
+        ls = _lane.get_lane_status()
+        if ls.get("open_candidate_gate") is True:
+            plan["next_safe_action"] = "RECOMMEND_GATE_DECISION"
+            plan["recommended_token"] = ls.get("next_required_action")
+            plan["decision"] = "ACTIVE_CANDIDATE_GATE"
+            plan["would_auto_advance"] = False
+            plan["active_candidate"] = ls.get("active_candidate")
+            plan["reason"] = ("candidate %s is an open frozen proposal; recommend "
+                              "its human decision (advance to spec or reject)"
+                              % ls.get("active_candidate"))
+        elif ls.get("next_is_automation_readiness") is True:
+            plan["next_safe_action"] = "RECOMMEND_AUTOMATION_READINESS_STEP"
+            plan["recommended_token"] = _lane.AUTOMATION_READINESS_TOKEN
+            plan["decision"] = "AUTOMATION_READINESS"
+            plan["would_auto_advance"] = False
+            plan["is_automation_readiness"] = True
+            plan["reason"] = ("candidate-research lane at automation readiness; not "
+                              "another candidate")
     return plan
 
 
@@ -377,22 +402,28 @@ def render_markdown(report: dict) -> str:
                      % ap.get("excluded_rejected_families_count"))
     lines.append("- planner executes nothing (read-only; no build / labels / "
                  "replay / portfolio / paper / live).")
-    lines.append("## 14. Candidate research lane — AUTOMATION READINESS")
+    lines.append("## 14. Candidate research lane — ACTIVE CANDIDATE")
     ar = r.get("automation_readiness") or {}
     lines.append("- C16 lifecycle complete: %s | rejected ledger: %s families"
                  % (ar.get("c16_lifecycle_complete"),
                     ar.get("rejected_ledger_count")))
-    lines.append("- **next stage:** `%s`" % ar.get("next_stage"))
-    lines.append("- next required action: `%s`"
+    lines.append("- **active candidate:** %s — %s"
+                 % (ar.get("active_candidate"), ar.get("active_candidate_label")))
+    lines.append("- verdict: `%s` | open candidate gate: %s"
+                 % (ar.get("active_candidate_verdict"),
+                    ar.get("open_candidate_gate")))
+    lines.append("- **next required action:** `%s`"
                  % ar.get("next_required_action"))
-    lines.append("- recommends a new candidate: %s | surfaces agree: %s"
-                 % (ar.get("next_is_new_candidate"), ar.get("surfaces_agree")))
+    lines.append("- automation-readiness next: %s | recommends a new candidate: "
+                 "%s | surfaces agree: %s"
+                 % (ar.get("next_is_automation_readiness"),
+                    ar.get("next_is_new_candidate"), ar.get("surfaces_agree")))
     lines.append("- overnight automation research-only: %s | real-data-QA & "
                  "replay BLOCKED, paper / micro-live / live LOCKED."
                  % ar.get("overnight_automation_research_only"))
-    lines.append("## 15. Next-strategy research memo (research-only, no candidate)")
+    lines.append("## 15. Next-strategy research memo (provenance — led to C17)")
     nm = r.get("next_strategy_memo") or {}
-    lines.append("- **recommended next direction:** %s (`%s`)"
+    lines.append("- recommended direction (now Candidate #17): %s (`%s`)"
                  % (nm.get("recommended_direction"),
                     nm.get("recommended_direction_key")))
     for i, d in enumerate(nm.get("ranked_directions") or []):
@@ -400,13 +431,9 @@ def render_markdown(report: dict) -> str:
     if nm.get("why_recommended_is_different"):
         lines.append("- why different from C1–C16: %s"
                      % nm.get("why_recommended_is_different"))
-    lines.append("- creates a candidate yet: %s (no C17) | rejected ledger: %s"
-                 % (nm.get("creates_candidate_id"),
-                    nm.get("rejected_ledger_count")))
-    lines.append("- required human gate before any candidate: `%s`"
-                 % nm.get("human_approval_before_candidate"))
-    lines.append("- next required action stays: `%s`"
-                 % nm.get("next_required_action"))
+    lines.append("- the memo itself created no candidate; C17 was created later "
+                 "under explicit human approval. Rejected ledger: %s."
+                 % nm.get("rejected_ledger_count"))
     lines.append("")
     return "\n".join(lines) + "\n"
 

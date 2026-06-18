@@ -54,20 +54,39 @@ def test_rejected_ledger_is_c1_to_c16_21():
     assert lane.validate_lane_status(bad)["valid"] is False
 
 
-# ---- next stage = automation readiness, NOT another candidate --------------
+# ---- C17 is the ACTIVE open candidate (not automation readiness, not new) --
 
-def test_next_stage_is_automation_readiness_not_candidate():
-    assert _R["next_stage"] == "automation_readiness"
-    assert _R["next_is_automation_readiness"] is True
+def test_c17_is_active_open_candidate():
+    assert _R["active_candidate"] == "C17"
+    assert _R["open_candidate_gate"] is True
+    assert _R["next_is_automation_readiness"] is False
+    assert _R["automation_readiness_was_prior_stage"] is True
     assert _R["next_is_new_candidate"] is False
-    assert _R["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-    assert _R["open_candidate_gate"] is False
-    assert _R["active_candidate"] is None
-    assert _R["starts_a_new_candidate"] is False
-    bad = {**_R, "next_is_new_candidate": True}
+    assert _R["next_stage"] == "c17_candidate_spec_decision"
+    assert _R["next_required_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    det = _R["active_candidate_detail"]
+    assert det["family"] == "risk_adjusted_portfolio_construction_vol_targeted_allocation"
+    assert det["name"] == "risk_adjusted_portfolio_construction_vol_targeted_allocation_v1"
+    assert det["verdict"] == "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+    assert det["next_action"] == "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+    # C17 present in the candidate lane as an active frozen proposal
+    c17 = next(c for c in _R["candidate_lane"] if c["candidate"] == "C17")
+    assert c17["state"] == "PROPOSED_FROZEN_FOR_HUMAN_REVIEW"
+    # tamper: cannot fall back to automation readiness / no active candidate
+    bad = {**_R, "next_is_automation_readiness": True}
     assert lane.validate_lane_status(bad)["valid"] is False
-    bad2 = {**_R, "next_stage": "build_next_candidate"}
+    bad2 = {**_R, "active_candidate": None}
     assert lane.validate_lane_status(bad2)["valid"] is False
+    bad3 = {**_R, "open_candidate_gate": False}
+    assert lane.validate_lane_status(bad3)["valid"] is False
+
+
+def test_c16_remains_complete_and_kept_on_record():
+    assert _R["c16_lifecycle_complete"] is True
+    assert _R["c16_rejection_verdict"] == "REJECT_C16_AT_LABELS"
+    c16 = next(c for c in _R["candidate_lane"] if c["candidate"] == "C16")
+    assert c16["state"] == "REJECTED_KEPT_ON_RECORD"
 
 
 # ---- overnight/morning automation stays research-only + locked -------------
@@ -96,7 +115,8 @@ def test_human_approval_and_no_trading_action():
     for banned in ("PAPER", "LIVE", "EXECUTE", "BROKER", "ORDER", "FETCH",
                    "PROMOTE", "DEPLOY"):
         assert banned not in nra.upper(), banned
-    assert "RESEARCH_ONLY" in nra
+    # the next action is a human decision gate (advance C17 to spec, or reject)
+    assert nra.startswith("HUMAN_DECISION_C17_")
 
 
 # ---- candidate lane summary -------------------------------------------------
@@ -117,11 +137,15 @@ def test_summarize_for_morning_report():
     assert summ["section"] == "candidate_research_lane_status"
     assert summ["c16_lifecycle_complete"] is True
     assert summ["rejected_ledger_count"] == 21
-    assert summ["next_stage"] == "automation_readiness"
-    assert summ["next_is_automation_readiness"] is True
+    assert summ["active_candidate"] == "C17"
+    assert summ["open_candidate_gate"] is True
+    assert summ["active_candidate_verdict"] == "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+    assert "Risk-adjusted portfolio construction" in summ["active_candidate_label"]
+    assert summ["next_stage"] == "c17_candidate_spec_decision"
+    assert summ["next_is_automation_readiness"] is False
     assert summ["next_is_new_candidate"] is False
     assert summ["next_required_action"] == (
-        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
     assert summ["overnight_automation_research_only"] is True
     assert summ["executes_nothing"] is True
 

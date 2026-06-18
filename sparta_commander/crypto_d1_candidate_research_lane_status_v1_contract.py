@@ -53,7 +53,24 @@ C16_LIFECYCLE_GATES = (
      "commit": "1d0b0dcd5fe7a40fe8bdcec906f955170c8039c4"},
 )
 
-# The candidate-research lane summary (most recent candidates; all rejected).
+STATE_ACTIVE_PROPOSAL = "PROPOSED_FROZEN_FOR_HUMAN_REVIEW"
+
+# Candidate #17 -- the ACTIVE open candidate (a frozen family proposal), created
+# from the human-approved next-strategy research direction (memo). Frozen facts
+# pinned to the pushed C17 proposal commit. The lane reports C17; it creates
+# nothing. (Hardcoded -- the C17 proposal imports the lane via the memo, so the
+# lane must not import the C17 proposal.)
+C17_CANDIDATE_ID = "C17"
+C17_FAMILY = "risk_adjusted_portfolio_construction_vol_targeted_allocation"
+C17_NAME = "risk_adjusted_portfolio_construction_vol_targeted_allocation_v1"
+C17_VERDICT = "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+C17_LABEL = ("Risk-adjusted portfolio construction — vol-targeted / risk-parity "
+             "allocation across BTC/ETH/SOL")
+C17_PROPOSAL_COMMIT = "1c3a4671cb3a0d238825dd7d7b7070a50f40d419"
+C17_NEXT_GATE = "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+
+# The candidate-research lane summary: C13-C16 rejected (kept on record), C17 now
+# ACTIVE as a frozen proposal awaiting the human spec decision.
 CANDIDATE_LANE = (
     {"candidate": "C13", "family": "lead_lag_propagation_continuation",
      "state": STATE_REJECTED, "rejected_at": "real_candle_labels"},
@@ -63,11 +80,19 @@ CANDIDATE_LANE = (
      "state": STATE_REJECTED, "rejected_at": "fee_honest_replay"},
     {"candidate": "C16", "family": "cointegration_pairs_market_neutral",
      "state": STATE_REJECTED, "rejected_at": "real_candle_labels"},
+    {"candidate": "C17", "family": C17_FAMILY, "state": STATE_ACTIVE_PROPOSAL,
+     "stage": "family_proposal", "verdict": C17_VERDICT},
 )
 
-# The next stage is AUTOMATION READINESS, not another candidate.
-NEXT_REQUIRED_ACTION = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-NEXT_STAGE = "automation_readiness"
+# The PRIOR-stage automation-readiness token (stable; kept for provenance and for
+# the automation-readiness prep/memo artifacts that belong to that stage).
+AUTOMATION_READINESS_TOKEN = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+
+# The CURRENT next stage is the C17 human spec decision (an open candidate gate),
+# NOT automation readiness any more -- automation readiness was the PRIOR stage
+# that produced the research memo that led to C17.
+NEXT_REQUIRED_ACTION = C17_NEXT_GATE
+NEXT_STAGE = "c17_candidate_spec_decision"
 
 _CAPABILITY_FLAGS_FALSE = (
     "executes", "writes_files", "runs_detector", "runs_labels", "runs_replay",
@@ -109,29 +134,41 @@ def get_lane_status() -> dict[str, Any]:
         "is_pure_status_only": True,
         "label": (
             "Crypto-D1 candidate research lane status (READ-ONLY, RESEARCH ONLY). "
-            "C16 lifecycle COMPLETE; rejected ledger C1-C16 (21 families); next "
-            "stage is AUTOMATION READINESS, not another candidate. Overnight/"
-            "morning automation stays research-only and human-gated. Executes "
-            "nothing."),
-        # C16 completion
+            "C16 lifecycle COMPLETE; rejected ledger C1-C16 (21 families). "
+            "Candidate #17 is now the ACTIVE open candidate (frozen family "
+            "proposal): Risk-adjusted portfolio construction — vol-targeted / "
+            "risk-parity allocation across BTC/ETH/SOL, awaiting the human spec "
+            "decision. Overnight/morning automation stays research-only and "
+            "human-gated. Executes nothing."),
+        # C16 completion (unchanged)
         "c16_lifecycle_complete": True,
         "c16_candidate_family": "cointegration_pairs_market_neutral",
         "c16_rejection_verdict": "REJECT_C16_AT_LABELS",
         "c16_lifecycle_gates": [dict(g) for g in C16_LIFECYCLE_GATES],
         "c16_in_rejected_ledger":
             "cointegration_pairs_market_neutral" in REJECTED_FAMILIES_C1_TO_C16,
-        # rejected ledger
+        # rejected ledger (unchanged)
         "rejected_ledger_count": REJECTED_LEDGER_COUNT,
         "rejected_ledger_is_c1_to_c16": REJECTED_LEDGER_COUNT == 21,
         "rejected_families": list(REJECTED_FAMILIES_C1_TO_C16),
-        # candidate lane summary
+        # candidate lane summary -- C17 is now ACTIVE/open
         "candidate_lane": [dict(c) for c in CANDIDATE_LANE],
-        "active_candidate": None,
-        "open_candidate_gate": False,
-        # next stage = automation readiness (NOT another candidate)
-        "current_stage": "candidate_research_complete_through_c16",
+        "active_candidate": C17_CANDIDATE_ID,
+        "open_candidate_gate": True,
+        "active_candidate_detail": {
+            "candidate": C17_CANDIDATE_ID, "family": C17_FAMILY,
+            "name": C17_NAME, "label": C17_LABEL, "verdict": C17_VERDICT,
+            "stage": "family_proposal", "proposal_commit": C17_PROPOSAL_COMMIT,
+            "next_action": C17_NEXT_GATE,
+        },
+        # next stage = the C17 human spec decision (open gate), NOT automation
+        # readiness. Automation readiness was the PRIOR stage that produced the
+        # research memo that led to C17 (still visible as provenance, below).
+        "current_stage": "c17_family_proposal_frozen_for_human_review",
         "next_stage": NEXT_STAGE,
-        "next_is_automation_readiness": True,
+        "next_is_automation_readiness": False,
+        "automation_readiness_was_prior_stage": True,
+        "next_strategy_memo_led_to_c17": True,
         "next_is_new_candidate": False,
         "next_required_action": NEXT_REQUIRED_ACTION,
         "requires_human_approval": True,
@@ -164,13 +201,18 @@ def get_lane_status() -> dict[str, Any]:
 
 
 def summarize_for_morning_report() -> dict[str, Any]:
-    """Pure morning-report-ready block: C16 complete, ledger C1-C16 (21), next =
-    automation readiness. Read-only; executes nothing."""
+    """Pure morning-report-ready block: C16 complete, ledger C1-C16 (21), and
+    Candidate #17 ACTIVE as a frozen proposal awaiting the human spec decision.
+    Read-only; executes nothing."""
     s = get_lane_status()
     return {
         "section": "candidate_research_lane_status",
         "c16_lifecycle_complete": s["c16_lifecycle_complete"],
         "rejected_ledger_count": s["rejected_ledger_count"],
+        "active_candidate": s["active_candidate"],
+        "active_candidate_label": s["active_candidate_detail"]["label"],
+        "active_candidate_verdict": s["active_candidate_detail"]["verdict"],
+        "open_candidate_gate": s["open_candidate_gate"],
         "current_stage": s["current_stage"],
         "next_stage": s["next_stage"],
         "next_is_automation_readiness": s["next_is_automation_readiness"],
@@ -214,19 +256,32 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
             record.get("rejected_families") or []):
         failures.append("ledger_missing_c16_family")
 
-    # next stage = automation readiness, NOT a new candidate
+    # C17 is the ACTIVE open candidate; next stage = the C17 human spec decision,
+    # NOT automation readiness and NOT a new candidate.
+    if record.get("active_candidate") != C17_CANDIDATE_ID:
+        failures.append("c17_not_active")
+    if record.get("open_candidate_gate") is not True:
+        failures.append("open_candidate_gate_expected")
+    det = record.get("active_candidate_detail") or {}
+    if det.get("family") != C17_FAMILY:
+        failures.append("c17_family_mismatch")
+    if det.get("verdict") != C17_VERDICT:
+        failures.append("c17_verdict_mismatch")
+    if det.get("next_action") != C17_NEXT_GATE:
+        failures.append("c17_next_gate_mismatch")
     if record.get("next_stage") != NEXT_STAGE:
-        failures.append("next_stage_not_automation_readiness")
-    if record.get("next_is_automation_readiness") is not True:
-        failures.append("next_not_automation_readiness")
+        failures.append("next_stage_not_c17_spec_decision")
+    if record.get("next_is_automation_readiness") is not False:
+        failures.append("must_not_be_automation_readiness_while_c17_open")
     if record.get("next_is_new_candidate") is not False:
         failures.append("next_must_not_be_new_candidate")
-    if record.get("next_required_action") != NEXT_REQUIRED_ACTION:
-        failures.append("next_action_tampered")
-    if record.get("open_candidate_gate") is not False:
-        failures.append("no_open_gate_expected")
-    if record.get("active_candidate") is not None:
-        failures.append("no_active_candidate_expected")
+    if record.get("next_required_action") != C17_NEXT_GATE:
+        failures.append("next_action_not_c17_gate")
+    # C17 must appear in the candidate lane as an active frozen proposal
+    lane_c17 = next((c for c in (record.get("candidate_lane") or [])
+                     if c.get("candidate") == "C17"), None)
+    if not lane_c17 or lane_c17.get("state") != STATE_ACTIVE_PROPOSAL:
+        failures.append("c17_not_active_in_candidate_lane")
 
     # automation path research-only + downstream blocked/locked
     if record.get("overnight_automation_research_only") is not True:

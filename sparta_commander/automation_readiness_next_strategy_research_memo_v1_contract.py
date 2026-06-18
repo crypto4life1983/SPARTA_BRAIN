@@ -37,7 +37,7 @@ REJECTED_FAMILY_LESSONS = dict(_rep.REJECTED_FAMILY_LESSONS)
 
 # The next_required_action does NOT advance to a candidate; the memo is itself the
 # automation-readiness research output.
-NEXT_REQUIRED_ACTION = _lane.NEXT_REQUIRED_ACTION  # BUILD_AUTOMATION_..._ONLY
+NEXT_REQUIRED_ACTION = _lane.AUTOMATION_READINESS_TOKEN  # the memo's own stage
 # Turning ANY direction below into a candidate requires this separate human gate.
 HUMAN_APPROVAL_BEFORE_CANDIDATE = (
     "HUMAN_DECISION_APPROVE_NEXT_RESEARCH_DIRECTION_THEN_BUILD_CANDIDATE_PROPOSAL")

@@ -64,14 +64,17 @@ def test_morning_report_sections_agree_no_candidate_drift():
                  "next_action": "NONE (closed)"}})
     ap = report["autopilot_plan"]
     ar = report["automation_readiness"]
-    # (5) §13 clean-tree plan
-    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
-    # (6) §14
-    assert ar["next_stage"] == "automation_readiness"
-    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    # (5) §13 clean-tree plan now defers to the active C17 candidate gate
+    assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
+    assert ap["recommended_token"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    # (6) §14 shows C17 active
+    assert ar["active_candidate"] == "C17"
+    assert ar["next_required_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
     md = mr.render_markdown(report)
-    assert "AUTOMATION READINESS" in md
-    # (7) no candidate drift on any surface
+    assert "ACTIVE CANDIDATE" in md
+    # (7) no next-candidate drift on any surface
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
     assert ar["next_is_new_candidate"] is False
     assert _R["next_is_new_candidate"] is False

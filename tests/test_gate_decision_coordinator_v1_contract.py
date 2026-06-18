@@ -30,16 +30,17 @@ def _clean_synced_state():
             "candidates": dict(_C15_CLOSED), "ledger": dict(_LEDGER_OK)}
 
 
-# --- 1. clean synced + no open gate -> AUTOMATION READINESS (post-C16) -------
+# --- 1. clean synced + no open gate in state -> defer to lane (C17 active) ---
 
-def test_clean_synced_recommends_automation_readiness_after_c16():
-    # the candidate-research lane is complete through C16, so the idle/default
-    # recommendation must NOT drift back to "next candidate research".
+def test_clean_synced_defers_to_lane_c17_open_gate():
+    # the lane now has C17 as an ACTIVE open candidate, so the idle/default
+    # recommendation defers to the C17 human spec decision -- it does NOT drift to
+    # next-candidate, and (while C17 is open) it is no longer automation readiness.
     d = gdc.coordinate(_clean_synced_state())
-    assert d["detected_gate"] == "candidate_lane_complete_automation_readiness"
-    assert d["recommendation_kind"] == gdc.REC_AUTOMATION_READINESS
-    assert d["next_safe_command"] == gdc.AUTOMATION_READINESS_TOKEN
-    assert d["next_safe_command"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert d["detected_gate"] == "active_candidate_open_gate"
+    assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
+    assert d["next_safe_command"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
     assert d["next_research_recommended"] is False   # NOT a new candidate
     assert d["automation_lane_continues"] is True
     assert gdc.validate_coordinator_decision(d)["valid"] is True
@@ -197,7 +198,7 @@ def test_supports_morning_report_output():
     assert summ["requires_human_approval"] is True
     # idle now defers to automation readiness, not a new candidate
     assert summ["next_research_recommended"] is False
-    assert summ["paste_this"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert summ["paste_this"] == "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
     assert summ["automation_lane_continues"] is True
     assert summ["executes_nothing"] is True
     c15 = next(c for c in summ["closed_excluded"] if c["candidate"] == "C15")

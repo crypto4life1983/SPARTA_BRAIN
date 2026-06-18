@@ -61,6 +61,13 @@ def automation_readiness_block() -> dict[str, Any]:
                     "coordinator_recommendation_kind"),
             "section14_present": True,
             "next_is_new_candidate": integ.get("next_is_new_candidate"),
+            "next_is_automation_readiness": lane.get("next_is_automation_readiness"),
+            "active_candidate": lane.get("active_candidate"),
+            "active_candidate_label":
+                (lane.get("active_candidate_detail") or {}).get("label"),
+            "active_candidate_verdict":
+                (lane.get("active_candidate_detail") or {}).get("verdict"),
+            "open_candidate_gate": lane.get("open_candidate_gate"),
             "candidate_lane": lane.get("candidate_lane") or [],
             "safety_locks": {
                 "real_data_qa": lane.get("real_data_qa_state"),
@@ -248,11 +255,18 @@ def _render_automation_readiness_html(panel: dict) -> str:
                      'expected automation readiness.</div>'
                      % _esc(NEXT_CANDIDATE_DRIFT_TOKEN))
     parts.append('<div class="jv-am-h">Candidate research lane — '
-                 'AUTOMATION READINESS</div>')
+                 'ACTIVE CANDIDATE</div>')
     parts.append('<div class="jv-detail">C16 lifecycle complete: <b>%s</b> · '
                  'rejected ledger: <b>%s</b> families</div>'
                  % (_esc(ar.get("c16_lifecycle_complete")),
                     _esc(ar.get("rejected_ledger_count"))))
+    if ar.get("active_candidate"):
+        parts.append('<div class="jv-detail">Active candidate: <b>%s</b> — %s '
+                     '(verdict <code>%s</code>, open gate %s)</div>'
+                     % (_esc(ar.get("active_candidate")),
+                        _esc(ar.get("active_candidate_label")),
+                        _esc(ar.get("active_candidate_verdict")),
+                        _esc(ar.get("open_candidate_gate"))))
     parts.append('<div class="jv-detail">Next required action: <code>%s</code></div>'
                  % _esc(ar.get("next_required_action")))
     parts.append('<div class="jv-detail">§13 (clean tree) recommends: <b>%s</b> · '
@@ -276,12 +290,12 @@ def _render_automation_readiness_html(panel: dict) -> str:
                  % (_esc(locks.get("real_data_qa")), _esc(locks.get("replay")),
                     _esc(locks.get("paper_trading")), _esc(locks.get("micro_live")),
                     _esc(locks.get("live_trading"))))
-    # next-strategy research memo (research-only; creates NO candidate)
+    # next-strategy research memo (provenance -- the research that led to C17)
     nm = panel.get("next_strategy_memo") or {}
     if nm.get("available"):
         parts.append('<div class="jv-am-h">Next-strategy research memo '
-                     '(research-only · no candidate)</div>')
-        parts.append('<div class="jv-detail">Recommended next direction: '
+                     '(provenance · led to C17)</div>')
+        parts.append('<div class="jv-detail">Recommended direction (now C17): '
                      '<b>%s</b> (<code>%s</code>)</div>'
                      % (_esc(nm.get("recommended_direction")),
                         _esc(nm.get("recommended_direction_key"))))
@@ -294,11 +308,8 @@ def _render_automation_readiness_html(panel: dict) -> str:
             parts.append('<div class="jv-detail">Why it avoids C1–C16 failure '
                          'modes: %s</div>'
                          % _esc(nm.get("why_recommended_is_different")))
-        parts.append('<div class="jv-detail">Creates a candidate yet: <b>%s</b> '
-                     '(no C17)</div>' % _esc(nm.get("creates_candidate_id")))
-        parts.append('<div class="jv-am-paste">Before any candidate → human gate: '
-                     '<code>%s</code></div>'
-                     % _esc(nm.get("human_approval_before_candidate")))
+        parts.append('<div class="jv-detail">The memo itself created no candidate; '
+                     'C17 was created later under explicit human approval.</div>')
     return "".join(parts)
 
 

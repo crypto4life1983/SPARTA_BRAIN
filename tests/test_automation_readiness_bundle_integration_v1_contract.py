@@ -34,12 +34,17 @@ def test_c16_complete_visible():
     assert _R["rejected_ledger_count"] == 21
 
 
-# ---- 2. next stage = automation_readiness ----------------------------------
+# ---- 2. next directive = C17 spec decision (lane has active candidate) ------
 
-def test_next_stage_automation_readiness():
-    assert _R["next_stage"] == "automation_readiness"
-    assert _R["next_is_automation_readiness"] is True
-    assert _R["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+def test_next_directive_is_c17_spec_decision():
+    assert _R["active_candidate"] == "C17"
+    assert _R["open_candidate_gate"] is True
+    assert _R["next_is_automation_readiness"] is False
+    assert _R["next_stage"] == "c17_candidate_spec_decision"
+    assert _R["next_required_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    assert "Risk-adjusted portfolio construction" in _R["active_candidate_label"]
+    assert _R["active_candidate_verdict"] == "C17_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
 
 
 # ---- 3. no new candidate recommended on any surface ------------------------
@@ -84,15 +89,15 @@ def test_paper_micro_live_live_locked():
 
 # ---- 7. morning / autopilot / bundle / coordinator surfaces agree ----------
 
-def test_surfaces_agree_on_automation_readiness():
+def test_surfaces_agree_on_c17_directive():
     assert _R["surfaces_agree"] is True
     assert _R["all_tokens_match"] is True
     s = _R["surfaces"]
-    token = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    token = "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
     assert s["lane_status_next"] == token
-    assert s["coordinator_idle_command"] == token
+    assert s["coordinator_command"] == token
     assert s["lane_morning_next"] == token
-    assert s["coordinator_recommendation_kind"] == gdc.REC_AUTOMATION_READINESS
+    assert s["coordinator_recommendation_kind"] == gdc.REC_GATE_DECISION
     # the SARA generic idle (build a proposal) is OVERRIDDEN by the lane directive
     assert _R["sara_generic_idle_overridden_by_lane_directive"] is True
     assert _R["sara_generic_idle_action"] == gdc._sara.ACTION_BUILD_PROPOSAL
@@ -100,9 +105,10 @@ def test_surfaces_agree_on_automation_readiness():
     assert ari.validate_automation_readiness_integration(bad)["valid"] is False
 
 
-def test_coordinator_idle_no_longer_drifts_to_next_candidate():
-    # directly: the coordinator's clean+synced+no-open-gate branch now recommends
-    # automation readiness, not a new candidate.
+def test_coordinator_idle_defers_to_lane_c17_gate():
+    # the coordinator's clean+synced+no-open-gate-in-state branch defers to the
+    # lane, which now has C17 as the active open candidate -> C17 spec decision,
+    # not a new candidate and not automation readiness.
     d = gdc.coordinate({
         "repo": {"clean": True, "ahead": 0, "behind": 0,
                  "uncommitted_changes": False},
@@ -110,22 +116,26 @@ def test_coordinator_idle_no_longer_drifts_to_next_candidate():
         "candidates": {"C16": {"family": "cointegration_pairs_market_neutral",
                                "status": "REJECTED_KEPT_ON_RECORD", "active": False,
                                "next_action": "NONE__C16_CLOSED", "shipped": True}}})
-    assert d["recommendation_kind"] == gdc.REC_AUTOMATION_READINESS
-    assert d["next_safe_command"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
+    assert d["next_safe_command"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
     assert d["next_research_recommended"] is False
-    assert d["detected_gate"] == "candidate_lane_complete_automation_readiness"
+    assert d["detected_gate"] == "active_candidate_open_gate"
 
 
 # ---- morning-report-style output -------------------------------------------
 
 def test_summarize_for_morning_report():
     summ = ari.summarize_for_morning_report()
-    assert summ["section"] == "automation_readiness"
+    assert summ["section"] == "candidate_lane_directive"
     assert summ["c16_lifecycle_complete"] is True
     assert summ["rejected_ledger_count"] == 21
-    assert summ["next_stage"] == "automation_readiness"
+    assert summ["active_candidate"] == "C17"
+    assert summ["open_candidate_gate"] is True
+    assert summ["next_stage"] == "c17_candidate_spec_decision"
     assert summ["next_required_action"] == (
-        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    assert summ["next_is_automation_readiness"] is False
     assert summ["next_is_new_candidate"] is False
     assert summ["surfaces_agree"] is True
     assert summ["executes_nothing"] is True

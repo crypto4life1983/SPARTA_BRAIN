@@ -254,42 +254,48 @@ def _all_rejected_status():
     }
 
 
-def test_autopilot_plan_idle_shows_automation_readiness_not_next_candidate():
-    # the candidate-research lane is complete through C16, so the idle plan must
-    # NOT drift to "next candidate" -- it shows automation readiness.
+def test_autopilot_plan_idle_defers_to_c17_active_gate():
+    # C17 is the active open candidate, so the idle plan defers to the C17 human
+    # spec decision -- NOT a new candidate, NOT automation readiness.
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ap = report["autopilot_plan"]
-    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
-    assert ap["recommended_token"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-    assert ap["would_auto_advance"] is False        # not auto-advance; human-gated
-    assert ap["is_automation_readiness"] is True
+    assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
+    assert ap["recommended_token"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    assert ap["would_auto_advance"] is False
+    assert ap["active_candidate"] == "C17"
     assert ap["next_is_new_candidate"] is False
     assert ap["planner_is_read_only"] is True
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
-    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in md
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in md
 
 
-def test_morning_report_shows_automation_readiness_section():
+def test_morning_report_shows_c17_active_candidate_section():
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ar = report["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
     assert ar["rejected_ledger_count"] == 21
-    assert ar["next_stage"] == "automation_readiness"
-    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert ar["active_candidate"] == "C17"
+    assert ar["open_candidate_gate"] is True
+    assert ar["next_stage"] == "c17_candidate_spec_decision"
+    assert ar["next_required_action"] == (
+        "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    assert ar["next_is_automation_readiness"] is False
     assert ar["next_is_new_candidate"] is False
     assert ar["surfaces_agree"] is True
     md = mr.render_markdown(report)
-    assert "AUTOMATION READINESS" in md
-    assert "automation_readiness" in md
-    # the what-to-do-next line also points at automation readiness, not a candidate
-    assert "AUTOMATION READINESS" in report["what_to_do_next"]
+    assert "ACTIVE CANDIDATE" in md
+    assert "Risk-adjusted portfolio construction" in md
+    # the what-to-do-next line points at the C17 decision, not automation readiness
+    assert "ACTIVE open candidate" in report["what_to_do_next"]
+    assert "HUMAN_DECISION_C17_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in report["what_to_do_next"]
 
 
-def test_morning_report_shows_next_strategy_memo():
+def test_morning_report_shows_next_strategy_memo_as_provenance():
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     nm = report["next_strategy_memo"]
@@ -297,15 +303,11 @@ def test_morning_report_shows_next_strategy_memo():
         "risk_adjusted_portfolio_construction_vol_targeted_allocation")
     assert "Risk-adjusted portfolio construction" in nm["recommended_direction"]
     assert len(nm["ranked_directions"]) >= 3
-    assert nm["creates_candidate_id"] is False
     assert nm["rejected_ledger_count"] == 21
-    assert nm["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-    assert nm["human_approval_before_candidate"] == (
-        "HUMAN_DECISION_APPROVE_NEXT_RESEARCH_DIRECTION_THEN_BUILD_CANDIDATE_PROPOSAL")
     md = mr.render_markdown(report)
     assert "Next-strategy research memo" in md
+    assert "led to C17" in md
     assert "risk_adjusted_portfolio_construction_vol_targeted_allocation" in md
-    assert "no C17" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
 
 
