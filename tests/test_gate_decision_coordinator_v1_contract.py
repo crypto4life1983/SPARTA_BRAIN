@@ -30,14 +30,17 @@ def _clean_synced_state():
             "candidates": dict(_C15_CLOSED), "ledger": dict(_LEDGER_OK)}
 
 
-# --- 1. clean synced + no open gate -> next candidate research --------------
+# --- 1. clean synced + no open gate -> AUTOMATION READINESS (post-C16) -------
 
-def test_clean_synced_recommends_next_candidate():
+def test_clean_synced_recommends_automation_readiness_after_c16():
+    # the candidate-research lane is complete through C16, so the idle/default
+    # recommendation must NOT drift back to "next candidate research".
     d = gdc.coordinate(_clean_synced_state())
-    assert d["detected_gate"] == "clean_synced_idle"
-    assert d["recommendation_kind"] == gdc.REC_NEXT_CANDIDATE
-    assert d["next_safe_command"] == gdc.NEXT_CANDIDATE_TOKEN
-    assert d["next_research_recommended"] is True
+    assert d["detected_gate"] == "candidate_lane_complete_automation_readiness"
+    assert d["recommendation_kind"] == gdc.REC_AUTOMATION_READINESS
+    assert d["next_safe_command"] == gdc.AUTOMATION_READINESS_TOKEN
+    assert d["next_safe_command"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert d["next_research_recommended"] is False   # NOT a new candidate
     assert d["automation_lane_continues"] is True
     assert gdc.validate_coordinator_decision(d)["valid"] is True
 
@@ -192,7 +195,9 @@ def test_supports_morning_report_output():
     assert summ["decision_ready"] is True
     assert summ["paste_this"] == d["next_safe_command"]
     assert summ["requires_human_approval"] is True
-    assert summ["next_research_recommended"] is True
+    # idle now defers to automation readiness, not a new candidate
+    assert summ["next_research_recommended"] is False
+    assert summ["paste_this"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     assert summ["automation_lane_continues"] is True
     assert summ["executes_nothing"] is True
     c15 = next(c for c in summ["closed_excluded"] if c["candidate"] == "C15")

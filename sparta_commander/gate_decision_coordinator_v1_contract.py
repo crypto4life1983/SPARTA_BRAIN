@@ -31,6 +31,7 @@ from typing import Any
 import sparta_commander.research_expansion_plan_v1_contract as _rep
 import sparta_commander.research_expansion_autopilot_integration_v1_spec as _rei
 import sparta_commander.safe_research_autopilot_v1_contract as _sara
+import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as _lane
 
 GDC_SCHEMA_VERSION = 1
 GDC_MODE = "RESEARCH_ONLY"
@@ -55,15 +56,21 @@ NEXT_CANDIDATE_TOKEN = _rei.ALLOWED_BATCH_RECOMMENDED_TOKEN  # BUILD_NEXT_..._ON
 
 # Recommendation kinds (the COMPLETE allowlist).
 REC_NEXT_CANDIDATE = "RECOMMEND_NEXT_CANDIDATE_RESEARCH"
+REC_AUTOMATION_READINESS = "RECOMMEND_AUTOMATION_READINESS_STEP"
 REC_PUSH = "RECOMMEND_PUSH_APPROVAL"
 REC_COMMIT = "RECOMMEND_COMMIT_APPROVAL"
 REC_LEDGER_BUMP = "RECOMMEND_LEDGER_BUMP_APPROVAL"
 REC_GATE_DECISION = "RECOMMEND_GATE_DECISION"
 REC_STOP_AWAIT_APPROVAL = "STOP_AWAIT_HUMAN_APPROVAL"
 ALL_RECOMMENDATION_KINDS = (
-    REC_NEXT_CANDIDATE, REC_PUSH, REC_COMMIT, REC_LEDGER_BUMP,
-    REC_GATE_DECISION, REC_STOP_AWAIT_APPROVAL,
+    REC_NEXT_CANDIDATE, REC_AUTOMATION_READINESS, REC_PUSH, REC_COMMIT,
+    REC_LEDGER_BUMP, REC_GATE_DECISION, REC_STOP_AWAIT_APPROVAL,
 )
+
+# The candidate-research-lane directive (authoritative): post-C16 the idle/default
+# recommendation must NOT drift back to "next candidate research" -- it is
+# automation readiness.
+AUTOMATION_READINESS_TOKEN = _lane.NEXT_REQUIRED_ACTION  # BUILD_AUTOMATION_..._ONLY
 
 # Substrings the coordinator must NEVER emit in a recommended command.
 FORBIDDEN_COMMAND_SUBSTRINGS = (
@@ -194,14 +201,25 @@ def coordinate(state: dict) -> dict[str, Any]:
         reason = ("candidate %s is at an open gate; recommend the human paste its "
                   "decision token (advance/reject stays human-gated)"
                   % nxt["candidate"])
-    # 5) clean + synced + ledger ok + no open gate -> next research
+    # 5) clean + synced + ledger ok + no open gate -> defer to the candidate-
+    #    research-lane directive. Post-C16 that directive is AUTOMATION READINESS,
+    #    so the idle/default recommendation does NOT drift back to next-candidate.
     else:
-        rec_kind = REC_NEXT_CANDIDATE
-        detected_gate = "clean_synced_idle"
-        command = NEXT_CANDIDATE_TOKEN
-        reason = ("repo is clean and synced, the rejected ledger is consistent, "
-                  "and no candidate gate is open; recommend selecting the next "
-                  "candidate family to research (automation lane continues)")
+        _lane_status = _lane.get_lane_status()
+        if _lane_status.get("next_is_automation_readiness") is True:
+            rec_kind = REC_AUTOMATION_READINESS
+            detected_gate = "candidate_lane_complete_automation_readiness"
+            command = AUTOMATION_READINESS_TOKEN
+            reason = ("repo is clean and synced and no candidate gate is open; the "
+                      "candidate-research lane is COMPLETE through C16, so the next "
+                      "stage is AUTOMATION READINESS, not another candidate")
+        else:
+            rec_kind = REC_NEXT_CANDIDATE
+            detected_gate = "clean_synced_idle"
+            command = NEXT_CANDIDATE_TOKEN
+            reason = ("repo is clean and synced, the rejected ledger is consistent, "
+                      "and no candidate gate is open; recommend selecting the next "
+                      "candidate family to research (automation lane continues)")
 
     decision: dict[str, Any] = {
         "schema_version": GDC_SCHEMA_VERSION, "mode": GDC_MODE, "lane": GDC_LANE,
@@ -323,6 +341,9 @@ def validate_coordinator_decision(decision: dict) -> dict[str, Any]:
     # next-candidate recommendation must be the canonical proposal token only
     if kind == REC_NEXT_CANDIDATE and cmd != NEXT_CANDIDATE_TOKEN:
         failures.append("next_candidate_command_unexpected")
+    # automation-readiness recommendation must be the lane directive token only
+    if kind == REC_AUTOMATION_READINESS and cmd != AUTOMATION_READINESS_TOKEN:
+        failures.append("automation_readiness_command_unexpected")
 
     locks = decision.get("scope_locks") or {}
     for key in ("no_auto_commit", "no_auto_push", "no_auto_advance",
