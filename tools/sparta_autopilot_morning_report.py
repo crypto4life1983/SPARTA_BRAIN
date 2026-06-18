@@ -37,6 +37,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 import sparta_commander.safe_research_autopilot_v1_contract as _sara  # noqa: E402,E501
+import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -165,7 +166,10 @@ def _what_to_do_next(run_status, gate, candidate_status) -> str:
     closed_note = (" Closed/rejected: %s." % ", ".join(sorted(closed))
                    if closed else "")
     if gate.get("action", "NONE").startswith("NONE"):
-        return ("Last run was %s. No open human decision right now.%s"
+        return ("Last run was %s. No open human decision right now.%s The "
+                "candidate-research lane is COMPLETE through C16; the next stage "
+                "is AUTOMATION READINESS (research-only, human-gated). To proceed, "
+                "paste: BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY ."
                 % (run_status.lower(), closed_note))
     return ("Last run was %s.%s The open decision is %s on %s. "
             "To advance, paste: %s . To reject, paste: %s ."
@@ -204,6 +208,21 @@ def _autopilot_plan(candidate_status: dict, git_summary: dict) -> dict:
         _sara.DEFAULT_REJECTED_FAMILIES)
     plan["planner_is_read_only"] = True
     plan["planner_executes_nothing"] = True
+    # The candidate-research lane is COMPLETE through C16. When the only thing the
+    # generic planner would do is open a NEW candidate proposal (the clean, idle
+    # case), the authoritative next stage is AUTOMATION READINESS -- so the morning
+    # report does NOT drift back to "next candidate research". Dirty-repo stops and
+    # active-candidate chain stops are preserved unchanged.
+    plan["is_automation_readiness"] = False
+    plan["next_is_new_candidate"] = False
+    if plan.get("next_safe_action") == _sara.ACTION_BUILD_PROPOSAL:
+        plan["next_safe_action"] = "RECOMMEND_AUTOMATION_READINESS_STEP"
+        plan["recommended_token"] = _ari.AUTOMATION_READINESS_TOKEN
+        plan["decision"] = "AUTOMATION_READINESS"
+        plan["would_auto_advance"] = False
+        plan["is_automation_readiness"] = True
+        plan["reason"] = ("candidate-research lane complete through C16; the next "
+                          "stage is automation readiness, not another candidate")
     return plan
 
 
@@ -234,6 +253,7 @@ def build_morning_report(run_state, git_summary: dict,
         "error_summary": list(rs.get("errors") or []),
         "what_to_do_next": _what_to_do_next(run_status, gate, candidate_status),
         "autopilot_plan": _autopilot_plan(candidate_status, git_summary),
+        "automation_readiness": _ari.summarize_for_morning_report(),
         "capability_flags": dict(CAPABILITY_FLAGS),
         "no_paper_live_readiness_claim": True,
     }
@@ -333,6 +353,19 @@ def render_markdown(report: dict) -> str:
                      % ap.get("excluded_rejected_families_count"))
     lines.append("- planner executes nothing (read-only; no build / labels / "
                  "replay / portfolio / paper / live).")
+    lines.append("## 14. Candidate research lane — AUTOMATION READINESS")
+    ar = r.get("automation_readiness") or {}
+    lines.append("- C16 lifecycle complete: %s | rejected ledger: %s families"
+                 % (ar.get("c16_lifecycle_complete"),
+                    ar.get("rejected_ledger_count")))
+    lines.append("- **next stage:** `%s`" % ar.get("next_stage"))
+    lines.append("- next required action: `%s`"
+                 % ar.get("next_required_action"))
+    lines.append("- recommends a new candidate: %s | surfaces agree: %s"
+                 % (ar.get("next_is_new_candidate"), ar.get("surfaces_agree")))
+    lines.append("- overnight automation research-only: %s | real-data-QA & "
+                 "replay BLOCKED, paper / micro-live / live LOCKED."
+                 % ar.get("overnight_automation_research_only"))
     lines.append("")
     return "\n".join(lines) + "\n"
 

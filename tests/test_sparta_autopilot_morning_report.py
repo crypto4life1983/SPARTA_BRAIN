@@ -254,18 +254,39 @@ def _all_rejected_status():
     }
 
 
-def test_autopilot_plan_recommends_open_proposal_when_all_rejected():
+def test_autopilot_plan_idle_shows_automation_readiness_not_next_candidate():
+    # the candidate-research lane is complete through C16, so the idle plan must
+    # NOT drift to "next candidate" -- it shows automation readiness.
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ap = report["autopilot_plan"]
-    assert ap["next_safe_action"] == "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL"
-    assert ap["would_auto_advance"] is True
+    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
+    assert ap["recommended_token"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert ap["would_auto_advance"] is False        # not auto-advance; human-gated
+    assert ap["is_automation_readiness"] is True
+    assert ap["next_is_new_candidate"] is False
     assert ap["planner_is_read_only"] is True
-    assert ap["excluded_rejected_families_count"] == 21
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
-    assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" in md
-    assert "EXCLUDES" in md
+    assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in md
+
+
+def test_morning_report_shows_automation_readiness_section():
+    report = mr.build_morning_report(_success_run_state(), _git_summary(),
+                                     _all_rejected_status())
+    ar = report["automation_readiness"]
+    assert ar["c16_lifecycle_complete"] is True
+    assert ar["rejected_ledger_count"] == 21
+    assert ar["next_stage"] == "automation_readiness"
+    assert ar["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+    assert ar["next_is_new_candidate"] is False
+    assert ar["surfaces_agree"] is True
+    md = mr.render_markdown(report)
+    assert "AUTOMATION READINESS" in md
+    assert "automation_readiness" in md
+    # the what-to-do-next line also points at automation readiness, not a candidate
+    assert "AUTOMATION READINESS" in report["what_to_do_next"]
 
 
 def test_autopilot_plan_dirty_repo_shows_stop_prominently():
