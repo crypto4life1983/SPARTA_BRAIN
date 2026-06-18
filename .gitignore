@@ -75,3 +75,7 @@ data/conviction_bar_follow_through_c14/
 # Candidate #15 slow vol-targeted time-series momentum — gitignored detector
 # labels / replay artifacts (real-candle outputs; SHA-pinned in review contracts)
 data/slow_vol_targeted_time_series_momentum_c15/
+
+# Candidate #16 cointegration pairs market-neutral — gitignored detector labels /
+# replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
+data/cointegration_pairs_market_neutral_c16/
