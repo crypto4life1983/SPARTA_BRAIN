@@ -64,6 +64,12 @@ _EXTRA_PINNED = {
         "3a415c6da9002f5966da6cca6bc916caf4342cb1a10c4c0a8ec054fefab87a68",
 }
 
+# Post-C16 directive: the candidate-research lane is COMPLETE through C16, so the
+# run record's next human gate is AUTOMATION READINESS (research-only, human-gated)
+# -- NOT "next candidate family". Kept in sync with the lane-status / coordinator /
+# morning-report / integration surfaces.
+NEXT_HUMAN_GATE = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
+
 
 def reseed_queue(queue):
     """Re-seed the 4 default safe tasks to "queued" at the start of every
@@ -189,11 +195,13 @@ def task_seed_brief(reports_dir, stamp):
     lines += ["- " + s for s in seeds]
     lines += [
         "", "## Draft direction for human review",
-        "A long-only, BTC/SOL-weighted candidate family built on the",
-        "existing staged data, keeping the 81 bps floor and 27 bps cost",
-        "discipline, would test the strongest frozen observations without",
-        "touching either rejected candidate. Next human gate:",
-        "HUMAN_DECISION_ON_NEXT_CANDIDATE_FAMILY.", ""]
+        "The candidate-research lane is COMPLETE through C16 (rejected ledger",
+        "C1-C16 / 21). The next stage is AUTOMATION READINESS (research-only,",
+        "human-gated): strengthen the overnight research-prep output (ledger",
+        "lessons memo, evidence summaries) so a future candidate family is",
+        "better prepared -- without building, fetching, replaying, or trading",
+        "anything. This brief proposes; the human decides. Next human gate:",
+        NEXT_HUMAN_GATE + ".", ""]
     with open(brief_path, "x", encoding="utf-8", newline="") as handle:
         handle.write("\n".join(lines))
     return {"brief": str(brief_path)}
@@ -260,7 +268,7 @@ def main() -> int:
         "integrity_status": integrity_status,
         "claims_made": "none",
         "no_commit_no_push": True,
-        "next_human_gate": "HUMAN_DECISION_ON_NEXT_CANDIDATE_FAMILY",
+        "next_human_gate": NEXT_HUMAN_GATE,
     }
     check = validate_run_record(run_record)
     assert check["acceptable"] is True, check["errors"]
