@@ -101,6 +101,7 @@ DEFAULT_REJECTED_FAMILIES = (
     "conviction_bar_follow_through",               # C14 (kept on record)
     "slow_vol_targeted_time_series_momentum",      # C15 (kept on record)
     "cointegration_pairs_market_neutral",          # C16 (kept on record)
+    "risk_adjusted_portfolio_construction_vol_targeted_allocation",  # C17 (rejected at replay)
 )
 
 _CAPABILITY_FLAGS_FALSE = (

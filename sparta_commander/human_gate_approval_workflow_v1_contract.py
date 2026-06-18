@@ -167,10 +167,27 @@ def build_human_gate_workflow() -> dict[str, Any]:
     candidate = lane.get("active_candidate")
     candidate_name = det.get("name")
     stage_label = det.get("stage_label")
+    open_gate = lane.get("open_candidate_gate") is True
 
     spec = _GATE_SPECS.get(gate_token)
     recognized = spec is not None
-    if recognized:
+    _operational_forbids = (
+        "no real data fetch", "no detection", "no labels",
+        "no replay/backtest/PnL", "no optimization",
+        "no paper/live/broker/order code")
+    if not open_gate:
+        # No open candidate gate (e.g. the last candidate was rejected and the lane
+        # is at automation readiness). There is no human approval to paste -- the
+        # surface says so plainly and offers no copyable approval text.
+        decision = ("NO OPEN CANDIDATE GATE — candidate lane is at automation "
+                    "readiness; await the next human-approved research direction")
+        stage_after = None
+        allows = ()
+        forbids = _operational_forbids
+        approval_text = None
+        reject_text = None
+        recognized = False
+    elif recognized:
         decision = spec["recommended_decision"]
         stage_after = spec["stage_after_approval"]
         allows = tuple(spec["allows"])
@@ -185,9 +202,7 @@ def build_human_gate_workflow() -> dict[str, Any]:
         decision = "AWAIT EXPLICIT HUMAN DECISION (no recommended action mapped)"
         stage_after = None
         allows = ()
-        forbids = ("no real data fetch", "no detection", "no labels",
-                   "no replay/backtest/PnL", "no optimization",
-                   "no paper/live/broker/order code")
+        forbids = _operational_forbids
         approval_text = None
         reject_text = None
 
@@ -211,6 +226,7 @@ def build_human_gate_workflow() -> dict[str, Any]:
         "current_stage_label": stage_label,
         "current_human_gate": gate_token,
         "gate_recognized": recognized,
+        "has_open_human_gate": open_gate,
         # 4 -- recommended safe next decision (a HUMAN decision; never auto-applied)
         "recommended_decision": decision,
         "stage_after_approval": stage_after,
@@ -275,27 +291,40 @@ def validate_human_gate_workflow(record: dict[str, Any]) -> dict[str, Any]:
             lane.get("active_candidate_detail") or {}).get("stage_label"):
         failures.append("stage_label_mismatch")
 
-    # recommended decision + copyable approval text
+    # recommended decision is always present
     if not record.get("recommended_decision"):
         failures.append("recommended_decision_missing")
-    txt = record.get("approval_text_to_paste") or ""
-    if not txt:
-        failures.append("approval_text_missing")
-    else:
-        if record.get("current_human_gate") not in txt:
-            failures.append("approval_text_missing_gate_token")
-        if str(record.get("recommended_decision")) not in txt:
-            failures.append("approval_text_missing_decision")
-        if "Do not commit or push" not in txt:
-            failures.append("approval_text_missing_stop_guard")
+    has_gate = record.get("has_open_human_gate") is True
+    # the workflow must agree with the lane on whether a human gate is open
+    if has_gate != (lane.get("open_candidate_gate") is True):
+        failures.append("open_gate_state_mismatch")
 
-    # allows (research-only) + forbids -- gate-INVARIANT checks (hold at every
-    # gate; gate-specific allow/forbid wording lives in _GATE_SPECS).
-    allows = record.get("approval_allows") or []
-    if not allows:
-        failures.append("allows_empty")
-    if not any("research-only validation" in a for a in allows):
-        failures.append("allows_missing_validation")
+    if has_gate:
+        # an open candidate gate -> a full copyable approval text is required
+        txt = record.get("approval_text_to_paste") or ""
+        if not txt:
+            failures.append("approval_text_missing")
+        else:
+            if record.get("current_human_gate") not in txt:
+                failures.append("approval_text_missing_gate_token")
+            if str(record.get("recommended_decision")) not in txt:
+                failures.append("approval_text_missing_decision")
+            if "Do not commit or push" not in txt:
+                failures.append("approval_text_missing_stop_guard")
+        # allows (research-only) -- gate-INVARIANT checks
+        allows = record.get("approval_allows") or []
+        if not allows:
+            failures.append("allows_empty")
+        if not any("research-only validation" in a for a in allows):
+            failures.append("allows_missing_validation")
+    else:
+        # NO open candidate gate -> there must be NO copyable approval text
+        if record.get("approval_text_to_paste") is not None:
+            failures.append("approval_text_should_be_none_when_no_gate")
+        if record.get("reject_text_to_paste") is not None:
+            failures.append("reject_text_should_be_none_when_no_gate")
+
+    # forbids -- gate-INVARIANT (operational forbids present in BOTH states).
     forbids = " || ".join(record.get("approval_forbids") or []).lower()
     # every gate must forbid: real data fetch, replay/backtest/PnL, optimization,
     # and paper/live/broker/order.
@@ -356,6 +385,7 @@ def summarize_for_panel() -> dict[str, Any]:
     r = build_human_gate_workflow()
     return {
         "active_candidate": r["active_candidate"],
+        "has_open_human_gate": r["has_open_human_gate"],
         "current_stage_label": r["current_stage_label"],
         "current_human_gate": r["current_human_gate"],
         "recommended_decision": r["recommended_decision"],

@@ -218,77 +218,57 @@ def test_missing_report_panel_has_empty_autopilot_plan():
 
 # --- C16 / ledger-21 / automation-readiness / safety locks alignment -------- #
 
-def test_panel_shows_c16_complete_and_ledger_21():
+def test_panel_shows_c16_complete_and_ledger_22():
     p = panel.build_autopilot_morning_panel(_success_report())
     ar = p["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 21
+    assert ar["rejected_ledger_count"] == 22
     h = p["html"]
-    assert "ACTIVE CANDIDATE" in h
-    assert "21" in h
+    assert "AUTOMATION READINESS" in h
+    assert "22" in h
 
 
-def test_panel_shows_c17_active_next_action():
+def test_panel_shows_c17_rejected_no_active():
     p = panel.build_autopilot_morning_panel(_success_report())
     ar = p["automation_readiness"]
-    assert ar["active_candidate"] == "C17"
-    assert ar["open_candidate_gate"] is True
+    assert ar["active_candidate"] is None
+    assert ar["open_candidate_gate"] is False
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
-    assert ar["section13_recommendation_when_clean"] == "RECOMMEND_GATE_DECISION"
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+    assert ar["section13_recommendation_when_clean"] == (
+        "RECOMMEND_AUTOMATION_READINESS_STEP")
     assert ar["section14_present"] is True
     assert ar["surfaces_agree"] is True
     assert ar["next_is_new_candidate"] is False
-    assert ar["next_is_automation_readiness"] is False
-    assert ar["active_candidate_stage_label"] == "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
-    assert ar["active_candidate_method"] == "volatility_targeted_risk_parity_allocation"
-    assert ar["active_candidate_assets"] == ["BTCUSD", "ETHUSD", "SOLUSD"]
-    assert ar["active_candidate_timeframe"] == "D1"
-    assert ar["active_candidate_synthetic_fixtures_only"] is True
-    assert ar["active_candidate_dry_run_all_checks_pass"] is True
-    assert ar["active_candidate_dry_run_summary"]
+    assert ar["next_is_automation_readiness"] is True
+    assert ar["last_rejected_candidate"] == "C17"
+    assert ar["last_rejected_candidate_verdict"] == "C17_REJECTED_AT_FEE_HONEST_REPLAY"
     h = p["html"]
-    assert "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" in h
-    assert "ACTIVE CANDIDATE" in h
-    assert "Risk-adjusted portfolio construction" in h
-    # stage / method / assets / timeframe + detector dry-run summary rendered
-    assert "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW" in h
-    assert "volatility_targeted_risk_parity_allocation" in h
-    assert "BTCUSD, ETHUSD, SOLUSD" in h
-    assert "D1" in h
-    assert "Detector dry-run: synthetic fixtures only" in h
-    # the already-cleared detector-spec gate must not appear as the current directive
-    assert "ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" not in h
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in h
+    assert "AUTOMATION READINESS" in h
+    assert "Active candidate: <b>none</b>" in h
+    assert "C17_REJECTED_AT_FEE_HONEST_REPLAY" in h
+    assert "rejected at fee_honest_replay" in h
+    # the already-cleared labels gate must not appear as the current directive
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" not in h
 
 
-def test_panel_shows_human_gate_approval_workflow():
+def test_panel_human_gate_workflow_no_open_gate():
     p = panel.build_autopilot_morning_panel(_success_report())
     w = p["human_gate_workflow"]
     assert w["available"] is True
-    assert w["active_candidate"] == "C17"
-    assert w["current_stage_label"] == "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
-    assert w["current_human_gate"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
-    assert w["recommended_decision"] == (
-        "ADVANCE C17 TO REAL-CANDLE LABELS / REVIEW (FROZEN LOCAL DATA ONLY)")
-    assert w["would_auto_advance"] is False
+    assert w["has_open_human_gate"] is False
+    assert w["active_candidate"] is None
+    assert w["approval_text_to_paste"] is None
     assert w["ready_for_commit"] is False
     assert w["commit_approval_text"] is None
     h = p["html"]
-    # dashboard exposes the gate, the copyable approval text, allows + forbids,
-    # the bypass guard, and the future-ready ready-for-commit field
+    # dashboard says plainly there is no open candidate gate; no copyable approval
     assert "Human-gate approval workflow" in h
-    assert "ADVANCE C17 TO REAL-CANDLE LABELS" in h
-    assert "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" in h
-    assert "Do not commit or push" in h          # copyable approval text body
-    assert "frozen local data" in h              # labels-gate allow wording
-    assert "no new data fetch" in h
-    assert "no auto-trading" in h
-    assert "no paper/live/broker/order code" in h
+    assert "NO OPEN CANDIDATE GATE" in h
     assert "BYPASS" in h
-    assert "Ready-for-commit" in h
-    # never advances; the already-cleared detector-spec gate not shown as current
-    assert "ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" not in h
+    # no stale candidate gate is shown as current
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" not in h
 
 
 def test_panel_shows_safety_locks():
@@ -340,22 +320,24 @@ def test_panel_dirty_tree_warns_but_does_not_hide_c16():
     assert p["git_dirty_warning"] is True
     h = p["html"]
     assert "DIRTY" in h
-    # C16 / active-candidate status still fully visible despite the dirty tree
+    # C16 / lane status still fully visible despite the dirty tree
     assert p["automation_readiness"]["c16_lifecycle_complete"] is True
-    assert p["automation_readiness"]["rejected_ledger_count"] == 21
-    assert p["automation_readiness"]["active_candidate"] == "C17"
-    assert "ACTIVE CANDIDATE" in h
+    assert p["automation_readiness"]["rejected_ledger_count"] == 22
+    assert p["automation_readiness"]["active_candidate"] is None
+    assert "AUTOMATION READINESS" in h
 
 
-def test_no_report_still_shows_c16_and_c17_active():
+def test_no_report_still_shows_c16_and_c17_rejected():
     p = panel.build_autopilot_morning_panel(None)
     ar = p["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 21
-    assert ar["active_candidate"] == "C17"
+    assert ar["rejected_ledger_count"] == 22
+    assert ar["active_candidate"] is None
+    assert ar["last_rejected_candidate"] == "C17"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
-    assert "ACTIVE CANDIDATE" in p["html"]
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+    assert "AUTOMATION READINESS" in p["html"]
+    assert "C17_REJECTED_AT_FEE_HONEST_REPLAY" in p["html"]
 
 
 def test_panel_run_metadata_and_seed_brief_path():

@@ -18,7 +18,7 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 
 _R = hgw.build_human_gate_workflow()
 
-GATE = "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"
+GATE = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
 
 
 # ---- core: research-only, pure, validates ----------------------------------
@@ -32,57 +32,42 @@ def test_workflow_research_only_and_validates():
 
 # ---- 1/2/3 mirrors the lane's current candidate / stage / gate -------------
 
-def test_mirrors_lane_current_gate():
+def test_mirrors_lane_no_open_gate():
     ls = lane.get_lane_status()
-    assert _R["active_candidate"] == "C17" == ls["active_candidate"]
-    assert _R["current_stage_label"] == "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
+    # C17 is rejected -> the lane has NO active candidate and NO open human gate
+    assert _R["active_candidate"] is None == ls["active_candidate"]
+    assert _R["has_open_human_gate"] is False
     assert _R["current_human_gate"] == GATE == ls["next_required_action"]
-    assert _R["gate_recognized"] is True
-    # tamper: a stale gate (the already-cleared detector-spec gate) must fail
-    bad = {**_R, "current_human_gate":
-           "HUMAN_DECISION_C17_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"}
+    assert _R["gate_recognized"] is False
+    # tamper: claiming an open gate while the lane has none must fail
+    bad = {**_R, "has_open_human_gate": True,
+           "approval_text_to_paste": "x"}
     assert hgw.validate_human_gate_workflow(bad)["valid"] is False
 
 
-# ---- 4 recommended safe next decision --------------------------------------
+# ---- 4 recommended safe next decision (no open gate) -----------------------
 
-def test_recommended_decision():
-    assert _R["recommended_decision"] == (
-        "ADVANCE C17 TO REAL-CANDLE LABELS / REVIEW (FROZEN LOCAL DATA ONLY)")
-    assert _R["stage_after_approval"] == "real_candle_labels_review"
-
-
-# ---- 5 exact copyable approval text ----------------------------------------
-
-def test_copyable_approval_text():
-    txt = _R["approval_text_to_paste"]
-    assert txt
-    assert GATE in txt
-    assert "ADVANCE C17 TO REAL-CANDLE LABELS" in txt
-    assert "risk_adjusted_portfolio_construction_vol_targeted_allocation_v1" in txt
-    assert ("DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW -> real_candle_labels_review"
-            in txt)
-    assert "Do not commit or push" in txt
-    # a reject alternative is also generated
-    assert _R["reject_text_to_paste"] and GATE in _R["reject_text_to_paste"]
-    assert "REJECT" in _R["reject_text_to_paste"]
+def test_recommended_decision_no_open_gate():
+    assert "NO OPEN CANDIDATE GATE" in _R["recommended_decision"]
+    assert _R["stage_after_approval"] is None
 
 
-# ---- 6 what the approval allows (frozen local data only) -------------------
+# ---- 5 no copyable approval text when no gate is open ----------------------
 
-def test_approval_allows():
-    allows = _R["approval_allows"]
-    assert any("frozen local data" in a for a in allows)
-    assert any("label/review preparation" in a for a in allows)
-    assert any("research-only validation" in a for a in allows)
+def test_no_copyable_approval_text_when_no_open_gate():
+    assert _R["approval_text_to_paste"] is None
+    assert _R["reject_text_to_paste"] is None
+    # tamper: a fabricated approval text while no gate is open must fail
+    bad = {**_R, "approval_text_to_paste": "paste me"}
+    assert hgw.validate_human_gate_workflow(bad)["valid"] is False
 
 
-# ---- 7 what the approval forbids -------------------------------------------
+# ---- 7 the gate-invariant operational forbids still hold -------------------
 
-def test_approval_forbids():
+def test_approval_forbids_invariant():
     forbids = " || ".join(_R["approval_forbids"]).lower()
-    for must in ("no new data fetch", "no replay/backtest/pnl", "no optimization",
-                 "no paper/live/broker/order code", "no auto-trading"):
+    for must in ("data fetch", "replay", "optimization",
+                 "paper/live/broker/order"):
         assert must in forbids, must
 
 
@@ -100,13 +85,13 @@ def test_does_not_auto_advance():
         assert hgw.validate_human_gate_workflow(bad)["valid"] is False, bad_key
 
 
-# ---- 6/7 C17 remains DETECTOR_DRY_RUN frozen; downstream locked ------------
+# ---- 6/7 C17 rejected; downstream locked -----------------------------------
 
-def test_c17_remains_detector_dry_run_frozen_and_downstream_locked():
-    # the workflow does not change the lane: C17 still DETECTOR_DRY_RUN frozen
+def test_c17_rejected_and_downstream_locked():
+    # the workflow does not change the lane: C17 is rejected at fee-honest replay
     ls = lane.get_lane_status()
-    assert (ls["active_candidate_detail"]["verdict"]
-            == "C17_DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW")
+    assert (ls["last_rejected_candidate_detail"]["verdict"]
+            == "C17_REJECTED_AT_FEE_HONEST_REPLAY")
     assert _R["downstream_gates_locked"] is True
     sl = _R["safety_locks"]
     assert sl["real_data_qa"] == "BLOCKED"
@@ -166,11 +151,11 @@ def test_scope_locks_all_true():
 
 def test_summarize_for_panel():
     s = hgw.summarize_for_panel()
-    assert s["active_candidate"] == "C17"
+    assert s["active_candidate"] is None
+    assert s["has_open_human_gate"] is False
     assert s["current_human_gate"] == GATE
-    assert s["recommended_decision"] == (
-        "ADVANCE C17 TO REAL-CANDLE LABELS / REVIEW (FROZEN LOCAL DATA ONLY)")
-    assert GATE in s["approval_text_to_paste"]
+    assert "NO OPEN CANDIDATE GATE" in s["recommended_decision"]
+    assert s["approval_text_to_paste"] is None
     assert s["would_auto_advance"] is False
     assert s["ready_for_commit"] is False
     assert s["commit_approval_text"] is None

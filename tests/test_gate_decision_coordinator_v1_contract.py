@@ -32,15 +32,15 @@ def _clean_synced_state():
 
 # --- 1. clean synced + no open gate in state -> defer to lane (C17 active) ---
 
-def test_clean_synced_defers_to_lane_c17_open_gate():
-    # the lane now has C17 as an ACTIVE open candidate, so the idle/default
-    # recommendation defers to the C17 human spec decision -- it does NOT drift to
-    # next-candidate, and (while C17 is open) it is no longer automation readiness.
+def test_clean_synced_defers_to_lane_automation_readiness():
+    # the lane now has C17 REJECTED with NO active candidate, so the idle/default
+    # recommendation defers to AUTOMATION READINESS -- it does NOT drift to
+    # next-candidate and there is no open candidate gate.
     d = gdc.coordinate(_clean_synced_state())
-    assert d["detected_gate"] == "active_candidate_open_gate"
-    assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
+    assert d["detected_gate"] == "candidate_lane_complete_automation_readiness"
+    assert d["recommendation_kind"] == gdc.REC_AUTOMATION_READINESS
     assert d["next_safe_command"] == (
-        "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
     assert d["next_research_recommended"] is False   # NOT a new candidate
     assert d["automation_lane_continues"] is True
     assert gdc.validate_coordinator_decision(d)["valid"] is True
@@ -198,7 +198,7 @@ def test_supports_morning_report_output():
     assert summ["requires_human_approval"] is True
     # idle now defers to automation readiness, not a new candidate
     assert summ["next_research_recommended"] is False
-    assert summ["paste_this"] == "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"
+    assert summ["paste_this"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     assert summ["automation_lane_continues"] is True
     assert summ["executes_nothing"] is True
     c15 = next(c for c in summ["closed_excluded"] if c["candidate"] == "C15")
@@ -215,8 +215,8 @@ def test_integrates_with_existing_pieces_does_not_replace():
         assert piece in d["integrates_with"]
     assert d["does_not_replace_autopilot_or_orchestrator"] is True
     assert d["replaces_autopilot_or_orchestrator"] is False
-    # canonical ledger is reused, not redefined (20 = C1-C15)
-    assert gdc.EXPECTED_LEDGER_COUNT == 21
+    # canonical ledger is reused, not redefined (22 = C1-C17)
+    assert gdc.EXPECTED_LEDGER_COUNT == 22
 
 
 def test_capability_flags_all_false_and_tamper_rejected():

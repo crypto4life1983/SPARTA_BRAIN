@@ -112,8 +112,9 @@ def build_automation_readiness_integration() -> dict[str, Any]:
     surfaces_agree = (all_tokens_match and no_new_candidate and research_only
                       and downstream_locked and coordinator_matches_lane_directive
                       and lane.get("c16_lifecycle_complete") is True
-                      and lane.get("rejected_ledger_count") == 21)
+                      and lane.get("rejected_ledger_count") == 22)
     det = lane.get("active_candidate_detail") or {}
+    _rej = lane.get("last_rejected_candidate_detail") or {}
 
     record: dict[str, Any] = {
         "version": ARI_VERSION, "mode": ARI_MODE, "lane": ARI_LANE,
@@ -122,29 +123,23 @@ def build_automation_readiness_integration() -> dict[str, Any]:
             "Candidate-lane directive integration v1 (READ-ONLY, RESEARCH ONLY). "
             "Connects the candidate-research-lane status into the coordinator/"
             "morning/autopilot surfaces so they AGREE on the current directive. "
-            "Candidate #17 is the ACTIVE open candidate with a frozen detector spec "
-            "+ SYNTHETIC dry-run awaiting the human real-candle-labels decision. "
-            "Executes nothing; overnight/morning automation stays research-only and "
-            "human-gated."),
+            "Candidate #17 is now REJECTED at the fee-honest replay stage (kept on "
+            "record); there is NO active/open candidate and the next stage is "
+            "AUTOMATION READINESS. Executes nothing; overnight/morning automation "
+            "stays research-only and human-gated."),
         # the aligned directive (follows the lane)
         "next_required_action": token,
         "next_stage": lane.get("next_stage"),
         "next_is_automation_readiness": lane.get("next_is_automation_readiness"),
         "next_is_new_candidate": False,
         "active_candidate": lane.get("active_candidate"),
-        "active_candidate_label": det.get("label"),
-        "active_candidate_verdict": det.get("verdict"),
-        "active_candidate_stage": det.get("stage"),
-        "active_candidate_stage_label": det.get("stage_label"),
-        "active_candidate_method": det.get("method"),
-        "active_candidate_assets": det.get("assets"),
-        "active_candidate_timeframe": det.get("timeframe"),
-        "active_candidate_synthetic_fixtures_only":
-            det.get("synthetic_fixtures_only"),
-        "active_candidate_dry_run_all_checks_pass":
-            det.get("dry_run_all_checks_pass"),
-        "active_candidate_dry_run_summary": det.get("dry_run_summary"),
         "open_candidate_gate": lane.get("open_candidate_gate"),
+        # C17 is rejected at fee-honest replay -> surface the last rejected candidate
+        "last_rejected_candidate": lane.get("last_rejected_candidate"),
+        "last_rejected_candidate_label": _rej.get("label"),
+        "last_rejected_candidate_verdict": _rej.get("verdict"),
+        "last_rejected_candidate_rejected_at": _rej.get("rejected_at"),
+        "last_rejected_candidate_reason": _rej.get("rejection_reason"),
         "requires_human_approval": True,
         # C16 completion + ledger
         "c16_lifecycle_complete": lane.get("c16_lifecycle_complete"),
@@ -199,19 +194,13 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "c16_lifecycle_complete": r["c16_lifecycle_complete"],
         "rejected_ledger_count": r["rejected_ledger_count"],
         "active_candidate": r["active_candidate"],
-        "active_candidate_label": r["active_candidate_label"],
-        "active_candidate_verdict": r["active_candidate_verdict"],
-        "active_candidate_stage": r["active_candidate_stage"],
-        "active_candidate_stage_label": r["active_candidate_stage_label"],
-        "active_candidate_method": r["active_candidate_method"],
-        "active_candidate_assets": r["active_candidate_assets"],
-        "active_candidate_timeframe": r["active_candidate_timeframe"],
-        "active_candidate_synthetic_fixtures_only":
-            r["active_candidate_synthetic_fixtures_only"],
-        "active_candidate_dry_run_all_checks_pass":
-            r["active_candidate_dry_run_all_checks_pass"],
-        "active_candidate_dry_run_summary": r["active_candidate_dry_run_summary"],
         "open_candidate_gate": r["open_candidate_gate"],
+        "last_rejected_candidate": r["last_rejected_candidate"],
+        "last_rejected_candidate_label": r["last_rejected_candidate_label"],
+        "last_rejected_candidate_verdict": r["last_rejected_candidate_verdict"],
+        "last_rejected_candidate_rejected_at":
+            r["last_rejected_candidate_rejected_at"],
+        "last_rejected_candidate_reason": r["last_rejected_candidate_reason"],
         "next_stage": r["next_stage"],
         "next_required_action": r["next_required_action"],
         "next_is_automation_readiness": r["next_is_automation_readiness"],
@@ -225,9 +214,10 @@ def summarize_for_morning_report() -> dict[str, Any]:
 
 def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[str, Any]:
     """Anti-tamper validator. Valid only when the integration is research-only,
-    integration-only, all surfaces AGREE on automation readiness (the same token,
-    no new candidate), C16 complete + ledger 21, the automation path is research-
-    only with downstream BLOCKED/LOCKED, and every capability flag is False."""
+    integration-only, all surfaces AGREE on the lane directive (the same token, no
+    new candidate), C16 complete + ledger 22 (C17 rejected at fee-honest replay),
+    the automation path is research-only with downstream BLOCKED/LOCKED, and every
+    capability flag is False."""
     failures: list = []
     if record.get("mode") != ARI_MODE:
         failures.append("mode_not_research_only")
@@ -241,18 +231,17 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
     if record.get("coordinator_matches_lane_directive") is not True:
         failures.append("coordinator_does_not_match_lane_directive")
 
-    # the integration follows the lane's CURRENT directive: Candidate #17 is the
-    # active open candidate with a frozen detector spec + SYNTHETIC dry-run awaiting
-    # the human real-candle-labels decision.
-    if record.get("next_required_action") != (
-            "HUMAN_DECISION_C17_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"):
-        failures.append("next_action_not_c17_gate")
-    if record.get("active_candidate") != "C17":
-        failures.append("active_candidate_not_c17")
-    if record.get("open_candidate_gate") is not True:
-        failures.append("open_candidate_gate_expected")
-    if record.get("next_is_automation_readiness") is not False:
-        failures.append("must_not_be_automation_readiness_while_c17_open")
+    # the integration follows the lane's CURRENT directive: C17 is REJECTED at
+    # fee-honest replay, there is NO active/open candidate, and the next stage is
+    # AUTOMATION READINESS (NOT a new candidate).
+    if record.get("next_required_action") != _lane.AUTOMATION_READINESS_TOKEN:
+        failures.append("next_action_not_automation_readiness")
+    if record.get("active_candidate") is not None:
+        failures.append("must_have_no_active_candidate")
+    if record.get("open_candidate_gate") is not False:
+        failures.append("open_candidate_gate_must_be_false")
+    if record.get("next_is_automation_readiness") is not True:
+        failures.append("must_be_automation_readiness")
     if record.get("next_is_new_candidate") is not False:
         failures.append("next_must_not_be_new_candidate")
     if record.get("no_new_candidate_recommended") is not True:
@@ -260,8 +249,8 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
 
     if record.get("c16_lifecycle_complete") is not True:
         failures.append("c16_not_complete")
-    if record.get("rejected_ledger_count") != 21:
-        failures.append("ledger_not_21")
+    if record.get("rejected_ledger_count") != 22:
+        failures.append("ledger_not_22")
 
     # automation path research-only + downstream blocked/locked
     if record.get("automation_research_only") is not True:

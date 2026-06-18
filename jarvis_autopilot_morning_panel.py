@@ -64,27 +64,15 @@ def automation_readiness_block() -> dict[str, Any]:
             "next_is_new_candidate": integ.get("next_is_new_candidate"),
             "next_is_automation_readiness": lane.get("next_is_automation_readiness"),
             "active_candidate": lane.get("active_candidate"),
-            "active_candidate_label":
-                (lane.get("active_candidate_detail") or {}).get("label"),
-            "active_candidate_verdict":
-                (lane.get("active_candidate_detail") or {}).get("verdict"),
-            "active_candidate_stage_label":
-                (lane.get("active_candidate_detail") or {}).get("stage_label"),
-            "active_candidate_method":
-                (lane.get("active_candidate_detail") or {}).get("method"),
-            "active_candidate_assets":
-                (lane.get("active_candidate_detail") or {}).get("assets") or [],
-            "active_candidate_timeframe":
-                (lane.get("active_candidate_detail") or {}).get("timeframe"),
-            "active_candidate_synthetic_fixtures_only":
-                (lane.get("active_candidate_detail") or {}).get(
-                    "synthetic_fixtures_only"),
-            "active_candidate_dry_run_all_checks_pass":
-                (lane.get("active_candidate_detail") or {}).get(
-                    "dry_run_all_checks_pass"),
-            "active_candidate_dry_run_summary":
-                (lane.get("active_candidate_detail") or {}).get("dry_run_summary"),
             "open_candidate_gate": lane.get("open_candidate_gate"),
+            "last_rejected_candidate": lane.get("last_rejected_candidate"),
+            "last_rejected_candidate_verdict":
+                (lane.get("last_rejected_candidate_detail") or {}).get("verdict"),
+            "last_rejected_candidate_rejected_at":
+                (lane.get("last_rejected_candidate_detail") or {}).get("rejected_at"),
+            "last_rejected_candidate_reason":
+                (lane.get("last_rejected_candidate_detail") or {}).get(
+                    "rejection_reason"),
             "candidate_lane": lane.get("candidate_lane") or [],
             "safety_locks": {
                 "real_data_qa": lane.get("real_data_qa_state"),
@@ -278,6 +266,13 @@ def _render_human_gate_workflow_html(panel: dict) -> str:
     if not w.get("available"):
         return ""
     parts = ['<div class="jv-am-h jv-am-gate">Human-gate approval workflow</div>']
+    if not w.get("has_open_human_gate"):
+        # no open candidate gate -> nothing to paste; say so plainly
+        parts.append('<div class="jv-detail">%s</div>'
+                     % _esc(w.get("recommended_decision")))
+        parts.append('<div class="jv-detail jv-am-gate">⚠ %s</div>'
+                     % _esc(w.get("gate_bypass_warning")))
+        return "".join(parts)
     parts.append('<div class="jv-detail">Active candidate: <b>%s</b> · stage: '
                  '<b>%s</b></div>'
                  % (_esc(w.get("active_candidate")),
@@ -330,31 +325,27 @@ def _render_automation_readiness_html(panel: dict) -> str:
                      'expected automation readiness.</div>'
                      % _esc(NEXT_CANDIDATE_DRIFT_TOKEN))
     parts.append('<div class="jv-am-h">Candidate research lane — '
-                 'ACTIVE CANDIDATE</div>')
+                 'AUTOMATION READINESS</div>')
     parts.append('<div class="jv-detail">C16 lifecycle complete: <b>%s</b> · '
                  'rejected ledger: <b>%s</b> families</div>'
                  % (_esc(ar.get("c16_lifecycle_complete")),
                     _esc(ar.get("rejected_ledger_count"))))
     if ar.get("active_candidate"):
-        parts.append('<div class="jv-detail">Active candidate: <b>%s</b> — %s '
-                     '(stage <b>%s</b>, verdict <code>%s</code>, open gate %s)</div>'
+        parts.append('<div class="jv-detail">Active candidate: <b>%s</b> '
+                     '(open gate %s)</div>'
                      % (_esc(ar.get("active_candidate")),
-                        _esc(ar.get("active_candidate_label")),
-                        _esc(ar.get("active_candidate_stage_label")),
-                        _esc(ar.get("active_candidate_verdict")),
                         _esc(ar.get("open_candidate_gate"))))
-        parts.append('<div class="jv-detail">Method: <code>%s</code> · assets: '
-                     '<b>%s</b> · timeframe: <b>%s</b></div>'
-                     % (_esc(ar.get("active_candidate_method")),
-                        _esc(", ".join(ar.get("active_candidate_assets") or [])),
-                        _esc(ar.get("active_candidate_timeframe"))))
-        if ar.get("active_candidate_dry_run_summary"):
-            parts.append('<div class="jv-detail">Detector dry-run: synthetic '
-                         'fixtures only <b>%s</b> · all checks pass <b>%s</b></div>'
-                         % (_esc(ar.get("active_candidate_synthetic_fixtures_only")),
-                            _esc(ar.get("active_candidate_dry_run_all_checks_pass"))))
+    else:
+        parts.append('<div class="jv-detail">Active candidate: <b>none</b> '
+                     '(open gate %s)</div>' % _esc(ar.get("open_candidate_gate")))
+        parts.append('<div class="jv-detail">Last candidate: <b>%s</b> '
+                     '(verdict <code>%s</code>, rejected at %s)</div>'
+                     % (_esc(ar.get("last_rejected_candidate")),
+                        _esc(ar.get("last_rejected_candidate_verdict")),
+                        _esc(ar.get("last_rejected_candidate_rejected_at"))))
+        if ar.get("last_rejected_candidate_reason"):
             parts.append('<div class="jv-detail">%s</div>'
-                         % _esc(ar.get("active_candidate_dry_run_summary")))
+                         % _esc(ar.get("last_rejected_candidate_reason")))
     parts.append('<div class="jv-detail">Next required action: <code>%s</code></div>'
                  % _esc(ar.get("next_required_action")))
     parts.append(_render_human_gate_workflow_html(panel))
