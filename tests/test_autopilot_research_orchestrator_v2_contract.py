@@ -65,6 +65,49 @@ def test_two_closed_lists_disjoint_and_complete():
         assert must in hs, must
 
 
+def test_explicit_allowlist_staging_policy_declared():
+    # V2 now pairs with the commit guard: explicit-allowlist staging + clutter
+    # tolerance so a clean tracked tree can proceed amid unrelated untracked clutter.
+    for k in ("requires_explicit_allowlist_staging", "forbids_broad_staging",
+              "untracked_clutter_tolerated",
+              "clean_tracked_tree_with_clutter_may_proceed"):
+        assert _C[k] is True, k
+    assert _C["pairs_with_commit_guard"] == (
+        "explicit_allowlist_commit_guard_v1_contract")
+    assert _C["scope_locks"]["no_broad_staging"] is True
+    assert _C["scope_locks"]["no_git_add_dot"] is True
+    bad = {**_C, "forbids_broad_staging": False}
+    assert aro2.validate_orchestrator_contract(bad)["valid"] is False
+    bad2 = {**_C, "pairs_with_commit_guard": None}
+    assert aro2.validate_orchestrator_contract(bad2)["valid"] is False
+
+
+def test_broad_staging_command_stops_even_when_clean():
+    step = _auto_step()
+    step["staging_command"] = "git add -A"
+    d = aro2.decide_orchestrator_step(step)
+    assert d["verdict"] == "STOP_FOR_HUMAN"
+    assert "broad_staging_forbidden" in d["reasons"]
+    assert d["broad_staging_detected"] is True
+
+
+def test_explicit_path_staging_command_proceeds():
+    step = _auto_step()
+    step["staging_command"] = "git add sparta_commander/x.py tests/test_x.py"
+    d = aro2.decide_orchestrator_step(step)
+    assert d["verdict"] == "AUTO_CONTINUE"
+    assert d["broad_staging_detected"] is False
+
+
+def test_untracked_clutter_present_does_not_block_clean_tracked_step():
+    # clean tracked tree (precheck all True) + unrelated untracked clutter present
+    step = _auto_step()
+    step["precheck"]["untracked_clutter_present"] = True  # informational only
+    d = aro2.decide_orchestrator_step(step)
+    assert d["verdict"] == "AUTO_CONTINUE"
+    assert d["untracked_clutter_tolerated"] is True
+
+
 def test_discipline_flags_declared():
     for k in ("tests_required_before_commit", "push_requires_pass_and_clean_diff",
               "commit_expected_files_only", "never_stages_data_artifacts",

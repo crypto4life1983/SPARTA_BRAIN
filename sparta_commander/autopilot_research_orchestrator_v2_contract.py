@@ -32,6 +32,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import sparta_commander.explicit_allowlist_commit_guard_v1_contract as _cg
+
 ARO2_SCHEMA_VERSION = 2
 ARO2_MODE = "RESEARCH_ONLY"
 ARO2_LANE = "crypto_d1_auto_research"
@@ -114,7 +116,14 @@ _CAPABILITY_FLAGS_FALSE = (
 
 
 def _precheck_failures(precheck: dict) -> list:
-    """Pure: which required prechecks are NOT satisfied (declared snapshot)."""
+    """Pure: which required prechecks are NOT satisfied (declared snapshot).
+
+    Note on `clean_working_tree`: this means a clean TRACKED tree (no tracked
+    modifications / nothing staged outside the expected set). Pre-existing UNTRACKED
+    clutter is TOLERATED and is NOT a dirty-tree failure -- explicit per-path staging
+    (enforced by the Explicit-Allowlist Commit Guard) keeps that clutter out of the
+    commit, so a clean tracked tree may proceed even when unrelated clutter exists.
+    """
     precheck = precheck or {}
     out = []
     if precheck.get("clean_working_tree") is not True:
@@ -180,6 +189,14 @@ def decide_orchestrator_step(step: dict) -> dict[str, Any]:
         stop = True
         reasons.append("scoped_diff_not_expected_files_only")
 
+    # broad staging is FORBIDDEN -- automation must stage by explicit per-path
+    # `git add <path>` only (delegated to the Explicit-Allowlist Commit Guard). A
+    # `git add .` / `-A` / `--all` / `-u` / `:/` / `*` or `git commit -a/-am` stops.
+    staging_command = step.get("staging_command") or ""
+    if _cg.is_broad_staging_command(staging_command):
+        stop = True
+        reasons.append("broad_staging_forbidden")
+
     # 3) unknown / unrecognized category is itself an unclear gate -> stop
     if category not in AUTO_CONTINUE_CATEGORIES and category not in (
             HUMAN_STOP_CATEGORIES):
@@ -211,6 +228,8 @@ def decide_orchestrator_step(step: dict) -> dict[str, Any]:
         "blocklist_wins": category in HUMAN_STOP_CATEGORIES,
         "required_pipeline": list(SAFE_STEP_PIPELINE),
         "precheck_failures": _precheck_failures(precheck),
+        "broad_staging_detected": _cg.is_broad_staging_command(staging_command),
+        "untracked_clutter_tolerated": True,
         "requires_human_approval": verdict == VERDICT_STOP_FOR_HUMAN,
         "executes_nothing": True,
     }
@@ -234,7 +253,11 @@ def build_orchestrator_contract() -> dict[str, Any]:
             "ALWAYS stopping at real human decision gates and forbidden / "
             "trading-adjacent gates. Pure policy: executes nothing, installs no "
             "scheduler, runs no overnight automation, touches no git/network/data/"
-            "paper/live. The blocklist always wins; every capability flag is False."),
+            "paper/live. Staging is EXPLICIT per-path only (broad `git add .`/`-A` "
+            "forbidden, delegated to the Explicit-Allowlist Commit Guard); a clean "
+            "TRACKED tree may proceed even when unrelated pre-existing untracked "
+            "clutter exists. The blocklist always wins; every capability flag is "
+            "False."),
         "verdicts": list(ALL_VERDICTS),
         "auto_continue_categories": list(AUTO_CONTINUE_CATEGORIES),
         "human_stop_categories": list(HUMAN_STOP_CATEGORIES),
@@ -248,12 +271,19 @@ def build_orchestrator_contract() -> dict[str, Any]:
         "never_stages_data_artifacts": True,
         "does_not_weaken_human_gates": True,
         "one_compact_report_per_step": True,
+        # explicit-allowlist staging + clutter tolerance (paired with the guard)
+        "requires_explicit_allowlist_staging": True,
+        "forbids_broad_staging": True,
+        "untracked_clutter_tolerated": True,
+        "clean_tracked_tree_with_clutter_may_proceed": True,
+        "pairs_with_commit_guard": "explicit_allowlist_commit_guard_v1_contract",
         "human_review_required": True,
     }
     for flag in _CAPABILITY_FLAGS_FALSE:
         record[flag] = False
     record["scope_locks"] = {
         "no_execute": True, "no_git": True, "no_auto_commit": True,
+        "no_broad_staging": True, "no_git_add_dot": True, "no_git_add_all": True,
         "no_auto_push": True, "no_write": True, "no_run_tests": True,
         "no_shell": True, "no_detector": True, "no_labels": True, "no_replay": True,
         "no_pnl": True, "no_optimization": True, "no_robustness": True,
@@ -304,9 +334,15 @@ def validate_orchestrator_contract(record: dict[str, Any]) -> dict[str, Any]:
     # discipline flags
     for k in ("tests_required_before_commit", "push_requires_pass_and_clean_diff",
               "commit_expected_files_only", "never_stages_data_artifacts",
-              "does_not_weaken_human_gates", "one_compact_report_per_step"):
+              "does_not_weaken_human_gates", "one_compact_report_per_step",
+              "requires_explicit_allowlist_staging", "forbids_broad_staging",
+              "untracked_clutter_tolerated",
+              "clean_tracked_tree_with_clutter_may_proceed"):
         if record.get(k) is not True:
             failures.append("discipline_flag_off_%s" % k)
+    if record.get("pairs_with_commit_guard") != (
+            "explicit_allowlist_commit_guard_v1_contract"):
+        failures.append("commit_guard_pairing_missing")
 
     # precheck / stop / pipeline declared in full
     if set(record.get("required_prechecks") or []) != set(REQUIRED_PRECHECKS):
@@ -318,6 +354,7 @@ def validate_orchestrator_contract(record: dict[str, Any]) -> dict[str, Any]:
 
     locks = record.get("scope_locks") or {}
     for key in ("no_execute", "no_git", "no_auto_commit", "no_auto_push",
+                "no_broad_staging", "no_git_add_dot", "no_git_add_all",
                 "no_data_fetch", "no_data_staging", "no_scheduler_install",
                 "no_overnight_automation", "no_new_candidate",
                 "no_advance_or_reject_decision", "no_optimization_or_rescue_variant",
