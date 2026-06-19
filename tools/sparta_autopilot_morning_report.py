@@ -402,23 +402,32 @@ def render_markdown(report: dict) -> str:
                      % ap.get("excluded_rejected_families_count"))
     lines.append("- planner executes nothing (read-only; no build / labels / "
                  "replay / portfolio / paper / live).")
-    lines.append("## 14. Candidate research lane — AUTOMATION READINESS "
-                 "(no active candidate)")
+    lines.append("## 14. Candidate research lane — ACTIVE CANDIDATE")
     ar = r.get("automation_readiness") or {}
     lines.append("- C16 lifecycle complete: %s | rejected ledger: %s families"
                  % (ar.get("c16_lifecycle_complete"),
                     ar.get("rejected_ledger_count")))
     if ar.get("active_candidate"):
-        lines.append("- **active candidate:** %s" % ar.get("active_candidate"))
+        lines.append("- **active candidate:** %s — %s"
+                     % (ar.get("active_candidate"),
+                        ar.get("active_candidate_label")))
+        lines.append("- stage: **%s** | verdict: `%s` | timeframe: %s | open "
+                     "candidate gate: %s"
+                     % (ar.get("active_candidate_stage_label"),
+                        ar.get("active_candidate_verdict"),
+                        ar.get("active_candidate_timeframe"),
+                        ar.get("open_candidate_gate")))
+        if ar.get("active_candidate_scope_note"):
+            lines.append("  - %s" % ar.get("active_candidate_scope_note"))
+        lines.append("- market-neutral (no buy-and-hold beta): %s"
+                     % ar.get("active_candidate_is_market_neutral"))
     else:
         lines.append("- **active candidate:** none (open candidate gate: %s)"
                      % ar.get("open_candidate_gate"))
-        lines.append("- **last candidate:** %s — `%s` (rejected at %s)"
-                     % (ar.get("last_rejected_candidate"),
-                        ar.get("last_rejected_candidate_verdict"),
-                        ar.get("last_rejected_candidate_rejected_at")))
-        if ar.get("last_rejected_candidate_reason"):
-            lines.append("  - %s" % ar.get("last_rejected_candidate_reason"))
+    lines.append("- last rejected candidate: %s — `%s` (rejected at %s)"
+                 % (ar.get("last_rejected_candidate"),
+                    ar.get("last_rejected_candidate_verdict"),
+                    ar.get("last_rejected_candidate_rejected_at")))
     lines.append("- **next required action:** `%s`"
                  % ar.get("next_required_action"))
     lines.append("- automation-readiness next: %s | recommends a new candidate: "

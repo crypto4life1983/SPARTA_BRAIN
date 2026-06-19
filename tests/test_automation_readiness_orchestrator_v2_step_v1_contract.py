@@ -34,13 +34,15 @@ def test_is_the_step_for_the_lane_token():
     assert _R["is_step_for"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
 
 
-def test_live_state_ledger_23_c18_rejected_c19_active_consistent():
-    # readiness was certified at the idle stage; C19 has since been opened FROM it,
-    # so the lane's active candidate is None OR exactly C19 (consistent).
-    assert _R["active_candidate"] in (None, "C19")
+def test_live_state_ledger_at_least_23_forward_candidate_consistent():
+    # readiness was certified at the idle stage; a FORWARD candidate (C19, then C20,
+    # ...) has since been opened FROM it, so the lane's active candidate is None OR a
+    # forward candidate (>= C19) -- consistent.
+    active = _R["active_candidate"]
+    assert active is None or (active.startswith("C") and int(active[1:]) >= 19)
     assert _R["rejected_ledger_count"] >= 23
-    # C18 is rejected/closed (present in the ledger); after C19 is rejected it is
-    # no longer the LAST rejected -- the readiness step tolerates that.
+    # C18 is rejected/closed (present in the ledger); after later rejections it is no
+    # longer the LAST rejected -- the readiness step tolerates that.
     assert "h4_trend_following_market_structure" in lane.get_lane_status()["rejected_families"]
 
 
@@ -49,9 +51,9 @@ def test_all_readiness_checks_pass():
         assert v is True, k
     # tamper: any failed check -> not ready -> invalid
     bad_checks = {**_R["readiness_checks"],
-                  "no_active_candidate_or_c19_open": False}
+                  "no_active_candidate_or_forward_open": False}
     bad = {**_R, "readiness_checks": bad_checks,
-           "blockers": ["no_active_candidate_or_c19_open"]}
+           "blockers": ["no_active_candidate_or_forward_open"]}
     assert ars.validate_automation_readiness_step(bad)["valid"] is False
 
 

@@ -3,11 +3,12 @@
 
 A pure, stdlib-only, read-only status snapshot for the Crypto-D1 candidate-research
 lane. It records -- deterministically, from already-committed contract state -- that
-the C16 lifecycle is COMPLETE, that the canonical rejected ledger is now C1-C19 (24
+the C16 lifecycle is COMPLETE, that the canonical rejected ledger is C1-C19 (24
 families), that C17/C18 are rejected at fee-honest replay and C19 is rejected at the
-real-candle labels / neutrality gate (all kept on record), and that there is NO
-active/open candidate -- the next stage is AUTOMATION READINESS. It is a map of
-state, not a controller.
+real-candle labels / neutrality gate (all kept on record), and that Candidate #20
+(mechanically-neutral spot/perp basis + funding carry) is now the ACTIVE open
+candidate at the family_proposal gate awaiting the human candidate-spec decision. It
+is a map of state, not a controller.
 
 It executes NOTHING: no detector, no labels, no replay, no PnL, no optimization,
 no data fetch, no writes, no stage/commit/push, no paper/live/broker/order surface.
@@ -87,9 +88,34 @@ C19_REJECTION_REASON = (
     "it.")
 C19_LABELS_REVIEW_COMMIT = "c9470c085555bbbb0928b178a86181a95a76088e"
 
-# The candidate-research lane summary: C13-C19 all rejected (kept on record). C19 was
-# rejected at the real-candle labels / neutrality gate -- there is NO active/open
-# candidate.
+# Candidate #20 -- the ACTIVE open candidate at the family_proposal gate. Promoted
+# from the committed C20 family-proposal contract (mechanically-neutral spot/perp
+# basis + funding carry), itself chain-gated on the frozen public basis/funding
+# data-readiness review. Frozen facts pinned to the pushed C20 proposal commit. The
+# lane reports C20; it creates nothing and advances nothing. (Hardcoded -- the lane
+# imports no candidate contract.)
+C20_CANDIDATE_ID = "C20"
+C20_FAMILY = "mechanically_neutral_spot_perp_basis_funding_carry"
+C20_NAME = "mechanically_neutral_spot_perp_basis_funding_carry_v1"
+C20_STAGE = "family_proposal"
+C20_STAGE_LABEL = "PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+C20_VERDICT = "C20_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+C20_TIMEFRAME = "D1"
+C20_UNIVERSE = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
+C20_LABEL = ("Mechanically-neutral spot/perp basis + funding carry — a SAME-ASSET "
+             "long-spot / short-perp position on frozen public BTC/ETH/SOL (D1) that "
+             "is MECHANICALLY market-neutral by construction (not estimated, so it "
+             "cannot fail OOS like C16/C19), harvesting the basis + funding CARRY (not "
+             "buy-and-hold beta like C17/C18, not OHLCV timing)")
+C20_SCOPE_NOTE = ("frozen public BTC/ETH/SOL spot+perp+funding D1 only; no new data "
+                  "fetch; no XAUUSD / new instrument class; same-asset mechanical "
+                  "neutrality is gate zero; return source is basis/funding carry; "
+                  "carries no buy-and-hold beta and no estimated cross-asset hedge")
+C20_PROPOSAL_COMMIT = "ec8e95449a9ebc5b17e3a97a5d2333a560d4e3c5"
+C20_NEXT_GATE = "HUMAN_DECISION_C20_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+
+# The candidate-research lane summary: C13-C19 all rejected (kept on record); C20 is
+# now the ACTIVE open candidate at the family_proposal gate.
 CANDIDATE_LANE = (
     {"candidate": "C13", "family": "lead_lag_propagation_continuation",
      "state": STATE_REJECTED, "rejected_at": "real_candle_labels"},
@@ -106,15 +132,17 @@ CANDIDATE_LANE = (
      "rejected_at": C18_REJECTED_AT_STAGE},
     {"candidate": "C19", "family": C19_FAMILY, "state": STATE_REJECTED,
      "rejected_at": C19_REJECTED_AT_STAGE},
+    {"candidate": "C20", "family": C20_FAMILY, "state": STATE_ACTIVE_PROPOSAL,
+     "stage": C20_STAGE, "verdict": C20_VERDICT},
 )
 
 # The PRIOR-stage automation-readiness token (stable; kept for provenance).
 AUTOMATION_READINESS_TOKEN = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
 
-# With C19 rejected and NO active/open candidate, the CURRENT next stage is again
-# AUTOMATION READINESS (research-only, human-gated) -- NOT a new candidate (no C20).
-NEXT_REQUIRED_ACTION = AUTOMATION_READINESS_TOKEN
-NEXT_STAGE = "automation_readiness"
+# C20 is the ACTIVE open candidate, so the CURRENT next stage is the C20 human spec
+# decision (an open candidate gate), NOT automation readiness.
+NEXT_REQUIRED_ACTION = C20_NEXT_GATE
+NEXT_STAGE = "c20_candidate_spec_decision"
 
 _CAPABILITY_FLAGS_FALSE = (
     "executes", "writes_files", "runs_detector", "runs_labels", "runs_replay",
@@ -149,22 +177,24 @@ def safety_flags() -> dict[str, Any]:
 
 def get_lane_status() -> dict[str, Any]:
     """Deterministic, read-only snapshot of the Crypto-D1 candidate research lane.
-    Records C16 complete, the C1-C19 (24) rejected ledger, and that there is NO
-    active/open candidate after Candidate #19 (OOS-validated beta-neutral
-    cross-sectional relative value) was rejected at the real-candle labels /
-    neutrality gate -- the next stage is AUTOMATION READINESS. Executes nothing."""
+    Records C16 complete, the C1-C19 (24) rejected ledger (C17/C18 rejected at replay
+    and C19 at the labels/neutrality gate, all kept on record), and that Candidate #20
+    (mechanically-neutral spot/perp basis + funding carry) is now the ACTIVE open
+    candidate at the family_proposal gate awaiting the human candidate-spec decision.
+    Executes nothing."""
     record: dict[str, Any] = {
         "version": LANE_STATUS_VERSION, "mode": LANE_STATUS_MODE, "lane": LANE,
         "is_pure_status_only": True,
         "label": (
             "Crypto-D1 candidate research lane status (READ-ONLY, RESEARCH ONLY). "
-            "C16 lifecycle COMPLETE; rejected ledger C1-C19 (24 families). "
-            "Candidate #19 (OOS-validated beta-neutral cross-sectional relative "
-            "value) is now CLOSED / REJECTED at the real-candle labels / neutrality "
-            "gate (kept on record): mechanics clean but only 41 entries (< 100 gate) "
-            "and OOS beta-neutrality held on only ~44% of bars -- the C16 echo; no "
-            "fee-honest replay was run. There is NO active/open candidate; the next "
-            "stage is AUTOMATION READINESS. Overnight/morning automation stays "
+            "C16 lifecycle COMPLETE; rejected ledger C1-C19 (24 families); C17/C18 "
+            "closed at fee-honest replay and C19 at the real-candle labels / "
+            "neutrality gate (all kept on record). Candidate #20 is now the ACTIVE "
+            "open candidate at the family_proposal gate: mechanically-neutral "
+            "spot/perp basis + funding carry (BTC/ETH/SOL D1, frozen public data) -- "
+            "a SAME-ASSET, MECHANICALLY-neutral CARRY edge (not estimated like "
+            "C16/C19, not buy-and-hold beta like C17/C18) -- awaiting the human "
+            "candidate-spec decision. Overnight/morning automation stays "
             "research-only and human-gated. Executes nothing."),
         # C16 completion (unchanged)
         "c16_lifecycle_complete": True,
@@ -179,12 +209,24 @@ def get_lane_status() -> dict[str, Any]:
         "rejected_families": list(REJECTED_FAMILIES_C1_TO_C19),
         "c18_in_rejected_ledger": C18_FAMILY in REJECTED_FAMILIES_C1_TO_C19,
         "c19_in_rejected_ledger": C19_FAMILY in REJECTED_FAMILIES_C1_TO_C19,
-        # candidate lane summary -- C19 is now REJECTED; NO active/open candidate
+        # candidate lane summary -- C20 is now the ACTIVE/open candidate
         "candidate_lane": [dict(c) for c in CANDIDATE_LANE],
-        "active_candidate": None,
-        "open_candidate_gate": False,
-        "active_candidate_detail": None,
-        # C19 is now the last rejected candidate (provenance); C18 before it.
+        "active_candidate": C20_CANDIDATE_ID,
+        "open_candidate_gate": True,
+        "active_candidate_detail": {
+            "candidate": C20_CANDIDATE_ID, "family": C20_FAMILY, "name": C20_NAME,
+            "label": C20_LABEL, "verdict": C20_VERDICT,
+            "stage": C20_STAGE, "stage_label": C20_STAGE_LABEL,
+            "timeframe": C20_TIMEFRAME,
+            "universe": list(C20_UNIVERSE),
+            "scope_note": C20_SCOPE_NOTE,
+            "is_market_neutral": True,
+            "is_mechanically_neutral_same_asset": True,
+            "return_source_is_carry_not_timing": True,
+            "proposal_commit": C20_PROPOSAL_COMMIT,
+            "next_action": C20_NEXT_GATE,
+        },
+        # C19 stays visible as the last rejected candidate (provenance); C18 before it.
         "last_rejected_candidate": C19_CANDIDATE_ID,
         "last_rejected_candidate_detail": {
             "candidate": C19_CANDIDATE_ID, "family": C19_FAMILY,
@@ -197,12 +239,15 @@ def get_lane_status() -> dict[str, Any]:
         },
         "prior_rejected_candidate": C18_CANDIDATE_ID,
         "prior_rejected_candidate_verdict": C18_VERDICT,
-        # next stage = AUTOMATION READINESS (C19 rejected, no active candidate, no C20)
-        "current_stage": "c19_rejected_at_real_candle_labels_neutrality_gate",
+        # next stage = the C20 human candidate-spec decision (open gate), NOT
+        # automation readiness and NOT a new candidate (no C21 here).
+        "current_stage": "c20_family_proposal_frozen_for_human_review",
         "next_stage": NEXT_STAGE,
-        "next_is_automation_readiness": True,
+        "next_is_automation_readiness": False,
         "automation_readiness_was_prior_stage": True,
         "next_strategy_memo_led_to_c17": True,
+        "c20_promoted_from_proposal":
+            "mechanically_neutral_spot_perp_basis_funding_carry_v1_proposal",
         "next_is_new_candidate": False,
         "next_required_action": NEXT_REQUIRED_ACTION,
         "requires_human_approval": True,
@@ -235,17 +280,25 @@ def get_lane_status() -> dict[str, Any]:
 
 
 def summarize_for_morning_report() -> dict[str, Any]:
-    """Pure morning-report-ready block: C16 complete, ledger C1-C19 (24), and
-    Candidate #19 now REJECTED at the real-candle labels / neutrality gate (no
-    active/open candidate; next stage = automation readiness). Read-only; executes
-    nothing."""
+    """Pure morning-report-ready block: C16 complete, ledger C1-C19 (24), C19
+    rejected (kept on record, last rejected), and Candidate #20 now ACTIVE at the
+    family_proposal gate awaiting the human candidate-spec decision. Read-only;
+    executes nothing."""
     s = get_lane_status()
     rej = s["last_rejected_candidate_detail"]
+    det = s["active_candidate_detail"]
     return {
         "section": "candidate_research_lane_status",
         "c16_lifecycle_complete": s["c16_lifecycle_complete"],
         "rejected_ledger_count": s["rejected_ledger_count"],
         "active_candidate": s["active_candidate"],
+        "active_candidate_label": det["label"],
+        "active_candidate_verdict": det["verdict"],
+        "active_candidate_stage": det["stage"],
+        "active_candidate_stage_label": det["stage_label"],
+        "active_candidate_timeframe": det["timeframe"],
+        "active_candidate_scope_note": det["scope_note"],
+        "active_candidate_is_market_neutral": det["is_market_neutral"],
         "open_candidate_gate": s["open_candidate_gate"],
         "last_rejected_candidate": s["last_rejected_candidate"],
         "last_rejected_candidate_verdict": rej["verdict"],
@@ -265,11 +318,12 @@ def summarize_for_morning_report() -> dict[str, Any]:
 def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
     """Anti-tamper validator. Valid only when the status is research-only, status-
     only, records C16 complete + C1-C19 (24) ledger (C18 rejected at replay and C19
-    at the labels/neutrality gate, kept on record), marks Candidate #19 REJECTED at
-    the real-candle labels / neutrality gate (kept on record, NOT active/open),
-    reports NO active candidate with the next stage = AUTOMATION READINESS (NOT a new
-    candidate), keeps the automation path research-only with all downstream capability
-    blocked/locked, and pins every capability flag False."""
+    at the labels/neutrality gate, kept on record), marks Candidate #20 the ACTIVE
+    open candidate at the family_proposal gate (mechanically-neutral spot/perp basis +
+    funding carry, market-neutral, carry return source) whose next gate is the human
+    candidate-spec decision (NOT automation readiness and NOT a new candidate), keeps
+    C19 as the last rejected candidate, keeps the automation path research-only with
+    all downstream capability blocked/locked, and pins every capability flag False."""
     failures: list = []
     if record.get("mode") != LANE_STATUS_MODE:
         failures.append("mode_not_research_only")
@@ -302,14 +356,37 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
     if record.get("c19_in_rejected_ledger") is not True:
         failures.append("c19_not_in_ledger")
 
-    # C19 is REJECTED at the labels/neutrality gate (kept on record); NO active/open
-    # candidate; next stage = AUTOMATION READINESS and NOT a new candidate.
-    if record.get("active_candidate") is not None:
-        failures.append("must_have_no_active_candidate")
-    if record.get("open_candidate_gate") is not False:
-        failures.append("open_candidate_gate_must_be_false")
-    if record.get("active_candidate_detail") is not None:
-        failures.append("active_candidate_detail_must_be_none")
+    # C20 is the ACTIVE open candidate at the family_proposal gate; C19 stays
+    # REJECTED (kept on record) as the last rejected candidate / provenance.
+    if record.get("active_candidate") != C20_CANDIDATE_ID:
+        failures.append("c20_not_active")
+    if record.get("open_candidate_gate") is not True:
+        failures.append("open_candidate_gate_expected")
+    det = record.get("active_candidate_detail") or {}
+    if det.get("family") != C20_FAMILY:
+        failures.append("c20_family_mismatch")
+    if det.get("verdict") != C20_VERDICT:
+        failures.append("c20_verdict_not_proposal_frozen")
+    if det.get("stage") != C20_STAGE:
+        failures.append("c20_stage_not_family_proposal")
+    if det.get("stage_label") != C20_STAGE_LABEL:
+        failures.append("c20_stage_label_mismatch")
+    if det.get("timeframe") != C20_TIMEFRAME:
+        failures.append("c20_timeframe_not_d1")
+    if det.get("is_market_neutral") is not True:
+        failures.append("c20_must_be_market_neutral")
+    if det.get("is_mechanically_neutral_same_asset") is not True:
+        failures.append("c20_must_be_mechanically_neutral_same_asset")
+    if det.get("return_source_is_carry_not_timing") is not True:
+        failures.append("c20_return_source_not_carry")
+    if list(det.get("universe") or []) != ["BTCUSDT", "ETHUSDT", "SOLUSDT"]:
+        failures.append("c20_universe_not_btc_eth_sol")
+    if not (isinstance(det.get("proposal_commit"), str)
+            and len(det["proposal_commit"]) == 40):
+        failures.append("c20_proposal_commit_bad")
+    if det.get("next_action") != C20_NEXT_GATE:
+        failures.append("c20_next_gate_mismatch")
+    # C19 kept on record as the last rejected candidate (provenance)
     if record.get("last_rejected_candidate") != C19_CANDIDATE_ID:
         failures.append("last_rejected_not_c19")
     rej = record.get("last_rejected_candidate_detail") or {}
@@ -324,16 +401,22 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
     if not (isinstance(rej.get("labels_review_commit"), str)
             and len(rej["labels_review_commit"]) == 40):
         failures.append("c19_labels_review_commit_bad")
+    # next stage = the C20 candidate-spec decision (open gate), NOT automation
+    # readiness and NOT a new candidate.
     if record.get("next_stage") != NEXT_STAGE:
-        failures.append("next_stage_not_automation_readiness")
-    if record.get("next_is_automation_readiness") is not True:
-        failures.append("next_must_be_automation_readiness")
+        failures.append("next_stage_not_c20_candidate_spec_decision")
+    if record.get("next_is_automation_readiness") is not False:
+        failures.append("must_not_be_automation_readiness_while_c20_open")
     if record.get("next_is_new_candidate") is not False:
         failures.append("next_must_not_be_new_candidate")
-    if record.get("next_required_action") != AUTOMATION_READINESS_TOKEN:
-        failures.append("next_action_not_automation_readiness")
-    # C19 must appear in the candidate lane as REJECTED at the labels gate; C18 also
-    # still rejected at fee-honest replay.
+    if record.get("next_required_action") != C20_NEXT_GATE:
+        failures.append("next_action_not_c20_gate")
+    # C20 must appear in the candidate lane as an active frozen proposal; C19 still
+    # rejected at the labels gate; C18 still rejected at fee-honest replay.
+    lane_c20 = next((c for c in (record.get("candidate_lane") or [])
+                     if c.get("candidate") == "C20"), None)
+    if not lane_c20 or lane_c20.get("state") != STATE_ACTIVE_PROPOSAL:
+        failures.append("c20_not_active_proposal_in_candidate_lane")
     lane_c19 = next((c for c in (record.get("candidate_lane") or [])
                      if c.get("candidate") == "C19"), None)
     if not lane_c19 or lane_c19.get("state") != STATE_REJECTED \

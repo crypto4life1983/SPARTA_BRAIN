@@ -258,15 +258,21 @@ def build_c19_research_direction_recommendation() -> dict[str, Any]:
         "candidate_id": None,
         "is_active_candidate": False,
         # current lane state reviewed (read-only). At recommendation time the lane
-        # had no active candidate; once the human opens C19 from THIS recommendation,
-        # the lane's active candidate becomes exactly the preferred family below --
-        # which is consistent (not a conflict).
+        # had no active candidate; once the human opened C19 from THIS recommendation,
+        # the lane's active candidate became exactly the preferred family below; the
+        # lane has since progressed to a LATER candidate (C20, ...). All three states
+        # are consistent with this historical recommendation -- only a DIFFERENT
+        # candidate that predated/replaced C19 would be a conflict.
         "lane_active_candidate": lane.get("active_candidate"),
         "lane_open_candidate_gate": lane.get("open_candidate_gate"),
         "lane_active_is_none_or_this_recommendation": (
             lane.get("active_candidate") is None
             or (lane.get("active_candidate_detail") or {}).get("family")
-            == PREFERRED_DIRECTION_KEY),
+            == PREFERRED_DIRECTION_KEY
+            or (isinstance(lane.get("active_candidate"), str)
+                and lane.get("active_candidate", "").startswith("C")
+                and lane.get("active_candidate", "")[1:].isdigit()
+                and int(lane.get("active_candidate", "C0")[1:]) >= 19)),
         "rejected_ledger_count": lane.get("rejected_ledger_count"),
         "uses_c1_to_c18_ledger": REJECTED_LEDGER_COUNT == 23,
         "last_rejected_candidate": lane.get("last_rejected_candidate"),
