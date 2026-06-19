@@ -83,3 +83,7 @@ data/cointegration_pairs_market_neutral_c16/
 data/risk_adjusted_portfolio_construction_vol_targeted_allocation_c17/
 
 data/h4_trend_following_market_structure_c18/
+
+# Candidate #19 OOS-validated beta-neutral cross-sectional relative value --
+# gitignored real-candle labels artifacts (SHA-pinned in the review contract)
+data/oos_validated_beta_neutral_cross_sectional_relative_value_c19/
