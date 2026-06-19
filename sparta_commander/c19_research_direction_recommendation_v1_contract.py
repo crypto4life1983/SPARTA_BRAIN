@@ -257,9 +257,16 @@ def build_c19_research_direction_recommendation() -> dict[str, Any]:
         "creates_candidate": False,
         "candidate_id": None,
         "is_active_candidate": False,
-        # current lane state reviewed (read-only)
+        # current lane state reviewed (read-only). At recommendation time the lane
+        # had no active candidate; once the human opens C19 from THIS recommendation,
+        # the lane's active candidate becomes exactly the preferred family below --
+        # which is consistent (not a conflict).
         "lane_active_candidate": lane.get("active_candidate"),
         "lane_open_candidate_gate": lane.get("open_candidate_gate"),
+        "lane_active_is_none_or_this_recommendation": (
+            lane.get("active_candidate") is None
+            or (lane.get("active_candidate_detail") or {}).get("family")
+            == PREFERRED_DIRECTION_KEY),
         "rejected_ledger_count": lane.get("rejected_ledger_count"),
         "uses_c1_to_c18_ledger": REJECTED_LEDGER_COUNT == 23,
         "last_rejected_candidate": lane.get("last_rejected_candidate"),
@@ -361,9 +368,10 @@ def validate_c19_research_direction_recommendation(
     if record.get("candidate_id") is not None:
         failures.append("candidate_id_must_be_none")
 
-    # reviewed live lane state
-    if record.get("lane_active_candidate") is not None:
-        failures.append("lane_should_have_no_active_candidate")
+    # reviewed live lane state: the lane must have NO active candidate OR exactly the
+    # preferred family this recommendation opened (C19) -- never a conflicting one.
+    if record.get("lane_active_is_none_or_this_recommendation") is not True:
+        failures.append("lane_active_conflicts_with_recommendation")
     if record.get("rejected_ledger_count") != 23:
         failures.append("ledger_not_23")
     if record.get("uses_c1_to_c18_ledger") is not True:

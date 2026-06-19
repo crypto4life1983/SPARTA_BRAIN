@@ -80,6 +80,26 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no auto-trading",
         ),
     },
+    "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT": {
+        "recommended_decision": "ADVANCE C19 TO CANDIDATE SPEC",
+        "stage_after_approval": "candidate_spec",
+        "allows": (
+            "build the candidate-spec contract (pure, declared rules)",
+            "define exact dollar-neutral / return-beta-neutral construction, the "
+            "OOS-neutrality gate-zero, residual / entry / exit / stop / turnover / "
+            "non-overlap / replay-win rules",
+            "research-only validation",
+        ),
+        "forbids": (
+            "no detector build",
+            "no real data fetch",
+            "no new instrument class / XAUUSD",
+            "no labels",
+            "no replay/backtest/PnL",
+            "no optimization / rescue / tuning",
+            "no paper/live/broker/order code",
+        ),
+    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (

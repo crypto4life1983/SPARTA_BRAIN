@@ -64,17 +64,17 @@ def test_morning_report_sections_agree_no_candidate_drift():
                  "next_action": "NONE (closed)"}})
     ap = report["autopilot_plan"]
     ar = report["automation_readiness"]
-    # (5) §13 clean-tree plan defers to the lane = AUTOMATION READINESS (C17 rejected)
-    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
+    # (5) §13 clean-tree plan defers to the lane = the C19 open-candidate spec gate
+    assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
     assert ap["recommended_token"] == (
-        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
-    # (6) §14 shows NO active candidate; C17 rejected at fee-honest replay
-    assert ar["active_candidate"] is None
+        "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+    # (6) §14 shows C19 ACTIVE; C18 rejected at fee-honest replay (last rejected)
+    assert ar["active_candidate"] == "C19"
     assert ar["last_rejected_candidate"] == "C18"
     assert ar["next_required_action"] == (
-        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+        "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
     md = mr.render_markdown(report)
-    assert "AUTOMATION READINESS" in md
+    assert "ACTIVE CANDIDATE" in md
     assert "C18_REJECTED_AT_FEE_HONEST_REPLAY" in md
     # (7) no next-candidate drift on any surface
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md

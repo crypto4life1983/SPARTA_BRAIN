@@ -82,11 +82,14 @@ def build_automation_readiness_step() -> dict[str, Any]:
 
     rej = lane.get("last_rejected_candidate_detail") or {}
 
-    # the readiness preconditions (each must hold)
+    # the readiness preconditions (each must hold). The lane either has NO active
+    # candidate (the moment this step certified readiness) OR has C19 active -- the
+    # candidate that was subsequently opened USING this readiness. Both are
+    # consistent; a DIFFERENT active candidate would not be.
     checks = {
         "lane_status_valid": lane_valid,
-        "no_active_candidate": lane.get("active_candidate") is None
-            and lane.get("open_candidate_gate") is False,
+        "no_active_candidate_or_c19_open":
+            lane.get("active_candidate") in (None, "C19"),
         "ledger_is_23_lane": lane.get("rejected_ledger_count") == EXPECTED_LEDGER_COUNT,
         "ledger_is_23_rep":
             rep.get("rejected_families_count") == EXPECTED_LEDGER_COUNT,
@@ -95,8 +98,11 @@ def build_automation_readiness_step() -> dict[str, Any]:
             and rej.get("verdict") == EXPECTED_C18_VERDICT
             and "h4_trend_following_market_structure"
             in (lane.get("rejected_families") or [])),
-        "next_stage_is_automation_readiness":
-            lane.get("next_is_automation_readiness") is True
+        # next stage is automation readiness (idle) OR the C19 spec-decision gate
+        # (C19 was opened from this readiness) -- never a NEW candidate / drift.
+        "next_stage_is_automation_readiness_or_c19_gate":
+            (lane.get("next_is_automation_readiness") is True
+             or lane.get("active_candidate") == "C19")
             and lane.get("next_is_new_candidate") is False,
         "orchestrator_v2_live": aro2_valid and aro2.get("is_runner") is False
             and aro2.get("installs_scheduler") is False,
@@ -212,19 +218,18 @@ def validate_automation_readiness_step(record: dict[str, Any]) -> dict[str, Any]
 
     # every readiness check must be True
     checks = record.get("readiness_checks") or {}
-    for k in ("lane_status_valid", "no_active_candidate", "ledger_is_23_lane",
-              "ledger_is_23_rep", "c18_rejected_closed",
-              "next_stage_is_automation_readiness", "orchestrator_v2_live",
+    for k in ("lane_status_valid", "no_active_candidate_or_c19_open",
+              "ledger_is_23_lane", "ledger_is_23_rep", "c18_rejected_closed",
+              "next_stage_is_automation_readiness_or_c19_gate", "orchestrator_v2_live",
               "commit_guard_live", "guard_paired_with_orchestrator",
               "explicit_allowlist_staging_required", "untracked_clutter_tolerated"):
         if checks.get(k) is not True:
             failures.append("readiness_check_failed_%s" % k)
 
-    # confirmed live-state facts
-    if record.get("active_candidate") is not None:
-        failures.append("active_candidate_must_be_none")
-    if record.get("open_candidate_gate") is not False:
-        failures.append("open_candidate_gate_must_be_false")
+    # confirmed live-state facts: no active candidate OR exactly C19 (opened from
+    # this readiness); never a different active candidate.
+    if record.get("active_candidate") not in (None, "C19"):
+        failures.append("active_candidate_must_be_none_or_c19")
     if record.get("rejected_ledger_count") != EXPECTED_LEDGER_COUNT:
         failures.append("ledger_not_23")
     if record.get("last_rejected_candidate") != EXPECTED_LAST_REJECTED:

@@ -34,21 +34,23 @@ def test_is_the_step_for_the_lane_token():
     assert _R["is_step_for"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
 
 
-def test_live_state_no_active_ledger_23_c18_rejected():
-    assert _R["active_candidate"] is None
-    assert _R["open_candidate_gate"] is False
+def test_live_state_ledger_23_c18_rejected_c19_active_consistent():
+    # readiness was certified at the idle stage; C19 has since been opened FROM it,
+    # so the lane's active candidate is None OR exactly C19 (consistent).
+    assert _R["active_candidate"] in (None, "C19")
     assert _R["rejected_ledger_count"] == 23
     assert _R["last_rejected_candidate"] == "C18"
     assert _R["last_rejected_candidate_verdict"] == "C18_REJECTED_AT_FEE_HONEST_REPLAY"
-    assert _R["next_stage"] == "automation_readiness"
 
 
 def test_all_readiness_checks_pass():
     for k, v in _R["readiness_checks"].items():
         assert v is True, k
     # tamper: any failed check -> not ready -> invalid
-    bad_checks = {**_R["readiness_checks"], "no_active_candidate": False}
-    bad = {**_R, "readiness_checks": bad_checks, "blockers": ["no_active_candidate"]}
+    bad_checks = {**_R["readiness_checks"],
+                  "no_active_candidate_or_c19_open": False}
+    bad = {**_R, "readiness_checks": bad_checks,
+           "blockers": ["no_active_candidate_or_c19_open"]}
     assert ars.validate_automation_readiness_step(bad)["valid"] is False
 
 

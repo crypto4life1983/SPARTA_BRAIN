@@ -124,10 +124,11 @@ def build_automation_readiness_integration() -> dict[str, Any]:
             "Candidate-lane directive integration v1 (READ-ONLY, RESEARCH ONLY). "
             "Connects the candidate-research-lane status into the coordinator/"
             "morning/autopilot surfaces so they AGREE on the current directive. "
-            "Candidate #18 (H4 market-structure trend-following) is now REJECTED at "
-            "the fee-honest replay stage (kept on record); there is NO active/open "
-            "candidate and the next stage is AUTOMATION READINESS. Executes nothing; "
-            "overnight/morning automation stays research-only and human-gated."),
+            "Candidate #19 (OOS-validated beta-neutral cross-sectional relative "
+            "value) is now the ACTIVE open candidate at the family_proposal gate "
+            "awaiting the human candidate-spec decision; C18 stays rejected (kept on "
+            "record). Executes nothing; overnight/morning automation stays "
+            "research-only and human-gated."),
         # the aligned directive (follows the lane)
         "next_required_action": token,
         "next_stage": lane.get("next_stage"),
@@ -135,7 +136,15 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         "next_is_new_candidate": False,
         "active_candidate": lane.get("active_candidate"),
         "open_candidate_gate": lane.get("open_candidate_gate"),
-        # C18 is rejected at fee-honest replay -> surface the last rejected candidate
+        # C19 is the ACTIVE open candidate -> surface its fields
+        "active_candidate_label": det.get("label"),
+        "active_candidate_verdict": det.get("verdict"),
+        "active_candidate_stage": det.get("stage"),
+        "active_candidate_stage_label": det.get("stage_label"),
+        "active_candidate_timeframe": det.get("timeframe"),
+        "active_candidate_scope_note": det.get("scope_note"),
+        "active_candidate_is_market_neutral": det.get("is_market_neutral"),
+        # C18 stays visible as the last rejected candidate (provenance)
         "last_rejected_candidate": lane.get("last_rejected_candidate"),
         "last_rejected_candidate_label": _rej.get("label"),
         "last_rejected_candidate_verdict": _rej.get("verdict"),
@@ -196,6 +205,13 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "rejected_ledger_count": r["rejected_ledger_count"],
         "active_candidate": r["active_candidate"],
         "open_candidate_gate": r["open_candidate_gate"],
+        "active_candidate_label": r["active_candidate_label"],
+        "active_candidate_verdict": r["active_candidate_verdict"],
+        "active_candidate_stage": r["active_candidate_stage"],
+        "active_candidate_stage_label": r["active_candidate_stage_label"],
+        "active_candidate_timeframe": r["active_candidate_timeframe"],
+        "active_candidate_scope_note": r["active_candidate_scope_note"],
+        "active_candidate_is_market_neutral": r["active_candidate_is_market_neutral"],
         "last_rejected_candidate": r["last_rejected_candidate"],
         "last_rejected_candidate_label": r["last_rejected_candidate_label"],
         "last_rejected_candidate_verdict": r["last_rejected_candidate_verdict"],
@@ -232,17 +248,18 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
     if record.get("coordinator_matches_lane_directive") is not True:
         failures.append("coordinator_does_not_match_lane_directive")
 
-    # the integration follows the lane's CURRENT directive: C18 is REJECTED at
-    # fee-honest replay, there is NO active/open candidate, and the next stage is
-    # AUTOMATION READINESS (NOT a new candidate).
-    if record.get("next_required_action") != _lane.AUTOMATION_READINESS_TOKEN:
-        failures.append("next_action_not_automation_readiness")
-    if record.get("active_candidate") is not None:
-        failures.append("must_have_no_active_candidate")
-    if record.get("open_candidate_gate") is not False:
-        failures.append("open_candidate_gate_must_be_false")
-    if record.get("next_is_automation_readiness") is not True:
-        failures.append("must_be_automation_readiness")
+    # the integration follows the lane's CURRENT directive: C19 is the ACTIVE open
+    # candidate at the family_proposal gate awaiting the human candidate-spec
+    # decision (NOT automation readiness and NOT a new candidate).
+    if record.get("next_required_action") != (
+            "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"):
+        failures.append("next_action_not_c19_gate")
+    if record.get("active_candidate") != "C19":
+        failures.append("active_candidate_not_c19")
+    if record.get("open_candidate_gate") is not True:
+        failures.append("open_candidate_gate_expected")
+    if record.get("next_is_automation_readiness") is not False:
+        failures.append("must_not_be_automation_readiness_while_c19_open")
     if record.get("next_is_new_candidate") is not False:
         failures.append("next_must_not_be_new_candidate")
     if record.get("no_new_candidate_recommended") is not True:
