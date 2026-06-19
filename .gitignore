@@ -87,3 +87,7 @@ data/h4_trend_following_market_structure_c18/
 # Candidate #19 OOS-validated beta-neutral cross-sectional relative value --
 # gitignored real-candle labels artifacts (SHA-pinned in the review contract)
 data/oos_validated_beta_neutral_cross_sectional_relative_value_c19/
+
+# Research universe expansion -- gitignored PUBLIC spot/perp/funding fetched data
+# (SHA-pinned in the data-readiness review contract; never committed)
+data/crypto_basis_funding_research/
