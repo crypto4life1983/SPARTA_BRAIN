@@ -90,13 +90,15 @@ def build_automation_readiness_step() -> dict[str, Any]:
         "lane_status_valid": lane_valid,
         "no_active_candidate_or_c19_open":
             lane.get("active_candidate") in (None, "C19"),
-        "ledger_is_23_lane": lane.get("rejected_ledger_count") == EXPECTED_LEDGER_COUNT,
-        "ledger_is_23_rep":
-            rep.get("rejected_families_count") == EXPECTED_LEDGER_COUNT,
+        # ledger is at least 23 (monotonic; >= the count when this step was certified)
+        "ledger_at_least_23_lane":
+            lane.get("rejected_ledger_count", 0) >= EXPECTED_LEDGER_COUNT,
+        "ledger_at_least_23_rep":
+            rep.get("rejected_families_count", 0) >= EXPECTED_LEDGER_COUNT,
+        # C18 is REJECTED / closed (present in the ledger) -- it need not be the LAST
+        # rejected after later rejections (e.g. C19).
         "c18_rejected_closed": (
-            lane.get("last_rejected_candidate") == EXPECTED_LAST_REJECTED
-            and rej.get("verdict") == EXPECTED_C18_VERDICT
-            and "h4_trend_following_market_structure"
+            "h4_trend_following_market_structure"
             in (lane.get("rejected_families") or [])),
         # next stage is automation readiness (idle) OR the C19 spec-decision gate
         # (C19 was opened from this readiness) -- never a NEW candidate / drift.
@@ -219,7 +221,8 @@ def validate_automation_readiness_step(record: dict[str, Any]) -> dict[str, Any]
     # every readiness check must be True
     checks = record.get("readiness_checks") or {}
     for k in ("lane_status_valid", "no_active_candidate_or_c19_open",
-              "ledger_is_23_lane", "ledger_is_23_rep", "c18_rejected_closed",
+              "ledger_at_least_23_lane", "ledger_at_least_23_rep",
+              "c18_rejected_closed",
               "next_stage_is_automation_readiness_or_c19_gate", "orchestrator_v2_live",
               "commit_guard_live", "guard_paired_with_orchestrator",
               "explicit_allowlist_staging_required", "untracked_clutter_tolerated"):
@@ -230,12 +233,8 @@ def validate_automation_readiness_step(record: dict[str, Any]) -> dict[str, Any]
     # this readiness); never a different active candidate.
     if record.get("active_candidate") not in (None, "C19"):
         failures.append("active_candidate_must_be_none_or_c19")
-    if record.get("rejected_ledger_count") != EXPECTED_LEDGER_COUNT:
-        failures.append("ledger_not_23")
-    if record.get("last_rejected_candidate") != EXPECTED_LAST_REJECTED:
-        failures.append("last_rejected_not_c18")
-    if record.get("last_rejected_candidate_verdict") != EXPECTED_C18_VERDICT:
-        failures.append("c18_verdict_wrong")
+    if record.get("rejected_ledger_count", 0) < EXPECTED_LEDGER_COUNT:
+        failures.append("ledger_below_23")
 
     # the live policy contracts must be certified valid
     if record.get("orchestrator_v2_valid") is not True:

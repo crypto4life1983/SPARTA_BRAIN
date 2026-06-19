@@ -103,6 +103,7 @@ DEFAULT_REJECTED_FAMILIES = (
     "cointegration_pairs_market_neutral",          # C16 (kept on record)
     "risk_adjusted_portfolio_construction_vol_targeted_allocation",  # C17 (rejected at replay)
     "h4_trend_following_market_structure",  # C18 (rejected at replay)
+    "oos_validated_beta_neutral_cross_sectional_relative_value",  # C19 (rejected at labels)
 )
 
 _CAPABILITY_FLAGS_FALSE = (

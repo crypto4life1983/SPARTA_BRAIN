@@ -138,12 +138,13 @@ def test_rejected_ledger_has_19_families_including_c14():
     assert "single_bar_conviction_continuation" in _R["rejected_family_lessons"]
 
 
-def test_current_rejected_ledger_is_23_including_c18():
+def test_current_rejected_ledger_is_24_including_c19():
     # the CURRENT canonical ledger used for forward anti-loop now includes C18
     cur = _R["rejected_families_current"]
-    assert len(cur) == 23
-    assert _R["rejected_families_count"] == 23
+    assert len(cur) == 24
+    assert _R["rejected_families_count"] == 24
     assert "h4_trend_following_market_structure" in cur
+    assert "oos_validated_beta_neutral_cross_sectional_relative_value" in cur
     assert "risk_adjusted_portfolio_construction_vol_targeted_allocation" in cur
     assert "cointegration_pairs_market_neutral" in cur
     assert "slow_vol_targeted_time_series_momentum" in cur

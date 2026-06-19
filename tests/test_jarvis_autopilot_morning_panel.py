@@ -218,52 +218,57 @@ def test_missing_report_panel_has_empty_autopilot_plan():
 
 # --- C16 / ledger-21 / automation-readiness / safety locks alignment -------- #
 
-def test_panel_shows_c16_complete_and_ledger_23():
+def test_panel_shows_c16_complete_and_ledger_24():
     p = panel.build_autopilot_morning_panel(_success_report())
     ar = p["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 23
+    assert ar["rejected_ledger_count"] == 24
     h = p["html"]
-    assert "ACTIVE CANDIDATE" in h
-    assert "23" in h
+    assert "AUTOMATION READINESS" in h
+    assert "24" in h
 
 
-def test_panel_shows_c19_active_at_proposal_gate():
+def test_panel_shows_c18_rejected_no_active():
     p = panel.build_autopilot_morning_panel(_success_report())
     ar = p["automation_readiness"]
-    assert ar["active_candidate"] == "C19"
-    assert ar["open_candidate_gate"] is True
+    assert ar["active_candidate"] is None
+    assert ar["open_candidate_gate"] is False
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
     assert ar["section13_recommendation_when_clean"] == (
-        "RECOMMEND_GATE_DECISION")
+        "RECOMMEND_AUTOMATION_READINESS_STEP")
     assert ar["section14_present"] is True
     assert ar["surfaces_agree"] is True
     assert ar["next_is_new_candidate"] is False
-    assert ar["next_is_automation_readiness"] is False
-    assert ar["active_candidate_verdict"] == "C19_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
-    assert ar["last_rejected_candidate"] == "C18"
-    assert ar["last_rejected_candidate_verdict"] == "C18_REJECTED_AT_FEE_HONEST_REPLAY"
+    assert ar["next_is_automation_readiness"] is True
+    assert ar["last_rejected_candidate"] == "C19"
+    assert ar["last_rejected_candidate_verdict"] == "C19_REJECTED_AT_REAL_CANDLE_LABELS"
     h = p["html"]
-    assert "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in h
-    assert "ACTIVE CANDIDATE" in h
-    assert "Active candidate: <b>C19</b>" in h
-    assert "C19_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in h
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in h
+    assert "AUTOMATION READINESS" in h
+    assert "Active candidate: <b>none</b>" in h
+    assert "C19_REJECTED_AT_REAL_CANDLE_LABELS" in h
+    assert "rejected at real_candle_labels_neutrality_gate" in h
+    # the already-cleared labels gate must not appear as the current directive
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" not in h
 
 
-def test_panel_human_gate_workflow_c19_open_gate():
+def test_panel_human_gate_workflow_no_open_gate():
     p = panel.build_autopilot_morning_panel(_success_report())
     w = p["human_gate_workflow"]
     assert w["available"] is True
-    assert w["has_open_human_gate"] is True
-    assert w["active_candidate"] == "C19"
-    assert w["approval_text_to_paste"] is not None
+    assert w["has_open_human_gate"] is False
+    assert w["active_candidate"] is None
+    assert w["approval_text_to_paste"] is None
     assert w["ready_for_commit"] is False
     assert w["commit_approval_text"] is None
     h = p["html"]
-    # dashboard surfaces the open C19 gate + a copyable approval
+    # dashboard says plainly there is no open candidate gate; no copyable approval
     assert "Human-gate approval workflow" in h
-    assert "ADVANCE C19 TO CANDIDATE SPEC" in h
+    assert "NO OPEN CANDIDATE GATE" in h
+    assert "BYPASS" in h
+    # no stale candidate gate is shown as current
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" not in h
 
 
 def test_panel_shows_safety_locks():
@@ -317,22 +322,22 @@ def test_panel_dirty_tree_warns_but_does_not_hide_c16():
     assert "DIRTY" in h
     # C16 / lane status still fully visible despite the dirty tree
     assert p["automation_readiness"]["c16_lifecycle_complete"] is True
-    assert p["automation_readiness"]["rejected_ledger_count"] == 23
-    assert p["automation_readiness"]["active_candidate"] == "C19"
-    assert "ACTIVE CANDIDATE" in h
+    assert p["automation_readiness"]["rejected_ledger_count"] == 24
+    assert p["automation_readiness"]["active_candidate"] is None
+    assert "AUTOMATION READINESS" in h
 
 
-def test_no_report_still_shows_c16_and_c19_active():
+def test_no_report_still_shows_c16_and_c18_rejected():
     p = panel.build_autopilot_morning_panel(None)
     ar = p["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 23
-    assert ar["active_candidate"] == "C19"
-    assert ar["last_rejected_candidate"] == "C18"
+    assert ar["rejected_ledger_count"] == 24
+    assert ar["active_candidate"] is None
+    assert ar["last_rejected_candidate"] == "C19"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
-    assert "ACTIVE CANDIDATE" in p["html"]
-    assert "C19_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in p["html"]
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+    assert "AUTOMATION READINESS" in p["html"]
+    assert "C19_REJECTED_AT_REAL_CANDLE_LABELS" in p["html"]
 
 
 def test_panel_run_metadata_and_seed_brief_path():

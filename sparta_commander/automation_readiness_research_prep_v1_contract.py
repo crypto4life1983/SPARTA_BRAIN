@@ -182,11 +182,11 @@ def validate_automation_readiness_research_prep(record: dict[str, Any]) -> dict[
     if record.get("goal_is_autonomous_candidate_creation") is not False:
         failures.append("goal_must_not_be_autonomous_candidate")
 
-    # C16 complete + ledger 23 (C17 and C18 both rejected at fee-honest replay)
+    # C16 complete + ledger 24 (C17/C18 rejected at replay; C19 at labels)
     if record.get("c16_lifecycle_complete") is not True:
         failures.append("c16_not_complete")
-    if record.get("rejected_ledger_count") != 23:
-        failures.append("ledger_not_23")
+    if record.get("rejected_ledger_count") != 24:
+        failures.append("ledger_not_24")
 
     # aligned directive (all surfaces agree, run-record gate aligned, no candidate)
     if record.get("next_required_action") != NEXT_REQUIRED_ACTION:

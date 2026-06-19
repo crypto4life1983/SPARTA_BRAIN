@@ -270,10 +270,12 @@ def build_c19_research_direction_recommendation() -> dict[str, Any]:
         "rejected_ledger_count": lane.get("rejected_ledger_count"),
         "uses_c1_to_c18_ledger": REJECTED_LEDGER_COUNT == 23,
         "last_rejected_candidate": lane.get("last_rejected_candidate"),
+        # C18 is REJECTED (present in the ledger) -- the recommendation was made when
+        # C18 was the last rejected; it stays valid after later rejections (e.g. C19)
+        # so long as C18 remains in the rejected ledger (monotonic).
         "c18_rejected_at_replay": (
-            lane.get("last_rejected_candidate") == "C18"
-            and (lane.get("last_rejected_candidate_detail") or {}).get("verdict")
-            == "C18_REJECTED_AT_FEE_HONEST_REPLAY"),
+            "h4_trend_following_market_structure"
+            in (lane.get("rejected_families") or [])),
         # lessons + traits
         "lessons_c1_to_c18": list(LESSONS_C1_TO_C18),
         "traits_to_avoid": list(TRAITS_TO_AVOID),
@@ -372,8 +374,8 @@ def validate_c19_research_direction_recommendation(
     # preferred family this recommendation opened (C19) -- never a conflicting one.
     if record.get("lane_active_is_none_or_this_recommendation") is not True:
         failures.append("lane_active_conflicts_with_recommendation")
-    if record.get("rejected_ledger_count") != 23:
-        failures.append("ledger_not_23")
+    if record.get("rejected_ledger_count", 0) < 23:
+        failures.append("ledger_below_23")
     if record.get("uses_c1_to_c18_ledger") is not True:
         failures.append("not_using_c1_to_c18_ledger")
     if record.get("c18_rejected_at_replay") is not True:

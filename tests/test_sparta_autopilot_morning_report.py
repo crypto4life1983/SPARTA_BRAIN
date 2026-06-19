@@ -254,48 +254,50 @@ def _all_rejected_status():
     }
 
 
-def test_autopilot_plan_idle_defers_to_c19_active_gate():
-    # C19 is the ACTIVE open candidate, so the idle plan defers to the C19 human
-    # spec-decision gate -- NOT a new candidate, NOT automation readiness.
+def test_autopilot_plan_idle_defers_to_automation_readiness():
+    # C17 is REJECTED with no active candidate, so the idle plan defers to
+    # AUTOMATION READINESS -- NOT a new candidate, NOT an open candidate gate.
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ap = report["autopilot_plan"]
-    assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
+    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
     assert ap["would_auto_advance"] is False
     assert ap["next_is_new_candidate"] is False
     assert ap["planner_is_read_only"] is True
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
-    assert "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in md
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in md
 
 
-def test_morning_report_shows_c19_active_section():
+def test_morning_report_shows_c18_rejected_section():
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ar = report["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 23
-    assert ar["active_candidate"] == "C19"
-    assert ar["open_candidate_gate"] is True
-    assert ar["active_candidate_verdict"] == "C19_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
-    assert ar["last_rejected_candidate"] == "C18"
-    assert ar["last_rejected_candidate_verdict"] == "C18_REJECTED_AT_FEE_HONEST_REPLAY"
-    assert ar["next_stage"] == "c19_candidate_spec_decision"
+    assert ar["rejected_ledger_count"] == 24
+    assert ar["active_candidate"] is None
+    assert ar["open_candidate_gate"] is False
+    assert ar["last_rejected_candidate"] == "C19"
+    assert ar["last_rejected_candidate_verdict"] == "C19_REJECTED_AT_REAL_CANDLE_LABELS"
+    assert ar["next_stage"] == "automation_readiness"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
-    assert ar["next_is_automation_readiness"] is False
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+    assert ar["next_is_automation_readiness"] is True
     assert ar["next_is_new_candidate"] is False
     assert ar["surfaces_agree"] is True
     md = mr.render_markdown(report)
-    assert "ACTIVE CANDIDATE" in md
-    assert "C19_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in md
-    assert "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in md
-    # the what-to-do-next line points at the C19 spec-decision gate
-    assert "HUMAN_DECISION_C19_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in (
-        report["what_to_do_next"])
+    assert "AUTOMATION READINESS" in md
+    assert "C19_REJECTED_AT_REAL_CANDLE_LABELS" in md
+    assert "rejected at real_candle_labels_neutrality_gate" in md
+    # the next gate is automation readiness, NOT the cleared labels gate
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in md
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" not in md
+    # the what-to-do-next line points at automation readiness
+    assert "AUTOMATION READINESS" in report["what_to_do_next"]
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in report["what_to_do_next"]
 
 
 def test_morning_report_shows_next_strategy_memo_as_provenance():
