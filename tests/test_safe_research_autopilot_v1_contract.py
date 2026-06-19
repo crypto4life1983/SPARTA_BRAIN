@@ -119,7 +119,7 @@ def test_refuses_proposing_a_rejected_family():
         assert d["is_hard_stop"] is True
 
 
-def test_default_ledger_contains_c10_through_c17():
+def test_default_ledger_contains_c10_through_c18():
     led = sara.DEFAULT_REJECTED_FAMILIES
     for fam in ("intraweek_calendar_seasonality_drift",
                 "cross_asset_dispersion_reversion",
@@ -128,9 +128,10 @@ def test_default_ledger_contains_c10_through_c17():
                 "conviction_bar_follow_through",
                 "slow_vol_targeted_time_series_momentum",
                 "cointegration_pairs_market_neutral",
-                "risk_adjusted_portfolio_construction_vol_targeted_allocation"):
+                "risk_adjusted_portfolio_construction_vol_targeted_allocation",
+                "h4_trend_following_market_structure"):
         assert fam in led, fam
-    assert len(led) == 22
+    assert len(led) == 23
 
 
 # ---- forbidden gates: any labels/replay/etc stage -> hard stop -------------

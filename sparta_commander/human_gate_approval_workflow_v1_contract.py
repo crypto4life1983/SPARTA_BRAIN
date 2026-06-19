@@ -80,24 +80,6 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no auto-trading",
         ),
     },
-    "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT": {
-        "recommended_decision": "ADVANCE C18 TO CANDIDATE SPEC",
-        "stage_after_approval": "candidate_spec",
-        "allows": (
-            "build the candidate-spec contract (pure, declared rules)",
-            "define exact trend / entry / stop / exit / pyramiding / invalidation / "
-            "non-overlap rules",
-            "research-only validation",
-        ),
-        "forbids": (
-            "no detector build",
-            "no real data fetch",
-            "no labels",
-            "no replay/backtest/PnL",
-            "no optimization",
-            "no paper/live/broker/order code",
-        ),
-    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (

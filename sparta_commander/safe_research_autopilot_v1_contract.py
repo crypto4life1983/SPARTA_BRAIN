@@ -102,6 +102,7 @@ DEFAULT_REJECTED_FAMILIES = (
     "slow_vol_targeted_time_series_momentum",      # C15 (kept on record)
     "cointegration_pairs_market_neutral",          # C16 (kept on record)
     "risk_adjusted_portfolio_construction_vol_targeted_allocation",  # C17 (rejected at replay)
+    "h4_trend_following_market_structure",  # C18 (rejected at replay)
 )
 
 _CAPABILITY_FLAGS_FALSE = (

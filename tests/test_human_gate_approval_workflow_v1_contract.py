@@ -18,7 +18,7 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 
 _R = hgw.build_human_gate_workflow()
 
-GATE = "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+GATE = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
 
 
 # ---- core: research-only, pure, validates ----------------------------------
@@ -32,39 +32,34 @@ def test_workflow_research_only_and_validates():
 
 # ---- 1/2/3 mirrors the lane's current candidate / stage / gate -------------
 
-def test_mirrors_lane_c18_open_gate():
+def test_mirrors_lane_no_open_gate():
     ls = lane.get_lane_status()
-    # C18 is the active open candidate at the family_proposal gate
-    assert _R["active_candidate"] == "C18" == ls["active_candidate"]
-    assert _R["has_open_human_gate"] is True
+    # C17 is rejected -> the lane has NO active candidate and NO open human gate
+    assert _R["active_candidate"] is None == ls["active_candidate"]
+    assert _R["has_open_human_gate"] is False
     assert _R["current_human_gate"] == GATE == ls["next_required_action"]
-    assert _R["gate_recognized"] is True
-    # tamper: a stale gate must fail
-    bad = {**_R, "current_human_gate":
-           "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"}
+    assert _R["gate_recognized"] is False
+    # tamper: claiming an open gate while the lane has none must fail
+    bad = {**_R, "has_open_human_gate": True,
+           "approval_text_to_paste": "x"}
     assert hgw.validate_human_gate_workflow(bad)["valid"] is False
 
 
-# ---- 4 recommended safe next decision (C18 -> spec) ------------------------
+# ---- 4 recommended safe next decision (no open gate) -----------------------
 
-def test_recommended_decision_advance_c18_to_spec():
-    assert _R["recommended_decision"] == "ADVANCE C18 TO CANDIDATE SPEC"
-    assert _R["stage_after_approval"] == "candidate_spec"
+def test_recommended_decision_no_open_gate():
+    assert "NO OPEN CANDIDATE GATE" in _R["recommended_decision"]
+    assert _R["stage_after_approval"] is None
 
 
-# ---- 5 exact copyable approval text ----------------------------------------
+# ---- 5 no copyable approval text when no gate is open ----------------------
 
-def test_copyable_approval_text():
-    txt = _R["approval_text_to_paste"]
-    assert txt
-    assert GATE in txt
-    assert "ADVANCE C18 TO CANDIDATE SPEC" in txt
-    assert "h4_trend_following_market_structure_v1" in txt
-    assert "PROPOSAL_FROZEN_FOR_HUMAN_REVIEW -> candidate_spec" in txt
-    assert "Do not commit or push" in txt
-    # a reject alternative is also generated
-    assert _R["reject_text_to_paste"] and GATE in _R["reject_text_to_paste"]
-    assert "REJECT" in _R["reject_text_to_paste"]
+def test_no_copyable_approval_text_when_no_open_gate():
+    assert _R["approval_text_to_paste"] is None
+    assert _R["reject_text_to_paste"] is None
+    # tamper: a fabricated approval text while no gate is open must fail
+    bad = {**_R, "approval_text_to_paste": "paste me"}
+    assert hgw.validate_human_gate_workflow(bad)["valid"] is False
 
 
 # ---- 7 the gate-invariant operational forbids still hold -------------------
@@ -92,11 +87,11 @@ def test_does_not_auto_advance():
 
 # ---- 6/7 C17 rejected; downstream locked -----------------------------------
 
-def test_c17_rejected_and_downstream_locked():
+def test_c18_rejected_and_downstream_locked():
     # the workflow does not change the lane: C17 is rejected at fee-honest replay
     ls = lane.get_lane_status()
     assert (ls["last_rejected_candidate_detail"]["verdict"]
-            == "C17_REJECTED_AT_FEE_HONEST_REPLAY")
+            == "C18_REJECTED_AT_FEE_HONEST_REPLAY")
     assert _R["downstream_gates_locked"] is True
     sl = _R["safety_locks"]
     assert sl["real_data_qa"] == "BLOCKED"
@@ -156,11 +151,11 @@ def test_scope_locks_all_true():
 
 def test_summarize_for_panel():
     s = hgw.summarize_for_panel()
-    assert s["active_candidate"] == "C18"
-    assert s["has_open_human_gate"] is True
+    assert s["active_candidate"] is None
+    assert s["has_open_human_gate"] is False
     assert s["current_human_gate"] == GATE
-    assert s["recommended_decision"] == "ADVANCE C18 TO CANDIDATE SPEC"
-    assert GATE in s["approval_text_to_paste"]
+    assert "NO OPEN CANDIDATE GATE" in s["recommended_decision"]
+    assert s["approval_text_to_paste"] is None
     assert s["would_auto_advance"] is False
     assert s["ready_for_commit"] is False
     assert s["commit_approval_text"] is None

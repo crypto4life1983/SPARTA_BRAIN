@@ -65,19 +65,6 @@ def automation_readiness_block() -> dict[str, Any]:
             "next_is_automation_readiness": lane.get("next_is_automation_readiness"),
             "active_candidate": lane.get("active_candidate"),
             "open_candidate_gate": lane.get("open_candidate_gate"),
-            "active_candidate_label":
-                (lane.get("active_candidate_detail") or {}).get("label"),
-            "active_candidate_verdict":
-                (lane.get("active_candidate_detail") or {}).get("verdict"),
-            "active_candidate_stage_label":
-                (lane.get("active_candidate_detail") or {}).get("stage_label"),
-            "active_candidate_timeframe":
-                (lane.get("active_candidate_detail") or {}).get("timeframe"),
-            "active_candidate_scope_note":
-                (lane.get("active_candidate_detail") or {}).get("scope_note"),
-            "active_candidate_is_approximation_not_exact":
-                (lane.get("active_candidate_detail") or {}).get(
-                    "is_objective_approximation_not_exact_system"),
             "last_rejected_candidate": lane.get("last_rejected_candidate"),
             "last_rejected_candidate_verdict":
                 (lane.get("last_rejected_candidate_detail") or {}).get("verdict"),
@@ -338,35 +325,27 @@ def _render_automation_readiness_html(panel: dict) -> str:
                      'expected automation readiness.</div>'
                      % _esc(NEXT_CANDIDATE_DRIFT_TOKEN))
     parts.append('<div class="jv-am-h">Candidate research lane — '
-                 'ACTIVE CANDIDATE</div>')
+                 'AUTOMATION READINESS</div>')
     parts.append('<div class="jv-detail">C16 lifecycle complete: <b>%s</b> · '
                  'rejected ledger: <b>%s</b> families</div>'
                  % (_esc(ar.get("c16_lifecycle_complete")),
                     _esc(ar.get("rejected_ledger_count"))))
     if ar.get("active_candidate"):
-        parts.append('<div class="jv-detail">Active candidate: <b>%s</b> — %s '
-                     '(stage <b>%s</b>, verdict <code>%s</code>, timeframe %s, '
-                     'open gate %s)</div>'
+        parts.append('<div class="jv-detail">Active candidate: <b>%s</b> '
+                     '(open gate %s)</div>'
                      % (_esc(ar.get("active_candidate")),
-                        _esc(ar.get("active_candidate_label")),
-                        _esc(ar.get("active_candidate_stage_label")),
-                        _esc(ar.get("active_candidate_verdict")),
-                        _esc(ar.get("active_candidate_timeframe")),
                         _esc(ar.get("open_candidate_gate"))))
-        if ar.get("active_candidate_scope_note"):
-            parts.append('<div class="jv-detail">%s</div>'
-                         % _esc(ar.get("active_candidate_scope_note")))
-        parts.append('<div class="jv-detail">Objective approximation (NOT the '
-                     'observed trader\'s exact system): <b>%s</b></div>'
-                     % _esc(ar.get("active_candidate_is_approximation_not_exact")))
     else:
         parts.append('<div class="jv-detail">Active candidate: <b>none</b> '
                      '(open gate %s)</div>' % _esc(ar.get("open_candidate_gate")))
-    parts.append('<div class="jv-detail">Last rejected candidate: <b>%s</b> '
-                 '(verdict <code>%s</code>, rejected at %s)</div>'
-                 % (_esc(ar.get("last_rejected_candidate")),
-                    _esc(ar.get("last_rejected_candidate_verdict")),
-                    _esc(ar.get("last_rejected_candidate_rejected_at"))))
+        parts.append('<div class="jv-detail">Last candidate: <b>%s</b> '
+                     '(verdict <code>%s</code>, rejected at %s)</div>'
+                     % (_esc(ar.get("last_rejected_candidate")),
+                        _esc(ar.get("last_rejected_candidate_verdict")),
+                        _esc(ar.get("last_rejected_candidate_rejected_at"))))
+        if ar.get("last_rejected_candidate_reason"):
+            parts.append('<div class="jv-detail">%s</div>'
+                         % _esc(ar.get("last_rejected_candidate_reason")))
     parts.append('<div class="jv-detail">Next required action: <code>%s</code></div>'
                  % _esc(ar.get("next_required_action")))
     parts.append(_render_human_gate_workflow_html(panel))

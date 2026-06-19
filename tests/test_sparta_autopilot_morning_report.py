@@ -254,53 +254,50 @@ def _all_rejected_status():
     }
 
 
-def test_autopilot_plan_idle_defers_to_c18_active_gate():
-    # C18 is the active open candidate, so the idle plan defers to the C18 human
-    # spec decision -- NOT a new candidate, NOT automation readiness.
+def test_autopilot_plan_idle_defers_to_automation_readiness():
+    # C17 is REJECTED with no active candidate, so the idle plan defers to
+    # AUTOMATION READINESS -- NOT a new candidate, NOT an open candidate gate.
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ap = report["autopilot_plan"]
-    assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
+    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
     assert ap["would_auto_advance"] is False
     assert ap["next_is_new_candidate"] is False
     assert ap["planner_is_read_only"] is True
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
-    assert "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in md
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in md
 
 
-def test_morning_report_shows_c18_active_section():
+def test_morning_report_shows_c18_rejected_section():
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ar = report["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 22
-    assert ar["active_candidate"] == "C18"
-    assert ar["open_candidate_gate"] is True
-    assert ar["active_candidate_verdict"] == "C18_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
-    assert ar["active_candidate_timeframe"] == "H4"
-    assert ar["active_candidate_is_approximation_not_exact"] is True
-    assert ar["last_rejected_candidate"] == "C17"
-    assert ar["next_stage"] == "c18_candidate_spec_decision"
+    assert ar["rejected_ledger_count"] == 23
+    assert ar["active_candidate"] is None
+    assert ar["open_candidate_gate"] is False
+    assert ar["last_rejected_candidate"] == "C18"
+    assert ar["last_rejected_candidate_verdict"] == "C18_REJECTED_AT_FEE_HONEST_REPLAY"
+    assert ar["next_stage"] == "automation_readiness"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
-    assert ar["next_is_automation_readiness"] is False
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+    assert ar["next_is_automation_readiness"] is True
     assert ar["next_is_new_candidate"] is False
     assert ar["surfaces_agree"] is True
     md = mr.render_markdown(report)
-    assert "ACTIVE CANDIDATE" in md
-    assert "C18_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in md
-    assert "H4 market-structure" in md
-    assert "NOT the observed trader's exact system" in md
-    # the next gate is the C18 spec decision; C17 still shown as last rejected
-    assert "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in md
-    assert "C17_REJECTED_AT_FEE_HONEST_REPLAY" in md
-    # what-to-do-next points at the C18 decision
-    assert "ACTIVE open candidate" in report["what_to_do_next"]
-    assert "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in report["what_to_do_next"]
+    assert "AUTOMATION READINESS" in md
+    assert "C18_REJECTED_AT_FEE_HONEST_REPLAY" in md
+    assert "rejected at fee_honest_replay" in md
+    # the next gate is automation readiness, NOT the cleared labels gate
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in md
+    assert "ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT" not in md
+    # the what-to-do-next line points at automation readiness
+    assert "AUTOMATION READINESS" in report["what_to_do_next"]
+    assert "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY" in report["what_to_do_next"]
 
 
 def test_morning_report_shows_next_strategy_memo_as_provenance():

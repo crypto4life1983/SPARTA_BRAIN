@@ -138,21 +138,23 @@ def test_rejected_ledger_has_19_families_including_c14():
     assert "single_bar_conviction_continuation" in _R["rejected_family_lessons"]
 
 
-def test_current_rejected_ledger_is_22_including_c17():
-    # the CURRENT canonical ledger used for forward anti-loop now includes C17
+def test_current_rejected_ledger_is_23_including_c18():
+    # the CURRENT canonical ledger used for forward anti-loop now includes C18
     cur = _R["rejected_families_current"]
-    assert len(cur) == 22
-    assert _R["rejected_families_count"] == 22
+    assert len(cur) == 23
+    assert _R["rejected_families_count"] == 23
+    assert "h4_trend_following_market_structure" in cur
     assert "risk_adjusted_portfolio_construction_vol_targeted_allocation" in cur
     assert "cointegration_pairs_market_neutral" in cur
     assert "slow_vol_targeted_time_series_momentum" in cur
     assert "conviction_bar_follow_through" in cur
-    assert ("risk_adjusted_portfolio_construction_vol_targeted_allocation"
+    assert ("h4_trend_following_market_structure"
             in _R["rejected_family_lessons"])
-    # C15, C16 and C17 are all refused by the scorer's default anti-loop
+    # C15, C16, C17 and C18 are all refused by the scorer's default anti-loop
     for fam in ("slow_vol_targeted_time_series_momentum",
                 "cointegration_pairs_market_neutral",
-                "risk_adjusted_portfolio_construction_vol_targeted_allocation"):
+                "risk_adjusted_portfolio_construction_vol_targeted_allocation",
+                "h4_trend_following_market_structure"):
         s = rep.score_candidate_idea({
             "family": fam, "distinct_edge_axis": True,
             "materially_different_from_all_rejected": True, "durability_proxy": 0.9})

@@ -96,6 +96,19 @@ REJECTED_FAMILIES_C1_TO_C17 = REJECTED_FAMILIES_C1_TO_C16 + (
     "risk_adjusted_portfolio_construction_vol_targeted_allocation",   # C17
 )
 
+# --- the CURRENT canonical rejected ledger (C1-C18; 23 families). The C1-C17 tuple
+# above is kept FROZEN because the (already pushed) C17 AND C18 chains legitimately
+# reference it as it was while C18 was still an open candidate (count 22). New
+# proposals must use this 23-family ledger so C18 is never re-proposed. C18 (H4
+# market-structure trend-following) was REJECTED at the fee-honest replay stage: it
+# made +95.4% but failed BTC buy-and-hold risk-adjusted (Sharpe 0.52 vs 0.93, Calmar
+# 0.25 vs 0.60) and its 2026 forward-OOS edge did not hold -- lower drawdown alone is
+# not enough. (This rejects the objective C18 approximation, not the observed
+# trader's exact private system.)
+REJECTED_FAMILIES_C1_TO_C18 = REJECTED_FAMILIES_C1_TO_C17 + (
+    "h4_trend_following_market_structure",   # C18
+)
+
 # --- learning data distilled from C1-C16 (why each broad mechanism failed) ---
 REJECTED_FAMILY_LESSONS = {
     "calendar_seasonality": "C10: undifferentiated long-drift dressed as a "
@@ -127,6 +140,16 @@ REJECTED_FAMILY_LESSONS = {
         "forward-OOS edge did not hold; in a crypto bull, de-risking away from the "
         "biggest winner lowers risk-adjusted return -- lower drawdown alone is not "
         "an edge over simply holding the basket.",
+    "h4_trend_following_market_structure":
+        "C18: H4 market-structure trend-following (no-indicator, patience, "
+        "add-to-winners) cleared the labels structural gate (389 setups) but was "
+        "rejected at fee-honest replay -- it made +95.4% and cut max drawdown to "
+        "-38.2% yet did NOT beat BTC buy-and-hold (Sharpe 0.52 vs 0.93, Calmar 0.25 "
+        "vs 0.60), had a low 15.2% win rate with negative total R (-101.4, structural "
+        "stops bled faster than the pyramided winners recovered), and the 2026 "
+        "forward-OOS edge did not hold; lower drawdown alone is not an edge over "
+        "holding BTC. (Rejects the objective approximation, not the observed trader's "
+        "exact private system.)",
 }
 
 # --- THE C14 LESSON (preserved + operationalized) ---------------------------
@@ -241,7 +264,7 @@ def score_candidate_idea(idea: dict, rejected_families: Any = None) -> dict[str,
     weighted score that puts DURABILITY above TIMING (the C14 lesson). Builds
     nothing; recommends nothing executable."""
     rejected = set(rejected_families if rejected_families is not None
-                   else REJECTED_FAMILIES_C1_TO_C17)
+                   else REJECTED_FAMILIES_C1_TO_C18)
     family = idea.get("family")
     out: dict[str, Any] = {
         "family": family, "buildable": False, "priority_score": 0.0,
@@ -352,8 +375,8 @@ def build_research_expansion_plan(repo_root: Any = ".",
         "human_gated_stages": list(HUMAN_GATED_STAGES),
         "real_data_stages": list(REAL_DATA_STAGES),
         "rejected_families_c1_to_c14": list(REJECTED_FAMILIES_C1_TO_C14),
-        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C17),
-        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C17),
+        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C18),
+        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C18),
         "rejected_family_lessons": dict(REJECTED_FAMILY_LESSONS),
         "c14_lesson": C14_LESSON,
         "priority_weights": dict(PRIORITY_WEIGHTS),
@@ -445,19 +468,21 @@ def validate_research_expansion_plan(record: dict[str, Any]) -> dict[str, Any]:
     if len(led) != 19:
         failures.append("rejected_ledger_count_unexpected")
 
-    # CURRENT canonical ledger (C1-C17) used for forward anti-loop: must add C17
-    # (and still contain C16 + C15).
+    # CURRENT canonical ledger (C1-C18) used for forward anti-loop: must add C18
+    # (and still contain C17 + C16 + C15).
     cur = record.get("rejected_families_current") or []
+    if "h4_trend_following_market_structure" not in cur:
+        failures.append("current_ledger_missing_c18")
     if "risk_adjusted_portfolio_construction_vol_targeted_allocation" not in cur:
         failures.append("current_ledger_missing_c17")
     if "cointegration_pairs_market_neutral" not in cur:
         failures.append("current_ledger_missing_c16")
     if "slow_vol_targeted_time_series_momentum" not in cur:
         failures.append("current_ledger_missing_c15")
-    if len(cur) != 22:
+    if len(cur) != 23:
         failures.append("current_ledger_count_unexpected")
-    if record.get("rejected_families_count") != 22:
-        failures.append("rejected_families_count_not_22")
+    if record.get("rejected_families_count") != 23:
+        failures.append("rejected_families_count_not_23")
 
     # Portfolio objective declared, NOT computed.
     po = record.get("portfolio_objective") or {}

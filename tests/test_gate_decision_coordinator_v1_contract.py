@@ -32,15 +32,15 @@ def _clean_synced_state():
 
 # --- 1. clean synced + no open gate in state -> defer to lane (C17 active) ---
 
-def test_clean_synced_defers_to_lane_c18_open_gate():
-    # the lane now has C18 as the ACTIVE open candidate at the family_proposal gate,
-    # so the idle/default recommendation defers to the C18 human spec decision -- it
-    # does NOT drift to next-candidate and is not automation readiness.
+def test_clean_synced_defers_to_lane_automation_readiness():
+    # the lane now has C17 REJECTED with NO active candidate, so the idle/default
+    # recommendation defers to AUTOMATION READINESS -- it does NOT drift to
+    # next-candidate and there is no open candidate gate.
     d = gdc.coordinate(_clean_synced_state())
-    assert d["detected_gate"] == "active_candidate_open_gate"
-    assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
+    assert d["detected_gate"] == "candidate_lane_complete_automation_readiness"
+    assert d["recommendation_kind"] == gdc.REC_AUTOMATION_READINESS
     assert d["next_safe_command"] == (
-        "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
     assert d["next_research_recommended"] is False   # NOT a new candidate
     assert d["automation_lane_continues"] is True
     assert gdc.validate_coordinator_decision(d)["valid"] is True
@@ -196,9 +196,9 @@ def test_supports_morning_report_output():
     assert summ["decision_ready"] is True
     assert summ["paste_this"] == d["next_safe_command"]
     assert summ["requires_human_approval"] is True
-    # idle now defers to the C18 open candidate gate, not a new candidate
+    # idle now defers to automation readiness, not a new candidate
     assert summ["next_research_recommended"] is False
-    assert summ["paste_this"] == "HUMAN_DECISION_C18_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+    assert summ["paste_this"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     assert summ["automation_lane_continues"] is True
     assert summ["executes_nothing"] is True
     c15 = next(c for c in summ["closed_excluded"] if c["candidate"] == "C15")
@@ -216,7 +216,7 @@ def test_integrates_with_existing_pieces_does_not_replace():
     assert d["does_not_replace_autopilot_or_orchestrator"] is True
     assert d["replaces_autopilot_or_orchestrator"] is False
     # canonical ledger is reused, not redefined (22 = C1-C17)
-    assert gdc.EXPECTED_LEDGER_COUNT == 22
+    assert gdc.EXPECTED_LEDGER_COUNT == 23
 
 
 def test_capability_flags_all_false_and_tamper_rejected():
