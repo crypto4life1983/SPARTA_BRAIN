@@ -42,6 +42,7 @@ import sparta_commander.automation_readiness_next_strategy_research_memo_v1_cont
 import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as _lane  # noqa: E402,E501
 import sparta_commander.sparta_automation_v2_morning_integration_contract as _v2mi  # noqa: E402,E501
 import sparta_commander.sparta_automation_v2_daily_report_contract as _v2dr  # noqa: E402,E501
+import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _c22trk  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -354,6 +355,11 @@ def build_morning_report(run_state, git_summary: dict,
         "HUMAN_DECISION_C21_ADVANCE" not in str(_v2_token or "")
         and "HUMAN_DECISION_C21_ADVANCE" not in str(report.get(
             "authoritative_next_action") or ""))
+    # --- C22 Signum GC data-collection tracker (read-only directory listing) --
+    _gc_dir = REPO_ROOT / _c22trk.DATA_DIR
+    _gc_names = (sorted(p.name for p in _gc_dir.glob(_c22trk.EXPORT_GLOB)
+                        if p.is_file()) if _gc_dir.is_dir() else [])
+    report["c22_gc_collection_tracker"] = _c22trk.build_collection_status(_gc_names)
     return report
 
 
@@ -378,6 +384,11 @@ def render_markdown(report: dict) -> str:
                          "(`%s`) is SUPERSEDED by Automation V2 — follow the "
                          "Automation V2 next action above."
                          % r.get("legacy_recommended_token"))
+        lines.append("")
+    # --- C22 Signum GC data-collection tracker section -----------------------
+    _gc_trk = r.get("c22_gc_collection_tracker")
+    if _gc_trk:
+        lines.append(_c22trk.render_collection_section_markdown(_gc_trk))
         lines.append("")
     lines.append("**Run status:** `%s`" % r["run_status"])
     lines.append("")

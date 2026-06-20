@@ -32,6 +32,7 @@ import sparta_commander.automation_readiness_next_strategy_research_memo_v1_cont
 import sparta_commander.human_gate_approval_workflow_v1_contract as _hgw
 import sparta_commander.sparta_automation_v2_morning_integration_contract as _v2mi
 import sparta_commander.sparta_automation_v2_daily_report_contract as _v2dr
+import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _c22trk
 
 REPO_ROOT = Path(__file__).resolve().parent
 LATEST_JSON_REL = "reports/autopilot_morning/latest.json"
@@ -206,6 +207,24 @@ def _attach_automation_v2(panel: dict) -> None:
         "HUMAN_DECISION_C21_ADVANCE" not in str(v2_token or ""))
 
 
+def c22_gc_tracker_block() -> dict[str, Any]:
+    """Pure-ish. Read-only directory listing of staged frozen daily GC exports -> the C22
+    collection-progress status. Lists basenames only (opens / parses / fetches nothing).
+    Never raises."""
+    try:
+        data_dir = REPO_ROOT / _c22trk.DATA_DIR
+        names = (sorted(p.name for p in data_dir.glob(_c22trk.EXPORT_GLOB)
+                        if p.is_file()) if data_dir.is_dir() else [])
+        return _c22trk.build_collection_status(names)
+    except Exception:  # noqa: BLE001 -- the view must never crash the console
+        return _c22trk.build_collection_status([])
+
+
+def _attach_c22_gc_tracker(panel: dict) -> None:
+    """Pure. Attach the C22 Signum GC data-collection tracker status to the panel."""
+    panel["c22_gc_collection_tracker"] = c22_gc_tracker_block()
+
+
 def build_autopilot_morning_panel(report) -> dict[str, Any]:
     """Pure. Normalize the morning report (or None) into a JARVIS panel dict.
     Always returns a dict; never claims paper/live readiness."""
@@ -241,6 +260,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
         panel["safety_locks"] = panel["automation_readiness"].get(
             "safety_locks", {})
         _attach_automation_v2(panel)
+        _attach_c22_gc_tracker(panel)
         panel["html"] = render_autopilot_morning_html(panel)
         return panel
 
@@ -288,6 +308,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
     }
     panel["safety_locks"] = panel["automation_readiness"].get("safety_locks", {})
     _attach_automation_v2(panel)
+    _attach_c22_gc_tracker(panel)
     panel["html"] = render_autopilot_morning_html(panel)
     return panel
 
@@ -468,6 +489,15 @@ def _render_automation_v2_html(panel: dict) -> str:
     return "".join(parts)
 
 
+def _render_c22_gc_tracker_html(panel: dict) -> str:
+    """Pure. The C22 Signum GC data-collection tracker block (read-only progress)."""
+    trk = panel.get("c22_gc_collection_tracker") or {}
+    if not trk:
+        return ""
+    return ('<div class="jv-am-h">C22 GC data-collection tracker</div>'
+            + _c22trk.render_collection_section_html(trk))
+
+
 def render_autopilot_morning_html(panel: dict) -> str:
     """Pure. Server-rendered HTML fragment for the JARVIS panel body. No JS, no
     inline event handlers, no execution affordances. Never claims paper/live
@@ -482,6 +512,7 @@ def render_autopilot_morning_html(panel: dict) -> str:
                 % (_esc(status), _esc(NO_REPORT_MESSAGE)))
         # the AUTHORITATIVE Automation V2 next action is shown even with no report
         body = _render_automation_v2_html(panel) \
+            + _render_c22_gc_tracker_html(panel) \
             + _render_automation_readiness_html(panel)
         foot = ('<div class="jv-am-foot">Research-only status surface. '
                 'No paper/live-readiness claim.</div>'
@@ -498,6 +529,8 @@ def render_autopilot_morning_html(panel: dict) -> str:
                     _esc(panel.get("latest_run_record_id") or "—")))
     # the AUTHORITATIVE Automation V2 next-action block, rendered prominently first.
     parts.append(_render_automation_v2_html(panel))
+    # the C22 Signum GC data-collection tracker (research-only progress reminder).
+    parts.append(_render_c22_gc_tracker_html(panel))
     if panel.get("seed_brief_path"):
         parts.append('<div class="jv-detail">Latest seed brief: %s</div>'
                      % _esc(panel.get("seed_brief_path")))
