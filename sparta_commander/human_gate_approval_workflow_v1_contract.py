@@ -101,6 +101,29 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no paper/live/broker/order code",
         ),
     },
+    "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT": {
+        "recommended_decision": "ADVANCE C21 TO CANDIDATE SPEC",
+        "stage_after_approval": "candidate_spec",
+        "allows": (
+            "build the candidate-spec contract (pure, declared rules)",
+            "define the exact LOW-TURNOVER same-asset long-spot / short-perp funding "
+            "carry construction: mechanical-neutrality gate-zero, carry-regime gate, "
+            "entry/exit hysteresis, hold-persistence / minimum-hold, turnover & "
+            "round-trip limits, rebalance cadence, durable-carry-breakdown exits, "
+            "replay-win criteria (74 bps two-leg cost reserved)",
+            "research-only validation",
+        ),
+        "forbids": (
+            "no detector build",
+            "no real data fetch (use the frozen public BTC/ETH/SOL dataset only)",
+            "no new instrument class / XAUUSD",
+            "no labels",
+            "no replay/backtest/PnL",
+            "no optimization / rescue / tuning",
+            "no rescue or retune of C20 (C20 stays rejected)",
+            "no paper/live/broker/order code",
+        ),
+    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (

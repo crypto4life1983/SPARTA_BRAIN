@@ -337,7 +337,7 @@ def _render_automation_readiness_html(panel: dict) -> str:
                      'expected automation readiness.</div>'
                      % _esc(NEXT_CANDIDATE_DRIFT_TOKEN))
     parts.append('<div class="jv-am-h">Candidate research lane — '
-                 'AUTOMATION READINESS</div>')
+                 'ACTIVE CANDIDATE</div>')
     parts.append('<div class="jv-detail">C16 lifecycle complete: <b>%s</b> · '
                  'rejected ledger: <b>%s</b> families</div>'
                  % (_esc(ar.get("c16_lifecycle_complete")),

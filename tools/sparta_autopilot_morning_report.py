@@ -402,8 +402,7 @@ def render_markdown(report: dict) -> str:
                      % ap.get("excluded_rejected_families_count"))
     lines.append("- planner executes nothing (read-only; no build / labels / "
                  "replay / portfolio / paper / live).")
-    lines.append("## 14. Candidate research lane — AUTOMATION READINESS "
-                 "(no active candidate)")
+    lines.append("## 14. Candidate research lane — ACTIVE CANDIDATE")
     ar = r.get("automation_readiness") or {}
     lines.append("- C16 lifecycle complete: %s | rejected ledger: %s families"
                  % (ar.get("c16_lifecycle_complete"),
