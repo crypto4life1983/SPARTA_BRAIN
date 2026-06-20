@@ -30,6 +30,8 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari
 import sparta_commander.automation_readiness_next_strategy_research_memo_v1_contract as _memo
 import sparta_commander.human_gate_approval_workflow_v1_contract as _hgw
+import sparta_commander.sparta_automation_v2_morning_integration_contract as _v2mi
+import sparta_commander.sparta_automation_v2_daily_report_contract as _v2dr
 
 REPO_ROOT = Path(__file__).resolve().parent
 LATEST_JSON_REL = "reports/autopilot_morning/latest.json"
@@ -174,6 +176,36 @@ def load_latest_report(repo_root: Any = REPO_ROOT):
         return None
 
 
+def automation_v2_block(git_summary: dict | None = None) -> dict[str, Any]:
+    """Pure. The live Automation V2 morning section -- the AUTHORITATIVE next-action
+    block. Reads the FULL candidate chain (incl. the C22 data-readiness gate), so it is
+    correct even when the lane-derived legacy section is stale. Never raises."""
+    try:
+        return _v2mi.build_v2_morning_section(
+            _v2mi.repo_state_from_surface(git_summary or {}))
+    except Exception:  # noqa: BLE001 -- the view must never crash the console
+        return {"available": False, "section": "automation_v2_morning_packet"}
+
+
+def _attach_automation_v2(panel: dict) -> None:
+    """Pure. Attach the Automation V2 packet as the panel's AUTHORITATIVE next action and
+    mark the legacy lane-derived recommendation superseded when they disagree."""
+    v2 = automation_v2_block(panel.get("git_status_summary"))
+    panel["automation_v2"] = v2
+    v2_token = v2.get("next_human_approval_token")
+    legacy_token = (panel.get("automation_readiness") or {}).get(
+        "next_required_action")
+    panel["authoritative_next_action_source"] = "AUTOMATION_V2"
+    panel["authoritative_next_action"] = v2_token
+    panel["automation_v2_recommended_gate_kind"] = v2.get("recommended_gate_kind")
+    panel["automation_v2_artifact_dir"] = _v2dr.ARTIFACT_DIR
+    panel["legacy_recommendation_superseded_by_automation_v2"] = (
+        legacy_token != v2_token)
+    panel["legacy_recommended_token"] = legacy_token
+    panel["does_not_present_c21_advance_as_current_action"] = (
+        "HUMAN_DECISION_C21_ADVANCE" not in str(v2_token or ""))
+
+
 def build_autopilot_morning_panel(report) -> dict[str, Any]:
     """Pure. Normalize the morning report (or None) into a JARVIS panel dict.
     Always returns a dict; never claims paper/live readiness."""
@@ -208,6 +240,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
         }
         panel["safety_locks"] = panel["automation_readiness"].get(
             "safety_locks", {})
+        _attach_automation_v2(panel)
         panel["html"] = render_autopilot_morning_html(panel)
         return panel
 
@@ -254,6 +287,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
         "no_paper_live_readiness_claim": True,
     }
     panel["safety_locks"] = panel["automation_readiness"].get("safety_locks", {})
+    _attach_automation_v2(panel)
     panel["html"] = render_autopilot_morning_html(panel)
     return panel
 
@@ -413,6 +447,27 @@ def _render_automation_readiness_html(panel: dict) -> str:
     return "".join(parts)
 
 
+def _render_automation_v2_html(panel: dict) -> str:
+    """Pure. The AUTHORITATIVE Automation V2 next-action block (rendered prominently,
+    before the legacy lane sections). Marks the legacy recommendation superseded."""
+    v2 = panel.get("automation_v2") or {}
+    if not v2 or v2.get("available") is False:
+        return ""
+    parts = ['<div class="jv-am-h jv-am-gate">⚑ Automation V2 — Authoritative Next '
+             'Action</div>']
+    parts.append(_v2mi.render_v2_section_html(v2))
+    if panel.get("automation_v2_artifact_dir"):
+        parts.append('<div class="jv-detail">Daily report artifact path: '
+                     '<code>%s/</code></div>'
+                     % _esc(panel.get("automation_v2_artifact_dir")))
+    if panel.get("legacy_recommendation_superseded_by_automation_v2"):
+        parts.append('<div class="jv-detail jv-am-bad">⚠ The legacy autopilot '
+                     'recommendation below (<code>%s</code>) is SUPERSEDED by '
+                     'Automation V2 — follow the Automation V2 next action above.'
+                     '</div>' % _esc(panel.get("legacy_recommended_token")))
+    return "".join(parts)
+
+
 def render_autopilot_morning_html(panel: dict) -> str:
     """Pure. Server-rendered HTML fragment for the JARVIS panel body. No JS, no
     inline event handlers, no execution affordances. Never claims paper/live
@@ -425,8 +480,9 @@ def render_autopilot_morning_html(panel: dict) -> str:
                 '<div class="jv-am-status jv-am-muted">%s</div>'
                 '<div class="jv-detail">%s</div>'
                 % (_esc(status), _esc(NO_REPORT_MESSAGE)))
-        # automation-readiness status is shown even with no report
-        body = _render_automation_readiness_html(panel)
+        # the AUTHORITATIVE Automation V2 next action is shown even with no report
+        body = _render_automation_v2_html(panel) \
+            + _render_automation_readiness_html(panel)
         foot = ('<div class="jv-am-foot">Research-only status surface. '
                 'No paper/live-readiness claim.</div>'
                 '<div class="jv-detail">Full report: %s</div></div>'
@@ -440,6 +496,8 @@ def render_autopilot_morning_html(panel: dict) -> str:
     parts.append('<div class="jv-detail">Last run: %s · run id: %s</div>'
                  % (_esc(panel.get("last_run_time") or "—"),
                     _esc(panel.get("latest_run_record_id") or "—")))
+    # the AUTHORITATIVE Automation V2 next-action block, rendered prominently first.
+    parts.append(_render_automation_v2_html(panel))
     if panel.get("seed_brief_path"):
         parts.append('<div class="jv-detail">Latest seed brief: %s</div>'
                      % _esc(panel.get("seed_brief_path")))

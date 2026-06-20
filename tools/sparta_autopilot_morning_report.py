@@ -40,6 +40,8 @@ import sparta_commander.safe_research_autopilot_v1_contract as _sara  # noqa: E4
 import sparta_commander.automation_readiness_bundle_integration_v1_contract as _ari  # noqa: E402,E501
 import sparta_commander.automation_readiness_next_strategy_research_memo_v1_contract as _memo  # noqa: E402,E501
 import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as _lane  # noqa: E402,E501
+import sparta_commander.sparta_automation_v2_morning_integration_contract as _v2mi  # noqa: E402,E501
+import sparta_commander.sparta_automation_v2_daily_report_contract as _v2dr  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -330,6 +332,28 @@ def build_morning_report(run_state, git_summary: dict,
         "capability_flags": dict(CAPABILITY_FLAGS),
         "no_paper_live_readiness_claim": True,
     }
+    # --- Automation V2 packet: the AUTHORITATIVE next-action section ---------
+    # The V2 packet reads the FULL live candidate chain (incl. the C22 data-readiness
+    # gate), so it knows the true current next action even when the lane-derived legacy
+    # section is stale. It supersedes the legacy recommendation when they disagree.
+    _v2_section = _v2mi.build_v2_morning_section(
+        _v2mi.repo_state_from_surface(git_summary or {}))
+    report["automation_v2_packet"] = _v2_section
+    _v2_token = _v2_section.get("next_human_approval_token")
+    _legacy_token = (report.get("autopilot_plan") or {}).get("recommended_token")
+    report["automation_v2_recommended_gate_kind"] = (
+        _v2_section.get("recommended_gate_kind"))
+    report["automation_v2_artifact_dir"] = _v2dr.ARTIFACT_DIR
+    report["authoritative_next_action_source"] = "AUTOMATION_V2"
+    report["authoritative_next_action"] = _v2_token
+    report["legacy_recommendation_superseded_by_automation_v2"] = (
+        _legacy_token != _v2_token)
+    report["legacy_recommended_token"] = _legacy_token
+    # the dashboard never presents a C21 advance/reject as the current next action
+    report["does_not_present_c21_advance_as_current_action"] = (
+        "HUMAN_DECISION_C21_ADVANCE" not in str(_v2_token or "")
+        and "HUMAN_DECISION_C21_ADVANCE" not in str(report.get(
+            "authoritative_next_action") or ""))
     return report
 
 
@@ -341,6 +365,20 @@ def render_markdown(report: dict) -> str:
     lines.append("> Research-only status surface. No paper/live/broker/order "
                  "capability. Never a paper/live-readiness claim.")
     lines.append("")
+    # --- Automation V2: the AUTHORITATIVE next-action section (prominent) -----
+    _v2sec = r.get("automation_v2_packet")
+    if _v2sec:
+        lines.append("## ⚑ Automation V2 — Authoritative Next Action")
+        lines.append(_v2mi.render_v2_section_markdown(_v2sec))
+        if r.get("automation_v2_artifact_dir"):
+            lines.append("- Daily report artifact path: `%s/`"
+                         % r["automation_v2_artifact_dir"])
+        if r.get("legacy_recommendation_superseded_by_automation_v2"):
+            lines.append("> NOTE: the legacy autopilot recommendation below "
+                         "(`%s`) is SUPERSEDED by Automation V2 — follow the "
+                         "Automation V2 next action above."
+                         % r.get("legacy_recommended_token"))
+        lines.append("")
     lines.append("**Run status:** `%s`" % r["run_status"])
     lines.append("")
     lines.append("## 1. Last run time")
