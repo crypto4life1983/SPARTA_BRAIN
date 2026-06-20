@@ -67,15 +67,15 @@ def test_morning_report_sections_agree_no_candidate_drift():
     # (5) §13 clean-tree plan defers to the lane = the C21 open-candidate spec gate
     assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
     # (6) §14 shows C21 ACTIVE; C20 rejected at fee-honest replay (last rejected)
     assert ar["active_candidate"] == "C21"
     assert ar["last_rejected_candidate"] == "C20"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
     md = mr.render_markdown(report)
     assert "ACTIVE CANDIDATE" in md
-    assert "C21_DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW" in md
+    assert "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW" in md
     # (7) no next-candidate drift on any surface
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
     assert ar["next_is_new_candidate"] is False

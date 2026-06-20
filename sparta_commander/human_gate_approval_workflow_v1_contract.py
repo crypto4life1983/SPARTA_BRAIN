@@ -163,6 +163,30 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no paper/live/broker/order code",
         ),
     },
+    "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT": {
+        "recommended_decision": (
+            "ADVANCE C21 TO FEE-HONEST REPLAY / REVIEW (FROZEN PUBLIC DATA + FROZEN "
+            "LABELS ONLY)"),
+        "stage_after_approval": "fee_honest_replay_review",
+        "allows": (
+            "build the fee-honest replay/review unit ONLY on the frozen public "
+            "BTC/ETH/SOL dataset + the frozen C21 labels (no fetch, no re-detect)",
+            "apply the reserved 37/74 bps two-leg cost honestly to the FROZEN labels "
+            "and compare against the always-on carry benchmark",
+            "research-only validation; the replay decides accept/reject only",
+        ),
+        "forbids": (
+            "no new data fetch",
+            "no re-detection / re-labeling / re-parameterization",
+            "no replay parameter tuning or refit (apply the reserved 37/74 bps cost "
+            "honestly, once -- the replay decides accept/reject only)",
+            "no optimization / rescue / tuning",
+            "no new instrument class / XAUUSD",
+            "no rescue or retune of C20 (C20 stays rejected)",
+            "no paper/live/broker/order code",
+            "no capital allocation / portfolio promotion (separate later gate)",
+        ),
+    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (

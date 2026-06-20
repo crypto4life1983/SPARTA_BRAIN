@@ -95,3 +95,7 @@ data/crypto_basis_funding_research/
 # Candidate #20 mechanically-neutral spot/perp basis + funding carry --
 # gitignored real-candle labels artifacts (SHA-pinned in the review contract)
 data/mechanically_neutral_spot_perp_basis_funding_carry_c20/
+
+# Candidate #21 low-turnover same-asset spot/perp funding carry --
+# gitignored real-candle labels artifacts (SHA-pinned in the review contract)
+data/low_turnover_same_asset_spot_perp_funding_carry_c21/

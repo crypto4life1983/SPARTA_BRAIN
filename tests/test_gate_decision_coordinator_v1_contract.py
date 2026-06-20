@@ -40,7 +40,7 @@ def test_clean_synced_defers_to_lane_c21_open_gate():
     assert d["detected_gate"] == "active_candidate_open_gate"
     assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
     assert d["next_safe_command"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
     assert d["next_research_recommended"] is False   # NOT a new candidate
     assert d["automation_lane_continues"] is True
     assert gdc.validate_coordinator_decision(d)["valid"] is True
@@ -198,7 +198,7 @@ def test_supports_morning_report_output():
     assert summ["requires_human_approval"] is True
     # idle now defers to the C21 open-candidate spec-decision gate, not a new candidate
     assert summ["next_research_recommended"] is False
-    assert summ["paste_this"] == "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"
+    assert summ["paste_this"] == "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"
     assert summ["automation_lane_continues"] is True
     assert summ["executes_nothing"] is True
     c15 = next(c for c in summ["closed_excluded"] if c["candidate"] == "C15")

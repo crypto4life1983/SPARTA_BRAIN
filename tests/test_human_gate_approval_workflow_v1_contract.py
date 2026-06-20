@@ -18,7 +18,7 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 
 _R = hgw.build_human_gate_workflow()
 
-GATE = "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"
+GATE = "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"
 
 
 # ---- core: research-only, pure, validates ----------------------------------
@@ -47,8 +47,10 @@ def test_mirrors_lane_c21_open_gate():
 # ---- 4 recommended safe next decision (C21 open gate) ----------------------
 
 def test_recommended_decision_advance_c21_to_spec():
-    assert _R["recommended_decision"] == "ADVANCE C21 TO REAL-CANDLE LABELS / REVIEW (FROZEN PUBLIC DATA ONLY)"
-    assert _R["stage_after_approval"] == "real_candle_labels_review"
+    assert _R["recommended_decision"] == (
+        "ADVANCE C21 TO FEE-HONEST REPLAY / REVIEW (FROZEN PUBLIC DATA + FROZEN "
+        "LABELS ONLY)")
+    assert _R["stage_after_approval"] == "fee_honest_replay_review"
 
 
 # ---- 5 copyable approval text when the C21 gate is open --------------------
@@ -63,8 +65,10 @@ def test_copyable_approval_text_present():
 # ---- 7 the gate-invariant operational forbids still hold -------------------
 
 def test_approval_forbids_invariant():
+    # gate-invariant operational forbids (the replay gate ALLOWS replay on the frozen
+    # labels but still forbids replay tuning/refit, re-detection, and optimization).
     forbids = " || ".join(_R["approval_forbids"]).lower()
-    for must in ("data fetch", "replay", "optimization",
+    for must in ("data fetch", "re-detection", "replay", "optimization",
                  "paper/live/broker/order"):
         assert must in forbids, must
 
@@ -152,7 +156,9 @@ def test_summarize_for_panel():
     assert s["active_candidate"] == "C21"
     assert s["has_open_human_gate"] is True
     assert s["current_human_gate"] == GATE
-    assert s["recommended_decision"] == "ADVANCE C21 TO REAL-CANDLE LABELS / REVIEW (FROZEN PUBLIC DATA ONLY)"
+    assert s["recommended_decision"] == (
+        "ADVANCE C21 TO FEE-HONEST REPLAY / REVIEW (FROZEN PUBLIC DATA + FROZEN "
+        "LABELS ONLY)")
     assert s["approval_text_to_paste"] is not None
     assert s["would_auto_advance"] is False
     assert s["ready_for_commit"] is False
