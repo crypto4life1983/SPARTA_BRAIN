@@ -142,9 +142,11 @@ def build_v2_morning_section(repo_state: dict) -> dict[str, Any]:
     }
     for flag in _CAPABILITY_FLAGS_FALSE:
         section[flag] = False
-    # honest cross-check: while blocked, the recommendation is staging, never labels
+    # honest cross-check: True ONLY if the recommendation is actually ADVANCE while
+    # blocked (a dirty-repo RESOLVE_REPO or a pending PUSH legitimately takes priority and
+    # is NOT "advancing to labels").
     section["recommends_advancing_to_labels_while_blocked"] = (
-        c22_blocked and gate["recommendation_kind"] != _v2.REC_STAGE_DATA)
+        c22_blocked and gate["recommendation_kind"] == _v2.REC_ADVANCE)
     return section
 
 
@@ -265,10 +267,17 @@ def validate_v2_morning_section(section: dict) -> dict[str, Any]:
     if not section.get("last_verdict"):
         failures.append("last_verdict_missing")
 
-    # while C22 is DATA_NOT_READY: staging recommendation, never labels / fabricate
+    # while C22 is DATA_NOT_READY: staging recommendation when the repo is safe, never
+    # labels / fabricate. A dirty repo (RESOLVE_REPO) or pending push legitimately takes
+    # higher priority -- but the section must NEVER recommend advancing to labels.
     if section.get("c22_data_not_ready") is True:
-        if section.get("recommended_gate_kind") != _v2.REC_STAGE_DATA:
-            failures.append("blocked_must_recommend_staging")
+        rs = section.get("repo_sync") or {}
+        git_safe = (section.get("git_safe_to_automate") is True
+                    and int(rs.get("ahead", 0) or 0) == 0)
+        if git_safe and section.get("recommended_gate_kind") != _v2.REC_STAGE_DATA:
+            failures.append("blocked_must_recommend_staging_when_repo_safe")
+        if section.get("recommended_gate_kind") == _v2.REC_ADVANCE and git_safe:
+            failures.append("must_not_advance_to_labels_while_blocked")
         if section.get("do_not_proceed_to_labels") is not True:
             failures.append("must_say_do_not_proceed_to_labels")
         if section.get("do_not_fabricate_data") is not True:

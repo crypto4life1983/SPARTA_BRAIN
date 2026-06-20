@@ -56,6 +56,10 @@ reports/strategy_factory_routines/candidate_registry/
 # Autopilot morning report — generated runtime status surface (regenerable)
 reports/autopilot_morning/
 
+# Automation V2 daily decision report — generated read-only daily artifacts
+# (markdown + JSON; regenerable; never committed)
+reports/automation_v2_daily/
+
 # Candidate #11 cross-asset dispersion reversion — gitignored detector labels /
 # replay artifacts (real-candle outputs; SHA-pinned in the review contracts)
 data/cross_asset_dispersion_reversion_c11/
