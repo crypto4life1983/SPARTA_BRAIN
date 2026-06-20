@@ -9591,6 +9591,40 @@ def page_jarvis_autopilot_morning():
     return HTMLResponse(page, status_code=200)
 
 
+@app.get("/control", response_class=HTMLResponse)
+def page_sparta_control_panel():
+    """Read-only SPARTA Control Panel: renders the Bundle A current-state control
+    packet (repo + lane + C22 collection + scheduled-task health + suggested next
+    action). No execution affordances; tokens are suggestions only, never run."""
+    try:
+        import tools.sparta_current_state_once as _cs
+        import sparta_commander.sparta_control_panel_render_v1_contract as _cpr
+        packet = _cs.build_current_state()
+        body = _cpr.render_control_panel_html(packet)
+    except Exception as _exc:  # noqa: BLE001 -- the page must never crash
+        body = ("<div class='jv-am-status jv-am-bad'>Control panel unavailable "
+                "(%s)</div>" % type(_exc).__name__)
+    page = (
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        "<title>SPARTA — Control Panel</title><style>"
+        "body{background:#06121f;color:#cfe6ff;font-family:ui-monospace,"
+        "monospace;padding:24px;line-height:1.5}h1{font-size:16px;"
+        "letter-spacing:.12em;color:#9fe9ff}.jv-am-h{margin-top:14px;"
+        "font-weight:600;color:#bfe3ff}.jv-detail{color:#8fb4cc}"
+        ".jv-am-status{font-size:15px;font-weight:700;margin-bottom:6px}"
+        ".jv-am-ok{color:#5fffa0}.jv-am-warn{color:#ffd166}"
+        ".jv-am-bad{color:#ff6b6b}.jv-am-muted{color:#8aa6bb}"
+        ".jv-am-gate{color:#9fe9ff}.jv-am-paste code,code{background:#0a2236;"
+        "padding:2px 7px;border-radius:5px;color:#eaffd6}"
+        ".jv-am-foot{margin-top:16px;color:#6f8aa0;font-size:12px}"
+        "a{color:#7fd4ff}</style></head><body>"
+        "<h1>SPARTA — CONTROL PANEL</h1>" + (body or "") +
+        "<p class='jv-am-foot'>Read-only status surface. Tokens are suggestions "
+        "only — never auto-executed. <a href='/jarvis'>← JARVIS</a></p>"
+        "</body></html>")
+    return HTMLResponse(page, status_code=200)
+
+
 @app.get("/jarvis", response_class=HTMLResponse)
 def page_jarvis(request: Request):
     """Cinematic read-only command center. No execution affordances."""
