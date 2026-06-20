@@ -119,20 +119,20 @@ C20_REJECTION_REASON = (
     "explicit human approval.")
 C20_REPLAY_REVIEW_COMMIT = "59de8da7deb3cc25f951702bce63155235313052"
 
-# Candidate #21 -- the ACTIVE open candidate now at the CANDIDATE-SPEC review stage.
-# The C21 family proposal (low-turnover same-asset spot/perp funding carry) was
-# human-approved to advance into candidate-spec review; the candidate-spec contract is
-# committed and FROZEN_FOR_HUMAN_REVIEW. Built ON the preserved C20 lesson (the
-# always-on neutral carry is real; C20's high-turnover TIMING failed on churn cost) --
-# but it is NOT a rescue/retune of C20: C20 stays rejected. Frozen facts pinned to the
-# pushed C21 proposal + spec commits. The lane reports C21; it creates nothing, builds
-# no detector, runs no labels/replay, and advances nothing.
+# Candidate #21 -- the ACTIVE open candidate now at the DETECTOR-SPEC + SYNTHETIC
+# DRY-RUN review stage. The C21 candidate spec was human-approved to advance into the
+# detector-spec dry-run; the detector-spec contract + synthetic dry-run is built and
+# FROZEN_FOR_HUMAN_REVIEW on SYNTHETIC fixtures only. Built ON the preserved C20 lesson
+# (the always-on neutral carry is real; C20's high-turnover TIMING failed on churn
+# cost) -- but it is NOT a rescue/retune of C20: C20 stays rejected. Frozen facts pinned
+# to the pushed C21 proposal + spec commits. The lane reports C21; it ran NO real-candle
+# detection, NO labels, NO replay, and advances nothing.
 C21_CANDIDATE_ID = "C21"
 C21_FAMILY = "low_turnover_same_asset_spot_perp_funding_carry"
 C21_NAME = "low_turnover_same_asset_spot_perp_funding_carry_v1"
-C21_STAGE = "candidate_spec"
-C21_STAGE_LABEL = "SPEC_FROZEN_FOR_HUMAN_REVIEW"
-C21_VERDICT = "C21_SPEC_FROZEN_FOR_HUMAN_REVIEW"
+C21_STAGE = "detector_spec_dry_run"
+C21_STAGE_LABEL = "DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
+C21_VERDICT = "C21_DETECTOR_DRY_RUN_FROZEN_FOR_HUMAN_REVIEW"
 C21_TIMEFRAME = "D1"
 C21_UNIVERSE = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
 C21_LABEL = ("Low-turnover same-asset spot/perp funding carry — harvest the SAME "
@@ -144,11 +144,12 @@ C21_SCOPE_NOTE = ("frozen public BTC/ETH/SOL spot+perp+funding D1 only; no new d
                   "fetch; no XAUUSD / new instrument class; same-asset mechanical "
                   "neutrality is gate zero; LOW TURNOVER is a first-class design "
                   "constraint; carry source; NOT a rescue/retune of C20 (C20 stays "
-                  "rejected); candidate spec FROZEN for human review -- detector / "
-                  "labels / replay remain locked and unauthorized")
+                  "rejected); detector spec + SYNTHETIC dry-run FROZEN for human review "
+                  "-- real-candle detection / labels / replay remain locked and "
+                  "unauthorized")
 C21_PROPOSAL_COMMIT = "896a16eeee6ed1abd58b28fa75ebadaaff05d7bf"
 C21_SPEC_COMMIT = "316ebce733be0ce0496edf44219c6fe717bb2afd"
-C21_NEXT_GATE = "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"
+C21_NEXT_GATE = "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT"
 
 # The candidate-research lane summary: C13-C20 all rejected (kept on record); C21 is
 # now the ACTIVE open candidate at the family_proposal gate.
@@ -177,11 +178,12 @@ CANDIDATE_LANE = (
 # The PRIOR-stage automation-readiness token (stable; kept for provenance).
 AUTOMATION_READINESS_TOKEN = "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
 
-# C21 is the ACTIVE open candidate at the candidate-spec review stage, so the CURRENT
-# next human gate is the C21 detector-spec dry-run decision (an open candidate gate),
-# NOT automation readiness. Detector / labels / replay stay locked until that gate.
+# C21 is the ACTIVE open candidate at the detector-spec + synthetic dry-run review
+# stage, so the CURRENT next human gate is the C21 real-candle labels decision (an open
+# candidate gate), NOT automation readiness. Real-candle detection / labels / replay
+# stay locked until that gate.
 NEXT_REQUIRED_ACTION = C21_NEXT_GATE
-NEXT_STAGE = "c21_detector_spec_dry_run_decision"
+NEXT_STAGE = "c21_real_candle_labels_decision"
 
 _CAPABILITY_FLAGS_FALSE = (
     "executes", "writes_files", "runs_detector", "runs_labels", "runs_replay",
@@ -219,9 +221,10 @@ def get_lane_status() -> dict[str, Any]:
     Records C16 complete, the C1-C20 (25) rejected ledger (C17/C18/C20 rejected at
     fee-honest replay and C19 at the labels/neutrality gate, all kept on record), and
     that Candidate #21 (low-turnover same-asset spot/perp funding carry) is now the
-    ACTIVE open candidate at the CANDIDATE-SPEC review stage (spec frozen for human
-    review) awaiting the human detector-spec-dry-run decision. Detector / labels /
-    replay stay LOCKED. C20 stays rejected (not rescued/retuned). Executes nothing."""
+    ACTIVE open candidate at the DETECTOR-SPEC + SYNTHETIC DRY-RUN review stage (frozen
+    for human review on synthetic fixtures only) awaiting the human real-candle labels
+    decision. Real-candle detection / labels / replay stay LOCKED. C20 stays rejected
+    (not rescued/retuned). Executes nothing."""
     record: dict[str, Any] = {
         "version": LANE_STATUS_VERSION, "mode": LANE_STATUS_MODE, "lane": LANE,
         "is_pure_status_only": True,
@@ -229,15 +232,16 @@ def get_lane_status() -> dict[str, Any]:
             "Crypto-D1 candidate research lane status (READ-ONLY, RESEARCH ONLY). "
             "C16 lifecycle COMPLETE; rejected ledger C1-C20 (25 families); C20 stays "
             "CLOSED / REJECTED at fee-honest replay (kept on record, not rescued). "
-            "Candidate #21 is now the ACTIVE open candidate at the CANDIDATE-SPEC "
-            "review stage: low-turnover same-asset spot/perp funding carry (BTC/ETH/SOL "
-            "D1, frozen public data) -- harvests the SAME carry C20's always-on "
-            "benchmark proved real (+21.2%, Sharpe 1.09) but with LOW TURNOVER / hold "
-            "persistence so the 74 bps two-leg cost that killed C20 cannot dominate. "
-            "The candidate spec is FROZEN for human review; the next human gate is the "
-            "detector-spec dry-run decision and detector / labels / replay stay LOCKED "
-            "and unauthorized. Overnight/morning automation stays research-only and "
-            "human-gated. Executes nothing."),
+            "Candidate #21 is now the ACTIVE open candidate at the DETECTOR-SPEC + "
+            "SYNTHETIC DRY-RUN review stage: low-turnover same-asset spot/perp funding "
+            "carry (BTC/ETH/SOL D1, frozen public data) -- harvests the SAME carry "
+            "C20's always-on benchmark proved real (+21.2%, Sharpe 1.09) but with LOW "
+            "TURNOVER / hold persistence so the 74 bps two-leg cost that killed C20 "
+            "cannot dominate. The detector spec + synthetic dry-run is FROZEN for human "
+            "review; the next human gate is the real-candle labels decision and "
+            "real-candle detection / labels / replay stay LOCKED and unauthorized. "
+            "Overnight/morning automation stays research-only and human-gated. Executes "
+            "nothing."),
         # C16 completion (unchanged)
         "c16_lifecycle_complete": True,
         "c16_candidate_family": "cointegration_pairs_market_neutral",
@@ -270,8 +274,8 @@ def get_lane_status() -> dict[str, Any]:
             "is_rescue_or_retune_of_c20": False,
             "proposal_commit": C21_PROPOSAL_COMMIT,
             "spec_commit": C21_SPEC_COMMIT,
-            "spec_frozen_for_human_review": True,
-            "detector_labels_replay_locked": True,
+            "detector_synthetic_dry_run_frozen_for_human_review": True,
+            "real_candle_detection_labels_replay_locked": True,
             "next_action": C21_NEXT_GATE,
         },
         # C20 stays the last rejected candidate (provenance); C19 before it.
@@ -289,7 +293,7 @@ def get_lane_status() -> dict[str, Any]:
         "prior_rejected_candidate_verdict": C20_VERDICT,
         # next stage = the C21 human candidate-spec decision (open gate), NOT
         # automation readiness and NOT a new candidate (no C22 here).
-        "current_stage": "c21_candidate_spec_frozen_for_human_review",
+        "current_stage": "c21_detector_spec_synthetic_dry_run_frozen_for_human_review",
         "next_stage": NEXT_STAGE,
         "next_is_automation_readiness": False,
         "automation_readiness_was_prior_stage": True,
@@ -368,13 +372,14 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
     """Anti-tamper validator. Valid only when the status is research-only, status-
     only, records C16 complete + C1-C20 (25) ledger (C18/C20 rejected at fee-honest
     replay and C19 at the labels/neutrality gate, kept on record), marks Candidate #21
-    the ACTIVE open candidate at the CANDIDATE-SPEC review stage (low-turnover
-    same-asset spot/perp funding carry, market-neutral, low-turnover, carry source, NOT
-    a rescue/retune of C20; spec frozen for human review with detector/labels/replay
-    locked) whose next gate is the human detector-spec-dry-run decision (NOT automation
-    readiness and NOT a new candidate), keeps C20 as the last rejected candidate, keeps
-    the automation path research-only with all downstream capability blocked/locked, and
-    pins every capability flag False."""
+    the ACTIVE open candidate at the DETECTOR-SPEC + SYNTHETIC DRY-RUN review stage
+    (low-turnover same-asset spot/perp funding carry, market-neutral, low-turnover,
+    carry source, NOT a rescue/retune of C20; detector synthetic dry-run frozen for
+    human review with real-candle detection/labels/replay locked) whose next gate is the
+    human real-candle labels decision (NOT automation readiness and NOT a new
+    candidate), keeps C20 as the last rejected candidate, keeps the automation path
+    research-only with all downstream capability blocked/locked, and pins every
+    capability flag False."""
     failures: list = []
     if record.get("mode") != LANE_STATUS_MODE:
         failures.append("mode_not_research_only")
@@ -420,9 +425,9 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
     if det.get("family") != C21_FAMILY:
         failures.append("c21_family_mismatch")
     if det.get("verdict") != C21_VERDICT:
-        failures.append("c21_verdict_not_spec_frozen")
+        failures.append("c21_verdict_not_detector_dry_run_frozen")
     if det.get("stage") != C21_STAGE:
-        failures.append("c21_stage_not_candidate_spec")
+        failures.append("c21_stage_not_detector_spec_dry_run")
     if det.get("stage_label") != C21_STAGE_LABEL:
         failures.append("c21_stage_label_mismatch")
     if det.get("timeframe") != C21_TIMEFRAME:
@@ -437,10 +442,10 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
         failures.append("c21_return_source_not_carry")
     if det.get("is_rescue_or_retune_of_c20") is not False:
         failures.append("c21_must_not_be_c20_rescue")
-    if det.get("spec_frozen_for_human_review") is not True:
-        failures.append("c21_spec_not_frozen_for_review")
-    if det.get("detector_labels_replay_locked") is not True:
-        failures.append("c21_detector_labels_replay_not_locked")
+    if det.get("detector_synthetic_dry_run_frozen_for_human_review") is not True:
+        failures.append("c21_detector_dry_run_not_frozen_for_review")
+    if det.get("real_candle_detection_labels_replay_locked") is not True:
+        failures.append("c21_real_candle_detection_labels_replay_not_locked")
     if list(det.get("universe") or []) != ["BTCUSDT", "ETHUSDT", "SOLUSDT"]:
         failures.append("c21_universe_not_btc_eth_sol")
     if not (isinstance(det.get("proposal_commit"), str)
@@ -469,7 +474,7 @@ def validate_lane_status(record: dict[str, Any]) -> dict[str, Any]:
     # next stage = the C21 detector-spec dry-run decision (open gate), NOT automation
     # readiness and NOT a new candidate.
     if record.get("next_stage") != NEXT_STAGE:
-        failures.append("next_stage_not_c21_detector_spec_dry_run_decision")
+        failures.append("next_stage_not_c21_real_candle_labels_decision")
     if record.get("next_is_automation_readiness") is not False:
         failures.append("must_not_be_automation_readiness_while_c21_open")
     if record.get("next_is_new_candidate") is not False:

@@ -143,6 +143,26 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no paper/live/broker/order code",
         ),
     },
+    "HUMAN_DECISION_C21_ADVANCE_TO_REAL_CANDLE_LABELS_OR_REJECT": {
+        "recommended_decision": (
+            "ADVANCE C21 TO REAL-CANDLE LABELS / REVIEW (FROZEN PUBLIC DATA ONLY)"),
+        "stage_after_approval": "real_candle_labels_review",
+        "allows": (
+            "build the real-candle labels/review unit ONLY on the frozen public "
+            "BTC/ETH/SOL spot+perp+funding dataset (no fetch)",
+            "apply the FROZEN C21 low-turnover detector rules to produce labels only "
+            "(setup/entry/exit/hold/turnover/mechanical-neutrality counts)",
+            "research-only validation",
+        ),
+        "forbids": (
+            "no new data fetch",
+            "no replay/backtest/PnL",
+            "no optimization / rescue / tuning",
+            "no new instrument class / XAUUSD",
+            "no rescue or retune of C20 (C20 stays rejected)",
+            "no paper/live/broker/order code",
+        ),
+    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (
