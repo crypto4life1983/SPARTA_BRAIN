@@ -18,7 +18,7 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 
 _R = hgw.build_human_gate_workflow()
 
-GATE = "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"
+GATE = "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD"
 
 
 # ---- core: research-only, pure, validates ----------------------------------
@@ -34,41 +34,39 @@ def test_workflow_research_only_and_validates():
 
 def test_mirrors_lane_c21_open_gate():
     ls = lane.get_lane_status()
-    # C21 is the ACTIVE open candidate -> the lane has an open human gate
-    assert _R["active_candidate"] == "C21" == ls["active_candidate"]
-    assert _R["has_open_human_gate"] is True
+    # C21 is REJECTED -> there is NO open candidate ADVANCE gate; the lane's next
+    # required action is the C22 family-proposal readiness (an open-candidate decision,
+    # not a candidate ADVANCE gate the workflow registry maps).
+    assert ls["active_candidate"] is None
+    assert _R["active_candidate"] is None
+    assert _R["has_open_human_gate"] is False
     assert _R["current_human_gate"] == GATE == ls["next_required_action"]
-    assert _R["gate_recognized"] is True
-    # tamper: dropping the open-gate flag while the lane has one must fail
-    bad = {**_R, "has_open_human_gate": False}
+    # tamper: claiming an open gate while the lane has none must fail
+    bad = {**_R, "has_open_human_gate": True}
     assert hgw.validate_human_gate_workflow(bad)["valid"] is False
 
 
-# ---- 4 recommended safe next decision (C21 open gate) ----------------------
+# ---- 4 no open candidate gate -> no advance recommendation -----------------
 
 def test_recommended_decision_advance_c21_to_spec():
-    assert _R["recommended_decision"] == (
-        "ADVANCE C21 TO FEE-HONEST REPLAY / REVIEW (FROZEN PUBLIC DATA + FROZEN "
-        "LABELS ONLY)")
-    assert _R["stage_after_approval"] == "fee_honest_replay_review"
+    assert "NO OPEN CANDIDATE GATE" in _R["recommended_decision"]
+    assert "Candidate #22 family-proposal readiness" in _R["recommended_decision"]
+    assert _R["stage_after_approval"] is None
 
 
-# ---- 5 copyable approval text when the C21 gate is open --------------------
+# ---- 5 no copyable advance-approval text when no gate is open --------------
 
 def test_copyable_approval_text_present():
-    assert _R["approval_text_to_paste"] is not None
-    assert GATE in _R["approval_text_to_paste"]
-    assert "stop before commit" in _R["approval_text_to_paste"].lower()
-    assert _R["reject_text_to_paste"] is not None
+    assert _R["approval_text_to_paste"] is None
+    assert _R["reject_text_to_paste"] is None
 
 
 # ---- 7 the gate-invariant operational forbids still hold -------------------
 
 def test_approval_forbids_invariant():
-    # gate-invariant operational forbids (the replay gate ALLOWS replay on the frozen
-    # labels but still forbids replay tuning/refit, re-detection, and optimization).
+    # gate-invariant operational forbids present even with no open gate.
     forbids = " || ".join(_R["approval_forbids"]).lower()
-    for must in ("data fetch", "re-detection", "replay", "optimization",
+    for must in ("data fetch", "replay", "optimization",
                  "paper/live/broker/order"):
         assert must in forbids, must
 
@@ -90,9 +88,12 @@ def test_does_not_auto_advance():
 # ---- 6/7 C17 rejected; downstream locked -----------------------------------
 
 def test_c20_rejected_and_downstream_locked():
-    # the workflow does not change the lane: C20 is rejected at fee-honest replay
+    # the workflow does not change the lane: C21 is the last rejected (at replay), C20
+    # the prior rejected (at replay)
     ls = lane.get_lane_status()
     assert (ls["last_rejected_candidate_detail"]["verdict"]
+            == "C21_REJECTED_AT_FEE_HONEST_REPLAY")
+    assert (ls["prior_rejected_candidate_detail"]["verdict"]
             == "C20_REJECTED_AT_FEE_HONEST_REPLAY")
     assert _R["downstream_gates_locked"] is True
     sl = _R["safety_locks"]
@@ -153,13 +154,11 @@ def test_scope_locks_all_true():
 
 def test_summarize_for_panel():
     s = hgw.summarize_for_panel()
-    assert s["active_candidate"] == "C21"
-    assert s["has_open_human_gate"] is True
+    assert s["active_candidate"] is None
+    assert s["has_open_human_gate"] is False
     assert s["current_human_gate"] == GATE
-    assert s["recommended_decision"] == (
-        "ADVANCE C21 TO FEE-HONEST REPLAY / REVIEW (FROZEN PUBLIC DATA + FROZEN "
-        "LABELS ONLY)")
-    assert s["approval_text_to_paste"] is not None
+    assert "NO OPEN CANDIDATE GATE" in s["recommended_decision"]
+    assert s["approval_text_to_paste"] is None
     assert s["would_auto_advance"] is False
     assert s["ready_for_commit"] is False
     assert s["commit_approval_text"] is None

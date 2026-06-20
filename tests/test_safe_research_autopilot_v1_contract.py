@@ -131,9 +131,10 @@ def test_default_ledger_contains_c10_through_c20():
                 "risk_adjusted_portfolio_construction_vol_targeted_allocation",
                 "h4_trend_following_market_structure",
                 "oos_validated_beta_neutral_cross_sectional_relative_value",
-                "mechanically_neutral_spot_perp_basis_funding_carry"):
+                "mechanically_neutral_spot_perp_basis_funding_carry",
+                "low_turnover_same_asset_spot_perp_funding_carry"):
         assert fam in led, fam
-    assert len(led) == 25
+    assert len(led) == 26
 
 
 # ---- forbidden gates: any labels/replay/etc stage -> hard stop -------------

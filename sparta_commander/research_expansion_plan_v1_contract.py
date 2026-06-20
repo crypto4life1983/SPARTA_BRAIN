@@ -139,6 +139,23 @@ REJECTED_FAMILIES_C1_TO_C20 = REJECTED_FAMILIES_C1_TO_C19 + (
     "mechanically_neutral_spot_perp_basis_funding_carry",   # C20
 )
 
+# --- the CURRENT canonical rejected ledger (C1-C21; 26 families). The C1-C20 tuple
+# above is kept FROZEN because the (already pushed) C21 chain references it as it was
+# while C21 was still an open candidate (count 25). New proposals must use this
+# 26-family ledger so C21 is never re-proposed. C21 (low-turnover same-asset spot/perp
+# funding carry) was REJECTED at the fee-honest replay stage: unlike C20 the LOW-TURNOVER
+# design WORKED (20 trades, cost drag 14.8%, net +20.2% / Sharpe 1.05 vs C20's -74.5%),
+# but it does NOT beat the trivial always-on neutral-carry null (+21.2%, Sharpe 1.09) and
+# the 2026 forward-OOS fails (strategy -1.0%, null -0.5%); 2 of 4 decisive gates pass and
+# the two decisive market-neutral gates (beats-null, forward-OOS) fail. The SPARTA
+# Pipeline Audit v1 cross-checks all pass, so this is an EDGE-driven rejection, not a
+# fee/funding/lookahead/duplicate/alignment artifact. The carry SOURCE is real but free
+# (it is the null) and OOS-fragile; the detector timing adds no edge. The always-on carry
+# itself would be a SEPARATE future candidate only under explicit human approval.
+REJECTED_FAMILIES_C1_TO_C21 = REJECTED_FAMILIES_C1_TO_C20 + (
+    "low_turnover_same_asset_spot_perp_funding_carry",   # C21
+)
+
 # --- learning data distilled from C1-C16 (why each broad mechanism failed) ---
 REJECTED_FAMILY_LESSONS = {
     "calendar_seasonality": "C10: undifferentiated long-drift dressed as a "
@@ -200,6 +217,20 @@ REJECTED_FAMILY_LESSONS = {
         "this rejects the TIMING/churn, not the carry. A LOW-TURNOVER always-on carry "
         "may deserve a separate future candidate under explicit human approval -- "
         "churn cost, not signal, is the killer here.",
+    "low_turnover_same_asset_spot_perp_funding_carry":
+        "C21: low-turnover same-asset spot/perp funding carry was the low-turnover "
+        "answer to C20 -- and the low-turnover design WORKED: 20 trades (cost drag "
+        "14.8% vs C20's 521%) kept it net +20.2% (Sharpe 1.05; gross +25.7%, Sharpe "
+        "1.31), validating that CHURN, not signal, killed C20. BUT it was REJECTED at "
+        "fee-honest replay because it does NOT beat the trivial always-on neutral-carry "
+        "null (+21.2%, Sharpe 1.09) and the 2026 forward-OOS fails (strategy -1.0%, null "
+        "-0.5%): 2 of 4 decisive gates pass, the two decisive gates (beats-null, "
+        "forward-OOS) fail. SPARTA Pipeline Audit v1 confirms this is not a fee/funding/"
+        "lookahead/duplicate/alignment artifact. The carry SOURCE is real but FREE (it "
+        "is the null) and OOS-fragile; the detector timing adds no edge. Two lessons: "
+        "(1) low turnover fixes the churn; (2) same-asset carry timing adds no edge over "
+        "the always-on null -- the always-on carry itself is a SEPARATE future candidate "
+        "only with explicit human approval.",
 }
 
 # --- THE C14 LESSON (preserved + operationalized) ---------------------------
@@ -314,7 +345,7 @@ def score_candidate_idea(idea: dict, rejected_families: Any = None) -> dict[str,
     weighted score that puts DURABILITY above TIMING (the C14 lesson). Builds
     nothing; recommends nothing executable."""
     rejected = set(rejected_families if rejected_families is not None
-                   else REJECTED_FAMILIES_C1_TO_C20)
+                   else REJECTED_FAMILIES_C1_TO_C21)
     family = idea.get("family")
     out: dict[str, Any] = {
         "family": family, "buildable": False, "priority_score": 0.0,
@@ -425,8 +456,8 @@ def build_research_expansion_plan(repo_root: Any = ".",
         "human_gated_stages": list(HUMAN_GATED_STAGES),
         "real_data_stages": list(REAL_DATA_STAGES),
         "rejected_families_c1_to_c14": list(REJECTED_FAMILIES_C1_TO_C14),
-        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C20),
-        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C20),
+        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C21),
+        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C21),
         "rejected_family_lessons": dict(REJECTED_FAMILY_LESSONS),
         "c14_lesson": C14_LESSON,
         "priority_weights": dict(PRIORITY_WEIGHTS),
@@ -521,6 +552,8 @@ def validate_research_expansion_plan(record: dict[str, Any]) -> dict[str, Any]:
     # CURRENT canonical ledger (C1-C18) used for forward anti-loop: must add C18
     # (and still contain C17 + C16 + C15).
     cur = record.get("rejected_families_current") or []
+    if "low_turnover_same_asset_spot_perp_funding_carry" not in cur:
+        failures.append("current_ledger_missing_c21")
     if "mechanically_neutral_spot_perp_basis_funding_carry" not in cur:
         failures.append("current_ledger_missing_c20")
     if "oos_validated_beta_neutral_cross_sectional_relative_value" not in cur:
@@ -533,10 +566,10 @@ def validate_research_expansion_plan(record: dict[str, Any]) -> dict[str, Any]:
         failures.append("current_ledger_missing_c16")
     if "slow_vol_targeted_time_series_momentum" not in cur:
         failures.append("current_ledger_missing_c15")
-    if len(cur) != 25:
+    if len(cur) != 26:
         failures.append("current_ledger_count_unexpected")
-    if record.get("rejected_families_count") != 25:
-        failures.append("rejected_families_count_not_25")
+    if record.get("rejected_families_count") != 26:
+        failures.append("rejected_families_count_not_26")
 
     # Portfolio objective declared, NOT computed.
     po = record.get("portfolio_objective") or {}

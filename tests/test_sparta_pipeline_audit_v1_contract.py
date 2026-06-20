@@ -192,15 +192,17 @@ def test_c21_audit_hooks_hold_and_replay_not_started():
 
 def test_c21_unchanged_and_no_replay_paper_live():
     ls = lane.get_lane_status()
-    assert _R["active_candidate"] == "C21" == ls["active_candidate"]
-    assert _R["active_candidate_unchanged"] is True
-    assert _R["active_candidate_stage"] == "real_candle_labels_review"
-    assert _R["active_candidate_verdict"] == "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW"
+    # the audit was the pre-replay guardrail; C21 has since been rejected at replay
+    assert _R["active_candidate"] is None
+    assert ls["active_candidate"] is None
+    assert _R["active_candidate_is_none"] is True
+    assert _R["c21_now_rejected_at_replay"] is True
+    assert _R["c21_rejection_was_edge_driven_not_artifact"] is True
     assert _R["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
-    assert _R["next_gate_unchanged"] is True
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
+    assert _R["next_is_c22_proposal_readiness"] is True
     assert _R["c20_remains_rejected"] is True
-    assert _R["rejected_ledger_count"] == 25
+    assert _R["rejected_ledger_count"] == 26
     assert _R["c22_started"] is False
     assert _R["c21_replay_started"] is False
     # the audit itself opens NO execution permission
@@ -244,9 +246,9 @@ def test_validator_catches_tampered_category_and_known_truth():
     bad_k["known_loser_fails"] = {**bad_k["known_loser_fails"], "fails": False}
     bad2 = {**_R, "known_truth_cases": bad_k}
     assert a.validate_pipeline_audit(bad2)["valid"] is False
-    # flipping the next gate (as if replay opened) must fail
+    # flipping the next directive away from the C22 readiness must fail
     bad3 = {**_R, "next_required_action": "HUMAN_DECISION_C21_REPLAY_RUNNING",
-            "next_gate_unchanged": False}
+            "next_is_c22_proposal_readiness": False}
     assert a.validate_pipeline_audit(bad3)["valid"] is False
 
 
@@ -258,9 +260,10 @@ def test_summarize_for_morning_report():
     assert summ["pipeline_audit_available"] is True
     assert summ["research_only"] is True
     assert summ["all_categories_pass"] is True
-    assert summ["active_candidate"] == "C21"
-    assert summ["active_candidate_unchanged"] is True
-    assert summ["next_gate_unchanged"] is True
+    assert summ["active_candidate"] is None
+    assert summ["active_candidate_is_none"] is True
+    assert summ["c21_now_rejected_at_replay"] is True
+    assert summ["next_is_c22_proposal_readiness"] is True
     assert summ["c20_remains_rejected"] is True
     assert summ["c22_started"] is False
     assert summ["c21_replay_started"] is False

@@ -176,6 +176,17 @@ def _what_to_do_next(run_status, gate, candidate_status) -> str:
                     % (run_status.lower(), closed_note, ls.get("active_candidate"),
                        det.get("label"), det.get("stage_label"),
                        ls.get("next_required_action")))
+        if ls.get("next_is_new_candidate") is True:
+            rej = ls.get("last_rejected_candidate_detail") or {}
+            nxt = ls.get("next_candidate_readiness") or {}
+            return ("Last run was %s.%s Candidate %s is REJECTED at %s (kept on "
+                    "record). The next stage is the Candidate %s family-proposal "
+                    "READINESS only (human-gated) — no candidate is active. To open "
+                    "it, paste: %s ."
+                    % (run_status.lower(), closed_note,
+                       ls.get("last_rejected_candidate"), rej.get("rejected_at"),
+                       (nxt.get("candidate") or "22").lstrip("C"),
+                       ls.get("next_required_action")))
         return ("Last run was %s. No open human decision right now.%s The "
                 "candidate-research lane is at AUTOMATION READINESS (research-only, "
                 "human-gated). To proceed, paste: %s ."
@@ -241,6 +252,19 @@ def _autopilot_plan(candidate_status: dict, git_summary: dict) -> dict:
             plan["reason"] = ("candidate %s is an open frozen artifact; recommend "
                               "its human decision (advance or reject)"
                               % ls.get("active_candidate"))
+        elif ls.get("next_is_new_candidate") is True:
+            # the lane's last candidate was rejected (kept on record); the next stage is
+            # a new-candidate family-proposal READINESS that requires an explicit human
+            # open-candidate approval -> defer to that human decision (not an auto build).
+            plan["next_safe_action"] = "RECOMMEND_GATE_DECISION"
+            plan["recommended_token"] = ls.get("next_required_action")
+            plan["decision"] = "NEXT_CANDIDATE_PROPOSAL_READINESS"
+            plan["would_auto_advance"] = False
+            plan["next_is_new_candidate"] = True
+            _nxt = ls.get("next_candidate_readiness") or {}
+            plan["reason"] = ("the lane's last candidate is rejected (kept on record); "
+                              "the next stage is the %s family-proposal readiness only "
+                              "(human-gated)" % _nxt.get("candidate", "next"))
         elif ls.get("next_is_automation_readiness") is True:
             plan["next_safe_action"] = "RECOMMEND_AUTOMATION_READINESS_STEP"
             plan["recommended_token"] = _lane.AUTOMATION_READINESS_TOKEN

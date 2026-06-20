@@ -37,7 +37,7 @@ def test_prep_pure_and_validates():
 
 def test_c16_complete_and_ledger_25():
     assert _R["c16_lifecycle_complete"] is True
-    assert _R["rejected_ledger_count"] == 25
+    assert _R["rejected_ledger_count"] == 26
 
 
 # ---- (3) next action + (4) run-record gate aligned -------------------------
@@ -64,22 +64,21 @@ def test_morning_report_sections_agree_no_candidate_drift():
                  "next_action": "NONE (closed)"}})
     ap = report["autopilot_plan"]
     ar = report["automation_readiness"]
-    # (5) §13 clean-tree plan defers to the lane = the C21 open-candidate spec gate
+    # (5) §13 clean-tree plan defers to the lane = the C22 proposal-readiness gate
     assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
-    # (6) §14 shows C21 ACTIVE; C20 rejected at fee-honest replay (last rejected)
-    assert ar["active_candidate"] == "C21"
-    assert ar["last_rejected_candidate"] == "C20"
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
+    # (6) §14 shows NO active candidate; C21 rejected at fee-honest replay (last rejected)
+    assert ar["active_candidate"] is None
+    assert ar["last_rejected_candidate"] == "C21"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
     md = mr.render_markdown(report)
-    assert "ACTIVE CANDIDATE" in md
-    assert "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW" in md
-    # (7) no next-candidate drift on any surface
+    assert "C21_REJECTED_AT_FEE_HONEST_REPLAY" in md
+    # (7) no AUTO next-candidate drift (the C22 readiness is a human-gated decision)
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
-    assert ar["next_is_new_candidate"] is False
-    assert _R["next_is_new_candidate"] is False
+    assert ar["next_is_new_candidate"] is True
+    assert _R["next_is_new_candidate"] is True
 
 
 # ---- (8/9/10) research-only + downstream blocked/locked --------------------
@@ -123,10 +122,10 @@ def test_summarize_for_morning_report():
     summ = arp.summarize_for_morning_report()
     assert summ["section"] == "automation_readiness_research_prep"
     assert summ["c16_lifecycle_complete"] is True
-    assert summ["rejected_ledger_count"] == 25
+    assert summ["rejected_ledger_count"] == 26
     assert summ["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     assert summ["run_record_next_human_gate"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
-    assert summ["next_is_new_candidate"] is False
+    assert summ["next_is_new_candidate"] is True
     assert summ["goal_is_live_trading"] is False
     assert summ["executes_nothing"] is True
 

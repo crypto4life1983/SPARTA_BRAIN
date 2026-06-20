@@ -255,21 +255,21 @@ def _all_rejected_status():
 
 
 def test_autopilot_plan_idle_defers_to_c21_active_gate():
-    # C21 is the ACTIVE open candidate, so the idle plan defers to the C21 human
-    # spec-decision gate -- NOT a new candidate, NOT automation readiness.
+    # C21 is REJECTED; the idle plan defers to the C22 family-proposal readiness human
+    # decision -- NOT an auto new candidate, NOT automation readiness.
     report = mr.build_morning_report(_success_run_state(), _git_summary(),
                                      _all_rejected_status())
     ap = report["autopilot_plan"]
     assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
     assert ap["would_auto_advance"] is False
-    assert ap["next_is_new_candidate"] is False
+    assert ap["next_is_new_candidate"] is True
     assert ap["planner_is_read_only"] is True
     md = mr.render_markdown(report)
     assert "Safe Research Autopilot" in md
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
-    assert "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT" in md
+    assert "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD" in md
 
 
 def test_morning_report_shows_c21_active_section():
@@ -277,24 +277,22 @@ def test_morning_report_shows_c21_active_section():
                                      _all_rejected_status())
     ar = report["automation_readiness"]
     assert ar["c16_lifecycle_complete"] is True
-    assert ar["rejected_ledger_count"] == 25
-    assert ar["active_candidate"] == "C21"
-    assert ar["open_candidate_gate"] is True
-    assert ar["active_candidate_verdict"] == "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW"
-    assert ar["last_rejected_candidate"] == "C20"
-    assert ar["last_rejected_candidate_verdict"] == "C20_REJECTED_AT_FEE_HONEST_REPLAY"
-    assert ar["next_stage"] == "c21_fee_honest_replay_decision"
+    assert ar["rejected_ledger_count"] == 26
+    assert ar["active_candidate"] is None
+    assert ar["open_candidate_gate"] is False
+    assert ar["last_rejected_candidate"] == "C21"
+    assert ar["last_rejected_candidate_verdict"] == "C21_REJECTED_AT_FEE_HONEST_REPLAY"
+    assert ar["next_stage"] == "candidate_22_proposal_readiness"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
     assert ar["next_is_automation_readiness"] is False
-    assert ar["next_is_new_candidate"] is False
+    assert ar["next_is_new_candidate"] is True
     assert ar["surfaces_agree"] is True
     md = mr.render_markdown(report)
-    assert "ACTIVE CANDIDATE" in md
-    assert "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW" in md
-    assert "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT" in md
-    # the what-to-do-next line points at the C21 spec-decision gate
-    assert "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT" in (
+    assert "C21_REJECTED_AT_FEE_HONEST_REPLAY" in md
+    assert "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD" in md
+    # the what-to-do-next line points at the C22 proposal-readiness gate
+    assert "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD" in (
         report["what_to_do_next"])
 
 

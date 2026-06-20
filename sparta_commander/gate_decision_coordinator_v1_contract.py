@@ -47,9 +47,9 @@ INTEGRATES_WITH = (
     "rejected_ledger_status",
 )
 
-# The CURRENT canonical rejected ledger (C1-C15) -- reused, not redefined.
-CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C20)
-EXPECTED_LEDGER_COUNT = len(CANONICAL_REJECTED_FAMILIES)            # 25 (C1-C20)
+# The CURRENT canonical rejected ledger (C1-C21) -- reused, not redefined.
+CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C21)
+EXPECTED_LEDGER_COUNT = len(CANONICAL_REJECTED_FAMILIES)            # 26 (C1-C21)
 
 # The only token the coordinator may recommend to OPEN new research.
 NEXT_CANDIDATE_TOKEN = _rei.ALLOWED_BATCH_RECOMMENDED_TOKEN  # BUILD_NEXT_..._ONLY
@@ -215,6 +215,18 @@ def coordinate(state: dict) -> dict[str, Any]:
             reason = ("candidate %s is an open frozen artifact on the lane; "
                       "recommend its human decision (advance or reject)"
                       % _lane_status.get("active_candidate"))
+        elif _lane_status.get("next_is_new_candidate") is True:
+            # the lane has no active candidate (the last one was rejected) and the
+            # next stage is a new-candidate family-proposal READINESS that requires an
+            # explicit human open-candidate approval -> recommend that human decision.
+            rec_kind = REC_GATE_DECISION
+            detected_gate = "candidate_lane_next_proposal_readiness"
+            command = _lane_status.get("next_required_action")
+            _nxt = _lane_status.get("next_candidate_readiness") or {}
+            reason = ("the lane's last candidate was rejected (kept on record) and the "
+                      "next stage is the %s family-proposal readiness only (not "
+                      "implementation); recommend the human open-candidate decision"
+                      % _nxt.get("candidate", "next"))
         elif _lane_status.get("next_is_automation_readiness") is True:
             rec_kind = REC_AUTOMATION_READINESS
             detected_gate = "candidate_lane_complete_automation_readiness"

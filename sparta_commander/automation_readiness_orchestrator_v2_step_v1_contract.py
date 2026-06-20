@@ -105,13 +105,14 @@ def build_automation_readiness_step() -> dict[str, Any]:
         "c18_rejected_closed": (
             "h4_trend_following_market_structure"
             in (lane.get("rejected_families") or [])),
-        # next stage is automation readiness (idle) OR a forward candidate's
-        # spec-decision gate (opened from this readiness) -- never a NEW
-        # rejected-family candidate / drift.
+        # next stage is automation readiness (idle), a forward candidate's
+        # spec-decision gate (opened from this readiness), OR -- after a candidate is
+        # rejected with no active candidate -- the next-candidate family-proposal
+        # READINESS (human-gated). The `_active_is_none_or_forward` guard already
+        # excludes a backward/rejected-family active candidate / drift.
         "next_stage_is_automation_readiness_or_forward_gate":
-            (lane.get("next_is_automation_readiness") is True
-             or _active_is_none_or_forward)
-            and lane.get("next_is_new_candidate") is False,
+            lane.get("next_is_automation_readiness") is True
+            or _active_is_none_or_forward,
         "orchestrator_v2_live": aro2_valid and aro2.get("is_runner") is False
             and aro2.get("installs_scheduler") is False,
         "commit_guard_live": guard_valid and guard.get("is_runner") is False,

@@ -43,7 +43,10 @@ def test_reviews_live_lane_state():
     assert active is None or (active.startswith("C") and int(active[1:]) >= 19)
     assert _R["rejected_ledger_count"] >= 23
     assert _R["uses_c1_to_c18_ledger"] is True
-    assert _R["last_rejected_candidate"] in ("C18", "C19", "C20")
+    # forward-tolerant: the lane has since progressed; the last rejected candidate is
+    # any later rejection (>= C18) -- C18/C19/C20/C21/...
+    lrc = _R["last_rejected_candidate"]
+    assert lrc.startswith("C") and int(lrc[1:]) >= 18
     assert _R["c18_rejected_at_replay"] is True  # C18 present in the ledger
 
 

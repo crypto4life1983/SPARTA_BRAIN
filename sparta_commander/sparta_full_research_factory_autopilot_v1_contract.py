@@ -200,6 +200,7 @@ def build_factory_architecture() -> dict[str, Any]:
     detail = lane.get("active_candidate_detail") or {}
     rejected = lane.get("last_rejected_candidate")
     rej_detail = lane.get("last_rejected_candidate_detail") or {}
+    prior_detail = lane.get("prior_rejected_candidate_detail") or {}
     ledger_count = lane.get("rejected_ledger_count")
 
     record: dict[str, Any] = {
@@ -246,19 +247,25 @@ def build_factory_architecture() -> dict[str, Any]:
         # --- rejected-ledger lessons are respected -----------------------------
         "respects_rejected_ledger": True,
         "rejected_ledger_count": ledger_count,
-        "rejected_ledger_is_c1_to_c20": ledger_count == 25,
+        "rejected_ledger_is_c1_to_c21": ledger_count == 26,
         "never_reproposes_rejected_family": True,
         "never_retunes_rejected_candidate": True,
         # --- authoritative current state (from the lane) -----------------------
-        "active_candidate": active,
-        "active_candidate_authoritative": active == "C21",
-        "active_candidate_stage": detail.get("stage"),
-        "active_candidate_verdict": detail.get("verdict"),
+        # C21 is now REJECTED at fee-honest replay (kept on record, last rejected); there
+        # is NO active candidate. The next candidate (C22) is proposal-readiness only and
+        # NOT started -- it may only be created after this resolution, human-gated.
+        "active_candidate": active,                            # None
+        "active_candidate_is_none_authoritative": active is None,
+        "last_rejected_candidate": rejected,                  # C21
+        "c21_remains_rejected": (
+            rejected == "C21"
+            and rej_detail.get("verdict") == "C21_REJECTED_AT_FEE_HONEST_REPLAY"),
         "c20_remains_rejected": (
-            rejected == "C20"
-            and rej_detail.get("verdict") == "C20_REJECTED_AT_FEE_HONEST_REPLAY"),
+            prior_detail.get("verdict") == "C20_REJECTED_AT_FEE_HONEST_REPLAY"),
         "c22_started": False,
         "c22_candidate_id": None,
+        "c22_is_next_proposal_readiness_only": (
+            (lane.get("next_candidate_readiness") or {}).get("candidate") == "C22"),
         "c22_only_created_after_current_candidate_resolved": True,
         # --- posture -----------------------------------------------------------
         "requires_human_approval": True,
@@ -284,7 +291,9 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "human_gates_before": r["human_gates_before"],
         "hard_locks": r["hard_locks"],
         "active_candidate": r["active_candidate"],
-        "active_candidate_authoritative": r["active_candidate_authoritative"],
+        "active_candidate_is_none_authoritative": r["active_candidate_is_none_authoritative"],
+        "last_rejected_candidate": r["last_rejected_candidate"],
+        "c21_remains_rejected": r["c21_remains_rejected"],
         "c20_remains_rejected": r["c20_remains_rejected"],
         "c22_started": r["c22_started"],
         "requires_human_before_paper_trading": True,
@@ -356,16 +365,19 @@ def validate_factory_architecture(record: dict[str, Any]) -> dict[str, Any]:
     # rejected-ledger lessons respected
     if record.get("respects_rejected_ledger") is not True:
         failures.append("does_not_respect_rejected_ledger")
-    if record.get("rejected_ledger_count") != 25:
-        failures.append("rejected_ledger_count_not_25")
+    if record.get("rejected_ledger_count") != 26:
+        failures.append("rejected_ledger_count_not_26")
     if record.get("never_retunes_rejected_candidate") is not True:
         failures.append("retunes_rejected_candidate")
 
-    # authoritative state: C21 active, C20 rejected, C22 not started
-    if record.get("active_candidate") != "C21":
-        failures.append("active_candidate_not_c21")
-    if record.get("active_candidate_authoritative") is not True:
-        failures.append("active_candidate_not_authoritative")
+    # authoritative state: NO active candidate (C21 rejected); C21+C20 rejected; C22 not
+    # started (it is the next proposal-readiness candidate only).
+    if record.get("active_candidate") is not None:
+        failures.append("active_candidate_must_be_none")
+    if record.get("active_candidate_is_none_authoritative") is not True:
+        failures.append("active_none_not_authoritative")
+    if record.get("c21_remains_rejected") is not True:
+        failures.append("c21_not_rejected")
     if record.get("c20_remains_rejected") is not True:
         failures.append("c20_not_rejected")
     if record.get("c22_started") is not False:

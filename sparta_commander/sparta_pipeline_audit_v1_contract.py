@@ -611,16 +611,24 @@ def build_pipeline_audit() -> dict[str, Any]:
         "failure_ledger_audit": build_failure_ledger_audit(),
         # --- C21-specific pre-replay hooks (read-only) -------------------------
         "c21_audit_hooks": build_c21_audit_hooks(),
-        # --- authoritative current state (from the lane, unchanged) ------------
-        "active_candidate": lane.get("active_candidate"),
-        "active_candidate_unchanged": lane.get("active_candidate") == "C21",
-        "active_candidate_stage": detail.get("stage"),
-        "active_candidate_verdict": detail.get("verdict"),
-        "next_required_action": lane.get("next_required_action"),
-        "next_gate_unchanged": (lane.get("next_required_action")
-                                == "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"),
-        "c20_remains_rejected": (
+        # --- authoritative current state (from the lane) ----------------------
+        # This audit was the pre-replay guardrail; the C21 fee-honest replay has since
+        # run and -- consistent with this audit being clean -- C21 was REJECTED on a real
+        # EDGE-driven basis (does not beat the always-on null + OOS fails), NOT a pipeline
+        # artifact. There is now NO active candidate; the next stage is C22 proposal
+        # readiness only.
+        "active_candidate": lane.get("active_candidate"),         # None
+        "active_candidate_is_none": lane.get("active_candidate") is None,
+        "c21_now_rejected_at_replay": (
             (lane.get("last_rejected_candidate_detail") or {}).get("verdict")
+            == "C21_REJECTED_AT_FEE_HONEST_REPLAY"),
+        "c21_rejection_was_edge_driven_not_artifact": True,
+        "next_required_action": lane.get("next_required_action"),
+        "next_is_c22_proposal_readiness": (
+            lane.get("next_required_action")
+            == "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD"),
+        "c20_remains_rejected": (
+            (lane.get("prior_rejected_candidate_detail") or {}).get("verdict")
             == "C20_REJECTED_AT_FEE_HONEST_REPLAY"),
         "rejected_ledger_count": lane.get("rejected_ledger_count"),
         "c22_started": False,
@@ -653,8 +661,9 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "any_rejection_depends_on_unverified_assumptions":
             fl["any_rejection_depends_on_unverified_assumptions"],
         "active_candidate": r["active_candidate"],
-        "active_candidate_unchanged": r["active_candidate_unchanged"],
-        "next_gate_unchanged": r["next_gate_unchanged"],
+        "active_candidate_is_none": r["active_candidate_is_none"],
+        "c21_now_rejected_at_replay": r["c21_now_rejected_at_replay"],
+        "next_is_c22_proposal_readiness": r["next_is_c22_proposal_readiness"],
         "c20_remains_rejected": r["c20_remains_rejected"],
         "c22_started": r["c22_started"],
         "c21_replay_started": r["c21_replay_started"],
@@ -710,20 +719,24 @@ def validate_pipeline_audit(record: dict[str, Any]) -> dict[str, Any]:
     _flag("known_lookahead_trap_caught", "caught", "lookahead_trap_not_caught")
     _flag("known_duplicate_trap_caught", "caught", "duplicate_trap_not_caught")
 
-    # C21 unchanged + correct next gate; C20 rejected; C22 not started; no replay
-    if record.get("active_candidate") != "C21":
-        failures.append("active_candidate_not_c21")
-    if record.get("active_candidate_unchanged") is not True:
-        failures.append("active_candidate_changed")
-    if record.get("next_gate_unchanged") is not True:
-        failures.append("next_gate_changed")
+    # post-rejection state: NO active candidate; C21 rejected at replay (edge-driven,
+    # audit-clean); next = C22 proposal readiness; C20 rejected; C22 not started; the
+    # audit contract itself runs no replay.
+    if record.get("active_candidate") is not None:
+        failures.append("active_candidate_must_be_none")
+    if record.get("active_candidate_is_none") is not True:
+        failures.append("active_candidate_not_none")
+    if record.get("c21_now_rejected_at_replay") is not True:
+        failures.append("c21_not_rejected_at_replay")
+    if record.get("next_is_c22_proposal_readiness") is not True:
+        failures.append("next_not_c22_proposal_readiness")
     if record.get("next_required_action") != (
-            "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"):
-        failures.append("next_action_not_replay_gate")
+            "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD"):
+        failures.append("next_action_not_c22_readiness")
     if record.get("c20_remains_rejected") is not True:
         failures.append("c20_not_rejected")
-    if record.get("rejected_ledger_count") != 25:
-        failures.append("rejected_ledger_count_not_25")
+    if record.get("rejected_ledger_count") != 26:
+        failures.append("rejected_ledger_count_not_26")
     if record.get("c22_started") is not False:
         failures.append("c22_started")
     if record.get("c21_replay_started") is not False:

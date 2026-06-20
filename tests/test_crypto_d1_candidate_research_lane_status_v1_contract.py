@@ -45,9 +45,9 @@ def test_c16_lifecycle_complete_visible():
 # ---- rejected ledger C1-C16 (21) reused from REP ---------------------------
 
 def test_rejected_ledger_is_c1_to_c20_25():
-    assert _R["rejected_ledger_count"] == 25
-    assert _R["rejected_ledger_is_c1_to_c20"] is True
-    assert len(rep.REJECTED_FAMILIES_C1_TO_C20) == 25
+    assert _R["rejected_ledger_count"] == 26
+    assert _R["rejected_ledger_is_c1_to_c21"] is True
+    assert len(rep.REJECTED_FAMILIES_C1_TO_C21) == 26
     assert "cointegration_pairs_market_neutral" in _R["rejected_families"]
     assert "slow_vol_targeted_time_series_momentum" in _R["rejected_families"]
     assert ("risk_adjusted_portfolio_construction_vol_targeted_allocation"
@@ -57,69 +57,74 @@ def test_rejected_ledger_is_c1_to_c20_25():
             in _R["rejected_families"])
     assert ("mechanically_neutral_spot_perp_basis_funding_carry"
             in _R["rejected_families"])
+    assert ("low_turnover_same_asset_spot_perp_funding_carry"
+            in _R["rejected_families"])
     assert _R["c18_in_rejected_ledger"] is True
     assert _R["c19_in_rejected_ledger"] is True
     assert _R["c20_in_rejected_ledger"] is True
-    bad = {**_R, "rejected_ledger_count": 24}
+    assert _R["c21_in_rejected_ledger"] is True
+    bad = {**_R, "rejected_ledger_count": 25}
     assert lane.validate_lane_status(bad)["valid"] is False
 
 
-# ---- C21 is the ACTIVE open candidate at the REAL-CANDLE LABELS review stage ----
+# ---- C21 is now REJECTED at fee-honest replay; NO active candidate ---------
 
 def test_c21_active_candidate_at_detector_dry_run_review():
-    assert _R["active_candidate"] == "C21"
-    assert _R["open_candidate_gate"] is True
+    # there is NO active candidate (C21 rejected); next = C22 proposal readiness only
+    assert _R["active_candidate"] is None
+    assert _R["open_candidate_gate"] is False
+    assert _R["active_candidate_detail"] is None
     assert _R["next_is_automation_readiness"] is False
-    assert _R["next_is_new_candidate"] is False
-    assert _R["next_stage"] == "c21_fee_honest_replay_decision"
+    assert _R["next_is_new_candidate"] is True
+    assert _R["next_stage"] == "candidate_22_proposal_readiness"
     assert _R["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
-    det = _R["active_candidate_detail"]
-    assert det["candidate"] == "C21"
-    assert det["family"] == "low_turnover_same_asset_spot_perp_funding_carry"
-    assert det["verdict"] == "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW"
-    assert det["stage"] == "real_candle_labels_review"
-    assert det["stage_label"] == "LABELS_FROZEN_FOR_HUMAN_REVIEW"
-    assert det["timeframe"] == "D1"
-    assert det["universe"] == ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
-    assert det["is_market_neutral"] is True
-    assert det["is_mechanically_neutral_same_asset"] is True
-    assert det["is_low_turnover"] is True
-    assert det["return_source_is_carry_not_timing"] is True
-    assert det["is_rescue_or_retune_of_c20"] is False
-    # the labels are frozen for review (no fee-honest claim); replay/paper/live locked
-    assert det["labels_frozen_for_human_review"] is True
-    assert det["fee_honest_performance_claimed"] is False
-    assert det["replay_paper_live_locked"] is True
-    assert len(det["proposal_commit"]) == 40
-    assert len(det["spec_commit"]) == 40
-    assert len(det["detector_commit"]) == 40
-    assert det["next_action"] == "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
+    nxt = _R["next_candidate_readiness"]
+    assert nxt["candidate"] == "C22"
+    assert nxt["implementation_started"] is False
+    assert nxt["requires_explicit_human_open_candidate_approval"] is True
+    # C21 is the LAST rejected candidate, kept on record
+    rej = _R["last_rejected_candidate_detail"]
+    assert _R["last_rejected_candidate"] == "C21"
+    assert rej["family"] == "low_turnover_same_asset_spot_perp_funding_carry"
+    assert rej["verdict"] == "C21_REJECTED_AT_FEE_HONEST_REPLAY"
+    assert rej["rejected_at"] == "fee_honest_replay"
+    assert rej["rejection_reason_code"] == (
+        "EDGE_DOES_NOT_BEAT_ALWAYS_ON_NEUTRAL_CARRY_NULL_AND_FORWARD_OOS_FAILS")
+    assert rej["low_turnover_design_worked"] is True
+    assert rej["beats_always_on_null_after_costs"] is False
+    assert rej["carry_source_is_real"] is True
+    assert rej["not_a_pipeline_artifact"] is True
+    assert rej["is_rescue_or_retune_of_c20"] is False
+    assert len(rej["labels_review_commit"]) == 40
+    assert len(rej["detector_commit"]) == 40
     assert _R["c20_remains_rejected_not_rescued"] is True
-    # C21 present in the candidate lane as an active frozen (labels) candidate
+    assert _R["c21_remains_rejected_not_rescued"] is True
+    # C21 present in the candidate lane as REJECTED at fee-honest replay
     c21 = next(c for c in _R["candidate_lane"] if c["candidate"] == "C21")
-    assert c21["state"] == "PROPOSED_FROZEN_FOR_HUMAN_REVIEW"
-    assert c21["stage"] == "real_candle_labels_review"
-    # tamper: cannot unlock replay/paper/live while at the labels review stage
-    bad_det = {**det, "replay_paper_live_locked": False}
-    bad_lock = {**_R, "active_candidate_detail": bad_det}
-    assert lane.validate_lane_status(bad_lock)["valid"] is False
-    # tamper: cannot drop the active candidate / close the gate / rescue C20
-    bad = {**_R, "active_candidate": None}
+    assert c21["state"] == "REJECTED_KEPT_ON_RECORD"
+    assert c21["rejected_at"] == "fee_honest_replay"
+    # tamper: cannot re-activate a candidate / reopen the gate
+    bad = {**_R, "active_candidate": "C21"}
     assert lane.validate_lane_status(bad)["valid"] is False
-    bad2 = {**_R, "open_candidate_gate": False}
+    bad2 = {**_R, "open_candidate_gate": True}
     assert lane.validate_lane_status(bad2)["valid"] is False
     bad3 = {**_R, "next_is_automation_readiness": True}
     assert lane.validate_lane_status(bad3)["valid"] is False
+    # tamper: cannot claim C21 beat the null
+    bad_rej = {**rej, "beats_always_on_null_after_costs": True}
+    assert lane.validate_lane_status(
+        {**_R, "last_rejected_candidate_detail": bad_rej})["valid"] is False
 
 
 def test_c20_kept_on_record_as_last_rejected():
-    assert _R["last_rejected_candidate"] == "C20"
-    rej = _R["last_rejected_candidate_detail"]
-    assert rej["family"] == "mechanically_neutral_spot_perp_basis_funding_carry"
-    assert rej["verdict"] == "C20_REJECTED_AT_FEE_HONEST_REPLAY"
-    assert rej["rejected_at"] == "fee_honest_replay"
-    assert len(rej["replay_review_commit"]) == 40
+    # C20 is now the PRIOR rejected candidate (C21 is the last)
+    assert _R["prior_rejected_candidate"] == "C20"
+    pr = _R["prior_rejected_candidate_detail"]
+    assert pr["family"] == "mechanically_neutral_spot_perp_basis_funding_carry"
+    assert pr["verdict"] == "C20_REJECTED_AT_FEE_HONEST_REPLAY"
+    assert pr["rejected_at"] == "fee_honest_replay"
+    assert len(pr["replay_review_commit"]) == 40
     c20 = next(c for c in _R["candidate_lane"] if c["candidate"] == "C20")
     assert c20["state"] == "REJECTED_KEPT_ON_RECORD"
     assert c20["rejected_at"] == "fee_honest_replay"
@@ -133,14 +138,14 @@ def test_c19_kept_on_record_as_rejected():
 
 
 def test_c21_detector_dry_run_invariants_no_permissions_opened():
-    # C21 is the ONLY active candidate; the next gate is the fee-honest replay
-    # decision ONLY; replay/paper/live stay locked; C20 stays rejected (not
-    # rescued/retuned); C22 is not started anywhere on the lane surface.
+    # NO active candidate (C21 rejected); the next stage is the C22 proposal readiness
+    # ONLY; replay/paper/live stay locked; C20+C21 stay rejected; C22 is not started.
     active = [c for c in _R["candidate_lane"]
               if c["state"] == "PROPOSED_FROZEN_FOR_HUMAN_REVIEW"]
-    assert [c["candidate"] for c in active] == ["C21"]   # C21 is the only active one
+    assert active == []                                  # no active candidate
+    assert _R["active_candidate"] is None
     assert _R["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
     # no detector/labels/replay/data automation is authorized; all stay blocked/locked
     assert _R["real_data_qa_state"] == "BLOCKED"
     assert _R["replay_state"] == "BLOCKED"
@@ -148,15 +153,16 @@ def test_c21_detector_dry_run_invariants_no_permissions_opened():
     assert _R["runs_labels"] is False
     assert _R["runs_replay"] is False
     assert _R["fetches_data"] is False
-    assert _R["active_candidate_detail"]["replay_paper_live_locked"] is True
     # no paper/live/broker/order system is active
     assert _R["paper_trading_state"] == "LOCKED"
     assert _R["live_trading_state"] == "LOCKED"
     assert _R["places_orders"] is False
     assert _R["connects_broker"] is False
-    # C20 stays rejected (not rescued); no C22 anywhere
+    # C20+C21 stay rejected (not rescued); C22 not started anywhere on the lane
     assert _R["c20_remains_rejected_not_rescued"] is True
+    assert _R["c21_remains_rejected_not_rescued"] is True
     assert all(c["candidate"] != "C22" for c in _R["candidate_lane"])
+    assert _R["next_candidate_readiness"]["implementation_started"] is False
     assert _R["scope_locks"]["no_new_candidate"] is True
 
 
@@ -193,8 +199,8 @@ def test_human_approval_and_no_trading_action():
     for banned in ("PAPER", "LIVE", "EXECUTE", "BROKER", "ORDER", "FETCH",
                    "PROMOTE", "DEPLOY"):
         assert banned not in nra.upper(), banned
-    # C21 active -> the next action is the human fee-honest-replay-or-reject decision
-    assert nra == "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"
+    # C21 rejected -> the next action is the human open-C22-proposal-or-hold decision
+    assert nra == "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD"
 
 
 # ---- candidate lane summary -------------------------------------------------
@@ -210,7 +216,8 @@ def test_candidate_lane_summary_rejected_plus_c21_active():
     assert lane_rows["C18"]["rejected_at"] == "fee_honest_replay"
     assert lane_rows["C19"]["rejected_at"] == "real_candle_labels_neutrality_gate"
     assert lane_rows["C20"]["rejected_at"] == "fee_honest_replay"
-    assert lane_rows["C21"]["state"] == "PROPOSED_FROZEN_FOR_HUMAN_REVIEW"
+    assert lane_rows["C21"]["state"] == "REJECTED_KEPT_ON_RECORD"
+    assert lane_rows["C21"]["rejected_at"] == "fee_honest_replay"
 
 
 # ---- morning-report-style output -------------------------------------------
@@ -219,22 +226,23 @@ def test_summarize_for_morning_report():
     summ = lane.summarize_for_morning_report()
     assert summ["section"] == "candidate_research_lane_status"
     assert summ["c16_lifecycle_complete"] is True
-    assert summ["rejected_ledger_count"] == 25
-    assert summ["active_candidate"] == "C21"
-    assert summ["active_candidate_verdict"] == "C21_LABELS_FROZEN_FOR_HUMAN_REVIEW"
-    assert summ["active_candidate_stage"] == "real_candle_labels_review"
-    assert summ["active_candidate_is_market_neutral"] is True
-    assert summ["active_candidate_is_low_turnover"] is True
-    assert summ["open_candidate_gate"] is True
-    assert summ["last_rejected_candidate"] == "C20"
-    assert summ["last_rejected_candidate_verdict"] == "C20_REJECTED_AT_FEE_HONEST_REPLAY"
+    assert summ["rejected_ledger_count"] == 26
+    assert summ["active_candidate"] is None
+    assert summ["active_candidate_detail"] is None
+    assert summ["open_candidate_gate"] is False
+    assert summ["last_rejected_candidate"] == "C21"
+    assert summ["last_rejected_candidate_verdict"] == "C21_REJECTED_AT_FEE_HONEST_REPLAY"
     assert summ["last_rejected_candidate_rejected_at"] == "fee_honest_replay"
     assert summ["last_rejected_candidate_reason"]
-    assert summ["next_stage"] == "c21_fee_honest_replay_decision"
+    assert summ["last_rejected_candidate_reason_code"] == (
+        "EDGE_DOES_NOT_BEAT_ALWAYS_ON_NEUTRAL_CARRY_NULL_AND_FORWARD_OOS_FAILS")
+    assert summ["prior_rejected_candidate"] == "C20"
+    assert summ["next_stage"] == "candidate_22_proposal_readiness"
     assert summ["next_is_automation_readiness"] is False
-    assert summ["next_is_new_candidate"] is False
+    assert summ["next_is_new_candidate"] is True
+    assert summ["next_candidate_readiness"]["candidate"] == "C22"
     assert summ["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT")
+        "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD")
     assert summ["overnight_automation_research_only"] is True
     assert summ["executes_nothing"] is True
 

@@ -111,7 +111,7 @@ def build_automation_readiness_research_prep() -> dict[str, Any]:
         "next_required_action": NEXT_REQUIRED_ACTION,
         "run_record_next_human_gate": RUN_RECORD_NEXT_HUMAN_GATE,
         "surfaces_agree": integ.get("surfaces_agree"),
-        "next_is_new_candidate": False,
+        "next_is_new_candidate": lane.get("next_is_new_candidate"),
         # what overnight automation may / may not do
         "allowed_overnight_tasks_research_only":
             list(ALLOWED_OVERNIGHT_TASKS_RESEARCH_ONLY),
@@ -182,11 +182,11 @@ def validate_automation_readiness_research_prep(record: dict[str, Any]) -> dict[
     if record.get("goal_is_autonomous_candidate_creation") is not False:
         failures.append("goal_must_not_be_autonomous_candidate")
 
-    # C16 complete + ledger 25 (C17/C18/C20 rejected at replay; C19 at labels)
+    # C16 complete + ledger 26 (C17/C18/C20/C21 rejected at replay; C19 at labels)
     if record.get("c16_lifecycle_complete") is not True:
         failures.append("c16_not_complete")
-    if record.get("rejected_ledger_count") != 25:
-        failures.append("ledger_not_25")
+    if record.get("rejected_ledger_count") != 26:
+        failures.append("ledger_not_26")
 
     # aligned directive (all surfaces agree, run-record gate aligned, no candidate)
     if record.get("next_required_action") != NEXT_REQUIRED_ACTION:
@@ -198,8 +198,8 @@ def validate_automation_readiness_research_prep(record: dict[str, Any]) -> dict[
         failures.append("run_record_gate_still_next_candidate")
     if record.get("surfaces_agree") is not True:
         failures.append("surfaces_do_not_agree")
-    if record.get("next_is_new_candidate") is not False:
-        failures.append("next_must_not_be_new_candidate")
+    if record.get("next_is_new_candidate") is not True:
+        failures.append("next_must_be_new_candidate_readiness")
 
     # allowed vs forbidden action sets
     if record.get("all_next_actions_are_advisory_human_gated") is not True:

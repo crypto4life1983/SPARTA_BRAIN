@@ -49,7 +49,7 @@ REI_MODE = "RESEARCH_ONLY"
 # slow_vol_targeted_time_series_momentum / C15, AND cointegration_pairs_market_
 # neutral / C16). The integrated planner uses THIS for anti-loop so none of C14,
 # C15, or C16 can ever be re-proposed.
-CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C20)
+CANONICAL_REJECTED_FAMILIES = tuple(_rep.REJECTED_FAMILIES_C1_TO_C21)
 
 # The integrated batch may ONLY ever feed SARA's lowest-risk build gate.
 INTEGRATION_FEEDS_ONLY = _sara.ACTION_BUILD_PROPOSAL
@@ -341,8 +341,8 @@ def validate_integration_spec(record: dict[str, Any]) -> dict[str, Any]:
     if record.get("batch_feeds_only") != INTEGRATION_FEEDS_ONLY:
         failures.append("batch_feeds_more_than_proposal_gate")
 
-    if record.get("canonical_rejected_families_count") != 25:
-        failures.append("canonical_ledger_not_25")
+    if record.get("canonical_rejected_families_count") != 26:
+        failures.append("canonical_ledger_not_26")
     if record.get("canonical_includes_c14") is not True:
         failures.append("canonical_missing_c14")
     if record.get("canonical_includes_c15") is not True:

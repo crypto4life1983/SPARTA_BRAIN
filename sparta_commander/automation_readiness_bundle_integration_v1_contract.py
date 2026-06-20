@@ -96,10 +96,12 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         lane.get("next_required_action") == token
         and coord.get("next_safe_command") == token
         and lane_morning.get("next_required_action") == token)
-    no_new_candidate = (
-        lane.get("next_is_new_candidate") is False
-        and coord.get("next_research_recommended") is False
-        and lane_morning.get("next_is_new_candidate") is False)
+    # the lane's last candidate (C21) was rejected; the CURRENT directive is the
+    # Candidate #22 family-proposal READINESS (a human-gated new-candidate decision).
+    # All surfaces must AGREE the next stage is that new-candidate readiness.
+    next_is_new_candidate_readiness = (
+        lane.get("next_is_new_candidate") is True
+        and lane_morning.get("next_is_new_candidate") is True)
     research_only = (
         lane.get("overnight_automation_research_only") is True
         and coord.get("executes_nothing") is True)
@@ -110,10 +112,11 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         and lane.get("live_trading_state") == _lane.STATE_LOCKED)
     coordinator_matches_lane_directive = (
         coord.get("next_safe_command") == token)
-    surfaces_agree = (all_tokens_match and no_new_candidate and research_only
-                      and downstream_locked and coordinator_matches_lane_directive
+    surfaces_agree = (all_tokens_match and next_is_new_candidate_readiness
+                      and research_only and downstream_locked
+                      and coordinator_matches_lane_directive
                       and lane.get("c16_lifecycle_complete") is True
-                      and lane.get("rejected_ledger_count") == 25)
+                      and lane.get("rejected_ledger_count") == 26)
     det = lane.get("active_candidate_detail") or {}
     _rej = lane.get("last_rejected_candidate_detail") or {}
 
@@ -125,18 +128,19 @@ def build_automation_readiness_integration() -> dict[str, Any]:
             "Connects the candidate-research-lane status into the coordinator/"
             "morning/autopilot surfaces so they AGREE on the current directive. "
             "Candidate #21 (low-turnover same-asset spot/perp funding carry) is now "
-            "the ACTIVE open candidate at the family_proposal gate awaiting the human "
-            "candidate-spec decision; C20 stays rejected (kept on record, not "
-            "rescued). Executes nothing; overnight/morning automation stays "
-            "research-only and human-gated."),
+            "REJECTED at fee-honest replay (kept on record, last rejected); there is NO "
+            "active candidate and the next stage is the Candidate #22 family-proposal "
+            "READINESS only (human-gated). C20/C21 stay rejected (not rescued). Executes "
+            "nothing; overnight/morning automation stays research-only and human-gated."),
         # the aligned directive (follows the lane)
         "next_required_action": token,
         "next_stage": lane.get("next_stage"),
         "next_is_automation_readiness": lane.get("next_is_automation_readiness"),
-        "next_is_new_candidate": False,
+        "next_is_new_candidate": lane.get("next_is_new_candidate"),
+        "next_candidate_readiness": lane.get("next_candidate_readiness"),
         "active_candidate": lane.get("active_candidate"),
         "open_candidate_gate": lane.get("open_candidate_gate"),
-        # C21 is the ACTIVE open candidate -> surface its fields
+        # there is NO active candidate now -> these surface as None
         "active_candidate_label": det.get("label"),
         "active_candidate_verdict": det.get("verdict"),
         "active_candidate_stage": det.get("stage"),
@@ -161,7 +165,7 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         "surfaces": surfaces,
         "surfaces_agree": surfaces_agree,
         "all_tokens_match": all_tokens_match,
-        "no_new_candidate_recommended": no_new_candidate,
+        "next_is_new_candidate_readiness_agreed": next_is_new_candidate_readiness,
         "automation_research_only": research_only,
         "downstream_blocked_and_locked": downstream_locked,
         "coordinator_matches_lane_directive": coordinator_matches_lane_directive,
@@ -226,6 +230,7 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "next_required_action": r["next_required_action"],
         "next_is_automation_readiness": r["next_is_automation_readiness"],
         "next_is_new_candidate": r["next_is_new_candidate"],
+        "next_candidate_readiness": r["next_candidate_readiness"],
         "surfaces_agree": r["surfaces_agree"],
         "overnight_automation_research_only": r["overnight_automation_research_only"],
         "requires_human_approval": True,
@@ -235,10 +240,10 @@ def summarize_for_morning_report() -> dict[str, Any]:
 
 def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[str, Any]:
     """Anti-tamper validator. Valid only when the integration is research-only,
-    integration-only, all surfaces AGREE on the lane directive (the same token, no
-    new candidate), C16 complete + ledger 25 (C18/C20 at replay; C19 at labels), the
-    automation path is research-only with downstream BLOCKED/LOCKED, and every
-    capability flag is False."""
+    integration-only, all surfaces AGREE on the lane directive (the same token, a
+    new-candidate readiness for C22), C16 complete + ledger 26 (C18/C20/C21 at replay;
+    C19 at labels), there is NO active candidate, the automation path is research-only
+    with downstream BLOCKED/LOCKED, and every capability flag is False."""
     failures: list = []
     if record.get("mode") != ARI_MODE:
         failures.append("mode_not_research_only")
@@ -252,29 +257,29 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
     if record.get("coordinator_matches_lane_directive") is not True:
         failures.append("coordinator_does_not_match_lane_directive")
 
-    # the integration follows the lane's CURRENT directive: C21 is the ACTIVE open
-    # candidate at the REAL-CANDLE LABELS review stage awaiting the human fee-honest
-    # replay decision (NOT automation readiness and NOT a new candidate).
+    # the integration follows the lane's CURRENT directive: C21 is REJECTED at fee-honest
+    # replay (kept on record); there is NO active candidate and the next stage is the
+    # Candidate #22 family-proposal readiness (human-gated), NOT automation readiness.
     if record.get("next_required_action") != (
-            "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"):
-        failures.append("next_action_not_c21_gate")
-    if record.get("active_candidate") != "C21":
-        failures.append("active_candidate_not_c21")
-    if record.get("open_candidate_gate") is not True:
-        failures.append("open_candidate_gate_expected")
+            "HUMAN_DECISION_OPEN_CANDIDATE_22_FAMILY_PROPOSAL_OR_HOLD"):
+        failures.append("next_action_not_c22_proposal_readiness")
+    if record.get("active_candidate") is not None:
+        failures.append("active_candidate_must_be_none")
+    if record.get("open_candidate_gate") is not False:
+        failures.append("open_candidate_gate_must_be_closed")
     if record.get("next_is_automation_readiness") is not False:
-        failures.append("must_not_be_automation_readiness_while_c21_open")
+        failures.append("must_not_be_automation_readiness")
     if record.get("c20_remains_rejected_not_rescued") is not True:
         failures.append("c20_must_remain_rejected_not_rescued")
-    if record.get("next_is_new_candidate") is not False:
-        failures.append("next_must_not_be_new_candidate")
-    if record.get("no_new_candidate_recommended") is not True:
-        failures.append("a_surface_recommends_new_candidate")
+    if record.get("next_is_new_candidate") is not True:
+        failures.append("next_must_be_new_candidate_readiness")
+    if record.get("next_is_new_candidate_readiness_agreed") is not True:
+        failures.append("surfaces_do_not_agree_new_candidate_readiness")
 
     if record.get("c16_lifecycle_complete") is not True:
         failures.append("c16_not_complete")
-    if record.get("rejected_ledger_count") != 25:
-        failures.append("ledger_not_25")
+    if record.get("rejected_ledger_count") != 26:
+        failures.append("ledger_not_26")
 
     # automation path research-only + downstream blocked/locked
     if record.get("automation_research_only") is not True:

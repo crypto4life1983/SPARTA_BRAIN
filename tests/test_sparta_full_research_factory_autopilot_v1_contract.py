@@ -113,8 +113,8 @@ def test_human_approval_required_before_paper_and_live():
 
 def test_rejected_ledger_lessons_respected():
     assert _R["respects_rejected_ledger"] is True
-    assert _R["rejected_ledger_count"] == 25
-    assert _R["rejected_ledger_is_c1_to_c20"] is True
+    assert _R["rejected_ledger_count"] == 26
+    assert _R["rejected_ledger_is_c1_to_c21"] is True
     assert _R["never_reproposes_rejected_family"] is True
     assert _R["never_retunes_rejected_candidate"] is True
     assert "no_retuning_rejected_candidates" in _R["hard_locks"]
@@ -122,18 +122,21 @@ def test_rejected_ledger_lessons_respected():
     assert f.validate_factory_architecture(bad)["valid"] is False
 
 
-# ---- C21 authoritative, C20 rejected, C22 not started ----------------------
+# ---- no active candidate; C21+C20 rejected; C22 not started ----------------
 
 def test_c21_authoritative_c20_rejected_c22_not_started():
-    assert _R["active_candidate"] == "C21"
-    assert _R["active_candidate_authoritative"] is True
+    assert _R["active_candidate"] is None
+    assert _R["active_candidate_is_none_authoritative"] is True
+    assert _R["last_rejected_candidate"] == "C21"
+    assert _R["c21_remains_rejected"] is True
     assert _R["c20_remains_rejected"] is True
     assert "no_rescue_of_c20" in _R["hard_locks"]
     assert _R["c22_started"] is False
     assert _R["c22_candidate_id"] is None
+    assert _R["c22_is_next_proposal_readiness_only"] is True
     assert _R["c22_only_created_after_current_candidate_resolved"] is True
     for bad_kv in (("active_candidate", "C22"), ("c20_remains_rejected", False),
-                   ("c22_started", True)):
+                   ("c21_remains_rejected", False), ("c22_started", True)):
         bad = {**_R, bad_kv[0]: bad_kv[1]}
         assert f.validate_factory_architecture(bad)["valid"] is False, bad_kv[0]
 
@@ -189,8 +192,10 @@ def test_summarize_for_morning_report():
     summ = f.summarize_for_morning_report()
     assert summ["section"] == "sparta_full_research_factory_autopilot_v1"
     assert summ["factory_name"] == "SPARTA_FULL_RESEARCH_FACTORY_AUTOPILOT_V1"
-    assert summ["active_candidate"] == "C21"
-    assert summ["active_candidate_authoritative"] is True
+    assert summ["active_candidate"] is None
+    assert summ["active_candidate_is_none_authoritative"] is True
+    assert summ["last_rejected_candidate"] == "C21"
+    assert summ["c21_remains_rejected"] is True
     assert summ["c20_remains_rejected"] is True
     assert summ["c22_started"] is False
     assert summ["requires_human_before_paper_trading"] is True

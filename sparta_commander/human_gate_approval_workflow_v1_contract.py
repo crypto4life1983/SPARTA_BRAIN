@@ -283,11 +283,13 @@ def build_human_gate_workflow() -> dict[str, Any]:
         "no replay/backtest/PnL", "no optimization",
         "no paper/live/broker/order code")
     if not open_gate:
-        # No open candidate gate (e.g. the last candidate was rejected and the lane
-        # is at automation readiness). There is no human approval to paste -- the
-        # surface says so plainly and offers no copyable approval text.
-        decision = ("NO OPEN CANDIDATE GATE — candidate lane is at automation "
-                    "readiness; await the next human-approved research direction")
+        # No open candidate gate: the last candidate (C21) was rejected (kept on record)
+        # and the lane's next stage is the Candidate #22 family-proposal readiness only
+        # (human-gated). There is no candidate ADVANCE gate to paste -- the surface says
+        # so plainly and offers no copyable advance-approval text.
+        decision = ("NO OPEN CANDIDATE GATE — the last candidate is rejected (kept on "
+                    "record); the next stage is the Candidate #22 family-proposal "
+                    "readiness only, awaiting an explicit human open-candidate approval")
         stage_after = None
         allows = ()
         forbids = _operational_forbids
