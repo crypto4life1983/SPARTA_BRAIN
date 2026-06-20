@@ -1,0 +1,268 @@
+"""Candidate #22 -- Signum Trend Radar GC LOCAL EXPORT IMPORTER
+-- PURE, LOCAL-ONLY, RESEARCH ONLY.
+
+The PURE decision core for importing a locally-saved Signum Trend Radar GC daily export
+JSON (produced by the EXTERNAL read-only Claude Routine) from a local inbox into the C22
+dataset folder. It is PURE: it operates on an ALREADY-PARSED JSON dict (the importer tool
+reads the local file and passes it in) and on the set of decision-dates the destination
+already holds; it performs NO file or network I/O, connects to NO Signum / MCP /
+Hyperliquid, fetches NO data, and NEVER mutates the JSON contents.
+
+It validates the export structurally (>=50 rows by `total` or `results` length; every row
+detector=gc + assetClass=crypto; a single runDate; indicators.data with latest + previous
+closed daily candles carrying gc.trend/upper/filter; marketRank present; cmcRefPriceUsd
+present), derives the deterministic destination filename from runDate
+(gc_crypto_trendradar_daily_YYYYMMDD.json), and decides:
+
+  * IMPORT_OK        -- valid + the date is not already collected -> copy into the dataset
+                        folder under the deterministic name (the TOOL does the byte copy;
+                        it never overwrites);
+  * DUPLICATE_WINDOW -- valid but the date is already collected -> do not import;
+  * INVALID          -- structurally invalid -> do not import, name the failures.
+
+Every dangerous capability (Signum/MCP/Hyperliquid, API keys, trading, bot edits, scheduler,
+labels, replay) is pinned False with a full scope_locks set; C22 stays
+HOLD_FOR_MORE_FROZEN_DATA_WINDOWS.
+"""
+from __future__ import annotations
+
+from typing import Any
+
+import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _trk
+import sparta_commander.external_signum_trend_radar_gc_long_short_v1_real_candle_dataset_validation_contract as _dv  # noqa: E501
+
+IMP_SCHEMA_VERSION = 1
+IMP_MODE = "RESEARCH_ONLY"
+IMP_LANE = "crypto_d1_auto_research"
+
+CANDIDATE_ID = _dv.CANDIDATE_ID
+
+INBOX_DIR = "data/external_signum_trend_radar_gc_inbox"
+DEST_DIR = _trk.DATA_DIR                                # data/external_signum_trend_radar_gc
+EXPORT_GLOB = _trk.EXPORT_GLOB                          # gc_crypto_trendradar_daily*.json
+DEST_FILENAME_PREFIX = _trk.EXPORT_PREFIX              # gc_crypto_trendradar_daily
+EXPECTED_ROW_COUNT = _dv.EXPECTED_ROW_COUNT            # 50
+EXPECTED_DETECTOR = "gc"
+EXPECTED_ASSET_CLASS = "crypto"
+
+VERDICT_IMPORT_OK = "C22_GC_IMPORT_OK"
+VERDICT_DUPLICATE = "C22_GC_IMPORT_DUPLICATE_WINDOW"
+VERDICT_INVALID = "C22_GC_IMPORT_INVALID"
+
+C22_STATE = _trk.C22_STATE                              # HOLD_FOR_MORE_FROZEN_DATA_WINDOWS
+
+_CAPABILITY_FLAGS_FALSE = (
+    "executes", "performs_network_io", "connects_signum", "uses_mcp",
+    "accesses_hyperliquid", "fetches_data", "calls_api", "uses_credentials",
+    "uses_api_keys", "mutates_json_contents", "overwrites_destination", "edits_bots",
+    "sends_trades", "places_orders", "contains_order_logic", "paper_trading",
+    "live_trading", "deploys_capital", "connects_broker", "connects_exchange",
+    "creates_claude_routines", "runs_claude_routine", "runs_labels", "runs_replay",
+    "builds_replay", "optimizes_parameters", "installs_scheduler", "triggers_scheduler",
+    "modifies_scheduler", "modifies_c22_rules", "starts_c23", "reopens_c21",
+    "auto_commits", "auto_pushes", "auto_fetches", "auto_promotes", "auto_advances",
+    "crosses_into_forbidden_gate",
+)
+
+
+def extract_run_date(parsed: dict) -> str | None:
+    """PURE. The single distinct ISO runDate across the export rows, or None if absent or
+    inconsistent (mixed-date export)."""
+    results = list((parsed or {}).get("results") or [])
+    run_dates = {r.get("runDate") for r in results
+                 if isinstance(r, dict) and r.get("runDate")}
+    if len(run_dates) == 1:
+        return next(iter(run_dates))
+    return None
+
+
+def derive_destination_filename(run_date: str | None) -> str | None:
+    """PURE. The deterministic destination filename from an ISO runDate:
+    YYYY-MM-DD -> gc_crypto_trendradar_daily_YYYYMMDD.json. None if the date is unusable."""
+    if not run_date:
+        return None
+    digits = str(run_date).replace("-", "")
+    if len(digits) == 8 and digits.isdigit():
+        return "%s_%s.json" % (DEST_FILENAME_PREFIX, digits)
+    return None
+
+
+def validate_import_candidate(parsed: dict) -> dict[str, Any]:
+    """PURE. Structural validity of one parsed export. Reuses the committed dataset-facts
+    extractor and adds the import-specific checks (total/length >= 50, assetClass=crypto,
+    single runDate). No I/O."""
+    facts = _dv.extract_dataset_facts(parsed)
+    results = list((parsed or {}).get("results") or [])
+    total = (parsed or {}).get("total")
+    n = len(results)
+    run_date = extract_run_date(parsed)
+    all_crypto = (n > 0 and all(
+        isinstance(r, dict) and r.get("assetClass") == EXPECTED_ASSET_CLASS
+        for r in results))
+
+    checks = {
+        "has_50_rows": (isinstance(total, int) and total >= EXPECTED_ROW_COUNT)
+        or n >= EXPECTED_ROW_COUNT,
+        "all_detector_gc": facts.get("all_detector_gc") is True,
+        "all_asset_class_crypto": all_crypto,
+        "run_date_present": run_date is not None,
+        "indicators_data_present": facts.get("rows_missing_indicators_data") == 0,
+        "latest_and_previous_candles_present":
+            facts.get("latest_and_previous_candles_present") is True,
+        "gc_trend_upper_filter_present":
+            facts.get("gc_trend_upper_filter_present") is True,
+        "market_rank_present": facts.get("rows_missing_market_rank") == 0 and n > 0,
+        "cmc_ref_price_usd_present": facts.get("cmc_ref_price_usd_present") is True,
+    }
+    failures = [k for k, v in checks.items() if not v]
+    return {"valid": not failures, "checks": checks, "failures": failures,
+            "run_date": run_date, "n_rows": n, "total": total}
+
+
+def build_import_decision(parsed: dict, already_collected_dates: Any,
+                          action: str = "copy") -> dict[str, Any]:
+    """Assemble the PURE import decision for one parsed export. Decides IMPORT_OK /
+    DUPLICATE_WINDOW / INVALID; the importer TOOL performs the actual byte copy (never
+    overwriting). No I/O; never mutates the JSON."""
+    collected = {d for d in (already_collected_dates or set())}
+    validity = validate_import_candidate(parsed)
+    run_date = validity["run_date"]
+    dest_filename = derive_destination_filename(run_date)
+
+    if not validity["valid"] or not dest_filename:
+        verdict = VERDICT_INVALID
+        reasons = list(validity["failures"]) or ["underivable_destination_filename"]
+        should_import = False
+    elif run_date in collected:
+        verdict = VERDICT_DUPLICATE
+        reasons = ["duplicate_window_for_date:%s" % run_date]
+        should_import = False
+    else:
+        verdict = VERDICT_IMPORT_OK
+        reasons = []
+        should_import = True
+
+    record: dict[str, Any] = {
+        "schema_version": IMP_SCHEMA_VERSION, "mode": IMP_MODE, "lane": IMP_LANE,
+        "candidate_id": CANDIDATE_ID,
+        "is_local_importer_only": True, "read_only_source": True,
+        "label": (
+            "Candidate #22 Signum GC local export importer decision (LOCAL-ONLY, RESEARCH "
+            "ONLY). Validates a locally-saved export, derives the destination filename from "
+            "runDate, and decides IMPORT_OK / DUPLICATE_WINDOW / INVALID without mutating "
+            "the JSON, connecting to Signum/MCP, or overwriting."),
+        "inbox_dir": INBOX_DIR, "dest_dir": DEST_DIR,
+        "action": "copy" if action != "move" else "move",
+        # validity + derivation
+        "validity": validity,
+        "structurally_valid": validity["valid"],
+        "run_date": run_date,
+        "destination_filename": dest_filename,
+        "already_collected_dates": sorted(collected),
+        # decision
+        "verdict": verdict,
+        "should_import": should_import,
+        "reasons": reasons,
+        "never_overwrites": True,
+        "never_mutates_json": True,
+        # current state
+        "c22_state": C22_STATE,
+        "replay_locked": True,
+        "advances_nothing": True,
+        "human_review_required": True,
+    }
+    for flag in _CAPABILITY_FLAGS_FALSE:
+        record[flag] = False
+    record["scope_locks"] = {
+        "no_execute": True, "no_network_io": True, "no_signum_connection": True,
+        "no_mcp": True, "no_hyperliquid": True, "no_data_fetch": True,
+        "no_api_keys": True, "no_credentials": True, "no_mutate_json": True,
+        "no_overwrite_destination": True, "no_bot_edits": True, "no_trades": True,
+        "no_order_logic": True, "no_paper_trading": True, "no_live_trading": True,
+        "no_broker": True, "no_claude_routine": True, "no_run_labels": True,
+        "no_replay": True, "no_optimization": True, "no_install_scheduler": True,
+        "no_trigger_scheduler": True, "no_modify_c22_rules": True, "no_start_c23": True,
+        "no_reopen_c21": True, "no_auto_commit": True, "no_auto_push": True,
+        "no_crossing_into_forbidden_gate": True,
+    }
+    return record
+
+
+def validate_import_decision(record: Any) -> dict[str, Any]:
+    """Anti-tamper validator. Valid only when research-only, local-importer-only; the
+    verdict is from the closed set and consistent with the validity + duplicate facts
+    (IMPORT_OK requires structurally valid + a derived filename + a non-duplicate date;
+    DUPLICATE requires valid + an already-collected date; INVALID otherwise);
+    should_import is True only for IMPORT_OK; the JSON is never mutated and the destination
+    is never overwritten; C22 stays HOLD; and every capability flag is False."""
+    failures: list = []
+    if not isinstance(record, dict):
+        return {"valid": False, "failures": ["record_not_a_dict"]}
+    r = record
+
+    if r.get("mode") != IMP_MODE:
+        failures.append("mode_not_research_only")
+    if r.get("is_local_importer_only") is not True:
+        failures.append("not_local_importer_only")
+    if r.get("verdict") not in (VERDICT_IMPORT_OK, VERDICT_DUPLICATE, VERDICT_INVALID):
+        failures.append("bad_verdict")
+
+    valid = r.get("structurally_valid") is True
+    dest = r.get("destination_filename")
+    collected = set(r.get("already_collected_dates") or [])
+    run_date = r.get("run_date")
+    v = r.get("verdict")
+
+    if v == VERDICT_IMPORT_OK:
+        if not (valid and dest and run_date not in collected):
+            failures.append("import_ok_without_valid_nonduplicate")
+        if r.get("should_import") is not True:
+            failures.append("import_ok_must_import")
+    elif v == VERDICT_DUPLICATE:
+        if not (valid and run_date in collected):
+            failures.append("duplicate_requires_valid_collected_date")
+        if r.get("should_import") is not False:
+            failures.append("duplicate_must_not_import")
+    else:  # INVALID
+        if valid and dest:
+            failures.append("invalid_but_structurally_valid")
+        if r.get("should_import") is not False:
+            failures.append("invalid_must_not_import")
+
+    # destination filename derivation matches runDate
+    if dest is not None and dest != derive_destination_filename(run_date):
+        failures.append("destination_filename_inconsistent")
+
+    # no mutation / no overwrite invariants
+    if r.get("never_mutates_json") is not True:
+        failures.append("must_not_mutate_json")
+    if r.get("never_overwrites") is not True:
+        failures.append("must_not_overwrite")
+    if r.get("mutates_json_contents") is not False:
+        failures.append("mutates_json_flag_true")
+    if r.get("overwrites_destination") is not False:
+        failures.append("overwrites_flag_true")
+
+    # state
+    if r.get("c22_state") != C22_STATE:
+        failures.append("c22_state_wrong")
+    if r.get("replay_locked") is not True:
+        failures.append("replay_not_locked")
+    if r.get("advances_nothing") is not True:
+        failures.append("must_advance_nothing")
+
+    locks = r.get("scope_locks") or {}
+    for key in ("no_execute", "no_network_io", "no_signum_connection", "no_mcp",
+                "no_hyperliquid", "no_data_fetch", "no_api_keys", "no_mutate_json",
+                "no_overwrite_destination", "no_bot_edits", "no_trades", "no_order_logic",
+                "no_paper_trading", "no_live_trading", "no_claude_routine",
+                "no_run_labels", "no_replay", "no_install_scheduler",
+                "no_trigger_scheduler", "no_modify_c22_rules", "no_start_c23",
+                "no_reopen_c21"):
+        if locks.get(key) is not True:
+            failures.append("scope_lock_false_%s" % key)
+    for flag in _CAPABILITY_FLAGS_FALSE:
+        if r.get(flag) is not False:
+            failures.append("capability_flag_true_%s" % flag)
+
+    return {"valid": not failures, "failures": failures}
