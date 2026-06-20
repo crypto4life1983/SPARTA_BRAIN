@@ -104,6 +104,7 @@ DEFAULT_REJECTED_FAMILIES = (
     "risk_adjusted_portfolio_construction_vol_targeted_allocation",  # C17 (rejected at replay)
     "h4_trend_following_market_structure",  # C18 (rejected at replay)
     "oos_validated_beta_neutral_cross_sectional_relative_value",  # C19 (rejected at labels)
+    "mechanically_neutral_spot_perp_basis_funding_carry",  # C20 (rejected at replay)
 )
 
 _CAPABILITY_FLAGS_FALSE = (

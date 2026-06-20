@@ -113,7 +113,7 @@ def build_automation_readiness_integration() -> dict[str, Any]:
     surfaces_agree = (all_tokens_match and no_new_candidate and research_only
                       and downstream_locked and coordinator_matches_lane_directive
                       and lane.get("c16_lifecycle_complete") is True
-                      and lane.get("rejected_ledger_count") == 24)
+                      and lane.get("rejected_ledger_count") == 25)
     det = lane.get("active_candidate_detail") or {}
     _rej = lane.get("last_rejected_candidate_detail") or {}
 
@@ -125,8 +125,8 @@ def build_automation_readiness_integration() -> dict[str, Any]:
             "Connects the candidate-research-lane status into the coordinator/"
             "morning/autopilot surfaces so they AGREE on the current directive. "
             "Candidate #20 (mechanically-neutral spot/perp basis + funding carry) is "
-            "now the ACTIVE open candidate at the family_proposal gate awaiting the "
-            "human candidate-spec decision; C19 stays rejected (kept on record). "
+            "now REJECTED at the fee-honest replay stage (kept on record); there is "
+            "NO active/open candidate and the next stage is AUTOMATION READINESS. "
             "Executes nothing; overnight/morning automation stays research-only and "
             "human-gated."),
         # the aligned directive (follows the lane)
@@ -136,15 +136,7 @@ def build_automation_readiness_integration() -> dict[str, Any]:
         "next_is_new_candidate": False,
         "active_candidate": lane.get("active_candidate"),
         "open_candidate_gate": lane.get("open_candidate_gate"),
-        # C20 is the ACTIVE open candidate -> surface its fields
-        "active_candidate_label": det.get("label"),
-        "active_candidate_verdict": det.get("verdict"),
-        "active_candidate_stage": det.get("stage"),
-        "active_candidate_stage_label": det.get("stage_label"),
-        "active_candidate_timeframe": det.get("timeframe"),
-        "active_candidate_scope_note": det.get("scope_note"),
-        "active_candidate_is_market_neutral": det.get("is_market_neutral"),
-        # C19 stays visible as the last rejected candidate (provenance)
+        # C20 is rejected at fee-honest replay -> surface the last rejected candidate
         "last_rejected_candidate": lane.get("last_rejected_candidate"),
         "last_rejected_candidate_label": _rej.get("label"),
         "last_rejected_candidate_verdict": _rej.get("verdict"),
@@ -205,13 +197,6 @@ def summarize_for_morning_report() -> dict[str, Any]:
         "rejected_ledger_count": r["rejected_ledger_count"],
         "active_candidate": r["active_candidate"],
         "open_candidate_gate": r["open_candidate_gate"],
-        "active_candidate_label": r["active_candidate_label"],
-        "active_candidate_verdict": r["active_candidate_verdict"],
-        "active_candidate_stage": r["active_candidate_stage"],
-        "active_candidate_stage_label": r["active_candidate_stage_label"],
-        "active_candidate_timeframe": r["active_candidate_timeframe"],
-        "active_candidate_scope_note": r["active_candidate_scope_note"],
-        "active_candidate_is_market_neutral": r["active_candidate_is_market_neutral"],
         "last_rejected_candidate": r["last_rejected_candidate"],
         "last_rejected_candidate_label": r["last_rejected_candidate_label"],
         "last_rejected_candidate_verdict": r["last_rejected_candidate_verdict"],
@@ -232,9 +217,9 @@ def summarize_for_morning_report() -> dict[str, Any]:
 def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[str, Any]:
     """Anti-tamper validator. Valid only when the integration is research-only,
     integration-only, all surfaces AGREE on the lane directive (the same token, no
-    new candidate), C16 complete + ledger 24 (C18 at replay; C19 at labels
-    replay), the automation path is research-only with downstream BLOCKED/LOCKED, and
-    every capability flag is False."""
+    new candidate), C16 complete + ledger 25 (C18/C20 at replay; C19 at labels), the
+    automation path is research-only with downstream BLOCKED/LOCKED, and every
+    capability flag is False."""
     failures: list = []
     if record.get("mode") != ARI_MODE:
         failures.append("mode_not_research_only")
@@ -248,18 +233,17 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
     if record.get("coordinator_matches_lane_directive") is not True:
         failures.append("coordinator_does_not_match_lane_directive")
 
-    # the integration follows the lane's CURRENT directive: C20 is the ACTIVE open
-    # candidate at the family_proposal gate awaiting the human candidate-spec
-    # decision (NOT automation readiness and NOT a new candidate).
-    if record.get("next_required_action") != (
-            "HUMAN_DECISION_C20_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"):
-        failures.append("next_action_not_c20_gate")
-    if record.get("active_candidate") != "C20":
-        failures.append("active_candidate_not_c20")
-    if record.get("open_candidate_gate") is not True:
-        failures.append("open_candidate_gate_expected")
-    if record.get("next_is_automation_readiness") is not False:
-        failures.append("must_not_be_automation_readiness_while_c20_open")
+    # the integration follows the lane's CURRENT directive: C20 is REJECTED at
+    # fee-honest replay, there is NO active/open candidate, and the next stage is
+    # AUTOMATION READINESS (NOT a new candidate).
+    if record.get("next_required_action") != _lane.AUTOMATION_READINESS_TOKEN:
+        failures.append("next_action_not_automation_readiness")
+    if record.get("active_candidate") is not None:
+        failures.append("must_have_no_active_candidate")
+    if record.get("open_candidate_gate") is not False:
+        failures.append("open_candidate_gate_must_be_false")
+    if record.get("next_is_automation_readiness") is not True:
+        failures.append("must_be_automation_readiness")
     if record.get("next_is_new_candidate") is not False:
         failures.append("next_must_not_be_new_candidate")
     if record.get("no_new_candidate_recommended") is not True:
@@ -267,8 +251,8 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
 
     if record.get("c16_lifecycle_complete") is not True:
         failures.append("c16_not_complete")
-    if record.get("rejected_ledger_count") != 24:
-        failures.append("ledger_not_24")
+    if record.get("rejected_ledger_count") != 25:
+        failures.append("ledger_not_25")
 
     # automation path research-only + downstream blocked/locked
     if record.get("automation_research_only") is not True:

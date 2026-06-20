@@ -121,6 +121,24 @@ REJECTED_FAMILIES_C1_TO_C19 = REJECTED_FAMILIES_C1_TO_C18 + (
     "oos_validated_beta_neutral_cross_sectional_relative_value",   # C19
 )
 
+# --- the CURRENT canonical rejected ledger (C1-C20; 25 families). The C1-C19 tuple
+# above is kept FROZEN because the (already pushed) C20 chain references it as it was
+# while C20 was still an open candidate (count 24). New proposals must use this
+# 25-family ledger so C20 is never re-proposed. C20 (mechanically-neutral spot/perp
+# basis + funding carry) was REJECTED at the fee-honest replay stage: applying the
+# reserved 37 bps all-in cost PER LEG (74 bps round-trip per trade, two legs) to the
+# 704 frozen trades produced a portfolio net -74.5% (Sharpe -12.84, Calmar -0.285,
+# max DD -74.5%) and the 2026 forward-OOS failed (net -8.3%, Sharpe -12.2, 0% win
+# rate). All four decisive gates failed; it lost badly vs the random/null always-on
+# neutral-carry baseline (+21.2%, Sharpe 1.09). The mechanically-neutral CARRY itself
+# is real -- the always-on null is positive (BTC/ETH funding) -- so this rejects the
+# C20 entry/exit TIMING, whose 704 round-trips x 74 bps = 521% cost drag destroyed the
+# carry, NOT the same-asset carry thesis. A low-turnover always-on carry would be a
+# SEPARATE future candidate only under explicit human approval.
+REJECTED_FAMILIES_C1_TO_C20 = REJECTED_FAMILIES_C1_TO_C19 + (
+    "mechanically_neutral_spot_perp_basis_funding_carry",   # C20
+)
+
 # --- learning data distilled from C1-C16 (why each broad mechanism failed) ---
 REJECTED_FAMILY_LESSONS = {
     "calendar_seasonality": "C10: undifferentiated long-drift dressed as a "
@@ -170,6 +188,18 @@ REJECTED_FAMILY_LESSONS = {
         "held on only 862/1977 bars (~44%), with 15 positions closed by "
         "neutrality-break; this echoes the C16 failure that return-beta neutrality "
         "does not persist out of sample, so no fee-honest replay was run.",
+    "mechanically_neutral_spot_perp_basis_funding_carry":
+        "C20: mechanically-neutral same-asset long-spot/short-perp basis + funding "
+        "carry cleared every prior structural gate (704 entries, mechanical "
+        "neutrality 100% by construction) but was REJECTED at fee-honest replay -- "
+        "the entry/exit TIMING over-trades: 704 round-trips x 74 bps two-leg cost = "
+        "521% cost drag, turning a +21.2% raw carry into net -74.5% (Sharpe -12.84), "
+        "with 2026 forward-OOS net -8.3% / 0% win rate and losing badly to the "
+        "random/null always-on neutral-carry baseline (+21.2%, Sharpe 1.09). The "
+        "CARRY THESIS is real (always-on null positive, BTC/ETH funding Sharpe ~8); "
+        "this rejects the TIMING/churn, not the carry. A LOW-TURNOVER always-on carry "
+        "may deserve a separate future candidate under explicit human approval -- "
+        "churn cost, not signal, is the killer here.",
 }
 
 # --- THE C14 LESSON (preserved + operationalized) ---------------------------
@@ -284,7 +314,7 @@ def score_candidate_idea(idea: dict, rejected_families: Any = None) -> dict[str,
     weighted score that puts DURABILITY above TIMING (the C14 lesson). Builds
     nothing; recommends nothing executable."""
     rejected = set(rejected_families if rejected_families is not None
-                   else REJECTED_FAMILIES_C1_TO_C19)
+                   else REJECTED_FAMILIES_C1_TO_C20)
     family = idea.get("family")
     out: dict[str, Any] = {
         "family": family, "buildable": False, "priority_score": 0.0,
@@ -395,8 +425,8 @@ def build_research_expansion_plan(repo_root: Any = ".",
         "human_gated_stages": list(HUMAN_GATED_STAGES),
         "real_data_stages": list(REAL_DATA_STAGES),
         "rejected_families_c1_to_c14": list(REJECTED_FAMILIES_C1_TO_C14),
-        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C19),
-        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C19),
+        "rejected_families_current": list(REJECTED_FAMILIES_C1_TO_C20),
+        "rejected_families_count": len(REJECTED_FAMILIES_C1_TO_C20),
         "rejected_family_lessons": dict(REJECTED_FAMILY_LESSONS),
         "c14_lesson": C14_LESSON,
         "priority_weights": dict(PRIORITY_WEIGHTS),
@@ -491,6 +521,8 @@ def validate_research_expansion_plan(record: dict[str, Any]) -> dict[str, Any]:
     # CURRENT canonical ledger (C1-C18) used for forward anti-loop: must add C18
     # (and still contain C17 + C16 + C15).
     cur = record.get("rejected_families_current") or []
+    if "mechanically_neutral_spot_perp_basis_funding_carry" not in cur:
+        failures.append("current_ledger_missing_c20")
     if "oos_validated_beta_neutral_cross_sectional_relative_value" not in cur:
         failures.append("current_ledger_missing_c19")
     if "h4_trend_following_market_structure" not in cur:
@@ -501,10 +533,10 @@ def validate_research_expansion_plan(record: dict[str, Any]) -> dict[str, Any]:
         failures.append("current_ledger_missing_c16")
     if "slow_vol_targeted_time_series_momentum" not in cur:
         failures.append("current_ledger_missing_c15")
-    if len(cur) != 24:
+    if len(cur) != 25:
         failures.append("current_ledger_count_unexpected")
-    if record.get("rejected_families_count") != 24:
-        failures.append("rejected_families_count_not_24")
+    if record.get("rejected_families_count") != 25:
+        failures.append("rejected_families_count_not_25")
 
     # Portfolio objective declared, NOT computed.
     po = record.get("portfolio_objective") or {}

@@ -43,7 +43,7 @@ def test_reviews_live_lane_state():
     assert active is None or (active.startswith("C") and int(active[1:]) >= 19)
     assert _R["rejected_ledger_count"] >= 23
     assert _R["uses_c1_to_c18_ledger"] is True
-    assert _R["last_rejected_candidate"] in ("C18", "C19")
+    assert _R["last_rejected_candidate"] in ("C18", "C19", "C20")
     assert _R["c18_rejected_at_replay"] is True  # C18 present in the ledger
 
 

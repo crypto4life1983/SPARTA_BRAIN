@@ -62,16 +62,16 @@ def test_gate_sequence_and_sara_hard_stops_preserved():
 
 # ---- canonical 20-family ledger reconciles with SARA + C14 + C15 -----------
 
-def test_canonical_ledger_is_24_and_reconciles():
-    assert _R["canonical_rejected_families_count"] == 24
+def test_canonical_ledger_is_25_and_reconciles():
+    assert _R["canonical_rejected_families_count"] == 25
     assert _R["canonical_includes_c14"] is True
     assert _R["canonical_includes_c15"] is True
     assert _R["canonical_includes_c16"] is True
     recon = _R["rejected_ledger_reconciliation"]
-    # SARA's ledger bumps (C14..C18) have been applied; canonical == SARA, no
+    # SARA's ledger bumps (C14..C20) have been applied; canonical == SARA, no
     # duplicates. Reconciliation holds by set equality.
-    assert recon["sara_count"] == 24
-    assert recon["canonical_count"] == 24
+    assert recon["sara_count"] == 25
+    assert recon["canonical_count"] == 25
     assert recon["c14_in_sara"] is True
     assert recon["c15_in_sara"] is True
     assert recon["c16_in_sara"] is True
@@ -178,7 +178,7 @@ def test_morning_report_summary_has_portfolio_fit_fields():
     assert summ["generated_count"] == 3
     assert summ["buildable_count"] == 2
     assert summ["selected_to_build"] == ["axis_durable"]
-    assert summ["excluded_rejected_families_count"] == 24
+    assert summ["excluded_rejected_families_count"] == 25
     top = summ["ranked"][0]
     for field in ("family", "priority_score", "durability_proxy",
                   "timing_signal_proxy", "portfolio_fit"):

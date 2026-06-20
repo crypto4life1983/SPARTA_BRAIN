@@ -35,9 +35,9 @@ def test_prep_pure_and_validates():
 
 # ---- (1) C16 complete + (2) ledger 22 --------------------------------------
 
-def test_c16_complete_and_ledger_23():
+def test_c16_complete_and_ledger_25():
     assert _R["c16_lifecycle_complete"] is True
-    assert _R["rejected_ledger_count"] == 24
+    assert _R["rejected_ledger_count"] == 25
 
 
 # ---- (3) next action + (4) run-record gate aligned -------------------------
@@ -64,18 +64,18 @@ def test_morning_report_sections_agree_no_candidate_drift():
                  "next_action": "NONE (closed)"}})
     ap = report["autopilot_plan"]
     ar = report["automation_readiness"]
-    # (5) §13 clean-tree plan defers to the lane = the C20 open-candidate spec gate
-    assert ap["next_safe_action"] == "RECOMMEND_GATE_DECISION"
+    # (5) §13 clean-tree plan defers to the lane = AUTOMATION READINESS (C20 rejected)
+    assert ap["next_safe_action"] == "RECOMMEND_AUTOMATION_READINESS_STEP"
     assert ap["recommended_token"] == (
-        "HUMAN_DECISION_C20_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
-    # (6) §14 shows C20 ACTIVE; C19 rejected at the labels gate (last rejected)
-    assert ar["active_candidate"] == "C20"
-    assert ar["last_rejected_candidate"] == "C19"
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
+    # (6) §14 shows NO active candidate; C20 rejected at fee-honest replay (last rejected)
+    assert ar["active_candidate"] is None
+    assert ar["last_rejected_candidate"] == "C20"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C20_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY")
     md = mr.render_markdown(report)
-    assert "ACTIVE CANDIDATE" in md
-    assert "C20_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in md
+    assert "AUTOMATION READINESS" in md
+    assert "C20_REJECTED_AT_FEE_HONEST_REPLAY" in md
     # (7) no next-candidate drift on any surface
     assert "BUILD_NEXT_CANDIDATE_FAMILY_PROPOSAL" not in md
     assert ar["next_is_new_candidate"] is False
@@ -123,7 +123,7 @@ def test_summarize_for_morning_report():
     summ = arp.summarize_for_morning_report()
     assert summ["section"] == "automation_readiness_research_prep"
     assert summ["c16_lifecycle_complete"] is True
-    assert summ["rejected_ledger_count"] == 24
+    assert summ["rejected_ledger_count"] == 25
     assert summ["next_required_action"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     assert summ["run_record_next_human_gate"] == "BUILD_AUTOMATION_READINESS_STEP_RESEARCH_ONLY"
     assert summ["next_is_new_candidate"] is False
