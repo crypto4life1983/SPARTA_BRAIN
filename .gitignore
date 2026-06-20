@@ -103,3 +103,7 @@ data/mechanically_neutral_spot_perp_basis_funding_carry_c20/
 # Candidate #21 low-turnover same-asset spot/perp funding carry --
 # gitignored real-candle labels artifacts (SHA-pinned in the review contract)
 data/low_turnover_same_asset_spot_perp_funding_carry_c21/
+
+# Candidate #22 external Signum Trend Radar GC long/short --
+# gitignored staged dataset + real-candle entry-label artifacts (SHA-pinned in contracts)
+data/external_signum_trend_radar_gc/
