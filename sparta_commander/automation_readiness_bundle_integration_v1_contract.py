@@ -253,10 +253,10 @@ def validate_automation_readiness_integration(record: dict[str, Any]) -> dict[st
         failures.append("coordinator_does_not_match_lane_directive")
 
     # the integration follows the lane's CURRENT directive: C21 is the ACTIVE open
-    # candidate at the family_proposal gate awaiting the human candidate-spec
-    # decision (NOT automation readiness and NOT a new candidate).
+    # candidate at the CANDIDATE-SPEC review stage awaiting the human detector-spec
+    # dry-run decision (NOT automation readiness and NOT a new candidate).
     if record.get("next_required_action") != (
-            "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"):
+            "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"):
         failures.append("next_action_not_c21_gate")
     if record.get("active_candidate") != "C21":
         failures.append("active_candidate_not_c21")

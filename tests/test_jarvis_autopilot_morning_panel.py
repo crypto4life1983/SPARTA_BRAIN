@@ -234,21 +234,21 @@ def test_panel_shows_c21_active_at_proposal_gate():
     assert ar["active_candidate"] == "C21"
     assert ar["open_candidate_gate"] is True
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert ar["section13_recommendation_when_clean"] == (
         "RECOMMEND_GATE_DECISION")
     assert ar["section14_present"] is True
     assert ar["surfaces_agree"] is True
     assert ar["next_is_new_candidate"] is False
     assert ar["next_is_automation_readiness"] is False
-    assert ar["active_candidate_verdict"] == "C21_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+    assert ar["active_candidate_verdict"] == "C21_SPEC_FROZEN_FOR_HUMAN_REVIEW"
     assert ar["last_rejected_candidate"] == "C20"
     assert ar["last_rejected_candidate_verdict"] == "C20_REJECTED_AT_FEE_HONEST_REPLAY"
     h = p["html"]
-    assert "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT" in h
+    assert "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT" in h
     assert "ACTIVE CANDIDATE" in h
     assert "Active candidate: <b>C21</b>" in h
-    assert "C21_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in h
+    assert "C21_SPEC_FROZEN_FOR_HUMAN_REVIEW" in h
 
 
 def test_panel_human_gate_workflow_c21_open_gate():
@@ -263,7 +263,7 @@ def test_panel_human_gate_workflow_c21_open_gate():
     h = p["html"]
     # dashboard surfaces the open C21 gate + a copyable approval
     assert "Human-gate approval workflow" in h
-    assert "ADVANCE C21 TO CANDIDATE SPEC" in h
+    assert "ADVANCE C21 TO DETECTOR SPEC + SYNTHETIC DRY-RUN" in h
 
 
 def test_panel_shows_safety_locks():
@@ -330,9 +330,9 @@ def test_no_report_still_shows_c16_and_c21_active():
     assert ar["active_candidate"] == "C21"
     assert ar["last_rejected_candidate"] == "C20"
     assert ar["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert "ACTIVE CANDIDATE" in p["html"]
-    assert "C21_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW" in p["html"]
+    assert "C21_SPEC_FROZEN_FOR_HUMAN_REVIEW" in p["html"]
 
 
 def test_panel_run_metadata_and_seed_brief_path():

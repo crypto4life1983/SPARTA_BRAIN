@@ -124,6 +124,25 @@ _GATE_SPECS: dict[str, dict[str, Any]] = {
             "no paper/live/broker/order code",
         ),
     },
+    "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT": {
+        "recommended_decision": "ADVANCE C21 TO DETECTOR SPEC + SYNTHETIC DRY-RUN",
+        "stage_after_approval": "detector_spec_dry_run",
+        "allows": (
+            "build the detector-spec contract (pure, declared) for the FROZEN C21 "
+            "low-turnover carry rules",
+            "build synthetic dry-run fixtures + tests (deterministic, no real data)",
+            "research-only validation",
+        ),
+        "forbids": (
+            "no real data fetch (use the frozen public BTC/ETH/SOL dataset only)",
+            "no real-candle detection / labels",
+            "no replay/backtest/PnL",
+            "no optimization / rescue / tuning",
+            "no new instrument class / XAUUSD",
+            "no rescue or retune of C20 (C20 stays rejected)",
+            "no paper/live/broker/order code",
+        ),
+    },
 }
 
 _CAPABILITY_FLAGS_FALSE = (

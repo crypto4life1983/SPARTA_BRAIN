@@ -40,11 +40,11 @@ def test_next_directive_is_c21_spec_decision():
     assert _R["active_candidate"] == "C21"
     assert _R["open_candidate_gate"] is True
     assert _R["next_is_automation_readiness"] is False
-    assert _R["next_stage"] == "c21_candidate_spec_decision"
+    assert _R["next_stage"] == "c21_detector_spec_dry_run_decision"
     assert _R["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
-    assert _R["active_candidate_verdict"] == "C21_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
-    assert _R["active_candidate_stage"] == "family_proposal"
+        "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
+    assert _R["active_candidate_verdict"] == "C21_SPEC_FROZEN_FOR_HUMAN_REVIEW"
+    assert _R["active_candidate_stage"] == "candidate_spec"
     assert _R["active_candidate_is_market_neutral"] is True
     assert _R["active_candidate_is_low_turnover"] is True
     assert _R["c20_remains_rejected_not_rescued"] is True
@@ -100,7 +100,7 @@ def test_surfaces_agree_on_c21_directive():
     assert _R["surfaces_agree"] is True
     assert _R["all_tokens_match"] is True
     s = _R["surfaces"]
-    token = "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT"
+    token = "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT"
     assert s["lane_status_next"] == token
     assert s["coordinator_command"] == token
     assert s["lane_morning_next"] == token
@@ -124,7 +124,7 @@ def test_coordinator_idle_defers_to_lane_c21_open_gate():
                                "next_action": "NONE__C16_CLOSED", "shipped": True}}})
     assert d["recommendation_kind"] == gdc.REC_GATE_DECISION
     assert d["next_safe_command"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert d["next_research_recommended"] is False
 
 
@@ -137,15 +137,15 @@ def test_summarize_for_morning_report():
     assert summ["rejected_ledger_count"] == 25
     assert summ["active_candidate"] == "C21"
     assert summ["open_candidate_gate"] is True
-    assert summ["active_candidate_verdict"] == "C21_PROPOSAL_FROZEN_FOR_HUMAN_REVIEW"
+    assert summ["active_candidate_verdict"] == "C21_SPEC_FROZEN_FOR_HUMAN_REVIEW"
     assert summ["active_candidate_is_market_neutral"] is True
     assert summ["active_candidate_is_low_turnover"] is True
     assert summ["last_rejected_candidate"] == "C20"
     assert summ["last_rejected_candidate_verdict"] == "C20_REJECTED_AT_FEE_HONEST_REPLAY"
     assert summ["last_rejected_candidate_rejected_at"] == "fee_honest_replay"
-    assert summ["next_stage"] == "c21_candidate_spec_decision"
+    assert summ["next_stage"] == "c21_detector_spec_dry_run_decision"
     assert summ["next_required_action"] == (
-        "HUMAN_DECISION_C21_ADVANCE_TO_CANDIDATE_SPEC_OR_REJECT")
+        "HUMAN_DECISION_C21_ADVANCE_TO_DETECTOR_SPEC_DRY_RUN_OR_REJECT")
     assert summ["next_is_automation_readiness"] is False
     assert summ["next_is_new_candidate"] is False
     assert summ["surfaces_agree"] is True
