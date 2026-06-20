@@ -43,6 +43,7 @@ import sparta_commander.crypto_d1_candidate_research_lane_status_v1_contract as 
 import sparta_commander.sparta_automation_v2_morning_integration_contract as _v2mi  # noqa: E402,E501
 import sparta_commander.sparta_automation_v2_daily_report_contract as _v2dr  # noqa: E402,E501
 import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _c22trk  # noqa: E402,E501
+import sparta_commander.sparta_c22_current_morning_packet_contract as _c22cur  # noqa: E402,E501
 OVERNIGHT_RUN_DIR = REPO_ROOT / "data" / "overnight_autopilot" / "reports"
 OVERNIGHT_RUN_GLOB = "overnight_run_*.json"
 OUT_DIR = REPO_ROOT / "reports" / "autopilot_morning"
@@ -359,7 +360,23 @@ def build_morning_report(run_state, git_summary: dict,
     _gc_dir = REPO_ROOT / _c22trk.DATA_DIR
     _gc_names = (sorted(p.name for p in _gc_dir.glob(_c22trk.EXPORT_GLOB)
                         if p.is_file()) if _gc_dir.is_dir() else [])
-    report["c22_gc_collection_tracker"] = _c22trk.build_collection_status(_gc_names)
+    _trk_status = _c22trk.build_collection_status(_gc_names)
+    report["c22_gc_collection_tracker"] = _trk_status
+    # --- C22 CURRENT authoritative packet (supersedes the stale DATA_NOT_READY view) -----
+    # The Automation V2 packet above predates the C22 labels/labels-review/collection
+    # progression and still reports DATA_NOT_READY / dataset-staging. The current packet
+    # reads the realigned lane-status v2 surface (with the LIVE tracker window count) and
+    # is the AUTHORITATIVE next-action source: collect more windows toward 20/20 (HOLD),
+    # then suggest the frozen-window review; C23 stays queued/on-deck.
+    _cur = _c22cur.build_c22_current_morning_packet(
+        collected_windows=_trk_status.get("collected_windows"))
+    report["c22_current_packet"] = _cur
+    report["automation_v2_packet_superseded_by_current"] = True
+    report["automation_v2_legacy_next_action"] = report.get("authoritative_next_action")
+    report["authoritative_next_action_source"] = _cur["authoritative_next_action_source"]
+    report["authoritative_next_action"] = _cur["authoritative_next_action"]
+    report["does_not_present_dataset_staging_as_current_action"] = (
+        _cur["does_not_present_dataset_staging_as_current_action"])
     return report
 
 
@@ -371,19 +388,32 @@ def render_markdown(report: dict) -> str:
     lines.append("> Research-only status surface. No paper/live/broker/order "
                  "capability. Never a paper/live-readiness claim.")
     lines.append("")
-    # --- Automation V2: the AUTHORITATIVE next-action section (prominent) -----
+    # --- C22 CURRENT packet: the AUTHORITATIVE next-action section (prominent) -
+    _cur = r.get("c22_current_packet")
+    if _cur:
+        lines.append("## ⚑ C22 Collection — Authoritative Next Action")
+        lines.append(_c22cur.render_current_packet_markdown(_cur))
+        lines.append("")
+    # --- Automation V2 (SUPERSEDED historical data-readiness view) ------------
     _v2sec = r.get("automation_v2_packet")
     if _v2sec:
-        lines.append("## ⚑ Automation V2 — Authoritative Next Action")
+        if _cur:
+            lines.append("## (Superseded) Automation V2 — historical "
+                         "data-readiness view")
+            lines.append("> SUPERSEDED by the C22 Collection authoritative section "
+                         "above. C22's dataset is staged + validated and labels were "
+                         "produced; the lane is now collecting more frozen windows, so "
+                         "the DATA_NOT_READY / dataset-staging view below is historical.")
+        else:
+            lines.append("## ⚑ Automation V2 — Authoritative Next Action")
         lines.append(_v2mi.render_v2_section_markdown(_v2sec))
         if r.get("automation_v2_artifact_dir"):
             lines.append("- Daily report artifact path: `%s/`"
                          % r["automation_v2_artifact_dir"])
         if r.get("legacy_recommendation_superseded_by_automation_v2"):
             lines.append("> NOTE: the legacy autopilot recommendation below "
-                         "(`%s`) is SUPERSEDED by Automation V2 — follow the "
-                         "Automation V2 next action above."
-                         % r.get("legacy_recommended_token"))
+                         "(`%s`) is SUPERSEDED — follow the C22 Collection "
+                         "authoritative section above." % r.get("legacy_recommended_token"))
         lines.append("")
     # --- C22 Signum GC data-collection tracker section -----------------------
     _gc_trk = r.get("c22_gc_collection_tracker")

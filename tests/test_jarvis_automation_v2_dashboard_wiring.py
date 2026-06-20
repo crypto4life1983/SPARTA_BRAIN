@@ -21,6 +21,11 @@ import sparta_commander.sparta_automation_v2_morning_integration_contract as v2m
 _STAGING_TOKEN = (
     "HUMAN_STAGE_FROZEN_TREND_RADAR_GC_DETECTOR_DATASET_THEN_REAUTHORISE_C22_LABELS")
 _C21_TOKEN = "HUMAN_DECISION_C21_ADVANCE_TO_FEE_HONEST_REPLAY_OR_REJECT"
+# after the C22 current-packet realignment the AUTHORITATIVE next action is the collection
+# token; the old DATA_NOT_READY / dataset-staging Automation V2 view is demoted to a
+# clearly-superseded historical block.
+_COLLECT_TOKEN = (
+    "HUMAN_STAGE_MORE_FROZEN_DAILY_TREND_RADAR_GC_WINDOWS_THEN_REREVIEW_C22_LABELS")
 
 _GS = {"branch": "master", "staged": 0, "modified": 0, "untracked": 0, "clean": True}
 _RUN = {"run_time": "t", "tasks_attempted": ["a"], "tasks_completed": ["a"],
@@ -40,29 +45,33 @@ _ROOT = Path(mr.__file__).resolve().parents[1]
 
 # ---- morning report: V2 packet is the AUTHORITATIVE next action -------------
 
-def test_morning_report_has_authoritative_v2_packet():
-    assert _REPORT["authoritative_next_action_source"] == "AUTOMATION_V2"
-    assert _REPORT["authoritative_next_action"] == _STAGING_TOKEN
-    assert _REPORT["automation_v2_recommended_gate_kind"] == "RECOMMEND_DATASET_STAGING"
+def test_morning_report_authoritative_is_now_current_packet_v2_superseded():
+    # AUTHORITATIVE is now the C22 CURRENT collection packet (not the stale V2 staging view)
+    assert _REPORT["authoritative_next_action_source"] == "C22_CURRENT_COLLECTION"
+    assert _REPORT["authoritative_next_action"] == _COLLECT_TOKEN
+    assert _REPORT["automation_v2_packet_superseded_by_current"] is True
+    assert _REPORT["does_not_present_dataset_staging_as_current_action"] is True
+    cur = _REPORT["c22_current_packet"]
+    assert cur["c22_state"] == "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS"
+    assert cur["c22_replay_locked"] is True
+    assert cur["collection_progress"] == "1/20"
+    assert cur["c23_on_deck"] is True and cur["c23_is_active"] is False
+    # the old V2 packet is still attached as the superseded historical view
     sec = _REPORT["automation_v2_packet"]
-    assert sec["c22_data_not_ready"] is True
     assert sec["last_verdict"] == "DATA_NOT_READY"
-    assert sec["rejected_ledger_count"] == 26
-    assert sec["last_rejected_candidate"] == "C21"
-    assert sec["lane_active_candidate"] is None
     assert v2mi.validate_v2_morning_section(sec)["valid"] is True
 
 
-def test_morning_report_markdown_surfaces_v2_state():
-    assert "Automation V2 — Authoritative Next Action" in _MD
-    assert "DATA_NOT_READY" in _MD
-    assert _STAGING_TOKEN in _MD
-    assert "DO NOT proceed to labels" in _MD
-    assert "DO NOT fabricate data" in _MD
+def test_morning_report_markdown_current_authoritative_and_superseded_v2():
+    # the new authoritative section + the demoted/superseded V2 historical block
+    assert "C22 Collection — Authoritative Next Action" in _MD
+    assert _COLLECT_TOKEN in _MD
+    assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in _MD
+    assert "1/20" in _MD
+    assert "queued / ON-DECK" in _MD
+    assert "(Superseded) Automation V2" in _MD
+    assert "DATA_NOT_READY" in _MD            # still shown, in the superseded block
     assert "C1-C21 (26)" in _MD
-    assert "reports/automation_v2_daily" in _MD
-    # the danger-lock display is present
-    assert "no live trading" in _MD and "no Signum" in _MD
 
 
 # ---- stale legacy guard + current-state priority ---------------------------
@@ -83,25 +92,26 @@ def test_legacy_recommendation_superseded_and_no_c21_advance():
 
 # ---- panel: V2 packet rendered prominently in the HTML ---------------------
 
-def test_panel_html_surfaces_authoritative_v2():
-    assert _PANEL["authoritative_next_action_source"] == "AUTOMATION_V2"
-    assert _PANEL["authoritative_next_action"] == _STAGING_TOKEN
-    assert _PANEL["legacy_recommendation_superseded_by_automation_v2"] is True
-    assert _PANEL["does_not_present_c21_advance_as_current_action"] is True
-    assert "Automation V2 — Authoritative Next Action" in _HTML
-    assert "DATA_NOT_READY" in _HTML
-    assert _STAGING_TOKEN in _HTML
-    assert "SUPERSEDED" in _HTML
-    assert "reports/automation_v2_daily" in _HTML
+def test_panel_html_surfaces_current_authoritative_v2_superseded():
+    assert _PANEL["authoritative_next_action_source"] == "C22_CURRENT_COLLECTION"
+    assert _PANEL["authoritative_next_action"] == _COLLECT_TOKEN
+    assert _PANEL["automation_v2_packet_superseded_by_current"] is True
+    assert _PANEL["does_not_present_dataset_staging_as_current_action"] is True
+    # the new authoritative block + the demoted superseded V2 block
+    assert "C22 Collection — Authoritative Next Action" in _HTML
+    assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in _HTML
+    assert "1/20" in _HTML
+    assert "(Superseded) Automation V2" in _HTML
+    assert "DATA_NOT_READY" in _HTML          # still shown, superseded block
     assert _C21_TOKEN not in _PANEL["authoritative_next_action"]
 
 
-def test_panel_no_report_still_shows_v2_authoritative():
+def test_panel_no_report_still_shows_current_authoritative():
     p = panel.build_autopilot_morning_panel(None)
-    assert p["authoritative_next_action"] == _STAGING_TOKEN
-    assert "Automation V2 — Authoritative Next Action" in p["html"]
-    assert _STAGING_TOKEN in p["html"]
-    assert "DATA_NOT_READY" in p["html"]
+    assert p["authoritative_next_action"] == _COLLECT_TOKEN
+    assert "C22 Collection — Authoritative Next Action" in p["html"]
+    assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in p["html"]
+    assert "(Superseded) Automation V2" in p["html"]
 
 
 # ---- danger locks remain surfaced + locked ---------------------------------

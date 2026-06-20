@@ -33,6 +33,7 @@ import sparta_commander.human_gate_approval_workflow_v1_contract as _hgw
 import sparta_commander.sparta_automation_v2_morning_integration_contract as _v2mi
 import sparta_commander.sparta_automation_v2_daily_report_contract as _v2dr
 import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _c22trk
+import sparta_commander.sparta_c22_current_morning_packet_contract as _c22cur
 
 REPO_ROOT = Path(__file__).resolve().parent
 LATEST_JSON_REL = "reports/autopilot_morning/latest.json"
@@ -225,6 +226,26 @@ def _attach_c22_gc_tracker(panel: dict) -> None:
     panel["c22_gc_collection_tracker"] = c22_gc_tracker_block()
 
 
+def _attach_c22_current_packet(panel: dict) -> None:
+    """Pure. Attach the C22 CURRENT authoritative packet (reads the realigned lane-status
+    v2 surface with the live tracker count) and REPOINT the panel's authoritative
+    next-action to it, demoting the stale Automation V2 DATA_NOT_READY view to superseded.
+    Never raises."""
+    try:
+        trk = panel.get("c22_gc_collection_tracker") or {}
+        cur = _c22cur.build_c22_current_morning_packet(
+            collected_windows=trk.get("collected_windows"))
+    except Exception:  # noqa: BLE001 -- the view must never crash the console
+        cur = _c22cur.build_c22_current_morning_packet()
+    panel["c22_current_packet"] = cur
+    panel["automation_v2_packet_superseded_by_current"] = True
+    panel["automation_v2_legacy_next_action"] = panel.get("authoritative_next_action")
+    panel["authoritative_next_action_source"] = cur["authoritative_next_action_source"]
+    panel["authoritative_next_action"] = cur["authoritative_next_action"]
+    panel["does_not_present_dataset_staging_as_current_action"] = (
+        cur["does_not_present_dataset_staging_as_current_action"])
+
+
 def build_autopilot_morning_panel(report) -> dict[str, Any]:
     """Pure. Normalize the morning report (or None) into a JARVIS panel dict.
     Always returns a dict; never claims paper/live readiness."""
@@ -261,6 +282,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
             "safety_locks", {})
         _attach_automation_v2(panel)
         _attach_c22_gc_tracker(panel)
+        _attach_c22_current_packet(panel)
         panel["html"] = render_autopilot_morning_html(panel)
         return panel
 
@@ -309,6 +331,7 @@ def build_autopilot_morning_panel(report) -> dict[str, Any]:
     panel["safety_locks"] = panel["automation_readiness"].get("safety_locks", {})
     _attach_automation_v2(panel)
     _attach_c22_gc_tracker(panel)
+    _attach_c22_current_packet(panel)
     panel["html"] = render_autopilot_morning_html(panel)
     return panel
 
@@ -468,14 +491,34 @@ def _render_automation_readiness_html(panel: dict) -> str:
     return "".join(parts)
 
 
+def _render_c22_current_html(panel: dict) -> str:
+    """Pure. The C22 CURRENT authoritative next-action block (collect-to-20/20 HOLD, then
+    suggest the frozen-window review; C23 on-deck). Supersedes the stale Automation V2
+    DATA_NOT_READY view."""
+    cur = panel.get("c22_current_packet") or {}
+    if not cur:
+        return ""
+    return ('<div class="jv-am-h jv-am-gate">⚑ C22 Collection — Authoritative Next '
+            'Action</div>' + _c22cur.render_current_packet_html(cur))
+
+
 def _render_automation_v2_html(panel: dict) -> str:
-    """Pure. The AUTHORITATIVE Automation V2 next-action block (rendered prominently,
-    before the legacy lane sections). Marks the legacy recommendation superseded."""
+    """Pure. The Automation V2 next-action block. When the C22 CURRENT packet is present
+    this block is DEMOTED to a clearly-superseded historical data-readiness view; the
+    current packet above is authoritative."""
     v2 = panel.get("automation_v2") or {}
     if not v2 or v2.get("available") is False:
         return ""
-    parts = ['<div class="jv-am-h jv-am-gate">⚑ Automation V2 — Authoritative Next '
-             'Action</div>']
+    superseded = bool(panel.get("c22_current_packet"))
+    if superseded:
+        parts = ['<div class="jv-am-h">(Superseded) Automation V2 — historical '
+                 'data-readiness view</div>',
+                 '<div class="jv-detail jv-am-bad">⚠ SUPERSEDED by the C22 Collection '
+                 'authoritative section above — the dataset is staged + validated and '
+                 'labels were produced; the lane is now collecting more windows.</div>']
+    else:
+        parts = ['<div class="jv-am-h jv-am-gate">⚑ Automation V2 — Authoritative Next '
+                 'Action</div>']
     parts.append(_v2mi.render_v2_section_html(v2))
     if panel.get("automation_v2_artifact_dir"):
         parts.append('<div class="jv-detail">Daily report artifact path: '
@@ -483,8 +526,8 @@ def _render_automation_v2_html(panel: dict) -> str:
                      % _esc(panel.get("automation_v2_artifact_dir")))
     if panel.get("legacy_recommendation_superseded_by_automation_v2"):
         parts.append('<div class="jv-detail jv-am-bad">⚠ The legacy autopilot '
-                     'recommendation below (<code>%s</code>) is SUPERSEDED by '
-                     'Automation V2 — follow the Automation V2 next action above.'
+                     'recommendation below (<code>%s</code>) is SUPERSEDED — follow the '
+                     'C22 Collection authoritative next action above.'
                      '</div>' % _esc(panel.get("legacy_recommended_token")))
     return "".join(parts)
 
@@ -510,8 +553,10 @@ def render_autopilot_morning_html(panel: dict) -> str:
                 '<div class="jv-am-status jv-am-muted">%s</div>'
                 '<div class="jv-detail">%s</div>'
                 % (_esc(status), _esc(NO_REPORT_MESSAGE)))
-        # the AUTHORITATIVE Automation V2 next action is shown even with no report
-        body = _render_automation_v2_html(panel) \
+        # the AUTHORITATIVE C22 Collection next action (current packet) is shown first,
+        # then the superseded Automation V2 historical view, even with no report.
+        body = _render_c22_current_html(panel) \
+            + _render_automation_v2_html(panel) \
             + _render_c22_gc_tracker_html(panel) \
             + _render_automation_readiness_html(panel)
         foot = ('<div class="jv-am-foot">Research-only status surface. '
@@ -527,7 +572,9 @@ def render_autopilot_morning_html(panel: dict) -> str:
     parts.append('<div class="jv-detail">Last run: %s · run id: %s</div>'
                  % (_esc(panel.get("last_run_time") or "—"),
                     _esc(panel.get("latest_run_record_id") or "—")))
-    # the AUTHORITATIVE Automation V2 next-action block, rendered prominently first.
+    # the AUTHORITATIVE C22 Collection next-action block (current packet), first.
+    parts.append(_render_c22_current_html(panel))
+    # the superseded Automation V2 historical data-readiness view.
     parts.append(_render_automation_v2_html(panel))
     # the C22 Signum GC data-collection tracker (research-only progress reminder).
     parts.append(_render_c22_gc_tracker_html(panel))
