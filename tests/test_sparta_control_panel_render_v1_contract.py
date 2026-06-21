@@ -12,6 +12,8 @@ from pathlib import Path
 import sparta_commander.sparta_control_panel_render_v1_contract as cpr
 import sparta_commander.sparta_current_state_control_packet_contract as cp
 import sparta_commander.sparta_scheduled_task_health_classifier_contract as th
+import sparta_commander.sparta_scheduled_run_watchdog_contract as wd
+import sparta_commander.sparta_candidate_lifecycle_orchestrator_contract as lo
 
 _CLEAN = {"head": "h", "origin": "h", "ahead": 0, "behind": 0, "clean": True,
           "staged_paths": []}
@@ -98,6 +100,54 @@ def test_renderer_reads_only_the_packet():
     assert p["c22_collection"]["progress"] == "7/20"
     assert "7/20" in cpr.render_control_panel_html(p)
     assert "7/20" in cpr.render_control_panel_markdown(p)
+
+
+# ---- E2: watchdog + lifecycle sections surfaced in /control ----------------
+
+_FRESH_C22 = {"collected_windows": 1, "latest_window_date": "2026-06-20",
+              "days_since_latest_window": 1}
+_WATCHDOG = wd.build_watchdog(_OK_HEALTH, _FRESH_C22)
+_LIFECYCLE = lo.build_lifecycle(collected_windows=1)
+
+
+def test_watchdog_section_html():
+    h = cpr.render_watchdog_section_html(_WATCHDOG)
+    assert "Scheduled-run watchdog: NONE" in h
+    assert "NO_ACTION_REQUIRED" in h
+    assert "Priority tasks:" in h and "C22 risks:" in h
+    assert "reran_any_task=False" in h
+    assert "changed_any_scheduled_task=False" in h
+    assert "auto_executes_any_token=False" in h
+    assert "<script" not in h.lower() and "onclick" not in h.lower()
+
+
+def test_lifecycle_section_html():
+    h = cpr.render_lifecycle_section_html(_LIFECYCLE)
+    assert "Candidate lifecycle" in h
+    assert "C22_COLLECT_MORE_WINDOWS" in h
+    assert "HUMAN_STAGE_MORE_FROZEN_DAILY_TREND_RADAR_GC_WINDOWS_THEN_REREVIEW_C22_LABELS" in h
+    assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in h
+    assert "C23 gate: C23_WAITING_FOR_C22_CONCLUSION" in h
+    assert "advances_any_candidate=False" in h
+    assert "opens_c23_as_active=False" in h
+    assert "modifies_repo=False" in h
+
+
+def test_control_panel_includes_watchdog_and_lifecycle():
+    html = cpr.render_control_panel_html(_packet(), _WATCHDOG, _LIFECYCLE)
+    assert "Scheduled-run watchdog" in html
+    assert "Candidate lifecycle" in html
+    assert "C22_COLLECT_MORE_WINDOWS" in html
+    assert "<script" not in html.lower() and "onclick" not in html.lower()
+    # backward compatible: omitting them renders no extra sections
+    plain = cpr.render_control_panel_html(_packet())
+    assert "Scheduled-run watchdog" not in plain
+    assert "Candidate lifecycle" not in plain
+
+
+def test_sections_empty_when_no_finding():
+    assert cpr.render_watchdog_section_html(None) == ""
+    assert cpr.render_lifecycle_section_html(None) == ""
 
 
 # ---- module purity ---------------------------------------------------------

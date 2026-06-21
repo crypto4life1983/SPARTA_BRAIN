@@ -9600,7 +9600,19 @@ def page_sparta_control_panel():
         import tools.sparta_current_state_once as _cs
         import sparta_commander.sparta_control_panel_render_v1_contract as _cpr
         packet = _cs.build_current_state()
-        body = _cpr.render_control_panel_html(packet)
+        # read-only Bundle C watchdog + Bundle D lifecycle (display-only; never run a task,
+        # never advance a candidate, never execute a token). Each is independently safe.
+        try:
+            import tools.sparta_scheduled_run_watchdog_once as _wdrun
+            _watchdog = _wdrun.build_watchdog_finding()
+        except Exception:  # noqa: BLE001
+            _watchdog = None
+        try:
+            import tools.sparta_candidate_lifecycle_orchestrator_once as _lorun
+            _lifecycle = _lorun.build_lifecycle_finding()
+        except Exception:  # noqa: BLE001
+            _lifecycle = None
+        body = _cpr.render_control_panel_html(packet, _watchdog, _lifecycle)
     except Exception as _exc:  # noqa: BLE001 -- the page must never crash
         body = ("<div class='jv-am-status jv-am-bad'>Control panel unavailable "
                 "(%s)</div>" % type(_exc).__name__)

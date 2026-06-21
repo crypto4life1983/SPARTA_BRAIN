@@ -116,8 +116,63 @@ def render_control_panel_markdown(packet: dict) -> str:
     return "\n".join(lines)
 
 
-def render_control_panel_html(packet: dict) -> str:
-    """PURE. The control panel as an HTML fragment (no JS, no execution affordances)."""
+def render_watchdog_section_html(watchdog: dict) -> str:
+    """PURE. The Bundle C scheduled-run watchdog summary (read-only display of an existing
+    watchdog finding -- recomputes nothing). Returns '' if no watchdog finding."""
+    w = watchdog or {}
+    if not w:
+        return ""
+    sev = w.get("severity")
+    cls = {"ALERT": "jv-am-bad", "ATTENTION": "jv-am-warn", "NONE": "jv-am-ok"}.get(
+        sev, "jv-am-muted")
+    parts = ['<div class="jv-am-h %s">Scheduled-run watchdog: %s</div><ul>'
+             % (cls, _esc(sev))]
+    parts.append('<li>Primary recommendation: <b>%s</b></li>'
+                 % _esc(w.get("primary_recommendation")))
+    ps = w.get("priority_states") or {}
+    parts.append('<li>Priority tasks: %s</li>' % _esc(
+        ", ".join("%s=%s" % (k.split("_")[-1] if "_" in k else k, v)
+                  for k, v in ps.items())))
+    risks = [k for k, v in (w.get("c22_risks") or {}).items() if v is True]
+    parts.append('<li>C22 risks: %s</li>' % _esc(", ".join(risks) or "none"))
+    for chk in (w.get("operator_checks") or []):
+        parts.append('<li class="jv-detail">check: %s</li>' % _esc(chk))
+    parts.append('<li class="jv-detail">reran_any_task=%s | changed_any_scheduled_task=%s '
+                 '| auto_executes_any_token=%s</li></ul>' % (
+                     _esc(w.get("reran_any_task")),
+                     _esc(w.get("changed_any_scheduled_task")),
+                     _esc(w.get("auto_executes_any_token"))))
+    return "".join(parts)
+
+
+def render_lifecycle_section_html(lifecycle: dict) -> str:
+    """PURE. The Bundle D candidate-lifecycle summary (read-only display of an existing
+    lifecycle finding -- recomputes nothing). Returns '' if no lifecycle finding."""
+    lo = lifecycle or {}
+    if not lo:
+        return ""
+    st = lo.get("lifecycle_state") or {}
+    parts = ['<div class="jv-am-h jv-am-gate">Candidate lifecycle</div><ul>']
+    parts.append('<li>Current gate: <b>%s</b></li>' % _esc(lo.get("current_gate")))
+    parts.append('<li>Suggested human token: <code>%s</code></li>'
+                 % _esc(lo.get("suggested_human_token")))
+    parts.append('<li>C22 progress / state: %s / %s</li>' % (
+        _esc(st.get("c22_progress")), _esc(st.get("c22_state"))))
+    parts.append('<li>C23 gate: %s</li>' % _esc(lo.get("c23_gate")))
+    parts.append('<li class="jv-detail">advances_any_candidate=%s | opens_c23_as_active=%s '
+                 '| auto_executes_any_token=%s | modifies_repo=%s</li></ul>' % (
+                     _esc(lo.get("advances_any_candidate")),
+                     _esc(lo.get("opens_c23_as_active")),
+                     _esc(lo.get("auto_executes_any_token")),
+                     _esc(lo.get("modifies_repo"))))
+    return "".join(parts)
+
+
+def render_control_panel_html(packet: dict, watchdog: dict = None,
+                              lifecycle: dict = None) -> str:
+    """PURE. The control panel as an HTML fragment (no JS, no execution affordances).
+    Optionally appends the read-only Bundle C watchdog + Bundle D lifecycle summaries
+    (display-only; recomputes nothing)."""
     p = packet or {}
     rs = p.get("repo_state") or {}
     lane = p.get("lane") or {}
@@ -184,4 +239,7 @@ def render_control_panel_html(packet: dict) -> str:
     parts.append('<div class="jv-detail">C23 opens (after C22 concludes) via: '
                  '<code>%s</code></div>' % _esc(na.get("c23_open_token_after_c22")))
     parts.append('</div>')
+    # optional read-only Bundle C watchdog + Bundle D lifecycle summaries
+    parts.append(render_watchdog_section_html(watchdog))
+    parts.append(render_lifecycle_section_html(lifecycle))
     return "".join(parts)

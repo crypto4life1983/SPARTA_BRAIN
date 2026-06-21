@@ -40,6 +40,13 @@ def test_control_route_renders_read_only_panel():
         assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in text
         assert ("HUMAN_STAGE_MORE_FROZEN_DAILY_TREND_RADAR_GC_WINDOWS_THEN_REREVIEW_"
                 "C22_LABELS" in text)
+        # E2: the read-only watchdog + lifecycle sections are surfaced
+        assert "Scheduled-run watchdog" in text
+        assert "Candidate lifecycle" in text
+        assert "Current gate:" in text
+        # proof flags rendered, read-only
+        assert "reran_any_task=False" in text
+        assert "advances_any_candidate=False" in text
         # no execution affordances
         assert "<script" not in text.lower()
 
