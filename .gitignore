@@ -109,3 +109,8 @@ data/low_turnover_same_asset_spot_perp_funding_carry_c21/
 data/external_signum_trend_radar_gc/
 # Candidate #22 local import inbox for externally-exported GC daily JSON (never committed)
 data/external_signum_trend_radar_gc_inbox/
+
+# Broad crypto universe (C23/C24 sleeve research) -- local frozen CSVs + manifest/quality
+# report are EXPLORATORY, survivorship-biased data; never committed (the fetcher tool + its
+# safety tests ARE committed)
+data/broad_crypto_universe_c23_c24/
