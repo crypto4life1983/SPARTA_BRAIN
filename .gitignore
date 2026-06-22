@@ -114,3 +114,8 @@ data/external_signum_trend_radar_gc_inbox/
 # report are EXPLORATORY, survivorship-biased data; never committed (the fetcher tool + its
 # safety tests ARE committed)
 data/broad_crypto_universe_c23_c24/
+
+# Broad multi-asset FUNDING universe (cross-sectional carry return-engine research) --
+# EXPLORATORY, survivorship-biased local frozen funding CSVs + manifest/quality report;
+# never committed (the bounded fetcher tool + its safety tests ARE committed)
+data/broad_crypto_funding_universe/
