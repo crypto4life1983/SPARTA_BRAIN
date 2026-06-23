@@ -9613,6 +9613,13 @@ def page_sparta_control_panel():
         except Exception:  # noqa: BLE001
             _lifecycle = None
         body = _cpr.render_control_panel_html(packet, _watchdog, _lifecycle)
+        # read-only Candidate Arena daily section (display-only; reads the pure arena contract;
+        # promotes nothing, advances nothing, fetches nothing). Independently safe.
+        try:
+            import sparta_commander.sparta_candidate_arena_daily_section_v1_contract as _arsec
+            body = body + _arsec.render_arena_section_html()
+        except Exception:  # noqa: BLE001
+            pass
     except Exception as _exc:  # noqa: BLE001 -- the page must never crash
         body = ("<div class='jv-am-status jv-am-bad'>Control panel unavailable "
                 "(%s)</div>" % type(_exc).__name__)
