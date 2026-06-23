@@ -124,3 +124,8 @@ data/broad_crypto_funding_universe/
 # frozen DVOL OHLC CSVs + manifest/quality report; never committed (the bounded public-only
 # Deribit DVOL fetcher tool + its safety tests ARE committed)
 data/deribit_iv_universe/
+
+# Per-strike BTC options chain (VRP Phase-2: forward-only public snapshots + any human-procured
+# paid Tardis import) -- EXPLORATORY local data; never committed (the bounded public-only
+# forward collector + the paid-import contract + their tests ARE committed)
+data/deribit_options_chain_universe/
