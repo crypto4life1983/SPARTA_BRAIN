@@ -51,18 +51,24 @@ _CAPABILITY_FLAGS_FALSE = (
 )
 
 
-def classify_drop_candidate(parsed: dict, already_collected_dates: Any) -> dict[str, Any]:
+def classify_drop_candidate(parsed: dict, already_collected_dates: Any,
+                            today: Any = None, raw_bytes: Any = None,
+                            compact_bytes: Any = None) -> dict[str, Any]:
     """PURE. Classify one parsed drop-folder candidate by reusing the committed importer
     decision: PICKUP_OK (valid + new date), PICKUP_DUPLICATE_WINDOW (valid + already
-    collected), PICKUP_IGNORED_INVALID (not a valid GC export). Derives the deterministic
-    inbox filename from runDate. No I/O; never mutates."""
-    decision = _imp.build_import_decision(parsed, already_collected_dates)
+    collected), PICKUP_IGNORED_INVALID (not a valid GC export, OR future-dated, OR
+    anomalous-shape relative to the supplied local date / sizes). Derives the deterministic
+    inbox filename from runDate. No I/O; never mutates. When ``today`` and/or ``raw_bytes``
+    are supplied, a future-dated OR shape/size-anomalous export is NOT picked up (it never
+    enters the inbox), so such files cannot reach active collection."""
+    decision = _imp.build_import_decision(parsed, already_collected_dates, today=today,
+                                          raw_bytes=raw_bytes, compact_bytes=compact_bytes)
     v = decision["verdict"]
     if v == _imp.VERDICT_IMPORT_OK:
         verdict, should = PICKUP_OK, True
     elif v == _imp.VERDICT_DUPLICATE:
         verdict, should = PICKUP_DUPLICATE, False
-    else:
+    else:  # INVALID / FUTURE_DATED / ANOMALOUS -> ignored, never copied into the inbox
         verdict, should = PICKUP_IGNORED_INVALID, False
     return {
         "verdict": verdict, "should_pickup": should,

@@ -149,6 +149,258 @@ def test_tool_empty_inbox(tmp_path, monkeypatch):
     assert runner.main() == 0
 
 
+# ---- future-dated guard: data-integrity hardening (clock-anomalous exports) -
+
+def test_is_future_dated_helper():
+    assert imp.is_future_dated("2026-06-26", "2026-06-25") is True
+    assert imp.is_future_dated("2026-06-25", "2026-06-25") is False   # same day OK
+    assert imp.is_future_dated("2026-06-24", "2026-06-25") is False   # past OK
+    assert imp.is_future_dated(None, "2026-06-25") is False
+    assert imp.is_future_dated("garbage", "2026-06-25") is False      # unparseable -> False
+
+
+def test_same_day_import_is_ok_with_today():
+    today = "2026-06-25"
+    d = imp.build_import_decision(_valid_parsed("2026-06-25"), set(), today=today)
+    assert d["verdict"] == imp.VERDICT_IMPORT_OK
+    assert d["is_future_dated"] is False
+    assert d["should_import"] is True
+    assert imp.validate_import_decision(d)["valid"] is True
+
+
+def test_duplicate_still_noop_with_today():
+    today = "2026-06-25"
+    d = imp.build_import_decision(_valid_parsed("2026-06-20"), {"2026-06-20"}, today=today)
+    assert d["verdict"] == imp.VERDICT_DUPLICATE
+    assert d["should_import"] is False
+    assert imp.validate_import_decision(d)["valid"] is True
+
+
+def test_future_dated_is_rejected_not_imported():
+    today = "2026-06-25"
+    d = imp.build_import_decision(_valid_parsed("2026-06-26"), set(), today=today)
+    assert d["verdict"] == imp.VERDICT_FUTURE_DATED
+    assert d["is_future_dated"] is True
+    assert d["should_import"] is False
+    assert "future_dated_run_date:2026-06-26_after_local_date:2026-06-25" in d["reasons"]
+    assert imp.validate_import_decision(d)["valid"] is True
+    # tamper: a future-dated export may NOT be relabeled IMPORT_OK
+    bad = {**d, "verdict": imp.VERDICT_IMPORT_OK, "should_import": True}
+    assert imp.validate_import_decision(bad)["valid"] is False
+
+
+def test_tool_quarantines_future_dated_and_count_does_not_advance(tmp_path, monkeypatch):
+    inbox = tmp_path / "inbox"
+    dest = tmp_path / "dest"
+    inbox.mkdir()
+    dest.mkdir()
+    monkeypatch.setattr(runner, "INBOX", inbox)
+    monkeypatch.setattr(runner, "DEST", dest)
+    monkeypatch.setattr(runner, "QUARANTINE_DIR", inbox / "_quarantine")
+    today = "2026-06-25"
+
+    # (5) a valid SAME-DAY file still imports normally
+    good = inbox / "gc_crypto_trendradar_daily_good.json"
+    good.write_bytes(json.dumps(_valid_parsed("2026-06-25")).encode("utf-8"))
+    rg = runner.import_one(good, runner._already_collected_dates(), today=today)
+    assert rg["imported"] is True
+    assert (dest / "gc_crypto_trendradar_daily_20260625.json").is_file()
+
+    # a FUTURE-dated file is quarantined, never imported
+    fut = inbox / "gc_crypto_trendradar_daily_future.json"
+    blob = json.dumps(_valid_parsed("2026-06-26")).encode("utf-8")
+    fut.write_bytes(blob)
+    rf = runner.import_one(fut, runner._already_collected_dates(), today=today)
+    assert rf["imported"] is False
+    assert rf["verdict"] == imp.VERDICT_FUTURE_DATED
+    assert rf["quarantined"] is True
+
+    # (4) dataset did NOT gain the future window; count/latest date unchanged
+    assert not (dest / "gc_crypto_trendradar_daily_20260626.json").exists()
+    collected = sorted(trk._date_from_filename(p.name) for p in dest.glob(trk.EXPORT_GLOB))
+    assert collected == ["2026-06-25"]   # only the same-day import; 2026-06-26 absent
+
+    # original moved OUT of the inbox top-level (not left to re-import, not deleted)
+    assert not fut.exists()
+    qroot = inbox / "_quarantine" / "2026-06-26"
+    qfiles = list(qroot.glob("*"))
+    payloads = [p for p in qfiles if p.name.endswith(".json") and ".note." not in p.name]
+    notes = [p for p in qfiles if p.name.endswith(".note.json")]
+    assert payloads and notes
+    # (4-cont) quarantined payload preserved byte-for-byte (moved, not mutated/deleted)
+    assert payloads[0].read_bytes() == blob
+    # quarantine note carries reason, timestamp, source, destination, size, SHA-256
+    note = json.loads(notes[0].read_text(encoding="utf-8"))
+    assert note["sha256"] == hashlib.sha256(blob).hexdigest()
+    assert note["size_bytes"] == len(blob)
+    assert note["status"] == "QUARANTINED_NOT_DELETED"
+    assert note["local_machine_date"] == today
+    assert note["source_path"] and note["destination_path"] and note["quarantined_at"]
+
+
+def test_quarantine_is_invisible_to_scanners_and_under_gitignored_inbox(tmp_path, monkeypatch):
+    """(5) git/artifact safety: quarantine lives INSIDE the gitignored inbox dir and its files
+    do NOT match the EXPORT_GLOB, so no importer/tracker scan re-imports a quarantined file and
+    nothing lands in the tracked dataset."""
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    monkeypatch.setattr(runner, "INBOX", inbox)
+    monkeypatch.setattr(runner, "DEST", tmp_path / "dest")
+    monkeypatch.setattr(runner, "QUARANTINE_DIR", inbox / "_quarantine")
+    # production inbox path is the gitignored data dir, and quarantine nests under it
+    assert imp.INBOX_DIR == "data/external_signum_trend_radar_gc_inbox"
+    assert runner.QUARANTINE_DIR.parent == inbox
+
+    fut = inbox / "gc_crypto_trendradar_daily_future.json"
+    fut.write_bytes(json.dumps(_valid_parsed("2026-06-26")).encode("utf-8"))
+    runner.import_one(fut, set(), today="2026-06-25")
+
+    # a non-recursive EXPORT_GLOB over the inbox finds NO quarantined payload
+    assert list(inbox.glob(trk.EXPORT_GLOB)) == []
+    payloads = list((inbox / "_quarantine" / "2026-06-26").glob("*"))
+    assert payloads, "expected quarantined files to exist in the subfolder"
+    for p in payloads:
+        assert not p.name.startswith(trk.EXPORT_PREFIX)   # off the EXPORT_GLOB prefix
+
+
+# ---- same-day shape/size anomaly guard (full-dump / pretty-printed exports) -
+
+def test_check_shape_anomaly_helper():
+    p = _valid_parsed("2026-06-25")
+    # canonical minified daily export -> clean
+    assert imp.check_shape_anomaly(p, 62442, 62338)["anomalous"] is False
+    assert imp.check_shape_anomaly(p)["anomalous"] is False
+    # pretty-printed (raw bloated, MINIFIED payload normal) -> NOT anomalous, only warned
+    pp = imp.check_shape_anomaly(p, 113530, 62348)   # the 06-20 / 06-26 shape
+    assert pp["anomalous"] is False
+    assert pp["warnings"]
+    # real extra content (minified payload beyond the content ceiling) -> anomalous
+    assert imp.check_shape_anomaly(p, 200000, 199000)["anomalous"] is True
+    # extra top-level key (full/raw dump) -> anomalous via content-shape
+    assert imp.check_shape_anomaly({**p, "debugDump": {"all": True}})["anomalous"] is True
+
+
+def test_normal_minified_same_day_imports_with_sizes():
+    d = imp.build_import_decision(_valid_parsed("2026-06-25"), set(), today="2026-06-25",
+                                  raw_bytes=62442, compact_bytes=62338)   # ratio ~1.00
+    assert d["verdict"] == imp.VERDICT_IMPORT_OK
+    assert d["is_anomalous_shape"] is False
+    assert d["should_import"] is True
+    assert imp.validate_import_decision(d)["valid"] is True
+
+
+def test_pretty_printed_alone_imports_with_warning():
+    # the 06-20/06-26 shape: ~113 KB raw but content-equivalent ~62 KB minified -> IMPORTS
+    d = imp.build_import_decision(_valid_parsed("2026-06-25"), set(), today="2026-06-25",
+                                  raw_bytes=113530, compact_bytes=62348)   # ratio ~1.82
+    assert d["verdict"] == imp.VERDICT_IMPORT_OK
+    assert d["is_anomalous_shape"] is False
+    assert d["should_import"] is True
+    assert d["shape_warnings"]   # formatting is flagged as a non-blocking warning
+    assert imp.validate_import_decision(d)["valid"] is True
+
+
+def test_oversized_minified_content_is_anomalous():
+    # real extra content: the MINIFIED payload is far above the normal ~62 KB
+    d = imp.build_import_decision(_valid_parsed("2026-06-25"), set(), today="2026-06-25",
+                                  raw_bytes=190000, compact_bytes=185000)
+    assert d["verdict"] == imp.VERDICT_ANOMALOUS
+    assert any("minified_content_exceeds_ceiling" in x for x in d["anomaly_reasons"])
+    assert imp.validate_import_decision(d)["valid"] is True
+    bad = {**d, "verdict": imp.VERDICT_IMPORT_OK, "should_import": True}
+    assert imp.validate_import_decision(bad)["valid"] is False
+
+
+def test_full_dump_shape_is_anomalous():
+    # extra top-level key + far too many rows = a full/raw dump, not a daily window
+    p = _valid_parsed("2026-06-25", total=500, n=70)
+    p["debugDump"] = {"everything": True}
+    d = imp.build_import_decision(p, set(), today="2026-06-25",
+                                  raw_bytes=80000, compact_bytes=79000)
+    assert d["verdict"] == imp.VERDICT_ANOMALOUS
+    assert any("unexpected_top_level_keys" in x for x in d["anomaly_reasons"])
+    assert any("results" in x or "total" in x for x in d["anomaly_reasons"])
+
+
+def test_tool_pretty_printed_imports_with_warning(tmp_path, monkeypatch):
+    inbox = tmp_path / "inbox"
+    dest = tmp_path / "dest"
+    inbox.mkdir()
+    dest.mkdir()
+    monkeypatch.setattr(runner, "INBOX", inbox)
+    monkeypatch.setattr(runner, "DEST", dest)
+    monkeypatch.setattr(runner, "QUARANTINE_DIR", inbox / "_quarantine")
+
+    compact = json.dumps(_valid_parsed("2026-06-24"), separators=(",", ":"))
+    pretty = json.dumps(_valid_parsed("2026-06-24"), indent=2)
+    assert len(pretty) / len(compact) > imp.PRETTY_PRINT_WARN_RATIO   # really pretty-printed
+    src = inbox / "gc_crypto_trendradar_daily_pp.json"
+    src.write_bytes(pretty.encode("utf-8"))
+    res = runner.import_one(src, runner._already_collected_dates(), today="2026-06-25")
+    # pretty-printing alone does NOT block import; it is imported WITH a warning
+    assert res["imported"] is True
+    assert res["verdict"] == imp.VERDICT_IMPORT_OK
+    assert res["shape_warnings"]
+    assert (dest / "gc_crypto_trendradar_daily_20260624.json").is_file()
+
+
+def test_tool_quarantines_true_full_dump_and_count_does_not_advance(tmp_path, monkeypatch):
+    inbox = tmp_path / "inbox"
+    dest = tmp_path / "dest"
+    inbox.mkdir()
+    dest.mkdir()
+    monkeypatch.setattr(runner, "INBOX", inbox)
+    monkeypatch.setattr(runner, "DEST", dest)
+    monkeypatch.setattr(runner, "QUARANTINE_DIR", inbox / "_quarantine")
+    today = "2026-06-25"
+
+    # a normal MINIFIED same-day export imports normally
+    good = inbox / "gc_crypto_trendradar_daily_good.json"
+    good.write_bytes(json.dumps(_valid_parsed("2026-06-25"), separators=(",", ":")).encode())
+    assert runner.import_one(good, runner._already_collected_dates(),
+                             today=today)["imported"] is True
+
+    # a TRUE full/raw dump (extra top-level key) is quarantined, never imported
+    dump = dict(_valid_parsed("2026-06-25"))
+    dump["debugDump"] = {"all": True}
+    blob = json.dumps(dump, separators=(",", ":")).encode("utf-8")   # minified, real extra key
+    bad = inbox / "gc_crypto_trendradar_daily_dump.json"
+    bad.write_bytes(blob)
+    rb = runner.import_one(bad, runner._already_collected_dates(), today=today)
+    assert rb["imported"] is False
+    assert rb["verdict"] == imp.VERDICT_ANOMALOUS
+    assert rb["quarantined"] is True
+
+    # C22 count/latest do NOT advance from the dump (only the good import counts)
+    collected = sorted(trk._date_from_filename(p.name) for p in dest.glob(trk.EXPORT_GLOB))
+    assert collected == ["2026-06-25"]
+
+    # dump moved OUT of the inbox top-level (not re-importable, not deleted)
+    assert not bad.exists()
+    assert "gc_crypto_trendradar_daily_dump.json" not in [p.name for p in inbox.glob(trk.EXPORT_GLOB)]
+    qfiles = list((inbox / "_quarantine" / "2026-06-25").glob("*"))
+    payloads = [p for p in qfiles if p.name.endswith(".json") and ".note." not in p.name]
+    notes = [p for p in qfiles if p.name.endswith(".note.json")]
+    assert payloads and notes
+    assert payloads[0].read_bytes() == blob
+    for p in payloads:
+        assert not p.name.startswith(trk.EXPORT_PREFIX)   # invisible to EXPORT_GLOB scans
+    note = json.loads(notes[0].read_text(encoding="utf-8"))
+    assert note["sha256"] == hashlib.sha256(blob).hexdigest()
+    assert "anomalous" in note["quarantine_reason"]
+    assert note["status"] == "QUARANTINED_NOT_DELETED"
+
+
+def test_duplicate_normal_file_still_noop_with_sizes():
+    # a normal, in-band duplicate must remain a harmless no-op (not flagged anomalous)
+    d = imp.build_import_decision(_valid_parsed("2026-06-20"), {"2026-06-20"},
+                                  today="2026-06-25", raw_bytes=62442, compact_bytes=62338)
+    assert d["verdict"] == imp.VERDICT_DUPLICATE
+    assert d["is_anomalous_shape"] is False
+    assert d["should_import"] is False
+    assert imp.validate_import_decision(d)["valid"] is True
+
+
 # ---- tracker compatibility: imported filename is counted as a window -------
 
 def test_imported_filename_is_tracked_window():

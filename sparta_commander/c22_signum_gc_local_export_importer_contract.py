@@ -26,6 +26,7 @@ HOLD_FOR_MORE_FROZEN_DATA_WINDOWS.
 """
 from __future__ import annotations
 
+import datetime as _dt
 from typing import Any
 
 import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _trk
@@ -48,6 +49,27 @@ EXPECTED_ASSET_CLASS = "crypto"
 VERDICT_IMPORT_OK = "C22_GC_IMPORT_OK"
 VERDICT_DUPLICATE = "C22_GC_IMPORT_DUPLICATE_WINDOW"
 VERDICT_INVALID = "C22_GC_IMPORT_INVALID"
+# Data-integrity guard: a structurally-valid export whose decision date is AFTER the local
+# machine date must NEVER enter active collection (future-dated / clock-anomalous export).
+VERDICT_FUTURE_DATED = "C22_GC_IMPORT_FUTURE_DATED"
+# Data-integrity guard: a structurally-valid SAME-DAY export whose shape does not match the
+# canonical daily export (e.g. a full/raw dump, or a non-canonical pretty-printed blob) must
+# NOT enter active collection even though its date is fine.
+VERDICT_ANOMALOUS = "C22_GC_IMPORT_ANOMALOUS_SHAPE"
+
+# --- canonical daily-export shape envelope (for the same-day anomaly guard) ----------------
+# The normal daily GC export has exactly these top-level keys, the top-50 result rows, and a
+# ~62 KB MINIFIED payload. Anomaly rejection is judged on the NORMALIZED/minified content
+# shape -- NOT on pretty-printing. Pretty-printing alone (large raw bytes but normal minified
+# content) is a non-blocking WARNING, never a rejection: the 2026-06-20 bootstrap and the
+# 2026-06-26 file are both ~113 KB pretty-printed yet byte-for-byte content-equivalent to a
+# normal ~62 KB minified window (same keys, 50 rows, identical schema, ~62 KB compact).
+EXPECTED_TOP_LEVEL_KEYS = frozenset(("limited", "results", "total"))
+MAX_RESULTS = 60                 # normal = 50; a full/raw dump would carry many more rows
+MAX_COMPACT_BYTES = 80_000       # minified-content ceiling; normal ~62 KB. Real extra content
+                                 # (longer history / foreign fields) inflates the MINIFIED size;
+                                 # pure pretty-printing does NOT (it only inflates raw bytes).
+PRETTY_PRINT_WARN_RATIO = 1.30   # raw/minified ratio above this -> formatting WARNING only
 
 C22_STATE = _trk.C22_STATE                              # HOLD_FOR_MORE_FROZEN_DATA_WINDOWS
 
@@ -87,6 +109,56 @@ def derive_destination_filename(run_date: str | None) -> str | None:
     return None
 
 
+def is_future_dated(run_date: Any, today_iso: Any) -> bool:
+    """PURE. True iff the export decision date (run_date, ISO YYYY-MM-DD) is strictly AFTER
+    the supplied local date (today_iso, ISO YYYY-MM-DD). No clock read, no I/O -- the caller
+    supplies today. Returns False if either date is missing/unparseable (structural validity
+    handles malformed dates; the runner always supplies a real today)."""
+    if not run_date or not today_iso:
+        return False
+    try:
+        rd = _dt.date.fromisoformat(str(run_date)[:10])
+        td = _dt.date.fromisoformat(str(today_iso)[:10])
+    except ValueError:
+        return False
+    return rd > td
+
+
+def check_shape_anomaly(parsed: dict, raw_bytes: Any = None,
+                        compact_bytes: Any = None) -> dict[str, Any]:
+    """PURE. Reject only TRUE content-shape anomalies -- a full/raw dump or a foreign schema --
+    judged on the NORMALIZED/minified content, NOT on pretty-printing. Hard reject reasons:
+    unexpected top-level keys, an out-of-band result count, or a minified payload above the
+    content ceiling (real extra content). Pure whitespace/pretty-printing (large raw bytes but
+    a normal minified payload + normal shape) is reported as a non-blocking WARNING, never a
+    rejection. Returns {"anomalous": bool, "reasons": [...], "warnings": [...]}. No I/O."""
+    reasons: list = []
+    warnings: list = []
+    p = parsed or {}
+    extra_keys = set(p.keys()) - EXPECTED_TOP_LEVEL_KEYS
+    if extra_keys:
+        reasons.append("unexpected_top_level_keys:%s" % ",".join(sorted(extra_keys)))
+    results = p.get("results")
+    n = len(results) if isinstance(results, list) else 0
+    total = p.get("total")
+    if n > MAX_RESULTS:
+        reasons.append("too_many_results:%d_gt_%d" % (n, MAX_RESULTS))
+    if isinstance(total, int) and total > MAX_RESULTS:
+        reasons.append("total_exceeds_max:%d_gt_%d" % (total, MAX_RESULTS))
+    # real extra content shows up in the MINIFIED size; pretty-printing does NOT
+    if isinstance(compact_bytes, int) and compact_bytes > MAX_COMPACT_BYTES:
+        reasons.append("minified_content_exceeds_ceiling:%d_gt_%d"
+                       % (compact_bytes, MAX_COMPACT_BYTES))
+    # whitespace/pretty-printing -> WARNING only (content is fine, still imports)
+    if isinstance(raw_bytes, int) and raw_bytes > 0 and \
+            isinstance(compact_bytes, int) and compact_bytes > 0:
+        ratio = raw_bytes / compact_bytes
+        if ratio > PRETTY_PRINT_WARN_RATIO:
+            warnings.append("pretty_printed_non_canonical_whitespace:ratio_%.2f_gt_%.2f"
+                            % (ratio, PRETTY_PRINT_WARN_RATIO))
+    return {"anomalous": bool(reasons), "reasons": reasons, "warnings": warnings}
+
+
 def validate_import_candidate(parsed: dict) -> dict[str, Any]:
     """PURE. Structural validity of one parsed export. Reuses the committed dataset-facts
     extractor and adds the import-specific checks (total/length >= 50, assetClass=crypto,
@@ -120,18 +192,35 @@ def validate_import_candidate(parsed: dict) -> dict[str, Any]:
 
 
 def build_import_decision(parsed: dict, already_collected_dates: Any,
-                          action: str = "copy") -> dict[str, Any]:
+                          action: str = "copy",
+                          today: Any = None,
+                          raw_bytes: Any = None,
+                          compact_bytes: Any = None) -> dict[str, Any]:
     """Assemble the PURE import decision for one parsed export. Decides IMPORT_OK /
-    DUPLICATE_WINDOW / INVALID; the importer TOOL performs the actual byte copy (never
-    overwriting). No I/O; never mutates the JSON."""
+    FUTURE_DATED / ANOMALOUS_SHAPE / DUPLICATE_WINDOW / INVALID; the importer TOOL performs
+    the actual byte copy (never overwriting). No I/O; never mutates the JSON. When ``today``
+    (ISO local date) is supplied a future-dated export is rejected as FUTURE_DATED. When
+    ``raw_bytes`` (and optionally the minified ``compact_bytes``) are supplied a same-day but
+    non-canonical export (full/raw dump or pretty-printed blob) is rejected as ANOMALOUS_SHAPE.
+    Both guards keep clock-/shape-anomalous exports out of active collection."""
     collected = {d for d in (already_collected_dates or set())}
     validity = validate_import_candidate(parsed)
     run_date = validity["run_date"]
     dest_filename = derive_destination_filename(run_date)
+    future_dated = today is not None and is_future_dated(run_date, today)
+    anomaly = check_shape_anomaly(parsed, raw_bytes, compact_bytes)
 
     if not validity["valid"] or not dest_filename:
         verdict = VERDICT_INVALID
         reasons = list(validity["failures"]) or ["underivable_destination_filename"]
+        should_import = False
+    elif future_dated:
+        verdict = VERDICT_FUTURE_DATED
+        reasons = ["future_dated_run_date:%s_after_local_date:%s" % (run_date, today)]
+        should_import = False
+    elif anomaly["anomalous"]:
+        verdict = VERDICT_ANOMALOUS
+        reasons = list(anomaly["reasons"])
         should_import = False
     elif run_date in collected:
         verdict = VERDICT_DUPLICATE
@@ -157,6 +246,13 @@ def build_import_decision(parsed: dict, already_collected_dates: Any,
         "validity": validity,
         "structurally_valid": validity["valid"],
         "run_date": run_date,
+        "today": today,
+        "is_future_dated": future_dated,
+        "raw_bytes": raw_bytes,
+        "compact_bytes": compact_bytes,
+        "is_anomalous_shape": anomaly["anomalous"],
+        "anomaly_reasons": list(anomaly["reasons"]),
+        "shape_warnings": list(anomaly["warnings"]),
         "destination_filename": dest_filename,
         "already_collected_dates": sorted(collected),
         # decision
@@ -204,7 +300,8 @@ def validate_import_decision(record: Any) -> dict[str, Any]:
         failures.append("mode_not_research_only")
     if r.get("is_local_importer_only") is not True:
         failures.append("not_local_importer_only")
-    if r.get("verdict") not in (VERDICT_IMPORT_OK, VERDICT_DUPLICATE, VERDICT_INVALID):
+    if r.get("verdict") not in (VERDICT_IMPORT_OK, VERDICT_FUTURE_DATED, VERDICT_ANOMALOUS,
+                                VERDICT_DUPLICATE, VERDICT_INVALID):
         failures.append("bad_verdict")
 
     valid = r.get("structurally_valid") is True
@@ -218,6 +315,24 @@ def validate_import_decision(record: Any) -> dict[str, Any]:
             failures.append("import_ok_without_valid_nonduplicate")
         if r.get("should_import") is not True:
             failures.append("import_ok_must_import")
+        if r.get("is_future_dated") is True:
+            failures.append("import_ok_but_future_dated")
+        if r.get("is_anomalous_shape") is True:
+            failures.append("import_ok_but_anomalous_shape")
+    elif v == VERDICT_FUTURE_DATED:
+        if not (valid and dest):
+            failures.append("future_dated_requires_valid_export")
+        if r.get("is_future_dated") is not True:
+            failures.append("future_dated_flag_not_set")
+        if r.get("should_import") is not False:
+            failures.append("future_dated_must_not_import")
+    elif v == VERDICT_ANOMALOUS:
+        if not (valid and dest):
+            failures.append("anomalous_requires_valid_export")
+        if r.get("is_anomalous_shape") is not True:
+            failures.append("anomalous_flag_not_set")
+        if r.get("should_import") is not False:
+            failures.append("anomalous_must_not_import")
     elif v == VERDICT_DUPLICATE:
         if not (valid and run_date in collected):
             failures.append("duplicate_requires_valid_collected_date")

@@ -14,6 +14,7 @@ push / git add. Originals are left in the inbox (the operator may archive them).
 """
 from __future__ import annotations
 
+import datetime as _dt
 import hashlib
 import json
 import sys
@@ -28,10 +29,67 @@ import sparta_commander.c22_signum_gc_data_collection_tracker_contract as _trk  
 
 INBOX = REPO_ROOT / _imp.INBOX_DIR
 DEST = REPO_ROOT / _imp.DEST_DIR
+# Quarantine lives INSIDE the (gitignored) inbox dir so it is auto-ignored without editing
+# .gitignore; a subfolder + non-EXPORT_GLOB filenames keep it invisible to every importer/
+# tracker scan (all of which use a non-recursive glob of EXPORT_GLOB).
+QUARANTINE_DIR = INBOX / "_quarantine"
+
+
+def _today_iso() -> str:
+    """The local machine date (ISO YYYY-MM-DD). The only clock read in the import path; the
+    pure contract stays clock-free and receives this value as `today`."""
+    return _dt.date.today().isoformat()
 
 
 def _sha256_bytes(blob: bytes) -> str:
     return hashlib.sha256(blob).hexdigest()
+
+
+# map a rejection verdict -> the human-readable quarantine reason
+_QUARANTINE_REASON = {
+    _imp.VERDICT_FUTURE_DATED: "future_dated_export_decision_date_after_local_machine_date",
+    _imp.VERDICT_ANOMALOUS: "anomalous_shape_non_canonical_or_oversize_export",
+}
+
+
+def _quarantine_rejected_export(src: Path, decision: dict) -> dict:
+    """Move a rejected inbox export (future-dated OR anomalous-shape) OUT of active collection
+    into the gitignored quarantine area, writing a sidecar note (reason, timestamp, source,
+    destination, size, SHA-256). Never overwrites, never deletes the payload (it is MOVED, not
+    removed), and never writes into the dataset folder."""
+    raw = src.read_bytes()
+    sha = _sha256_bytes(raw)
+    size = len(raw)
+    run_date = decision.get("run_date") or "unknown_date"
+    qdir = QUARANTINE_DIR / str(run_date)
+    qdir.mkdir(parents=True, exist_ok=True)
+    # unique, non-EXPORT_GLOB destination name (timestamp-stamped) -> never collides/overwrites
+    stamp = _dt.datetime.now().strftime("%Y%m%dT%H%M%S")
+    q_payload = qdir / ("inbox__%s__%s" % (stamp, src.name))
+    note = {
+        "quarantine_reason": _QUARANTINE_REASON.get(decision["verdict"], "rejected_export"),
+        "verdict": decision["verdict"],
+        "detail": decision.get("reasons"),
+        "run_date": run_date,
+        "local_machine_date": decision.get("today"),
+        "raw_bytes": decision.get("raw_bytes"),
+        "compact_bytes": decision.get("compact_bytes"),
+        "quarantined_at": _dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+        "source_path": _rel(src),
+        "destination_path": _rel(q_payload),
+        "size_bytes": size,
+        "sha256": sha,
+        "status": "QUARANTINED_NOT_DELETED",
+        "restore_note": ("a human must re-validate and re-run the standard import to "
+                         "re-admit this window; it never entered the active dataset"),
+    }
+    (qdir / (q_payload.name + ".note.json")).write_text(
+        json.dumps(note, indent=2, sort_keys=True), encoding="utf-8")
+    src.rename(q_payload)   # MOVE out of the inbox (not a delete); payload bytes preserved
+    return {"source": src.name, "verdict": decision["verdict"],
+            "run_date": run_date, "reasons": decision["reasons"],
+            "imported": False, "quarantined": True,
+            "quarantine_path": _rel(q_payload), "sha256": sha, "size_bytes": size}
 
 
 def _rel(path: Path) -> str:
@@ -56,9 +114,11 @@ def _already_collected_dates() -> set:
     return dates
 
 
-def import_one(src: Path, already_dates: set) -> dict:
-    """Validate + (if IMPORT_OK) byte-copy one inbox file. Never overwrites, never
-    mutates."""
+def import_one(src: Path, already_dates: set, today: str | None = None) -> dict:
+    """Validate + (if IMPORT_OK) byte-copy one inbox file. Never overwrites, never mutates.
+    A future-dated export (decision date after the local machine date) is QUARANTINED out of
+    the inbox and never enters the dataset. `today` defaults to the real local date."""
+    today = today or _today_iso()
     raw = src.read_bytes()
     try:
         parsed = json.loads(raw.decode("utf-8"))
@@ -67,12 +127,25 @@ def import_one(src: Path, already_dates: set) -> dict:
                 "reasons": ["unparseable_json:%s" % type(exc).__name__],
                 "imported": False}
 
-    decision = _imp.build_import_decision(parsed, already_dates)
+    # raw size + minified ("compact") size feed the same-day shape/size anomaly guard
+    raw_bytes = len(raw)
+    compact_bytes = len(json.dumps(parsed, separators=(",", ":")).encode("utf-8"))
+    decision = _imp.build_import_decision(parsed, already_dates, today=today,
+                                          raw_bytes=raw_bytes, compact_bytes=compact_bytes)
     check = _imp.validate_import_decision(decision)
+
+    # data-integrity guards: future-dated OR anomalous-shape valid export -> quarantine
+    if decision["verdict"] in (_imp.VERDICT_FUTURE_DATED, _imp.VERDICT_ANOMALOUS) and \
+            check["valid"]:
+        res = _quarantine_rejected_export(src, decision)
+        res["decision_valid"] = check["valid"]
+        return res
+
     out = {"source": src.name, "verdict": decision["verdict"],
            "run_date": decision["run_date"],
            "destination_filename": decision["destination_filename"],
            "reasons": decision["reasons"],
+           "shape_warnings": decision.get("shape_warnings") or [],
            "decision_valid": check["valid"], "imported": False}
 
     if decision["verdict"] != _imp.VERDICT_IMPORT_OK or not check["valid"]:
@@ -116,6 +189,13 @@ def main() -> int:
                           if r.get("verdict") == _imp.VERDICT_DUPLICATE),
         "invalid": sum(1 for r in results
                        if r.get("verdict") == _imp.VERDICT_INVALID),
+        "quarantined": sum(1 for r in results if r.get("quarantined")),
+        "quarantined_future_dated": sum(
+            1 for r in results
+            if r.get("quarantined") and r.get("verdict") == _imp.VERDICT_FUTURE_DATED),
+        "quarantined_anomalous": sum(
+            1 for r in results
+            if r.get("quarantined") and r.get("verdict") == _imp.VERDICT_ANOMALOUS),
         "results": results,
     }
     print(json.dumps(summary, indent=2, sort_keys=True))

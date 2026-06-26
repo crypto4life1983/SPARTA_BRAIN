@@ -80,7 +80,10 @@ def pickup_drop_folder() -> tuple:
             res["reasons"] = ["unparseable:%s" % type(exc).__name__]
             results.append(res)
             continue
-        cls = _pk.classify_drop_candidate(parsed, already)
+        cls = _pk.classify_drop_candidate(
+            parsed, already, today=_importer._today_iso(),
+            raw_bytes=len(raw),
+            compact_bytes=len(json.dumps(parsed, separators=(",", ":")).encode("utf-8")))
         res.update({"verdict": cls["verdict"], "run_date": cls["run_date"],
                     "inbox_filename": cls["inbox_filename"], "reasons": cls["reasons"]})
         if cls["should_pickup"] and cls["inbox_filename"]:

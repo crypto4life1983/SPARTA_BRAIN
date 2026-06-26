@@ -66,7 +66,10 @@ def summarize_automation_run(scanned: int, results: Any) -> dict[str, Any]:
     imported = [r for r in res if r.get("imported") is True]
     duplicates = [r for r in res
                   if r.get("verdict") == _imp.VERDICT_DUPLICATE]
-    invalids = [r for r in res if r.get("verdict") == _imp.VERDICT_INVALID]
+    # A FUTURE_DATED or ANOMALOUS_SHAPE export is rejected (never imported); count it with the
+    # invalids so the overall status honestly reflects "nothing valid imported this run".
+    invalids = [r for r in res if r.get("verdict") in (
+        _imp.VERDICT_INVALID, _imp.VERDICT_FUTURE_DATED, _imp.VERDICT_ANOMALOUS)]
     n_imported = len(imported)
     n_dupes = len(duplicates)
     n_invalid = len(invalids)
