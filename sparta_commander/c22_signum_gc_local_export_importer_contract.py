@@ -71,6 +71,18 @@ MAX_COMPACT_BYTES = 80_000       # minified-content ceiling; normal ~62 KB. Real
                                  # pure pretty-printing does NOT (it only inflates raw bytes).
 PRETTY_PRINT_WARN_RATIO = 1.30   # raw/minified ratio above this -> formatting WARNING only
 
+# --- Signum top-100 -> top-50 canonicalization (vendor upgraded the radar 50 -> 100 rows) --
+# Signum/Michael: "users got a nice upgrade ... if you need 50 simply take the first 50 rows
+# only." A CLEAN 100-row export (exactly 100/100, canonical top-level keys, every row valid)
+# is REDUCIBLE: the importer derives the canonical 50-row window from the FIRST 50 rows
+# (preserving vendor order) and imports THAT, instead of fatally rejecting the file. A
+# malformed 100-row file (bad rows, extra keys, wrong count) is NOT reducible and still
+# rejects/quarantines.
+VERDICT_REDUCIBLE = "C22_GC_IMPORT_REDUCIBLE_TOP100_TO_TOP50"
+REDUCIBLE_SOURCE_TOTAL = 100
+CANONICAL_TOTAL = EXPECTED_ROW_COUNT          # 50
+REDUCER_ID = "first_50_vendor_instruction"
+
 C22_STATE = _trk.C22_STATE                              # HOLD_FOR_MORE_FROZEN_DATA_WINDOWS
 
 _CAPABILITY_FLAGS_FALSE = (
@@ -159,6 +171,32 @@ def check_shape_anomaly(parsed: dict, raw_bytes: Any = None,
     return {"anomalous": bool(reasons), "reasons": reasons, "warnings": warnings}
 
 
+def is_reducible_top100(parsed: dict) -> bool:
+    """PURE. True iff this is a CLEAN Signum top-100 export that can be canonicalized to the
+    top-50 window: exactly the canonical top-level keys, total == 100, and exactly 100 result
+    rows. Row-level validity is checked separately by validate_import_candidate (over all
+    rows), so a malformed 100-row file fails that and is rejected -- never reduced. No I/O."""
+    p = parsed or {}
+    if set(p.keys()) != EXPECTED_TOP_LEVEL_KEYS:
+        return False
+    results = p.get("results")
+    if not isinstance(results, list):
+        return False
+    return p.get("total") == REDUCIBLE_SOURCE_TOTAL and len(results) == REDUCIBLE_SOURCE_TOTAL
+
+
+def derive_canonical_top50(parsed: dict) -> dict[str, Any]:
+    """PURE. Derive the canonical 50-row window from a reducible top-100 export: the FIRST 50
+    rows (preserving vendor order), total = 50, and the SAME top-level shape as the legacy
+    50-row files ({limited, results, total}) with NO extra metadata. Returns a NEW dict;
+    never mutates the input. Deterministic."""
+    p = parsed or {}
+    rows = list(p.get("results") or [])[:CANONICAL_TOTAL]
+    return {"limited": bool(p.get("limited", False)),
+            "results": rows,
+            "total": CANONICAL_TOTAL}
+
+
 def validate_import_candidate(parsed: dict) -> dict[str, Any]:
     """PURE. Structural validity of one parsed export. Reuses the committed dataset-facts
     extractor and adds the import-specific checks (total/length >= 50, assetClass=crypto,
@@ -209,6 +247,7 @@ def build_import_decision(parsed: dict, already_collected_dates: Any,
     dest_filename = derive_destination_filename(run_date)
     future_dated = today is not None and is_future_dated(run_date, today)
     anomaly = check_shape_anomaly(parsed, raw_bytes, compact_bytes)
+    reducible = validity["valid"] and is_reducible_top100(parsed)
 
     if not validity["valid"] or not dest_filename:
         verdict = VERDICT_INVALID
@@ -218,6 +257,11 @@ def build_import_decision(parsed: dict, already_collected_dates: Any,
         verdict = VERDICT_FUTURE_DATED
         reasons = ["future_dated_run_date:%s_after_local_date:%s" % (run_date, today)]
         should_import = False
+    elif reducible:
+        # clean 100-row Signum export -> derive + import the canonical top-50 (NOT fatal)
+        verdict = VERDICT_REDUCIBLE
+        reasons = ["reducible_top100_to_top50:%s" % REDUCER_ID]
+        should_import = False          # the RAW 100-row file is never imported as-is
     elif anomaly["anomalous"]:
         verdict = VERDICT_ANOMALOUS
         reasons = list(anomaly["reasons"])
@@ -253,6 +297,10 @@ def build_import_decision(parsed: dict, already_collected_dates: Any,
         "is_anomalous_shape": anomaly["anomalous"],
         "anomaly_reasons": list(anomaly["reasons"]),
         "shape_warnings": list(anomaly["warnings"]),
+        "is_reducible_top100": reducible,
+        "reducible_source_total": (validity["total"] if reducible else None),
+        "should_reduce_and_import": reducible,
+        "reducer": REDUCER_ID if reducible else None,
         "destination_filename": dest_filename,
         "already_collected_dates": sorted(collected),
         # decision
@@ -301,7 +349,7 @@ def validate_import_decision(record: Any) -> dict[str, Any]:
     if r.get("is_local_importer_only") is not True:
         failures.append("not_local_importer_only")
     if r.get("verdict") not in (VERDICT_IMPORT_OK, VERDICT_FUTURE_DATED, VERDICT_ANOMALOUS,
-                                VERDICT_DUPLICATE, VERDICT_INVALID):
+                                VERDICT_REDUCIBLE, VERDICT_DUPLICATE, VERDICT_INVALID):
         failures.append("bad_verdict")
 
     valid = r.get("structurally_valid") is True
@@ -319,6 +367,17 @@ def validate_import_decision(record: Any) -> dict[str, Any]:
             failures.append("import_ok_but_future_dated")
         if r.get("is_anomalous_shape") is True:
             failures.append("import_ok_but_anomalous_shape")
+        if r.get("is_reducible_top100") is True:
+            failures.append("import_ok_but_reducible_top100")
+    elif v == VERDICT_REDUCIBLE:
+        if not (valid and dest):
+            failures.append("reducible_requires_valid_export")
+        if r.get("is_reducible_top100") is not True:
+            failures.append("reducible_flag_not_set")
+        if r.get("should_import") is not False:
+            failures.append("reducible_raw_must_not_import_as_is")
+        if r.get("should_reduce_and_import") is not True:
+            failures.append("reducible_must_reduce_and_import")
     elif v == VERDICT_FUTURE_DATED:
         if not (valid and dest):
             failures.append("future_dated_requires_valid_export")

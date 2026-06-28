@@ -64,11 +64,14 @@ def classify_drop_candidate(parsed: dict, already_collected_dates: Any,
     decision = _imp.build_import_decision(parsed, already_collected_dates, today=today,
                                           raw_bytes=raw_bytes, compact_bytes=compact_bytes)
     v = decision["verdict"]
-    if v == _imp.VERDICT_IMPORT_OK:
+    # IMPORT_OK and REDUCIBLE (clean same-day top-100) are both picked up into the inbox; the
+    # importer derives the canonical top-50 from a reducible file before it lands in the
+    # dataset. INVALID / FUTURE_DATED / ANOMALOUS are ignored (never copied into the inbox).
+    if v in (_imp.VERDICT_IMPORT_OK, _imp.VERDICT_REDUCIBLE):
         verdict, should = PICKUP_OK, True
     elif v == _imp.VERDICT_DUPLICATE:
         verdict, should = PICKUP_DUPLICATE, False
-    else:  # INVALID / FUTURE_DATED / ANOMALOUS -> ignored, never copied into the inbox
+    else:
         verdict, should = PICKUP_IGNORED_INVALID, False
     return {
         "verdict": verdict, "should_pickup": should,

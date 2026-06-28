@@ -33,6 +33,10 @@ DEST = REPO_ROOT / _imp.DEST_DIR
 # .gitignore; a subfolder + non-EXPORT_GLOB filenames keep it invisible to every importer/
 # tracker scan (all of which use a non-recursive glob of EXPORT_GLOB).
 QUARANTINE_DIR = INBOX / "_quarantine"
+# Reduction provenance lives in a subfolder of the (gitignored) dataset dir, off the
+# EXPORT_GLOB pattern + in a subfolder, so the tracker's non-recursive window scan never sees
+# it and no provenance file is ever counted as a window or tracked by git.
+REDUCTION_LOG_DIR = DEST / "_reductions"
 
 
 def _today_iso() -> str:
@@ -114,6 +118,84 @@ def _already_collected_dates() -> set:
     return dates
 
 
+def _canonical_bytes(derived: dict) -> bytes:
+    """Deterministic minified bytes for a derived canonical window (same compact form as the
+    legacy 50-row files: no extra whitespace, UTF-8)."""
+    return json.dumps(derived, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def _write_reduction_provenance(src: Path, raw: bytes, parsed: dict, derived: dict,
+                                derived_bytes: bytes, dest_path: Path) -> str:
+    """Write the ignored provenance sidecar for a top-100 -> top-50 reduction. Returns the
+    repo-relative provenance path. Lives under the gitignored dataset dir, off EXPORT_GLOB."""
+    run_date = _imp.extract_run_date(parsed) or "unknown_date"
+    REDUCTION_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    note = {
+        "reducer": _imp.REDUCER_ID,
+        "vendor_instruction_quote": (
+            "Signum/Michael: users got a nice upgrade (50 -> 100 rows); "
+            "if you need 50 simply take the first 50 rows only."),
+        "original_filename": src.name,
+        "original_sha256": _sha256_bytes(raw),
+        "original_total": parsed.get("total"),
+        "original_results": len(parsed.get("results") or []),
+        "canonical_total": derived.get("total"),
+        "canonical_results": len(derived.get("results") or []),
+        "canonical_destination": _rel(dest_path),
+        "canonical_sha256": _sha256_bytes(derived_bytes),
+        "run_date": run_date,
+        "reduced_at": _dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+    }
+    stamp = _dt.datetime.now().strftime("%Y%m%dT%H%M%S")
+    prov = REDUCTION_LOG_DIR / ("reduction_%s_%s.json" % (run_date, stamp))
+    prov.write_text(json.dumps(note, indent=2, sort_keys=True), encoding="utf-8")
+    return _rel(prov)
+
+
+def _reduce_and_import(src: Path, raw: bytes, parsed: dict, decision: dict,
+                       already_dates: set, today: str) -> dict:
+    """Derive the canonical top-50 window from a reducible top-100 export and import THAT
+    (never the raw 100-row file). Re-validates the derived window through the same guarded
+    decision path; writes a provenance sidecar. Never overwrites."""
+    derived = _imp.derive_canonical_top50(parsed)
+    derived_bytes = _canonical_bytes(derived)
+    dd = _imp.build_import_decision(derived, already_dates, today=today,
+                                    raw_bytes=len(derived_bytes),
+                                    compact_bytes=len(derived_bytes))
+    dcheck = _imp.validate_import_decision(dd)
+    out = {"source": src.name, "verdict": decision["verdict"],
+           "run_date": decision["run_date"],
+           "destination_filename": dd["destination_filename"],
+           "reasons": decision["reasons"], "reduced": True, "reducer": _imp.REDUCER_ID,
+           "original_total": parsed.get("total"),
+           "original_sha256": _sha256_bytes(raw),
+           "decision_valid": dcheck["valid"], "imported": False}
+
+    # derived window must be a clean, non-duplicate IMPORT_OK to land in the dataset
+    if dd["verdict"] == _imp.VERDICT_DUPLICATE:
+        out["verdict"] = _imp.VERDICT_DUPLICATE
+        out["reasons"] = list(dd["reasons"])
+        return out
+    if dd["verdict"] != _imp.VERDICT_IMPORT_OK or not dcheck["valid"]:
+        out["reasons"] = ["derived_window_not_importable:%s" % dd["verdict"]]
+        return out
+
+    dest_path = DEST / dd["destination_filename"]
+    if dest_path.exists():            # never overwrite
+        out["verdict"] = _imp.VERDICT_DUPLICATE
+        out["reasons"] = ["destination_exists:%s" % dd["destination_filename"]]
+        return out
+
+    DEST.mkdir(parents=True, exist_ok=True)
+    dest_path.write_bytes(derived_bytes)          # write the DERIVED canonical 50-row window
+    out["imported"] = True
+    out["destination_path"] = _rel(dest_path)
+    out["sha256"] = _sha256_bytes(derived_bytes)
+    out["provenance_path"] = _write_reduction_provenance(
+        src, raw, parsed, derived, derived_bytes, dest_path)
+    return out
+
+
 def import_one(src: Path, already_dates: set, today: str | None = None) -> dict:
     """Validate + (if IMPORT_OK) byte-copy one inbox file. Never overwrites, never mutates.
     A future-dated export (decision date after the local machine date) is QUARANTINED out of
@@ -140,6 +222,10 @@ def import_one(src: Path, already_dates: set, today: str | None = None) -> dict:
         res = _quarantine_rejected_export(src, decision)
         res["decision_valid"] = check["valid"]
         return res
+
+    # vendor top-100 export -> derive + import the canonical top-50 window (first 50 rows)
+    if decision["verdict"] == _imp.VERDICT_REDUCIBLE and check["valid"]:
+        return _reduce_and_import(src, raw, parsed, decision, already_dates, today)
 
     out = {"source": src.name, "verdict": decision["verdict"],
            "run_date": decision["run_date"],
@@ -185,6 +271,7 @@ def main() -> int:
         "dest": _rel(DEST),
         "scanned": len(files),
         "imported": sum(1 for r in results if r.get("imported")),
+        "reduced_top100_to_top50": sum(1 for r in results if r.get("reduced")),
         "duplicates": sum(1 for r in results
                           if r.get("verdict") == _imp.VERDICT_DUPLICATE),
         "invalid": sum(1 for r in results

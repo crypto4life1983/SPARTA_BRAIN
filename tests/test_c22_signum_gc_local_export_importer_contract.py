@@ -401,6 +401,134 @@ def test_duplicate_normal_file_still_noop_with_sizes():
     assert imp.validate_import_decision(d)["valid"] is True
 
 
+# ---- Signum top-100 -> top-50 canonicalization / reduction -----------------
+
+def test_is_reducible_top100_helper():
+    assert imp.is_reducible_top100(_valid_parsed("2026-06-28", total=100, n=100)) is True
+    assert imp.is_reducible_top100(_valid_parsed("2026-06-28", total=50, n=50)) is False
+    # extra top-level key -> not reducible (full/raw dump, handled by the anomaly path)
+    p = _valid_parsed("2026-06-28", total=100, n=100); p["debugDump"] = {"x": 1}
+    assert imp.is_reducible_top100(p) is False
+    # count mismatch -> not reducible
+    assert imp.is_reducible_top100(_valid_parsed("2026-06-28", total=100, n=50)) is False
+
+
+def test_derive_canonical_top50_first_50_preserving_order():
+    p = _valid_parsed("2026-06-28", total=100, n=100)
+    d = imp.derive_canonical_top50(p)
+    assert sorted(d.keys()) == ["limited", "results", "total"]   # no extra metadata
+    assert d["total"] == 50 and len(d["results"]) == 50
+    assert d["results"] == p["results"][:50]                     # FIRST 50, order preserved
+    assert len(p["results"]) == 100                              # input not mutated
+
+
+def test_reducible_decision_same_day():
+    d = imp.build_import_decision(_valid_parsed("2026-06-28", total=100, n=100), set(),
+                                  today="2026-06-28", raw_bytes=130000, compact_bytes=70000)
+    assert d["verdict"] == imp.VERDICT_REDUCIBLE
+    assert d["is_reducible_top100"] is True
+    assert d["should_import"] is False and d["should_reduce_and_import"] is True
+    assert d["reducer"] == "first_50_vendor_instruction"
+    assert imp.validate_import_decision(d)["valid"] is True
+    # tamper: a reducible export may NOT be relabeled IMPORT_OK (raw 100 rows must not import)
+    bad = {**d, "verdict": imp.VERDICT_IMPORT_OK, "should_import": True}
+    assert imp.validate_import_decision(bad)["valid"] is False
+
+
+def test_future_dated_100row_does_not_reduce_early():
+    d = imp.build_import_decision(_valid_parsed("2026-06-28", total=100, n=100), set(),
+                                  today="2026-06-27", raw_bytes=130000, compact_bytes=70000)
+    assert d["verdict"] == imp.VERDICT_FUTURE_DATED   # future date beats reduction
+    assert d["should_import"] is False
+
+
+def test_malformed_100row_rejects_not_reduces():
+    # a bad row -> structurally INVALID, never reduced
+    p = _valid_parsed("2026-06-28", total=100, n=100); p["results"][80]["detector"] = "tr"
+    d = imp.build_import_decision(p, set(), today="2026-06-28",
+                                  raw_bytes=130000, compact_bytes=70000)
+    assert d["verdict"] == imp.VERDICT_INVALID
+    # extra top-level key (full/raw dump) -> ANOMALOUS, never reduced
+    p2 = _valid_parsed("2026-06-28", total=100, n=100); p2["debugDump"] = {"x": 1}
+    d2 = imp.build_import_decision(p2, set(), today="2026-06-28",
+                                   raw_bytes=130000, compact_bytes=70000)
+    assert d2["verdict"] == imp.VERDICT_ANOMALOUS
+
+
+def test_tool_reduces_top100_and_imports_canonical_top50(tmp_path, monkeypatch):
+    inbox = tmp_path / "inbox"
+    dest = tmp_path / "dest"
+    inbox.mkdir()
+    dest.mkdir()
+    monkeypatch.setattr(runner, "INBOX", inbox)
+    monkeypatch.setattr(runner, "DEST", dest)
+    monkeypatch.setattr(runner, "QUARANTINE_DIR", inbox / "_quarantine")
+    monkeypatch.setattr(runner, "REDUCTION_LOG_DIR", dest / "_reductions")
+    today = "2026-06-28"
+
+    src = inbox / "gc_crypto_trendradar_daily_top100.json"
+    src.write_bytes(json.dumps(_valid_parsed("2026-06-28", total=100, n=100),
+                               separators=(",", ":")).encode("utf-8"))
+    res = runner.import_one(src, runner._already_collected_dates(), today=today)
+    assert res["imported"] is True
+    assert res["verdict"] == imp.VERDICT_REDUCIBLE
+    assert res["reduced"] is True and res["reducer"] == "first_50_vendor_instruction"
+
+    # (5) derived active window: canonical shape, total=50, 50 first rows
+    out = dest / "gc_crypto_trendradar_daily_20260628.json"
+    assert out.is_file()
+    canon = json.loads(out.read_bytes().decode("utf-8"))
+    assert sorted(canon.keys()) == ["limited", "results", "total"]
+    assert canon["total"] == 50 and len(canon["results"]) == 50
+    src_rows = json.loads(src.read_bytes().decode("utf-8"))["results"][:50]
+    assert canon["results"] == src_rows               # first 50, order preserved
+
+    # (8) count/latest advanced only via the reduced window
+    collected = sorted(trk._date_from_filename(p.name) for p in dest.glob(trk.EXPORT_GLOB))
+    assert collected == ["2026-06-28"]
+
+    # (6) provenance sidecar in the ignored subfolder, off EXPORT_GLOB
+    prov = list((dest / "_reductions").glob("*.json"))
+    assert prov, "expected a reduction provenance sidecar"
+    note = json.loads(prov[0].read_text(encoding="utf-8"))
+    assert note["reducer"] == "first_50_vendor_instruction"
+    assert note["original_total"] == 100 and note["original_results"] == 100
+    assert note["canonical_total"] == 50
+    assert note["original_sha256"] and note["canonical_sha256"]
+    assert note["original_filename"] == "gc_crypto_trendradar_daily_top100.json"
+    assert "first 50 rows" in note["vendor_instruction_quote"].lower()
+    # the window scan sees ONLY the canonical file, never the provenance sidecar
+    assert list(dest.glob(trk.EXPORT_GLOB)) == [out]
+    for p in prov:
+        assert not p.name.startswith(trk.EXPORT_PREFIX)
+
+
+def test_tool_reduced_window_duplicate_is_noop(tmp_path, monkeypatch):
+    inbox = tmp_path / "inbox"
+    dest = tmp_path / "dest"
+    inbox.mkdir()
+    dest.mkdir()
+    monkeypatch.setattr(runner, "INBOX", inbox)
+    monkeypatch.setattr(runner, "DEST", dest)
+    monkeypatch.setattr(runner, "QUARANTINE_DIR", inbox / "_quarantine")
+    monkeypatch.setattr(runner, "REDUCTION_LOG_DIR", dest / "_reductions")
+    today = "2026-06-28"
+    blob = json.dumps(_valid_parsed("2026-06-28", total=100, n=100),
+                      separators=(",", ":")).encode("utf-8")
+
+    s1 = inbox / "gc_crypto_trendradar_daily_a.json"
+    s1.write_bytes(blob)
+    assert runner.import_one(s1, runner._already_collected_dates(),
+                             today=today)["imported"] is True
+    # a second reducible file for the SAME date -> derived window is a DUPLICATE no-op
+    s2 = inbox / "gc_crypto_trendradar_daily_b.json"
+    s2.write_bytes(blob)
+    r2 = runner.import_one(s2, runner._already_collected_dates(), today=today)
+    assert r2["imported"] is False
+    assert r2["verdict"] == imp.VERDICT_DUPLICATE
+    assert len(list(dest.glob(trk.EXPORT_GLOB))) == 1   # still exactly one window
+
+
 # ---- tracker compatibility: imported filename is counted as a window -------
 
 def test_imported_filename_is_tracked_window():
