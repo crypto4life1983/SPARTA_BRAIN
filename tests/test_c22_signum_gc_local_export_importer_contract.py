@@ -455,6 +455,46 @@ def test_malformed_100row_rejects_not_reduces():
     assert d2["verdict"] == imp.VERDICT_ANOMALOUS
 
 
+# ---- vendor schema drift: top-level advisory `aiRules` is tolerated -----------
+
+def test_airules_top100_stays_reducible():
+    # Signum 2026-07 drift: a clean top-100 export now carries an advisory `aiRules` list.
+    # It must stay REDUCIBLE (not rejected as an unexpected-key anomaly).
+    p = _valid_parsed("2026-06-28", total=100, n=100)
+    p["aiRules"] = ["hold winners", "cut losers"]
+    assert imp.is_reducible_top100(p) is True
+    d = imp.build_import_decision(p, set(), today="2026-06-28",
+                                  raw_bytes=250000, compact_bytes=124000)
+    assert d["verdict"] == imp.VERDICT_REDUCIBLE
+    assert d["should_reduce_and_import"] is True
+    assert imp.validate_import_decision(d)["valid"] is True
+    # the canonical top-50 derived from it drops aiRules -> dataset window unchanged
+    derived = imp.derive_canonical_top50(p)
+    assert sorted(derived.keys()) == ["limited", "results", "total"]
+    assert derived["total"] == 50 and len(derived["results"]) == 50
+
+
+def test_airules_alone_is_not_anomalous():
+    # a legacy-shape (top-50) export with only the new aiRules key is NOT anomalous
+    p = _valid_parsed("2026-06-25", total=50, n=50)
+    p["aiRules"] = ["stay disciplined"]
+    a = imp.check_shape_anomaly(p, raw_bytes=62000, compact_bytes=61000)
+    assert a["anomalous"] is False
+    assert not any("unexpected_top_level_keys" in x for x in a["reasons"])
+
+
+def test_airules_plus_other_extra_key_still_anomalous():
+    # aiRules is tolerated, but a genuine foreign key alongside it is STILL a full/dump anomaly
+    p = _valid_parsed("2026-06-28", total=100, n=100)
+    p["aiRules"] = ["x"]
+    p["debugDump"] = {"all": True}
+    assert imp.is_reducible_top100(p) is False
+    a = imp.check_shape_anomaly(p, raw_bytes=130000, compact_bytes=70000)
+    assert a["anomalous"] is True
+    assert any("debugDump" in x for x in a["reasons"])
+    assert not any("aiRules" in x for x in a["reasons"])
+
+
 def test_tool_reduces_top100_and_imports_canonical_top50(tmp_path, monkeypatch):
     inbox = tmp_path / "inbox"
     dest = tmp_path / "dest"

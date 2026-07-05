@@ -65,6 +65,12 @@ VERDICT_ANOMALOUS = "C22_GC_IMPORT_ANOMALOUS_SHAPE"
 # 2026-06-26 file are both ~113 KB pretty-printed yet byte-for-byte content-equivalent to a
 # normal ~62 KB minified window (same keys, 50 rows, identical schema, ~62 KB compact).
 EXPECTED_TOP_LEVEL_KEYS = frozenset(("limited", "results", "total"))
+# Vendor schema drift (2026-07): Signum began attaching a top-level advisory `aiRules` list
+# (natural-language trading notes) to the daily payload. It carries NO per-window/per-symbol
+# data and is dropped by derive_canonical_top50, so the canonical dataset window is unchanged.
+# It is tolerated as a non-anomalous extra key (a clean top-100+aiRules stays REDUCIBLE); any
+# OTHER unexpected top-level key is still a full/raw-dump anomaly and is rejected.
+ALLOWED_EXTRA_TOP_LEVEL_KEYS = frozenset(("aiRules",))
 MAX_RESULTS = 60                 # normal = 50; a full/raw dump would carry many more rows
 MAX_COMPACT_BYTES = 80_000       # minified-content ceiling; normal ~62 KB. Real extra content
                                  # (longer history / foreign fields) inflates the MINIFIED size;
@@ -147,7 +153,7 @@ def check_shape_anomaly(parsed: dict, raw_bytes: Any = None,
     reasons: list = []
     warnings: list = []
     p = parsed or {}
-    extra_keys = set(p.keys()) - EXPECTED_TOP_LEVEL_KEYS
+    extra_keys = set(p.keys()) - EXPECTED_TOP_LEVEL_KEYS - ALLOWED_EXTRA_TOP_LEVEL_KEYS
     if extra_keys:
         reasons.append("unexpected_top_level_keys:%s" % ",".join(sorted(extra_keys)))
     results = p.get("results")
@@ -177,7 +183,7 @@ def is_reducible_top100(parsed: dict) -> bool:
     rows. Row-level validity is checked separately by validate_import_candidate (over all
     rows), so a malformed 100-row file fails that and is rejected -- never reduced. No I/O."""
     p = parsed or {}
-    if set(p.keys()) != EXPECTED_TOP_LEVEL_KEYS:
+    if set(p.keys()) - ALLOWED_EXTRA_TOP_LEVEL_KEYS != EXPECTED_TOP_LEVEL_KEYS:
         return False
     results = p.get("results")
     if not isinstance(results, list):
