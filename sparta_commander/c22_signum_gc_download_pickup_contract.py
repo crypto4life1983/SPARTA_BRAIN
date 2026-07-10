@@ -188,7 +188,7 @@ def validate_pickup_chain(record: Any) -> dict[str, Any]:
     if rd.get("ready") is not ready:
         failures.append("readiness_inconsistent")
     if r.get("overall_status") not in (
-            _rw.STATUS_READY, _rw.STATUS_NOT_READY):
+            _rw.STATUS_READY, _rw.STATUS_NOT_READY, _rw.STATUS_COLLECTING_EXTENSION):
         failures.append("bad_overall_status")
     if ready and r.get("suggested_next_token") != _rw.SUGGESTED_REVIEW_TOKEN:
         failures.append("ready_must_surface_exact_token")

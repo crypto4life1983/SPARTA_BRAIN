@@ -170,7 +170,7 @@ def render_collection_section_markdown(status: dict) -> str:
         "- Ready to re-review: **%s**" % s.get("ready_for_rereview"),
     ]
     if s.get("ready_for_rereview"):
-        lines.append("- ✅ Enough windows — next human action: `%s`"
+        lines.append("- [ready] Enough windows -- next human action: `%s`"
                      % s.get("next_human_action_when_ready"))
     else:
         lines.append("- Keep exporting daily; when ready the human action is: `%s`"

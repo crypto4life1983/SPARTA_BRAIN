@@ -54,7 +54,11 @@ def scan_window_facts() -> list:
 
 
 def build_status() -> dict:
-    status = _rw.build_readiness(scan_window_facts())
+    # lifecycle-aware: pass the recorded facts so the consumed collection-review token is not
+    # resurfaced once C22 is in the label-evidence HOLD (default-off in the pure contract).
+    status = _rw.build_readiness(scan_window_facts(),
+                                 review_consumed=_rw.COLLECTION_REVIEW_CONSUMED,
+                                 label_review_decision=_rw.LABEL_REVIEW_DECISION)
     assert _rw.validate_readiness(status)["valid"], "readiness_failed_validation"
     return status
 
@@ -70,6 +74,10 @@ def main() -> int:
         "valid_window_dates": s["valid_window_dates"],
         "invalid_windows": s["invalid_windows"],
         "ready": s["ready"],
+        "collection_review_consumed": s["collection_review_consumed"],
+        "collection_review_gate_reached": s["collection_review_gate_reached"],
+        "label_review_decision": s["label_review_decision"],
+        "extension_windows": s["extension_windows"],
         "suggested_next_token": s["suggested_next_token"],
         "c22_state": s["c22_state"],
     }, indent=2, sort_keys=True))

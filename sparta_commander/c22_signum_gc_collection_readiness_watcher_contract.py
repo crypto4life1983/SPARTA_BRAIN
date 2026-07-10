@@ -34,9 +34,19 @@ C22_STATE = _trk.C22_STATE                            # HOLD_FOR_MORE_FROZEN_DAT
 
 STATUS_NOT_READY = "NOT_READY_COLLECTING"
 STATUS_READY = "READY_FOR_HUMAN_REVIEW"
+# after the original collection-review gate is consumed and C22 has moved into the
+# label-evidence HOLD, additional windows extend evidence under this neutral status.
+STATUS_COLLECTING_EXTENSION = "COLLECTING_ADDITIONAL_FROZEN_WINDOWS_FOR_LABEL_EVIDENCE"
 
 # the EXACT token a human would paste once enough valid windows exist (NEVER auto-executed).
 SUGGESTED_REVIEW_TOKEN = "HUMAN_APPROVED_C22_SIGNUM_GC_FROZEN_DATA_WINDOW_REVIEW"
+
+# --- recorded lifecycle facts (human decisions that already happened; NOT invented thresholds).
+# The original 20-window collection-review gate WAS reached and reviewed, and the label-review
+# decision is HOLD_FOR_MORE_C22_LABEL_EVIDENCE. The runner passes these so the watcher does NOT
+# keep resurfacing the already-consumed collection-review token merely because count >= 20.
+COLLECTION_REVIEW_CONSUMED = True
+LABEL_REVIEW_DECISION = "HOLD_FOR_MORE_C22_LABEL_EVIDENCE"
 
 _CAPABILITY_FLAGS_FALSE = (
     "executes", "auto_runs_labels_review", "auto_runs_replay", "auto_sends_token",
@@ -52,9 +62,16 @@ _CAPABILITY_FLAGS_FALSE = (
 )
 
 
-def build_readiness(window_facts: Any) -> dict[str, Any]:
+def build_readiness(window_facts: Any, review_consumed: bool = False,
+                    label_review_decision: Any = None) -> dict[str, Any]:
     """PURE. Fold per-window validity facts into the readiness status. Each fact is
-    {filename, date, valid}. Counts VALID distinct dates as windows. No I/O."""
+    {filename, date, valid}. Counts VALID distinct dates as windows. No I/O.
+
+    Lifecycle-aware: when ``review_consumed`` is True (the original collection-review gate was
+    already reached and reviewed and C22 moved into the label-evidence HOLD), the watcher does
+    NOT resurface the consumed review token no matter how many windows exist -- it reports the
+    neutral STATUS_COLLECTING_EXTENSION and counts windows beyond the threshold as evidence
+    extension. Default False preserves the original count-based collection behavior exactly."""
     facts = [w for w in (window_facts or []) if isinstance(w, dict)]
     valid_dates = sorted({w.get("date") for w in facts
                           if w.get("valid") is True and w.get("date")})
@@ -64,8 +81,25 @@ def build_readiness(window_facts: Any) -> dict[str, Any]:
 
     n_valid = len(valid_dates)
     remaining = max(0, REQUIRED_WINDOWS - n_valid)
-    ready = n_valid >= REQUIRED_WINDOWS
-    status = STATUS_READY if ready else STATUS_NOT_READY
+    threshold_reached = n_valid >= REQUIRED_WINDOWS
+    review_consumed = bool(review_consumed)
+    # extension mode engages ONLY once the review is consumed AND the original 20-window
+    # threshold was reached; below threshold (or not consumed) the original behavior holds.
+    extension_active = review_consumed and threshold_reached
+    if extension_active:
+        # consumed gate + threshold reached: never resurface the token; extend evidence
+        ready = False
+        status = STATUS_COLLECTING_EXTENSION
+        suggested = None
+        decision = label_review_decision or LABEL_REVIEW_DECISION
+        extension_windows = max(0, n_valid - REQUIRED_WINDOWS)
+    else:
+        ready = threshold_reached
+        status = STATUS_READY if ready else STATUS_NOT_READY
+        # never resurface the token once the review is consumed, even at exactly threshold
+        suggested = (SUGGESTED_REVIEW_TOKEN if (ready and not review_consumed) else None)
+        decision = None
+        extension_windows = 0
     progress = "%d/%d" % (n_valid, REQUIRED_WINDOWS)
 
     record: dict[str, Any] = {
@@ -88,8 +122,15 @@ def build_readiness(window_facts: Any) -> dict[str, Any]:
         # readiness
         "ready": ready,
         "status": status,
-        # the suggested token is surfaced ONLY when ready; it is NEVER auto-executed
-        "suggested_next_token": SUGGESTED_REVIEW_TOKEN if ready else None,
+        # lifecycle awareness (recorded facts): once the collection-review gate is consumed,
+        # the token is NEVER resurfaced; extra windows extend label evidence under HOLD.
+        "collection_review_consumed": review_consumed,
+        "evidence_extension_active": extension_active,
+        "collection_review_gate_reached": bool(threshold_reached or review_consumed),
+        "label_review_decision": decision,
+        "extension_windows": extension_windows,
+        # the suggested token is surfaced ONLY when ready AND not yet consumed; NEVER auto-executed
+        "suggested_next_token": suggested,
         "review_token_reference": SUGGESTED_REVIEW_TOKEN,
         "token_is_suggestion_for_human_to_paste": True,
         "auto_executes_token": False,
@@ -133,14 +174,29 @@ def validate_readiness(record: Any) -> dict[str, Any]:
         failures.append("not_watcher_only")
     if r.get("is_suggestion_only") is not True:
         failures.append("not_suggestion_only")
-    if r.get("status") not in (STATUS_READY, STATUS_NOT_READY):
+    if r.get("status") not in (STATUS_READY, STATUS_NOT_READY, STATUS_COLLECTING_EXTENSION):
         failures.append("bad_status")
     if r.get("required_windows") != REQUIRED_WINDOWS:
         failures.append("required_windows_tampered")
 
+    extension_active = r.get("evidence_extension_active") is True
     n = r.get("collected_valid_windows")
     if not isinstance(n, int) or n < 0:
         failures.append("bad_window_count")
+    elif extension_active:
+        # extension lifecycle: never ready, never resurface the token, extension-counted
+        if n < REQUIRED_WINDOWS:
+            failures.append("extension_active_below_threshold")
+        if r.get("ready") is not False:
+            failures.append("consumed_must_not_be_ready")
+        if r.get("status") != STATUS_COLLECTING_EXTENSION:
+            failures.append("consumed_status_must_be_extension")
+        if r.get("suggested_next_token") is not None:
+            failures.append("consumed_must_not_surface_token")
+        if r.get("extension_windows") != max(0, n - REQUIRED_WINDOWS):
+            failures.append("extension_windows_inconsistent")
+        if r.get("label_review_decision") != LABEL_REVIEW_DECISION:
+            failures.append("label_review_decision_wrong")
     else:
         expect_ready = n >= REQUIRED_WINDOWS
         if r.get("ready") is not expect_ready:

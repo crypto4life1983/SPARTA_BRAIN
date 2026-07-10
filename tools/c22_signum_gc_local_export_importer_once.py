@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime as _dt
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -37,6 +38,41 @@ QUARANTINE_DIR = INBOX / "_quarantine"
 # EXPORT_GLOB pattern + in a subfolder, so the tracker's non-recursive window scan never sees
 # it and no provenance file is ever counted as a window or tracked by git.
 REDUCTION_LOG_DIR = DEST / "_reductions"
+
+# Immutable raw top-100 retention (ADDITIVE). Only reduced (top-100 -> top-50) windows get a
+# byte-identical raw archive; native top-50 windows never do. Lives in a subfolder of the
+# gitignored dataset dir, off EXPORT_GLOB, so the tracker's non-recursive window scan never
+# counts it and it is never a git-tracked artifact. It NEVER replaces the canonical top-50.
+RAW_TOP100_DIRNAME = "_raw_top100"
+SOURCE_TYPE_NATIVE = "native_top50"
+SOURCE_TYPE_REDUCED = "reduced_top50"
+SOURCE_TYPE_RAW_RETAINED = "raw_top100_retained"
+
+
+def _raw_top100_dir() -> Path:
+    """Resolved at call time from the (test-monkeypatchable) DEST global."""
+    return DEST / RAW_TOP100_DIRNAME
+
+
+def _raw_top100_name(run_date: str) -> str:
+    return "gc_crypto_trendradar_daily_%s_raw_top100.json" % str(run_date).replace("-", "")
+
+
+def _write_raw_top100(raw: bytes, run_date: str, row_count: int) -> dict:
+    """Preserve a BYTE-IDENTICAL copy of the original 100-row vendor file as immutable
+    evidence. Atomic (temp + os.replace); refuses to overwrite an existing archive; never
+    touches the canonical top-50 dataset. Returns {path, sha256, row_count, source_type}."""
+    out_dir = _raw_top100_dir()
+    out_path = out_dir / _raw_top100_name(run_date)
+    if out_path.exists():                        # immutable after admission: never overwrite
+        raise RuntimeError("refuse_overwrite_raw_top100:%s" % out_path.name)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    tmp = out_path.with_suffix(".json.tmp")
+    with open(tmp, "wb") as f:
+        f.write(raw)                             # byte-identical original vendor bytes
+    os.replace(tmp, out_path)                    # atomic finalize
+    return {"path": _rel(out_path), "sha256": _sha256_bytes(raw),
+            "row_count": row_count, "source_type": SOURCE_TYPE_RAW_RETAINED}
 
 
 def _today_iso() -> str:
@@ -125,12 +161,16 @@ def _canonical_bytes(derived: dict) -> bytes:
 
 
 def _write_reduction_provenance(src: Path, raw: bytes, parsed: dict, derived: dict,
-                                derived_bytes: bytes, dest_path: Path) -> str:
+                                derived_bytes: bytes, dest_path: Path,
+                                raw_top100_info: dict | None = None) -> str:
     """Write the ignored provenance sidecar for a top-100 -> top-50 reduction. Returns the
-    repo-relative provenance path. Lives under the gitignored dataset dir, off EXPORT_GLOB."""
+    repo-relative provenance path. Lives under the gitignored dataset dir, off EXPORT_GLOB.
+    Extended additively with source_type + the retained raw top-100 provenance."""
     run_date = _imp.extract_run_date(parsed) or "unknown_date"
     REDUCTION_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    info = raw_top100_info or {}
     note = {
+        "source_type": SOURCE_TYPE_REDUCED,
         "reducer": _imp.REDUCER_ID,
         "vendor_instruction_quote": (
             "Signum/Michael: users got a nice upgrade (50 -> 100 rows); "
@@ -143,6 +183,12 @@ def _write_reduction_provenance(src: Path, raw: bytes, parsed: dict, derived: di
         "canonical_results": len(derived.get("results") or []),
         "canonical_destination": _rel(dest_path),
         "canonical_sha256": _sha256_bytes(derived_bytes),
+        # additive raw top-100 retention provenance
+        "raw_top100_retained": bool(raw_top100_info),
+        "raw_top100_path": info.get("path"),
+        "raw_top100_sha256": info.get("sha256"),
+        "raw_top100_row_count": info.get("row_count"),
+        "raw_top100_source_type": (SOURCE_TYPE_RAW_RETAINED if raw_top100_info else None),
         "run_date": run_date,
         "reduced_at": _dt.datetime.now().astimezone().isoformat(timespec="seconds"),
     }
@@ -191,8 +237,24 @@ def _reduce_and_import(src: Path, raw: bytes, parsed: dict, decision: dict,
     out["imported"] = True
     out["destination_path"] = _rel(dest_path)
     out["sha256"] = _sha256_bytes(derived_bytes)
+    out["source_type"] = SOURCE_TYPE_REDUCED
+    # ADDITIVE: preserve the immutable raw top-100 evidence (never replaces the canonical
+    # top-50; collision-refusing + atomic). Retention is supplementary -- a failure here never
+    # breaks or reverts the already-succeeded canonical import.
+    raw_info = None
+    try:
+        raw_info = _write_raw_top100(
+            raw, out["run_date"] or _imp.extract_run_date(parsed),
+            len(parsed.get("results") or []))
+        out["raw_top100_retained"] = True
+        out["raw_top100_path"] = raw_info["path"]
+        out["raw_top100_sha256"] = raw_info["sha256"]
+        out["raw_top100_row_count"] = raw_info["row_count"]
+    except Exception as exc:  # noqa: BLE001
+        out["raw_top100_retained"] = False
+        out["raw_top100_retention_error"] = "%s:%s" % (type(exc).__name__, exc)
     out["provenance_path"] = _write_reduction_provenance(
-        src, raw, parsed, derived, derived_bytes, dest_path)
+        src, raw, parsed, derived, derived_bytes, dest_path, raw_top100_info=raw_info)
     return out
 
 
@@ -248,6 +310,7 @@ def import_one(src: Path, already_dates: set, today: str | None = None) -> dict:
     out["imported"] = True
     out["destination_path"] = _rel(dest_path)
     out["sha256"] = _sha256_bytes(raw)
+    out["source_type"] = SOURCE_TYPE_NATIVE   # native top-50: NO raw-top-100 archive created
     return out
 
 
