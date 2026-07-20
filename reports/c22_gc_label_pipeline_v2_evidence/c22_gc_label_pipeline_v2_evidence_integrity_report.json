@@ -1,0 +1,508 @@
+{
+  "activation_authorized": false,
+  "aggregate_label_counts": {
+    "BEAR_SHORT": 72,
+    "HEDGE_SHORT": 3,
+    "LONG_ENTRY": 13,
+    "NONE": 1212,
+    "SKIP": 0
+  },
+  "aggregate_manifest_sha256": "48347e9c8ea8cee037863b6a1c23fa0506a0dbf429fb7e2900782addeef2d167",
+  "artifact_filename": "c22_gc_real_candle_entry_labels_multiwindow_v2_26w_2026-06-20_2026-07-15.json",
+  "artifact_sha256_on_disk": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8",
+  "artifact_sha256_rebuilt_from_frozen_sources": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8",
+  "byte_identical_rebuild": true,
+  "canonical_label_payload_sha256": "5dc9eae4471fd697b18622e716b2086a6899f17d0cd02fd589d88ca6da927991",
+  "collection_state_changed": false,
+  "end_to_end_provenance_complete_all_windows": false,
+  "human_review_required": true,
+  "labels_total": 1300,
+  "mode": "RESEARCH_ONLY_READ_ONLY_EVIDENCE_REPORT",
+  "optimization_authorized": false,
+  "per_window_label_counts": {
+    "2026-06-20": {
+      "BEAR_SHORT": 1,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-06-21": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-06-22": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-06-23": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 47,
+      "SKIP": 0
+    },
+    "2026-06-24": {
+      "BEAR_SHORT": 1,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-06-25": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-06-26": {
+      "BEAR_SHORT": 1,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-06-27": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-06-28": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-06-29": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 47,
+      "SKIP": 0
+    },
+    "2026-06-30": {
+      "BEAR_SHORT": 1,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-07-01": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 1,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-07-02": {
+      "BEAR_SHORT": 3,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-07-03": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-07-04": {
+      "BEAR_SHORT": 3,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-07-05": {
+      "BEAR_SHORT": 6,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 44,
+      "SKIP": 0
+    },
+    "2026-07-06": {
+      "BEAR_SHORT": 6,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 1,
+      "NONE": 42,
+      "SKIP": 0
+    },
+    "2026-07-07": {
+      "BEAR_SHORT": 6,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 43,
+      "SKIP": 0
+    },
+    "2026-07-08": {
+      "BEAR_SHORT": 6,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 0,
+      "NONE": 43,
+      "SKIP": 0
+    },
+    "2026-07-09": {
+      "BEAR_SHORT": 4,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-07-10": {
+      "BEAR_SHORT": 3,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-07-11": {
+      "BEAR_SHORT": 4,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-07-12": {
+      "BEAR_SHORT": 5,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 45,
+      "SKIP": 0
+    },
+    "2026-07-13": {
+      "BEAR_SHORT": 2,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-07-14": {
+      "BEAR_SHORT": 3,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 47,
+      "SKIP": 0
+    },
+    "2026-07-15": {
+      "BEAR_SHORT": 5,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 2,
+      "NONE": 43,
+      "SKIP": 0
+    }
+  },
+  "pre_build_status": "LABEL_SOURCE_INTEGRITY_PASS_WITH_LEGACY_PROVENANCE_GAP",
+  "provenance_accounting": {
+    "windows_full_provenance": [
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-14",
+      "2026-07-15"
+    ],
+    "windows_missing_raw_by_design": [
+      "2026-06-20",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-29",
+      "2026-06-30",
+      "2026-07-01",
+      "2026-07-02",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-05",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-08",
+      "2026-07-09"
+    ],
+    "windows_missing_raw_mandatory": [],
+    "windows_missing_sidecar_by_design": [
+      "2026-06-20",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27"
+    ],
+    "windows_missing_sidecar_mandatory": []
+  },
+  "provenance_tier_counts": {
+    "FULL_RAW_REDUCTION_PROVENANCE": 6,
+    "LEGACY_REDUCED_ONLY": 8,
+    "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW": 12
+  },
+  "provenance_tiers_by_window": {
+    "2026-06-20": "LEGACY_REDUCED_ONLY",
+    "2026-06-21": "LEGACY_REDUCED_ONLY",
+    "2026-06-22": "LEGACY_REDUCED_ONLY",
+    "2026-06-23": "LEGACY_REDUCED_ONLY",
+    "2026-06-24": "LEGACY_REDUCED_ONLY",
+    "2026-06-25": "LEGACY_REDUCED_ONLY",
+    "2026-06-26": "LEGACY_REDUCED_ONLY",
+    "2026-06-27": "LEGACY_REDUCED_ONLY",
+    "2026-06-28": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-06-29": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-06-30": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-01": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-02": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-03": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-04": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-05": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-06": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-07": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-08": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-09": "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW",
+    "2026-07-10": "FULL_RAW_REDUCTION_PROVENANCE",
+    "2026-07-11": "FULL_RAW_REDUCTION_PROVENANCE",
+    "2026-07-12": "FULL_RAW_REDUCTION_PROVENANCE",
+    "2026-07-13": "FULL_RAW_REDUCTION_PROVENANCE",
+    "2026-07-14": "FULL_RAW_REDUCTION_PROVENANCE",
+    "2026-07-15": "FULL_RAW_REDUCTION_PROVENANCE"
+  },
+  "raw_mandatory_from": "2026-07-10",
+  "recommendation": "READY_FOR_HUMAN_REVIEW_OF_REPLAY_APPROVAL",
+  "recommendation_reasons": [],
+  "replay_authorized": false,
+  "report": "c22_gc_label_pipeline_v2_evidence_integrity_report",
+  "sidecar_mandatory_from": "2026-06-28",
+  "signal_concentration": {
+    "by_date": {
+      "2026-06-20": {
+        "BEAR_SHORT": 1,
+        "LONG_ENTRY": 1,
+        "NONE": 48
+      },
+      "2026-06-21": {
+        "BEAR_SHORT": 2,
+        "NONE": 48
+      },
+      "2026-06-22": {
+        "NONE": 50
+      },
+      "2026-06-23": {
+        "BEAR_SHORT": 2,
+        "LONG_ENTRY": 1,
+        "NONE": 47
+      },
+      "2026-06-24": {
+        "BEAR_SHORT": 1,
+        "NONE": 49
+      },
+      "2026-06-25": {
+        "NONE": 50
+      },
+      "2026-06-26": {
+        "BEAR_SHORT": 1,
+        "NONE": 49
+      },
+      "2026-06-27": {
+        "LONG_ENTRY": 1,
+        "NONE": 49
+      },
+      "2026-06-28": {
+        "BEAR_SHORT": 2,
+        "NONE": 48
+      },
+      "2026-06-29": {
+        "BEAR_SHORT": 2,
+        "LONG_ENTRY": 1,
+        "NONE": 47
+      },
+      "2026-06-30": {
+        "BEAR_SHORT": 1,
+        "LONG_ENTRY": 1,
+        "NONE": 48
+      },
+      "2026-07-01": {
+        "BEAR_SHORT": 2,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 1,
+        "NONE": 46
+      },
+      "2026-07-02": {
+        "BEAR_SHORT": 3,
+        "LONG_ENTRY": 1,
+        "NONE": 46
+      },
+      "2026-07-03": {
+        "BEAR_SHORT": 2,
+        "NONE": 48
+      },
+      "2026-07-04": {
+        "BEAR_SHORT": 3,
+        "LONG_ENTRY": 1,
+        "NONE": 46
+      },
+      "2026-07-05": {
+        "BEAR_SHORT": 6,
+        "NONE": 44
+      },
+      "2026-07-06": {
+        "BEAR_SHORT": 6,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 1,
+        "NONE": 42
+      },
+      "2026-07-07": {
+        "BEAR_SHORT": 6,
+        "LONG_ENTRY": 1,
+        "NONE": 43
+      },
+      "2026-07-08": {
+        "BEAR_SHORT": 6,
+        "HEDGE_SHORT": 1,
+        "NONE": 43
+      },
+      "2026-07-09": {
+        "BEAR_SHORT": 4,
+        "NONE": 46
+      },
+      "2026-07-10": {
+        "BEAR_SHORT": 3,
+        "LONG_ENTRY": 1,
+        "NONE": 46
+      },
+      "2026-07-11": {
+        "BEAR_SHORT": 4,
+        "NONE": 46
+      },
+      "2026-07-12": {
+        "BEAR_SHORT": 5,
+        "NONE": 45
+      },
+      "2026-07-13": {
+        "BEAR_SHORT": 2,
+        "NONE": 48
+      },
+      "2026-07-14": {
+        "BEAR_SHORT": 3,
+        "NONE": 47
+      },
+      "2026-07-15": {
+        "BEAR_SHORT": 5,
+        "LONG_ENTRY": 2,
+        "NONE": 43
+      }
+    },
+    "by_signal": {
+      "BEAR_SHORT": 72,
+      "HEDGE_SHORT": 3,
+      "LONG_ENTRY": 13,
+      "NONE": 1212
+    },
+    "by_symbol_non_none": {
+      "BINANCE:AAVEUSDT": {
+        "BEAR_SHORT": 1,
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:CRVUSDT": {
+        "BEAR_SHORT": 5
+      },
+      "BINANCE:DEXEUSDT": {
+        "LONG_ENTRY": 2
+      },
+      "BINANCE:IMXUSDT": {
+        "BEAR_SHORT": 1
+      },
+      "BINANCE:INJUSDT": {
+        "BEAR_SHORT": 3
+      },
+      "BINANCE:JSTUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:JUPUSDT": {
+        "LONG_ENTRY": 2
+      },
+      "BINANCE:LINKUSDT": {
+        "BEAR_SHORT": 1
+      },
+      "BINANCE:PENDLEUSDT": {
+        "BEAR_SHORT": 5
+      },
+      "BINANCE:QNTUSDT": {
+        "BEAR_SHORT": 5
+      },
+      "BINANCE:SOLUSDT": {
+        "BEAR_SHORT": 1
+      },
+      "BINANCE:SUNUSDT": {
+        "BEAR_SHORT": 2
+      },
+      "BINANCE:TIAUSDT": {
+        "BEAR_SHORT": 4,
+        "HEDGE_SHORT": 2
+      },
+      "BINANCE:TRXUSDT": {
+        "BEAR_SHORT": 10
+      },
+      "BINANCE:VIRTUALUSDT": {
+        "BEAR_SHORT": 1
+      },
+      "BINANCE:ZECUSDT": {
+        "BEAR_SHORT": 3,
+        "LONG_ENTRY": 1
+      },
+      "BITFINEX:LEOUSD": {
+        "BEAR_SHORT": 1
+      },
+      "BYBIT:GRAMUSDT": {
+        "BEAR_SHORT": 4
+      },
+      "BYBIT:TELUSDT": {
+        "BEAR_SHORT": 1
+      },
+      "COINBASE:AEROUSD": {
+        "LONG_ENTRY": 3
+      },
+      "COINBASE:MORPHOUSD": {
+        "BEAR_SHORT": 1,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 1
+      },
+      "GATE:ASTERUSDT": {
+        "BEAR_SHORT": 3
+      },
+      "GATE:GTUSDT": {
+        "BEAR_SHORT": 12
+      },
+      "KRAKEN:KASUSD": {
+        "BEAR_SHORT": 2
+      },
+      "KRAKEN:SPXUSD": {
+        "BEAR_SHORT": 5,
+        "LONG_ENTRY": 2
+      },
+      "OKX:OKBUSDT": {
+        "BEAR_SHORT": 1
+      }
+    }
+  },
+  "token_issued": false,
+  "validator_failures": [],
+  "validator_valid": true,
+  "window_count": 26,
+  "window_end": "2026-07-15",
+  "window_start": "2026-06-20"
+}
