@@ -1,0 +1,421 @@
+{
+  "contracts_ready": true,
+  "execution_data_contract": {
+    "assumes_borrow_availability": false,
+    "assumes_zero_basis": false,
+    "assumes_zero_funding": false,
+    "basis_adjustment_selected": false,
+    "basis_adjustment_selection": false,
+    "basis_alignment_diagnostic_fields": [
+      "signal_price",
+      "execution_reference_price",
+      "absolute_difference",
+      "percentage_basis",
+      "timestamp_difference",
+      "symbol_map_confidence",
+      "approved_adjustment_rule_if_any"
+    ],
+    "basis_alignment_review_required": true,
+    "blockers": [],
+    "bound_replay_spec_sha256": "9bf10af353521738f440c2e953af44cdd5ed093590f03a843a01972485dd9867",
+    "builder_version": "execution_data_short_feasibility_b1_v1",
+    "candidate_id": "C22",
+    "commit": false,
+    "contract": "c22_execution_data_and_short_instrument_feasibility",
+    "contract_sha256": "1a207918c7146182ab41d888d1daa14cf85fbb592d97295795701932bccf713f",
+    "cost_base_case_approval": false,
+    "cost_base_case_approved": false,
+    "cost_base_case_evidence_fields": [
+      "source",
+      "effective_date",
+      "tier_or_volume_assumption",
+      "maker_or_taker_assumption",
+      "instrument",
+      "venue",
+      "deterministic_value_or_formula",
+      "sha256_or_immutable_source_ref"
+    ],
+    "cost_components": [
+      "entry_exchange_fee",
+      "exit_exchange_fee",
+      "entry_half_spread",
+      "exit_half_spread",
+      "entry_slippage",
+      "exit_slippage",
+      "funding_or_borrow_cost",
+      "exceptional_exit_cost",
+      "basis_adjustment_cost_if_applicable"
+    ],
+    "cost_result_levels": [
+      "gross",
+      "transaction_cost_only_net",
+      "fully_net_after_funding_or_borrow"
+    ],
+    "dataset_mutation": false,
+    "dry_run": false,
+    "execution_feasibility_rules": {
+      "deterministic_ordering": [
+        "decision_date_ascending",
+        "market_rank_ascending",
+        "stable_asset_identifier_ascending"
+      ],
+      "exits_before_entries": true,
+      "insufficient_nav_deterministic_rejection": true,
+      "max_gross_exposure_pct_nav": 100.0,
+      "missing_next_bar_fail_closed": true,
+      "next_executable_bar_reference": "entries/exits fill at the OPEN of the next executable market bar after the evaluation date",
+      "no_invented_fill": true,
+      "no_proportional_resizing": true,
+      "no_simultaneous_long_and_short_same_asset": true,
+      "one_position_per_asset": true,
+      "partial_fill_policy": "UNRESOLVED unless supported by historical data"
+    },
+    "fetch": false,
+    "forward_data_admission": false,
+    "human_review_required": true,
+    "import": false,
+    "instrument_selected": false,
+    "instrument_selection": false,
+    "lane": "crypto_d1_auto_research",
+    "lifecycle_advancement": false,
+    "lifecycle_gates_activated": false,
+    "liquidity_feasibility_evidence": [
+      "daily_notional_volume",
+      "order_size_as_pct_of_volume",
+      "spread",
+      "minimum_order_size",
+      "lot_size",
+      "price_increment",
+      "instrument_availability"
+    ],
+    "long_and_short_price_series_stated_separately": true,
+    "mode": "RESEARCH_ONLY",
+    "network": false,
+    "option_1_linear_perpetual_futures": {
+      "fail_closed_when_any_absent": true,
+      "requirements": [
+        "explicit_venue",
+        "exact_contract_symbol",
+        "quote_asset",
+        "settlement_asset",
+        "instrument_start_date",
+        "historical_ohlc_source",
+        "historical_funding_rate_source",
+        "funding_timestamps_and_payment_intervals",
+        "trading_fee_schedule",
+        "tick_size",
+        "lot_size",
+        "symbol_mapping_to_gc_signal_asset",
+        "delisting_and_contract_migration_history",
+        "availability_on_every_signal_and_holding_date"
+      ]
+    },
+    "option_2_spot_margin_short": {
+      "fail_closed_when_any_absent": true,
+      "requirements": [
+        "explicit_venue",
+        "spot_symbol",
+        "margin_mode",
+        "borrowable_asset",
+        "historical_borrow_availability",
+        "historical_borrow_rate_source",
+        "borrow_charging_interval",
+        "trading_fee_schedule",
+        "symbol_mapping",
+        "suspension_and_delisting_history",
+        "availability_on_every_signal_and_holding_date"
+      ]
+    },
+    "phase": "B1_CONTRACT_AND_PLANNING_ONLY",
+    "phase_b1_build_token": "HUMAN_APPROVED_BUILD_C22_FORWARD_AND_EXECUTION_DATA_READINESS_PHASE_B1",
+    "prohibitions": [
+      "silently_using_spot_ohlc_for_perpetual_fills",
+      "silently_using_perpetual_ohlc_for_spot_margin_fills",
+      "assuming_borrow_availability",
+      "assuming_zero_funding",
+      "assuming_zero_basis",
+      "substituting_a_currently_available_instrument_for_one_that_did_not_exist_historically"
+    ],
+    "proposed_lifecycle_gates": [
+      {
+        "gate": "C22_FORWARD_EXIT_DATA_CONTRACT_READY_FOR_HUMAN_REVIEW",
+        "human_token": "HUMAN_DECISION_C22_FORWARD_EXIT_DATA_CONTRACT_ACCEPT_OR_REVISE",
+        "purpose": "human reviews the forward exit-only data contract"
+      },
+      {
+        "gate": "C22_EXECUTION_DATA_CONTRACT_READY_FOR_HUMAN_REVIEW",
+        "human_token": "HUMAN_DECISION_C22_EXECUTION_DATA_CONTRACT_ACCEPT_OR_REVISE",
+        "purpose": "human reviews the execution-data / short-feasibility contract"
+      },
+      {
+        "gate": "C22_EXIT_ONLY_DATASET_READY_FOR_ADMISSION_REVIEW",
+        "human_token": "HUMAN_DECISION_C22_EXIT_ONLY_DATASET_ADMIT_OR_REJECT",
+        "purpose": "human reviews the frozen exit-only snapshot dataset for admission"
+      },
+      {
+        "gate": "C22_SHORT_INSTRUMENT_READY_FOR_HUMAN_SELECTION",
+        "human_token": "HUMAN_DECISION_C22_SHORT_INSTRUMENT_SELECT",
+        "purpose": "human selects perp vs spot-margin with full feasibility evidence"
+      },
+      {
+        "gate": "C22_EXECUTION_COST_BASE_CASE_READY_FOR_HUMAN_REVIEW",
+        "human_token": "HUMAN_DECISION_C22_EXECUTION_COST_BASE_CASE_ACCEPT_OR_REVISE",
+        "purpose": "human reviews/freezes the component-level cost base case"
+      },
+      {
+        "gate": "C22_DRY_RUN_SPEC_READY_FOR_HUMAN_REVIEW",
+        "human_token": "HUMAN_DECISION_C22_DRY_RUN_SPEC_ACCEPT_OR_REVISE",
+        "purpose": "human reviews the no-PnL dry-run spec (only after all above accepted)"
+      }
+    ],
+    "push": false,
+    "replay": false,
+    "schema_version": 1,
+    "short_instrument_status": "UNRESOLVED_PENDING_SEPARATE_HUMAN_SELECTION",
+    "simulation": false,
+    "substitutes_nonexistent_instrument": false,
+    "thirty_seven_bps_is_base_case": false,
+    "thirty_seven_bps_status": "SENSITIVITY_CASE_NOT_BASE_CASE",
+    "token_consumption": false,
+    "token_issuance": false,
+    "verdict": "C22_EXECUTION_DATA_CONTRACT_READY_FOR_HUMAN_REVIEW"
+  },
+  "execution_data_contract_failures": [],
+  "execution_data_contract_valid": true,
+  "forward_data_coverage_verdict": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
+  "forward_exit_data_contract": {
+    "administrative_liquidation": {
+      "excluded_from_return_sharpe_calmar_benchmarks": true,
+      "non_decisive": true,
+      "permitted_only_as_truncation_diagnostic": true
+    },
+    "admits_any_snapshot": false,
+    "blockers": [],
+    "bound_replay_spec_sha256": "9bf10af353521738f440c2e953af44cdd5ed093590f03a843a01972485dd9867",
+    "builder_version": "forward_exit_data_readiness_b1_v1",
+    "candidate_id": "C22",
+    "changes_collection_state": false,
+    "changes_entry_period": false,
+    "classification_never_admits": true,
+    "commit": false,
+    "contract": "c22_forward_exit_only_trend_radar_data_readiness",
+    "contract_sha256": "f3a1029ae705bd67e4eb8cdebff144f949c2d0ff6a62f89344738fbec65e731c",
+    "cost_base_case_approval": false,
+    "data_dir": "data/external_signum_trend_radar_gc",
+    "dataset_mutation": false,
+    "dry_run": false,
+    "entry_cutoff": "2026-07-15",
+    "expected_session_rules": {
+      "asset_absent_from_valid_export": "asset not in a VALID top-50 export -> OUT_OF_RADAR exit",
+      "duplicate_asset_rows": "duplicate (asset,runDate) rows -> rejected, never merged",
+      "duplicate_runDate": "two exports for one runDate -> DUPLICATE (rejected, never merged)",
+      "entire_export_missing": "the whole expected export absent -> fail-closed halt",
+      "incomplete_top50": "export present but < 50 valid ranked rows -> INVALID (fail-closed on a holding session)",
+      "inconsistent_symbol_mapping": "asset<->symbol not deterministically mappable -> fail-closed",
+      "malformed_export": "structurally invalid export on an expected session -> fail-closed halt",
+      "missing_expected_weekday_export": "an expected weekday export that is absent -> MISSING_EXPECTED_EXPORT; on a HOLDING session this is a fail-closed halt (never a silent exit)",
+      "weekend_non_export": "Saturday/Sunday and legitimate non-export dates have NO session; an open position simply carries (no exit decision)"
+    },
+    "export_prefix": "gc_crypto_trendradar_daily",
+    "extension_increment_calendar_days": 15,
+    "extension_is_deterministic_not_outcome_driven": true,
+    "fetch": false,
+    "first_exit_only_date": "2026-07-16",
+    "first_extension_range": {
+      "calendar_days": 15,
+      "end": "2026-08-29",
+      "index": 1,
+      "start": "2026-08-15"
+    },
+    "forward_data_admission": false,
+    "generates_entry_after_cutoff": false,
+    "human_review_required": true,
+    "import": false,
+    "initial_exit_data_range": {
+      "calendar_days": 30,
+      "end": "2026-08-14",
+      "start": "2026-07-16"
+    },
+    "initial_review_calendar_days": 30,
+    "instrument_selection": false,
+    "insufficient_data_outcome": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
+    "inventory_classes": [
+      "PRESENT_BUT_NOT_ADMITTED",
+      "VALID_EXIT_ONLY_CANDIDATE",
+      "INVALID",
+      "DUPLICATE",
+      "OUTSIDE_REQUIRED_RANGE",
+      "MISSING_EXPECTED_EXPORT"
+    ],
+    "lane": "crypto_d1_auto_research",
+    "lifecycle_advancement": false,
+    "mode": "RESEARCH_ONLY",
+    "network": false,
+    "no_new_entries_after_cutoff": true,
+    "phase": "B1_CONTRACT_AND_PLANNING_ONLY",
+    "phase_b1_build_token": "HUMAN_APPROVED_BUILD_C22_FORWARD_AND_EXECUTION_DATA_READINESS_PHASE_B1",
+    "post_cutoff_files_marked": "EXIT_ONLY",
+    "post_cutoff_not_used_in_v2_labels_or_entries": true,
+    "push": false,
+    "renames_files": false,
+    "replay": false,
+    "required_snapshot_fields": [
+      "runDate",
+      "asset_identifier",
+      "market_rank",
+      "top50_membership",
+      "gc.upper",
+      "gc.filter",
+      "gc.trend",
+      "ohlc.h",
+      "ohlc.c",
+      "source_filename",
+      "source_sha256",
+      "row_count",
+      "validation_status",
+      "provenance_tier_or_source_class",
+      "exit_only_admission_marker"
+    ],
+    "rev1_five_case_distinction": {
+      "absent_from_valid_top50": "OUT_OF_RADAR",
+      "entire_export_missing_or_malformed": "FAIL_CLOSED_HALT",
+      "no_executable_price": "FAIL_CLOSED_HALT",
+      "permanent_delisting_with_real_price": "DELISTED_EXIT_DIAGNOSTIC",
+      "temporary_suspension": "HOLD_AND_FLAG"
+    },
+    "schema_version": 1,
+    "second_extension_range": {
+      "calendar_days": 15,
+      "end": "2026-09-13",
+      "index": 2,
+      "start": "2026-08-30"
+    },
+    "simulation": false,
+    "token_consumption": false,
+    "token_issuance": false,
+    "verdict": "C22_FORWARD_EXIT_DATA_CONTRACT_READY_FOR_HUMAN_REVIEW"
+  },
+  "forward_exit_data_contract_failures": [],
+  "forward_exit_data_contract_valid": true,
+  "human_review_required": true,
+  "local_forward_inventory": {
+    "coverage_complete": false,
+    "coverage_verdict": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
+    "cutoff": "2026-07-15",
+    "expected_horizon_sessions": [
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-10",
+      "2026-08-11",
+      "2026-08-12",
+      "2026-08-13",
+      "2026-08-14"
+    ],
+    "initial_horizon": {
+      "calendar_days": 30,
+      "end": "2026-08-14",
+      "start": "2026-07-16"
+    },
+    "missing_expected_sessions_full_initial_horizon": [
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-10",
+      "2026-08-11",
+      "2026-08-12",
+      "2026-08-13",
+      "2026-08-14"
+    ],
+    "missing_expected_sessions_through_latest_collected": [],
+    "present_post_cutoff_snapshots": [
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260716.json",
+            "row_count": 50,
+            "sha256": "543859805e279285fe78630f49e82ebb5db63b25cf087508964be264d3f78543",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-16",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260717.json",
+            "row_count": 50,
+            "sha256": "5dd3542b51e30a87bf4ec3b20e901bf6cc1c06375f284be8080360eebc006780",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-17",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260720.json",
+            "row_count": 50,
+            "sha256": "45342583a75124eb12152914f8675708531997885d97869de31a100f15553edf",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-20",
+        "would_qualify_exit_only_structurally": true
+      }
+    ],
+    "present_valid_exit_only_candidate_dates": [
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-20"
+    ]
+  },
+  "mode": "RESEARCH_ONLY_READ_ONLY_CONTRACT_AND_PLANNING",
+  "no_cost_base_case_approved": true,
+  "no_data_admitted": true,
+  "no_instrument_selected": true,
+  "no_lifecycle_advanced": true,
+  "no_replay_or_simulation": true,
+  "no_token_issued_or_consumed": true,
+  "recommendation": "READY_FOR_HUMAN_REVIEW_OF_C22_FORWARD_AND_EXECUTION_DATA_CONTRACT",
+  "report": "c22_forward_and_execution_data_readiness_phase_b1"
+}
