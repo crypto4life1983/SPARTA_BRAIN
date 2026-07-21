@@ -1,29 +1,34 @@
 {
+  "admits_forward_data": false,
   "advances_lifecycle": false,
   "advances_without_human_approval": false,
+  "approves_cost_base_case": false,
+  "approves_short_instrument": false,
   "auto_commits": false,
   "auto_pushes": false,
   "benchmarks": {
     "fair_comparison_boundaries": {
-      "costs": "same transaction-cost model applied to every benchmark that trades (random-entry, signal-off entries); buy-and-hold pays one round trip",
+      "costs": "same disaggregated cost model for every benchmark that trades; buy-and-hold pays one round trip",
       "date_range": [
         "2026-06-20",
-        "END_OF_TEST"
+        "natural close of all positions"
       ],
-      "pricing": "same next-bar-open references and same daily snapshots"
+      "pricing": "same next-bar-open references + same daily snapshots"
     },
-    "random_entry_determinism": "fixed seed; entry dates/assets drawn from the same 26 frozen windows so the null shares the strategy's opportunity set",
+    "random_null_matching": "fixed seed; MATCHED to the strategy's side mix (long/hedge/bear proportions), holding-duration process, exposure profile and the SAME cost model; drawn from the same 26 frozen windows",
+    "random_null_no_easier_execution": true,
     "required": [
       "BTC_buy_and_hold",
-      "equal_weight_passive_universe",
+      "equal_weight_passive_universe_point_in_time",
       "zero_return_always_flat_null",
-      "fixed_seed_random_entry_null",
-      "c22_signal_off_null",
+      "fixed_seed_matched_random_entry_null",
+      "c22_signal_off_control",
       "gross_vs_net_strategy"
-    ]
+    ],
+    "survivorship_bias_control": "the equal-weight passive universe uses ONLY assets KNOWN at each decision date (point-in-time top-50 membership); no asset admitted on later knowledge"
   },
   "blockers": [],
-  "builder_version": "replay_spec_phase_a_v1",
+  "builder_version": "replay_spec_phase_a_rev1",
   "candidate_id": "C22",
   "changes_assets": false,
   "changes_collection_state": false,
@@ -35,44 +40,97 @@
   "computes_pnl": false,
   "connects_signum": false,
   "consumes_token": false,
+  "delisting_and_unavailability": {
+    "ABSENT_FROM_TOP50": "valid export, asset not in top-50 -> ordinary out-of-radar exit at the next executable bar",
+    "MISSING_FROM_SINGLE_EXPORT": "asset still trading but absent from ONE otherwise-valid export -> flagged SINGLE_EXPORT_ABSENCE; treated as out-of-radar but reported separately for human review, never silently",
+    "NO_EXECUTABLE_NEXT_BAR": "data-integrity FAIL-CLOSED, unless the PERMANENT_DELISTING last-real-price rule applies (then flagged)",
+    "PERMANENT_DELISTING": "exit ONLY at a real last executable market price, flagged DELISTED_EXIT; excluded from decisive edge attribution; NO invented/ favourable liquidation price",
+    "TEMPORARY_SUSPENSION": "market halted / no executable price -> HOLD the position, flag SUSPENDED; never invent a price; if it cannot resolve within reviewed coverage -> BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
+    "all_unavailable_market_assumptions_flagged_and_reported_separately": true,
+    "categories": [
+      "ABSENT_FROM_TOP50",
+      "MISSING_FROM_SINGLE_EXPORT",
+      "TEMPORARY_SUSPENSION",
+      "PERMANENT_DELISTING",
+      "NO_EXECUTABLE_NEXT_BAR"
+    ],
+    "delisting_not_treated_as_ordinary_out_of_radar": true,
+    "never_invent_favourable_price": true
+  },
   "deploys_capital": false,
   "execution_and_cost_model": {
-    "entry_price_reference": "next daily session OPEN after decision date D (next-bar)",
+    "base_case_values_frozen_here": false,
+    "base_case_values_source": "a SEPARATELY reviewed execution-data contract; the base-case component values MUST be frozen before replay (not set here)",
+    "disaggregated_cost_components": [
+      "exchange_fee_entry",
+      "exchange_fee_exit",
+      "bid_ask_spread",
+      "entry_slippage",
+      "exit_slippage",
+      "funding_or_borrow_cost",
+      "exceptional_or_liquidation_exit_cost"
+    ],
+    "entry_price_reference": "next executable market session OPEN after decision date D",
     "execution_style": "next-bar market execution; no same-bar fills",
-    "exit_price_reference": "next daily session OPEN after the exit-trigger evaluation date",
+    "exit_price_reference": "next executable market session OPEN after the exit-trigger evaluation date",
     "gap_handling": "fill at the actual next-bar open even if it gaps beyond the trigger level (no fill at the theoretical level)",
-    "liquidity_constraints": "top-50 rank membership is the liquidity proxy; a per-name notional cap may be required (flag for human review)",
+    "liquidity_constraints": "top-50 membership is the liquidity proxy; a per-name notional cap may be required (flag for human review)",
+    "long_leg_costs": "spot fee-in/out + spread + slippage",
     "note_not_silently_inheriting_37bps": true,
-    "partial_fill_policy": "assume full fill at the next-bar open for top-50 names at the proposed sizes; partial-fill modeling is out of scope for v1 and flagged",
-    "proposed_transaction_cost_all_in_round_trip_bps": 37.0,
-    "rejected_fill_policy": "if the next bar is missing (no open), the trade is FAIL-CLOSED as a data-integrity error, not silently dropped",
-    "short_specific_costs_must_be_separately_modeled": {
-      "borrow_or_funding_drag_reported_separately": true,
-      "if_perp": "add perpetual funding accrued per HELD day (sign-correct) + perp taker fee tier",
-      "if_spot_margin": "add borrow interest accrued per HELD day + margin fee tier",
-      "instrument_unresolved": "the frozen detector spec does NOT fix the short instrument (perp vs spot-margin); this MUST be decided by human review before replay"
-    },
-    "spread_assumption": "half-spread included inside the 37 bps; a wider explicit spread may be required for thin top-50 names (flag, do not soften)",
-    "transaction_cost_scope": "PROPOSED baseline for BOTH long and short legs: taker fee + slippage + half-spread on entry and on exit (37 bps all-in round trip). This is the spot house baseline (C10/C11/C12) and is APPROPRIATE for the LONG leg; for SHORT it covers only the transaction, NOT the carry",
-    "turnover_calculation": "one round-trip per closed position; per-asset and portfolio turnover reported; used in a turnover-sanity cross-check"
+    "partial_fill_policy": "assume full fill at next-bar open for top-50 names at proposed sizes; partial-fill modelling out of scope for v1 (flagged)",
+    "rejected_fill_policy": "missing next bar on an expected session -> FAIL-CLOSED data-integrity error, never silently dropped",
+    "results_required_at_three_levels": [
+      "gross",
+      "transaction_cost_only",
+      "fully_net"
+    ],
+    "sensitivity_all_in_round_trip_bps": 37.0,
+    "short_leg_costs": "transaction costs PLUS instrument-specific carry (perp funding OR margin borrow) per held day -- pending the short-instrument selection; modelled + reported separately",
+    "thirty_seven_bps_role": "LABELLED SENSITIVITY CASE ONLY (not the approved base case)",
+    "turnover_calculation": "one round-trip per closed position; per-asset + portfolio; used in a turnover-sanity cross-check"
   },
   "exit_methodology": {
-    "delisted_or_unavailable_asset": "treated as out-of-radar -> exit at the last available close; flagged DELISTED_EXIT (not counted as a rule-based edge exit)",
-    "end_of_test_forced_liquidation": "any position still open at END_OF_TEST is liquidated at that date's close and flagged FORCED_OPEN_AT_END_OF_TEST (excluded from edge attribution)",
+    "delisting_handled_separately": true,
     "exit_triggers_single_sourced_from_frozen_spec": true,
+    "forced_or_administrative_liquidation": {
+      "is_a_strategy_exit": false,
+      "role": "NON-DECISIVE truncation diagnostic ONLY; shown separately; NEVER included in decisive strategy metrics (net return / Sharpe / Calmar / benchmark comparison)"
+    },
     "long_exit_below_upper_band": "latest_closed_close < gc.upper (UPPER GC band)",
-    "long_exit_out_of_radar": "asset no longer in Trend Radar top-50 results on the evaluation date",
+    "long_exit_out_of_radar": "asset no longer in a VALID Trend Radar top-50 export on the evaluation date",
     "max_holding_period_in_frozen_spec": null,
-    "max_holding_period_note": "the FROZEN detector spec defines NO maximum holding period; positions are held until a frozen exit condition triggers. The only bound is the fail-closed END_OF_TEST horizon (PROPOSED 30d), which forces liquidation and is NOT a detector rule.",
-    "missing_candle_behavior": "FAIL-CLOSED: a missing expected daily bar/snapshot on a holding date is a data-integrity failure; the replay refuses to run rather than infer/interpolate a price",
-    "short_exit_out_of_radar": "asset no longer in Trend Radar results on the evaluation date",
+    "missing_candle_or_export_behavior": "FAIL-CLOSED on an expected export/trading session (data-integrity halt); never infer/interpolate a price and never silently exit",
+    "no_artificial_strategy_max_hold": true,
+    "short_exit_out_of_radar": "asset no longer in a VALID Trend Radar export on the evaluation date",
     "short_stop_close_above_filter": "latest_closed_close > gc.filter",
     "short_take_profit": "latest_closed_close <= 0.65 * derived_short_entry_price",
     "unresolved_items": [
-      "exact derived_short_entry_price reference (entry fill price vs signal-bar close) must be pinned at dry-run against the frozen entry-fill rule"
-    ]
+      "exact derived_short_entry_price reference (entry fill price) pinned at dry-run against the frozen entry-fill rule"
+    ],
+    "unresolved_positions_after_reviewed_coverage": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA"
   },
   "fetches_data": false,
+  "forward_exit_path_extension_rule": {
+    "administrative_liquidation_diagnostic_only": true,
+    "administrative_liquidation_excluded_from_decisive_metrics": true,
+    "extension_defined_without_examining_economic_results": true,
+    "extension_increment_calendar_days": 15,
+    "increment_is_predeclared_not_outcome_driven": true,
+    "initial_review_calendar_days": 30,
+    "no_new_entries_after": "2026-07-15",
+    "rule": "Review an INITIAL 30 calendar days of EXIT-ONLY forward coverage (from 2026-07-16). If any position is still open at the end of the reviewed coverage, the result is BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA and the coverage is EXTENDED in deterministic predeclared increments of 15 calendar days until EVERY open position closes naturally under the frozen exit rules. The horizon is NOT a strategy exit.",
+    "weekend_and_non_export_handling": "exit sessions occur ONLY on valid daily export dates; weekends / non-export days have NO decision session and the open position simply carries; the extension increment is counted in CALENDAR days but evaluation happens only on export sessions"
+  },
+  "forward_snapshot_alignment": {
+    "authoritative_export_for_gc_fields": "the daily Signum Trend Radar 'gc/crypto' export for the evaluation date -- the same export family and reduced top-50 convention as the frozen collection windows; determines gc.upper, gc.filter, gc.trend and top-50 radar membership",
+    "exit_only_manifest_marker": "EXIT_ONLY",
+    "friday_positions_before_monday": "a Friday-held position is evaluated on Friday's export; the next executable market bar is the next export session (typically Monday); no weekend fills",
+    "malformed_or_unavailable_export": "FAIL-CLOSED replay halt on an expected trading/export session (NOT an exit, NOT a skip); a missing expected session is a data-integrity failure",
+    "out_of_radar_definition": "absence from the reduced TOP-50 of a VALID, well-formed export on the evaluation date == out-of-radar",
+    "post_2026_07_15_snapshots": "marked EXIT_ONLY in the exit-path manifest; admissible ONLY for exit evaluation of positions opened <= 2026-07-15; REJECTED (fail-closed) if used to create any entry",
+    "timestamp_alignment": "the Trend Radar export's daily-close boundary maps to the NEXT executable market bar open; entries/exits fill at that next bar; exact boundary is single-sourced from the collection convention, never inferred from data",
+    "weekend_non_export_dates": "carry the previous valid snapshot's position state; NO new exit decision is taken on a non-export date (no session)"
+  },
   "frozen_evidence": {
     "actionable_breakdown": {
       "BEAR_SHORT": 72,
@@ -120,6 +178,7 @@
     ],
     "no_asset_or_date_cherry_picking": true,
     "no_date_after": "2026-07-15",
+    "no_new_entry_after": "2026-07-15",
     "provenance_tier_counts_retained_in_attribution": {
       "FULL_RAW_REDUCTION_PROVENANCE": 6,
       "LEGACY_REDUCED_ONLY": 8,
@@ -133,11 +192,15 @@
   },
   "generates_trades": false,
   "human_review_required": true,
+  "invents_prices": false,
   "invents_rule_values": false,
   "issues_token": false,
   "lane": "crypto_d1_auto_research",
   "live_trading": false,
   "mode": "RESEARCH_ONLY",
+  "modifies_collection_tracker": false,
+  "modifies_detector": false,
+  "modifies_lifecycle_orchestrator": false,
   "mutates_data": false,
   "mutates_v1_v2_artifacts": false,
   "optimizes_parameters": false,
@@ -146,24 +209,29 @@
   "phase_a_build_token": "HUMAN_APPROVED_BUILD_C22_REPLAY_SPECIFICATION_PHASE_A_SPEC_ONLY",
   "places_orders": false,
   "precommitted_rejection_gates": {
+    "data_or_execution_rejection": [
+      "exit-path snapshots not contiguous from 2026-07-16 to natural close",
+      "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA (positions unresolved after deterministic extension)",
+      "short instrument/venue/symbol-map/carry not resolved + feasible at run time",
+      "any post-2026-07-15 snapshot used to create a new entry",
+      "malformed/missing expected export on a holding session"
+    ],
     "economic_performance_rejection": [
-      "net return <= 0 after costs",
+      "net return <= 0 after fully-net costs",
       "non-positive net Sharpe",
-      "does NOT beat the fixed-seed random-entry null on a risk-adjusted basis",
-      "does NOT beat BTC buy-and-hold on a risk-adjusted basis",
-      "forward/held-out segment not positive"
+      "does NOT beat the matched fixed-seed random-entry null on a risk-adjusted basis",
+      "does NOT beat BTC buy-and-hold on a risk-adjusted basis"
     ],
-    "execution_or_data_rejection": [
-      "exit-path dataset not contiguous 2026-07-16..END_OF_TEST",
-      "any missing expected daily snapshot on a holding date",
-      "short instrument/carry model unspecified at run time",
-      "a post-2026-07-15 snapshot used to create a new entry"
-    ],
+    "held_out_segment": {
+      "is_decisive_gate": false,
+      "rationale": "with only 26 decision windows an arbitrary decisive holdout would be post-hoc and low-power; no repository convention defines a C22 holdout, so it is NOT a hard rejection gate",
+      "role": "LABELLED, NON-DECISIVE robustness diagnostic only"
+    },
     "insufficient_statistical_power_warning": {
       "actionable_labels": 88,
       "decision_windows": 26,
       "min_actionable_labels_reference": 30,
-      "warning": "88 actionable entries over 26 daily windows is a SHORT, low-power path; annualized figures are fragile and any result is INDICATIVE, not conclusive; a WARNING is mandatory on every annualized metric"
+      "warning": "88 actionable entries over 26 daily windows is a SHORT, low-power path; annualized figures are NON-CONCLUSIVE and every annualized metric MUST carry the warning; results are indicative only"
     },
     "integrity_rejection": [
       "any duplicate trade",
@@ -174,29 +242,25 @@
     ],
     "negative_results_preserved": true,
     "no_parameter_change_after_run": true,
+    "no_post_run_optimization": true,
     "no_post_run_rescue": true,
+    "no_selective_asset_removal": true,
+    "no_selective_date_removal": true,
     "no_selective_rerun": true
   },
   "price_path_data_contract": {
-    "corporate_or_token_symbol_mapping": "exchange:symbol mapping frozen per the candidate spec's explicit collision/mapping rule; no silent re-mapping",
     "critical_finding": "exit evaluation needs the daily Trend Radar SNAPSHOT (gc.upper, gc.filter, gc.trend + radar membership), NOT plain OHLC candles; only the take-profit (close <= 0.65*entry) is pure-price",
-    "deterministic_source_manifest": "per-file SHA-256 + (asset,date) coverage map; the exit-path dataset is a DISTINCT frozen artifact with its own manifest, separate from the V2 entry evidence",
-    "duplicate_bar_rejection": "duplicate (asset,date) rows are rejected, never merged",
-    "end_of_test_fail_closed_rule": {
-      "horizon_is_proposed_not_tuned": true,
-      "proposed_horizon_calendar_days": 30,
-      "rule": "END_OF_TEST = min(date by which ALL open positions have closed under frozen exit rules, last_decision_date + 30d). The exit-path dataset MUST provide a CONTIGUOUS daily snapshot sequence from 2026-07-16 through END_OF_TEST. If coverage is incomplete, the replay FAILS CLOSED (does not run). Any position still open at END_OF_TEST is force-liquidated + flagged.",
-      "why_variable": "exits are open-ended; the true end date is not known a priori"
-    },
+    "deterministic_source_manifest": "per-file SHA-256 + (asset,date) coverage map; exit-path dataset is a DISTINCT frozen artifact, separate from V2 entry evidence, with post-2026-07-15 rows marked EXIT_ONLY",
+    "duplicate_bar_rejection": "duplicate (asset,date) rows rejected, never merged",
     "entry_context_range": [
       "2026-06-20",
       "2026-07-15"
     ],
     "exit_path_range": [
       "2026-07-16",
-      "END_OF_TEST (deterministic; see rule)"
+      "until all positions close naturally (extended deterministically) or BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA"
     ],
-    "missing_bar_policy": "FAIL-CLOSED: any missing expected daily snapshot in the contiguous exit-path range aborts the replay",
+    "long_vs_short_price_series": "stated SEPARATELY -- the same OHLC series is NOT assumed for both; the short leg's series follows the chosen short instrument (see short_instrument_gate)",
     "no_fetch_in_this_task": true,
     "required_fields_per_asset_per_day": [
       "asset_identifier",
@@ -208,9 +272,8 @@
       "gc.trend",
       "radar_membership(top-50 rank)"
     ],
-    "timeframe": "daily (D1), same cadence as collection",
-    "timezone_and_daily_close_boundary": "the exact vendor Trend Radar daily close boundary used by the frozen windows (must match the collection convention; not inferred from data)",
-    "warm_up_requirements": "none for band/filter recomputation -- gc.upper/gc.filter are vendor-provided per snapshot; previous_close for crossover is the prior snapshot's latest-closed close (one prior daily bar)"
+    "timeframe": "daily (D1), same cadence + close boundary as collection",
+    "warm_up_requirements": "gc.upper/gc.filter are vendor-provided per snapshot (no recomputation); crossover needs one prior daily snapshot's latest-closed close"
   },
   "price_path_missing_data_inventory": {
     "already_on_disk_but_out_of_scope_until_gated": [
@@ -219,11 +282,12 @@
       "2026-07-20"
     ],
     "gate_required_before_use": "C22_FORWARD_PRICE_DATA_READY_FOR_HUMAN_REVIEW",
-    "hard_rule": "post-2026-07-15 snapshots are admissible for EXIT EVALUATION ONLY; they MUST NOT create new entries and MUST NOT enter the V2 entry evidence",
+    "hard_rule": "post-2026-07-15 snapshots are EXIT_ONLY; they MUST NOT create new entries and MUST NOT enter the V2 entry evidence",
+    "insufficient_data_outcome": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
     "missing": [
-      "contiguous daily Trend Radar snapshots (gc.upper/gc.filter/gc.trend + membership + ohlc.h/ohlc.c) for every trading date from 2026-07-16 through END_OF_TEST",
-      "a deterministic exit-path source manifest (per-file SHA-256 + coverage map)",
-      "human confirmation of END_OF_TEST horizon and of admitting post-2026-07-15 snapshots for EXIT-ONLY evaluation (no new entries after 2026-07-15)"
+      "contiguous daily Trend Radar snapshots (gc.upper/gc.filter/gc.trend + membership + ohlc.h/ohlc.c) from 2026-07-16 until every position closes naturally under the frozen rules (deterministic 15-day extension from an initial 30-day review)",
+      "a deterministic exit-path source manifest (per-file SHA-256 + coverage map, post-2026-07-15 rows marked EXIT_ONLY)",
+      "the chosen short instrument's historical price + funding/borrow series"
     ],
     "status": "NOT_FROZEN_NOT_AUTHORIZED"
   },
@@ -231,17 +295,17 @@
     {
       "gate": "C22_REPLAY_SPEC_READY_FOR_HUMAN_REVIEW",
       "human_token": "HUMAN_DECISION_C22_REPLAY_SPEC_ACCEPT_OR_REVISE",
-      "purpose": "human reviews THIS frozen replay specification"
+      "purpose": "human reviews the (revised) frozen replay specification"
     },
     {
       "gate": "C22_FORWARD_PRICE_DATA_READY_FOR_HUMAN_REVIEW",
       "human_token": "HUMAN_DECISION_C22_FORWARD_PRICE_DATA_ACCEPT_OR_REJECT",
-      "purpose": "human reviews the frozen exit-path snapshot dataset + manifest (exit-only use of post-2026-07-15 snapshots)"
+      "purpose": "human reviews the frozen exit-path snapshot dataset + manifest AND the resolved short instrument/venue/symbol-map/carry feasibility"
     },
     {
       "gate": "C22_DRY_RUN_READY_FOR_HUMAN_REVIEW",
       "human_token": "HUMAN_DECISION_C22_DRY_RUN_ACCEPT_OR_REJECT",
-      "purpose": "human reviews the synthetic/no-PnL dry-run wiring (entry/exit/no-lookahead)"
+      "purpose": "human reviews the no-PnL dry-run wiring (entry/exit/no-lookahead/ordering)"
     },
     {
       "gate": "C22_FEE_HONEST_REPLAY_READY_FOR_HUMAN_AUTHORIZATION",
@@ -258,7 +322,7 @@
   "reparameterizes": false,
   "replay_advance_token": "HUMAN_DECISION_C22_ADVANCE_TO_REPLAY_OR_REJECT",
   "required_results": {
-    "annualized_return_with_short_sample_warning": true,
+    "annualized_return_marked_non_conclusive": true,
     "attribution": [
       "long_contribution",
       "hedge_short_contribution",
@@ -271,9 +335,11 @@
       "benchmark_comparison_table"
     ],
     "cost_drags": [
-      "fee_drag",
+      "exchange_fee_drag",
+      "spread_drag",
       "slippage_drag",
-      "borrow_or_funding_drag"
+      "funding_or_borrow_drag",
+      "exceptional_exit_drag"
     ],
     "exposure": [
       "exposure_over_time",
@@ -290,6 +356,7 @@
     },
     "return": [
       "gross_return",
+      "transaction_cost_only_return",
       "net_return"
     ],
     "risk": [
@@ -302,39 +369,74 @@
       "closed_trade_count",
       "open_trade_count",
       "turnover"
-    ]
+    ],
+    "truncation_diagnostic_separate": "forced/administrative liquidation shown as a NON-DECISIVE truncation diagnostic, never in the decisive metrics"
   },
+  "revise_decision_ref": "HUMAN_DECISION_C22_REPLAY_SPEC_ACCEPT_OR_REVISE=REVISE",
+  "revision": "REV1_POST_FIRST_HUMAN_REVIEW",
   "runs_backtest": false,
   "runs_replay": false,
-  "schema_version": 1,
+  "schema_version": 2,
+  "short_instrument_gate": {
+    "fail_closed_when": [
+      "the required short instrument did not exist on the signal date",
+      "historical funding (perp) or borrow cost (margin) is missing",
+      "borrow availability cannot be established",
+      "the spot and derivative symbol cannot be mapped deterministically",
+      "the execution price source differs materially from the signal-price source without an approved basis adjustment"
+    ],
+    "gate_required_before_dry_run": "C22_FORWARD_PRICE_DATA_READY_FOR_HUMAN_REVIEW",
+    "long_and_short_stated_separately": true,
+    "options": {
+      "linear_perpetual_futures": "requires historical funding series (sign-correct, per held day)",
+      "spot_margin_short": "requires historical borrow AVAILABILITY + borrow cost series"
+    },
+    "required_before_dry_run": [
+      "explicit venue",
+      "explicit symbol map (spot<->derivative, deterministic)",
+      "instrument type",
+      "historical price source"
+    ],
+    "same_ohlc_for_both_not_assumed": true,
+    "status": "UNRESOLVED_PENDING_SEPARATE_HUMAN_SELECTION",
+    "thirty_seven_bps_short_model_approved": false
+  },
   "signal_handling": {
     "actionable_signals": [
       "LONG_ENTRY",
       "HEDGE_SHORT",
       "BEAR_SHORT"
     ],
-    "already_held_behavior": "skip new entry; keep managing the open position under the frozen exit rules",
-    "decision_timestamp": "the run/as-of date D of each frozen daily window; the detector reads the LATEST CLOSED daily candle + that day's gc block",
+    "decision_timestamp": "the run/as-of date D of each frozen daily window; detector reads the LATEST CLOSED daily candle + that day's gc block",
     "detector_rules_unchanged": true,
+    "deterministic_competition_ordering": [
+      "decision_date_ascending",
+      "market_rank_ascending",
+      "stable_asset_identifier_ascending"
+    ],
     "dust_handling": {
       "entry_min_pct_nav": 1.0,
       "entry_min_usd": 10,
       "exit_min_usd": 10,
       "held_dust_usd": 10
     },
-    "earliest_permissible_entry": "the OPEN of the NEXT daily session after decision date D (next-bar); NEVER the same closed bar that produced the signal",
-    "exposure_exceeds_nav_rule": "size on a live NAV snapshot; never reuse a percentage; cap cumulative deployed at 100% NAV; if a new entry would exceed 100% NAV it is SKIPPED (deterministic, by ascending market rank), never scaled to force a fit",
+    "earliest_permissible_entry": "the OPEN of the NEXT executable market session after decision date D (next-bar); NEVER the same closed bar",
+    "exit_ordering_vs_entry": "on any execution session EXITS are processed BEFORE entries (freed NAV becomes available to that session's entries)",
+    "insufficient_nav_rule": "DETERMINISTIC REJECTION by the ordering above -- a signal that does not fit under the 100% NAV cap is SKIPPED, never proportionally resized",
     "leverage": 1,
-    "leverage_restriction": "1x only; no borrow-financed leverage beyond the short instrument's inherent mechanics",
+    "leverage_restriction": "1x only",
+    "long_and_short_implementation_stated_separately": true,
     "lookahead_prevention": [
       "no same-bar fill",
-      "no use of any candle/gc field dated after the fill bar",
+      "no candle/gc field dated after the fill bar",
       "exit evaluation uses only closed bars up to the evaluation date"
     ],
     "max_gross_exposure_pct_nav": 100.0,
     "max_net_exposure_pct_nav": 100.0,
+    "no_new_entry_after": "2026-07-15",
+    "no_simultaneous_long_and_short_same_asset": true,
     "one_position_per_asset": true,
-    "overlapping_or_repeated_signals": "while a position in an asset is open, further entry signals for that asset are SKIPPED (already-held); no pyramiding / no averaging",
+    "overlapping_or_repeated_signals": "while a position is open, further entries for that asset are SKIPPED (already-held); no pyramiding",
     "position_sizing_pct_nav": {
       "bear_short": 5.0,
       "hedge_short": 3.0,
@@ -348,6 +450,7 @@
       "NONE",
       "SKIP"
     ],
+    "signal_while_exit_pending": "if an asset's exit is pending on the same session, its new entry signal is SKIPPED (already-held until the exit fills on that session; no same-session flip)",
     "ticker_collision_handling": {
       "skip_if_relative_diff_exceeds": 0.5
     }
@@ -360,5 +463,5 @@
   "uses_credentials": false,
   "uses_mcp": false,
   "uses_network": false,
-  "verdict": "C22_REPLAY_SPEC_READY_FOR_HUMAN_REVIEW"
+  "verdict": "C22_REPLAY_SPEC_READY_FOR_SECOND_HUMAN_REVIEW"
 }

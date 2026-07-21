@@ -25,11 +25,16 @@ BASENAME = "c22_gc_replay_specification_phase_a"
 def render_markdown(s: dict) -> str:
     ev = s["frozen_evidence"]; inv = s["price_path_missing_data_inventory"]
     cm = s["execution_and_cost_model"]; rg = s["precommitted_rejection_gates"]
+    em = s["exit_methodology"]; fx = s["forward_exit_path_extension_rule"]
+    fa = s["forward_snapshot_alignment"]; sg = s["short_instrument_gate"]
+    du = s["delisting_and_unavailability"]; sh = s["signal_handling"]; bm = s["benchmarks"]
     lines = [
-        "# C22 Replay Specification — Phase A (spec-only, research-only)",
+        "# C22 Replay Specification — Phase A, REV1 (spec-only, research-only)",
         "",
-        "Freezes *how* a future C22 fee-honest replay would run over the frozen V2 label",
-        "evidence. Runs no replay, fetches no data, issues no token, unlocks no gate.",
+        "Revised under %s. Freezes *how* a future C22 fee-honest replay would run over the"
+        % s["revise_decision_ref"],
+        "frozen V2 label evidence. Runs no replay, fetches/admits no data, approves no short",
+        "model or cost base case, issues no token, unlocks no gate.",
         "",
         "- Verdict: **%s**" % s["verdict"],
         "- Spec SHA-256: `%s`" % s["spec_sha256"],
@@ -40,53 +45,80 @@ def render_markdown(s: dict) -> str:
         % (ev["date_range"][0], ev["date_range"][1], ev["decision_windows"],
            ev["total_label_rows"], ev["actionable_labels"],
            ", ".join("%s=%d" % (k, v) for k, v in sorted(ev["actionable_breakdown"].items()))),
-        "- No date after %s; excluded future dates: %s"
-        % (ev["no_date_after"], ", ".join(ev["excluded_future_dates"])),
+        "- No new entry after %s; excluded future dates: %s"
+        % (ev["no_new_entry_after"], ", ".join(ev["excluded_future_dates"])),
         "- Provenance tiers retained: %s"
         % ", ".join("%s=%d" % (k, v)
                     for k, v in sorted(ev["provenance_tier_counts_retained_in_attribution"].items())),
         "",
-        "## Exit methodology (single-sourced from the frozen detector spec)",
-        "- Long exit: `%s`; or `%s`" % (s["exit_methodology"]["long_exit_below_upper_band"],
-                                        s["exit_methodology"]["long_exit_out_of_radar"]),
+        "## Exit methodology & forward-data extension (point 1)",
+        "- Long exit: `%s`; or `%s`" % (em["long_exit_below_upper_band"],
+                                        em["long_exit_out_of_radar"]),
         "- Short: stop `%s`; TP `%s`; or out-of-radar"
-        % (s["exit_methodology"]["short_stop_close_above_filter"],
-           s["exit_methodology"]["short_take_profit"]),
-        "- Max holding period in frozen spec: **%s** (only bound = fail-closed END_OF_TEST)"
-        % s["exit_methodology"]["max_holding_period_in_frozen_spec"],
+        % (em["short_stop_close_above_filter"], em["short_take_profit"]),
+        "- Max holding period in frozen spec: **%s** — no artificial strategy max-hold"
+        % em["max_holding_period_in_frozen_spec"],
+        "- Forced/administrative liquidation is a **non-decisive truncation diagnostic only**",
+        "- Initial review %d calendar days; if positions remain open → **%s**; extend in "
+        "predeclared **%d-day** increments until every position closes naturally"
+        % (fx["initial_review_calendar_days"],
+           em["unresolved_positions_after_reviewed_coverage"],
+           fx["extension_increment_calendar_days"]),
+        "- Weekend/non-export: %s" % fx["weekend_and_non_export_handling"],
         "",
-        "## Price-path data — CRITICAL FINDING",
-        "- %s" % s["price_path_data_contract"]["critical_finding"],
-        "- Missing-data status: **%s** (gate: `%s`)"
-        % (inv["status"], inv["gate_required_before_use"]),
-        "- Forward exit-path snapshots required 2026-07-16 → END_OF_TEST; %s"
-        % inv["hard_rule"],
-        "- On disk but out-of-scope until gated: %s"
-        % ", ".join(inv["already_on_disk_but_out_of_scope_until_gated"]),
+        "## Forward Trend Radar snapshot use (point 4)",
+        "- Authoritative export: %s" % fa["authoritative_export_for_gc_fields"],
+        "- Out-of-radar = %s" % fa["out_of_radar_definition"],
+        "- Friday→Monday: %s" % fa["friday_positions_before_monday"],
+        "- Malformed/unavailable export: %s" % fa["malformed_or_unavailable_export"],
+        "- Post-2026-07-15 snapshots marked `%s` and rejected for any entry"
+        % fa["exit_only_manifest_marker"],
+        "- Missing-data status: **%s** → %s (gate `%s`)"
+        % (inv["status"], inv["insufficient_data_outcome"], inv["gate_required_before_use"]),
         "",
-        "## Execution & cost model (proposed, for human review)",
+        "## Delisting / unavailability (point 5, separate from out-of-radar)",
+    ] + ["- **%s**: %s" % (c, du[c]) for c in du["categories"]] + [
+        "",
+        "## Short instrument gate (point 2 — UNRESOLVED)",
+        "- Status: **%s**; 37bps short model approved: **%s**"
+        % (sg["status"], sg["thirty_seven_bps_short_model_approved"]),
+        "- Human must select: %s" % " OR ".join(sg["options"].keys()),
+        "- Fail-closed when: %s" % "; ".join(sg["fail_closed_when"]),
+        "",
+        "## Execution & cost model (point 3 — disaggregated)",
         "- Entry/exit reference: %s / %s" % (cm["entry_price_reference"], cm["exit_price_reference"]),
-        "- Transaction cost: **%.0f bps all-in round-trip** (%s)"
-        % (cm["proposed_transaction_cost_all_in_round_trip_bps"],
-           "NOT silently inherited; long-appropriate, short-transaction only"),
-        "- Short carry (funding if perp / borrow if margin) modeled separately; instrument "
-        "UNRESOLVED pending human review",
+        "- Components: %s" % ", ".join(cm["disaggregated_cost_components"]),
+        "- 37 bps role: **%s** (base case NOT frozen here; from %s)"
+        % (cm["thirty_seven_bps_role"], cm["base_case_values_source"]),
+        "- Results required at: %s" % ", ".join(cm["results_required_at_three_levels"]),
         "",
-        "## Benchmarks",
-        "- %s" % ", ".join(s["benchmarks"]["required"]),
+        "## Exposure ordering (point 6)",
+        "- Deterministic order: %s" % " → ".join(sh["deterministic_competition_ordering"]),
+        "- %s" % sh["exit_ordering_vs_entry"],
+        "- Insufficient NAV: %s" % sh["insufficient_nav_rule"],
+        "- No simultaneous long+short same asset: %s"
+        % sh["no_simultaneous_long_and_short_same_asset"],
         "",
-        "## Pre-committed rejection gates",
+        "## Benchmarks (point 7)",
+        "- %s" % ", ".join(bm["required"]),
+        "- Survivorship control: %s" % bm["survivorship_bias_control"],
+        "- Random null: %s" % bm["random_null_matching"],
+        "",
+        "## Pre-committed rejection gates (point 9 — four separated classes)",
         "- Integrity: %s" % "; ".join(rg["integrity_rejection"]),
-        "- Execution/data: %s" % "; ".join(rg["execution_or_data_rejection"]),
+        "- Data/execution: %s" % "; ".join(rg["data_or_execution_rejection"]),
         "- Economic: %s" % "; ".join(rg["economic_performance_rejection"]),
         "- Power warning: %s" % rg["insufficient_statistical_power_warning"]["warning"],
+        "- Held-out (point 8): decisive=%s — %s"
+        % (rg["held_out_segment"]["is_decisive_gate"], rg["held_out_segment"]["role"]),
         "",
         "## Proposed lifecycle gates (not activated)",
     ]
     for g in s["proposed_lifecycle_gates"]:
         lines.append("1. `%s` — %s (token `%s`)" % (g["gate"], g["purpose"], g["human_token"]))
     lines += ["", "## Recommendation", "",
-              "**READY_FOR_HUMAN_REVIEW_OF_C22_REPLAY_SPEC**" if s["verdict"] == _spec.VERDICT_READY
+              "**READY_FOR_SECOND_HUMAN_REVIEW_OF_C22_REPLAY_SPEC**"
+              if s["verdict"] == _spec.VERDICT_READY
               else "**BLOCKED_BY_UNRESOLVED_REPLAY_SPEC_REQUIREMENTS**", ""]
     return "\n".join(lines)
 
