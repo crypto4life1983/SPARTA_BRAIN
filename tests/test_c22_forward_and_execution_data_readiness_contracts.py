@@ -1,8 +1,11 @@
-"""C22 Phase B1 forward-exit-data + execution-data readiness contract tests. Pure modules --
-no dataset needed. Verify frozen cutoff, EXIT_ONLY, no-entry-after-cutoff, entire-export vs
-asset-absence distinction, deterministic 30/15 horizon, coverage-blocks-readiness, short
-instrument unresolved, funding/borrow non-omittable, basis review required, 37bps sensitivity-
-only, componentized costs, no fetch/admit/replay/token/lifecycle capability, deterministic
+"""C22 Phase B1 forward-exit-data + execution-data readiness contract tests. Pure-module tests
+need no dataset. Deterministic report behavior is tested against a CONTROLLED tmp fixture
+(monkeypatched data dir), decoupled from the live/growing gitignored dataset; a separate
+read-only live-inventory test asserts stable invariants only (never an exact date list).
+Verify frozen cutoff, EXIT_ONLY, no-entry-after-cutoff, entire-export vs asset-absence
+distinction, deterministic 30/15 horizon, coverage-blocks-readiness, short instrument
+unresolved, funding/borrow non-omittable, basis review required, 37bps sensitivity-only,
+componentized costs, no fetch/admit/replay/token/lifecycle capability, deterministic
 serialization, stable hashes."""
 import hashlib
 import json
@@ -231,19 +234,84 @@ def test_deterministic_serialization_and_stable_hashes():
     assert "contract_sha256" not in json.loads(exe.canonical_contract_bytes(b1))
 
 
-def test_report_deterministic_and_no_admission():
+def _write_snapshot(dir_path, run_date, rows=50):
+    """Write a minimal structurally-valid (or, with rows!=50, malformed) GC snapshot fixture
+    named per the collection glob. Pure fixture I/O into a tmp dir; touches no real dataset."""
+    ymd = run_date.replace("-", "")
+    payload = {"results": [{"runDate": run_date} for _ in range(rows)]}
+    p = dir_path / ("%s_%s.json" % (fed.EXPORT_PREFIX, ymd))
+    p.write_text(json.dumps(payload), encoding="utf-8")
+    return p
+
+
+def test_report_deterministic_over_controlled_fixture(tmp_path, monkeypatch):
+    """Deterministic report behavior is tested against a CONTROLLED temporary dataset (not the
+    live gitignored dataset), so future daily imports cannot destabilize the exact assertions.
+    The report tool resolves rpt.DATA_DIR at call time, so monkeypatching it injects the
+    fixture -- no production code changes."""
+    fixture = tmp_path / "gc_fixture"
+    fixture.mkdir()
+    # baseline forward set: 3 valid weekday post-cutoff snapshots
+    _write_snapshot(fixture, "2026-07-16")
+    _write_snapshot(fixture, "2026-07-17")
+    _write_snapshot(fixture, "2026-07-20")
+    # a malformed post-cutoff snapshot (wrong row count) -> must fail closed as INVALID
+    _write_snapshot(fixture, "2026-07-21", rows=10)
+    # an entry-period file (<= cutoff) -> not a forward snapshot, skipped entirely
+    _write_snapshot(fixture, "2026-07-15")
+    before = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+              for p in fixture.glob("*.json")}
+
+    monkeypatch.setattr(rpt, "DATA_DIR", fixture, raising=True)
+
     r1 = rpt.build_report()
     r2 = rpt.build_report()
+    # byte-identical twice
     assert rpt.canonical_report_bytes(r1) == rpt.canonical_report_bytes(r2)
-    md1 = rpt.render_markdown(r1); md2 = rpt.render_markdown(r2)
-    assert md1 == md2
+    assert rpt.render_markdown(r1) == rpt.render_markdown(r2)
     # nothing admitted / selected / approved
     assert r1["no_data_admitted"] and r1["no_instrument_selected"]
     assert r1["no_cost_base_case_approved"] and r1["no_replay_or_simulation"]
     inv = r1["local_forward_inventory"]
-    assert all(s["admitted"] is False for s in inv["present_post_cutoff_snapshots"])
-    # post-cutoff snapshots present but only candidates, never admitted
+    snaps = {s["run_date"]: s for s in inv["present_post_cutoff_snapshots"]}
+    # entry-period file skipped (not a forward snapshot)
+    assert "2026-07-15" not in snaps
+    # exact deterministic candidate set from the controlled fixture
     assert inv["present_valid_exit_only_candidate_dates"] == \
         ["2026-07-16", "2026-07-17", "2026-07-20"]
-    # forward coverage over the 30-day horizon is incomplete -> blocked
+    # each fixture post-cutoff snapshot classified correctly, none admitted
+    for d in ("2026-07-16", "2026-07-17", "2026-07-20"):
+        assert snaps[d]["classification"] == "VALID_EXIT_ONLY_CANDIDATE"
+    # malformed snapshot fails closed
+    assert snaps["2026-07-21"]["classification"] == "INVALID"
+    assert all(s["admitted"] is False for s in inv["present_post_cutoff_snapshots"])
+    # incomplete horizon coverage -> blocked
     assert inv["coverage_verdict"] == "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA"
+    # no capability activated
+    assert r1["no_token_issued_or_consumed"] and r1["no_lifecycle_advanced"]
+    # no data mutation: fixture bytes unchanged
+    after = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+             for p in fixture.glob("*.json")}
+    assert before == after
+
+
+@pytest.mark.skipif(not rpt.DATA_DIR.is_dir(),
+                    reason="live GC dataset not present (clean checkout)")
+def test_live_inventory_invariants_no_exact_date_pin():
+    """Read-only integration check over the ACTUAL local dataset. Asserts stable INVARIANTS
+    only -- never an exact (growing) date list -- so daily imports cannot break it while still
+    guarding admission/coverage/entry-lock behavior."""
+    inv = rpt.local_forward_inventory()
+    # every discovered post-cutoff record has a unique runDate
+    dates = [s["run_date"] for s in inv["present_post_cutoff_snapshots"]]
+    assert len(dates) == len(set(dates))
+    # every structurally valid snapshot remains unadmitted, and none can create an entry
+    for s in inv["present_post_cutoff_snapshots"]:
+        assert s["admitted"] is False
+        assert s["run_date"] > fed.ENTRY_CUTOFF
+        assert fed.is_admissible_entry_date(s["run_date"]) is False
+    # candidates are a subset of present post-cutoff dates; the set MAY grow
+    assert set(inv["present_valid_exit_only_candidate_dates"]).issubset(set(dates))
+    # coverage stays blocked until the required weekday horizon is complete
+    if inv["missing_expected_sessions_full_initial_horizon"]:
+        assert inv["coverage_verdict"] == "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA"
