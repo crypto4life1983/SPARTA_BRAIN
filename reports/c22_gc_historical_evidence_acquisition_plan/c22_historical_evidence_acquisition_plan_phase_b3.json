@@ -1,0 +1,1422 @@
+{
+  "acquisition_plan": {
+    "acquisition_groups": {
+      "ASSETS_WITH_NO_LOCAL_EVIDENCE": [
+        "BINANCE:IMXUSDT",
+        "BINANCE:INJUSDT",
+        "BINANCE:PENDLEUSDT",
+        "BINANCE:QNTUSDT",
+        "BINANCE:SUNUSDT",
+        "BINANCE:TIAUSDT",
+        "BINANCE:VIRTUALUSDT",
+        "BITFINEX:LEOUSD",
+        "BYBIT:GRAMUSDT",
+        "BYBIT:TELUSDT",
+        "COINBASE:MORPHOUSD",
+        "GATE:ASTERUSDT",
+        "GATE:GTUSDT",
+        "KRAKEN:KASUSD",
+        "KRAKEN:SPXUSD",
+        "OKX:OKBUSDT"
+      ],
+      "ASSETS_WITH_PARTIAL_LOCAL_EVIDENCE": [
+        "BINANCE:AAVEUSDT",
+        "BINANCE:CRVUSDT",
+        "BINANCE:LINKUSDT",
+        "BINANCE:SOLUSDT",
+        "BINANCE:TRXUSDT",
+        "BINANCE:ZECUSDT"
+      ],
+      "BINANCE_VENUE_GROUP": [
+        "BINANCE:AAVEUSDT",
+        "BINANCE:CRVUSDT",
+        "BINANCE:IMXUSDT",
+        "BINANCE:INJUSDT",
+        "BINANCE:LINKUSDT",
+        "BINANCE:PENDLEUSDT",
+        "BINANCE:QNTUSDT",
+        "BINANCE:SOLUSDT",
+        "BINANCE:SUNUSDT",
+        "BINANCE:TIAUSDT",
+        "BINANCE:TRXUSDT",
+        "BINANCE:VIRTUALUSDT",
+        "BINANCE:ZECUSDT"
+      ],
+      "HIGH_COLLISION_IDENTIFIERS": [
+        "KRAKEN:SPXUSD"
+      ],
+      "MAPPING_SENSITIVE_OR_NEWER_ASSETS": [
+        "BINANCE:VIRTUALUSDT",
+        "BYBIT:GRAMUSDT",
+        "BYBIT:TELUSDT",
+        "GATE:ASTERUSDT"
+      ],
+      "VENUE_NATIVE_TOKENS": [
+        "BITFINEX:LEOUSD",
+        "GATE:GTUSDT",
+        "OKX:OKBUSDT"
+      ]
+    },
+    "acquisition_order": [
+      "1_historical_instrument_existence_registry",
+      "2_symbol_and_venue_mapping",
+      "3_funding_or_borrow_availability",
+      "4_historical_ohlc",
+      "5_fee_tick_lot_minimum_rules",
+      "6_liquidity_and_spread_evidence",
+      "7_full_holding_period_coverage"
+    ],
+    "acquisition_status": "NOT_AUTHORIZED",
+    "admission": false,
+    "api_call": false,
+    "asset_count": 22,
+    "authenticated_source_is_future_human_decision": true,
+    "authorization_sequence_activated": false,
+    "basis_approval": false,
+    "blockers": [],
+    "bound_evidence_request_sha256": "a08a4cd58caa373cd5c9ec4f8c980a646105aa6c126fe269c33d2534e7108b40",
+    "bound_execution_contract_sha256": "1a207918c7146182ab41d888d1daa14cf85fbb592d97295795701932bccf713f",
+    "bound_forward_contract_sha256": "f3a1029ae705bd67e4eb8cdebff144f949c2d0ff6a62f89344738fbec65e731c",
+    "bound_replay_spec_sha256": "9bf10af353521738f440c2e953af44cdd5ed093590f03a843a01972485dd9867",
+    "browsing": false,
+    "builder_version": "historical_evidence_acquisition_plan_b3_v1",
+    "candidate_id": "C22",
+    "commit": false,
+    "contract": "c22_historical_instrument_evidence_acquisition_plan",
+    "contract_sha256": "c171fd73e7f1166c8e22946f1dfab728f14b738de6f1306c17860b52893dcc9f",
+    "cost_approval": false,
+    "creates_evidence_layout": false,
+    "credential_classes": [
+      "PUBLIC_NO_AUTH",
+      "PUBLIC_API_WITH_RATE_LIMITS",
+      "AUTHENTICATED_READ_ONLY_API",
+      "PAID_VENDOR",
+      "UNAVAILABLE_OR_UNCLEAR"
+    ],
+    "credentials": false,
+    "cross_venue_substitution": false,
+    "decisive_minimum_tier": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+    "dry_run": false,
+    "early_fail_close_steps": {
+      "1_historical_instrument_existence_registry": "if the instrument/contract never existed over the signal+holding window -> asset fail-closed BEFORE any OHLC/funding acquisition",
+      "2_symbol_and_venue_mapping": "if signal symbol cannot be deterministically mapped (esp. SPX identity, venue-native tokens) -> fail-closed before further acquisition",
+      "3_funding_or_borrow_availability": "if neither perp funding nor spot-margin borrow existed historically -> asset fail-closed for BOTH implementations before OHLC/fees/liquidity"
+    },
+    "extension_increment_days": 15,
+    "external_verification_marker": "REQUIRES_EXTERNAL_VERIFICATION",
+    "feasibility_matrix": [
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "PARTIAL_EXPLORATORY_EVIDENCE_INSUFFICIENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 8,
+        "expected_acquisition_difficulty": "MEDIUM",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-06-26"
+        ],
+        "signal_symbol": "BINANCE:AAVEUSDT",
+        "stable_identifier": "BINANCE:AAVEUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "PARTIAL_EXPLORATORY_EVIDENCE_INSUFFICIENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 8,
+        "expected_acquisition_difficulty": "MEDIUM",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-05",
+          "2026-07-07",
+          "2026-07-08",
+          "2026-07-12",
+          "2026-07-14"
+        ],
+        "signal_symbol": "BINANCE:CRVUSDT",
+        "stable_identifier": "BINANCE:CRVUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 6,
+        "expected_acquisition_difficulty": "LOW",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-06"
+        ],
+        "signal_symbol": "BINANCE:IMXUSDT",
+        "stable_identifier": "BINANCE:IMXUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 6,
+        "expected_acquisition_difficulty": "LOW",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-11",
+          "2026-07-12",
+          "2026-07-15"
+        ],
+        "signal_symbol": "BINANCE:INJUSDT",
+        "stable_identifier": "BINANCE:INJUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "PARTIAL_EXPLORATORY_EVIDENCE_INSUFFICIENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 8,
+        "expected_acquisition_difficulty": "MEDIUM",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-15"
+        ],
+        "signal_symbol": "BINANCE:LINKUSDT",
+        "stable_identifier": "BINANCE:LINKUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 6,
+        "expected_acquisition_difficulty": "LOW",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-03",
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-07",
+          "2026-07-08"
+        ],
+        "signal_symbol": "BINANCE:PENDLEUSDT",
+        "stable_identifier": "BINANCE:PENDLEUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 6,
+        "expected_acquisition_difficulty": "LOW",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-06-20",
+          "2026-06-21",
+          "2026-06-23",
+          "2026-06-24",
+          "2026-07-11"
+        ],
+        "signal_symbol": "BINANCE:QNTUSDT",
+        "stable_identifier": "BINANCE:QNTUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "PARTIAL_EXPLORATORY_EVIDENCE_INSUFFICIENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 8,
+        "expected_acquisition_difficulty": "MEDIUM",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-02"
+        ],
+        "signal_symbol": "BINANCE:SOLUSDT",
+        "stable_identifier": "BINANCE:SOLUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 6,
+        "expected_acquisition_difficulty": "LOW",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-06",
+          "2026-07-07"
+        ],
+        "signal_symbol": "BINANCE:SUNUSDT",
+        "stable_identifier": "BINANCE:SUNUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 6,
+        "expected_acquisition_difficulty": "LOW",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-06-28",
+          "2026-06-29",
+          "2026-07-01",
+          "2026-07-02",
+          "2026-07-03",
+          "2026-07-08"
+        ],
+        "signal_symbol": "BINANCE:TIAUSDT",
+        "stable_identifier": "BINANCE:TIAUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "PARTIAL_EXPLORATORY_EVIDENCE_INSUFFICIENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 8,
+        "expected_acquisition_difficulty": "MEDIUM",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-06",
+          "2026-07-07",
+          "2026-07-08",
+          "2026-07-09",
+          "2026-07-10",
+          "2026-07-11",
+          "2026-07-12",
+          "2026-07-13",
+          "2026-07-14",
+          "2026-07-15"
+        ],
+        "signal_symbol": "BINANCE:TRXUSDT",
+        "stable_identifier": "BINANCE:TRXUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 10,
+        "expected_acquisition_difficulty": "HIGH",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_symbol_map_and_verify_historical_listing_existence"
+        ],
+        "mapping_risk_class": "MAPPING_SENSITIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-12"
+        ],
+        "signal_symbol": "BINANCE:VIRTUALUSDT",
+        "stable_identifier": "BINANCE:VIRTUALUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "PARTIAL_EXPLORATORY_EVIDENCE_INSUFFICIENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 8,
+        "expected_acquisition_difficulty": "MEDIUM",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-08",
+          "2026-07-09",
+          "2026-07-10"
+        ],
+        "signal_symbol": "BINANCE:ZECUSDT",
+        "stable_identifier": "BINANCE:ZECUSDT",
+        "venue": "BINANCE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 11,
+        "expected_acquisition_difficulty": "POSSIBLY_UNAVAILABLE",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_home_venue_implementation_or_explicit_cross_venue_approval"
+        ],
+        "mapping_risk_class": "VENUE_LOCKED_NATIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "short_signal_dates": [
+          "2026-07-15"
+        ],
+        "signal_symbol": "BITFINEX:LEOUSD",
+        "stable_identifier": "BITFINEX:LEOUSD",
+        "venue": "BITFINEX"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 10,
+        "expected_acquisition_difficulty": "HIGH",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_symbol_map_and_verify_historical_listing_existence"
+        ],
+        "mapping_risk_class": "MAPPING_SENSITIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07",
+          "2026-07-08"
+        ],
+        "signal_symbol": "BYBIT:GRAMUSDT",
+        "stable_identifier": "BYBIT:GRAMUSDT",
+        "venue": "BYBIT"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 10,
+        "expected_acquisition_difficulty": "HIGH",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_symbol_map_and_verify_historical_listing_existence"
+        ],
+        "mapping_risk_class": "MAPPING_SENSITIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-09"
+        ],
+        "signal_symbol": "BYBIT:TELUSDT",
+        "stable_identifier": "BYBIT:TELUSDT",
+        "venue": "BYBIT"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 10,
+        "expected_acquisition_difficulty": "HIGH",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-01",
+          "2026-07-06"
+        ],
+        "signal_symbol": "COINBASE:MORPHOUSD",
+        "stable_identifier": "COINBASE:MORPHOUSD",
+        "venue": "COINBASE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 10,
+        "expected_acquisition_difficulty": "HIGH",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_symbol_map_and_verify_historical_listing_existence"
+        ],
+        "mapping_risk_class": "MAPPING_SENSITIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-06-21",
+          "2026-07-04",
+          "2026-07-05"
+        ],
+        "signal_symbol": "GATE:ASTERUSDT",
+        "stable_identifier": "GATE:ASTERUSDT",
+        "venue": "GATE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 11,
+        "expected_acquisition_difficulty": "POSSIBLY_UNAVAILABLE",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_home_venue_implementation_or_explicit_cross_venue_approval"
+        ],
+        "mapping_risk_class": "VENUE_LOCKED_NATIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "short_signal_dates": [
+          "2026-07-04",
+          "2026-07-05",
+          "2026-07-06",
+          "2026-07-07",
+          "2026-07-08",
+          "2026-07-09",
+          "2026-07-10",
+          "2026-07-11",
+          "2026-07-12",
+          "2026-07-13",
+          "2026-07-14",
+          "2026-07-15"
+        ],
+        "signal_symbol": "GATE:GTUSDT",
+        "stable_identifier": "GATE:GTUSDT",
+        "venue": "GATE"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 10,
+        "expected_acquisition_difficulty": "HIGH",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument"
+        ],
+        "mapping_risk_class": "STANDARD_MAPPING",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+          "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE"
+        ],
+        "short_signal_dates": [
+          "2026-07-05",
+          "2026-07-06"
+        ],
+        "signal_symbol": "KRAKEN:KASUSD",
+        "stable_identifier": "KRAKEN:KASUSD",
+        "venue": "KRAKEN"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 11,
+        "expected_acquisition_difficulty": "POSSIBLY_UNAVAILABLE",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map",
+          "REQUIRES_EXTERNAL_VERIFICATION: SPX resolves to the specific crypto token (NOT the S&P 500 index)"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "pin_specific_crypto_token_identity_and_prohibit_sp500_index_mapping"
+        ],
+        "mapping_risk_class": "HIGH_COLLISION_RISK",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "short_signal_dates": [
+          "2026-06-28",
+          "2026-06-29",
+          "2026-06-30",
+          "2026-07-01",
+          "2026-07-02"
+        ],
+        "signal_symbol": "KRAKEN:SPXUSD",
+        "stable_identifier": "KRAKEN:SPXUSD",
+        "venue": "KRAKEN"
+      },
+      {
+        "current_local_evidence": {
+          "borrow_status": "ABSENT",
+          "fees": "ABSENT",
+          "funding_status": "ABSENT",
+          "liquidity": "ABSENT",
+          "perp_ohlc": "ABSENT"
+        },
+        "currently_fail_closed_both": true,
+        "estimated_distinct_evidence_datasets": 11,
+        "expected_acquisition_difficulty": "POSSIBLY_UNAVAILABLE",
+        "externally_unverified_assumptions": [
+          "REQUIRES_EXTERNAL_VERIFICATION: perpetual contract existence over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: spot-margin borrow availability over signal+holding window",
+          "REQUIRES_EXTERNAL_VERIFICATION: deterministic signal->execution symbol map"
+        ],
+        "fail_closed_condition": "fail-closed for an implementation if (a) the instrument/borrow never existed over the window, (b) the symbol cannot be deterministically mapped, or (c) mandatory cost/coverage evidence is absent; currently fail-closed under BOTH implementations",
+        "mandatory_human_decisions": [
+          "select_perp_vs_spot_margin_short_instrument",
+          "approve_home_venue_implementation_or_explicit_cross_venue_approval"
+        ],
+        "mapping_risk_class": "VENUE_LOCKED_NATIVE",
+        "no_cross_venue_substitution": true,
+        "possible_margin_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "possible_perp_source_classes": [
+          "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+          "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET_EXPLORATORY_ONLY"
+        ],
+        "short_signal_dates": [
+          "2026-06-23"
+        ],
+        "signal_symbol": "OKX:OKBUSDT",
+        "stable_identifier": "OKX:OKBUSDT",
+        "venue": "OKX"
+      }
+    ],
+    "fetch": false,
+    "filename_convention": "<venue>__<asset>__<category>__<start>_<end>.<ext> ; dates ISO YYYY-MM-DD; every file paired with a .sha256 sidecar; manifests list per-file sha256 + coverage; NEVER overwrites",
+    "final_exit_end_date_known": false,
+    "frozen_entry_dates_immutable": true,
+    "grouping_preserves_per_asset_validation": true,
+    "human_review_required": true,
+    "import": false,
+    "incremental_update_procedure": "extend forward in 15-day increments; append-only; each increment adds files + updates the manifest; NEVER rewrites prior files or frozen entry dates",
+    "infers_existence_from_current_listing": false,
+    "initial_range_end": "2026-08-14",
+    "instrument_selection": false,
+    "lane": "crypto_d1_auto_research",
+    "layout_created_this_phase": false,
+    "lifecycle_advancement": false,
+    "manifest_continuity_required": true,
+    "mapping_approval": false,
+    "margin_evidence_categories": [
+      "historical_spot_symbol_registry",
+      "historical_margin_eligibility",
+      "borrow_availability",
+      "borrow_rate_history",
+      "borrow_charging_intervals",
+      "fee_schedules",
+      "lot_tick_minimum_rules",
+      "historical_volume",
+      "historical_spread",
+      "suspension_and_delisting_history",
+      "availability_by_date"
+    ],
+    "min_acquisition_range_start": "2026-06-20",
+    "mode": "RESEARCH_ONLY",
+    "modifies_gitignore": false,
+    "network": false,
+    "no_credentials_created_or_requested": true,
+    "no_new_entry_after": "2026-07-15",
+    "perp_evidence_categories": [
+      "historical_contract_registry",
+      "instrument_listing_and_delisting_timestamps",
+      "contract_migrations",
+      "historical_ohlc",
+      "historical_funding_rates",
+      "funding_settlement_timestamps",
+      "fee_schedules_and_effective_dates",
+      "tick_size",
+      "lot_size",
+      "minimum_notional",
+      "historical_volume",
+      "historical_spread_or_orderbook_proxy",
+      "instrument_availability_by_date"
+    ],
+    "phase": "B3_ACQUISITION_PLAN_ONLY",
+    "phase_b3_build_token": "HUMAN_APPROVED_BUILD_C22_HISTORICAL_EVIDENCE_ACQUISITION_PLAN_PHASE_B3",
+    "prohibited_permissions": [
+      "trading_permissions",
+      "withdrawal_permissions",
+      "order_permissions",
+      "broker_or_exchange_account_linking",
+      "unrestricted_api_keys",
+      "secrets_committed_to_repository",
+      "credentials_in_reports_or_logs"
+    ],
+    "proposed_authorization_sequence": [
+      {
+        "batch": "C22_INSTRUMENT_REGISTRY_FETCH_READY_FOR_HUMAN_AUTHORIZATION",
+        "human_token": "HUMAN_DECISION_C22_INSTRUMENT_REGISTRY_FETCH_AUTHORIZE",
+        "purpose": "authorize fetching only the historical instrument-existence registry + listing/delisting timestamps"
+      },
+      {
+        "batch": "C22_FUNDING_AND_BORROW_FETCH_READY_FOR_HUMAN_AUTHORIZATION",
+        "human_token": "HUMAN_DECISION_C22_FUNDING_AND_BORROW_FETCH_AUTHORIZE",
+        "purpose": "authorize fetching historical funding (perp) and/or borrow availability+rate"
+      },
+      {
+        "batch": "C22_EXECUTION_OHLC_FETCH_READY_FOR_HUMAN_AUTHORIZATION",
+        "human_token": "HUMAN_DECISION_C22_EXECUTION_OHLC_FETCH_AUTHORIZE",
+        "purpose": "authorize fetching execution-instrument historical OHLC"
+      },
+      {
+        "batch": "C22_FEES_AND_LIQUIDITY_FETCH_READY_FOR_HUMAN_AUTHORIZATION",
+        "human_token": "HUMAN_DECISION_C22_FEES_AND_LIQUIDITY_FETCH_AUTHORIZE",
+        "purpose": "authorize fetching fee/tick/lot/minimum + liquidity/spread evidence"
+      },
+      {
+        "batch": "C22_HISTORICAL_INSTRUMENT_EVIDENCE_READY_FOR_ADMISSION_REVIEW",
+        "human_token": "HUMAN_DECISION_C22_HISTORICAL_INSTRUMENT_EVIDENCE_ADMIT_OR_REJECT",
+        "purpose": "human reviews all acquired evidence for admission"
+      }
+    ],
+    "proposed_evidence_root": "data/c22_short_instrument_evidence",
+    "proposed_layout": {
+      "borrow": "data/c22_short_instrument_evidence/borrow/<asset>/",
+      "canonical_normalized_files": "data/c22_short_instrument_evidence/canonical/<venue>/<asset>/",
+      "fees": "data/c22_short_instrument_evidence/fees/<venue>/",
+      "funding": "data/c22_short_instrument_evidence/funding/<asset>/",
+      "instrument_registry": "data/c22_short_instrument_evidence/registry/",
+      "liquidity": "data/c22_short_instrument_evidence/liquidity/<asset>/",
+      "manifests": "data/c22_short_instrument_evidence/manifests/",
+      "ohlc": "data/c22_short_instrument_evidence/ohlc/<asset>/",
+      "raw_source_files": "data/c22_short_instrument_evidence/raw/<venue>/<asset>/",
+      "rejected_quarantine": "data/c22_short_instrument_evidence/_quarantine/<date>/",
+      "symbol_mappings": "data/c22_short_instrument_evidence/mappings/",
+      "validation_reports": "data/c22_short_instrument_evidence/validation/"
+    },
+    "push": false,
+    "replay": false,
+    "schema_version": 1,
+    "simulation": false,
+    "source_hierarchy": [
+      "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+      "T2_OFFICIAL_ARCHIVED_INSTRUMENT_AND_FEE_RECORDS",
+      "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+      "T4_INDEPENDENTLY_ARCHIVED_PUBLIC_DATASET",
+      "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE"
+    ],
+    "source_hierarchy_rules": {
+      "margin:availability_by_date": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:borrow_availability": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:borrow_charging_intervals": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:borrow_rate_history": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:fee_schedules": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:historical_margin_eligibility": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:historical_spot_symbol_registry": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:historical_spread": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:historical_volume": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:lot_tick_minimum_rules": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "margin:suspension_and_delisting_history": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:contract_migrations": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:fee_schedules_and_effective_dates": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:funding_settlement_timestamps": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:historical_contract_registry": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:historical_funding_rates": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:historical_ohlc": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:historical_spread_or_orderbook_proxy": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:historical_volume": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:instrument_availability_by_date": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:instrument_listing_and_delisting_timestamps": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:lot_size": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:minimum_notional": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      },
+      "perp:tick_size": {
+        "acceptable_backup_source_class": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+        "admission_review_requirement": "separate human admission review before use",
+        "date_coverage_requirement": "signal+holding window",
+        "expected_file_format": "csv|json",
+        "immutable_identifier_requirement": "official URL/path + retrieved-at-UTC + venue id",
+        "preferred_source_class": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+        "sha256_or_content_manifest_requirement": "per-file SHA-256 + coverage manifest",
+        "unacceptable_source_class": "T5_UNSUPPORTED_THIRD_PARTY_EXPLORATORY_ONLY_NOT_DECISIVE",
+        "validation_rule": "schema + monotonic timestamps + no gaps on required sessions + no dup rows + REQUIRES_EXTERNAL_VERIFICATION on any external assumption"
+      }
+    },
+    "t5_never_decisive": true,
+    "token_consumption": false,
+    "token_issuance": false,
+    "verdict": "C22_HISTORICAL_EVIDENCE_ACQUISITION_PLAN_READY_FOR_HUMAN_REVIEW"
+  },
+  "acquisition_plan_failures": [],
+  "acquisition_plan_valid": true,
+  "human_review_required": true,
+  "mode": "RESEARCH_ONLY_READ_ONLY_ACQUISITION_PLAN",
+  "no_admission": true,
+  "no_api_call": true,
+  "no_browsing": true,
+  "no_credentials": true,
+  "no_fetch": true,
+  "no_instrument_selected": true,
+  "no_layout_created": true,
+  "no_lifecycle_advanced": true,
+  "no_network": true,
+  "no_token_issued_or_consumed": true,
+  "recommendation": "READY_FOR_HUMAN_REVIEW_OF_C22_HISTORICAL_EVIDENCE_ACQUISITION_PLAN",
+  "report": "c22_historical_evidence_acquisition_plan_phase_b3"
+}
