@@ -1,0 +1,936 @@
+{
+  "activation_authorized": false,
+  "aggregate_label_counts": {
+    "BEAR_SHORT": 0,
+    "HEDGE_SHORT": 7,
+    "LONG_ENTRY": 42,
+    "NONE": 1151,
+    "SKIP": 0
+  },
+  "aggregate_manifest_sha256": "87837d76779bb3fc5d66b4849aea6ff1d0f20667862d0ecd389046956ebbb364",
+  "artifact_filename": "c22_gc_real_candle_entry_labels_multiwindow_v2_24w_2026-08-17_2026-09-09.json",
+  "artifact_sha256_on_disk": "70aa418818d6ed218f46deae9ebb25ab27d8977b528078a69b6b19dd1a39bd64",
+  "artifact_sha256_rebuilt_from_frozen_sources": "70aa418818d6ed218f46deae9ebb25ab27d8977b528078a69b6b19dd1a39bd64",
+  "byte_identical_rebuild": true,
+  "canonical_label_payload_sha256": "f783c5ee6f61cbfd8ced0be27e35e24359e03bf2710f5c411e6a706eb50e73b0",
+  "collection_state_changed": false,
+  "entry_cutoff_for_replay": "2026-07-15",
+  "exit_only_window_count": 24,
+  "expected_dates_absent": [],
+  "expected_windows": 24,
+  "human_review_required": true,
+  "labels_total": 1200,
+  "mode": "RESEARCH_ONLY_READ_ONLY_EVIDENCE_REPORT",
+  "optimization_authorized": false,
+  "per_window_label_counts": {
+    "2026-08-17": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-08-18": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 2,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-08-19": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-08-20": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 10,
+      "NONE": 40,
+      "SKIP": 0
+    },
+    "2026-08-21": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 4,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-08-22": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 8,
+      "NONE": 42,
+      "SKIP": 0
+    },
+    "2026-08-23": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 0,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-08-24": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 4,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-08-25": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 1,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-08-26": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 0,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-08-27": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-08-28": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-08-29": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 2,
+      "LONG_ENTRY": 0,
+      "NONE": 48,
+      "SKIP": 0
+    },
+    "2026-08-30": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-08-31": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-09-01": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-09-02": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 0,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-09-03": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-09-04": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 4,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-09-05": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 1,
+      "LONG_ENTRY": 0,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-09-06": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 4,
+      "NONE": 46,
+      "SKIP": 0
+    },
+    "2026-09-07": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 0,
+      "NONE": 50,
+      "SKIP": 0
+    },
+    "2026-09-08": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 49,
+      "SKIP": 0
+    },
+    "2026-09-09": {
+      "BEAR_SHORT": 0,
+      "HEDGE_SHORT": 0,
+      "LONG_ENTRY": 1,
+      "NONE": 49,
+      "SKIP": 0
+    }
+  },
+  "profile": "V3_EXTENDED_SEG_B_24W",
+  "provenance_accounting": {
+    "windows_full_provenance": [
+      "2026-08-17",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-23",
+      "2026-08-24",
+      "2026-08-25",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30",
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-06",
+      "2026-09-07",
+      "2026-09-08",
+      "2026-09-09"
+    ],
+    "windows_missing_raw_by_design": [],
+    "windows_missing_raw_mandatory": [],
+    "windows_missing_sidecar_by_design": [],
+    "windows_missing_sidecar_mandatory": []
+  },
+  "provenance_tier_counts": {
+    "FULL_RAW_REDUCTION_PROVENANCE": 24,
+    "LEGACY_REDUCED_ONLY": 0,
+    "LEGACY_REDUCED_WITH_SIDECAR_NO_RAW": 0
+  },
+  "recommendation": "V3_EVIDENCE_INTEGRITY_PASS_DIAGNOSTIC_ONLY",
+  "recommendation_reasons": [],
+  "replay_authorized": false,
+  "report": "c22_gc_label_pipeline_v3_extended_evidence_integrity_report",
+  "signal_concentration": {
+    "by_date": {
+      "2026-08-17": {
+        "NONE": 50
+      },
+      "2026-08-18": {
+        "LONG_ENTRY": 2,
+        "NONE": 48
+      },
+      "2026-08-19": {
+        "NONE": 50
+      },
+      "2026-08-20": {
+        "LONG_ENTRY": 10,
+        "NONE": 40
+      },
+      "2026-08-21": {
+        "LONG_ENTRY": 4,
+        "NONE": 46
+      },
+      "2026-08-22": {
+        "LONG_ENTRY": 8,
+        "NONE": 42
+      },
+      "2026-08-23": {
+        "HEDGE_SHORT": 1,
+        "NONE": 49
+      },
+      "2026-08-24": {
+        "LONG_ENTRY": 4,
+        "NONE": 46
+      },
+      "2026-08-25": {
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 1,
+        "NONE": 48
+      },
+      "2026-08-26": {
+        "HEDGE_SHORT": 1,
+        "NONE": 49
+      },
+      "2026-08-27": {
+        "LONG_ENTRY": 1,
+        "NONE": 49
+      },
+      "2026-08-28": {
+        "NONE": 50
+      },
+      "2026-08-29": {
+        "HEDGE_SHORT": 2,
+        "NONE": 48
+      },
+      "2026-08-30": {
+        "NONE": 50
+      },
+      "2026-08-31": {
+        "NONE": 50
+      },
+      "2026-09-01": {
+        "LONG_ENTRY": 1,
+        "NONE": 49
+      },
+      "2026-09-02": {
+        "HEDGE_SHORT": 1,
+        "NONE": 49
+      },
+      "2026-09-03": {
+        "LONG_ENTRY": 1,
+        "NONE": 49
+      },
+      "2026-09-04": {
+        "LONG_ENTRY": 4,
+        "NONE": 46
+      },
+      "2026-09-05": {
+        "HEDGE_SHORT": 1,
+        "NONE": 49
+      },
+      "2026-09-06": {
+        "LONG_ENTRY": 4,
+        "NONE": 46
+      },
+      "2026-09-07": {
+        "NONE": 50
+      },
+      "2026-09-08": {
+        "LONG_ENTRY": 1,
+        "NONE": 49
+      },
+      "2026-09-09": {
+        "LONG_ENTRY": 1,
+        "NONE": 49
+      }
+    },
+    "by_signal": {
+      "HEDGE_SHORT": 7,
+      "LONG_ENTRY": 42,
+      "NONE": 1151
+    },
+    "by_symbol_non_none": {
+      "BINANCE:AAVEUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:ADAUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:ALGOUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:BNBUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:CAKEUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:ENAUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:ETHUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:GNOUSDT": {
+        "LONG_ENTRY": 3
+      },
+      "BINANCE:HBARUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:ICPUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:INJUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:JTOUSDT": {
+        "HEDGE_SHORT": 2
+      },
+      "BINANCE:JUPUSDT": {
+        "LONG_ENTRY": 2
+      },
+      "BINANCE:LDOUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:LTCUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:ONDOUSDT": {
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:PENDLEUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:PYTHUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:SHIBUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:SOLUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:SUIUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:TAOUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:TIAUSDT": {
+        "HEDGE_SHORT": 2
+      },
+      "BINANCE:TRXUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:UNIUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BINANCE:XLMUSDT": {
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 2
+      },
+      "BINANCE:XPLUSDT": {
+        "LONG_ENTRY": 3
+      },
+      "BINANCE:ZECUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BITFINEX:LEOUSD": {
+        "HEDGE_SHORT": 1
+      },
+      "BYBIT:HYPEUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "BYBIT:XDCUSDT": {
+        "LONG_ENTRY": 1
+      },
+      "COINBASE:AEROUSD": {
+        "LONG_ENTRY": 1
+      },
+      "COINBASE:MORPHOUSD": {
+        "LONG_ENTRY": 1
+      },
+      "COINBASE:VVVUSD": {
+        "LONG_ENTRY": 1
+      },
+      "KRAKEN:BTTUSD": {
+        "LONG_ENTRY": 1
+      },
+      "KRAKEN:SPXUSD": {
+        "LONG_ENTRY": 1
+      },
+      "KUCOIN:KCSUSDT": {
+        "LONG_ENTRY": 2
+      },
+      "KUCOIN:VELVETUSDT": {
+        "LONG_ENTRY": 1
+      }
+    }
+  },
+  "source_date_inventory": [
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 0,
+        "NONE": 50,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "456f333eca7fbf9ab16dcc56427cef811e3bce906c2a3ab2536d19687a86b36d",
+      "reduced_sha256": "0fcd6a8877a748438989ca3d974b5c175b5fb7b80d5157e2fabd1da3569ac546",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-17",
+      "sidecar_sha256": "b0d7e4e37fbfe45aaaed97d2d51d5423fd358bad836841fb9dc7232daf72a860",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260817.json",
+      "weekday": "Mon"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 2,
+        "NONE": 48,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "851cfa4f38eeb43f2c2fa81df3e926f004e4ffa67332c218aa6f8252031e6171",
+      "reduced_sha256": "4fc35ef7189b82feba6f06475e7ecb7873477f56099e4f1867fe0649fb305f06",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-18",
+      "sidecar_sha256": "14da5c9715eb6f0510a03001d0c5c60c69700b5ddc3fd3f8b3e7063aa2fbdfd4",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260818.json",
+      "weekday": "Tue"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 0,
+        "NONE": 50,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "f28339abe1fde5fc1b8a52a08ad3f8aafb8fb905ae17a8c8268272a1dfc36b0e",
+      "reduced_sha256": "9a921b641f932373fbdf104862581311bb058c2163cbc0b889595ca27a8f5ba9",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-19",
+      "sidecar_sha256": "ae0ee1d40ed6a6a469781d061cb2b7a101035b6f2c3aab36fa6390c15631f495",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260819.json",
+      "weekday": "Wed"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 10,
+        "NONE": 40,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "2e5d841c5b2fb29341a6194d898defc3e7eb152d3326419a4bc68d3cdc1f58b5",
+      "reduced_sha256": "a6a74102a87ba1688737fa702338eaa0cd89c858cb7e64b3b5a400df5e082a69",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-20",
+      "sidecar_sha256": "9787f16a6ce78ac569a657912ac9c140caed88be5369d57ae0e56f67a7e62a41",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260820.json",
+      "weekday": "Thu"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 4,
+        "NONE": 46,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "84ae52d227855d2df9be65e2661dbcd6b479389d8277bce85bff1a6110a83a9c",
+      "reduced_sha256": "5fd43aaa976bb3cd042c4b13ca78b9df73591eaa8d0261560dab8ee218d69946",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-21",
+      "sidecar_sha256": "1087c0d049e87fdc1d79939ac76788a94bbbe9501013847d2fb7fc386e879267",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260821.json",
+      "weekday": "Fri"
+    },
+    {
+      "is_weekend": true,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 8,
+        "NONE": 42,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "8b378362b807a4ebae3ec9245cf9fa145faf1a3991f69c9168b5a757c857bc2b",
+      "reduced_sha256": "4a9476ce05c8e3de58460cb4c11ff90af166fb93ca7e6a7c05027f393fb7d727",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-22",
+      "sidecar_sha256": "ecf7c3eea590c88a1d8397f32653d1f89a202e710d67235e7a70356f2178b096",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260822.json",
+      "weekday": "Sat"
+    },
+    {
+      "is_weekend": true,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 0,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "6777b3bc5d8d29649e0468ee885b53e119273f8a0c166b6d26ab2736ad52043e",
+      "reduced_sha256": "883b2ae52fdbe7c80ea15c986cb5413a353d9760b4b976ead327b893abd08748",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-23",
+      "sidecar_sha256": "337f481c626e9b44311e3fff27cc5608d4dff577b31a926665fb997bcaee0504",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260823.json",
+      "weekday": "Sun"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 4,
+        "NONE": 46,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "92a1eb62f052b509a2ed51c9842c9131f351c8e4eb1c79a0fdb1e5f47d686967",
+      "reduced_sha256": "93e8c1380ecd183775e9935fc8b1459d623534595d0009d826948ee11e3bb740",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-24",
+      "sidecar_sha256": "6a638ddb1daa725e732b798bc975c2adfcdadf63b913a68498bbe0b9755e5595",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260824.json",
+      "weekday": "Mon"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 1,
+        "NONE": 48,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "42331d81bbcd14b8d9895e7199919fa4d7d76ffaeedfca2057b6019c20d8f85e",
+      "reduced_sha256": "bd1df5ff8754b3dca2a5a363420819942da6e93ce5a2eeeb83c77d2ad919a977",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-25",
+      "sidecar_sha256": "8d7384b38d333698d7485fd7a73946698e6a25af002a1bcb1982f5621972229a",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260825.json",
+      "weekday": "Tue"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 0,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "8b3b13783d0c811b7621fcce1164902ddb4c81204ae6fa999775735ab7f75bf8",
+      "reduced_sha256": "01e5a4d63e6af99433266c0d0ffec9bacb754887a10cf5a8483a8b3f60846ab4",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-26",
+      "sidecar_sha256": "bc22422807947d5ca21a86af169047f36eb182e6886ab7eb9a8bab09198f247e",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260826.json",
+      "weekday": "Wed"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 1,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "a919440ecfb9a5c5c615bf92a8d40be0e9f840ec0d6eba918ab5df9c21448bd8",
+      "reduced_sha256": "b263d16ae7a3fa622522cf6c02e972dddaa6eac19c31dc1d597131b5049f3e42",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-27",
+      "sidecar_sha256": "ce3cdd2537a3f6fd3c6f9c5caaa6aea6f4dcf07ef09585b2f27b260196a25248",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260827.json",
+      "weekday": "Thu"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 0,
+        "NONE": 50,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "adab72a70661624b4638fa9a9bcb22a2c32c6395514c246448ce6baabb18cdbd",
+      "reduced_sha256": "105e1beeb64216eccd48c1c4a35512f744f20a730c50aec43cceb806926b3a9e",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-28",
+      "sidecar_sha256": "9c4a13aa082b8f51be911ba84da430252eb0a859ddcf62186c078dbf4c0a2385",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260828.json",
+      "weekday": "Fri"
+    },
+    {
+      "is_weekend": true,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 2,
+        "LONG_ENTRY": 0,
+        "NONE": 48,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "55a91e5d7c5187d658b7cc96ed93c4ebe776af281698ea4e7bd7d2848ac1662f",
+      "reduced_sha256": "a803d2351f0b758897544709a0562a4e0b3ddfd9677c032c2cde969e7ef5045a",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-29",
+      "sidecar_sha256": "f424d9880298697c4d07ff8fbb0ad08fa2aaeed5c2994757af52f85a4d7c2609",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260829.json",
+      "weekday": "Sat"
+    },
+    {
+      "is_weekend": true,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 0,
+        "NONE": 50,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "149ef3ad762376c5fc35814b6f727ebc6acb07536c4e27338bba4bd69d89f07c",
+      "reduced_sha256": "33514f71099771345b7ca2d5e7dd69053f1b9d7de8fa3b7085d6707939352604",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-30",
+      "sidecar_sha256": "e7db49239d24991b0895dba659be21f387996d75fb8a0d75909571e4fb52d7ca",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260830.json",
+      "weekday": "Sun"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 0,
+        "NONE": 50,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "8740ca7309ee72c6bb822b65534942a93717f50da04b103f7c35eac08fa96117",
+      "reduced_sha256": "3fad7810a00894b84b929523bb35a600f99c11497a9156d72f104c14e455e16b",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-08-31",
+      "sidecar_sha256": "ebc7d40c337b8f1053a7aacf61bd3f35e3a6948d275c95c044651b5960e16eac",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260831.json",
+      "weekday": "Mon"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 1,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "63ddfd99f1fc547315ce996a7728c8c2b67ae0e3475891d7bcb2b7fbcb9f676e",
+      "reduced_sha256": "f1ca46ae8eb113975b70b54153d15a3d27744548694b78712ffeec12535e1b10",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-01",
+      "sidecar_sha256": "4dd4fa17bb825b0341139b9e96fc037f3fb6c228a9983964c556165cc9e2c474",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260901.json",
+      "weekday": "Tue"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 0,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "6749984f4d4fafbc5cc908ed632793252041209b997c02ad909bd61e74578560",
+      "reduced_sha256": "3bd6ed07ef43ca1111516d6edaf078102474c7668a5d750edc1293775937e146",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-02",
+      "sidecar_sha256": "1b06dec4444502f3c6ac191cdf882bfd895848a4a9bd1b889c6b8062a1a86b1b",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260902.json",
+      "weekday": "Wed"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 1,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "15adba103dbe1e77cb9e40c3000cbed682fd0f40a6e15a13aaf99bf4e2e14007",
+      "reduced_sha256": "f10c290050ac34c0fd68d0fb031ade4fb4111fd867e92b69fbd8b03ed5425dd0",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-03",
+      "sidecar_sha256": "3a7c1973cda22f8810b8704765d09617351e4456d965c6258bbfcd92cc5326b7",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260903.json",
+      "weekday": "Thu"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 4,
+        "NONE": 46,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "ea5d27bdd824424492e0c7f93c6b9ba5e8698c32aa9a0693042fee8f8b92d89d",
+      "reduced_sha256": "cb34754afbcb9b4ce81950e77d7e60080ad8edbfb43496945981c3b514253e25",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-04",
+      "sidecar_sha256": "d1821933b1ee0e067c04880b182b7e9a0b9595f546d36c1bac0954bbc9930a2a",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260904.json",
+      "weekday": "Fri"
+    },
+    {
+      "is_weekend": true,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 1,
+        "LONG_ENTRY": 0,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "e2977239e4be39d8410635a8d2dd9916e6cf86563a787021e9debb1caf117b04",
+      "reduced_sha256": "99cc9be2a26a519f5a33ea3baf080bbce1f7818b6ad7f455d27c47be433e3bc7",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-05",
+      "sidecar_sha256": "3198456e625f66ba12749f86c1b0b97c3202e4d2c46339ed4c412ee57cc08639",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260905.json",
+      "weekday": "Sat"
+    },
+    {
+      "is_weekend": true,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 4,
+        "NONE": 46,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "08d76baada4011e66e979fc7f13924ff4c3b4e5f54df62edc0f94dd37cbe6050",
+      "reduced_sha256": "392a111cb1764d469dd5684dd9ca788e5741aa5be49655a46bb3b498b6252adb",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-06",
+      "sidecar_sha256": "19e58b8a55b6ff71a4f230dbfbb6b2eff48ccabf8c8b58c5fda53c46bd6ce889",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260906.json",
+      "weekday": "Sun"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 0,
+        "NONE": 50,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "34f1ddec11924d9427e1d4f6cfed26bd65d9611b01b8adece52f4233084b378d",
+      "reduced_sha256": "79f32070f0a9a0197f4f25a9ea37918aaaaf24e90ef5ce6afd00712988a8eb7a",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-07",
+      "sidecar_sha256": "f79c6c30bd8b07e192508e2597ebf468a1985372bdb42dfb31bb6b3622ffa44f",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260907.json",
+      "weekday": "Mon"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 1,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "57a9f9f7f79f2c22ee42cb48fa95965e06f1dcfba758033c6e4895c9828b701f",
+      "reduced_sha256": "682faf678d605e7cfffa2da280641dfb5a4dab29f071d1757f1c4d301ac20f9a",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-08",
+      "sidecar_sha256": "b692dc77abeaf0595b3b29b571baf39aee111f6f641935e677bb828fa448a0d5",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260908.json",
+      "weekday": "Tue"
+    },
+    {
+      "is_weekend": false,
+      "label_counts": {
+        "BEAR_SHORT": 0,
+        "HEDGE_SHORT": 0,
+        "LONG_ENTRY": 1,
+        "NONE": 49,
+        "SKIP": 0
+      },
+      "provenance_tier": "FULL_RAW_REDUCTION_PROVENANCE",
+      "raw_sha256": "71d8ab4b17b98a19daaa03dad4d39623abe25cba2c4b6916c8c2eaf85f1ed63d",
+      "reduced_sha256": "08bc423c5b8d6b4a16fe1c14da4015eff75e027e906a281b4a54731834993ac6",
+      "role": "EXIT_ONLY",
+      "row_count": 50,
+      "run_date": "2026-09-09",
+      "sidecar_sha256": "d19b59fb80adcb4f4e441ad1dd4fe88f18c1dfd1cea06e0d733ecf6980456368",
+      "source_path": "data/external_signum_trend_radar_gc/gc_crypto_trendradar_daily_20260909.json",
+      "weekday": "Wed"
+    }
+  ],
+  "token_issued": false,
+  "v2_frozen_artifact_sha256_expected": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8",
+  "v2_frozen_artifact_sha256_on_disk": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8",
+  "v2_subset_check": {
+    "canonical_identical": false,
+    "v2_actionable": 88,
+    "v2_range": [
+      "2026-06-20",
+      "2026-07-15"
+    ],
+    "v2_rows": 1300,
+    "v3_actionable_after_v2_range": 49,
+    "v3_actionable_in_v2_range": 0,
+    "v3_rows_in_v2_range": 0
+  },
+  "v2_unchanged": true,
+  "v3_role": "ADDITIONAL_EVIDENCE_AND_DIAGNOSTICS_ONLY_NEVER_REPLACES_V2",
+  "validator_failures": [],
+  "validator_valid": true,
+  "weekend_window_count": 6,
+  "window_count": 24,
+  "window_end": "2026-09-09",
+  "window_start": "2026-08-17"
+}
