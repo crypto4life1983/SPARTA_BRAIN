@@ -1,0 +1,4013 @@
+{
+  "allowed_endpoints": [
+    "https://fapi.binance.com/fapi/v1/exchangeInfo",
+    "https://api.bybit.com/v5/market/instruments-info",
+    "https://api.bybit.com/v5/market/kline",
+    "https://www.okx.com/api/v5/public/instruments",
+    "https://api.gateio.ws/api/v4/futures/usdt/contracts/",
+    "https://api.exchange.coinbase.com/products/",
+    "https://api.international.coinbase.com/api/v1/instruments",
+    "https://futures.kraken.com/derivatives/api/v3/instruments",
+    "https://futures.kraken.com/api/charts/v1/trade/",
+    "https://api.kraken.com/0/public/AssetPairs",
+    "https://api-pub.bitfinex.com/v2/candles/",
+    "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:margin"
+  ],
+  "assets": [
+    {
+      "c22_asset": "BINANCE:AAVEUSDT",
+      "candidates": [
+        {
+          "base_asset": "AAVE",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2020-10-16",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1602831600000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=AAVE quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "AAVEUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "AAVE",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "2013f731c6551b64d560f9a930bea03138eea3e4347890150a1eb3387eff10b3",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-26",
+              "fill_dates": [
+                "2026-06-27",
+                "2026-06-29"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-10-16<=2026-06-26",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "AAVEUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-26",
+          "fill_date_calendar": "2026-06-27",
+          "fill_date_weekday": "2026-06-29",
+          "market_rank": 47,
+          "passing_instruments": [
+            "AAVEUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__AAVE__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "fd7d22f857051cbe6f097075f2b606a53e3fabdf5d907e18579e1ea656512138",
+      "required_signal_dates": [
+        "2026-06-26"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "candidates": [
+        {
+          "base_asset": "CRV",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2020-09-01",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1598943600000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=CRV quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "CRVUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "CRV",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "645d29c9b567e332f44d4c69dbe78900d5950c970f5271fa1e6f51ad713d565c",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-09-01<=2026-07-05",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "CRVUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-05",
+          "fill_date_calendar": "2026-07-06",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 100,
+          "passing_instruments": [
+            "CRVUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-09-01<=2026-07-07",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "CRVUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-07",
+          "fill_date_calendar": "2026-07-08",
+          "fill_date_weekday": "2026-07-08",
+          "market_rank": 102,
+          "passing_instruments": [
+            "CRVUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-09-01<=2026-07-08",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "CRVUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 102,
+          "passing_instruments": [
+            "CRVUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-12",
+              "fill_dates": [
+                "2026-07-13",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-09-01<=2026-07-12",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "CRVUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-12",
+          "fill_date_calendar": "2026-07-13",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 101,
+          "passing_instruments": [
+            "CRVUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-14",
+              "fill_dates": [
+                "2026-07-15",
+                "2026-07-15"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-09-01<=2026-07-14",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "CRVUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-14",
+          "fill_date_calendar": "2026-07-15",
+          "fill_date_weekday": "2026-07-15",
+          "market_rank": 97,
+          "passing_instruments": [
+            "CRVUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__CRV__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "1c34389bb672b9d7d40e26e81cafbc5b7fc3ca8e3c4f6cb6b0e58e39165cdb2d",
+      "required_signal_dates": [
+        "2026-07-05",
+        "2026-07-07",
+        "2026-07-08",
+        "2026-07-12",
+        "2026-07-14"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 5,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:IMXUSDT",
+      "candidates": [
+        {
+          "base_asset": "IMX",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2022-02-10",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1644476400000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=IMX quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "IMXUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "IMX",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "e72391235cb7d287d6bcaf89193258ab1fb16cc8fbb8645d03e25b1230032412",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-02-10<=2026-07-06",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "IMXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 106,
+          "passing_instruments": [
+            "IMXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__IMX__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "3ae67fc8f03df7d93b945b95a586a709787180cf4ec962ab7e1c4423c7f11578",
+      "required_signal_dates": [
+        "2026-07-06"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:INJUSDT",
+      "candidates": [
+        {
+          "base_asset": "INJ",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2022-08-16",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1660633200000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=INJ quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "INJUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "INJ",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "1f82d835b6d0ec6cd9b5c479644c555197df388ff14fcc321dece73c2798bb23",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-11",
+              "fill_dates": [
+                "2026-07-12",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-08-16<=2026-07-11",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "INJUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-11",
+          "fill_date_calendar": "2026-07-12",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 79,
+          "passing_instruments": [
+            "INJUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-12",
+              "fill_dates": [
+                "2026-07-13",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-08-16<=2026-07-12",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "INJUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-12",
+          "fill_date_calendar": "2026-07-13",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 81,
+          "passing_instruments": [
+            "INJUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-15",
+              "fill_dates": [
+                "2026-07-16",
+                "2026-07-16"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-08-16<=2026-07-15",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "INJUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-15",
+          "fill_date_calendar": "2026-07-16",
+          "fill_date_weekday": "2026-07-16",
+          "market_rank": 78,
+          "passing_instruments": [
+            "INJUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__INJ__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "929a3a98aa7b7810505706b4850ff3b57dab507801c5c573fb4ab98635a75b6e",
+      "required_signal_dates": [
+        "2026-07-11",
+        "2026-07-12",
+        "2026-07-15"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 3,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:LINKUSDT",
+      "candidates": [
+        {
+          "base_asset": "LINK",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2020-01-17",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1579248000000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=LINK quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "LINKUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "LINK",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "83d3ad0380bc66a666869b29acee02c9d3ea140456bd097af39dada63f9e6460",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-15",
+              "fill_dates": [
+                "2026-07-16",
+                "2026-07-16"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-17<=2026-07-15",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "LINKUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-15",
+          "fill_date_calendar": "2026-07-16",
+          "fill_date_weekday": "2026-07-16",
+          "market_rank": 15,
+          "passing_instruments": [
+            "LINKUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__LINK__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "ce1f1442e2610fdd494f87f131c9cc2aad942d4297a609c0f739ab5c2e9b083b",
+      "required_signal_dates": [
+        "2026-07-15"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "candidates": [
+        {
+          "base_asset": "PENDLE",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2023-07-28",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1690511400000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=PENDLE quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "PENDLEUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "PENDLE",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "10953beaa2f1e0a2943077c68e60c635dbb6986b5705057d65bcb048f6e00e8e",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-03",
+              "fill_dates": [
+                "2026-07-04",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-07-28<=2026-07-03",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "PENDLEUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-03",
+          "fill_date_calendar": "2026-07-04",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 108,
+          "passing_instruments": [
+            "PENDLEUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-04",
+              "fill_dates": [
+                "2026-07-05",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-07-28<=2026-07-04",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "PENDLEUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-04",
+          "fill_date_calendar": "2026-07-05",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 110,
+          "passing_instruments": [
+            "PENDLEUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-07-28<=2026-07-05",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "PENDLEUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-05",
+          "fill_date_calendar": "2026-07-06",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 112,
+          "passing_instruments": [
+            "PENDLEUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-07-28<=2026-07-07",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "PENDLEUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-07",
+          "fill_date_calendar": "2026-07-08",
+          "fill_date_weekday": "2026-07-08",
+          "market_rank": 112,
+          "passing_instruments": [
+            "PENDLEUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-07-28<=2026-07-08",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "PENDLEUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 112,
+          "passing_instruments": [
+            "PENDLEUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__PENDLE__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "7752c7fe1696a9dc7642d07fab4f026e86a7d252875df56eedc7dc219d669144",
+      "required_signal_dates": [
+        "2026-07-03",
+        "2026-07-04",
+        "2026-07-05",
+        "2026-07-07",
+        "2026-07-08"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 5,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "candidates": [
+        {
+          "base_asset": "QNT",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2022-10-18",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1666076400000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=QNT quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "QNTUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "QNT",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "757fdb609803a3ce3bc6f70c5a3b0c811ccec826647aedb8ec41f644c9ec90ac",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-20",
+              "fill_dates": [
+                "2026-06-21",
+                "2026-06-22"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-10-18<=2026-06-20",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "QNTUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-20",
+          "fill_date_calendar": "2026-06-21",
+          "fill_date_weekday": "2026-06-22",
+          "market_rank": 60,
+          "passing_instruments": [
+            "QNTUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-21",
+              "fill_dates": [
+                "2026-06-22",
+                "2026-06-22"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-10-18<=2026-06-21",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "QNTUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-21",
+          "fill_date_calendar": "2026-06-22",
+          "fill_date_weekday": "2026-06-22",
+          "market_rank": 59,
+          "passing_instruments": [
+            "QNTUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-23",
+              "fill_dates": [
+                "2026-06-24",
+                "2026-06-24"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-10-18<=2026-06-23",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "QNTUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-23",
+          "fill_date_calendar": "2026-06-24",
+          "fill_date_weekday": "2026-06-24",
+          "market_rank": 59,
+          "passing_instruments": [
+            "QNTUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-24",
+              "fill_dates": [
+                "2026-06-25",
+                "2026-06-25"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-10-18<=2026-06-24",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "QNTUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-24",
+          "fill_date_calendar": "2026-06-25",
+          "fill_date_weekday": "2026-06-25",
+          "market_rank": 57,
+          "passing_instruments": [
+            "QNTUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-11",
+              "fill_dates": [
+                "2026-07-12",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-10-18<=2026-07-11",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "QNTUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-11",
+          "fill_date_calendar": "2026-07-12",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 62,
+          "passing_instruments": [
+            "QNTUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__QNT__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "6c9d8ade654a3964b9ca2e955057ccb9125c14c9e2268086e93de7c694ad3e05",
+      "required_signal_dates": [
+        "2026-06-20",
+        "2026-06-21",
+        "2026-06-23",
+        "2026-06-24",
+        "2026-07-11"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 5,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:SOLUSDT",
+      "candidates": [
+        {
+          "base_asset": "SOL",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2020-09-14",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1600066800000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=SOL quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "SOLUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "SOL",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "517c39048c815b832560287a3494ce1fe9058489feb2692df9b498aa76d7c21e",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-02",
+              "fill_dates": [
+                "2026-07-03",
+                "2026-07-03"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-09-14<=2026-07-02",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "SOLUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-02",
+          "fill_date_calendar": "2026-07-03",
+          "fill_date_weekday": "2026-07-03",
+          "market_rank": 7,
+          "passing_instruments": [
+            "SOLUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__SOL__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "f43245035c9a902ddd220969b082a1a017e5019edf66d92b1c0eaa9175ad797b",
+      "required_signal_dates": [
+        "2026-07-02"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:SUNUSDT",
+      "candidates": [
+        {
+          "base_asset": "SUN",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2024-08-22",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1724331900000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=SUN quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "SUNUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "SUN",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "56c1b6f743641adc1c9f876a6fe8198aeec179699ee7791fcba675a8db924cee",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-08-22<=2026-07-06",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "SUNUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 98,
+          "passing_instruments": [
+            "SUNUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-08-22<=2026-07-07",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "SUNUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-07",
+          "fill_date_calendar": "2026-07-08",
+          "fill_date_weekday": "2026-07-08",
+          "market_rank": 101,
+          "passing_instruments": [
+            "SUNUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__SUN__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "94c8e7d564373d6e1393dc9a5793ff6584aeb190236c76439bea4842135481d9",
+      "required_signal_dates": [
+        "2026-07-06",
+        "2026-07-07"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 2,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "candidates": [
+        {
+          "base_asset": "TIA",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2023-10-31",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1698769800000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=TIA quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "TIAUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "TIA",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "0805c4852547d1bfce43e90922ff45f6d2f6f05db02005764a61f6fe9d9d1580",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-28",
+              "fill_dates": [
+                "2026-06-29",
+                "2026-06-29"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-10-31<=2026-06-28",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TIAUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-28",
+          "fill_date_calendar": "2026-06-29",
+          "fill_date_weekday": "2026-06-29",
+          "market_rank": 96,
+          "passing_instruments": [
+            "TIAUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-29",
+              "fill_dates": [
+                "2026-06-30",
+                "2026-06-30"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-10-31<=2026-06-29",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TIAUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-29",
+          "fill_date_calendar": "2026-06-30",
+          "fill_date_weekday": "2026-06-30",
+          "market_rank": 96,
+          "passing_instruments": [
+            "TIAUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-01",
+              "fill_dates": [
+                "2026-07-02",
+                "2026-07-02"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-10-31<=2026-07-01",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TIAUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-01",
+          "fill_date_calendar": "2026-07-02",
+          "fill_date_weekday": "2026-07-02",
+          "market_rank": 97,
+          "passing_instruments": [
+            "TIAUSDT"
+          ],
+          "signal": "HEDGE_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-02",
+              "fill_dates": [
+                "2026-07-03",
+                "2026-07-03"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-10-31<=2026-07-02",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TIAUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-02",
+          "fill_date_calendar": "2026-07-03",
+          "fill_date_weekday": "2026-07-03",
+          "market_rank": 97,
+          "passing_instruments": [
+            "TIAUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-03",
+              "fill_dates": [
+                "2026-07-04",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-10-31<=2026-07-03",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TIAUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-03",
+          "fill_date_calendar": "2026-07-04",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 97,
+          "passing_instruments": [
+            "TIAUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2023-10-31<=2026-07-08",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TIAUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 96,
+          "passing_instruments": [
+            "TIAUSDT"
+          ],
+          "signal": "HEDGE_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__TIA__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "69a42a7c9fd18d731672577612e62e0adb56e98dda8e6a8a5f1777f1f4966880",
+      "required_signal_dates": [
+        "2026-06-28",
+        "2026-06-29",
+        "2026-07-01",
+        "2026-07-02",
+        "2026-07-03",
+        "2026-07-08"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 6,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "candidates": [
+        {
+          "base_asset": "TRX",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2020-01-15",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1579075500000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=TRX quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "TRXUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "TRX",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "0ce2fdffcfb7710f05bf14ac3e00578cd447aacf8eec8f23d5e2ccc05aee0f9d",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-06",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-07",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-07",
+          "fill_date_calendar": "2026-07-08",
+          "fill_date_weekday": "2026-07-08",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-08",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-09",
+              "fill_dates": [
+                "2026-07-10",
+                "2026-07-10"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-09",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-09",
+          "fill_date_calendar": "2026-07-10",
+          "fill_date_weekday": "2026-07-10",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-10",
+              "fill_dates": [
+                "2026-07-11",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-10",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-10",
+          "fill_date_calendar": "2026-07-11",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-11",
+              "fill_dates": [
+                "2026-07-12",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-11",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-11",
+          "fill_date_calendar": "2026-07-12",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-12",
+              "fill_dates": [
+                "2026-07-13",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-12",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-12",
+          "fill_date_calendar": "2026-07-13",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-13",
+              "fill_dates": [
+                "2026-07-14",
+                "2026-07-14"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-13",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-13",
+          "fill_date_calendar": "2026-07-14",
+          "fill_date_weekday": "2026-07-14",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-14",
+              "fill_dates": [
+                "2026-07-15",
+                "2026-07-15"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-14",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-14",
+          "fill_date_calendar": "2026-07-15",
+          "fill_date_weekday": "2026-07-15",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-15",
+              "fill_dates": [
+                "2026-07-16",
+                "2026-07-16"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-01-15<=2026-07-15",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "TRXUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-15",
+          "fill_date_calendar": "2026-07-16",
+          "fill_date_weekday": "2026-07-16",
+          "market_rank": 8,
+          "passing_instruments": [
+            "TRXUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__TRX__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "0e8e4e56b0686ec1b37f5ab279c834b349edb6073bfd7bb1e64dc7956bbfa7a5",
+      "required_signal_dates": [
+        "2026-07-06",
+        "2026-07-07",
+        "2026-07-08",
+        "2026-07-09",
+        "2026-07-10",
+        "2026-07-11",
+        "2026-07-12",
+        "2026-07-13",
+        "2026-07-14",
+        "2026-07-15"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 10,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:VIRTUALUSDT",
+      "candidates": [
+        {
+          "base_asset": "VIRTUAL",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2024-12-10",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1733833800000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=VIRTUAL quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "VIRTUALUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "VIRTUAL",
+      "eliminated_signals": 0,
+      "mapping_risk": "MAPPING_SENSITIVE",
+      "normalized_evidence_sha256": "a10bd3b09630dfc40bdbefb7e0918ad45953239494c91f367b7d90415fa619a1",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-12",
+              "fill_dates": [
+                "2026-07-13",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-12-10<=2026-07-12",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "VIRTUALUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-12",
+          "fill_date_calendar": "2026-07-13",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 87,
+          "passing_instruments": [
+            "VIRTUALUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__VIRTUAL__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "03d416c7418319cd45b7ef70d0556c3fffd348f5b1b78a7423301f7094f1cc3b",
+      "required_signal_dates": [
+        "2026-07-12"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "mapping_risk:MAPPING_SENSITIVE"
+      ],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BINANCE:ZECUSDT",
+      "candidates": [
+        {
+          "base_asset": "ZEC",
+          "contract_type": "PERPETUAL",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+              "raw_sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+            }
+          ],
+          "existence_date": "2020-02-05",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "onboardDate_ms": 1580889600000
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseAsset=ZEC quoteAsset=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=PERPETUAL status=TRADING",
+          "venue": "BINANCE",
+          "venue_instrument_symbol": "ZECUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "ZEC",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "760605b6de47121b24491dc525c076c59497b6b718dc376500dd68f6a80177c9",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-02-05<=2026-07-08",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "ZECUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 12,
+          "passing_instruments": [
+            "ZECUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-09",
+              "fill_dates": [
+                "2026-07-10",
+                "2026-07-10"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-02-05<=2026-07-09",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "ZECUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-09",
+          "fill_date_calendar": "2026-07-10",
+          "fill_date_weekday": "2026-07-10",
+          "market_rank": 12,
+          "passing_instruments": [
+            "ZECUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-10",
+              "fill_dates": [
+                "2026-07-11",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2020-02-05<=2026-07-10",
+              "venue": "BINANCE",
+              "venue_instrument_symbol": "ZECUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-10",
+          "fill_date_calendar": "2026-07-11",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 12,
+          "passing_instruments": [
+            "ZECUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BINANCE__ZEC__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "cdcb8157811a7c7b7ef2205f1479455513f966cd78756e9ccd9190281ae78d89",
+      "required_signal_dates": [
+        "2026-07-08",
+        "2026-07-09",
+        "2026-07-10"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:26+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "BINANCE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 3,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BITFINEX:LEOUSD",
+      "candidates": [
+        {
+          "base_asset": "LEO",
+          "contract_type": "SPOT",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api-pub.bitfinex.com/v2/candles/trade:1D:tLEOUSD/hist",
+              "http_status": 200,
+              "query_params": {
+                "end": "2026-07-20",
+                "pair": "tLEOUSD",
+                "start": "2026-06-01",
+                "tf": "1D"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BITFINEX/LEO/BITFINEX__LEO__daily_candles__20260910T225126Z__2026-09-10T225131Z.raw.json",
+              "raw_sha256": "b06f7652a2de7903e8701438724bd32856f16ddf63632db7f615dc3f8e3c518d"
+            },
+            {
+              "endpoint": "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:margin",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/BITFINEX/_shared/BITFINEX___shared__margin_pair_list_present_day__20260910T225126Z__2026-09-10T225131Z.raw.json",
+              "raw_sha256": "96880a5c0d66a8ca9dab32e7b4dbb4d7bff3f87bc0d2c29e56e8061fbdfa617a"
+            }
+          ],
+          "existence_date": "2026-06-01",
+          "existence_evidence": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE",
+          "existence_timestamp_raw": {
+            "candles_in_window": 50,
+            "earliest_official_daily_candle_in_window": "2026-06-01"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "pair symbol tLEOUSD is venue-native (LEO is Bitfinex's own token); base inferred from official pair naming",
+          "identity_ok": true,
+          "instrument_type": "spot_margin_pair",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [
+            {
+              "in_margin_pair_list_today": true
+            }
+          ],
+          "quote_or_settlement_asset": "USD",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "present-day margin list contains LEOUSD=True; historical margin enablement date NOT proven (Stage Two)",
+          "venue": "BITFINEX",
+          "venue_instrument_symbol": "tLEOUSD"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "LEO",
+      "eliminated_signals": 0,
+      "mapping_risk": "VENUE_LOCKED_NATIVE",
+      "normalized_evidence_sha256": "0a7dfd1f8222e65c1c09372a8bb91beafe13986a33991a1e7a061158b1a70619",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-15",
+              "fill_dates": [
+                "2026-07-16",
+                "2026-07-16"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-06-01<=2026-07-15",
+              "venue": "BITFINEX",
+              "venue_instrument_symbol": "tLEOUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-15",
+          "fill_date_calendar": "2026-07-16",
+          "fill_date_weekday": "2026-07-16",
+          "market_rank": 12,
+          "passing_instruments": [
+            "tLEOUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BITFINEX__LEO__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "6031e65ed25e5f320cd583dec4a6153f127510d0fed1e099d923a6da0592da04",
+      "required_signal_dates": [
+        "2026-07-15"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:31+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "existence_rests_on_official_market_data_not_a_launch_timestamp",
+        "mapping_risk:VENUE_LOCKED_NATIVE"
+      ],
+      "signum_venue": "BITFINEX",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BYBIT:GRAMUSDT",
+      "candidates": [
+        {
+          "base_asset": "GRAM",
+          "contract_type": "LinearPerpetual",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.bybit.com/v5/market/instruments-info",
+              "http_status": 200,
+              "query_params": {
+                "category": "linear",
+                "symbol": "GRAMUSDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__linear_instruments_info__20260910T225126Z__2026-09-10T225132Z.raw.json",
+              "raw_sha256": "f289e256bd3dada3aef7226df12636f34052432cbe1d56fc4b511d0750ac7e2a"
+            }
+          ],
+          "existence_date": "2026-06-22",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "launchTime_ms": "1782121594000"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseCoin=GRAM quoteCoin=USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "contractType=LinearPerpetual status=Trading",
+          "venue": "BYBIT",
+          "venue_instrument_symbol": "GRAMUSDT"
+        },
+        {
+          "base_asset": "GRAM",
+          "contract_type": "SPOT",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.bybit.com/v5/market/instruments-info",
+              "http_status": 200,
+              "query_params": {
+                "category": "spot",
+                "symbol": "GRAMUSDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__spot_instruments_info__20260910T225126Z__2026-09-10T225132Z.raw.json",
+              "raw_sha256": "89fe9eb70446bb37f659958716b0bba36f0c12619fde800f76ab0558319a93fd"
+            },
+            {
+              "endpoint": "https://api.bybit.com/v5/market/kline",
+              "http_status": 200,
+              "query_params": {
+                "category": "spot",
+                "end": "2026-07-20",
+                "interval": "D",
+                "start": "2026-06-01",
+                "symbol": "GRAMUSDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__spot_daily_kline__20260910T225126Z__2026-09-10T225132Z.raw.json",
+              "raw_sha256": "edbfe667937acb3ae00c88fb7217e7d358a14881f069192489f027dad8a8bd17"
+            }
+          ],
+          "existence_date": "2026-05-27",
+          "existence_evidence": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE",
+          "existence_timestamp_raw": {
+            "candles_in_window": 50,
+            "earliest_official_daily_candle_in_window": "2026-05-27"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseCoin=GRAM",
+          "identity_ok": true,
+          "instrument_type": "spot_margin_pair",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [
+            {
+              "marginTrading": "utaOnly",
+              "status": "Trading"
+            }
+          ],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "marginTrading=utaOnly (present-day flag; historical margin availability is Stage Two)",
+          "venue": "BYBIT",
+          "venue_instrument_symbol": "GRAMUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "GRAM",
+      "eliminated_signals": 0,
+      "mapping_risk": "MAPPING_SENSITIVE",
+      "normalized_evidence_sha256": "4082148de1f826f1c99938ff29a1dd58ee93f64b895a21e10726f3cc88c14c1b",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2026-06-22<=2026-07-05",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-05-27<=2026-07-05",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-05",
+          "fill_date_calendar": "2026-07-06",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 19,
+          "passing_instruments": [
+            "GRAMUSDT",
+            "GRAMUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2026-06-22<=2026-07-06",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-05-27<=2026-07-06",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 20,
+          "passing_instruments": [
+            "GRAMUSDT",
+            "GRAMUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2026-06-22<=2026-07-07",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-05-27<=2026-07-07",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-07",
+          "fill_date_calendar": "2026-07-08",
+          "fill_date_weekday": "2026-07-08",
+          "market_rank": 19,
+          "passing_instruments": [
+            "GRAMUSDT",
+            "GRAMUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2026-06-22<=2026-07-08",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-05-27<=2026-07-08",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "GRAMUSDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 21,
+          "passing_instruments": [
+            "GRAMUSDT",
+            "GRAMUSDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BYBIT__GRAM__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "a5dce0274c77d823b84c05269d1c6061703e5397d77d9044d18f8fe4bf0210f1",
+      "required_signal_dates": [
+        "2026-07-05",
+        "2026-07-06",
+        "2026-07-07",
+        "2026-07-08"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:32+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "existence_rests_on_official_market_data_not_a_launch_timestamp",
+        "mapping_risk:MAPPING_SENSITIVE"
+      ],
+      "signum_venue": "BYBIT",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 4,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "BYBIT:TELUSDT",
+      "candidates": [
+        {
+          "base_asset": "TEL",
+          "contract_type": "LinearPerpetual",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.bybit.com/v5/market/instruments-info",
+              "http_status": 200,
+              "query_params": {
+                "category": "linear",
+                "symbol": "TELUSDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/TEL/BYBIT__TEL__linear_instruments_info__20260910T225126Z__2026-09-10T225133Z.raw.json",
+              "raw_sha256": "28df254c55721b89b1f27c190f461f527e9319e34e870fe9383a980ad99065f0"
+            }
+          ],
+          "existence_date": null,
+          "existence_evidence": null,
+          "existence_timestamp_raw": null,
+          "identity_collision_unresolved": false,
+          "identity_note": "no_linear_perpetual_TELUSDT (retMsg=params error: symbol invalid)",
+          "identity_ok": false,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": false,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "instrument_absent",
+          "venue": "BYBIT",
+          "venue_instrument_symbol": "TELUSDT"
+        },
+        {
+          "base_asset": "TEL",
+          "contract_type": "SPOT",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.bybit.com/v5/market/instruments-info",
+              "http_status": 200,
+              "query_params": {
+                "category": "spot",
+                "symbol": "TELUSDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/TEL/BYBIT__TEL__spot_instruments_info__20260910T225126Z__2026-09-10T225134Z.raw.json",
+              "raw_sha256": "eb600c9cbc14239e1935ca64b652a0e78a6f552c7b9c3ef6e5ac588538430e44"
+            },
+            {
+              "endpoint": "https://api.bybit.com/v5/market/kline",
+              "http_status": 200,
+              "query_params": {
+                "category": "spot",
+                "end": "2026-07-20",
+                "interval": "D",
+                "start": "2026-06-01",
+                "symbol": "TELUSDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/TEL/BYBIT__TEL__spot_daily_kline__20260910T225126Z__2026-09-10T225134Z.raw.json",
+              "raw_sha256": "97edc77e240ff2529d66118eb331515165459c63b44bf5a96d65eddec20fb020"
+            }
+          ],
+          "existence_date": "2026-06-01",
+          "existence_evidence": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE",
+          "existence_timestamp_raw": {
+            "candles_in_window": 50,
+            "earliest_official_daily_candle_in_window": "2026-06-01"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_baseCoin=TEL",
+          "identity_ok": true,
+          "instrument_type": "spot_margin_pair",
+          "instrument_type_ok": false,
+          "present_day_only_observations": [
+            {
+              "marginTrading": "none",
+              "status": "Trading"
+            }
+          ],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "marginTrading=none (present-day flag; historical margin availability is Stage Two)",
+          "venue": "BYBIT",
+          "venue_instrument_symbol": "TELUSDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "TEL",
+      "eliminated_signals": 1,
+      "mapping_risk": "MAPPING_SENSITIVE",
+      "normalized_evidence_sha256": "110bb1386bce2b3a4d7f92cca1732f9e03dd5ef28df2e080939e66114b363a4d",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-09",
+              "fill_dates": [
+                "2026-07-10",
+                "2026-07-10"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "no_linear_perpetual_TELUSDT (retMsg=params error: symbol invalid)",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "TELUSDT",
+              "verdict": "FAIL_WRONG_ASSET"
+            },
+            {
+              "decision_date": "2026-07-09",
+              "fill_dates": [
+                "2026-07-10",
+                "2026-07-10"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "marginTrading=none (present-day flag; historical margin availability is Stage Two)",
+              "venue": "BYBIT",
+              "venue_instrument_symbol": "TELUSDT",
+              "verdict": "FAIL_WRONG_INSTRUMENT_TYPE"
+            }
+          ],
+          "decision_date": "2026-07-09",
+          "fill_date_calendar": "2026-07-10",
+          "fill_date_weekday": "2026-07-10",
+          "market_rank": 114,
+          "passing_instruments": [],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "FAIL_WRONG_INSTRUMENT_TYPE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/BYBIT__TEL__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "f3cef3ea61e69aa39470e2c393c3068f341a27d4014ec2c14d01ba6a7a4c670a",
+      "required_signal_dates": [
+        "2026-07-09"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:33+00:00",
+        "2026-09-10T22:51:34+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "mapping_risk:MAPPING_SENSITIVE"
+      ],
+      "signum_venue": "BYBIT",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 0,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "COINBASE:MORPHOUSD",
+      "candidates": [
+        {
+          "base_asset": "MORPHO",
+          "contract_type": "SPOT",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.exchange.coinbase.com/products/MORPHO-USD",
+              "http_status": 200,
+              "query_params": {
+                "product_id": "MORPHO-USD"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__exchange_product__20260910T225126Z__2026-09-10T225135Z.raw.json",
+              "raw_sha256": "d17408f764b1119ab4de4e6bc99bcb820fd23f38818e47bdcaca12819054e81f"
+            }
+          ],
+          "existence_date": null,
+          "existence_evidence": null,
+          "existence_timestamp_raw": null,
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base_currency=MORPHO",
+          "identity_ok": true,
+          "instrument_type": "spot_pair",
+          "instrument_type_ok": false,
+          "present_day_only_observations": [
+            {
+              "margin_enabled": false,
+              "status": "online"
+            }
+          ],
+          "quote_or_settlement_asset": "USD",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "spot product; margin_enabled=False (present-day); Coinbase Exchange spot cannot express a short",
+          "venue": "COINBASE",
+          "venue_instrument_symbol": "MORPHO-USD"
+        },
+        {
+          "base_asset": "MORPHO",
+          "contract_type": "PERP",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.international.coinbase.com/api/v1/instruments/MORPHO-PERP",
+              "http_status": 200,
+              "query_params": {
+                "instrument": "MORPHO-PERP"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__intx_instrument__20260910T225126Z__2026-09-10T225135Z.raw.json",
+              "raw_sha256": "b69f8a7f525dc6d939580b115ae133f402dfdf5b33045ceb148362e7115257de"
+            },
+            {
+              "endpoint": "https://api.international.coinbase.com/api/v1/instruments/MORPHO-PERP/candles",
+              "http_status": 200,
+              "query_params": {
+                "end": "2026-07-20",
+                "granularity": "ONE_DAY",
+                "instrument": "MORPHO-PERP",
+                "start": "2026-06-01"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__intx_daily_candles__20260910T225126Z__2026-09-10T225136Z.raw.json",
+              "raw_sha256": "751c148574beb5ca631446427659906df5429486ca263db4d46e7cbde643dd34"
+            }
+          ],
+          "existence_date": "2026-06-01",
+          "existence_evidence": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE",
+          "existence_timestamp_raw": {
+            "candles_in_window": 50,
+            "earliest_official_daily_candle_in_window": "2026-06-01"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base_asset_name=MORPHO quote=USDC (platform: Coinbase International Exchange, distinct from Coinbase Exchange spot)",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDC",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "type=PERP mode=STANDARD",
+          "venue": "COINBASE_INTERNATIONAL",
+          "venue_instrument_symbol": "MORPHO-PERP"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "MORPHO",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "c01928f50bdaa3dc687126912ff88669dcc38838a56390bcb904d82ef5aa26f5",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-01",
+              "fill_dates": [
+                "2026-07-02",
+                "2026-07-02"
+              ],
+              "instrument_type": "spot_pair",
+              "reason": "spot product; margin_enabled=False (present-day); Coinbase Exchange spot cannot express a short",
+              "venue": "COINBASE",
+              "venue_instrument_symbol": "MORPHO-USD",
+              "verdict": "FAIL_WRONG_INSTRUMENT_TYPE"
+            },
+            {
+              "decision_date": "2026-07-01",
+              "fill_dates": [
+                "2026-07-02",
+                "2026-07-02"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-06-01<=2026-07-01",
+              "venue": "COINBASE_INTERNATIONAL",
+              "venue_instrument_symbol": "MORPHO-PERP",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-01",
+          "fill_date_calendar": "2026-07-02",
+          "fill_date_weekday": "2026-07-02",
+          "market_rank": 53,
+          "passing_instruments": [
+            "MORPHO-PERP"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "spot_pair",
+              "reason": "spot product; margin_enabled=False (present-day); Coinbase Exchange spot cannot express a short",
+              "venue": "COINBASE",
+              "venue_instrument_symbol": "MORPHO-USD",
+              "verdict": "FAIL_WRONG_INSTRUMENT_TYPE"
+            },
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "OFFICIAL_HISTORICAL_MARKET_DATA_PRECEDING_DATE:2026-06-01<=2026-07-06",
+              "venue": "COINBASE_INTERNATIONAL",
+              "venue_instrument_symbol": "MORPHO-PERP",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 56,
+          "passing_instruments": [
+            "MORPHO-PERP"
+          ],
+          "signal": "HEDGE_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/COINBASE__MORPHO__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "73ab4ef4cb57ea465f281f1d7f6a3ef290a6713502196cd1a66b58222fa2d064",
+      "required_signal_dates": [
+        "2026-07-01",
+        "2026-07-06"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:35+00:00",
+        "2026-09-10T22:51:36+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "execution_platform_differs_from_signum_named_venue",
+        "existence_rests_on_official_market_data_not_a_launch_timestamp"
+      ],
+      "signum_venue": "COINBASE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 2,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "GATE:ASTERUSDT",
+      "candidates": [
+        {
+          "base_asset": "ASTER",
+          "contract_type": "direct",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.gateio.ws/api/v4/futures/usdt/contracts/ASTER_USDT",
+              "http_status": 200,
+              "query_params": {
+                "contract": "ASTER_USDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/GATE/ASTER/GATE__ASTER__futures_usdt_contract__20260910T225126Z__2026-09-10T225137Z.raw.json",
+              "raw_sha256": "04bc65795ef660a2618f1c3ceb0f8e6411f39dab0550bf1fdb57ac58651be11f"
+            }
+          ],
+          "existence_date": "2025-09-19",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "create_time_s": 1758284400,
+            "launch_time_s": 1758284400
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_contract_name=ASTER_USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "type=direct status=trading in_delisting=False",
+          "venue": "GATE",
+          "venue_instrument_symbol": "ASTER_USDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "ASTER",
+      "eliminated_signals": 0,
+      "mapping_risk": "MAPPING_SENSITIVE",
+      "normalized_evidence_sha256": "a6e544670e186560ce1a0a894dcc356c0bbdcd560a7ce34398341d1cfff04988",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-21",
+              "fill_dates": [
+                "2026-06-22",
+                "2026-06-22"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2025-09-19<=2026-06-21",
+              "venue": "GATE",
+              "venue_instrument_symbol": "ASTER_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-21",
+          "fill_date_calendar": "2026-06-22",
+          "fill_date_weekday": "2026-06-22",
+          "market_rank": 40,
+          "passing_instruments": [
+            "ASTER_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-04",
+              "fill_dates": [
+                "2026-07-05",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2025-09-19<=2026-07-04",
+              "venue": "GATE",
+              "venue_instrument_symbol": "ASTER_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-04",
+          "fill_date_calendar": "2026-07-05",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 39,
+          "passing_instruments": [
+            "ASTER_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2025-09-19<=2026-07-05",
+              "venue": "GATE",
+              "venue_instrument_symbol": "ASTER_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-05",
+          "fill_date_calendar": "2026-07-06",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 39,
+          "passing_instruments": [
+            "ASTER_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/GATE__ASTER__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "4259a87c36ac7a83d91226fbdf60a23e6da6ff5fe5b0cc041e1ccd57f5b5654b",
+      "required_signal_dates": [
+        "2026-06-21",
+        "2026-07-04",
+        "2026-07-05"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:37+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "mapping_risk:MAPPING_SENSITIVE"
+      ],
+      "signum_venue": "GATE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 3,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "candidates": [
+        {
+          "base_asset": "GT",
+          "contract_type": "direct",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.gateio.ws/api/v4/futures/usdt/contracts/GT_USDT",
+              "http_status": 200,
+              "query_params": {
+                "contract": "GT_USDT"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/GATE/GT/GATE__GT__futures_usdt_contract__20260910T225126Z__2026-09-10T225138Z.raw.json",
+              "raw_sha256": "bf5ebe752de6d94f1f8badd14c861471e879f88de9a00389d65921ad82c31ba2"
+            }
+          ],
+          "existence_date": "2022-03-20",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "create_time_s": 1647734400,
+            "launch_time_s": 1647734400
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_contract_name=GT_USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "type=direct status=trading in_delisting=False",
+          "venue": "GATE",
+          "venue_instrument_symbol": "GT_USDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "GT",
+      "eliminated_signals": 0,
+      "mapping_risk": "VENUE_LOCKED_NATIVE",
+      "normalized_evidence_sha256": "1404099da5b126f3948097da99d300d86d52e738749c4f34d6c7a243e95b5575",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-04",
+              "fill_dates": [
+                "2026-07-05",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-04",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-04",
+          "fill_date_calendar": "2026-07-05",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 68,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-05",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-05",
+          "fill_date_calendar": "2026-07-06",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 69,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-06",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 69,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-07",
+              "fill_dates": [
+                "2026-07-08",
+                "2026-07-08"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-07",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-07",
+          "fill_date_calendar": "2026-07-08",
+          "fill_date_weekday": "2026-07-08",
+          "market_rank": 68,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-08",
+              "fill_dates": [
+                "2026-07-09",
+                "2026-07-09"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-08",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-08",
+          "fill_date_calendar": "2026-07-09",
+          "fill_date_weekday": "2026-07-09",
+          "market_rank": 68,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-09",
+              "fill_dates": [
+                "2026-07-10",
+                "2026-07-10"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-09",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-09",
+          "fill_date_calendar": "2026-07-10",
+          "fill_date_weekday": "2026-07-10",
+          "market_rank": 69,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-10",
+              "fill_dates": [
+                "2026-07-11",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-10",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-10",
+          "fill_date_calendar": "2026-07-11",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 66,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-11",
+              "fill_dates": [
+                "2026-07-12",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-11",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-11",
+          "fill_date_calendar": "2026-07-12",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 67,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-12",
+              "fill_dates": [
+                "2026-07-13",
+                "2026-07-13"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-12",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-12",
+          "fill_date_calendar": "2026-07-13",
+          "fill_date_weekday": "2026-07-13",
+          "market_rank": 67,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-13",
+              "fill_dates": [
+                "2026-07-14",
+                "2026-07-14"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-13",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-13",
+          "fill_date_calendar": "2026-07-14",
+          "fill_date_weekday": "2026-07-14",
+          "market_rank": 67,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-14",
+              "fill_dates": [
+                "2026-07-15",
+                "2026-07-15"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-14",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-14",
+          "fill_date_calendar": "2026-07-15",
+          "fill_date_weekday": "2026-07-15",
+          "market_rank": 68,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-15",
+              "fill_dates": [
+                "2026-07-16",
+                "2026-07-16"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2022-03-20<=2026-07-15",
+              "venue": "GATE",
+              "venue_instrument_symbol": "GT_USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-07-15",
+          "fill_date_calendar": "2026-07-16",
+          "fill_date_weekday": "2026-07-16",
+          "market_rank": 68,
+          "passing_instruments": [
+            "GT_USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/GATE__GT__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "791695dea0e17c30cc9a66e7c0b99f92d8b7e9e2305fab49c768b21c7e7453ac",
+      "required_signal_dates": [
+        "2026-07-04",
+        "2026-07-05",
+        "2026-07-06",
+        "2026-07-07",
+        "2026-07-08",
+        "2026-07-09",
+        "2026-07-10",
+        "2026-07-11",
+        "2026-07-12",
+        "2026-07-13",
+        "2026-07-14",
+        "2026-07-15"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:38+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "mapping_risk:VENUE_LOCKED_NATIVE"
+      ],
+      "signum_venue": "GATE",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 12,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "KRAKEN:KASUSD",
+      "candidates": [
+        {
+          "base_asset": "KAS",
+          "contract_type": "flexible_futures",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://futures.kraken.com/derivatives/api/v3/instruments",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/_shared/KRAKEN___shared__futures_instruments__20260910T225126Z__2026-09-10T225139Z.raw.json",
+              "raw_sha256": "49d3136f012879e052368240fb0e564e4ed1f33d4f5a00fb6aaeb39d3a53a44f"
+            },
+            {
+              "endpoint": "https://futures.kraken.com/api/charts/v1/trade/PF_KASUSD/1d",
+              "http_status": 200,
+              "query_params": {
+                "from": "2026-06-01",
+                "resolution": "1d",
+                "symbol": "PF_KASUSD",
+                "to": "2026-07-20"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__futures_daily_chart__20260910T225126Z__2026-09-10T225140Z.raw.json",
+              "raw_sha256": "1d81b4bf353223f4a2323271b567829869c35be36fba31aaadbc9dd037340a3c"
+            }
+          ],
+          "existence_date": "2024-01-09",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "candles_in_window": 50,
+            "earliest_official_daily_candle_in_window": "2026-06-01",
+            "openingDate": "2024-01-09T12:57:13Z"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base=KAS pair=KAS:USD category=Layer 1 tradfi=False",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USD",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "type=flexible_futures tradeable=True isExpired=False",
+          "venue": "KRAKEN_FUTURES",
+          "venue_instrument_symbol": "PF_KASUSD"
+        },
+        {
+          "base_asset": "KAS",
+          "contract_type": "SPOT",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.kraken.com/0/public/AssetPairs",
+              "http_status": 200,
+              "query_params": {
+                "pair": "KASUSD"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__spot_assetpairs__20260910T225126Z__2026-09-10T225140Z.raw.json",
+              "raw_sha256": "9bc87697ebdca3dc11d3c4f5531a19e37e3221aba4a51e6c3651efc89c4f3da9"
+            }
+          ],
+          "existence_date": null,
+          "existence_evidence": "PRESENT_DAY_LISTING_ONLY_NON_DECISIVE",
+          "existence_timestamp_raw": null,
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base=KAS wsname=KAS/USD",
+          "identity_ok": true,
+          "instrument_type": "spot_margin_pair",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [
+            {
+              "leverage_sell": [
+                2,
+                3
+              ],
+              "status": "online"
+            }
+          ],
+          "quote_or_settlement_asset": "USD",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "leverage_sell=[2, 3] (present-day margin flag; Stage Two)",
+          "venue": "KRAKEN",
+          "venue_instrument_symbol": "KASUSD"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "KAS",
+      "eliminated_signals": 0,
+      "mapping_risk": "STANDARD_MAPPING",
+      "normalized_evidence_sha256": "77cfe6423bb8a23aace1d8a984610c95af102fcdc3f5b32bc83a06e853e94605",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-01-09<=2026-07-05",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_KASUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-05",
+              "fill_dates": [
+                "2026-07-06",
+                "2026-07-06"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "no_authoritative_dated_existence_evidence_present_day_listing_is_non_decisive",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "KASUSD",
+              "verdict": "UNRESOLVED_NO_AUTHORITATIVE_DATE"
+            }
+          ],
+          "decision_date": "2026-07-05",
+          "fill_date_calendar": "2026-07-06",
+          "fill_date_weekday": "2026-07-06",
+          "market_rank": 58,
+          "passing_instruments": [
+            "PF_KASUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-01-09<=2026-07-06",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_KASUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-06",
+              "fill_dates": [
+                "2026-07-07",
+                "2026-07-07"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "no_authoritative_dated_existence_evidence_present_day_listing_is_non_decisive",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "KASUSD",
+              "verdict": "UNRESOLVED_NO_AUTHORITATIVE_DATE"
+            }
+          ],
+          "decision_date": "2026-07-06",
+          "fill_date_calendar": "2026-07-07",
+          "fill_date_weekday": "2026-07-07",
+          "market_rank": 58,
+          "passing_instruments": [
+            "PF_KASUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/KRAKEN__KAS__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "71dc73bb627e95435c381a1cea5121cc6f013f16e5e9ee91d8d4f5cc76ca03c3",
+      "required_signal_dates": [
+        "2026-07-05",
+        "2026-07-06"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:39+00:00",
+        "2026-09-10T22:51:40+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [],
+      "signum_venue": "KRAKEN",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 2,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "candidates": [
+        {
+          "base_asset": "SPX",
+          "contract_type": "flexible_futures",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://futures.kraken.com/derivatives/api/v3/instruments",
+              "http_status": 200,
+              "query_params": {},
+              "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/_shared/KRAKEN___shared__futures_instruments__20260910T225126Z__2026-09-10T225139Z.raw.json",
+              "raw_sha256": "49d3136f012879e052368240fb0e564e4ed1f33d4f5a00fb6aaeb39d3a53a44f"
+            },
+            {
+              "endpoint": "https://futures.kraken.com/api/charts/v1/trade/PF_SPXUSD/1d",
+              "http_status": 200,
+              "query_params": {
+                "from": "2026-06-01",
+                "resolution": "1d",
+                "symbol": "PF_SPXUSD",
+                "to": "2026-07-20"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__futures_daily_chart__20260910T225126Z__2026-09-10T225140Z.raw.json",
+              "raw_sha256": "bc22616532b4da0edc8e15fb30f54a7b458184d0e57db967c33973c603b7f5b2"
+            }
+          ],
+          "existence_date": "2024-12-19",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "candles_in_window": 50,
+            "earliest_official_daily_candle_in_window": "2026-06-01",
+            "openingDate": "2024-12-19T16:40:21Z"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base=SPX pair=SPX:USD category=Meme tradfi=False; collision_resolved_by_first_party_classification:category=Meme tradfi=False (crypto asset, not an equity index)",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_futures",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USD",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "type=flexible_futures tradeable=True isExpired=False",
+          "venue": "KRAKEN_FUTURES",
+          "venue_instrument_symbol": "PF_SPXUSD"
+        },
+        {
+          "base_asset": "SPX",
+          "contract_type": "SPOT",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://api.kraken.com/0/public/AssetPairs",
+              "http_status": 200,
+              "query_params": {
+                "pair": "SPXUSD"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__spot_assetpairs__20260910T225126Z__2026-09-10T225141Z.raw.json",
+              "raw_sha256": "8c200327dd0c7998fde336145cfe58cee847ea078a3132fcf3399f803687b43c"
+            }
+          ],
+          "existence_date": null,
+          "existence_evidence": "PRESENT_DAY_LISTING_ONLY_NON_DECISIVE",
+          "existence_timestamp_raw": null,
+          "identity_collision_unresolved": true,
+          "identity_note": "official_base=SPX wsname=SPX/USD; spot AssetPairs carries no classification to resolve the SPX collision",
+          "identity_ok": true,
+          "instrument_type": "spot_margin_pair",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [
+            {
+              "leverage_sell": [
+                2,
+                3
+              ],
+              "status": "online"
+            }
+          ],
+          "quote_or_settlement_asset": "USD",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "leverage_sell=[2, 3] (present-day margin flag; Stage Two)",
+          "venue": "KRAKEN",
+          "venue_instrument_symbol": "SPXUSD"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "SPX",
+      "eliminated_signals": 0,
+      "mapping_risk": "HIGH_COLLISION_RISK",
+      "normalized_evidence_sha256": "c46abc864cb82cdca3436bc6919b444f98b97391f5cfda864f49f01022f1fe47",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-28",
+              "fill_dates": [
+                "2026-06-29",
+                "2026-06-29"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-12-19<=2026-06-28",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_SPXUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-06-28",
+              "fill_dates": [
+                "2026-06-29",
+                "2026-06-29"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "official_base=SPX wsname=SPX/USD; spot AssetPairs carries no classification to resolve the SPX collision",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "SPXUSD",
+              "verdict": "UNRESOLVED_IDENTITY_COLLISION"
+            }
+          ],
+          "decision_date": "2026-06-28",
+          "fill_date_calendar": "2026-06-29",
+          "fill_date_weekday": "2026-06-29",
+          "market_rank": 99,
+          "passing_instruments": [
+            "PF_SPXUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-29",
+              "fill_dates": [
+                "2026-06-30",
+                "2026-06-30"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-12-19<=2026-06-29",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_SPXUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-06-29",
+              "fill_dates": [
+                "2026-06-30",
+                "2026-06-30"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "official_base=SPX wsname=SPX/USD; spot AssetPairs carries no classification to resolve the SPX collision",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "SPXUSD",
+              "verdict": "UNRESOLVED_IDENTITY_COLLISION"
+            }
+          ],
+          "decision_date": "2026-06-29",
+          "fill_date_calendar": "2026-06-30",
+          "fill_date_weekday": "2026-06-30",
+          "market_rank": 100,
+          "passing_instruments": [
+            "PF_SPXUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-30",
+              "fill_dates": [
+                "2026-07-01",
+                "2026-07-01"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-12-19<=2026-06-30",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_SPXUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-06-30",
+              "fill_dates": [
+                "2026-07-01",
+                "2026-07-01"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "official_base=SPX wsname=SPX/USD; spot AssetPairs carries no classification to resolve the SPX collision",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "SPXUSD",
+              "verdict": "UNRESOLVED_IDENTITY_COLLISION"
+            }
+          ],
+          "decision_date": "2026-06-30",
+          "fill_date_calendar": "2026-07-01",
+          "fill_date_weekday": "2026-07-01",
+          "market_rank": 98,
+          "passing_instruments": [
+            "PF_SPXUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-01",
+              "fill_dates": [
+                "2026-07-02",
+                "2026-07-02"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-12-19<=2026-07-01",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_SPXUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-01",
+              "fill_dates": [
+                "2026-07-02",
+                "2026-07-02"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "official_base=SPX wsname=SPX/USD; spot AssetPairs carries no classification to resolve the SPX collision",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "SPXUSD",
+              "verdict": "UNRESOLVED_IDENTITY_COLLISION"
+            }
+          ],
+          "decision_date": "2026-07-01",
+          "fill_date_calendar": "2026-07-02",
+          "fill_date_weekday": "2026-07-02",
+          "market_rank": 98,
+          "passing_instruments": [
+            "PF_SPXUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        },
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-07-02",
+              "fill_dates": [
+                "2026-07-03",
+                "2026-07-03"
+              ],
+              "instrument_type": "linear_perpetual_futures",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2024-12-19<=2026-07-02",
+              "venue": "KRAKEN_FUTURES",
+              "venue_instrument_symbol": "PF_SPXUSD",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-07-02",
+              "fill_dates": [
+                "2026-07-03",
+                "2026-07-03"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "official_base=SPX wsname=SPX/USD; spot AssetPairs carries no classification to resolve the SPX collision",
+              "venue": "KRAKEN",
+              "venue_instrument_symbol": "SPXUSD",
+              "verdict": "UNRESOLVED_IDENTITY_COLLISION"
+            }
+          ],
+          "decision_date": "2026-07-02",
+          "fill_date_calendar": "2026-07-03",
+          "fill_date_weekday": "2026-07-03",
+          "market_rank": 98,
+          "passing_instruments": [
+            "PF_SPXUSD"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/KRAKEN__SPX__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "7aefa81e4ef47afda0d6572b8c52741d7ec0e39e3a480692ed019a4f173a5605",
+      "required_signal_dates": [
+        "2026-06-28",
+        "2026-06-29",
+        "2026-06-30",
+        "2026-07-01",
+        "2026-07-02"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:39+00:00",
+        "2026-09-10T22:51:40+00:00",
+        "2026-09-10T22:51:41+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "identity_collision_unresolved_on_a_candidate",
+        "mapping_risk:HIGH_COLLISION_RISK"
+      ],
+      "signum_venue": "KRAKEN",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 5,
+      "unresolved_signals": 0
+    },
+    {
+      "c22_asset": "OKX:OKBUSDT",
+      "candidates": [
+        {
+          "base_asset": "OKB",
+          "contract_type": "linear",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://www.okx.com/api/v5/public/instruments",
+              "http_status": 200,
+              "query_params": {
+                "instId": "OKB-USDT-SWAP",
+                "instType": "SWAP"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__public_instruments_swap__20260910T225126Z__2026-09-10T225141Z.raw.json",
+              "raw_sha256": "9f6e49cf2b58d07cfa75b20e0ad15177f919c7f2c781f140bc81ee7d040a240d"
+            }
+          ],
+          "existence_date": "2025-09-04",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "listTime_ms": "1756951200395"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base=OKB instFamily=OKB-USDT",
+          "identity_ok": true,
+          "instrument_type": "linear_perpetual_swap",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "instType=SWAP ctType=linear state=live",
+          "venue": "OKX",
+          "venue_instrument_symbol": "OKB-USDT-SWAP"
+        },
+        {
+          "base_asset": "OKB",
+          "contract_type": "MARGIN",
+          "delisted_date": null,
+          "evidence_sources": [
+            {
+              "endpoint": "https://www.okx.com/api/v5/public/instruments",
+              "http_status": 200,
+              "query_params": {
+                "instId": "OKB-USDT",
+                "instType": "MARGIN"
+              },
+              "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__public_instruments_margin__20260910T225126Z__2026-09-10T225141Z.raw.json",
+              "raw_sha256": "b5e6d3a2c8f2285836347e337599a4041aaf13ba22f8e4db4ca3093e8c53d3b6"
+            }
+          ],
+          "existence_date": "2021-01-29",
+          "existence_evidence": "AUTHORITATIVE_LAUNCH_TIMESTAMP",
+          "existence_timestamp_raw": {
+            "listTime_ms": "1611907686000"
+          },
+          "identity_collision_unresolved": false,
+          "identity_note": "official_base=OKB instFamily=OKB-USDT",
+          "identity_ok": true,
+          "instrument_type": "spot_margin_pair",
+          "instrument_type_ok": true,
+          "present_day_only_observations": [],
+          "quote_or_settlement_asset": "USDT",
+          "source_note": null,
+          "source_ok": true,
+          "type_note": "instType=MARGIN ctType= state=live",
+          "venue": "OKX",
+          "venue_instrument_symbol": "OKB-USDT"
+        }
+      ],
+      "canonical_name": null,
+      "canonical_symbol": "OKB",
+      "eliminated_signals": 0,
+      "mapping_risk": "VENUE_LOCKED_NATIVE",
+      "normalized_evidence_sha256": "a14d7fa3b1d2f0c63b58fb5a97c110c789b029e9a1ea7d5ee0b7cc553739ea91",
+      "per_signal": [
+        {
+          "candidate_verdicts": [
+            {
+              "decision_date": "2026-06-23",
+              "fill_dates": [
+                "2026-06-24",
+                "2026-06-24"
+              ],
+              "instrument_type": "linear_perpetual_swap",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2025-09-04<=2026-06-23",
+              "venue": "OKX",
+              "venue_instrument_symbol": "OKB-USDT-SWAP",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            },
+            {
+              "decision_date": "2026-06-23",
+              "fill_dates": [
+                "2026-06-24",
+                "2026-06-24"
+              ],
+              "instrument_type": "spot_margin_pair",
+              "reason": "AUTHORITATIVE_LAUNCH_TIMESTAMP:2021-01-29<=2026-06-23",
+              "venue": "OKX",
+              "venue_instrument_symbol": "OKB-USDT",
+              "verdict": "PASS_HISTORICAL_EXISTENCE"
+            }
+          ],
+          "decision_date": "2026-06-23",
+          "fill_date_calendar": "2026-06-24",
+          "fill_date_weekday": "2026-06-24",
+          "market_rank": 42,
+          "passing_instruments": [
+            "OKB-USDT-SWAP",
+            "OKB-USDT"
+          ],
+          "signal": "BEAR_SHORT",
+          "signal_verdict": "PASS_HISTORICAL_EXISTENCE"
+        }
+      ],
+      "registry_path": "data/c22_short_instrument_evidence/registry/OKX__OKB__instrument_existence__20260910T225126Z.json",
+      "registry_sha256": "98b6219537dab906a8e6ad19f69fa6ba2865919ee304c7ab75545f827d12a245",
+      "required_signal_dates": [
+        "2026-06-23"
+      ],
+      "retrieval_utc": [
+        "2026-09-10T22:51:41+00:00"
+      ],
+      "run_id": "20260910T225126Z",
+      "second_source_recommended": [
+        "mapping_risk:VENUE_LOCKED_NATIVE"
+      ],
+      "signum_venue": "OKX",
+      "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+      "stage_version": "c22_b3_stage1_v1",
+      "surviving_signals": 1,
+      "unresolved_signals": 0
+    }
+  ],
+  "assets_requiring_second_authoritative_source": {
+    "BINANCE:VIRTUALUSDT": [
+      "mapping_risk:MAPPING_SENSITIVE"
+    ],
+    "BITFINEX:LEOUSD": [
+      "existence_rests_on_official_market_data_not_a_launch_timestamp",
+      "mapping_risk:VENUE_LOCKED_NATIVE"
+    ],
+    "BYBIT:GRAMUSDT": [
+      "existence_rests_on_official_market_data_not_a_launch_timestamp",
+      "mapping_risk:MAPPING_SENSITIVE"
+    ],
+    "BYBIT:TELUSDT": [
+      "mapping_risk:MAPPING_SENSITIVE"
+    ],
+    "COINBASE:MORPHOUSD": [
+      "execution_platform_differs_from_signum_named_venue",
+      "existence_rests_on_official_market_data_not_a_launch_timestamp"
+    ],
+    "GATE:ASTERUSDT": [
+      "mapping_risk:MAPPING_SENSITIVE"
+    ],
+    "GATE:GTUSDT": [
+      "mapping_risk:VENUE_LOCKED_NATIVE"
+    ],
+    "KRAKEN:SPXUSD": [
+      "identity_collision_unresolved_on_a_candidate",
+      "mapping_risk:HIGH_COLLISION_RISK"
+    ],
+    "OKX:OKBUSDT": [
+      "mapping_risk:VENUE_LOCKED_NATIVE"
+    ]
+  },
+  "c22_performance_computed": false,
+  "candle_window": [
+    "2026-06-01",
+    "2026-07-20"
+  ],
+  "eliminated": 1,
+  "elimination_and_unresolved_reasons": {
+    "BYBIT:TELUSDT | 2026-07-09 | TELUSDT | FAIL_WRONG_ASSET": "no_linear_perpetual_TELUSDT (retMsg=params error: symbol invalid)",
+    "BYBIT:TELUSDT | 2026-07-09 | TELUSDT | FAIL_WRONG_INSTRUMENT_TYPE": "marginTrading=none (present-day flag; historical margin availability is Stage Two)"
+  },
+  "exports_modified": false,
+  "mode": "READ_ONLY_HISTORICAL_INSTRUMENT_EXISTENCE_EVIDENCE_ONLY",
+  "not_proven_here": [
+    "shortability",
+    "funding_availability",
+    "borrow_availability",
+    "fill_realism",
+    "liquidity",
+    "spread",
+    "historical_fee",
+    "slippage"
+  ],
+  "raw_evidence_files": [
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__usdm_exchangeinfo__20260910T225126Z__2026-09-10T225126Z.raw.json",
+      "sha256": "2dc55e92a76cbd999f4e37478da2d43551181e794b2ec94f00295f31014f683d"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BITFINEX/LEO/BITFINEX__LEO__daily_candles__20260910T225126Z__2026-09-10T225131Z.raw.json",
+      "sha256": "b06f7652a2de7903e8701438724bd32856f16ddf63632db7f615dc3f8e3c518d"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BITFINEX/_shared/BITFINEX___shared__margin_pair_list_present_day__20260910T225126Z__2026-09-10T225131Z.raw.json",
+      "sha256": "96880a5c0d66a8ca9dab32e7b4dbb4d7bff3f87bc0d2c29e56e8061fbdfa617a"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__linear_instruments_info__20260910T225126Z__2026-09-10T225132Z.raw.json",
+      "sha256": "f289e256bd3dada3aef7226df12636f34052432cbe1d56fc4b511d0750ac7e2a"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__spot_daily_kline__20260910T225126Z__2026-09-10T225132Z.raw.json",
+      "sha256": "edbfe667937acb3ae00c88fb7217e7d358a14881f069192489f027dad8a8bd17"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__spot_instruments_info__20260910T225126Z__2026-09-10T225132Z.raw.json",
+      "sha256": "89fe9eb70446bb37f659958716b0bba36f0c12619fde800f76ab0558319a93fd"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BYBIT/TEL/BYBIT__TEL__linear_instruments_info__20260910T225126Z__2026-09-10T225133Z.raw.json",
+      "sha256": "28df254c55721b89b1f27c190f461f527e9319e34e870fe9383a980ad99065f0"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BYBIT/TEL/BYBIT__TEL__spot_daily_kline__20260910T225126Z__2026-09-10T225134Z.raw.json",
+      "sha256": "97edc77e240ff2529d66118eb331515165459c63b44bf5a96d65eddec20fb020"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/BYBIT/TEL/BYBIT__TEL__spot_instruments_info__20260910T225126Z__2026-09-10T225134Z.raw.json",
+      "sha256": "eb600c9cbc14239e1935ca64b652a0e78a6f552c7b9c3ef6e5ac588538430e44"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__exchange_product__20260910T225126Z__2026-09-10T225135Z.raw.json",
+      "sha256": "d17408f764b1119ab4de4e6bc99bcb820fd23f38818e47bdcaca12819054e81f"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__intx_daily_candles__20260910T225126Z__2026-09-10T225136Z.raw.json",
+      "sha256": "751c148574beb5ca631446427659906df5429486ca263db4d46e7cbde643dd34"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__intx_instrument__20260910T225126Z__2026-09-10T225135Z.raw.json",
+      "sha256": "b69f8a7f525dc6d939580b115ae133f402dfdf5b33045ceb148362e7115257de"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/GATE/ASTER/GATE__ASTER__futures_usdt_contract__20260910T225126Z__2026-09-10T225137Z.raw.json",
+      "sha256": "04bc65795ef660a2618f1c3ceb0f8e6411f39dab0550bf1fdb57ac58651be11f"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/GATE/GT/GATE__GT__futures_usdt_contract__20260910T225126Z__2026-09-10T225138Z.raw.json",
+      "sha256": "bf5ebe752de6d94f1f8badd14c861471e879f88de9a00389d65921ad82c31ba2"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__futures_daily_chart__20260910T225126Z__2026-09-10T225140Z.raw.json",
+      "sha256": "1d81b4bf353223f4a2323271b567829869c35be36fba31aaadbc9dd037340a3c"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__spot_assetpairs__20260910T225126Z__2026-09-10T225140Z.raw.json",
+      "sha256": "9bc87697ebdca3dc11d3c4f5531a19e37e3221aba4a51e6c3651efc89c4f3da9"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__futures_daily_chart__20260910T225126Z__2026-09-10T225140Z.raw.json",
+      "sha256": "bc22616532b4da0edc8e15fb30f54a7b458184d0e57db967c33973c603b7f5b2"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__spot_assetpairs__20260910T225126Z__2026-09-10T225141Z.raw.json",
+      "sha256": "8c200327dd0c7998fde336145cfe58cee847ea078a3132fcf3399f803687b43c"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/KRAKEN/_shared/KRAKEN___shared__futures_instruments__20260910T225126Z__2026-09-10T225139Z.raw.json",
+      "sha256": "49d3136f012879e052368240fb0e564e4ed1f33d4f5a00fb6aaeb39d3a53a44f"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__public_instruments_margin__20260910T225126Z__2026-09-10T225141Z.raw.json",
+      "sha256": "b5e6d3a2c8f2285836347e337599a4041aaf13ba22f8e4db4ca3093e8c53d3b6"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__public_instruments_swap__20260910T225126Z__2026-09-10T225141Z.raw.json",
+      "sha256": "9f6e49cf2b58d07cfa75b20e0ad15177f919c7f2c781f140bc81ee7d040a240d"
+    }
+  ],
+  "registry_files": [
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__AAVE__instrument_existence__20260910T225126Z.json",
+      "sha256": "fd7d22f857051cbe6f097075f2b606a53e3fabdf5d907e18579e1ea656512138"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__CRV__instrument_existence__20260910T225126Z.json",
+      "sha256": "1c34389bb672b9d7d40e26e81cafbc5b7fc3ca8e3c4f6cb6b0e58e39165cdb2d"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__IMX__instrument_existence__20260910T225126Z.json",
+      "sha256": "3ae67fc8f03df7d93b945b95a586a709787180cf4ec962ab7e1c4423c7f11578"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__INJ__instrument_existence__20260910T225126Z.json",
+      "sha256": "929a3a98aa7b7810505706b4850ff3b57dab507801c5c573fb4ab98635a75b6e"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__LINK__instrument_existence__20260910T225126Z.json",
+      "sha256": "ce1f1442e2610fdd494f87f131c9cc2aad942d4297a609c0f739ab5c2e9b083b"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__PENDLE__instrument_existence__20260910T225126Z.json",
+      "sha256": "7752c7fe1696a9dc7642d07fab4f026e86a7d252875df56eedc7dc219d669144"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__QNT__instrument_existence__20260910T225126Z.json",
+      "sha256": "6c9d8ade654a3964b9ca2e955057ccb9125c14c9e2268086e93de7c694ad3e05"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__SOL__instrument_existence__20260910T225126Z.json",
+      "sha256": "f43245035c9a902ddd220969b082a1a017e5019edf66d92b1c0eaa9175ad797b"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__SUN__instrument_existence__20260910T225126Z.json",
+      "sha256": "94c8e7d564373d6e1393dc9a5793ff6584aeb190236c76439bea4842135481d9"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__TIA__instrument_existence__20260910T225126Z.json",
+      "sha256": "69a42a7c9fd18d731672577612e62e0adb56e98dda8e6a8a5f1777f1f4966880"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__TRX__instrument_existence__20260910T225126Z.json",
+      "sha256": "0e8e4e56b0686ec1b37f5ab279c834b349edb6073bfd7bb1e64dc7956bbfa7a5"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__VIRTUAL__instrument_existence__20260910T225126Z.json",
+      "sha256": "03d416c7418319cd45b7ef70d0556c3fffd348f5b1b78a7423301f7094f1cc3b"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BINANCE__ZEC__instrument_existence__20260910T225126Z.json",
+      "sha256": "cdcb8157811a7c7b7ef2205f1479455513f966cd78756e9ccd9190281ae78d89"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BITFINEX__LEO__instrument_existence__20260910T225126Z.json",
+      "sha256": "6031e65ed25e5f320cd583dec4a6153f127510d0fed1e099d923a6da0592da04"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BYBIT__GRAM__instrument_existence__20260910T225126Z.json",
+      "sha256": "a5dce0274c77d823b84c05269d1c6061703e5397d77d9044d18f8fe4bf0210f1"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/BYBIT__TEL__instrument_existence__20260910T225126Z.json",
+      "sha256": "f3cef3ea61e69aa39470e2c393c3068f341a27d4014ec2c14d01ba6a7a4c670a"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/COINBASE__MORPHO__instrument_existence__20260910T225126Z.json",
+      "sha256": "73ab4ef4cb57ea465f281f1d7f6a3ef290a6713502196cd1a66b58222fa2d064"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/GATE__ASTER__instrument_existence__20260910T225126Z.json",
+      "sha256": "4259a87c36ac7a83d91226fbdf60a23e6da6ff5fe5b0cc041e1ccd57f5b5654b"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/GATE__GT__instrument_existence__20260910T225126Z.json",
+      "sha256": "791695dea0e17c30cc9a66e7c0b99f92d8b7e9e2305fab49c768b21c7e7453ac"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/KRAKEN__KAS__instrument_existence__20260910T225126Z.json",
+      "sha256": "71dc73bb627e95435c381a1cea5121cc6f013f16e5e9ee91d8d4f5cc76ca03c3"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/KRAKEN__SPX__instrument_existence__20260910T225126Z.json",
+      "sha256": "7aefa81e4ef47afda0d6572b8c52741d7ec0e39e3a480692ed019a4f173a5605"
+    },
+    {
+      "path": "data/c22_short_instrument_evidence/registry/OKX__OKB__instrument_existence__20260910T225126Z.json",
+      "sha256": "98b6219537dab906a8e6ad19f69fa6ba2865919ee304c7ab75545f827d12a245"
+    }
+  ],
+  "report": "c22_b3_stage1_instrument_existence",
+  "run_id": "20260910T225126Z",
+  "short_assets_required": 22,
+  "short_signals_required": 75,
+  "stage": "B3_STAGE_ONE_INSTRUMENT_EXISTENCE",
+  "stage_two_request_ready": true,
+  "stage_two_started": false,
+  "stage_version": "c22_b3_stage1_v1",
+  "strategy_rules_modified": false,
+  "surviving_stage1": 74,
+  "unresolved": 0,
+  "v2_artifact_sha256": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8",
+  "v2_modified": false,
+  "verdict_counts": {
+    "FAIL_DELISTED_BEFORE_SIGNAL": 0,
+    "FAIL_LISTED_AFTER_SIGNAL": 0,
+    "FAIL_WRONG_ASSET": 0,
+    "FAIL_WRONG_INSTRUMENT_TYPE": 1,
+    "PASS_HISTORICAL_EXISTENCE": 74,
+    "UNRESOLVED_IDENTITY_COLLISION": 0,
+    "UNRESOLVED_NO_AUTHORITATIVE_DATE": 0,
+    "UNRESOLVED_SOURCE_INSUFFICIENT": 0
+  }
+}
