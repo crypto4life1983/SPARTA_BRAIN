@@ -1,0 +1,552 @@
+{
+  "as_of": "2026-09-09",
+  "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
+  "by_alignment": {
+    "ALIGNED": {
+      "avg_R": 0.559,
+      "n": 21,
+      "n_signals": 14,
+      "sum_R": 11.738,
+      "win_rate": 0.524
+    },
+    "COUNTER": {
+      "avg_R": -0.338,
+      "n": 4,
+      "n_signals": 4,
+      "sum_R": -1.352,
+      "win_rate": 0.25
+    },
+    "NO_TREND_REGIME": {
+      "avg_R": 0.954,
+      "n": 11,
+      "n_signals": 10,
+      "sum_R": 10.498,
+      "win_rate": 0.545
+    },
+    "UNLABELED": {
+      "avg_R": -1.084,
+      "n": 5,
+      "n_signals": 2,
+      "sum_R": -5.418,
+      "win_rate": 0.2
+    }
+  },
+  "by_exchange": {
+    "binance": {
+      "avg_R": 0.18,
+      "n": 26,
+      "n_signals": 22,
+      "sum_R": 4.669,
+      "win_rate": 0.385
+    },
+    "kraken": {
+      "avg_R": 0.72,
+      "n": 15,
+      "n_signals": 11,
+      "sum_R": 10.797,
+      "win_rate": 0.6
+    }
+  },
+  "by_month": {
+    "2026-05": {
+      "avg_R": -0.925,
+      "n": 8,
+      "n_signals": 5,
+      "sum_R": -7.403,
+      "win_rate": 0.125
+    },
+    "2026-06": {
+      "avg_R": 1.807,
+      "n": 15,
+      "n_signals": 10,
+      "sum_R": 27.109,
+      "win_rate": 0.8
+    },
+    "2026-07": {
+      "avg_R": -0.66,
+      "n": 6,
+      "n_signals": 3,
+      "sum_R": -3.959,
+      "win_rate": 0.167
+    },
+    "2026-08": {
+      "avg_R": -0.672,
+      "n": 8,
+      "n_signals": 8,
+      "sum_R": -5.374,
+      "win_rate": 0.25
+    },
+    "2026-09": {
+      "avg_R": 1.273,
+      "n": 4,
+      "n_signals": 4,
+      "sum_R": 5.093,
+      "win_rate": 0.75
+    }
+  },
+  "by_outcome": {
+    "LOSS": {
+      "avg_R": -1.228,
+      "n": 19,
+      "n_signals": 13,
+      "sum_R": -23.33,
+      "win_rate": 0.0
+    },
+    "TIMEOUT": {
+      "avg_R": 1.613,
+      "n": 20,
+      "n_signals": 15,
+      "sum_R": 32.264,
+      "win_rate": 0.85
+    },
+    "WIN": {
+      "avg_R": 3.266,
+      "n": 2,
+      "n_signals": 2,
+      "sum_R": 6.532,
+      "win_rate": 1.0
+    }
+  },
+  "by_regime_x_direction": {
+    "CHOP|long": {
+      "alignment": "NO_TREND_REGIME",
+      "avg_R": -1.082,
+      "n": 1,
+      "n_signals": 1,
+      "sum_R": -1.082,
+      "win_rate": 0.0
+    },
+    "CHOP|short": {
+      "alignment": "NO_TREND_REGIME",
+      "avg_R": 2.284,
+      "n": 1,
+      "n_signals": 1,
+      "sum_R": 2.284,
+      "win_rate": 1.0
+    },
+    "NONE|long": {
+      "alignment": "UNLABELED",
+      "avg_R": 0.126,
+      "n": 1,
+      "n_signals": 1,
+      "sum_R": 0.126,
+      "win_rate": 1.0
+    },
+    "NONE|short": {
+      "alignment": "UNLABELED",
+      "avg_R": -1.386,
+      "n": 4,
+      "n_signals": 1,
+      "sum_R": -5.544,
+      "win_rate": 0.0
+    },
+    "RANGE|long": {
+      "alignment": "NO_TREND_REGIME",
+      "avg_R": -0.088,
+      "n": 5,
+      "n_signals": 5,
+      "sum_R": -0.439,
+      "win_rate": 0.2
+    },
+    "RANGE|short": {
+      "alignment": "NO_TREND_REGIME",
+      "avg_R": 2.434,
+      "n": 4,
+      "n_signals": 3,
+      "sum_R": 9.735,
+      "win_rate": 1.0
+    },
+    "TREND_DOWN|long": {
+      "alignment": "COUNTER",
+      "avg_R": -0.338,
+      "n": 4,
+      "n_signals": 4,
+      "sum_R": -1.352,
+      "win_rate": 0.25
+    },
+    "TREND_DOWN|short": {
+      "alignment": "ALIGNED",
+      "avg_R": 0.321,
+      "n": 17,
+      "n_signals": 10,
+      "sum_R": 5.453,
+      "win_rate": 0.471
+    },
+    "TREND_UP|long": {
+      "alignment": "ALIGNED",
+      "avg_R": 1.571,
+      "n": 4,
+      "n_signals": 4,
+      "sum_R": 6.285,
+      "win_rate": 0.75
+    }
+  },
+  "by_strategy": {
+    "D": {
+      "avg_R": 1.142,
+      "n": 6,
+      "n_signals": 6,
+      "sum_R": 6.854,
+      "win_rate": 0.667
+    },
+    "D2": {
+      "avg_R": -0.839,
+      "n": 11,
+      "n_signals": 9,
+      "sum_R": -9.23,
+      "win_rate": 0.273
+    },
+    "E": {
+      "avg_R": 3.482,
+      "n": 2,
+      "n_signals": 2,
+      "sum_R": 6.964,
+      "win_rate": 1.0
+    },
+    "E2": {
+      "avg_R": 3.183,
+      "n": 2,
+      "n_signals": 1,
+      "sum_R": 6.367,
+      "win_rate": 1.0
+    },
+    "F": {
+      "avg_R": 2.574,
+      "n": 3,
+      "n_signals": 3,
+      "sum_R": 7.722,
+      "win_rate": 1.0
+    },
+    "F2": {
+      "avg_R": -0.108,
+      "n": 10,
+      "n_signals": 7,
+      "sum_R": -1.082,
+      "win_rate": 0.3
+    },
+    "G": {
+      "avg_R": -0.304,
+      "n": 7,
+      "n_signals": 7,
+      "sum_R": -2.129,
+      "win_rate": 0.286
+    }
+  },
+  "by_weekday": {
+    "Fri": {
+      "avg_R": -0.132,
+      "n": 9,
+      "n_signals": 6,
+      "sum_R": -1.186,
+      "win_rate": 0.333
+    },
+    "Mon": {
+      "avg_R": 2.339,
+      "n": 6,
+      "n_signals": 2,
+      "sum_R": 14.036,
+      "win_rate": 0.833
+    },
+    "Sat": {
+      "avg_R": 0.32,
+      "n": 4,
+      "n_signals": 4,
+      "sum_R": 1.278,
+      "win_rate": 0.25
+    },
+    "Sun": {
+      "avg_R": 0.592,
+      "n": 1,
+      "n_signals": 1,
+      "sum_R": 0.592,
+      "win_rate": 1.0
+    },
+    "Thu": {
+      "avg_R": -0.014,
+      "n": 6,
+      "n_signals": 6,
+      "sum_R": -0.087,
+      "win_rate": 0.667
+    },
+    "Tue": {
+      "avg_R": -0.593,
+      "n": 8,
+      "n_signals": 5,
+      "sum_R": -4.742,
+      "win_rate": 0.125
+    },
+    "Wed": {
+      "avg_R": 0.796,
+      "n": 7,
+      "n_signals": 6,
+      "sum_R": 5.575,
+      "win_rate": 0.571
+    }
+  },
+  "counts": {
+    "closed": 41,
+    "dedup_key": "open_date+symbol+direction",
+    "distinct_signals_all_rows": 31,
+    "distinct_signals_closed": 30,
+    "expectancy_R": 0.377,
+    "expectancy_R_dedup_mean": 0.262,
+    "note": "raw rows overstate the sample: the bot mirrors signals on binance and kraken and the loose '2' variants often fire on the same bar",
+    "open": 1,
+    "profit_factor": 1.62,
+    "rows": 42,
+    "sum_R_dedup_best": 8.881,
+    "sum_R_dedup_mean": 7.868,
+    "sum_R_raw": 15.466,
+    "win_rate": 0.463
+  },
+  "holding": {
+    "by_outcome": {
+      "LOSS": {
+        "max_days": 20.0,
+        "mean_days": 11.47,
+        "n": 19
+      },
+      "TIMEOUT": {
+        "max_days": 21.0,
+        "mean_days": 20.05,
+        "n": 20
+      },
+      "WIN": {
+        "max_days": 18.0,
+        "mean_days": 12.5,
+        "n": 2
+      }
+    },
+    "n_timeout": 20,
+    "timeout_share": 0.488
+  },
+  "mfe_capture": {
+    "capture_ratio": 0.598,
+    "mean_MFE_R": 2.983,
+    "mean_r_given_back_from_peak": 0.747,
+    "mean_realized_R": 1.785,
+    "n": 10,
+    "reached_2R_but_closed_below_1R": 1,
+    "status": "OK"
+  },
+  "posture": {
+    "broker": "NONE",
+    "external_project_modified": false,
+    "mode": "READ_ONLY_OBSERVATION",
+    "orders": "NONE",
+    "rules_applied": false
+  },
+  "sample_quality": {
+    "dedup_signals": 30,
+    "min_signals": 30,
+    "note": "every conclusion below threshold is PRELIMINARY",
+    "overall_label": "OK",
+    "overall_sample_ok": true,
+    "per_strategy": {
+      "D": {
+        "closed": 6,
+        "closed_signals": 6,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      },
+      "D2": {
+        "closed": 11,
+        "closed_signals": 9,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      },
+      "E": {
+        "closed": 2,
+        "closed_signals": 2,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      },
+      "E2": {
+        "closed": 2,
+        "closed_signals": 1,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      },
+      "F": {
+        "closed": 3,
+        "closed_signals": 3,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      },
+      "F2": {
+        "closed": 10,
+        "closed_signals": 7,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      },
+      "G": {
+        "closed": 7,
+        "closed_signals": 7,
+        "label": "PRELIMINARY",
+        "min_required": 20
+      }
+    }
+  },
+  "source": {
+    "db_path": "C:\\Users\\mahmo\\obsidian-trade-logger\\data\\trades.db",
+    "open_mode": "uri mode=ro"
+  },
+  "stop_discipline": {
+    "breaches": [
+      {
+        "close_price": 1.2871,
+        "direction": "short",
+        "id": 46,
+        "open_date": "2026-08-06",
+        "pnl_r": -4.627,
+        "sl": 1.0965768048100657,
+        "strategy": "D2",
+        "symbol": "XRPUSDT"
+      },
+      {
+        "close_price": 0.839,
+        "direction": "short",
+        "id": 47,
+        "open_date": "2026-08-14",
+        "pnl_r": -1.554,
+        "sl": 0.8125910947500417,
+        "strategy": "F2",
+        "symbol": "DOTUSDT"
+      },
+      {
+        "close_price": 1.49059,
+        "direction": "short",
+        "id": 15,
+        "open_date": "2026-04-28",
+        "pnl_r": -1.415,
+        "sl": 1.4639677226875762,
+        "strategy": "D2",
+        "symbol": "XRPUSDT"
+      },
+      {
+        "close_price": 1.49059,
+        "direction": "short",
+        "id": 16,
+        "open_date": "2026-04-28",
+        "pnl_r": -1.415,
+        "sl": 1.4639677226875762,
+        "strategy": "F2",
+        "symbol": "XRPUSDT"
+      },
+      {
+        "close_price": 1.4905,
+        "direction": "short",
+        "id": 13,
+        "open_date": "2026-04-28",
+        "pnl_r": -1.357,
+        "sl": 1.4640301550191412,
+        "strategy": "D2",
+        "symbol": "XRPUSDT"
+      },
+      {
+        "close_price": 1.4905,
+        "direction": "short",
+        "id": 14,
+        "open_date": "2026-04-28",
+        "pnl_r": -1.357,
+        "sl": 1.4640301550191412,
+        "strategy": "F2",
+        "symbol": "XRPUSDT"
+      },
+      {
+        "close_price": 8.05706,
+        "direction": "long",
+        "id": 44,
+        "open_date": "2026-07-22",
+        "pnl_r": -1.337,
+        "sl": 8.184824932575918,
+        "strategy": "F2",
+        "symbol": "LINKUSDT"
+      }
+    ],
+    "n_breaches": 7,
+    "planned_max_loss_R": -1.0,
+    "threshold_R": -1.2,
+    "total_excess_loss_R": 6.062
+  },
+  "strategy_labels": {
+    "D": "Donchian Breakout",
+    "D2": "Donchian Breakout (loose)",
+    "E": "EMA Cross",
+    "E2": "EMA Cross (loose)",
+    "F": "Fibonacci",
+    "F2": "Fibonacci (loose)",
+    "G": "Range Reversion"
+  },
+  "suggestions": [
+    {
+      "caveat": "observation only; not applied",
+      "evidence": {
+        "avg_R": -0.338,
+        "n": 4,
+        "n_signals": 4,
+        "sum_R": -1.352,
+        "win_rate": 0.25
+      },
+      "id": "block_long_in_TREND_DOWN",
+      "label": "OK",
+      "rule": "block long when regime=TREND_DOWN (counter-trend)",
+      "sample_ok": true,
+      "status": "SUGGESTION_ONLY"
+    },
+    {
+      "caveat": "observation only; not applied",
+      "evidence": {
+        "n_breaches": 7,
+        "total_excess_loss_R": 6.062,
+        "worst_ids": [
+          46,
+          47,
+          15,
+          16,
+          13
+        ]
+      },
+      "id": "enforce_hard_stop",
+      "label": "OK",
+      "rule": "enforce hard stop / investigate fills (losses beyond planned -1R)",
+      "sample_ok": true,
+      "status": "SUGGESTION_ONLY"
+    },
+    {
+      "caveat": "observation only; not applied",
+      "evidence": {
+        "capture_ratio": 0.598,
+        "mean_MFE_R": 2.983,
+        "mean_realized_R": 1.785,
+        "n": 10,
+        "reached_2R_but_closed_below_1R": 1
+      },
+      "id": "partial_tp_or_trail_2R",
+      "label": "OK",
+      "rule": "add partial take-profit or trailing stop at 2R",
+      "sample_ok": true,
+      "status": "SUGGESTION_ONLY"
+    },
+    {
+      "caveat": "observation only; not applied",
+      "evidence": {
+        "avg_R": -0.839,
+        "n": 11,
+        "n_signals": 9,
+        "sum_R": -9.23,
+        "win_rate": 0.273
+      },
+      "id": "review_pause_D2",
+      "label": "PRELIMINARY",
+      "rule": "review/pause strategy D2 (Donchian Breakout (loose))",
+      "sample_ok": false,
+      "status": "SUGGESTION_ONLY"
+    }
+  ],
+  "thresholds": {
+    "MIN_PER_STRATEGY": 20,
+    "MIN_SIGNALS": 30,
+    "STOP_BREACH_R": -1.2
+  }
+}
