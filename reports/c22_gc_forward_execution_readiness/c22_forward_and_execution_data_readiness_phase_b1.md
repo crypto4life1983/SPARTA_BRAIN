@@ -18,11 +18,63 @@ no cost base case, runs no replay, issues no token, activates no lifecycle gate.
 - Cutoff 2026-07-15; initial horizon 2026-07-16 → 2026-08-14 (22 expected weekday sessions)
 - 2026-07-16: gc_crypto_trendradar_daily_20260716.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
 - 2026-07-17: gc_crypto_trendradar_daily_20260717.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-18: gc_crypto_trendradar_daily_20260718.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-19: gc_crypto_trendradar_daily_20260719.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
 - 2026-07-20: gc_crypto_trendradar_daily_20260720.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
-- Present valid EXIT_ONLY candidate dates: 2026-07-16, 2026-07-17, 2026-07-20
+- 2026-07-21: gc_crypto_trendradar_daily_20260721.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-22: gc_crypto_trendradar_daily_20260722.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-23: gc_crypto_trendradar_daily_20260723.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-24: gc_crypto_trendradar_daily_20260724.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-25: gc_crypto_trendradar_daily_20260725.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-26: gc_crypto_trendradar_daily_20260726.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-27: gc_crypto_trendradar_daily_20260727.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-28: gc_crypto_trendradar_daily_20260728.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-29: gc_crypto_trendradar_daily_20260729.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-30: gc_crypto_trendradar_daily_20260730.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-07-31: gc_crypto_trendradar_daily_20260731.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-01: gc_crypto_trendradar_daily_20260801.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-02: gc_crypto_trendradar_daily_20260802.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-03: gc_crypto_trendradar_daily_20260803.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-04: gc_crypto_trendradar_daily_20260804.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-05: gc_crypto_trendradar_daily_20260805.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-06: gc_crypto_trendradar_daily_20260806.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-07: gc_crypto_trendradar_daily_20260807.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-08: gc_crypto_trendradar_daily_20260808.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-09: gc_crypto_trendradar_daily_20260809.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-10: gc_crypto_trendradar_daily_20260810.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-11: gc_crypto_trendradar_daily_20260811.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-12: gc_crypto_trendradar_daily_20260812.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-13: gc_crypto_trendradar_daily_20260813.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-14: gc_crypto_trendradar_daily_20260814.json (rows=50, valid=True) → **VALID_EXIT_ONLY_CANDIDATE**
+- 2026-08-15: gc_crypto_trendradar_daily_20260815.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-17: gc_crypto_trendradar_daily_20260817.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-18: gc_crypto_trendradar_daily_20260818.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-19: gc_crypto_trendradar_daily_20260819.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-20: gc_crypto_trendradar_daily_20260820.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-21: gc_crypto_trendradar_daily_20260821.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-22: gc_crypto_trendradar_daily_20260822.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-23: gc_crypto_trendradar_daily_20260823.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-24: gc_crypto_trendradar_daily_20260824.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-25: gc_crypto_trendradar_daily_20260825.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-26: gc_crypto_trendradar_daily_20260826.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-27: gc_crypto_trendradar_daily_20260827.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-28: gc_crypto_trendradar_daily_20260828.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-29: gc_crypto_trendradar_daily_20260829.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-30: gc_crypto_trendradar_daily_20260830.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-08-31: gc_crypto_trendradar_daily_20260831.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-01: gc_crypto_trendradar_daily_20260901.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-02: gc_crypto_trendradar_daily_20260902.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-03: gc_crypto_trendradar_daily_20260903.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-04: gc_crypto_trendradar_daily_20260904.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-05: gc_crypto_trendradar_daily_20260905.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-06: gc_crypto_trendradar_daily_20260906.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-07: gc_crypto_trendradar_daily_20260907.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-08: gc_crypto_trendradar_daily_20260908.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- 2026-09-09: gc_crypto_trendradar_daily_20260909.json (rows=50, valid=True) → **OUTSIDE_REQUIRED_RANGE**
+- Present valid EXIT_ONLY candidate dates: 2026-07-16, 2026-07-17, 2026-07-18, 2026-07-19, 2026-07-20, 2026-07-21, 2026-07-22, 2026-07-23, 2026-07-24, 2026-07-25, 2026-07-26, 2026-07-27, 2026-07-28, 2026-07-29, 2026-07-30, 2026-07-31, 2026-08-01, 2026-08-02, 2026-08-03, 2026-08-04, 2026-08-05, 2026-08-06, 2026-08-07, 2026-08-08, 2026-08-09, 2026-08-10, 2026-08-11, 2026-08-12, 2026-08-13, 2026-08-14
 - Missing expected sessions through latest collected: none
-- Missing expected sessions across full initial 30-day horizon: 19 (2026-07-21, 2026-07-22, 2026-07-23, 2026-07-24, 2026-07-27 …)
-- Forward-data coverage verdict: **BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA**
+- Missing expected sessions across full initial 30-day horizon: 0 ( …)
+- Forward-data coverage verdict: **COVERAGE_COMPLETE_FOR_RANGE**
 
 ## B. Execution-data & short-instrument feasibility
 - Short instrument: **UNRESOLVED_PENDING_SEPARATE_HUMAN_SELECTION** (selected=False)

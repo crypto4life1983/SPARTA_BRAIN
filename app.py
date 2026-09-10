@@ -5491,7 +5491,7 @@ _CTA_ACTION_PHRASES = [
 # Matched against lowercased "{product} {problem_solved}" using whole-word
 # boundaries (\b) — prevents "cord" matching "recording", etc.
 # More specific patterns come before broader ones.
-_HOOK_PATTERNS: list[tuple[list[str], list[str]]] = [
+_PRODUCT_HOOK_PATTERNS: list[tuple[list[str], list[str]]] = [
     (["back pain", "lower back", "slouch", "posture"], [
         "THIS FIXED MY BACK PAIN",
         "I STOPPED SLOUCHING INSTANTLY",
@@ -5809,7 +5809,7 @@ def _video_hook(product: str, niche: str, problem_solved: str = "") -> str:
     import random as _random
     import re as _re
     text = f"{product} {problem_solved}".lower()
-    for keywords, hooks in _HOOK_PATTERNS:
+    for keywords, hooks in _PRODUCT_HOOK_PATTERNS:
         if any(_re.search(r'\b' + _re.escape(kw) + r'\b', text) for kw in keywords):
             return _random.choice(hooks)
     niche_hooks = _HOOK_NICHE_FALLBACK.get((niche or "").lower(), _HOOK_DEFAULT_FALLBACK)

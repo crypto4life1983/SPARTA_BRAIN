@@ -182,7 +182,7 @@
   },
   "execution_data_contract_failures": [],
   "execution_data_contract_valid": true,
-  "forward_data_coverage_verdict": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
+  "forward_data_coverage_verdict": "COVERAGE_COMPLETE_FOR_RANGE",
   "forward_exit_data_contract": {
     "administrative_liquidation": {
       "excluded_from_return_sharpe_calmar_benchmarks": true,
@@ -299,8 +299,8 @@
   "forward_exit_data_contract_valid": true,
   "human_review_required": true,
   "local_forward_inventory": {
-    "coverage_complete": false,
-    "coverage_verdict": "BLOCKED_BY_INSUFFICIENT_FORWARD_EXIT_PATH_DATA",
+    "coverage_complete": true,
+    "coverage_verdict": "COVERAGE_COMPLETE_FOR_RANGE",
     "cutoff": "2026-07-15",
     "expected_horizon_sessions": [
       "2026-07-16",
@@ -331,27 +331,7 @@
       "end": "2026-08-14",
       "start": "2026-07-16"
     },
-    "missing_expected_sessions_full_initial_horizon": [
-      "2026-07-21",
-      "2026-07-22",
-      "2026-07-23",
-      "2026-07-24",
-      "2026-07-27",
-      "2026-07-28",
-      "2026-07-29",
-      "2026-07-30",
-      "2026-07-31",
-      "2026-08-03",
-      "2026-08-04",
-      "2026-08-05",
-      "2026-08-06",
-      "2026-08-07",
-      "2026-08-10",
-      "2026-08-11",
-      "2026-08-12",
-      "2026-08-13",
-      "2026-08-14"
-    ],
+    "missing_expected_sessions_full_initial_horizon": [],
     "missing_expected_sessions_through_latest_collected": [],
     "present_post_cutoff_snapshots": [
       {
@@ -392,6 +372,38 @@
         "duplicate": false,
         "files": [
           {
+            "filename": "gc_crypto_trendradar_daily_20260718.json",
+            "row_count": 50,
+            "sha256": "d3f4814c7de0066b44ce1f1816caef157ed6a6ff518aa606d2c39fd2de8961be",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-18",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260719.json",
+            "row_count": 50,
+            "sha256": "649cccceb1cc923818f8432862c8f068fbe47c10df6fc8a5467e3c03aee4e9fe",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-19",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
             "filename": "gc_crypto_trendradar_daily_20260720.json",
             "row_count": 50,
             "sha256": "45342583a75124eb12152914f8675708531997885d97869de31a100f15553edf",
@@ -401,12 +413,839 @@
         "in_initial_horizon": true,
         "run_date": "2026-07-20",
         "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260721.json",
+            "row_count": 50,
+            "sha256": "bf2e7963e25a771434de44ed2db62036849348cbe84269f32736b01d57e049a1",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-21",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260722.json",
+            "row_count": 50,
+            "sha256": "96aa98777c0f75e6d07f942f62f38fca897ff40a153a58158c6faa9ebd23a1fa",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-22",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260723.json",
+            "row_count": 50,
+            "sha256": "a16e089dbfcff65444215c227bac2205f415563793ab29be09aa749a696c41ec",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-23",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260724.json",
+            "row_count": 50,
+            "sha256": "02d07a7496594061ec6f1d3f32ce20567cf811689b221a1fe83d310138429f6c",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-24",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260725.json",
+            "row_count": 50,
+            "sha256": "b5270ec01f74cf5f96720ea53eba67dc69f40b7522f26bdb4bf436cafef21b98",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-25",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260726.json",
+            "row_count": 50,
+            "sha256": "c358ea4ff3b29d69b36e955184a2523c51137e2f7d50d86f3aa357ce6690b2a6",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-26",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260727.json",
+            "row_count": 50,
+            "sha256": "d8c038a22571de4097f7059b178252a9dba3ead46019ef2e4c712e7cd897690f",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-27",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260728.json",
+            "row_count": 50,
+            "sha256": "e85c8020d617c329564129a8e1a3d537143386245979901e57ef0b36648a39d4",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-28",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260729.json",
+            "row_count": 50,
+            "sha256": "506356f7193ff2d032bccaf9c012a93a884e5b4aba8158de565a1385c86db4da",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-29",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260730.json",
+            "row_count": 50,
+            "sha256": "1522a563e605181384ae80c00956fc8c72317d39b5758e411abc4686415bdbd9",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-30",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260731.json",
+            "row_count": 50,
+            "sha256": "9011d417373d5c393802a5439d86c318dca0a6ac10f45557ceffa6e9cb7553e3",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-07-31",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260801.json",
+            "row_count": 50,
+            "sha256": "40e24425ecd2f47fa499e5e201c65dd183e13b4a50a9107d069a45873c7d40a3",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-01",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260802.json",
+            "row_count": 50,
+            "sha256": "80e89e5d3d50c38b806fed41936171cf7cc324f905216778cdb7b1413f6a2779",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-02",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260803.json",
+            "row_count": 50,
+            "sha256": "2e9ff7189fd2e6af8bffd8a6f714ce6bb49bb62744b40a49efbc83917675a2f4",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-03",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260804.json",
+            "row_count": 50,
+            "sha256": "298ee8894bb886dbd26991f68f2fe27f97cad0c1a6cb19b43f6a5beae3ebeda5",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-04",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260805.json",
+            "row_count": 50,
+            "sha256": "e795eb290cd2d5a55fdb94fd08fcd6dbb5e4b4ff65f428b4ca00b43f2f988220",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-05",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260806.json",
+            "row_count": 50,
+            "sha256": "2c478ed4dfbd9b1703a308618b69b6083a336cfd01ffe2e0d832bcc4f0d5b729",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-06",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260807.json",
+            "row_count": 50,
+            "sha256": "e5493e5293d4c141a9138c1b94d3961c68ce9bf323d9350fbf76cad2b0c25d3d",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-07",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260808.json",
+            "row_count": 50,
+            "sha256": "3c5aa23c20c003544b4a37f9039ec699d33888867082dea19edd65adf544b963",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-08",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260809.json",
+            "row_count": 50,
+            "sha256": "3ed3410a47b58e2909b3222e344951b8f0187ff9061ac29e4f286d1f74efb3fe",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-09",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260810.json",
+            "row_count": 50,
+            "sha256": "e86bf6a8cc127d103e2c481e5bb0cb8783b81965c4e9e0760583e7057507b2f3",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-10",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260811.json",
+            "row_count": 50,
+            "sha256": "3ef43c6e570841b6d15599327bbe96736f35136d050c6fe659c915a91ca31d15",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-11",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260812.json",
+            "row_count": 50,
+            "sha256": "f185bfb9c2696efa45c05d4dc6174b65ec436082f37e7682a3b70ebd11a982dd",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-12",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260813.json",
+            "row_count": 50,
+            "sha256": "95a60f98b02f7f63296890250e17150ebe76444ed3322292e99dcda586e49b78",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-13",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "VALID_EXIT_ONLY_CANDIDATE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260814.json",
+            "row_count": 50,
+            "sha256": "951d2129c0149e392ed49e14fe10d64c795717653ad500926591dcf86750bad6",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": true,
+        "run_date": "2026-08-14",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260815.json",
+            "row_count": 50,
+            "sha256": "dfbe105b70eb8477a93db3f4c5c4ad61206028c9ee67a76aa301ecef16296ce0",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-15",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260817.json",
+            "row_count": 50,
+            "sha256": "0fcd6a8877a748438989ca3d974b5c175b5fb7b80d5157e2fabd1da3569ac546",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-17",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260818.json",
+            "row_count": 50,
+            "sha256": "4fc35ef7189b82feba6f06475e7ecb7873477f56099e4f1867fe0649fb305f06",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-18",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260819.json",
+            "row_count": 50,
+            "sha256": "9a921b641f932373fbdf104862581311bb058c2163cbc0b889595ca27a8f5ba9",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-19",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260820.json",
+            "row_count": 50,
+            "sha256": "a6a74102a87ba1688737fa702338eaa0cd89c858cb7e64b3b5a400df5e082a69",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-20",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260821.json",
+            "row_count": 50,
+            "sha256": "5fd43aaa976bb3cd042c4b13ca78b9df73591eaa8d0261560dab8ee218d69946",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-21",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260822.json",
+            "row_count": 50,
+            "sha256": "4a9476ce05c8e3de58460cb4c11ff90af166fb93ca7e6a7c05027f393fb7d727",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-22",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260823.json",
+            "row_count": 50,
+            "sha256": "883b2ae52fdbe7c80ea15c986cb5413a353d9760b4b976ead327b893abd08748",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-23",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260824.json",
+            "row_count": 50,
+            "sha256": "93e8c1380ecd183775e9935fc8b1459d623534595d0009d826948ee11e3bb740",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-24",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260825.json",
+            "row_count": 50,
+            "sha256": "bd1df5ff8754b3dca2a5a363420819942da6e93ce5a2eeeb83c77d2ad919a977",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-25",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260826.json",
+            "row_count": 50,
+            "sha256": "01e5a4d63e6af99433266c0d0ffec9bacb754887a10cf5a8483a8b3f60846ab4",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-26",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260827.json",
+            "row_count": 50,
+            "sha256": "b263d16ae7a3fa622522cf6c02e972dddaa6eac19c31dc1d597131b5049f3e42",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-27",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260828.json",
+            "row_count": 50,
+            "sha256": "105e1beeb64216eccd48c1c4a35512f744f20a730c50aec43cceb806926b3a9e",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-28",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260829.json",
+            "row_count": 50,
+            "sha256": "a803d2351f0b758897544709a0562a4e0b3ddfd9677c032c2cde969e7ef5045a",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-29",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260830.json",
+            "row_count": 50,
+            "sha256": "33514f71099771345b7ca2d5e7dd69053f1b9d7de8fa3b7085d6707939352604",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-30",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260831.json",
+            "row_count": 50,
+            "sha256": "3fad7810a00894b84b929523bb35a600f99c11497a9156d72f104c14e455e16b",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-08-31",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260901.json",
+            "row_count": 50,
+            "sha256": "f1ca46ae8eb113975b70b54153d15a3d27744548694b78712ffeec12535e1b10",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-01",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260902.json",
+            "row_count": 50,
+            "sha256": "3bd6ed07ef43ca1111516d6edaf078102474c7668a5d750edc1293775937e146",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-02",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260903.json",
+            "row_count": 50,
+            "sha256": "f10c290050ac34c0fd68d0fb031ade4fb4111fd867e92b69fbd8b03ed5425dd0",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-03",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260904.json",
+            "row_count": 50,
+            "sha256": "cb34754afbcb9b4ce81950e77d7e60080ad8edbfb43496945981c3b514253e25",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-04",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260905.json",
+            "row_count": 50,
+            "sha256": "99cc9be2a26a519f5a33ea3baf080bbce1f7818b6ad7f455d27c47be433e3bc7",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-05",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260906.json",
+            "row_count": 50,
+            "sha256": "392a111cb1764d469dd5684dd9ca788e5741aa5be49655a46bb3b498b6252adb",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-06",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260907.json",
+            "row_count": 50,
+            "sha256": "79f32070f0a9a0197f4f25a9ea37918aaaaf24e90ef5ce6afd00712988a8eb7a",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-07",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260908.json",
+            "row_count": 50,
+            "sha256": "682faf678d605e7cfffa2da280641dfb5a4dab29f071d1757f1c4d301ac20f9a",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-08",
+        "would_qualify_exit_only_structurally": true
+      },
+      {
+        "admitted": false,
+        "classification": "OUTSIDE_REQUIRED_RANGE",
+        "duplicate": false,
+        "files": [
+          {
+            "filename": "gc_crypto_trendradar_daily_20260909.json",
+            "row_count": 50,
+            "sha256": "08bc423c5b8d6b4a16fe1c14da4015eff75e027e906a281b4a54731834993ac6",
+            "structurally_valid": true
+          }
+        ],
+        "in_initial_horizon": false,
+        "run_date": "2026-09-09",
+        "would_qualify_exit_only_structurally": true
       }
     ],
     "present_valid_exit_only_candidate_dates": [
       "2026-07-16",
       "2026-07-17",
-      "2026-07-20"
+      "2026-07-18",
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-10",
+      "2026-08-11",
+      "2026-08-12",
+      "2026-08-13",
+      "2026-08-14"
     ]
   },
   "mode": "RESEARCH_ONLY_READ_ONLY_CONTRACT_AND_PLANNING",
