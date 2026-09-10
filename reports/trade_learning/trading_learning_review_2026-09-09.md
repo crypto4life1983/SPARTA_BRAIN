@@ -8,7 +8,7 @@ Scope: every trading system that has produced trades or paper trades in the last
 
 | System | Where | Mode | Since | Result to date |
 |---|---|---|---|---|
-| Daily bot D/E/F/G on 11 crypto pairs | obsidian-trade-logger `trades.db` | $20/trade, Binance + Kraken | 2026-04-28 | 41 closed rows, 30 distinct signals, +8.9R dedup (+$309 raw) |
+| Daily bot D/E/F/G on 11 crypto pairs | obsidian-trade-logger `trades.db` | PAPER, $20/trade, Binance + Kraken prices | 2026-04-28 | 41 closed rows, 30 distinct signals, +8.9R dedup (+$309 raw) |
 | Perp funding carry, always-on monthly | `reports/paper_funding_carry` | paper $10k | 2026-05-13 | +$49.4 (+0.49%) in 120 days, costs ate 36% of funding, max DD 0.17% |
 | NQ opening-range (MNQ) | `reports/nq_paper_orb` | paper $50k | 2026-05-13 | 52 trades, net −$2,172, DD −6.9% |
 | GC ICT (MGC) | `reports/gc_paper_ict` | paper $50k | 2026-06-14 | 0 trades in 40 sessions, tracker PAUSE |
@@ -92,3 +92,18 @@ The ledger points to three things, all modest:
 - The frozen breakout stack, if allowed to trade forward instead of sitting dormant.
 
 Nothing in the evidence supports a fast or large edge. The realistic path is the boring one: fix the leaks in the system that already trades, let sample sizes grow, and let the gates that already exist do their job.
+
+## Addendum 2026-09-10 — trade 46 forensic and rule what-if
+
+**Trade 46 (XRPUSDT D2 short, opened 2026-08-06, closed −4.63R).** The bot log shows it evaluated the exit every day at 01:00 on the daily close only (`sl_hit = close >= sl` for shorts). On 2026-08-20 the close was 1.0962 against a stop of 1.0966, four hundredths of a cent short of triggering. On 2026-08-21 XRP closed at 1.2871, a 17.6% move in one session, and on 08-22 at 1.565. The stop was honoured exactly as coded; the code only looks once a day at the close. With a 2×ATR stop of about 5%, a 17% daily move produces −4.6R by construction. This is gap risk from close-only stop checks, not a fill error. It is paper, so no money was lost. The fix for any live version is a resting stop order on the exchange, or at minimum an intraday high/low check; the fix for paper accounting is to mark the stop at the first bar whose high/low crosses it.
+
+**What-if replay of the proposed rules on the 30 dedup signals** (in-sample, post-hoc, small; direction of effect only):
+
+| Step | signals | sum R |
+|---|---|---|
+| Baseline, dedup | 30 | +8.9 |
+| Regime fail-closed (drop counter-trend and unlabeled) | 24 | +11.5 |
+| Plus hard stop cap at −1.5R | 24 | +14.6 |
+| Plus D2 on watch (keep only where a strict D/E/F twin fired) | 16 | +16.9 |
+
+Each rule moves in the expected direction. None of these numbers is a forecast; they are the same trades re-scored, which is the definition of overfitting if taken as a result. They justify testing the rules forward on the paper bot, nothing more.

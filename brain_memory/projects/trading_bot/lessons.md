@@ -4577,3 +4577,15 @@ into deep extraction even if the warning_labels list omits them.
 - **How to apply:** Judge paper lines by sign + sample vs their own pre-registered window, not by tracker status. Keep funding carry running. Let NQ ORB finish its window, then close on its own gate. Loosen or retire GC ICT. Decide whether the frozen stack is allowed to trade forward.
 
 - 2026-09-09 — LESSON: the journal's raw 41 closed rows are only 30 distinct signals; raw sum_R 15.47 collapses to 8.88 (best row per signal) / 7.87 (mean row). Any journal stat must be reported dedup-first or it overstates the edge ~2x. Also: 7 rows closed below -1.2R (worst -4.63R, id 46 XRPUSDT D2 short) for 6.06R excess loss — stop fills, not strategy logic, are the biggest single leak so far.
+
+## 2026-09-10 - LESSON_JOURNAL_002 - Trade 46 (−4.63R) was gap risk from close-only daily stop checks, not a fill error; and ALL journal trades are PAPER
+
+- **Lesson:** The bot evaluates exits once a day on the daily close (`sl_hit = close >= sl` for shorts). On 2026-08-20 XRP closed 1.0962 vs stop 1.0966 (0.04% short), then closed 1.2871 on 08-21 (+17.6% in one session) and 1.565 on 08-22. With a 2×ATR (~5%) stop, a 17% daily move yields −4.6R by construction. Also confirmed: every trade in trades.db is labelled "PAPER TRADE OPENED/CLOSED" by the bot — no real money has been risked by this system.
+- **Why:** Close-only stop logic is fine for honest paper accounting but has unbounded loss per trade; the stop distance is not the problem, the check frequency is.
+- **How to apply:** For paper: mark stops at the first bar whose high/low crosses the level (needs OHLC, not close). For any future live version: resting stop order on the exchange, never a once-a-day check. Rule what-if on the 30 dedup signals (regime fail-closed → stop cap −1.5R → D2 watch) moves +8.9R → +16.9R on 16 signals, in-sample only, direction-of-effect evidence, not a forecast.
+
+## 2026-09-10 - LESSON_S21_PAPER_002 - Implementation shortfall must be notional-weighted under a minimum-commission cost model
+
+- **Lesson:** With the locked S1 cost model ($1 minimum commission) the equal-weight rotation emits dust REBALANCE trims every week (e.g. +0.008 MU shares, ~$7 notional). An equal-weighted per-fill shortfall mean turned that into ~11,000 bps and tripped `IMPLEMENTATION_SHORTFALL_BLOWOUT` on the very first replay cycle. Total cost / total notional traded (~1-3 bps) is the honest aggregate.
+- **Why:** Per-fill bps are dominated by the smallest trades; the kill-switch threshold (25 bps) was designed for a book-level number.
+- **How to apply:** `cycle_runner` reports per-fill bps for transparency but feeds the kill-switch the notional-weighted cumulative mean. Also: an anchor gap must be replayed bar-by-bar or refused; the legacy +73.7% "week" is a 20.4-week hold and cannot be reconstructed into v2 state because its anchor is off-grid.
