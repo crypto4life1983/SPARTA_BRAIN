@@ -1,0 +1,3805 @@
+{
+  "admission_state_changed": false,
+  "c22_performance_computed": false,
+  "canonical_files": [
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/AAVE/BINANCE__AAVE__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "691b9f106d8482a7d1f4c82c46fa66ecd4dc49131bf549bc6b42cec4f7b294a4"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/CRV/BINANCE__CRV__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "f9e963de693b3123a37a356cadad11a131d1b22e571df6746181955dacae5d63"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/IMX/BINANCE__IMX__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "14c9ec6bf94c102bfb2f5fb97578841ef2879d438892b681ebbb8efe4ab55d38"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/INJ/BINANCE__INJ__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "d2dca9c427638d3a65ad9c00b0bf737767eef2de491001e75666ec4737eba435"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/LINK/BINANCE__LINK__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "04e981f91dce88e4bebf2aec6a34d07d3eef1e18d6eee2891d4eff8abcbf0eb7"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/PENDLE/BINANCE__PENDLE__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "707c9ed7721dcffe037d4b311d7a809fcddbd39721cde0708f6586d91b4f9e82"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/QNT/BINANCE__QNT__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "20b30c257fc0b320fd78ccdba0af03aee9d27aafacf46d77ec5054d9bb600307"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/SOL/BINANCE__SOL__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "0d996e20fd495076fcee2863d71c1e82008ca8a91af9f2eb6ecb45968eba09dd"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/SUN/BINANCE__SUN__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "aaf3e4fca1c28ecdff2b45feccb7bbc7572c0489cbf2a4552618e595a31abd2e"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/TIA/BINANCE__TIA__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "de23b1303d2d6d29f49a4f7682bba7d14858f3b27ec8966d57f12ee4fa3bd2c6"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/TRX/BINANCE__TRX__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "5c8d5789d7aeb9aded9b08eb263f46036d09b5c95117246767042b5993cf7fd2"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/VIRTUAL/BINANCE__VIRTUAL__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "9a2fc8a5512e9f208293d550ddb4cd4803ea95109ac47c97ed931bb526567802"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/ZEC/BINANCE__ZEC__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "436f18ad85ecacd1bb8bffcfb0aedd33e1f5f812a8ac209aa96049a474bbefa5"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/LEO/BITFINEX__LEO__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "a7f870387d99b90c223a5269edfb0e9491c09f1c3af930728b4e7ad90bea24a0"
+    },
+    {
+      "first_date": "2026-06-22",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/GRAM/BYBIT__GRAM__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 81,
+      "sha256": "7bd02f5cfaf03253a9ba3c777126ad8975a6d927a489d6253e291b4476af949c"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/ASTER/GATE__ASTER__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "cc547b711bf0f48961f7d4d711fa18f6bd4314287081f5cc1810554f172af94f"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/GT/GATE__GT__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "152eb666ee29f0fbfbf62a5d3f469bec54c72208472475b16654a449230c2faf"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/KAS/KRAKEN_FUTURES__KAS__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "5490872f037ffa3c964e69b955336e3e30f202c7a5eee8f8e49420db108a1732"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/SPX/KRAKEN_FUTURES__SPX__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "4e6be6ac83d9f673c0667f66e8dfd92d9d88b3dd07e6be26cb0370318c412768"
+    },
+    {
+      "first_date": "2026-06-20",
+      "last_date": "2026-09-10",
+      "path": "data/c22_short_instrument_evidence/ohlc/OKB/OKX__OKB__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+      "row_count": 83,
+      "sha256": "b8d14aac3862a007fe2931b6479b56d145aa6bb1e94af6ad92504cdac1ca37cb"
+    }
+  ],
+  "cost_arithmetic_performed": false,
+  "exports_modified": false,
+  "frozen_contract": {
+    "acquisition_step": "4_historical_ohlc",
+    "authorization_basis": "operator message 2026-09-11 authorizing Stage Three exactly as frozen; no approval record fabricated",
+    "authorization_batch": "C22_EXECUTION_OHLC_FETCH_READY_FOR_HUMAN_AUTHORIZATION",
+    "decisive_min_tier": "T3_REPUTABLE_INSTITUTIONAL_MARKET_DATA_SOURCE",
+    "early_fail_close_steps_already_applied": [
+      "1_historical_instrument_existence_registry",
+      "2_symbol_and_venue_mapping",
+      "3_funding_or_borrow_availability"
+    ],
+    "evidence_categories": {
+      "margin": "historical_volume",
+      "perp": "historical_ohlc"
+    },
+    "filename_convention": "<venue>__<asset>__<category>__<start>_<end>.<ext> ; dates ISO YYYY-MM-DD; every file paired with a .sha256 sidecar; manifests list per-file sha256 + coverage; NEVER overwrites",
+    "human_token_name": "HUMAN_DECISION_C22_EXECUTION_OHLC_FETCH_AUTHORIZE",
+    "layout": "data/c22_short_instrument_evidence/ohlc/<asset>/",
+    "module": "sparta_commander.c22_historical_evidence_acquisition_plan_contract",
+    "source_tier_used": "T1_OFFICIAL_VENUE_HISTORICAL_FILES_OR_OFFICIAL_API_DOCS",
+    "steps_not_executed_here": [
+      "1_historical_instrument_existence_registry",
+      "2_symbol_and_venue_mapping",
+      "3_funding_or_borrow_availability",
+      "5_fee_tick_lot_minimum_rules",
+      "6_liquidity_and_spread_evidence",
+      "7_full_holding_period_coverage"
+    ]
+  },
+  "funnel": {
+    "excluded_venue_policy": 2,
+    "fee_honestly_replayable_trades": 0,
+    "frozen_long_signals_no_execution_evidence_yet": 13,
+    "frozen_short_signals": 75,
+    "frozen_v2_signals": 88,
+    "stage1_eliminated_preserved": 1,
+    "stage1_survivors": 74,
+    "stage2_decisive_executable": 72,
+    "stage3_fail_gap": 0,
+    "stage3_ohlc_coverage_pass": 72,
+    "stage3_unresolved": 0,
+    "steps_remaining_before_admission": [
+      "5_fee_tick_lot_minimum_rules",
+      "6_liquidity_and_spread_evidence",
+      "7_full_holding_period_coverage",
+      "admission_review"
+    ]
+  },
+  "horizon": {
+    "extension_index": 2,
+    "extension_range": {
+      "calendar_days": 15,
+      "end": "2026-09-13",
+      "index": 2,
+      "start": "2026-08-30"
+    },
+    "fetch_end": "2026-09-10",
+    "replay_boundary": "2026-09-09",
+    "required_coverage_end": "2026-09-09"
+  },
+  "inputs": {
+    "dry_run_report": {
+      "sha256": "f76f8330f72e454fe507b38ac76c67d5eec8a2417c7faef620330a4c620102ef"
+    },
+    "stage2_governance_closure": {
+      "path": "reports/c22_gc_governance/c22_b3_stage2_governance_closure_20260911T130440Z.json",
+      "sha256": "ebca5fe7afe46d23e8468a12a458d69cbe1f2a3ac74c7c004791f1cb76c7bd36"
+    },
+    "stage2_report": {
+      "run": "20260910T231336Z",
+      "sha256": "03fbc61783152c27026a54cf588c7bdc80b69ea260dc43640e9bd28dc9605e3f"
+    },
+    "v2_artifact_sha256": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8"
+  },
+  "instruments": [
+    {
+      "c22_asset": "BINANCE:AAVEUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/AAVE/BINANCE__AAVE__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "691b9f106d8482a7d1f4c82c46fa66ecd4dc49131bf549bc6b42cec4f7b294a4"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "AAVEUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "AAVEUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/AAVE/BINANCE__AAVE__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130800Z.raw.json",
+          "raw_sha256": "5f08dfe639f7f16b81f7f2a1572ce0f99fc02a86b5afa24ca40d21fa1391b543"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/CRV/BINANCE__CRV__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "f9e963de693b3123a37a356cadad11a131d1b22e571df6746181955dacae5d63"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "CRVUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "CRVUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/CRV/BINANCE__CRV__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130801Z.raw.json",
+          "raw_sha256": "194aeb11b166e304af6f292679c8daf1796ba1763dd7db3a3a056cb55d9a3d32"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:IMXUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/IMX/BINANCE__IMX__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "14c9ec6bf94c102bfb2f5fb97578841ef2879d438892b681ebbb8efe4ab55d38"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "IMXUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "IMXUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/IMX/BINANCE__IMX__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130801Z.raw.json",
+          "raw_sha256": "6225656a50679b24f1dd78d1a0ea9df87db61326295648ff2f26f7336903252b"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:INJUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/INJ/BINANCE__INJ__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "d2dca9c427638d3a65ad9c00b0bf737767eef2de491001e75666ec4737eba435"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "INJUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "INJUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/INJ/BINANCE__INJ__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130802Z.raw.json",
+          "raw_sha256": "172b3dd2fc2b9e614223c33cc45af8a1220b81ab8b8a58d207fb4ef71f7ab384"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:LINKUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/LINK/BINANCE__LINK__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "04e981f91dce88e4bebf2aec6a34d07d3eef1e18d6eee2891d4eff8abcbf0eb7"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "LINKUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "LINKUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/LINK/BINANCE__LINK__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130803Z.raw.json",
+          "raw_sha256": "ac75f6b7f7ed18d74c3ebf12cf1671b62ea66117f4ae8d0471cf6d098d903079"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/PENDLE/BINANCE__PENDLE__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "707c9ed7721dcffe037d4b311d7a809fcddbd39721cde0708f6586d91b4f9e82"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "PENDLEUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "PENDLEUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/PENDLE/BINANCE__PENDLE__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130803Z.raw.json",
+          "raw_sha256": "bfd86ace4f2bba27922b47d6657c29f790a8be63c407f5cf89caaa39bb846f02"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/QNT/BINANCE__QNT__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "20b30c257fc0b320fd78ccdba0af03aee9d27aafacf46d77ec5054d9bb600307"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "QNTUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "QNTUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/QNT/BINANCE__QNT__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130804Z.raw.json",
+          "raw_sha256": "03448ac38ebf4fcb6afc791ccc2f36e9cf77795b190f3a578cfeb1ecdf1c2e2e"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:SOLUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/SOL/BINANCE__SOL__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "0d996e20fd495076fcee2863d71c1e82008ca8a91af9f2eb6ecb45968eba09dd"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "SOLUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "SOLUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/SOL/BINANCE__SOL__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130804Z.raw.json",
+          "raw_sha256": "6fcf9e2753ecbfb09506f35af062e20e1aaffa4d864c47c699b1fac450dabe1a"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:SUNUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/SUN/BINANCE__SUN__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "aaf3e4fca1c28ecdff2b45feccb7bbc7572c0489cbf2a4552618e595a31abd2e"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "SUNUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "SUNUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/SUN/BINANCE__SUN__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130805Z.raw.json",
+          "raw_sha256": "f8af736700c8a69fec63ad284836aacea31d7296bbafdce592254d8037945ab9"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/TIA/BINANCE__TIA__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "de23b1303d2d6d29f49a4f7682bba7d14858f3b27ec8966d57f12ee4fa3bd2c6"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "TIAUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "TIAUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/TIA/BINANCE__TIA__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130805Z.raw.json",
+          "raw_sha256": "d165cba71856ab44424e1c488ac67552c8c626b9a939367f500f5dd7cb593239"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/TRX/BINANCE__TRX__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "5c8d5789d7aeb9aded9b08eb263f46036d09b5c95117246767042b5993cf7fd2"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "TRXUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "TRXUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/TRX/BINANCE__TRX__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130806Z.raw.json",
+          "raw_sha256": "468fd13e11110ce5bf80e937ca3499f0565a090cc28f924733c3890a4d55a366"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:VIRTUALUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/VIRTUAL/BINANCE__VIRTUAL__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "9a2fc8a5512e9f208293d550ddb4cd4803ea95109ac47c97ed931bb526567802"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "VIRTUALUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "VIRTUALUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/VIRTUAL/BINANCE__VIRTUAL__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130807Z.raw.json",
+          "raw_sha256": "88b10086e7fe3bb08070cd598ad15c72f94862f89f83f5699150eefc01b0c519"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BINANCE:ZECUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/ZEC/BINANCE__ZEC__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "436f18ad85ecacd1bb8bffcfb0aedd33e1f5f812a8ac209aa96049a474bbefa5"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "ZECUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "interval": "1d",
+            "page": 0,
+            "start": "2026-06-20",
+            "symbol": "ZECUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/ZEC/BINANCE__ZEC__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130807Z.raw.json",
+          "raw_sha256": "86cee30661ba58ed871e3ffa0bf3ac6a8ff133e0dda0bb1317cb20f8bc9fed59"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE"
+    },
+    {
+      "c22_asset": "BITFINEX:LEOUSD",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/LEO/BITFINEX__LEO__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "a7f870387d99b90c223a5269edfb0e9491c09f1c3af930728b4e7ad90bea24a0"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "SPOT_MARGIN_BORROW",
+      "frozen_category": "historical_volume",
+      "instrument": "tLEOUSD",
+      "raw_sources": [
+        {
+          "endpoint": "https://api-pub.bitfinex.com/v2/candles/trade:1D:tLEOUSD/hist",
+          "http_status": 200,
+          "query_params": {
+            "end": "2026-09-10",
+            "pair": "tLEOUSD",
+            "start": "2026-06-20",
+            "tf": "1D"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BITFINEX/LEO/BITFINEX__LEO__stage3_pair_daily_candles__20260911T130800Z__2026-09-11T130808Z.raw.json",
+          "raw_sha256": "3044a52cc0c6a659a1f146b039b61c804766f8f02bbba4d27ebe3a6516d73b1b"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BITFINEX"
+    },
+    {
+      "c22_asset": "BYBIT:GRAMUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-22",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/GRAM/BYBIT__GRAM__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 81,
+        "sha256": "7bd02f5cfaf03253a9ba3c777126ad8975a6d927a489d6253e291b4476af949c"
+      },
+      "coverage_full_range": {
+        "complete": false,
+        "malformed_days": [],
+        "missing_days": [
+          "2026-06-20",
+          "2026-06-21"
+        ],
+        "present_days": 80,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "SPOT_MARGIN_BORROW",
+      "frozen_category": "historical_volume",
+      "instrument": "GRAMUSDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.bybit.com/v5/market/kline",
+          "http_status": 200,
+          "query_params": {
+            "category": "linear",
+            "end": "2026-09-10",
+            "interval": "D",
+            "start": "2026-06-20",
+            "symbol": "GRAMUSDT"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__stage3_linear_daily_kline__20260911T130800Z__2026-09-11T130808Z.raw.json",
+          "raw_sha256": "13233143e4372a9979e0ac4ae66b9f3df379983ff4e54f6c34d3aa8aa0cf3ba7"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BYBIT"
+    },
+    {
+      "c22_asset": "GATE:ASTERUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/ASTER/GATE__ASTER__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "cc547b711bf0f48961f7d4d711fa18f6bd4314287081f5cc1810554f172af94f"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "ASTER_USDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.gateio.ws/api/v4/futures/usdt/candlesticks",
+          "http_status": 200,
+          "query_params": {
+            "contract": "ASTER_USDT",
+            "from": "2026-06-20",
+            "interval": "1d",
+            "to": "2026-09-10"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/GATE/ASTER/GATE__ASTER__stage3_futures_daily_candlesticks__20260911T130800Z__2026-09-11T130809Z.raw.json",
+          "raw_sha256": "836b545e7833afd71bab6e14b6f0613c48790c3c755f230b24068b1ae91b19b7"
+        }
+      ],
+      "source_ok": true,
+      "venue": "GATE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/GT/GATE__GT__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "152eb666ee29f0fbfbf62a5d3f469bec54c72208472475b16654a449230c2faf"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "GT_USDT",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.gateio.ws/api/v4/futures/usdt/candlesticks",
+          "http_status": 200,
+          "query_params": {
+            "contract": "GT_USDT",
+            "from": "2026-06-20",
+            "interval": "1d",
+            "to": "2026-09-10"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/GATE/GT/GATE__GT__stage3_futures_daily_candlesticks__20260911T130800Z__2026-09-11T130810Z.raw.json",
+          "raw_sha256": "4d28224b531b310d65fa8f6c348dd1c72ccf35ea498c9354a4517f3d5f8306b4"
+        }
+      ],
+      "source_ok": true,
+      "venue": "GATE"
+    },
+    {
+      "c22_asset": "KRAKEN:KASUSD",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/KAS/KRAKEN_FUTURES__KAS__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "5490872f037ffa3c964e69b955336e3e30f202c7a5eee8f8e49420db108a1732"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "PF_KASUSD",
+      "raw_sources": [
+        {
+          "endpoint": "https://futures.kraken.com/api/charts/v1/trade/PF_KASUSD/1d",
+          "http_status": 200,
+          "query_params": {
+            "from": "2026-06-20",
+            "resolution": "1d",
+            "symbol": "PF_KASUSD",
+            "to": "2026-09-10"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__stage3_futures_daily_chart__20260911T130800Z__2026-09-11T130811Z.raw.json",
+          "raw_sha256": "68791c3eef5b518703238c0fc7cd11e08888ca22bd9a123073fe7713cb63ea30"
+        }
+      ],
+      "source_ok": true,
+      "venue": "KRAKEN_FUTURES"
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/SPX/KRAKEN_FUTURES__SPX__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "4e6be6ac83d9f673c0667f66e8dfd92d9d88b3dd07e6be26cb0370318c412768"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "PF_SPXUSD",
+      "raw_sources": [
+        {
+          "endpoint": "https://futures.kraken.com/api/charts/v1/trade/PF_SPXUSD/1d",
+          "http_status": 200,
+          "query_params": {
+            "from": "2026-06-20",
+            "resolution": "1d",
+            "symbol": "PF_SPXUSD",
+            "to": "2026-09-10"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__stage3_futures_daily_chart__20260911T130800Z__2026-09-11T130812Z.raw.json",
+          "raw_sha256": "cd7e49c183b8f9ef554dc333fea0410b36596b1d91b05d1cfcce8646e205cdc5"
+        }
+      ],
+      "source_ok": true,
+      "venue": "KRAKEN_FUTURES"
+    },
+    {
+      "c22_asset": "OKX:OKBUSDT",
+      "canonical_file": {
+        "first_date": "2026-06-20",
+        "last_date": "2026-09-10",
+        "path": "data/c22_short_instrument_evidence/ohlc/OKB/OKX__OKB__historical_ohlc__2026-06-20_2026-09-10__20260911T130800Z.json",
+        "row_count": 83,
+        "sha256": "b8d14aac3862a007fe2931b6479b56d145aa6bb1e94af6ad92504cdac1ca37cb"
+      },
+      "coverage_full_range": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "execution_path": "DERIVATIVE_PERPETUAL_OR_FUTURES",
+      "frozen_category": "historical_ohlc",
+      "instrument": "OKB-USDT-SWAP",
+      "raw_sources": [
+        {
+          "endpoint": "https://www.okx.com/api/v5/market/history-candles",
+          "http_status": 200,
+          "query_params": {
+            "bar": "1D",
+            "end": "2026-09-10",
+            "instId": "OKB-USDT-SWAP",
+            "page": 0,
+            "start": "2026-06-20"
+          },
+          "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage3_swap_history_candles_p00__20260911T130800Z__2026-09-11T130812Z.raw.json",
+          "raw_sha256": "ef30f818fb65fc8500fd6ee53dcffc665ac655de1d581407a0e9fcbc63e305c0"
+        }
+      ],
+      "source_ok": true,
+      "venue": "OKX"
+    }
+  ],
+  "mode": "READ_ONLY_EXECUTION_INSTRUMENT_HISTORICAL_OHLC_ACQUISITION",
+  "next_frozen_step": "5_fee_tick_lot_minimum_rules",
+  "next_step_request_permitted_by_spec": true,
+  "next_step_started": false,
+  "per_signal": [
+    {
+      "c22_asset": "BINANCE:AAVEUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 76,
+        "required_days": 76,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-26"
+      },
+      "decision_date": "2026-06-26",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "AAVEUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-26..2026-09-09 (76 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "MISSING_EXECUTION_PRICE",
+            "window_end": "2026-09-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "MISSING_EXECUTION_PRICE",
+            "window_end": "2026-09-09"
+          }
+        },
+        "end": "2026-09-09",
+        "start": "2026-06-26"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-26|BINANCE:AAVEUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 12,
+        "required_days": 12,
+        "required_end": "2026-07-16",
+        "required_start": "2026-07-05"
+      },
+      "decision_date": "2026-07-05",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "CRVUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-05..2026-07-16 (12 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-06",
+            "exit_date": "2026-07-16",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-16"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-06",
+            "exit_date": "2026-07-16",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-16"
+          }
+        },
+        "end": "2026-07-16",
+        "start": "2026-07-05"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-05|BINANCE:CRVUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-08",
+        "required_start": "2026-07-07"
+      },
+      "decision_date": "2026-07-07",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "CRVUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-07..2026-07-08 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          }
+        },
+        "end": "2026-07-08",
+        "start": "2026-07-07"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-07|BINANCE:CRVUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-09",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "CRVUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-09 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          }
+        },
+        "end": "2026-07-09",
+        "start": "2026-07-08"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-08|BINANCE:CRVUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-12"
+      },
+      "decision_date": "2026-07-12",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "CRVUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-12..2026-07-13 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-12"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-12|BINANCE:CRVUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:CRVUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-15",
+        "required_start": "2026-07-14"
+      },
+      "decision_date": "2026-07-14",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "CRVUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-14..2026-07-15 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-15"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-15"
+          }
+        },
+        "end": "2026-07-15",
+        "start": "2026-07-14"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-14|BINANCE:CRVUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:IMXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 25,
+        "required_days": 25,
+        "required_end": "2026-07-30",
+        "required_start": "2026-07-06"
+      },
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "IMXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-06..2026-07-30 (25 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-30",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-30"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-30",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-30"
+          }
+        },
+        "end": "2026-07-30",
+        "start": "2026-07-06"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-06|BINANCE:IMXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:INJUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 7,
+        "required_days": 7,
+        "required_end": "2026-07-17",
+        "required_start": "2026-07-11"
+      },
+      "decision_date": "2026-07-11",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "INJUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-11..2026-07-17 (7 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-12",
+            "exit_date": "2026-07-17",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-17"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-13",
+            "exit_date": "2026-07-17",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-17"
+          }
+        },
+        "end": "2026-07-17",
+        "start": "2026-07-11"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-11|BINANCE:INJUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:INJUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-12"
+      },
+      "decision_date": "2026-07-12",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "INJUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-12..2026-07-13 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-12"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-12|BINANCE:INJUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:INJUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-16",
+        "required_start": "2026-07-15"
+      },
+      "decision_date": "2026-07-15",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "INJUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-15..2026-07-16 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-16"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-16"
+          }
+        },
+        "end": "2026-07-16",
+        "start": "2026-07-15"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-15|BINANCE:INJUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:LINKUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 6,
+        "required_days": 6,
+        "required_end": "2026-07-20",
+        "required_start": "2026-07-15"
+      },
+      "decision_date": "2026-07-15",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "LINKUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-15..2026-07-20 (6 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-16",
+            "exit_date": "2026-07-18",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-18"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-16",
+            "exit_date": "2026-07-20",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-20"
+          }
+        },
+        "end": "2026-07-20",
+        "start": "2026-07-15"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-15|BINANCE:LINKUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 8,
+        "required_days": 8,
+        "required_end": "2026-07-10",
+        "required_start": "2026-07-03"
+      },
+      "decision_date": "2026-07-03",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PENDLEUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-03..2026-07-10 (8 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-04",
+            "exit_date": "2026-07-10",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-10"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-06",
+            "exit_date": "2026-07-10",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-10"
+          }
+        },
+        "end": "2026-07-10",
+        "start": "2026-07-03"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-03|BINANCE:PENDLEUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 3,
+        "required_days": 3,
+        "required_end": "2026-07-06",
+        "required_start": "2026-07-04"
+      },
+      "decision_date": "2026-07-04",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PENDLEUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-04..2026-07-06 (3 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-05"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-07-04"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-04|BINANCE:PENDLEUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-06",
+        "required_start": "2026-07-05"
+      },
+      "decision_date": "2026-07-05",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PENDLEUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-05..2026-07-06 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-07-05"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-05|BINANCE:PENDLEUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-08",
+        "required_start": "2026-07-07"
+      },
+      "decision_date": "2026-07-07",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PENDLEUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-07..2026-07-08 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          }
+        },
+        "end": "2026-07-08",
+        "start": "2026-07-07"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-07|BINANCE:PENDLEUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:PENDLEUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-09",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PENDLEUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-09 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          }
+        },
+        "end": "2026-07-09",
+        "start": "2026-07-08"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-08|BINANCE:PENDLEUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "decision_date": "2026-06-20",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "QNTUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-20..2026-09-09 (82 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-06-21",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-06-22",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          }
+        },
+        "end": "2026-09-09",
+        "start": "2026-06-20"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-20|BINANCE:QNTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-06-22",
+        "required_start": "2026-06-21"
+      },
+      "decision_date": "2026-06-21",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "QNTUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-21..2026-06-22 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-22"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-22"
+          }
+        },
+        "end": "2026-06-22",
+        "start": "2026-06-21"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-21|BINANCE:QNTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-06-24",
+        "required_start": "2026-06-23"
+      },
+      "decision_date": "2026-06-23",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "QNTUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-23..2026-06-24 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-24"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-24"
+          }
+        },
+        "end": "2026-06-24",
+        "start": "2026-06-23"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-23|BINANCE:QNTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-06-25",
+        "required_start": "2026-06-24"
+      },
+      "decision_date": "2026-06-24",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "QNTUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-24..2026-06-25 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-25"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-25"
+          }
+        },
+        "end": "2026-06-25",
+        "start": "2026-06-24"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-24|BINANCE:QNTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:QNTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 3,
+        "required_days": 3,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-11"
+      },
+      "decision_date": "2026-07-11",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "QNTUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-11..2026-07-13 (3 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-12"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-11"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-11|BINANCE:QNTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:SOLUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 6,
+        "required_days": 6,
+        "required_end": "2026-07-07",
+        "required_start": "2026-07-02"
+      },
+      "decision_date": "2026-07-02",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "SOLUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-02..2026-07-07 (6 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-03",
+            "exit_date": "2026-07-05",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-05"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-03",
+            "exit_date": "2026-07-07",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-07"
+          }
+        },
+        "end": "2026-07-07",
+        "start": "2026-07-02"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-02|BINANCE:SOLUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:SUNUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 4,
+        "required_days": 4,
+        "required_end": "2026-07-09",
+        "required_start": "2026-07-06"
+      },
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "SUNUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-06..2026-07-09 (4 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-09",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-09",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-09"
+          }
+        },
+        "end": "2026-07-09",
+        "start": "2026-07-06"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-06|BINANCE:SUNUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:SUNUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-08",
+        "required_start": "2026-07-07"
+      },
+      "decision_date": "2026-07-07",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "SUNUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-07..2026-07-08 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          }
+        },
+        "end": "2026-07-08",
+        "start": "2026-07-07"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-07|BINANCE:SUNUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 4,
+        "required_days": 4,
+        "required_end": "2026-07-01",
+        "required_start": "2026-06-28"
+      },
+      "decision_date": "2026-06-28",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TIAUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-28..2026-07-01 (4 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-06-29",
+            "exit_date": "2026-07-01",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-01"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-06-29",
+            "exit_date": "2026-07-01",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-01"
+          }
+        },
+        "end": "2026-07-01",
+        "start": "2026-06-28"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-28|BINANCE:TIAUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-06-30",
+        "required_start": "2026-06-29"
+      },
+      "decision_date": "2026-06-29",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TIAUSDT",
+      "reason": "official daily OHLC present for every day 2026-06-29..2026-06-30 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-30"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-30"
+          }
+        },
+        "end": "2026-06-30",
+        "start": "2026-06-29"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-29|BINANCE:TIAUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 7,
+        "required_days": 7,
+        "required_end": "2026-07-07",
+        "required_start": "2026-07-01"
+      },
+      "decision_date": "2026-07-01",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TIAUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-01..2026-07-07 (7 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-02",
+            "exit_date": "2026-07-05",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-05"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-02",
+            "exit_date": "2026-07-07",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-07"
+          }
+        },
+        "end": "2026-07-07",
+        "start": "2026-07-01"
+      },
+      "signal": "HEDGE_SHORT",
+      "signal_id": "2026-07-01|BINANCE:TIAUSDT|HEDGE_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-03",
+        "required_start": "2026-07-02"
+      },
+      "decision_date": "2026-07-02",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TIAUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-02..2026-07-03 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-03"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-03"
+          }
+        },
+        "end": "2026-07-03",
+        "start": "2026-07-02"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-02|BINANCE:TIAUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 4,
+        "required_days": 4,
+        "required_end": "2026-07-06",
+        "required_start": "2026-07-03"
+      },
+      "decision_date": "2026-07-03",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TIAUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-03..2026-07-06 (4 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-04"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-07-03"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-03|BINANCE:TIAUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TIAUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 6,
+        "required_days": 6,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TIAUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-13 (6 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-09",
+            "exit_date": "2026-07-11",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-11"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-09",
+            "exit_date": "2026-07-13",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-08"
+      },
+      "signal": "HEDGE_SHORT",
+      "signal_id": "2026-07-08|BINANCE:TIAUSDT|HEDGE_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 23,
+        "required_days": 23,
+        "required_end": "2026-07-28",
+        "required_start": "2026-07-06"
+      },
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-06..2026-07-28 (23 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-26",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-26"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-28",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-28"
+          }
+        },
+        "end": "2026-07-28",
+        "start": "2026-07-06"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-06|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-08",
+        "required_start": "2026-07-07"
+      },
+      "decision_date": "2026-07-07",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-07..2026-07-08 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          }
+        },
+        "end": "2026-07-08",
+        "start": "2026-07-07"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-07|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-09",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-09 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          }
+        },
+        "end": "2026-07-09",
+        "start": "2026-07-08"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-08|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-10",
+        "required_start": "2026-07-09"
+      },
+      "decision_date": "2026-07-09",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-09..2026-07-10 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-10"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-10"
+          }
+        },
+        "end": "2026-07-10",
+        "start": "2026-07-09"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-09|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 4,
+        "required_days": 4,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-10"
+      },
+      "decision_date": "2026-07-10",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-10..2026-07-13 (4 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-11"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-10"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-10|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 3,
+        "required_days": 3,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-11"
+      },
+      "decision_date": "2026-07-11",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-11..2026-07-13 (3 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-12"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-11"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-11|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-12"
+      },
+      "decision_date": "2026-07-12",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-12..2026-07-13 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-12"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-12|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-14",
+        "required_start": "2026-07-13"
+      },
+      "decision_date": "2026-07-13",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-13..2026-07-14 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-14"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-14"
+          }
+        },
+        "end": "2026-07-14",
+        "start": "2026-07-13"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-13|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-15",
+        "required_start": "2026-07-14"
+      },
+      "decision_date": "2026-07-14",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-14..2026-07-15 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-15"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-15"
+          }
+        },
+        "end": "2026-07-15",
+        "start": "2026-07-14"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-14|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:TRXUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-16",
+        "required_start": "2026-07-15"
+      },
+      "decision_date": "2026-07-15",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "TRXUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-15..2026-07-16 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-16"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-16"
+          }
+        },
+        "end": "2026-07-16",
+        "start": "2026-07-15"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-15|BINANCE:TRXUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:VIRTUALUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 11,
+        "required_days": 11,
+        "required_end": "2026-07-22",
+        "required_start": "2026-07-12"
+      },
+      "decision_date": "2026-07-12",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "VIRTUALUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-12..2026-07-22 (11 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-13",
+            "exit_date": "2026-07-22",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-22"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-13",
+            "exit_date": "2026-07-22",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-22"
+          }
+        },
+        "end": "2026-07-22",
+        "start": "2026-07-12"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-12|BINANCE:VIRTUALUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:ZECUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 7,
+        "required_days": 7,
+        "required_end": "2026-07-14",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "ZECUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-14 (7 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-09",
+            "exit_date": "2026-07-12",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-12"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-09",
+            "exit_date": "2026-07-14",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-14"
+          }
+        },
+        "end": "2026-07-14",
+        "start": "2026-07-08"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-08|BINANCE:ZECUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:ZECUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-10",
+        "required_start": "2026-07-09"
+      },
+      "decision_date": "2026-07-09",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "ZECUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-09..2026-07-10 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-10"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-10"
+          }
+        },
+        "end": "2026-07-10",
+        "start": "2026-07-09"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-09|BINANCE:ZECUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BINANCE:ZECUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 4,
+        "required_days": 4,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-10"
+      },
+      "decision_date": "2026-07-10",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "ZECUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-10..2026-07-13 (4 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-11"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-10"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-10|BINANCE:ZECUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BITFINEX:LEOUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 6,
+        "required_days": 6,
+        "required_end": "2026-07-20",
+        "required_start": "2026-07-15"
+      },
+      "decision_date": "2026-07-15",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "tLEOUSD",
+      "reason": "official daily OHLC present for every day 2026-07-15..2026-07-20 (6 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-16",
+            "exit_date": "2026-07-18",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-18"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-16",
+            "exit_date": "2026-07-20",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-20"
+          }
+        },
+        "end": "2026-07-20",
+        "start": "2026-07-15"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-15|BITFINEX:LEOUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BYBIT:GRAMUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 67,
+        "required_days": 67,
+        "required_end": "2026-09-09",
+        "required_start": "2026-07-05"
+      },
+      "decision_date": "2026-07-05",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GRAMUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-05..2026-09-09 (67 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-06",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-06",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          }
+        },
+        "end": "2026-09-09",
+        "start": "2026-07-05"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-05|BYBIT:GRAMUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BYBIT:GRAMUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-07",
+        "required_start": "2026-07-06"
+      },
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GRAMUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-06..2026-07-07 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-07"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-07"
+          }
+        },
+        "end": "2026-07-07",
+        "start": "2026-07-06"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-06|BYBIT:GRAMUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BYBIT:GRAMUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-08",
+        "required_start": "2026-07-07"
+      },
+      "decision_date": "2026-07-07",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GRAMUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-07..2026-07-08 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          }
+        },
+        "end": "2026-07-08",
+        "start": "2026-07-07"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-07|BYBIT:GRAMUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BYBIT:GRAMUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-09",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GRAMUSDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-09 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          }
+        },
+        "end": "2026-07-09",
+        "start": "2026-07-08"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-08|BYBIT:GRAMUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "BYBIT:TELUSDT",
+      "decision_date": "2026-07-09",
+      "decisive_execution_status": "ELIMINATED_STAGE_ONE_PRESERVED",
+      "instrument": null,
+      "reason": "Stage One elimination preserved",
+      "required_window": null,
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-09|BYBIT:TELUSDT|BEAR_SHORT",
+      "verdict": "NOT_ELIGIBLE_STAGE_ONE_ELIMINATED"
+    },
+    {
+      "c22_asset": "COINBASE:MORPHOUSD",
+      "decision_date": "2026-07-01",
+      "decisive_execution_status": "EXCLUDED_VENUE_POLICY",
+      "instrument": null,
+      "reason": "excluded by HOME_VENUE_ONLY governance decision",
+      "required_window": null,
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-01|COINBASE:MORPHOUSD|BEAR_SHORT",
+      "verdict": "NOT_ELIGIBLE_EXCLUDED_VENUE_POLICY"
+    },
+    {
+      "c22_asset": "COINBASE:MORPHOUSD",
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "EXCLUDED_VENUE_POLICY",
+      "instrument": null,
+      "reason": "excluded by HOME_VENUE_ONLY governance decision",
+      "required_window": null,
+      "signal": "HEDGE_SHORT",
+      "signal_id": "2026-07-06|COINBASE:MORPHOUSD|HEDGE_SHORT",
+      "verdict": "NOT_ELIGIBLE_EXCLUDED_VENUE_POLICY"
+    },
+    {
+      "c22_asset": "GATE:ASTERUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 81,
+        "required_days": 81,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-21"
+      },
+      "decision_date": "2026-06-21",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "ASTER_USDT",
+      "reason": "official daily OHLC present for every day 2026-06-21..2026-09-09 (81 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-06-22",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-06-22",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          }
+        },
+        "end": "2026-09-09",
+        "start": "2026-06-21"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-21|GATE:ASTERUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:ASTERUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 3,
+        "required_days": 3,
+        "required_end": "2026-07-06",
+        "required_start": "2026-07-04"
+      },
+      "decision_date": "2026-07-04",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "ASTER_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-04..2026-07-06 (3 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-05"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-07-04"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-04|GATE:ASTERUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:ASTERUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-06",
+        "required_start": "2026-07-05"
+      },
+      "decision_date": "2026-07-05",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "ASTER_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-05..2026-07-06 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-07-05"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-05|GATE:ASTERUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 20,
+        "required_days": 20,
+        "required_end": "2026-07-23",
+        "required_start": "2026-07-04"
+      },
+      "decision_date": "2026-07-04",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-04..2026-07-23 (20 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-05",
+            "exit_date": "2026-07-20",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-20"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-06",
+            "exit_date": "2026-07-23",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-23"
+          }
+        },
+        "end": "2026-07-23",
+        "start": "2026-07-04"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-04|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-06",
+        "required_start": "2026-07-05"
+      },
+      "decision_date": "2026-07-05",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-05..2026-07-06 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-07-05"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-05|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-07",
+        "required_start": "2026-07-06"
+      },
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-06..2026-07-07 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-07"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-07"
+          }
+        },
+        "end": "2026-07-07",
+        "start": "2026-07-06"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-06|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-08",
+        "required_start": "2026-07-07"
+      },
+      "decision_date": "2026-07-07",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-07..2026-07-08 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-08"
+          }
+        },
+        "end": "2026-07-08",
+        "start": "2026-07-07"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-07|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-09",
+        "required_start": "2026-07-08"
+      },
+      "decision_date": "2026-07-08",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-08..2026-07-09 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-09"
+          }
+        },
+        "end": "2026-07-09",
+        "start": "2026-07-08"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-08|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-10",
+        "required_start": "2026-07-09"
+      },
+      "decision_date": "2026-07-09",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-09..2026-07-10 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-10"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-10"
+          }
+        },
+        "end": "2026-07-10",
+        "start": "2026-07-09"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-09|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 4,
+        "required_days": 4,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-10"
+      },
+      "decision_date": "2026-07-10",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-10..2026-07-13 (4 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-11"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-10"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-10|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 3,
+        "required_days": 3,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-11"
+      },
+      "decision_date": "2026-07-11",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-11..2026-07-13 (3 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-12"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-11"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-11|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-13",
+        "required_start": "2026-07-12"
+      },
+      "decision_date": "2026-07-12",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-12..2026-07-13 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-13"
+          }
+        },
+        "end": "2026-07-13",
+        "start": "2026-07-12"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-12|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-14",
+        "required_start": "2026-07-13"
+      },
+      "decision_date": "2026-07-13",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-13..2026-07-14 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-14"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-14"
+          }
+        },
+        "end": "2026-07-14",
+        "start": "2026-07-13"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-13|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-15",
+        "required_start": "2026-07-14"
+      },
+      "decision_date": "2026-07-14",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-14..2026-07-15 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-15"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-15"
+          }
+        },
+        "end": "2026-07-15",
+        "start": "2026-07-14"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-14|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "GATE:GTUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-16",
+        "required_start": "2026-07-15"
+      },
+      "decision_date": "2026-07-15",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "GT_USDT",
+      "reason": "official daily OHLC present for every day 2026-07-15..2026-07-16 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-16"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-16"
+          }
+        },
+        "end": "2026-07-16",
+        "start": "2026-07-15"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-15|GATE:GTUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:KASUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 67,
+        "required_days": 67,
+        "required_end": "2026-09-09",
+        "required_start": "2026-07-05"
+      },
+      "decision_date": "2026-07-05",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_KASUSD",
+      "reason": "official daily OHLC present for every day 2026-07-05..2026-09-09 (67 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-07-06",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-07-06",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          }
+        },
+        "end": "2026-09-09",
+        "start": "2026-07-05"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-05|KRAKEN:KASUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:KASUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-07",
+        "required_start": "2026-07-06"
+      },
+      "decision_date": "2026-07-06",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_KASUSD",
+      "reason": "official daily OHLC present for every day 2026-07-06..2026-07-07 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-07"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-07"
+          }
+        },
+        "end": "2026-07-07",
+        "start": "2026-07-06"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-06|KRAKEN:KASUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 9,
+        "required_days": 9,
+        "required_end": "2026-07-06",
+        "required_start": "2026-06-28"
+      },
+      "decision_date": "2026-06-28",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_SPXUSD",
+      "reason": "official daily OHLC present for every day 2026-06-28..2026-07-06 (9 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-06-29",
+            "exit_date": "2026-07-04",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-04"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-06-29",
+            "exit_date": "2026-07-06",
+            "lifecycle_status": "CLOSED",
+            "window_end": "2026-07-06"
+          }
+        },
+        "end": "2026-07-06",
+        "start": "2026-06-28"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-28|KRAKEN:SPXUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-06-30",
+        "required_start": "2026-06-29"
+      },
+      "decision_date": "2026-06-29",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_SPXUSD",
+      "reason": "official daily OHLC present for every day 2026-06-29..2026-06-30 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-30"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-06-30"
+          }
+        },
+        "end": "2026-06-30",
+        "start": "2026-06-29"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-29|KRAKEN:SPXUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-01",
+        "required_start": "2026-06-30"
+      },
+      "decision_date": "2026-06-30",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_SPXUSD",
+      "reason": "official daily OHLC present for every day 2026-06-30..2026-07-01 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-01"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-01"
+          }
+        },
+        "end": "2026-07-01",
+        "start": "2026-06-30"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-30|KRAKEN:SPXUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-02",
+        "required_start": "2026-07-01"
+      },
+      "decision_date": "2026-07-01",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_SPXUSD",
+      "reason": "official daily OHLC present for every day 2026-07-01..2026-07-02 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-02"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-02"
+          }
+        },
+        "end": "2026-07-02",
+        "start": "2026-07-01"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-01|KRAKEN:SPXUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "KRAKEN:SPXUSD",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 2,
+        "required_days": 2,
+        "required_end": "2026-07-03",
+        "required_start": "2026-07-02"
+      },
+      "decision_date": "2026-07-02",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "PF_SPXUSD",
+      "reason": "official daily OHLC present for every day 2026-07-02..2026-07-03 (2 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-03"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": null,
+            "exit_date": null,
+            "lifecycle_status": "REJECTED",
+            "window_end": "2026-07-03"
+          }
+        },
+        "end": "2026-07-03",
+        "start": "2026-07-02"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-07-02|KRAKEN:SPXUSD|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    },
+    {
+      "c22_asset": "OKX:OKBUSDT",
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 79,
+        "required_days": 79,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-23"
+      },
+      "decision_date": "2026-06-23",
+      "decisive_execution_status": "PASS_HISTORICAL_SHORTABILITY",
+      "instrument": "OKB-USDT-SWAP",
+      "reason": "official daily OHLC present for every day 2026-06-23..2026-09-09 (79 days)",
+      "required_window": {
+        "by_profile": {
+          "CRYPTO_CALENDAR_SENSITIVITY": {
+            "entry_date": "2026-06-24",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          },
+          "V2_CONTRACT_EXACT": {
+            "entry_date": "2026-06-24",
+            "exit_date": null,
+            "lifecycle_status": "OPEN_AT_END_OF_DATA",
+            "window_end": "2026-09-09"
+          }
+        },
+        "end": "2026-09-09",
+        "start": "2026-06-23"
+      },
+      "signal": "BEAR_SHORT",
+      "signal_id": "2026-06-23|OKX:OKBUSDT|BEAR_SHORT",
+      "verdict": "PASS_OHLC_COVERAGE"
+    }
+  ],
+  "range_fetched": [
+    "2026-06-20",
+    "2026-09-10"
+  ],
+  "raw_evidence_files": [
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/AAVE/BINANCE__AAVE__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130800Z.raw.json",
+      "5f08dfe639f7f16b81f7f2a1572ce0f99fc02a86b5afa24ca40d21fa1391b543"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/CRV/BINANCE__CRV__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130801Z.raw.json",
+      "194aeb11b166e304af6f292679c8daf1796ba1763dd7db3a3a056cb55d9a3d32"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/IMX/BINANCE__IMX__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130801Z.raw.json",
+      "6225656a50679b24f1dd78d1a0ea9df87db61326295648ff2f26f7336903252b"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/INJ/BINANCE__INJ__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130802Z.raw.json",
+      "172b3dd2fc2b9e614223c33cc45af8a1220b81ab8b8a58d207fb4ef71f7ab384"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/LINK/BINANCE__LINK__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130803Z.raw.json",
+      "ac75f6b7f7ed18d74c3ebf12cf1671b62ea66117f4ae8d0471cf6d098d903079"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/PENDLE/BINANCE__PENDLE__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130803Z.raw.json",
+      "bfd86ace4f2bba27922b47d6657c29f790a8be63c407f5cf89caaa39bb846f02"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/QNT/BINANCE__QNT__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130804Z.raw.json",
+      "03448ac38ebf4fcb6afc791ccc2f36e9cf77795b190f3a578cfeb1ecdf1c2e2e"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/SOL/BINANCE__SOL__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130804Z.raw.json",
+      "6fcf9e2753ecbfb09506f35af062e20e1aaffa4d864c47c699b1fac450dabe1a"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/SUN/BINANCE__SUN__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130805Z.raw.json",
+      "f8af736700c8a69fec63ad284836aacea31d7296bbafdce592254d8037945ab9"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/TIA/BINANCE__TIA__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130805Z.raw.json",
+      "d165cba71856ab44424e1c488ac67552c8c626b9a939367f500f5dd7cb593239"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/TRX/BINANCE__TRX__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130806Z.raw.json",
+      "468fd13e11110ce5bf80e937ca3499f0565a090cc28f924733c3890a4d55a366"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/VIRTUAL/BINANCE__VIRTUAL__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130807Z.raw.json",
+      "88b10086e7fe3bb08070cd598ad15c72f94862f89f83f5699150eefc01b0c519"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BINANCE/ZEC/BINANCE__ZEC__stage3_usdm_daily_klines_p00__20260911T130800Z__2026-09-11T130807Z.raw.json",
+      "86cee30661ba58ed871e3ffa0bf3ac6a8ff133e0dda0bb1317cb20f8bc9fed59"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BITFINEX/LEO/BITFINEX__LEO__stage3_pair_daily_candles__20260911T130800Z__2026-09-11T130808Z.raw.json",
+      "3044a52cc0c6a659a1f146b039b61c804766f8f02bbba4d27ebe3a6516d73b1b"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__stage3_linear_daily_kline__20260911T130800Z__2026-09-11T130808Z.raw.json",
+      "13233143e4372a9979e0ac4ae66b9f3df379983ff4e54f6c34d3aa8aa0cf3ba7"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/GATE/ASTER/GATE__ASTER__stage3_futures_daily_candlesticks__20260911T130800Z__2026-09-11T130809Z.raw.json",
+      "836b545e7833afd71bab6e14b6f0613c48790c3c755f230b24068b1ae91b19b7"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/GATE/GT/GATE__GT__stage3_futures_daily_candlesticks__20260911T130800Z__2026-09-11T130810Z.raw.json",
+      "4d28224b531b310d65fa8f6c348dd1c72ccf35ea498c9354a4517f3d5f8306b4"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__stage3_futures_daily_chart__20260911T130800Z__2026-09-11T130811Z.raw.json",
+      "68791c3eef5b518703238c0fc7cd11e08888ca22bd9a123073fe7713cb63ea30"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__stage3_futures_daily_chart__20260911T130800Z__2026-09-11T130812Z.raw.json",
+      "cd7e49c183b8f9ef554dc333fea0410b36596b1d91b05d1cfcce8646e205cdc5"
+    ],
+    [
+      "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage3_swap_history_candles_p00__20260911T130800Z__2026-09-11T130812Z.raw.json",
+      "ef30f818fb65fc8500fd6ee53dcffc665ac655de1d581407a0e9fcbc63e305c0"
+    ]
+  ],
+  "report": "c22_b3_stage3_historical_ohlc",
+  "run_id": "20260911T130800Z",
+  "stage": "B3_STAGE_THREE_HISTORICAL_OHLC",
+  "stage_version": "c22_b3_stage3_v1",
+  "strategy_rules_modified": false,
+  "today_utc": "2026-09-11",
+  "v2_modified": false,
+  "verdict_counts": {
+    "FAIL_OHLC_COVERAGE_GAP": 0,
+    "NOT_ELIGIBLE_EXCLUDED_VENUE_POLICY": 2,
+    "NOT_ELIGIBLE_STAGE_ONE_ELIMINATED": 1,
+    "NOT_ELIGIBLE_STAGE_TWO_NOT_PASSED": 0,
+    "PASS_OHLC_COVERAGE": 72,
+    "UNRESOLVED_OHLC_SOURCE": 0
+  }
+}
