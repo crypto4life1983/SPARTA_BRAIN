@@ -4589,3 +4589,9 @@ into deep extraction even if the warning_labels list omits them.
 - **Lesson:** With the locked S1 cost model ($1 minimum commission) the equal-weight rotation emits dust REBALANCE trims every week (e.g. +0.008 MU shares, ~$7 notional). An equal-weighted per-fill shortfall mean turned that into ~11,000 bps and tripped `IMPLEMENTATION_SHORTFALL_BLOWOUT` on the very first replay cycle. Total cost / total notional traded (~1-3 bps) is the honest aggregate.
 - **Why:** Per-fill bps are dominated by the smallest trades; the kill-switch threshold (25 bps) was designed for a book-level number.
 - **How to apply:** `cycle_runner` reports per-fill bps for transparency but feeds the kill-switch the notional-weighted cumulative mean. Also: an anchor gap must be replayed bar-by-bar or refused; the legacy +73.7% "week" is a 20.4-week hold and cannot be reconstructed into v2 state because its anchor is off-grid.
+
+## 2026-09-11 - LESSON_H1_AUTH5_001 - Validate every field the locked accounting consumes, not just the headline series
+
+- **Lesson:** H1's data feasibility (Auth-1) and engine validation (Auth-3/4) checked `fundingRate` completeness and gaps but never `markPrice`, which the locked rule 7 multiplies on every stamp. The first real execution aborted on empty strings covering 55% of the window.
+- **Why:** Feasibility gates were written around the series that defines the edge, not around every operand of the P&L arithmetic.
+- **How to apply:** Data contracts must enumerate every column the engine reads and assert numeric completeness per column over the exact locked window (add a P4b-style in-window operand check to every future prereg). When it fails, ABORT and open an amendment gate; never patch the engine in place (anti-rescue).
