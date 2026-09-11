@@ -1,14 +1,14 @@
-# Trade Journal Learning Report — 2026-09-10
+# Trade Journal Learning Report — 2026-09-11
 
 **READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL · NO BROKER / NO ORDER**
 
-Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusion below threshold is PRELIMINARY.
+Sample label: **OK** (dedup closed signals 31 vs MIN_SIGNALS=30). Every conclusion below threshold is PRELIMINARY.
 
 ## Counts (closed trades)
 
-- rows 42 · closed 41 · open 1 · distinct signals (closed) 30
-- sum_R raw 15.466 · dedup best-row 8.881 · dedup mean-row 7.868
-- win rate 0.463 · expectancy 0.377 R (dedup mean 0.262) · profit factor 1.620
+- rows 42 · closed 42 · open 0 · distinct signals (closed) 31
+- sum_R raw 14.359 · dedup best-row 7.774 · dedup mean-row 6.761
+- win rate 0.452 · expectancy 0.342 R (dedup mean 0.218) · profit factor 1.551
 - note: raw rows overstate the sample: the bot mirrors signals on binance and kraken and the loose '2' variants often fire on the same bar
 
 ## Breakdowns
@@ -19,7 +19,7 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 |---|---|---|---|---|---|
 | D | 6 | 6 | 6.854 | 1.142 | 0.667 |
 | D2 | 11 | 9 | -9.230 | -0.839 | 0.273 |
-| E | 2 | 2 | 6.964 | 3.482 | 1.000 |
+| E | 3 | 3 | 5.857 | 1.952 | 0.667 |
 | E2 | 2 | 1 | 6.367 | 3.183 | 1.000 |
 | F | 3 | 3 | 7.722 | 2.574 | 1.000 |
 | F2 | 10 | 7 | -1.082 | -0.108 | 0.300 |
@@ -37,13 +37,13 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 | RANGE|short | 4 | 3 | 9.735 | 2.434 | 1.000 | NO_TREND_REGIME |
 | TREND_DOWN|long | 4 | 4 | -1.352 | -0.338 | 0.250 | COUNTER |
 | TREND_DOWN|short | 17 | 10 | 5.453 | 0.321 | 0.471 | ALIGNED |
-| TREND_UP|long | 4 | 4 | 6.285 | 1.571 | 0.750 | ALIGNED |
+| TREND_UP|long | 5 | 5 | 5.178 | 1.036 | 0.600 | ALIGNED |
 
 ### By alignment
 
 | bucket | n | n_signals | sum_R | avg_R | win_rate |
 |---|---|---|---|---|---|
-| ALIGNED | 21 | 14 | 11.738 | 0.559 | 0.524 |
+| ALIGNED | 22 | 15 | 10.631 | 0.483 | 0.500 |
 | COUNTER | 4 | 4 | -1.352 | -0.338 | 0.250 |
 | NO_TREND_REGIME | 11 | 10 | 10.498 | 0.954 | 0.545 |
 | UNLABELED | 5 | 2 | -5.418 | -1.084 | 0.200 |
@@ -52,7 +52,7 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 
 | bucket | n | n_signals | sum_R | avg_R | win_rate |
 |---|---|---|---|---|---|
-| LOSS | 19 | 13 | -23.330 | -1.228 | 0.000 |
+| LOSS | 20 | 14 | -24.437 | -1.222 | 0.000 |
 | TIMEOUT | 20 | 15 | 32.264 | 1.613 | 0.850 |
 | WIN | 2 | 2 | 6.532 | 3.266 | 1.000 |
 
@@ -60,7 +60,7 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 
 | bucket | n | n_signals | sum_R | avg_R | win_rate |
 |---|---|---|---|---|---|
-| binance | 26 | 22 | 4.669 | 0.180 | 0.385 |
+| binance | 27 | 23 | 3.562 | 0.132 | 0.370 |
 | kraken | 15 | 11 | 10.797 | 0.720 | 0.600 |
 
 ### By weekday (open_date)
@@ -69,7 +69,7 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 |---|---|---|---|---|---|
 | Fri | 9 | 6 | -1.186 | -0.132 | 0.333 |
 | Mon | 6 | 2 | 14.036 | 2.339 | 0.833 |
-| Sat | 4 | 4 | 1.278 | 0.320 | 0.250 |
+| Sat | 5 | 5 | 0.171 | 0.034 | 0.200 |
 | Sun | 1 | 1 | 0.592 | 0.592 | 1.000 |
 | Thu | 6 | 6 | -0.087 | -0.014 | 0.667 |
 | Tue | 8 | 5 | -4.742 | -0.593 | 0.125 |
@@ -83,7 +83,7 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 | 2026-06 | 15 | 10 | 27.109 | 1.807 | 0.800 |
 | 2026-07 | 6 | 3 | -3.959 | -0.660 | 0.167 |
 | 2026-08 | 8 | 8 | -5.374 | -0.672 | 0.250 |
-| 2026-09 | 4 | 4 | 5.093 | 1.273 | 0.750 |
+| 2026-09 | 5 | 5 | 3.986 | 0.797 | 0.600 |
 
 ## Stop discipline
 
@@ -106,8 +106,8 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 
 ## Holding
 
-- TIMEOUT share 0.488 (20 closes)
-- LOSS: n 19 · mean 11.470 d · max 20.000 d
+- TIMEOUT share 0.476 (20 closes)
+- LOSS: n 20 · mean 11.900 d · max 20.000 d
 - TIMEOUT: n 20 · mean 20.050 d · max 21.000 d
 - WIN: n 2 · mean 12.500 d · max 18.000 d
 
@@ -115,7 +115,7 @@ Sample label: **OK** (dedup closed signals 30 vs MIN_SIGNALS=30). Every conclusi
 
 - D: closed 6 (signals 6) vs 20 → PRELIMINARY
 - D2: closed 11 (signals 9) vs 20 → PRELIMINARY
-- E: closed 2 (signals 2) vs 20 → PRELIMINARY
+- E: closed 3 (signals 3) vs 20 → PRELIMINARY
 - E2: closed 2 (signals 1) vs 20 → PRELIMINARY
 - F: closed 3 (signals 3) vs 20 → PRELIMINARY
 - F2: closed 10 (signals 7) vs 20 → PRELIMINARY

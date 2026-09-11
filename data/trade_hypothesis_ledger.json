@@ -1,0 +1,201 @@
+{
+  "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
+  "created_as_of": "2026-09-11",
+  "default_thresholds": {
+    "max_p_positive_reject": 0.5,
+    "min_forward_signals": 20,
+    "min_p_positive": 0.9
+  },
+  "hypotheses": {
+    "block_long_in_TREND_DOWN": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-11",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-11",
+          "note": "registered from learning report; in-sample evidence frozen",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "block_long_in_TREND_DOWN",
+      "kind": "block",
+      "params": {
+        "alignment": "COUNTER",
+        "direction": "long",
+        "regime": "TREND_DOWN"
+      },
+      "registered_as_of": "2026-09-11",
+      "registered_evidence": {
+        "avg_R": -0.338,
+        "n": 4,
+        "n_signals": 4,
+        "sum_R": -1.352,
+        "win_rate": 0.25
+      },
+      "registered_label": "OK",
+      "rule": "block long when regime=TREND_DOWN (counter-trend)",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
+    "enforce_hard_stop": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-11",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-11",
+          "note": "registered from learning report; in-sample evidence frozen",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "enforce_hard_stop",
+      "kind": "stop_cap",
+      "params": {
+        "cap_R": -1.5
+      },
+      "registered_as_of": "2026-09-11",
+      "registered_evidence": {
+        "n_breaches": 7,
+        "total_excess_loss_R": 6.062,
+        "worst_ids": [
+          46,
+          47,
+          15,
+          16,
+          13
+        ]
+      },
+      "registered_label": "OK",
+      "rule": "enforce hard stop / investigate fills (losses beyond planned -1R)",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
+    "partial_tp_or_trail_2R": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-11",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-11",
+          "note": "registered from learning report; in-sample evidence frozen",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "partial_tp_or_trail_2R",
+      "kind": "partial_2R",
+      "params": {
+        "fraction": 0.5,
+        "trigger_R": 2.0
+      },
+      "registered_as_of": "2026-09-11",
+      "registered_evidence": {
+        "capture_ratio": 0.598,
+        "mean_MFE_R": 2.983,
+        "mean_realized_R": 1.785,
+        "n": 10,
+        "reached_2R_but_closed_below_1R": 1
+      },
+      "registered_label": "OK",
+      "rule": "add partial take-profit or trailing stop at 2R",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
+    "review_pause_D2": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-11",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-11",
+          "note": "registered from learning report; in-sample evidence frozen",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "review_pause_D2",
+      "kind": "block",
+      "params": {
+        "strategy": "D2"
+      },
+      "registered_as_of": "2026-09-11",
+      "registered_evidence": {
+        "avg_R": -0.839,
+        "n": 11,
+        "n_signals": 9,
+        "sum_R": -9.23,
+        "win_rate": 0.273
+      },
+      "registered_label": "PRELIMINARY",
+      "rule": "review/pause strategy D2 (Donchian Breakout (loose))",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    }
+  },
+  "last_updated_as_of": "2026-09-11",
+  "posture": {
+    "broker": "NONE",
+    "confirmed_means": "recommendation for the operator; nothing applied automatically",
+    "external_project_modified": false,
+    "journal_writes": "NONE",
+    "mode": "READ_ONLY_OBSERVATION",
+    "orders": "NONE",
+    "rules_applied": false
+  },
+  "schema_version": 1
+}

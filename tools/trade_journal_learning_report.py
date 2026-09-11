@@ -630,6 +630,12 @@ def main() -> int:
     print(f"wrote {REPORT_DIR / 'latest.json'}, latest.md, history.jsonl (+1 line)")
     print(f"closed {c['closed']} rows / {c['distinct_signals_closed']} signals · "
           f"suggestions {len(rep['suggestions'])} · sample {rep['sample_quality']['overall_label']}")
+    try:  # additive: feed the forward hypothesis ledger; never allowed to break the report
+        from tools import trade_hypothesis_ledger as thl
+        led = thl.run_cycle(rep, trades, excursions, as_of)
+        print(f"[hypothesis-ledger] {led['_last_run']['by_status']} → {thl.LEDGER_PATH}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"[hypothesis-ledger] skipped: {type(exc).__name__}: {exc}")
     return 0
 
 
