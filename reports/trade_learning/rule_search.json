@@ -1,0 +1,235 @@
+{
+  "as_of": "2026-09-11",
+  "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
+  "cells": [
+    {
+      "candidate": false,
+      "cell": {
+        "hold_bucket": "short"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__hold_bucket=short",
+      "mean_R": -0.7217,
+      "n_signals": 6,
+      "p_adj": 1.0,
+      "p_raw": 0.0805,
+      "sum_R": -4.33,
+      "win_rate": 0.0
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "direction": "short",
+        "strategy": "D2"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__strategy=D2__direction=short",
+      "mean_R": -0.7115,
+      "n_signals": 8,
+      "p_adj": 0.6522,
+      "p_raw": 0.0435,
+      "sum_R": -5.692,
+      "win_rate": 0.375
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "regime_at_open": "TREND_DOWN",
+        "strategy": "D2"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__strategy=D2__regime_at_open=TREND_DOWN",
+      "mean_R": -0.6193,
+      "n_signals": 7,
+      "p_adj": 1.0,
+      "p_raw": 0.078,
+      "sum_R": -4.335,
+      "win_rate": 0.429
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "direction": "long",
+        "strategy": "G"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__strategy=G__direction=long",
+      "mean_R": -0.3041,
+      "n_signals": 7,
+      "p_adj": 1.0,
+      "p_raw": 0.1939,
+      "sum_R": -2.129,
+      "win_rate": 0.286
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "direction": "short",
+        "regime_at_open": "TREND_DOWN"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__regime_at_open=TREND_DOWN__direction=short",
+      "mean_R": -0.262,
+      "n_signals": 10,
+      "p_adj": 1.0,
+      "p_raw": 0.1554,
+      "sum_R": -2.62,
+      "win_rate": 0.4
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "weekday": "Tue"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__weekday=Tue",
+      "mean_R": -0.111,
+      "n_signals": 5,
+      "p_adj": 1.0,
+      "p_raw": 0.3248,
+      "sum_R": -0.555,
+      "win_rate": 0.2
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "direction": "long",
+        "regime_at_open": "RANGE"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__regime_at_open=RANGE__direction=long",
+      "mean_R": -0.0878,
+      "n_signals": 5,
+      "p_adj": 1.0,
+      "p_raw": 0.3348,
+      "sum_R": -0.439,
+      "win_rate": 0.2
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "weekday": "Thu"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__weekday=Thu",
+      "mean_R": -0.0145,
+      "n_signals": 6,
+      "p_adj": 1.0,
+      "p_raw": 0.3503,
+      "sum_R": -0.087,
+      "win_rate": 0.667
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "exchange": "binance"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__exchange=binance",
+      "mean_R": -0.0054,
+      "n_signals": 23,
+      "p_adj": 1.0,
+      "p_raw": 0.095,
+      "sum_R": -0.125,
+      "win_rate": 0.348
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "weekday": "Sat"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__weekday=Sat",
+      "mean_R": 0.0342,
+      "n_signals": 5,
+      "p_adj": 1.0,
+      "p_raw": 1.0,
+      "sum_R": 0.171,
+      "win_rate": 0.2
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "weekday": "Fri"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__weekday=Fri",
+      "mean_R": 0.3325,
+      "n_signals": 6,
+      "p_adj": 1.0,
+      "p_raw": 1.0,
+      "sum_R": 1.995,
+      "win_rate": 0.5
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "weekday": "Wed"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__weekday=Wed",
+      "mean_R": 0.4793,
+      "n_signals": 6,
+      "p_adj": 1.0,
+      "p_raw": 1.0,
+      "sum_R": 2.876,
+      "win_rate": 0.5
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "hold_bucket": "long"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__hold_bucket=long",
+      "mean_R": 0.524,
+      "n_signals": 22,
+      "p_adj": 1.0,
+      "p_raw": 1.0,
+      "sum_R": 11.529,
+      "win_rate": 0.591
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "exchange": "kraken"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__exchange=kraken",
+      "mean_R": 0.9874,
+      "n_signals": 8,
+      "p_adj": 1.0,
+      "p_raw": 1.0,
+      "sum_R": 7.899,
+      "win_rate": 0.75
+    },
+    {
+      "candidate": false,
+      "cell": {
+        "direction": "long",
+        "regime_at_open": "TREND_UP"
+      },
+      "cells_tested": 15,
+      "id": "blockwhere__regime_at_open=TREND_UP__direction=long",
+      "mean_R": 1.0356,
+      "n_signals": 5,
+      "p_adj": 1.0,
+      "p_raw": 1.0,
+      "sum_R": 5.178,
+      "win_rate": 0.6
+    }
+  ],
+  "cells_tested": 15,
+  "controls": {
+    "correction": "bonferroni",
+    "max_new_per_week": 3,
+    "min_cell_signals": 5,
+    "p_adj_max": 0.1,
+    "permutations": 2000,
+    "seed": 42
+  },
+  "n_signals": 31,
+  "proposals": [],
+  "registered": [],
+  "registrations_this_week_before": 0
+}

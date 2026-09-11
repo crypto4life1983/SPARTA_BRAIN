@@ -45,6 +45,7 @@ from tools.trade_journal_adapter import (  # noqa: E402  (reuse, never modify)
 from tools.trade_journal_learning_report import (  # noqa: E402  (reuse, never modify)
     BANNER,
     _alignment,
+    _days_between,
     _pnl,
     _signal_key,
     _weekday,
@@ -151,6 +152,16 @@ def kind_for_id(sid: str) -> tuple[str, dict[str, Any]]:
         if wd.startswith("weekday_"):
             wd = wd[len("weekday_"):]
         return "flag", {"weekday": wd}
+    if sid.startswith("blockwhere__"):
+        # generic cell block emitted by tools/trade_rule_search.py:
+        # blockwhere__<field>=<value>__<field>=<value>  (fields: strategy, direction,
+        # regime_at_open, exchange, weekday, hold_bucket)
+        where: dict[str, str] = {}
+        for part in sid[len("blockwhere__"):].split("__"):
+            if "=" in part:
+                k, v = part.split("=", 1)
+                where[k] = v
+        return ("block_where", {"where": where}) if where else ("unknown", {})
     return "unknown", {}
 
 
@@ -264,12 +275,45 @@ def evaluate_flag(hyp: dict[str, Any], trade: dict[str, Any]) -> float | None:
     return -v
 
 
+def trade_field(trade: dict[str, Any], field: str) -> str | None:
+    """Derived/normalised trade attributes used by generic cell rules."""
+    if field == "weekday":
+        return _weekday(trade)
+    if field == "hold_bucket":
+        d = _days_between(trade.get("open_date"), trade.get("close_date"))
+        if d is None:
+            return None
+        return "short" if d <= 5 else ("mid" if d <= 12 else "long")
+    v = trade.get(field)
+    if v is None:
+        return None
+    v = str(v)
+    return v.upper() if field == "regime_at_open" else (v.lower() if field in ("direction", "exchange") else v)
+
+
+def evaluate_block_where(hyp: dict[str, Any], trade: dict[str, Any]) -> float | None:
+    """Block the entry when every field in params['where'] matches the trade."""
+    v = _pnl(trade)
+    if v is None:
+        return None
+    where = hyp.get("params", {}).get("where", {})
+    if not where:
+        return None
+    for field, want in where.items():
+        got = trade_field(trade, field)
+        if got is None or str(got) != str(want):
+            return None
+    return -v
+
+
 def evaluate_hypothesis(
     hyp: dict[str, Any], trade: dict[str, Any], excursion: dict[str, Any] | None = None
 ) -> float | None:
     kind = hyp.get("kind")
     if kind == "block":
         return evaluate_block(hyp, trade)
+    if kind == "block_where":
+        return evaluate_block_where(hyp, trade)
     if kind == "stop_cap":
         return evaluate_stop_cap(hyp, trade)
     if kind == "partial_2R":
