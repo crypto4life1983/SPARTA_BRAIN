@@ -1,7 +1,8 @@
-"""Additive monthly refresh of the external paper bot's Binance 15m kline cache.
+"""Additive monthly refresh of the external paper bot's Binance kline caches (1m + 15m).
 
 The frozen-stack paper bot in C:\\Users\\mahmo\\obsidian-trade-logger loads daily bars by
-aggregating monthly zips from ``data/binance_cache/<SYMBOL>/YYYY-MM.zip``. Between
+aggregating monthly 1m zips from ``data/binance_cache/<SYMBOL>_1m/YYYY-MM.zip`` (the 15m
+cache at ``data/binance_cache/<SYMBOL>/`` feeds the older backtests). Between
 2026-03 and 2026-09 nothing refreshed that cache, so the bot ran daily on stale data and
 appended zero trades. This tool downloads only the MISSING months from Binance's free
 public archive (data.binance.vision, no API key, no account, no trading endpoint) and
@@ -37,9 +38,16 @@ if str(ROOT) not in sys.path:
 EXTERNAL_ROOT = Path(r"C:\Users\mahmo\obsidian-trade-logger")
 CACHE_ROOT = EXTERNAL_ROOT / "data" / "binance_cache"
 SYMBOLS = ("BTCUSDT", "ETHUSDT", "XRPUSDT")
-URL = "https://data.binance.vision/data/spot/monthly/klines/{sym}/15m/{sym}-15m-{y}-{m:02d}.zip"
+URL = "https://data.binance.vision/data/spot/monthly/klines/{sym}/{interval}/{sym}-{interval}-{y}-{m:02d}.zip"
 REPORT_DIR = ROOT / "reports" / "binance_cache_refresh"
-MIN_ROWS, MAX_ROWS = 2500, 3000  # 15m bars in a month: 28..31 days x 96
+# interval -> (cache dir suffix, min rows, max rows). The frozen-stack paper bot's daily
+# loader (`load_1m` -> `to_daily`) reads the 1m cache at <SYMBOL>_1m/; the 15m cache at
+# <SYMBOL>/ feeds the older backtest scripts. Both are refreshed.
+INTERVALS: dict[str, tuple[str, int, int]] = {
+    "1m": ("_1m", 28 * 1440, 31 * 1440),   # 40,320 .. 44,640
+    "15m": ("", 28 * 96, 31 * 96),         # 2,688 .. 2,976
+}
+MIN_ROWS, MAX_ROWS = 2500, 3000  # kept for the 15m validator's historical callers
 
 
 def months_between(start: str, end: str) -> list[str]:
@@ -81,16 +89,17 @@ def missing_months(cache_root: Path, symbol: str, end_month: str) -> list[str]:
     return months_between(f"{y}-{m:02d}", end_month)
 
 
-def validate_zip_bytes(data: bytes, symbol: str, month: str) -> int:
-    """Return row count if the zip is a valid Binance monthly 15m kline file, else raise."""
+def validate_zip_bytes(data: bytes, symbol: str, month: str, interval: str = "15m") -> int:
+    """Return row count if the zip is a valid Binance monthly kline file, else raise."""
+    _, min_rows, max_rows = INTERVALS[interval]
     z = zipfile.ZipFile(io.BytesIO(data))
     names = z.namelist()
-    expected = f"{symbol}-15m-{month}.csv"
+    expected = f"{symbol}-{interval}-{month}.csv"
     if names != [expected]:
         raise ValueError(f"unexpected members {names}, expected [{expected}]")
     rows = z.read(expected).decode("utf-8", "replace").count("\n")
-    if not (MIN_ROWS <= rows <= MAX_ROWS):
-        raise ValueError(f"row count {rows} outside [{MIN_ROWS}, {MAX_ROWS}]")
+    if not (min_rows <= rows <= max_rows):
+        raise ValueError(f"row count {rows} outside [{min_rows}, {max_rows}]")
     return rows
 
 
@@ -118,26 +127,33 @@ def refresh(
         "no_credentials": True,
         "no_orders": True,
     }
-    for symbol in symbols:
-        for month in missing_months(cache_root, symbol, end_month):
-            dest = cache_root / symbol / f"{month}.zip"
-            if dest.exists():
-                result["skipped_existing"].append(f"{symbol}/{month}")
-                continue
-            result["planned"].append(f"{symbol}/{month}")
-            if dry_run:
-                continue
-            y, m = (int(x) for x in month.split("-"))
-            url = URL.format(sym=symbol, y=y, m=m)
-            try:
-                data = fetch(url)
-                rows = validate_zip_bytes(data, symbol, month)
-                dest.write_bytes(data)
-                result["downloaded"].append({"symbol": symbol, "month": month, "rows": rows})
-            except Exception as exc:  # network error, 404 (month not published), bad zip
-                result["failed"].append({"symbol": symbol, "month": month, "error": str(exc)[:160]})
-            if sleep_s:
-                time.sleep(sleep_s)
+    for interval, (suffix, _, _) in INTERVALS.items():
+        for symbol in symbols:
+            cache_key = f"{symbol}{suffix}"  # e.g. BTCUSDT_1m or BTCUSDT
+            for month in missing_months(cache_root, cache_key, end_month):
+                dest = cache_root / cache_key / f"{month}.zip"
+                tag = f"{cache_key}/{month}"
+                if dest.exists():
+                    result["skipped_existing"].append(tag)
+                    continue
+                result["planned"].append(tag)
+                if dry_run:
+                    continue
+                y, m = (int(x) for x in month.split("-"))
+                url = URL.format(sym=symbol, interval=interval, y=y, m=m)
+                try:
+                    data = fetch(url)
+                    rows = validate_zip_bytes(data, symbol, month, interval)
+                    dest.write_bytes(data)
+                    result["downloaded"].append(
+                        {"symbol": symbol, "interval": interval, "month": month, "rows": rows}
+                    )
+                except Exception as exc:  # network error, 404 (month not published), bad zip
+                    result["failed"].append(
+                        {"symbol": symbol, "interval": interval, "month": month, "error": str(exc)[:160]}
+                    )
+                if sleep_s:
+                    time.sleep(sleep_s)
     result["status"] = "OK" if not result["failed"] else "PARTIAL"
     return result
 

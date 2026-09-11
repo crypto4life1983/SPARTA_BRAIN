@@ -132,7 +132,10 @@ def _data_freshness_step(
     cache_root = external_root / "data" / "binance_cache"
     per_symbol: dict[str, Any] = {}
     ages: list[int] = []
-    for symbol in FRESHNESS_SYMBOLS:
+    # The paper bot's daily loader aggregates the 1m cache (<SYMBOL>_1m/); the 15m cache
+    # (<SYMBOL>/) feeds older backtests. Check both; the 1m one is the one that matters.
+    cache_keys = [f"{s}_1m" for s in FRESHNESS_SYMBOLS] + list(FRESHNESS_SYMBOLS)
+    for symbol in cache_keys:
         months = sorted(
             p.stem for p in (cache_root / symbol).glob("????-??.zip")
         ) if (cache_root / symbol).exists() else []
@@ -152,10 +155,11 @@ def _data_freshness_step(
             "age_days": age,
             "status": "OK" if age <= FRESHNESS_MAX_AGE_DAYS else "STALE_DATA",
         }
+    missing_1m = [k for k, v in per_symbol.items() if k.endswith("_1m") and v["status"] == "MISSING"]
     if not ages:
         status = "MISSING"
-    elif max(ages) > FRESHNESS_MAX_AGE_DAYS:
-        status = "STALE_DATA"
+    elif missing_1m or max(ages) > FRESHNESS_MAX_AGE_DAYS:
+        status = "STALE_DATA"  # a missing 1m cache means the paper bot cannot see the market
     else:
         status = "OK"
     result = {

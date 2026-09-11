@@ -6,27 +6,43 @@ import zipfile
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools import refresh_external_binance_15m_cache as rf  # noqa: E402
 
+ROWS = {"15m": 2880, "1m": 43200}  # a 30-day month
 
-def _zip_bytes(symbol: str, month: str, rows: int = 2880, member: str | None = None) -> bytes:
+
+def _zip_bytes(symbol: str, month: str, interval: str = "15m", rows: int | None = None,
+               member: str | None = None) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
-        z.writestr(member or f"{symbol}-15m-{month}.csv", "1,2,3\n" * rows)
+        z.writestr(member or f"{symbol}-{interval}-{month}.csv", "1,2,3\n" * (rows or ROWS[interval]))
     return buf.getvalue()
 
 
 def _cache(root: Path, months: dict[str, list[str]]) -> Path:
-    for sym, ms in months.items():
-        d = root / sym
+    """months keyed by cache dir name, e.g. 'BTCUSDT' (15m) or 'BTCUSDT_1m'."""
+    for key, ms in months.items():
+        d = root / key
         d.mkdir(parents=True)
         for m in ms:
             (d / f"{m}.zip").write_bytes(b"PK")
     return root
+
+
+def _fake_fetch(calls: list[str]):
+    def fetch(url: str) -> bytes:
+        calls.append(url)
+        parts = url.split("/klines/")[1].split("/")  # sym, interval, file
+        sym, interval = parts[0], parts[1]
+        month = url[-11:-4]
+        return _zip_bytes(sym, month, interval)
+    return fetch
 
 
 def test_months_between_and_last_full_month():
@@ -39,46 +55,45 @@ def test_missing_months_only_after_newest_cached(tmp_path: Path):
     cache = _cache(tmp_path, {"BTCUSDT": ["2026-02", "2026-03"]})
     assert rf.missing_months(cache, "BTCUSDT", "2026-05") == ["2026-04", "2026-05"]
     assert rf.missing_months(cache, "BTCUSDT", "2026-03") == []
-    assert rf.missing_months(cache, "NOPE", "2026-05") == []  # absent symbol dir: never created
+    assert rf.missing_months(cache, "NOPE", "2026-05") == []  # absent dir: never created
 
 
 def test_validate_rejects_wrong_member_and_row_count():
-    import pytest
-
     with pytest.raises(ValueError):
         rf.validate_zip_bytes(_zip_bytes("BTCUSDT", "2026-04", member="other.csv"), "BTCUSDT", "2026-04")
     with pytest.raises(ValueError):
         rf.validate_zip_bytes(_zip_bytes("BTCUSDT", "2026-04", rows=10), "BTCUSDT", "2026-04")
     assert rf.validate_zip_bytes(_zip_bytes("BTCUSDT", "2026-04"), "BTCUSDT", "2026-04") == 2880
+    # 1m bounds are different: a 15m-sized file must be rejected as 1m
+    with pytest.raises(ValueError):
+        rf.validate_zip_bytes(_zip_bytes("BTCUSDT", "2026-04", "1m", rows=2880), "BTCUSDT", "2026-04", "1m")
+    assert rf.validate_zip_bytes(_zip_bytes("BTCUSDT", "2026-04", "1m"), "BTCUSDT", "2026-04", "1m") == 43200
 
 
-def test_refresh_downloads_only_missing_and_never_overwrites(tmp_path: Path):
-    cache = _cache(tmp_path, {"BTCUSDT": ["2026-03"], "ETHUSDT": ["2026-04"]})
+def test_refresh_fills_both_intervals_and_never_overwrites(tmp_path: Path):
+    cache = _cache(tmp_path, {"BTCUSDT": ["2026-03"], "BTCUSDT_1m": ["2026-04"], "ETHUSDT_1m": ["2026-05"]})
     calls: list[str] = []
-
-    def fake_fetch(url: str) -> bytes:
-        calls.append(url)
-        sym = url.split("/klines/")[1].split("/")[0]
-        month = url[-11:-4]
-        return _zip_bytes(sym, month)
-
     before = (cache / "BTCUSDT" / "2026-03.zip").read_bytes()
     res = rf.refresh(cache_root=cache, symbols=("BTCUSDT", "ETHUSDT"), end_month="2026-05",
-                     fetch=fake_fetch, sleep_s=0)
+                     fetch=_fake_fetch(calls), sleep_s=0)
     assert res["status"] == "OK"
-    got = {(d["symbol"], d["month"]) for d in res["downloaded"]}
-    assert got == {("BTCUSDT", "2026-04"), ("BTCUSDT", "2026-05"), ("ETHUSDT", "2026-05")}
-    assert (cache / "BTCUSDT" / "2026-03.zip").read_bytes() == before  # untouched
-    assert (cache / "BTCUSDT" / "2026-05.zip").exists()
+    got = {(d["symbol"], d["interval"], d["month"]) for d in res["downloaded"]}
+    assert got == {
+        ("BTCUSDT", "15m", "2026-04"), ("BTCUSDT", "15m", "2026-05"),
+        ("BTCUSDT", "1m", "2026-05"),
+    }  # ETHUSDT has no 15m dir and its 1m dir is already current
+    assert (cache / "BTCUSDT" / "2026-03.zip").read_bytes() == before
+    assert (cache / "BTCUSDT_1m" / "2026-05.zip").exists()
+    assert any("/1m/" in c for c in calls) and any("/15m/" in c for c in calls)
     assert len(calls) == 3
 
 
 def test_refresh_dry_run_writes_nothing(tmp_path: Path):
-    cache = _cache(tmp_path, {"BTCUSDT": ["2026-03"]})
+    cache = _cache(tmp_path, {"BTCUSDT_1m": ["2026-03"]})
     res = rf.refresh(cache_root=cache, symbols=("BTCUSDT",), end_month="2026-04",
                      dry_run=True, fetch=lambda u: (_ for _ in ()).throw(AssertionError("no fetch")))
-    assert res["planned"] == ["BTCUSDT/2026-04"]
-    assert not (cache / "BTCUSDT" / "2026-04.zip").exists()
+    assert res["planned"] == ["BTCUSDT_1m/2026-04"]
+    assert not (cache / "BTCUSDT_1m" / "2026-04.zip").exists()
 
 
 def test_refresh_reports_failed_month_without_writing(tmp_path: Path):
