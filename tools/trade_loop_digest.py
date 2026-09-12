@@ -61,6 +61,13 @@ def build_digest(learning: dict | None, ledger: dict | None, search: dict | None
         for hid, h in sorted(hyps.items(), key=lambda kv: (kv[1].get("status", ""), kv[0])):
             fw = h.get("forward", {})
             th = h.get("thresholds", {})
+            if h.get("status") == "APPLIED":
+                ap = h.get("applied", {})
+                flag = " ⚠ regression" if ap.get("regression_flag") else ""
+                L.append(f"| `{hid}` | APPLIED {ap.get('applied_as_of', '')} | {h.get('registered_as_of')} | "
+                         f"{ap.get('n_after', 0)} after | {_f(ap.get('mean_R_after'))} vs base {_f(ap.get('baseline_mean_R'))} | "
+                         f"{_f(ap.get('p_after_ge_baseline'))} | rollback check at n≥20{flag} |")
+                continue
             nxt = (f"n≥{th.get('min_forward_signals', '?')} & p≥{th.get('min_p_positive', '?')}"
                    if h.get("status") in ("SHADOW", "CONFIRMED") else "terminal")
             L.append(f"| `{hid}` | {h.get('status')} | {h.get('registered_as_of')} | {fw.get('n_signals', 0)} | "
@@ -106,6 +113,11 @@ def build_digest(learning: dict | None, ledger: dict | None, search: dict | None
     for hid, h in hyps.items():
         if h.get("status") == "CONFIRMED":
             queue.append(f"apply CONFIRMED rule `{hid}` to the paper bot (spec: bot_rule_changes_spec)")
+        if h.get("status") == "APPLIED" and (h.get("applied") or {}).get("regression_flag"):
+            ap = h["applied"]
+            queue.append(f"consider ROLLBACK of applied rule `{hid}`: post-apply mean R "
+                         f"{_f(ap.get('mean_R_after'))} vs baseline {_f(ap.get('baseline_mean_R'))} "
+                         f"over {ap.get('n_after')} signals")
     for r in recs or []:
         if r.get("status") == "REJECTED":
             queue.append(f"record closure of {r.get('line')} (REJECTED by its own gates)")

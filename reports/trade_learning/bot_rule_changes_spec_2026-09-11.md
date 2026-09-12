@@ -1,9 +1,9 @@
 # Paper-bot rule changes — implementation spec (obsidian-trade-logger)
 
-Status: AUTHORIZED by operator ("yes please do", 2026-09-10) but NOT APPLIED. The Claude Code
-permission classifier blocked edits to the external bot's trading logic from this session.
-Apply from this spec in a session with edit permission for `C:\Users\mahmo\obsidian-trade-logger`,
-or grant that permission and ask again. The bot is paper-only (every trade is logged
+Status: **APPLIED 2026-09-11** in obsidian-trade-logger commit `c9a8f7b` (operator "ok do it all").
+Tests: 12 new in `tests/test_rule_changes_2026_09.py`; suite 2867 passed, 1 pre-existing unrelated
+failure. Ledger: the four matching hypotheses are marked APPLIED and tracked post-apply.
+(History: first authorized 2026-09-10, blocked by the permission classifier that day.) The bot is paper-only (every trade is logged
 "PAPER TRADE OPENED/CLOSED"); none of this adds broker or order code.
 
 Evidence behind each change: `trading_learning_review_2026-09-09.md` §2 and the addendum.

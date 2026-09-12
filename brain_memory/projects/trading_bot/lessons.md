@@ -4597,3 +4597,14 @@ into deep extraction even if the warning_labels list omits them.
 - **How to apply:** Data contracts must enumerate every column the engine reads and assert numeric completeness per column over the exact locked window (add a P4b-style in-window operand check to every future prereg). When it fails, ABORT and open an amendment gate; never patch the engine in place (anti-rescue).
 
 - 2026-09-11 — **Forward-only hypothesis scoring needs a signal-key memory, not just trade-id memory.** Binance/Kraken mirror rows of one signal can close on different days; tracking only `trade_ids_evaluated` would let a late-closing mirror re-enter as a "new" signal and double count. Store `signal_keys_evaluated` (open_date|symbol|direction) alongside the ids. Also: an exactly balanced ±1 forward set bootstraps to p≈0.5 and lands on the REJECT boundary — that is the intended threshold, so test fixtures for "ambiguous" must be mildly positive, not symmetric. Substring forbidden-word check means "already" trips "ready": keep it out of rendered text.
+
+## 2026-09-11 - LESSON_PAPER_SCORER_001 - A line's own graduation doc is rarely fully machine-evaluable; say so instead of substituting
+
+- **Lesson:** Of the five paper lines, only NQ ORB and GC ICT expose every own gate as a tracker field. Funding carry's gate 2 needs a same-period Phase-6B simulator estimate the tracker never emits; the frozen stack's DD envelope is on equity-% while the trades CSV carries only net_r; the frozen-stack window is a range ("60–90 day"), not a number; s21 has thresholds but no state. Trackers also emit bools as the strings "True"/"False" (GC `realized_pnl_positive`), so truthiness checks silently pass.
+- **Why:** Substituting a proxy for an unevaluable gate is exactly the "invent a gate" failure the loop forbids, and a string-bool would have turned a failed gate into a pass.
+- **How to apply:** Give gates a NOT_EVALUABLE / MANUAL status that keeps the line in SHADOW, cite the doc section that defines the gate, coerce every tracker bool through a parser, and compute sign from the numeric field rather than the tracker's flag.
+
+## 2026-09-12 - LESSON_LOOP_001 - Applying a rule ends its counterfactual; track before/after instead
+
+- **Lesson:** Once a block/stop/partial rule is live in the bot, the journal no longer contains the trades the rule would have blocked, so forward counterfactual scoring silently goes to n=0 and can never confirm or reject. The honest post-apply measure is realized dedup expectancy after the apply date vs the baseline frozen at apply time, with a pre-registered rollback threshold.
+- **How to apply:** mark applied rules APPLIED with the bot commit hash; judge them at n≥20 post-apply signals; rollback flag = mean R below baseline − 0.2R. Never leave an applied rule in SHADOW.

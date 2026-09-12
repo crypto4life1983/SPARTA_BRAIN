@@ -1,4 +1,4 @@
-# Trading loop status — 2026-09-11
+# Trading loop status — 2026-09-12
 
 READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL · NO BROKER / NO ORDER
 
@@ -11,10 +11,10 @@ READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL
 
 | id | status | registered | forward n | mean ΔR | p(>0) | next |
 |---|---|---|---|---|---|---|
-| `block_long_in_TREND_DOWN` | SHADOW | 2026-09-11 | 0 | - | - | n≥20 & p≥0.9 |
-| `enforce_hard_stop` | SHADOW | 2026-09-11 | 0 | - | - | n≥20 & p≥0.9 |
-| `partial_tp_or_trail_2R` | SHADOW | 2026-09-11 | 0 | - | - | n≥20 & p≥0.9 |
-| `review_pause_D2` | SHADOW | 2026-09-11 | 0 | - | - | n≥20 & p≥0.9 |
+| `block_long_in_TREND_DOWN` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
+| `enforce_hard_stop` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
+| `partial_tp_or_trail_2R` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
+| `review_pause_D2` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
 
 CONFIRMED rules awaiting the operator: **0**. A CONFIRMED rule is a recommendation to change the paper bot; nothing is applied by the loop.
 

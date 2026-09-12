@@ -59,7 +59,12 @@ MD_NAME = "hypothesis_ledger.md"
 HISTORY_NAME = "hypothesis_history.jsonl"
 
 SCHEMA_VERSION = 1
-STATUSES = ("PROPOSED", "SHADOW", "CONFIRMED", "REJECTED", "RETIRED")
+STATUSES = ("PROPOSED", "SHADOW", "CONFIRMED", "APPLIED", "REJECTED", "RETIRED")
+# APPLIED (Phase 4): the operator applied the rule in the paper bot. The counterfactual
+# scoring stops (the rule now shapes the trades themselves); instead the ledger tracks the
+# realized journal expectancy AFTER applied_as_of against the baseline frozen at apply time.
+APPLIED_MIN_N = 20
+APPLIED_REGRESSION_R = 0.2   # flag when post-apply mean R < baseline - 0.2R with n >= APPLIED_MIN_N
 
 DEFAULT_THRESHOLDS = {
     "min_forward_signals": 20,
@@ -323,6 +328,63 @@ def evaluate_hypothesis(
     return None
 
 
+# ── Phase 4: applied-rule tracking ──────────────────────────────────────────
+
+def _dedup_best_signals(trades: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    best: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for t in trades:
+        v = _pnl(t)
+        if v is None:
+            continue
+        k = _signal_key(t)
+        if k not in best or v > float(_pnl(best[k])):
+            best[k] = t
+    return list(best.values())
+
+
+def mark_applied(ledger: dict[str, Any], sid: str, as_of: str, trades: list[dict[str, Any]],
+                 note: str = "") -> dict[str, Any]:
+    """Operator applied hypothesis `sid` in the paper bot on `as_of`. Freezes the journal
+    baseline (dedup-best mean R of everything closed on/before as_of) and switches the
+    hypothesis to APPLIED. Counterfactual forward stats are kept as they were."""
+    hyp = ledger["hypotheses"][sid]
+    before = [float(_pnl(t)) for t in _dedup_best_signals(trades)
+              if (_close_day(t) is not None and _close_day(t) <= date.fromisoformat(as_of))]
+    hyp["applied"] = {
+        "applied_as_of": as_of,
+        "note": note,
+        "baseline_n": len(before),
+        "baseline_mean_R": _r(sum(before) / len(before)) if before else None,
+        "n_after": 0,
+        "mean_R_after": None,
+        "p_after_ge_baseline": None,
+        "regression_flag": False,
+        "last_eval_as_of": None,
+    }
+    hyp["history"].append({"as_of": as_of, "status": "APPLIED",
+                           "note": f"{hyp.get('status')} -> APPLIED: {note or 'applied in paper bot'}"})
+    hyp["status"] = "APPLIED"
+    return hyp
+
+
+def _update_applied(hyp: dict[str, Any], trades: list[dict[str, Any]], as_of: str) -> None:
+    ap = hyp.get("applied") or {}
+    since = date.fromisoformat(ap["applied_as_of"])
+    after = [float(_pnl(t)) for t in _dedup_best_signals(trades)
+             if (_close_day(t) is not None and _close_day(t) > since)]
+    ap["n_after"] = len(after)
+    ap["mean_R_after"] = _r(sum(after) / len(after)) if after else None
+    base = ap.get("baseline_mean_R")
+    if after and base is not None:
+        shifted = [x - float(base) for x in after]
+        ap["p_after_ge_baseline"] = bootstrap_p_positive(shifted)
+        ap["regression_flag"] = bool(
+            len(after) >= APPLIED_MIN_N and (sum(after) / len(after)) < float(base) - APPLIED_REGRESSION_R
+        )
+    ap["last_eval_as_of"] = as_of
+    hyp["applied"] = ap
+
+
 # ── forward evaluation ──────────────────────────────────────────────────────
 
 def bootstrap_p_positive(
@@ -393,6 +455,13 @@ def update_forward(
     summary: dict[str, Any] = {"as_of": as_of, "evaluated": {}, "status_changes": []}
     for sid in sorted(ledger.get("hypotheses", {})):
         hyp = ledger["hypotheses"][sid]
+        if hyp.get("status") == "APPLIED":
+            _update_applied(hyp, trades, as_of)
+            ap = hyp["applied"]
+            summary["evaluated"][sid] = {"applied": True, "n_after": ap["n_after"],
+                                         "mean_R_after": ap["mean_R_after"],
+                                         "regression_flag": ap["regression_flag"], "status": "APPLIED"}
+            continue
         if hyp.get("status") not in ("SHADOW", "CONFIRMED"):
             continue
         fwd = hyp["forward"]
@@ -630,13 +699,30 @@ def _register_manual_entry() -> None:
         print(f"[manual-entry] skipped: {type(exc).__name__}: {exc}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description="Hypothesis ledger (observation only)")
+    ap.add_argument("--mark-applied", nargs="*", default=None,
+                    help="hypothesis ids the operator applied in the paper bot (Phase 4)")
+    ap.add_argument("--applied-as-of", default=None, help="YYYY-MM-DD the rule went live in the paper bot")
+    ap.add_argument("--note", default="", help="free text, e.g. the bot commit hash")
+    args = ap.parse_args(argv)
     db_path = external_root().joinpath(*_REL_TRADES_DB)
     if not db_path.exists():
         print(f"trades.db not found: {db_path}")
         return 1
     as_of = datetime.now().strftime("%Y-%m-%d")  # local operator date
     trades, excursions = load_journal_ro(db_path)
+    if args.mark_applied:
+        ledger = load_ledger()
+        when = args.applied_as_of or as_of
+        for sid in args.mark_applied:
+            if sid not in ledger.get("hypotheses", {}):
+                print(f"unknown hypothesis: {sid}")
+                return 2
+            mark_applied(ledger, sid, when, trades, note=args.note)
+            print(f"APPLIED {sid} as of {when}")
+        save_ledger(ledger)
     rep = build_learning_report(trades, excursions, as_of)
     ledger = run_cycle(rep, trades, excursions, as_of)
     _register_manual_entry()

@@ -1,1 +1,2 @@
 {"as_of": "2026-09-11", "by_status": {"SHADOW": 4}, "forward_n": {"block_long_in_TREND_DOWN": 0, "enforce_hard_stop": 0, "partial_tp_or_trail_2R": 0, "review_pause_D2": 0}, "n_hypotheses": 4, "registered": ["block_long_in_TREND_DOWN", "enforce_hard_stop", "partial_tp_or_trail_2R", "review_pause_D2"], "status_changes": []}
+{"as_of": "2026-09-11", "by_status": {"APPLIED": 4}, "forward_n": {"block_long_in_TREND_DOWN": 0, "enforce_hard_stop": 0, "partial_tp_or_trail_2R": 0, "review_pause_D2": 0}, "n_hypotheses": 4, "registered": [], "status_changes": []}

@@ -8,6 +8,17 @@
   },
   "hypotheses": {
     "block_long_in_TREND_DOWN": {
+      "applied": {
+        "applied_as_of": "2026-09-11",
+        "baseline_mean_R": 0.2508,
+        "baseline_n": 31,
+        "last_eval_as_of": "2026-09-11",
+        "mean_R_after": null,
+        "n_after": 0,
+        "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+        "p_after_ge_baseline": null,
+        "regression_flag": false
+      },
       "forward": {
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
@@ -26,6 +37,11 @@
           "as_of": "2026-09-11",
           "note": "registered from learning report; in-sample evidence frozen",
           "status": "SHADOW"
+        },
+        {
+          "as_of": "2026-09-11",
+          "note": "SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+          "status": "APPLIED"
         }
       ],
       "id": "block_long_in_TREND_DOWN",
@@ -45,7 +61,7 @@
       },
       "registered_label": "OK",
       "rule": "block long when regime=TREND_DOWN (counter-trend)",
-      "status": "SHADOW",
+      "status": "APPLIED",
       "thresholds": {
         "max_p_positive_reject": 0.5,
         "min_forward_signals": 20,
@@ -53,6 +69,17 @@
       }
     },
     "enforce_hard_stop": {
+      "applied": {
+        "applied_as_of": "2026-09-11",
+        "baseline_mean_R": 0.2508,
+        "baseline_n": 31,
+        "last_eval_as_of": "2026-09-11",
+        "mean_R_after": null,
+        "n_after": 0,
+        "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+        "p_after_ge_baseline": null,
+        "regression_flag": false
+      },
       "forward": {
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
@@ -71,6 +98,11 @@
           "as_of": "2026-09-11",
           "note": "registered from learning report; in-sample evidence frozen",
           "status": "SHADOW"
+        },
+        {
+          "as_of": "2026-09-11",
+          "note": "SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+          "status": "APPLIED"
         }
       ],
       "id": "enforce_hard_stop",
@@ -92,7 +124,7 @@
       },
       "registered_label": "OK",
       "rule": "enforce hard stop / investigate fills (losses beyond planned -1R)",
-      "status": "SHADOW",
+      "status": "APPLIED",
       "thresholds": {
         "max_p_positive_reject": 0.5,
         "min_forward_signals": 20,
@@ -100,6 +132,17 @@
       }
     },
     "partial_tp_or_trail_2R": {
+      "applied": {
+        "applied_as_of": "2026-09-11",
+        "baseline_mean_R": 0.2508,
+        "baseline_n": 31,
+        "last_eval_as_of": "2026-09-11",
+        "mean_R_after": null,
+        "n_after": 0,
+        "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+        "p_after_ge_baseline": null,
+        "regression_flag": false
+      },
       "forward": {
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
@@ -118,6 +161,11 @@
           "as_of": "2026-09-11",
           "note": "registered from learning report; in-sample evidence frozen",
           "status": "SHADOW"
+        },
+        {
+          "as_of": "2026-09-11",
+          "note": "SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+          "status": "APPLIED"
         }
       ],
       "id": "partial_tp_or_trail_2R",
@@ -136,7 +184,7 @@
       },
       "registered_label": "OK",
       "rule": "add partial take-profit or trailing stop at 2R",
-      "status": "SHADOW",
+      "status": "APPLIED",
       "thresholds": {
         "max_p_positive_reject": 0.5,
         "min_forward_signals": 20,
@@ -144,6 +192,17 @@
       }
     },
     "review_pause_D2": {
+      "applied": {
+        "applied_as_of": "2026-09-11",
+        "baseline_mean_R": 0.2508,
+        "baseline_n": 31,
+        "last_eval_as_of": "2026-09-11",
+        "mean_R_after": null,
+        "n_after": 0,
+        "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+        "p_after_ge_baseline": null,
+        "regression_flag": false
+      },
       "forward": {
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
@@ -162,6 +221,11 @@
           "as_of": "2026-09-11",
           "note": "registered from learning report; in-sample evidence frozen",
           "status": "SHADOW"
+        },
+        {
+          "as_of": "2026-09-11",
+          "note": "SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
+          "status": "APPLIED"
         }
       ],
       "id": "review_pause_D2",
@@ -179,7 +243,7 @@
       },
       "registered_label": "PRELIMINARY",
       "rule": "review/pause strategy D2 (Donchian Breakout (loose))",
-      "status": "SHADOW",
+      "status": "APPLIED",
       "thresholds": {
         "max_p_positive_reject": 0.5,
         "min_forward_signals": 20,
