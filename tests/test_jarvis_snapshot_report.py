@@ -171,8 +171,17 @@ def test_status_shape_unchanged():
     assert isinstance(status, dict)
     # 24 base sections + 4 Bundle B read-only observation panels
     # (factory_status, survival_ledger, candidate_registry, freshness_guard)
-    # + 1 Bundle 1 Strategy Factory snapshot panel (strategy_factory).
-    assert len(status) == 29
+    # + 1 Bundle 1 Strategy Factory snapshot panel (strategy_factory) = 29,
+    # plus the sections added since (content_engine, money_engine,
+    # moving_company, lane_monitor, mission_flow, mission_flow_status,
+    # survival_ledger, trading_bridge, freshness_guard,
+    # strategy_factory_integration, system_map) -> 33 as of 2026-09-12.
+    # A bare count is a weak guard: what matters is that the payload stays
+    # read-only and never gains an execution surface, which the assertions
+    # below enforce. The count is kept only to make an unnoticed change visible.
+    assert len(status) == 33, (
+        "api_jarvis_status() section count changed; update this number and "
+        "confirm the new section is read-only")
     assert status["read_only"] is True
     trading = status["trading_detail"]
     assert trading["read_only"] is True
