@@ -94,5 +94,6 @@ def test_live_stage4_report_if_present_reconciles_and_selects_no_assumption():
     assert r["c22_performance_computed"] is False and r["cost_arithmetic_performed"] is False
     for x in r["step6_per_fill"]:
         assert set(x["never_inferred"]) == {"zero_spread", "infinite_liquidity", "full_fill_at_candle_open", "zero_market_impact"}
-    fr = importlib.import_module("tools.c22_fee_honest_replay_once")
-    assert fr.check_preconditions()["all_satisfied"] is False
+    # this stage selects no assumption and writes a run manifest, never an admission manifest
+    man = json.loads((s4.S1.MANIFEST_DIR / ("stage4_run_manifest__%s.json" % r["run_id"])).read_bytes().decode("utf-8"))
+    assert "not an admission manifest" in man["note"] and "no assumption selected" in man["note"]

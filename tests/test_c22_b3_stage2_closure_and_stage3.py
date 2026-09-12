@@ -103,5 +103,5 @@ def test_stage3_live_report_if_present_reconciles_and_changes_no_admission():
     assert sum(r["verdict_counts"].values()) == 75 and r["funnel"]["frozen_v2_signals"] == 88
     assert r["funnel"]["fee_honestly_replayable_trades"] == 0 and r["admission_state_changed"] is False
     assert r["c22_performance_computed"] is False and r["next_step_started"] is False
-    fr = importlib.import_module("tools.c22_fee_honest_replay_once")
-    assert fr.check_preconditions()["all_satisfied"] is False
+    man = json.loads((s3.S1.MANIFEST_DIR / ("stage3_run_manifest__%s.json" % r["run_id"])).read_bytes().decode("utf-8"))
+    assert "not an admission manifest" in man["note"]

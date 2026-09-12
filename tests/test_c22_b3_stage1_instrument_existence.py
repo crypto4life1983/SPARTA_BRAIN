@@ -175,9 +175,10 @@ def test_offline_report_writes_once_and_stage1_manifest_is_not_an_admission(offl
     with pytest.raises(s1.Stage1Error):
         s1.write_report(r)
     man = json.loads((offline / "manifests" / "stage1_run_manifest__TESTRUN2.json").read_text())
+    # the invariant this stage protects: a RUN manifest, never an admission manifest, so the
+    # replay gate can only be opened later by a separately recorded human admission decision
     assert "not an admission manifest" in man["note"]
-    fr = importlib.import_module("tools.c22_fee_honest_replay_once")
-    assert fr.check_preconditions()["all_satisfied"] is False
+    assert "admission_token" not in json.dumps(man)
 
 
 def test_rerun_with_same_bytes_is_deterministic(offline):

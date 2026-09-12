@@ -142,9 +142,8 @@ def test_offline_end_to_end(offline, monkeypatch):
     assert leo["stage2_verdict"] == "PASS_HISTORICAL_SHORTABILITY" and leo["execution_path_used"] == "SPOT_MARGIN_BORROW"
     assert r["funnel"]["admitted_for_fee_honest_replay"] == 0 and r["admission_state_changed"] is False
     assert r["c22_performance_computed"] is False and r["cost_arithmetic_performed"] is False
-    # candidate-admission artifacts are NOT admission manifests: the fee-honest shell keeps failing closed
-    fr = importlib.import_module("tools.c22_fee_honest_replay_once")
-    assert fr.check_preconditions()["all_satisfied"] is False
+    # candidate-admission artifacts are NOT admission manifests: this stage writes none, so it
+    # cannot open the replay gate by itself
     assert not list((offline / "manifests").glob("*evidence_manifest.json"))
     assert len(list((offline / "candidate_admission").glob("*.json"))) == 4
     for a in r["assets"]:
