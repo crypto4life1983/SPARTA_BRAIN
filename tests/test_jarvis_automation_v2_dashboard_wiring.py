@@ -39,6 +39,10 @@ _REPORT = mr.build_morning_report(_RUN, _GS, _CAND)
 _MD = mr.render_markdown(_REPORT)
 _PANEL = panel.build_autopilot_morning_panel(_REPORT)
 _HTML = _PANEL["html"]
+# Collection progress is live state that grows every time a window is imported (it was
+# "1/20" when this file was written and is well past 20 now). Derive it instead of pinning
+# a number, so accruing evidence can never fail these wiring tests again.
+_PROGRESS = _REPORT["c22_current_packet"]["collection_progress"]
 
 _ROOT = Path(mr.__file__).resolve().parents[1]
 
@@ -54,7 +58,11 @@ def test_morning_report_authoritative_is_now_current_packet_v2_superseded():
     cur = _REPORT["c22_current_packet"]
     assert cur["c22_state"] == "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS"
     assert cur["c22_replay_locked"] is True
-    assert cur["collection_progress"] == "1/20"
+    assert cur["collection_progress"] == _PROGRESS
+    # the review token was consumed in July: it must never be re-suggested,
+    # however many extra windows accrue (readiness-watcher lifecycle rule).
+    assert cur["collection_review_consumed"] is True
+    assert cur["review_token_available"] is False
     assert cur["c23_on_deck"] is True and cur["c23_is_active"] is False
     # the old V2 packet is still attached as the superseded historical view
     sec = _REPORT["automation_v2_packet"]
@@ -67,7 +75,7 @@ def test_morning_report_markdown_current_authoritative_and_superseded_v2():
     assert "C22 Collection — Authoritative Next Action" in _MD
     assert _COLLECT_TOKEN in _MD
     assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in _MD
-    assert "1/20" in _MD
+    assert _PROGRESS in _MD
     assert "queued / ON-DECK" in _MD
     assert "(Superseded) Automation V2" in _MD
     assert "DATA_NOT_READY" in _MD            # still shown, in the superseded block
@@ -100,7 +108,7 @@ def test_panel_html_surfaces_current_authoritative_v2_superseded():
     # the new authoritative block + the demoted superseded V2 block
     assert "C22 Collection — Authoritative Next Action" in _HTML
     assert "HOLD_FOR_MORE_FROZEN_DATA_WINDOWS" in _HTML
-    assert "1/20" in _HTML
+    assert _PROGRESS in _HTML
     assert "(Superseded) Automation V2" in _HTML
     assert "DATA_NOT_READY" in _HTML          # still shown, superseded block
     assert _C21_TOKEN not in _PANEL["authoritative_next_action"]

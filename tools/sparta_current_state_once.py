@@ -96,7 +96,12 @@ def main() -> int:
         "lane": p["lane"],
         "c22_collection": {k: p["c22_collection"][k] for k in (
             "progress", "windows_remaining", "latest_window_date",
-            "missing_export_warning", "ready_for_review", "readiness_alert")},
+            "missing_export_warning", "ready_for_review",
+            # whether the frozen-window review token may still be suggested: the
+            # 20-window review was already held and consumed, so `ready_for_review`
+            # alone must not be read as "paste the review token"
+            "collection_review_consumed", "review_token_available",
+            "readiness_alert")},
         "task_health": {
             "overall": p["task_health"].get("overall_task_health"),
             "counts": p["task_health"].get("counts"),

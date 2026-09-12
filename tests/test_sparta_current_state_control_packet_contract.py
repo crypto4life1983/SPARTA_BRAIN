@@ -81,13 +81,19 @@ def test_c22_collection_progress_and_missing_export():
     assert p["overall_status"] == "NEEDS_ATTENTION"
 
 
-def test_2020_readiness_alert_suggestion_only():
+def test_2020_alert_explains_the_consumed_review_instead_of_resuggesting_it():
+    """2026-09-12: at >= 20 windows the daily alert used to tell the operator to paste
+    the frozen-window review token. That review was already held and consumed, so the
+    alert now says so and points at the live collect/re-review action instead."""
     p = cp.build_current_state_packet(_CLEAN_REPO, 20, "2026-07-09", 0, _OK_HEALTH)
     c = p["c22_collection"]
     assert c["progress"] == "20/20" and c["ready_for_review"] is True
-    assert c["readiness_alert"] and _REVIEW in c["readiness_alert"]
-    # at 20/20 the authoritative action is the SUGGESTED review token
-    assert p["next_action"]["authoritative_next_action"] == _REVIEW
+    assert c["collection_review_consumed"] is True
+    assert c["review_token_available"] is False
+    assert c["readiness_alert"] and _REVIEW not in c["readiness_alert"]
+    assert "already held and consumed" in c["readiness_alert"]
+    assert _COLLECT in c["readiness_alert"]
+    assert p["next_action"]["authoritative_next_action"] == _COLLECT
     assert p["next_action"]["auto_executes_any_token"] is False
     assert cp.validate_current_state_packet(p)["valid"] is True
 

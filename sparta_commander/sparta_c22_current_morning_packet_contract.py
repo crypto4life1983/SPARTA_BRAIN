@@ -38,6 +38,14 @@ REQUIRED_WINDOWS = _trk.REQUIRED_WINDOWS                          # 20
 C22_STATE = _trk.C22_STATE                                       # HOLD_FOR_MORE_FROZEN...
 COLLECT_TOKEN = _trk.NEXT_HUMAN_ACTION_WHEN_READY                # stage-more-windows token
 REVIEW_TOKEN = _rw.SUGGESTED_REVIEW_TOKEN                        # frozen-window-review token
+# The 20-window collection review ALREADY happened and its decision was
+# HOLD_FOR_MORE_C22_LABEL_EVIDENCE. The readiness watcher records that fact and its
+# validator fails any record that surfaces the review token again in the extension phase
+# (`consumed_must_not_surface_token`). Without honouring it here this packet re-suggested a
+# token consumed in July every morning, purely because the window count is past 20 — the two
+# contracts contradicted each other on the operator's dashboard. Fixed 2026-09-12.
+COLLECTION_REVIEW_CONSUMED = _rw.COLLECTION_REVIEW_CONSUMED
+LABEL_REVIEW_DECISION = _rw.LABEL_REVIEW_DECISION
 C23_OPEN_GATE = _v2real.C23_OPEN_GATE_AFTER_C22                  # open-C23-after-C22 token
 
 AUTHORITATIVE_SOURCE = "C22_CURRENT_COLLECTION"
@@ -71,10 +79,16 @@ def build_c22_current_morning_packet(collected_windows: int | None = None) -> di
     collected = ad["collected_windows"]
     remaining = ad["windows_remaining"]
     progress = ad["collection_progress"]
+    # `ready_for_review` stays the raw count fact (>= 20 windows collected). Whether the
+    # review token may be SURFACED is a separate question, answered by the watcher's
+    # recorded lifecycle: once the collection review has been consumed it must not be
+    # suggested again, however many windows accrue afterwards.
     ready_for_review = collected >= REQUIRED_WINDOWS
+    review_token_available = ready_for_review and not COLLECTION_REVIEW_CONSUMED
 
-    # TRUE next action: collect while < 20; at >= 20 SUGGEST the review token (never auto-run)
-    authoritative_next_action = REVIEW_TOKEN if ready_for_review else COLLECT_TOKEN
+    # TRUE next action: the review token only while it is still un-consumed; otherwise keep
+    # collecting and re-review the labels (the recorded HOLD_FOR_MORE_C22_LABEL_EVIDENCE).
+    authoritative_next_action = REVIEW_TOKEN if review_token_available else COLLECT_TOKEN
 
     record: dict[str, Any] = {
         "schema_version": CMP_SCHEMA_VERSION, "mode": CMP_MODE, "lane": CMP_LANE,
@@ -99,6 +113,11 @@ def build_c22_current_morning_packet(collected_windows: int | None = None) -> di
         "windows_remaining": remaining,
         "collection_progress": progress,
         "ready_for_review": ready_for_review,
+        # recorded lifecycle: the collection review already happened and was consumed, so the
+        # review token is NOT re-suggested no matter how many extra windows accrue.
+        "collection_review_consumed": COLLECTION_REVIEW_CONSUMED,
+        "label_review_decision": LABEL_REVIEW_DECISION,
+        "review_token_available": review_token_available,
         # authoritative next action (current truth)
         "authoritative_next_action_source": AUTHORITATIVE_SOURCE,
         "authoritative_next_action": authoritative_next_action,
@@ -239,9 +258,15 @@ def validate_c22_current_morning_packet(record: Any) -> dict[str, Any]:
         if r.get("ready_for_review") is not (cw >= REQUIRED_WINDOWS):
             failures.append("ready_flag_inconsistent")
 
-    # authoritative next action: collect (<20) or suggested review (>=20); never staging
+    # authoritative next action: the review token only while it is still un-consumed;
+    # otherwise keep collecting. Never the superseded staging token.
     ready = r.get("ready_for_review") is True
-    expected = REVIEW_TOKEN if ready else COLLECT_TOKEN
+    consumed = r.get("collection_review_consumed") is True
+    if consumed and r.get("authoritative_next_action") == REVIEW_TOKEN:
+        failures.append("consumed_must_not_surface_review_token")
+    if r.get("review_token_available") is not (ready and not consumed):
+        failures.append("review_token_available_inconsistent")
+    expected = REVIEW_TOKEN if (ready and not consumed) else COLLECT_TOKEN
     if r.get("authoritative_next_action") != expected:
         failures.append("authoritative_next_action_wrong")
     if r.get("authoritative_next_action_source") != AUTHORITATIVE_SOURCE:

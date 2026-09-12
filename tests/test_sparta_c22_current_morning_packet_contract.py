@@ -61,10 +61,28 @@ def test_c23_on_deck_not_active():
 
 # ---- ready branch: at >= 20 the authoritative is the SUGGESTED review token -
 
-def test_ready_branch_suggests_review_token_only():
+def test_ready_branch_does_not_resurface_a_consumed_review_token(monkeypatch):
+    """2026-09-12: reaching 20 windows is NOT on its own a reason to suggest the
+    frozen-window review. That review was already held and consumed (decision
+    HOLD_FOR_MORE_C22_LABEL_EVIDENCE); the readiness watcher records the fact and its
+    own validator forbids re-surfacing the token. This packet used to ignore that and
+    re-suggested a consumed token every morning."""
     r = cur.build_c22_current_morning_packet(collected_windows=20)
-    assert r["ready_for_review"] is True
+    assert r["ready_for_review"] is True            # the raw count fact is unchanged
     assert r["collection_progress"] == "20/20"
+    assert r["collection_review_consumed"] is True
+    assert r["review_token_available"] is False
+    assert r["authoritative_next_action"] == _COLLECT
+    assert r["auto_executes_review_token"] is False
+    assert cur.validate_c22_current_morning_packet(r)["valid"] is True
+
+
+def test_ready_branch_suggests_review_token_when_not_yet_consumed(monkeypatch):
+    """The un-consumed path still works: had the review not been held, 20 windows
+    would suggest the review token (and only ever as a suggestion)."""
+    monkeypatch.setattr(cur, "COLLECTION_REVIEW_CONSUMED", False)
+    r = cur.build_c22_current_morning_packet(collected_windows=20)
+    assert r["review_token_available"] is True
     assert r["authoritative_next_action"] == _REVIEW
     assert r["auto_executes_review_token"] is False
     assert cur.validate_c22_current_morning_packet(r)["valid"] is True

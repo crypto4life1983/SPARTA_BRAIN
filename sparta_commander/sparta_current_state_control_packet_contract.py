@@ -87,6 +87,11 @@ def build_current_state_packet(repo_state: dict, collected_windows: int,
     cur = _c22cur.build_c22_current_morning_packet(collected_windows)
     collected = cur["collected_windows"]
     ready_for_review = cur["ready_for_review"]
+    # The collection review was already consumed (readiness-watcher lifecycle fact), so the
+    # review token must not be suggested again however many extra windows accrue. Without
+    # this the daily alert told the operator to paste a token consumed in July.
+    review_token_available = cur["review_token_available"]
+    collection_review_consumed = cur["collection_review_consumed"]
 
     # C22 missing-export warning (an expected daily window appears to be missing)
     dsl = days_since_latest_window
@@ -152,10 +157,18 @@ def build_current_state_packet(repo_state: dict, collected_windows: int,
                 "and save the daily export" % MISSING_EXPORT_DAY_THRESHOLD
                 if missing_export_warning else None),
             "ready_for_review": ready_for_review,
+            "collection_review_consumed": collection_review_consumed,
+            "review_token_available": review_token_available,
             "readiness_alert": (
                 "C22 has reached %d/%d -- you may now (suggestion) paste: %s"
                 % (collected, REQUIRED_WINDOWS, REVIEW_TOKEN)
-                if ready_for_review else None),
+                if review_token_available else
+                ("C22 is at %d/%d; the %d-window collection review was already held and "
+                 "consumed (decision: %s), so that token is NOT re-suggested. Collection "
+                 "continues in the extension phase; next action (suggestion): %s"
+                 % (collected, REQUIRED_WINDOWS, REQUIRED_WINDOWS,
+                    _c22cur.LABEL_REVIEW_DECISION, COLLECT_TOKEN)
+                 if ready_for_review else None)),
         },
         # scheduled-task health
         "task_health": th,
@@ -268,7 +281,11 @@ def validate_current_state_packet(record: Any) -> dict[str, Any]:
         failures.append("review_token_wrong")
     if na.get("c23_open_token_after_c22") != C23_OPEN_TOKEN:
         failures.append("c23_open_token_wrong")
-    expected_auth = REVIEW_TOKEN if coll.get("ready_for_review") else COLLECT_TOKEN
+    # the review token only while it is still un-consumed; otherwise keep collecting
+    if coll.get("collection_review_consumed") is True and \
+            na.get("authoritative_next_action") == REVIEW_TOKEN:
+        failures.append("consumed_must_not_surface_review_token")
+    expected_auth = REVIEW_TOKEN if coll.get("review_token_available") else COLLECT_TOKEN
     if na.get("authoritative_next_action") != expected_auth:
         failures.append("authoritative_action_inconsistent")
 
