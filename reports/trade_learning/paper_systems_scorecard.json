@@ -1,7 +1,7 @@
 {
   "as_of": "2026-09-12",
   "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
-  "generated_at": "2026-09-12T11:07:37",
+  "generated_at": "2026-09-12T17:24:13",
   "records": [
     {
       "as_of": "2026-09-12",
@@ -40,9 +40,9 @@
         {
           "hard": true,
           "name": "g2_realized_cagr_within_30pct_of_phase6b_same_period",
-          "note": "the tracker does not emit a same-period Phase-6B simulator estimate; the full-sample Phase-6B OOS CAGR (+8.08%) is shown in headline_metrics for reference only and is NOT the plan's gate quantity",
-          "status": "NOT_EVALUABLE",
-          "threshold": "+/- 30% of same-period Phase-6B estimate",
+          "note": "same-period Phase-6B estimate 0.022960457422345204 over 2026-05-13..2026-09-12 (122 days) from the locked config at baseline costs 10bps fee + 5bps slip; sealed artifact g2_same_period_estimate_20260912T162609Z.json sha256 0876d3820554a24e",
+          "status": "FAIL",
+          "threshold": "+/- 30% of same-period estimate 0.02296 (band 0.01607..0.02985)",
           "value": 0.01534
         },
         {
@@ -69,8 +69,8 @@
           "value": null
         }
       ],
-      "reason": "own window satisfied (122/90 days); unresolved own gates: g2_realized_cagr_within_30pct_of_phase6b_same_period=NOT_EVALUABLE",
-      "recommendation": "funding_carry_paper stays in SHADOW (own window satisfied (122/90 days); unresolved own gates: g2_realized_cagr_within_30pct_of_phase6b_same_period=NOT_EVALUABLE). Keep tracking; nothing to act on. plan section 8: 'If any of these is unmet, paper tracking continues without going live.' Observation only: no rule change, no strategy approval, no live-readiness claim.",
+      "reason": "own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period",
+      "recommendation": "The pre-registered window for funding_carry_paper resolved without meeting its own criteria (own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period). Record the window read as resolved-negative in the trading decision record; the operator chooses between continue-tracking (with this read logged) or restart with a new fixed launch date. No mid-window strategy edit, no re-tuning, no rescue. plan section 8: 'If any of these is unmet, paper tracking continues without going live.' Observation only: no rule change, no strategy approval, no live-readiness claim.",
       "sample": {
         "n_days": 122,
         "n_position_changes": 5
@@ -78,9 +78,10 @@
       "sign": "POSITIVE",
       "source_files": [
         "C:\\Users\\mahmo\\obsidian-trade-logger\\reports\\paper_funding_carry\\alerts.csv",
+        "C:\\Users\\mahmo\\obsidian-trade-logger\\reports\\paper_funding_carry\\g2_same_period_estimate_20260912T162609Z.json",
         "C:\\Users\\mahmo\\obsidian-trade-logger\\reports\\paper_funding_carry\\latest.json"
       ],
-      "status": "SHADOW",
+      "status": "REJECTED",
       "window": {
         "end_or_min_n": 90,
         "kind": "calendar_days_since_launch",

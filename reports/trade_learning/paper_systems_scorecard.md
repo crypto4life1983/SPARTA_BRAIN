@@ -6,25 +6,25 @@ Each line is scored against ITS OWN pre-registered window and gates (cited per l
 
 | line | status | sign | window | sample | reason |
 |---|---|---|---|---|---|
-| funding_carry_paper | **SHADOW** | POSITIVE | calendar_days_since_launch satisfied | {"n_days": 122, "n_position_changes": 5} | own window satisfied (122/90 days); unresolved own gates: g2_realized_cagr_within_30pct_of_phase6b_same_period=NOT_EVALUABLE |
+| funding_carry_paper | **REJECTED** | POSITIVE | calendar_days_since_launch satisfied | {"n_days": 122, "n_position_changes": 5} | own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period |
 | nq_orb_paper | **REJECTED** | NONE | closed_by_operator satisfied | {} | closed by recorded operator decision (CLOSURE_DECISION_2026-09-11.md): Decision (operator, 2026-09-11, recorded via SPARTA): CLOSED — REJECTED_BY_OWN_GRADUATION_CRITERIA. |
 | gc_ict_paper | **SHADOW** | POSITIVE | trading_days_AND_fired_trades open | {"n_days": 65, "n_trades": 2} | own window not yet satisfied (65/60 days, 2/40 trades); thin line: own rules doc expects ~2 years to reach 40 fired trades |
 | frozen_stack_paper_forward | **SHADOW** | NEGATIVE | forward_clean_paper_run_days open | {"n_backfill_rows_excluded": 257, "n_days": 0, "n_trades": 4} | own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (165-day span), 0 days of clean forward running since 2026-09-12) |
 | s21_weekly_rs_paper | **NO_DATA** | NONE | weeks_AND_closed_trades open | {"n_trades": 0} | no harness_state.json under runs/cycles_v2/ (C:\SPARTA_BRAIN\paper_trading\weekly_rs_s21_forward_paper_harness\runs\cycles_v2\harness_state.json); legacy runs/dry_cycle_001/002 are NOT valid evidence (brain_memory/projects/trading_bot/lessons.md LESSON_S21_PAPER_001/002); manifest paper_state=HARNESS_BUILT_NOT_YET_RUN |
 
-## funding_carry_paper -- SHADOW
+## funding_carry_paper -- REJECTED
 
 - Criteria file: `obsidian-trade-logger/reports/funding_carry_phase7_paper_plan.md (section 7 alerts, section 8 graduation criteria)`
 - Launched: 2026-05-13 · as_of 2026-09-12 · days elapsed 122
 - Window: {"end_or_min_n": 90, "kind": "calendar_days_since_launch", "satisfied": true}
 - Sign: POSITIVE · sample {"n_days": 122, "n_position_changes": 5}
-- Reason: own window satisfied (122/90 days); unresolved own gates: g2_realized_cagr_within_30pct_of_phase6b_same_period=NOT_EVALUABLE
-- Recommendation: funding_carry_paper stays in SHADOW (own window satisfied (122/90 days); unresolved own gates: g2_realized_cagr_within_30pct_of_phase6b_same_period=NOT_EVALUABLE). Keep tracking; nothing to act on. plan section 8: 'If any of these is unmet, paper tracking continues without going live.' Observation only: no rule change, no strategy approval, no live-readiness claim.
+- Reason: own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period
+- Recommendation: The pre-registered window for funding_carry_paper resolved without meeting its own criteria (own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period). Record the window read as resolved-negative in the trading decision record; the operator chooses between continue-tracking (with this read logged) or restart with a new fixed launch date. No mid-window strategy edit, no re-tuning, no rescue. plan section 8: 'If any of these is unmet, paper tracking continues without going live.' Observation only: no rule change, no strategy approval, no live-readiness claim.
 
 | own gate | threshold | value | status | hard | note |
 |---|---|---|---|---|---|
 | g1_90d_without_non_outage_critical | >= 90 days and 0 non-outage CRITICAL | 0 | PASS | yes | counted CRITICAL rows in alerts.csv since launch, excluding DATA_STALE*/DATA_MISSING* outage codes |
-| g2_realized_cagr_within_30pct_of_phase6b_same_period | +/- 30% of same-period Phase-6B estimate | 0.0153 | NOT_EVALUABLE | yes | the tracker does not emit a same-period Phase-6B simulator estimate; the full-sample Phase-6B OOS CAGR (+8.08%) is shown in headline_metrics for reference only and is NOT the plan's gate quantity |
+| g2_realized_cagr_within_30pct_of_phase6b_same_period | +/- 30% of same-period estimate 0.02296 (band 0.01607..0.02985) | 0.0153 | FAIL | yes | same-period Phase-6B estimate 0.022960457422345204 over 2026-05-13..2026-09-12 (122 days) from the locked config at baseline costs 10bps fee + 5bps slip; sealed artifact g2_same_period_estimate_20260912T162609Z.json sha256 0876d3820554a24e |
 | g3_max_dd_vs_phase6b_worst_oos | >= -0.0267 (3x of -0.89%) | -0.0017 | PASS | yes |  |
 | g4_phase8_basis_aware_completed_and_reviewed | report present and reviewed by a human | True | MANUAL | yes | reviewed-by-human is not machine-readable |
 | g5_explicit_human_sign_off | written go-live note | - | MANUAL | yes | outside any automated read |
@@ -55,6 +55,7 @@ Headline metrics:
 
 Source files (read-only):
 - `C:\Users\mahmo\obsidian-trade-logger\reports\paper_funding_carry\alerts.csv`
+- `C:\Users\mahmo\obsidian-trade-logger\reports\paper_funding_carry\g2_same_period_estimate_20260912T162609Z.json`
 - `C:\Users\mahmo\obsidian-trade-logger\reports\paper_funding_carry\latest.json`
 
 ## nq_orb_paper -- REJECTED
