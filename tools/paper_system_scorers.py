@@ -310,6 +310,43 @@ FC_DD_UNACCEPTABLE_MULT = 10.0       # "a 10x deterioration would not"
 FC_CAGR_TOLERANCE = 0.30             # section 8 item 2 (+/- 30% of the same-period Phase-6B estimate)
 FC_PHASE6B_FULL_SAMPLE_CAGR_PCT = 8.08  # funding_carry_phase6b_execution_refinement.md table (reference only)
 _FC_DATA_OUTAGE_CODES = ("DATA_STALE", "DATA_MISSING")
+_FC_G2_GLOB = "reports/paper_funding_carry/g2_same_period_estimate_*.json"
+
+
+def _latest_g2_estimate(ext_root: Path | None = None):
+    """Newest sealed same-period Phase-6B estimate under `ext_root`, or None.
+
+    READ ONLY, like every other external read here, and scoped to the caller's root so a
+    synthetic tree never reaches the live project. The artifact is produced by
+    obsidian-trade-logger/tools/funding_carry_g2_same_period_estimate.py; its sha256 sidecar is
+    verified so a tampered or truncated file is ignored rather than scored.
+    """
+    import hashlib
+    root = ext_root
+    if root is None:
+        try:
+            root = external_root()
+        except Exception:  # noqa: BLE001 - external project absent is a normal state
+            return None
+    if root is None:
+        return None
+    files = sorted(Path(root).glob(_FC_G2_GLOB))
+    for p in reversed(files):
+        try:
+            raw = p.read_bytes()
+            side = p.with_suffix(".json.sha256")
+            sha = hashlib.sha256(raw).hexdigest()
+            if side.exists() and side.read_text(encoding="utf-8").strip() != sha:
+                continue
+            rec = json.loads(raw.decode("utf-8"))
+        except (OSError, ValueError):
+            continue
+        if rec.get("simulator_same_period_cagr") is None:
+            continue
+        rec["_path"] = str(p.name)
+        rec["_sha256"] = sha
+        return rec
+    return None
 
 
 def score_funding_carry(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
@@ -363,13 +400,31 @@ def score_funding_carry(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
                    f">= {FC_WINDOW_DAYS} days and 0 non-outage CRITICAL",
                    float(non_outage_crit), window_ok and non_outage_crit == 0,
                    pending=not window_ok, note=g1_note)
-    # gate 2: realized CAGR within +/-30% of the same-period Phase-6B simulator estimate
-    g2 = gate("g2_realized_cagr_within_30pct_of_phase6b_same_period",
-              f"+/- {int(FC_CAGR_TOLERANCE * 100)}% of same-period Phase-6B estimate",
-              _round(ann_ret, 5), GATE_NOT_EVALUABLE, True,
-              "the tracker does not emit a same-period Phase-6B simulator estimate; the full-sample "
-              f"Phase-6B OOS CAGR (+{FC_PHASE6B_FULL_SAMPLE_CAGR_PCT}%) is shown in headline_metrics for "
-              "reference only and is NOT the plan's gate quantity")
+    # gate 2: realized CAGR within +/-30% of the same-period Phase-6B simulator estimate.
+    # The tracker does not emit that quantity; tools/funding_carry_g2_same_period_estimate.py
+    # re-runs the LOCKED config through the same simulator over the paper window at Phase-6B
+    # baseline costs and seals the result. Read the newest such artifact if one exists.
+    g2_est = inputs.get("g2_same_period_estimate")
+    if g2_est is None:
+        g2 = gate("g2_realized_cagr_within_30pct_of_phase6b_same_period",
+                  f"+/- {int(FC_CAGR_TOLERANCE * 100)}% of same-period Phase-6B estimate",
+                  _round(ann_ret, 5), GATE_NOT_EVALUABLE, True,
+                  "no sealed same-period estimate found; run tools/funding_carry_g2_same_period_estimate.py "
+                  f"(the full-sample Phase-6B OOS CAGR +{FC_PHASE6B_FULL_SAMPLE_CAGR_PCT}% is NOT the plan's gate quantity)")
+    else:
+        sim = g2_est.get("simulator_same_period_cagr")
+        band = g2_est.get("accept_band") or {}
+        lo, hi = band.get("low"), band.get("high")
+        ok = lo is not None and hi is not None and ann_ret is not None and lo <= ann_ret <= hi
+        w = g2_est.get("window") or {}
+        g2 = _cmp_gate("g2_realized_cagr_within_30pct_of_phase6b_same_period",
+                       (f"+/- {int(FC_CAGR_TOLERANCE * 100)}% of same-period estimate {sim:.5f} "
+                        f"(band {lo:.5f}..{hi:.5f})") if sim is not None and lo is not None else "band unavailable",
+                       _round(ann_ret, 5), bool(ok),
+                       note=("same-period Phase-6B estimate %s over %s..%s (%s days) from the locked config at "
+                             "baseline costs 10bps fee + 5bps slip; sealed artifact %s sha256 %s"
+                             % (sim, w.get("start"), w.get("end"), w.get("days"),
+                                g2_est.get("_path"), (g2_est.get("_sha256") or "")[:16])))
     # gate 3: max drawdown not materially worse than 3x the Phase-6B worst-OOS drawdown (-0.89%)
     dd_ok_thr = FC_PHASE6B_WORST_OOS_DD_PCT * FC_DD_ACCEPTABLE_MULT / 100.0
     dd_bad_thr = FC_PHASE6B_WORST_OOS_DD_PCT * FC_DD_UNACCEPTABLE_MULT / 100.0
@@ -826,10 +881,13 @@ def load_funding_carry_inputs(ext_root: Path) -> dict[str, Any]:
     latest_p, alerts_p = d / "latest.json", d / "alerts.csv"
     p8 = ext_root / "reports" / "funding_carry_phase8_basis_aware.md"
     latest = _read_json(latest_p) if latest_p.exists() else None
+    g2 = _latest_g2_estimate(ext_root)
+    g2_p = (d / g2["_path"]) if g2 else None
     return {"latest": latest,
             "alerts_rows": _read_csv(alerts_p) if alerts_p.exists() else None,
             "phase8_report_present": p8.exists(),
-            "source_files": [str(p) for p in (latest_p, alerts_p) if p.exists()]}
+            "g2_same_period_estimate": g2,
+            "source_files": [str(p) for p in (latest_p, alerts_p, g2_p) if p is not None and p.exists()]}
 
 
 def load_nq_orb_inputs(ext_root: Path) -> dict[str, Any]:

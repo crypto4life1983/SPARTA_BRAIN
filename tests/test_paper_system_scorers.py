@@ -162,7 +162,9 @@ def test_decide_branches():
 
 # ── funding carry ────────────────────────────────────────────────────────────
 
-def test_fc_real_shape_is_shadow_because_cagr_gate_not_evaluable():
+def test_fc_is_shadow_while_no_same_period_estimate_has_been_sealed():
+    """Without a sealed same-period Phase-6B estimate the hard gate cannot be evaluated, so the
+    line stays in SHADOW rather than being scored on a quantity the plan does not ask for."""
     rec = ALL_SCORERS["fc"]()
     assert rec["window"]["satisfied"] and rec["sign"] == "POSITIVE"
     assert rec["status"] == "SHADOW"
@@ -173,6 +175,48 @@ def test_fc_real_shape_is_shadow_because_cagr_gate_not_evaluable():
     assert st["g4_phase8_basis_aware_completed_and_reviewed"] == "MANUAL"
     assert "g2_" in rec["reason"]
     assert rec["days_elapsed"] == 121
+
+
+@pytest.mark.parametrize("band,expected_gate,expected_status", [
+    ({"low": 0.0100, "high": 0.0300}, "PASS", "CONFIRMED"),   # realized inside the band
+    ({"low": 0.0161, "high": 0.0299}, "FAIL", "REJECTED"),    # realized just below it
+])
+def test_fc_scores_g2_once_a_same_period_estimate_is_supplied(band, expected_gate, expected_status):
+    """With the estimate present the gate evaluates, and the scorer's pre-registered rule
+    (window satisfied + hard gate FAIL -> REJECTED) fires without any further intervention."""
+    est = {"simulator_same_period_cagr": 0.02296, "accept_band": band, "_path": "g2_x.json",
+           "_sha256": "a" * 64, "window": {"start": "2026-05-13", "end": "2026-09-12", "days": 122}}
+    rec = pss.score_funding_carry({"latest": fc_latest(), "alerts_rows": [], "phase8_report_present": True,
+                                   "g2_same_period_estimate": est, "source_files": ["a"]}, AS_OF)
+    st = {g["name"]: g["status"] for g in rec["own_gates"]}
+    assert st["g2_realized_cagr_within_30pct_of_phase6b_same_period"] == expected_gate
+    assert rec["status"] == expected_status
+
+
+def test_fc_g2_estimate_reader_ignores_a_tampered_artifact(tmp_path):
+    """A sealed estimate whose sha256 sidecar does not match is ignored, never scored."""
+    d = tmp_path / "reports" / "paper_funding_carry"
+    d.mkdir(parents=True)
+    p = d / "g2_same_period_estimate_20260912T000000Z.json"
+    p.write_bytes(b'{"simulator_same_period_cagr": 0.02, "accept_band": {"low": 0.01, "high": 0.03}}')
+    p.with_suffix(".json.sha256").write_text("0" * 64 + "\n", encoding="utf-8")
+    assert pss._latest_g2_estimate(tmp_path) is None
+
+
+def test_fc_g2_estimate_reader_is_scoped_to_the_given_root(tmp_path):
+    """The reader must never reach outside the root it is given (synthetic-tree isolation)."""
+    assert pss._latest_g2_estimate(tmp_path) is None
+
+
+def test_fc_g2_estimate_reader_ignores_a_tampered_artifact(tmp_path, monkeypatch):
+    """A sealed estimate whose sha256 sidecar does not match is ignored, never scored."""
+    d = tmp_path / "reports" / "paper_funding_carry"
+    d.mkdir(parents=True)
+    p = d / "g2_same_period_estimate_20260912T000000Z.json"
+    p.write_bytes(b'{"simulator_same_period_cagr": 0.02, "accept_band": {"low": 0.01, "high": 0.03}}')
+    p.with_suffix(".json.sha256").write_text("0" * 64 + "\n", encoding="utf-8")
+    monkeypatch.setattr(pss, "external_root", lambda: tmp_path)
+    assert pss._latest_g2_estimate() is None
 
 
 def test_fc_window_open_is_shadow():
