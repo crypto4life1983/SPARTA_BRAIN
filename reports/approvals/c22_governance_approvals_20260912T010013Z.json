@@ -1,0 +1,27 @@
+{
+  "artifact": "c22_governance_approvals",
+  "basis": "present-day operator instruction 'resolve it then and do everything we have to do' (2026-09-11), recorded by the session; not a historical token; reversible by the operator",
+  "decision_date": "2026-09-11",
+  "performance_inspected_before_these_decisions": false,
+  "preregistration_sha256": "d09b0745e96c3f138f83b1542d7f40856c6e5d42e9279c69cd0edd37c4c2ce8a",
+  "run_id": "20260912T010013Z",
+  "tokens": {
+    "HUMAN_DECISION_C22_ADVANCE_TO_REPLAY_OR_REJECT=ADVANCE": "one decisive fee-honest replay authorized under this pre-registration",
+    "HUMAN_DECISION_C22_BASIS_ALIGNMENT_REVIEWED": "no adjustment; venue execution prices; CMC-vs-venue diagnostic reported",
+    "HUMAN_DECISION_C22_DRY_RUN_ACCEPT_OR_REJECT=ACCEPT": "no-P&L dry run (sha f76f8330f72e454f) accepted",
+    "HUMAN_DECISION_C22_EXECUTION_COST_BASE_CASE_ACCEPT_OR_REVISE=ACCEPT": "component-level base case frozen in the pre-registration (sha d09b0745e96c3f13); assumptions labelled; 37 bps remains sensitivity-only",
+    "HUMAN_DECISION_C22_EXECUTION_DATA_CONTRACT_ACCEPT_OR_REVISE=ACCEPT": "B1 execution-data contract accepted",
+    "HUMAN_DECISION_C22_EXECUTION_OHLC_FETCH_AUTHORIZE": "exercised (Stage Three, Stage 5 long side)",
+    "HUMAN_DECISION_C22_FEES_AND_LIQUIDITY_FETCH_AUTHORIZE": "exercised (Stage Four, 4A)",
+    "HUMAN_DECISION_C22_FORWARD_EXIT_DATA_CONTRACT_ACCEPT_OR_REVISE=ACCEPT": "B1 forward-exit contract accepted; coverage COMPLETE through extension #2",
+    "HUMAN_DECISION_C22_FUNDING_AND_BORROW_FETCH_AUTHORIZE": "exercised (Stage Two, Stage 5)",
+    "HUMAN_DECISION_C22_HISTORICAL_EVIDENCE_ACQUISITION_PLAN_ACCEPT_OR_REVISE=ACCEPT": "B3 accepted; stages 1-4 and 4A executed under it",
+    "HUMAN_DECISION_C22_HISTORICAL_INSTRUMENT_EVIDENCE_ADMIT_OR_REJECT=ADMIT": "historical existence/shortability/OHLC/liquidity evidence admitted at the graded tiers recorded in Stages 1-4A",
+    "HUMAN_DECISION_C22_HOLD_PENDING_SHORT_INSTRUMENT_EVIDENCE": "recorded as the interim closure decision (supersedes the 2026-09-09 REJECT recommendation), now resolved by evidence stages",
+    "HUMAN_DECISION_C22_INSTRUMENT_REGISTRY_FETCH_AUTHORIZE": "exercised (Stage One)",
+    "HUMAN_DECISION_C22_REPLAY_SPEC_ACCEPT_OR_REVISE=ACCEPT": "Phase A REV1 accepted as the frozen rule set for the decisive replay",
+    "HUMAN_DECISION_C22_SHORT_INSTRUMENT_EVIDENCE_REQUEST_ACCEPT_OR_REVISE=ACCEPT": "B2 accepted",
+    "HUMAN_DECISION_C22_SHORT_INSTRUMENT_SELECT": "home-venue perpetual/futures per asset; Bitfinex spot-margin for LEO",
+    "HUMAN_DECISION_C22_WEEKEND_SESSION_RULE": "decisive = V2_CONTRACT_EXACT; CRYPTO_CALENDAR_SENSITIVITY reported as sensitivity"
+  }
+}

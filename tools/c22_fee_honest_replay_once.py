@@ -50,6 +50,10 @@ EVIDENCE_FIELDS_ALL = ("canonical_asset_identity", "historical_execution_instrum
                        "instrument_existence_on_required_dates", "historical_ohlc_coverage", "fee_schedule",
                        "minimum_quantity_or_notional", "tick_lot_constraints", "liquidity_spread_evidence")
 EVIDENCE_FIELDS_SHORT_ONLY = ("historical_shortability_mechanism", "funding_or_borrow_requirement")
+COST_BASE_CASE_FIELDS = ("fee_schedule", "minimum_quantity_or_notional", "tick_lot_constraints", "liquidity_spread_evidence")
+PREREG_DIR = REPO_ROOT / "reports" / "c22_gc_governance"
+DECISIVE_INPUTS_DIR = EVIDENCE_ROOT / "decisive_inputs"
+RESULTS_DIR = REPO_ROOT / "reports" / "c22_gc_fee_honest_replay"
 
 GATE_TOKENS = {
     "replay_spec_accepted": "HUMAN_DECISION_C22_REPLAY_SPEC_ACCEPT_OR_REVISE=ACCEPT",
@@ -82,9 +86,43 @@ def token_recorded(token: str, blobs=None) -> bool:
     return any(token in b for b in blobs)
 
 
+GOVERNANCE_EXCLUSIONS = {
+    # asset -> (excluded sides, recorded basis). Terminal exclusions from SEALED artifacts: these
+    # signals can never trade, so requiring admitted execution evidence for them is incoherent.
+    # They are still reported, never silently dropped, and the gate keeps failing closed for
+    # every instrument the decisive cohort CAN trade.
+    "BYBIT:TELUSDT": ({"SHORT"}, "Stage One FAIL_WRONG_INSTRUMENT_TYPE: no Bybit linear perpetual exists and spot margin is 'none'; elimination preserved"),
+    "COINBASE:MORPHOUSD": ({"SHORT"}, "Stage Two governance closure: EXCLUDED_VENUE_POLICY under HOME_VENUE_ONLY (short needs Coinbase International, a substituted platform)"),
+}
+
+
 def required_instruments() -> list:
+    """Instruments the decisive cohort can actually trade. Governance-excluded sides are dropped
+    from the requirement and returned separately so nothing disappears silently."""
     sigs, _ = DR.load_frozen_v2_signals()
-    return DR.instrument_feasibility_requirements(sigs)["instruments"]
+    allq = DR.instrument_feasibility_requirements(sigs)["instruments"]
+    out = []
+    for i in allq:
+        ex = GOVERNANCE_EXCLUSIONS.get(i["symbol"])
+        if not ex:
+            out.append(i)
+            continue
+        keep = [s for s in i["sides"] if s not in ex[0]]
+        if keep:
+            out.append(dict(i, sides=keep))
+    return out
+
+
+def excluded_instruments() -> list:
+    sigs, _ = DR.load_frozen_v2_signals()
+    allq = DR.instrument_feasibility_requirements(sigs)["instruments"]
+    out = []
+    for i in allq:
+        ex = GOVERNANCE_EXCLUSIONS.get(i["symbol"])
+        if ex:
+            out.append({"symbol": i["symbol"], "excluded_sides": sorted(ex[0]), "basis": ex[1],
+                        "remaining_sides": [s for s in i["sides"] if s not in ex[0]]})
+    return out
 
 
 def _manifest_path(symbol: str) -> Path:
@@ -108,6 +146,7 @@ def evaluate_instrument_evidence(inst: dict) -> dict:
             manifest = json.loads(path.read_bytes().decode("utf-8"))
         except (OSError, ValueError):
             manifest = None
+    cost_gate_recorded = token_recorded(GATE_TOKENS["cost_base_case_frozen"])
     for f in fields:
         ev = (manifest or {}).get(f)
         if not isinstance(ev, dict):
@@ -115,6 +154,14 @@ def evaluate_instrument_evidence(inst: dict) -> dict:
             status["missing"].append(f)
             continue
         tier = ev.get("source_tier")
+        if ev.get("evidence_basis") == "FROZEN_COST_BASE_CASE" and f in COST_BASE_CASE_FIELDS:
+            # B1 assigns fee / constraint / spread base-case values to the human-frozen cost gate, never to B3 evidence
+            if cost_gate_recorded and (manifest or {}).get("cost_base_case_token") == GATE_TOKENS["cost_base_case_frozen"]:
+                status["fields"][f] = "OK:FROZEN_COST_BASE_CASE"
+            else:
+                status["fields"][f] = "COST_BASE_CASE_NOT_FROZEN"
+                status["missing"].append(f)
+            continue
         if ev.get("evidence_basis") == "PRESENT_DAY_AVAILABILITY":
             status["fields"][f] = "REJECTED_PRESENT_DAY_ONLY"
             status["present_day_only_rejected"].append(f)
@@ -138,7 +185,7 @@ def check_preconditions() -> dict:
     blobs = _approval_records()
     p = {k: token_recorded(v, blobs) for k, v in GATE_TOKENS.items()}
     p["dry_run_report_present"] = DRY_RUN_REPORT.exists()
-    p["cost_base_case_frozen"] = p["cost_base_case_frozen"] and COST_BASE_CASE_DIR.is_dir() and any(COST_BASE_CASE_DIR.glob("*.json"))
+    p["cost_base_case_frozen"] = p["cost_base_case_frozen"] and bool(sorted(PREREG_DIR.glob("c22_decisive_replay_preregistration_*.json")))
     p["evidence_layout_exists"] = MANIFEST_DIR.is_dir()
     inst = required_instruments()
     ev = [evaluate_instrument_evidence(i) for i in inst]
@@ -147,6 +194,7 @@ def check_preconditions() -> dict:
     p["all_required_instruments_evidenced"] = all(e["satisfied"] for e in ev) if ev else False
     p["short_instruments_required"] = sum(1 for i in inst if "SHORT" in i["sides"])
     p["short_instruments_evidenced"] = sum(1 for i, e in zip(inst, ev) if "SHORT" in i["sides"] and e["satisfied"])
+    p["governance_excluded_instruments"] = excluded_instruments()
     gates = ["replay_spec_accepted", "forward_exit_contract_accepted", "execution_data_contract_accepted",
              "dry_run_accepted", "dry_run_report_present", "short_instrument_selected", "cost_base_case_frozen",
              "weekend_session_rule_ruled", "basis_alignment_reviewed", "historical_evidence_admitted",
@@ -160,9 +208,92 @@ def check_preconditions() -> dict:
     return p
 
 
+def latest_prereg() -> tuple:
+    files = sorted(PREREG_DIR.glob("c22_decisive_replay_preregistration_*.json"))
+    if not files:
+        raise RuntimeError("no_preregistration")
+    p = files[-1]
+    raw = p.read_bytes()
+    side = p.with_suffix(".json.sha256")
+    if side.exists() and side.read_text().strip() != hashlib.sha256(raw).hexdigest():
+        raise RuntimeError("preregistration_sha_mismatch")
+    pre = json.loads(raw.decode("utf-8"))
+    ip = DECISIVE_INPUTS_DIR / ("c22_decisive_inputs_%s.json" % pre["run_id"])
+    inputs = json.loads(ip.read_bytes().decode("utf-8"))
+    if inputs["prereg_sha256"] != pre["prereg_sha256"]:
+        raise RuntimeError("decisive_inputs_do_not_match_preregistration")
+    return pre, inputs, str(p.relative_to(REPO_ROOT)).replace("\\", "/"), hashlib.sha256(raw).hexdigest()
+
+
+def load_stage3_short_ohlc(pre: dict) -> dict:
+    """{asset: {date: row}} from the Stage Three canonical OHLC files for the short instruments."""
+    import tools.c22_b3_stage3_historical_ohlc_once as S3
+    out = {}
+    for key, c in pre["cost_base_case"]["constraints"].items():
+        if not key.startswith("SHORT|"):
+            continue
+        asset = key.split("|", 1)[1]
+        base = asset.split(":")[1]
+        base = base[:-4] if base.endswith("USDT") else base[:-3]
+        files = sorted((S3.OHLC_DIR / base).glob("%s__%s__historical_ohlc__*.json" % (c["venue"], base)))
+        if not files:
+            continue
+        payload = json.loads(files[-1].read_bytes().decode("utf-8"))
+        out[asset] = {r["date"]: r for r in payload["rows"]}
+    return out
+
+
+def run_fee_honest_replay(pre: dict, inputs: dict, prereg_path: str, prereg_file_sha: str) -> dict:
+    import sparta_commander.c22_fee_honest_replay_engine_contract as FE
+    import sparta_commander.c22_replay_lifecycle_engine_contract as E
+    signals, v2_sha = DR.load_frozen_v2_signals()
+    index = E.load_session_index(DR.DATA_DIR)
+    short_ohlc = load_stage3_short_ohlc(pre)
+    nav = pre["decisions"]["nav_usd"]["value"]
+    dec_profile, sens_profile = pre["decisions"]["session_profile_decisive"], pre["decisions"]["session_profile_sensitivity"]
+    base_hooks = FE.build_execution(pre, inputs, short_ohlc, use_venue_prices=True)
+    decisive = FE.run_variant(index, signals, dec_profile, base_hooks, nav, "DECISIVE_V2_EXACT_VENUE_PRICES_FROZEN_BASE_CASE", "DECISIVE")
+    export_basis = FE.run_variant(index, signals, dec_profile, FE.build_execution(pre, inputs, short_ohlc, use_venue_prices=False), nav, "SENSITIVITY_EXPORT_PRICE_BASIS", "SENSITIVITY")
+    sens = [export_basis,
+            FE.run_variant(index, signals, sens_profile, base_hooks, nav, "SENSITIVITY_CRYPTO_CALENDAR_PROFILE", "SENSITIVITY"),
+            FE.run_variant(index, signals, dec_profile, base_hooks, 100_000.0, "SENSITIVITY_NAV_100K", "SENSITIVITY"),
+            FE.run_variant(index, signals, dec_profile, FE.build_execution(pre, inputs, short_ohlc, True, fee_override_bps=13.5, slippage_override_bps=5.0), nav, "SENSITIVITY_37BPS_ROUND_TRIP_CONVENTION", "SENSITIVITY"),
+            FE.run_variant(index, signals, dec_profile, FE.build_execution(pre, inputs, short_ohlc, True, spot_fee_override_bps=10.0), nav, "SENSITIVITY_SPOT_LOW_OBSERVED_FEE_10BPS", "SENSITIVITY")]
+    sessions = E.expected_sessions(min(index), max(index), dec_profile)
+    btc = FE.btc_buy_and_hold(index, [s for s in sessions if s in index], pre, nav)
+    executed = FE.executed_trades_for_matching(decisive)
+    nb = pre["benchmarks"]["matched_random_entry_null"]
+    null = FE.matched_random_null(index, executed, pre, nav, nb["seed"], nb["resamples"], dec_profile)
+    g = FE.gates(decisive, null, btc, export_basis)
+    strip = lambda v: {k: x for k, x in v.items() if k not in ("records", "nav_series")}
+    return {"report": "c22_fee_honest_replay_results", "engine_version": FE.ENGINE_VERSION,
+            "preregistration": {"path": prereg_path, "file_sha256": prereg_file_sha, "prereg_sha256": pre["prereg_sha256"]},
+            "v2_artifact_sha256": v2_sha, "signals_in": len(signals), "data_boundary": max(index), "starting_nav_usd": nav,
+            "decisive": strip(decisive), "decisive_nav_series": decisive["nav_series"],
+            "decisive_records": [{k: v for k, v in r.items() if k not in ("entry_fill", "exit_fill")} for r in decisive["records"]],
+            "sensitivities": [strip(v) for v in sens],
+            "benchmarks": {"btc_buy_and_hold": btc, "zero_return_flat": {"total_return": 0.0}, "signal_off_control": {"trades": 0, "total_return": 0.0}, "matched_random_entry_null": null},
+            "gates": g, "power_warning": pre["rejection_gates"]["power_warning"], "assumption_register": pre["assumption_register"],
+            "decisive_conclusion": g["verdict"], "strategy_rules_modified": False, "v2_modified": False, "one_run_only": True}
+
+
+def _write_results(res: dict) -> dict:
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    from datetime import datetime, timezone
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    p = RESULTS_DIR / ("c22_fee_honest_replay_results_%s.json" % run_id)
+    if p.exists():
+        raise RuntimeError("refuse_overwrite")
+    blob = json.dumps(dict(res, run_id=run_id), indent=2, sort_keys=True, default=str).encode("utf-8") + b"\n"
+    p.write_bytes(blob)
+    p.with_suffix(".json.sha256").write_text(hashlib.sha256(blob).hexdigest() + "\n", encoding="utf-8")
+    return {"results_json": str(p.relative_to(REPO_ROOT)).replace("\\", "/"), "results_sha256": hashlib.sha256(blob).hexdigest(), "run_id": run_id}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--advance-token", default=os.environ.get("C22_REPLAY_ADVANCE_TOKEN"))
+    ap.add_argument("--execute-replay", action="store_true")
     a = ap.parse_args(argv)
     p = check_preconditions()
     summary = {"preconditions_all_satisfied": p["all_satisfied"], "unsatisfied": p["unsatisfied"],

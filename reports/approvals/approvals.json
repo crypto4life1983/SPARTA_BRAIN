@@ -1,0 +1,200 @@
+[
+  {
+    "action_executed": false,
+    "approval_id": "appr_7585dd600fb74a4a",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-16T15:25:46+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_b66dc4e4252041b6",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-16T15:26:19+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_136a2ebf5db84885",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-16T16:49:01+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_fa8f9df5860e4d8c",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-17T18:32:20+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_42d766eb3aff44e4",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-17T18:34:59+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_6fd1f01dfdd44b4b",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-17T18:37:54+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_9e2513c0563544a6",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-17T18:39:46+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_831304673ccb4355",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-17T18:45:43+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_d9c08ab72b004a1f",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-19T02:51:37+00:00",
+    "decided_at": "2026-05-22T21:39:29+00:00",
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "local_desktop_mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "EXPIRED"
+  }
+]

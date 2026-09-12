@@ -61,6 +61,7 @@ FILL_OK = "OK"
 FILL_MISSING_PRICE = "MISSING_EXECUTION_PRICE"
 FILL_DATA_GAP = "DATA_GAP"
 FILL_END_OF_DATA = "END_OF_DATA"
+FILL_VENUE_PRICE_MISSING = "VENUE_EXECUTION_PRICE_MISSING"
 
 # frozen exit reasons (rule text single-sourced from the candidate spec; asserted in tests)
 EXIT_LONG_BELOW_UPPER = "LONG_CLOSE_BELOW_GC_UPPER"
@@ -229,7 +230,7 @@ def _new_record(sig: dict) -> dict:
 
 def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=None,
                   cost_model=None, starting_nav: float = 100_000.0, pnl_enabled: bool = False,
-                  enforce_instrument_verification: bool = False) -> dict:
+                  enforce_instrument_verification: bool = False, execution: dict | None = None) -> dict:
     """Run every signal to exactly one terminal lifecycle status. Deterministic for identical
     inputs. With pnl_enabled=False the ledger never realizes a price difference."""
     if profile not in PROFILES:
@@ -238,6 +239,28 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
     if pnl_enabled and cost_model.get("status") == _C.MODEL_STATUS_ZERO:
         raise ValueError("pnl_enabled_requires_a_non_zero_cost_model_selection")
     registry = instrument_registry or {}
+    ex = execution or {}
+    # execution hooks (all optional, all pure): venue_open(symbol, fill_date)->{price,source}|None;
+    # cost_for(symbol)->cost model; half_spread_bps_for(symbol, fill_date, leg)->bps|None;
+    # constraints_for(symbol)->dict|None; capacity_for(symbol, fill_date, action)->notional|None;
+    # carry_for(symbol, prev_session, session, qty, mark, side)->{"funding":x,"borrow":y,"detail":...}
+    def _cm(symbol, side):
+        return ex["cost_for"](symbol, side) if ex.get("cost_for") else cost_model
+
+    def _slip(symbol, fill_date, leg, notional, model, side):
+        bps = ex["half_spread_bps_for"](symbol, fill_date, leg, side) if ex.get("half_spread_bps_for") else None
+        return abs(notional) * bps / 10000.0 if bps is not None else _C.slippage_cost(notional, model, leg)
+
+    def _apply_venue(fill, symbol, side):
+        if fill["status"] != FILL_OK or not ex.get("venue_open"):
+            return fill
+        v = ex["venue_open"](symbol, fill["fill_date"], side)
+        if not v or v.get("price") is None:
+            return dict(fill, status=FILL_VENUE_PRICE_MISSING, export_reference_price=fill["price"], price=None)
+        return dict(fill, price=float(v["price"]), export_reference_price=fill["price"], venue_source=v.get("source"))
+
+    nav_series = []
+    prev_session_holder = {"prev": None}
     first_export, last_export = min(index), max(index)
     sessions = expected_sessions(first_export, last_export, profile)
     ledger = _L.new_ledger(starting_nav)
@@ -275,7 +298,7 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
             rec["instrument_status"], rec["instrument"] = _instrument(sig["symbol"])
             if S not in session_set:
                 rec["notes"].append("decision_date_is_not_a_session_under_profile:%s" % profile)
-            fill = fill_at_next_open(index, S, sig["symbol"], profile, last_export)
+            fill = _apply_venue(fill_at_next_open(index, S, sig["symbol"], profile, last_export), sig["symbol"], _L.SIDE_OF_SIGNAL.get(sig["signal"]))
             rec["entry_fill"] = fill
             if fill["status"] == FILL_OK:
                 rec["lifecycle_status"] = ST_PENDING_ENTRY
@@ -286,6 +309,9 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
             elif fill["status"] == FILL_MISSING_PRICE:
                 rec["lifecycle_status"] = ST_MISSING_EXECUTION_PRICE
                 rec["requires_external_ohlc"] = True
+            elif fill["status"] == FILL_VENUE_PRICE_MISSING:
+                rec["lifecycle_status"] = ST_MISSING_EXECUTION_PRICE
+                rec["notes"].append("venue_execution_price_missing_on_fill_date")
             else:
                 rec["lifecycle_status"] = ST_PENDING_ENTRY
                 rec["notes"].append("entry_fill_beyond_end_of_data")
@@ -307,8 +333,9 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
             rec = records[pe["rid"]]
             pos = ledger["positions"][rec["symbol"]]
             close_px = pe["fill"]["price"] if pnl_enabled else pos["entry_price"]
-            fee = _C.trading_fee(pos["quantity"] * pe["fill"]["price"], cost_model) if pnl_enabled else 0.0
-            slip = _C.slippage_cost(pos["quantity"] * pe["fill"]["price"], cost_model, "exit") if pnl_enabled else 0.0
+            model = _cm(rec["symbol"], pos["side"])
+            fee = _C.trading_fee(pos["quantity"] * pe["fill"]["price"], model) if pnl_enabled else 0.0
+            slip = _slip(rec["symbol"], S, "exit", pos["quantity"] * pe["fill"]["price"], model, pos["side"]) if pnl_enabled else 0.0
             _L.close_position(ledger, rec["symbol"], close_px, S, pe["reason"], fee, slip, pe["fill"]["source_export"])
             open_rid_by_symbol.pop(rec["symbol"], None)
             rec.update({"lifecycle_status": ST_CLOSED, "exit_date": S, "exit_price": pe["fill"]["price"],
@@ -327,9 +354,14 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
                      "instrument_verified": verified if enforce_instrument_verification else True,
                      "instrument": rec["instrument"]}
             if pnl_enabled:
+                model = _cm(rec["symbol"], rec["side"])
                 notional_est = _L.nav(ledger) * rec["size_pct_nav"] / 100.0
-                order["entry_fee"] = _C.trading_fee(notional_est, cost_model)
-                order["entry_slippage"] = _C.slippage_cost(notional_est, cost_model, "entry")
+                order["entry_fee"] = _C.trading_fee(notional_est, model)
+                order["entry_slippage"] = _slip(rec["symbol"], S, "entry", notional_est, model, rec["side"])
+                if ex.get("constraints_for"):
+                    order["constraints"] = ex["constraints_for"](rec["symbol"], rec["side"])
+                if ex.get("capacity_for"):
+                    order["capacity_notional"] = ex["capacity_for"](rec["symbol"], S, "ENTRY", rec["side"])
             res = _L.open_position(ledger, order)
             if res["status"] == _L.STATUS_OPEN:
                 open_rid_by_symbol[rec["symbol"]] = pe["rid"]
@@ -362,13 +394,26 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
                 continue
             rec["exit_condition_date"] = S
             rec["exit_reason"] = reason
-            fill = fill_at_next_open(index, S, sym, profile, last_export)
+            fill = _apply_venue(fill_at_next_open(index, S, sym, profile, last_export), sym, ledger["positions"][sym]["side"])
             if fill["status"] == FILL_OK:
                 pending_exits.append({"rid": rid, "fill": fill, "reason": reason})
             else:
                 rec["exit_fill"] = fill
                 rec["requires_external_ohlc"] = fill["status"] == FILL_MISSING_PRICE
                 rec["notes"].append("exit_unfillable:%s" % fill["status"])
+        # (d2) carry accrual on open positions over (prev session, S]; marks = latest export close
+        if pnl_enabled and ex.get("carry_for"):
+            for sym in sorted(open_rid_by_symbol):
+                pos = ledger["positions"][sym]
+                row = snapshot.get(sym)
+                mark = latest_candle(row)["c"] if row else pos["entry_price"]
+                c = ex["carry_for"](sym, prev_session_holder["prev"], S, pos["quantity"], mark, pos["side"])
+                if c and (c.get("funding") or c.get("borrow")):
+                    _L.accrue_carry(ledger, sym, c.get("funding", 0.0), c.get("borrow", 0.0))
+                    records[open_rid_by_symbol[sym]].setdefault("carry_events", []).append({"session": S, **{k: v for k, v in c.items() if k != "detail"}})
+        prev_session_holder["prev"] = S
+        marks = {sym: latest_candle(snapshot[sym])["c"] for sym in open_rid_by_symbol if snapshot.get(sym)}
+        nav_series.append({"session": S, **{k: v for k, v in _L.snapshot(ledger, marks).items() if k in ("nav", "cash", "realized_pnl", "unrealized_pnl", "gross_exposure", "open_positions")}})
         # (e) entry decisions from signals dated S (no lookahead: only export S is consulted)
         _decide_entries(S, snapshot)
     # END OF DATA: never force-close; mark-to-market diagnostic only where a real close exists
@@ -410,6 +455,10 @@ def run_lifecycle(index: dict, signals: list, profile: str, instrument_registry=
         "performance_conclusion": (PERFORMANCE_CONCLUSION_NOT_COMPUTED if not pnl_enabled
                                    else (PERFORMANCE_CONCLUSION_INCOMPLETE if open_at_end else "COMPLETE_SUBJECT_TO_PRECONDITIONS")),
         "ledger_snapshot": _L.snapshot(ledger), "ledger_validation": _L.validate_ledger(ledger),
+        "nav_series": nav_series if pnl_enabled else None,
+        "closed_positions": ledger["closed"] if pnl_enabled else None,
+        "open_positions": list(ledger["positions"].values()) if pnl_enabled else None,
+        "ledger_rejections": ledger["rejected"],
     }
 
 

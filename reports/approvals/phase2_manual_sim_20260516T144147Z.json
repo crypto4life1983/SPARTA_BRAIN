@@ -1,0 +1,197 @@
+[
+  {
+    "action_executed": false,
+    "approval_id": "appr_cc0ecc4015b1424b",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/grants",
+    "created_at": "2026-05-16T14:41:47+00:00",
+    "decided_at": null,
+    "intent": "grant_funding_tasks",
+    "proposed_action": {
+      "summary": [
+        "Define the funding goal and the eligible entity.",
+        "Shortlist 3 grant/funding programs that match the entity.",
+        "For each: capture deadline, eligibility, required documents.",
+        "Draft a one-page application outline (do NOT submit).",
+        "Queue submission for human approval."
+      ],
+      "title": "Grant / Funding Tasks"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_SUBMISSION",
+    "status": "PENDING"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_fc106197be6b4799",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-16T14:41:47+00:00",
+    "decided_at": null,
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "PENDING"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_d2b1667aaeb44603",
+    "approved_at": "2026-05-16T14:41:47+00:00",
+    "approved_by": "mahmoud",
+    "command": "/draft_email write a professional email to a realtor partnership lead",
+    "created_at": "2026-05-16T14:41:47+00:00",
+    "decided_at": "2026-05-16T14:41:47+00:00",
+    "intent": "draft_email",
+    "proposed_action": {
+      "summary": [
+        "Draft generated. NOT sent.",
+        "Sending requires human approval (Phase 2)."
+      ],
+      "title": "Draft Email: (draft)"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_EMAIL",
+    "status": "APPROVED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_e7e278a7831740ae",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/grants",
+    "created_at": "2026-05-16T14:41:47+00:00",
+    "decided_at": null,
+    "intent": "grant_funding_tasks",
+    "proposed_action": {
+      "summary": [
+        "Define the funding goal and the eligible entity.",
+        "Shortlist 3 grant/funding programs that match the entity.",
+        "For each: capture deadline, eligibility, required documents.",
+        "Draft a one-page application outline (do NOT submit).",
+        "Queue submission for human approval."
+      ],
+      "title": "Grant / Funding Tasks"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_SUBMISSION",
+    "status": "PENDING"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_5bc05bcf76044e34",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-16T14:41:47+00:00",
+    "decided_at": null,
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "PENDING"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_c936db9defb54cf2",
+    "approved_at": "2026-05-16T14:41:47+00:00",
+    "approved_by": "mahmoud",
+    "command": "/draft_email write a professional email to a realtor partnership lead",
+    "created_at": "2026-05-16T14:41:47+00:00",
+    "decided_at": "2026-05-16T14:41:47+00:00",
+    "intent": "draft_email",
+    "proposed_action": {
+      "summary": [
+        "Draft generated. NOT sent.",
+        "Sending requires human approval (Phase 2)."
+      ],
+      "title": "Draft Email: (draft)"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_EMAIL",
+    "status": "APPROVED"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_50e6595755814c92",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/grants",
+    "created_at": "2026-05-16T14:41:48+00:00",
+    "decided_at": null,
+    "intent": "grant_funding_tasks",
+    "proposed_action": {
+      "summary": [
+        "Define the funding goal and the eligible entity.",
+        "Shortlist 3 grant/funding programs that match the entity.",
+        "For each: capture deadline, eligibility, required documents.",
+        "Draft a one-page application outline (do NOT submit).",
+        "Queue submission for human approval."
+      ],
+      "title": "Grant / Funding Tasks"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_SUBMISSION",
+    "status": "PENDING"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_c600a44302cc4c66",
+    "approved_at": null,
+    "approved_by": null,
+    "command": "/revenue",
+    "created_at": "2026-05-16T14:41:48+00:00",
+    "decided_at": null,
+    "intent": "revenue_plan",
+    "proposed_action": {
+      "summary": [
+        "Moving Company Leads \u00b7 approval_required=True (2 external step(s))",
+        "Affiliate Partner Leads \u00b7 approval_required=True (1 external step(s))",
+        "AI Automation Clients \u00b7 approval_required=True (1 external step(s))",
+        "YouTube Monetization Tasks \u00b7 approval_required=True (1 external step(s))"
+      ],
+      "title": "Revenue Opportunity Plan (plans only)"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_OUTREACH",
+    "status": "PENDING"
+  },
+  {
+    "action_executed": false,
+    "approval_id": "appr_3e2cc5e84d9a4b83",
+    "approved_at": "2026-05-16T14:41:48+00:00",
+    "approved_by": "mahmoud",
+    "command": "/draft_email write a professional email to a realtor partnership lead",
+    "created_at": "2026-05-16T14:41:48+00:00",
+    "decided_at": "2026-05-16T14:41:48+00:00",
+    "intent": "draft_email",
+    "proposed_action": {
+      "summary": [
+        "Draft generated. NOT sent.",
+        "Sending requires human approval (Phase 2)."
+      ],
+      "title": "Draft Email: (draft)"
+    },
+    "requested_by": "mahmoud",
+    "risk_level": "EXTERNAL_EMAIL",
+    "status": "APPROVED"
+  }
+]

@@ -48,8 +48,35 @@ REJECT_INSUFFICIENT_CASH = "INSUFFICIENT_AVAILABLE_NAV"
 REJECT_INVALID_PRICE = "INVALID_FILL_PRICE"
 REJECT_UNKNOWN_SIGNAL = "UNKNOWN_SIGNAL"
 REJECT_INSTRUMENT_UNVERIFIED = "INSTRUMENT_UNVERIFIED"
+REJECT_BELOW_MIN_ORDER_RULES = "BELOW_MIN_ORDER_RULES"
+REJECT_FILL_CAPACITY = "FILL_CAPACITY_EXCEEDED"
 
 _EPS = 1e-9
+
+
+def apply_constraints(notional: float, price: float, side: str, constraints) -> dict:
+    """PURE. Snap the fill price to tick (buys up, sells down) and the quantity DOWN to the lot
+    step; report min-qty / min-notional violations. No constraints -> pass-through."""
+    out = {"price": float(price), "quantity": notional / float(price), "ok": True, "reason": None, "applied": bool(constraints)}
+    if not constraints:
+        return out
+    tick = constraints.get("tick_size")
+    if tick:
+        n = out["price"] / tick
+        snapped = (int(n + 1 - _EPS) if side == SIDE_LONG else int(n + _EPS)) * tick
+        out["price"] = float(snapped)
+    lot = constraints.get("lot_step")
+    qty = notional / out["price"]
+    if lot:
+        qty = int(qty / lot + _EPS) * lot
+    out["quantity"] = qty
+    if constraints.get("min_qty") and qty < constraints["min_qty"] - _EPS:
+        out.update(ok=False, reason="qty_%s_below_min_qty_%s" % (qty, constraints["min_qty"]))
+    elif constraints.get("min_notional") and qty * out["price"] < constraints["min_notional"] - _EPS:
+        out.update(ok=False, reason="notional_%.4f_below_min_notional_%s" % (qty * out["price"], constraints["min_notional"]))
+    elif qty <= 0:
+        out.update(ok=False, reason="zero_quantity_after_lot_rounding")
+    return out
 
 
 def sizing_pct_nav(signal: str, breakout_within_window: bool) -> float:
@@ -168,6 +195,14 @@ def open_position(ledger: dict, order: dict, marks=None) -> dict:
     if gross_after > current_nav * MAX_GROSS_EXPOSURE_PCT_NAV / 100.0 + _EPS:
         return _reject(ledger, order, REJECT_EXPOSURE_CAP,
                        {"gross_after_pct_nav": gross_after / current_nav * 100.0, "cap": MAX_GROSS_EXPOSURE_PCT_NAV})
+    cap = order.get("capacity_notional")
+    if cap is not None and notional > float(cap) + _EPS:
+        return _reject(ledger, order, REJECT_FILL_CAPACITY, {"notional": notional, "observed_capacity_notional": float(cap)})
+    snap = apply_constraints(notional, float(price), SIDE_OF_SIGNAL[sig], order.get("constraints"))
+    if not snap["ok"]:
+        return _reject(ledger, order, REJECT_BELOW_MIN_ORDER_RULES, snap["reason"])
+    price, qty = snap["price"], snap["quantity"]
+    notional = qty * price                      # actual notional after lot rounding (never above the sized notional)
     fee = float(order.get("entry_fee", 0.0))
     slip = float(order.get("entry_slippage", 0.0))
     cash_needed = notional + fee + slip
@@ -179,7 +214,7 @@ def open_position(ledger: dict, order: dict, marks=None) -> dict:
            "symbol": order["symbol"], "side": SIDE_OF_SIGNAL[sig], "signal": sig,
            "decision_date": order["decision_date"], "market_rank": order["market_rank"],
            "size_pct_nav": size_pct, "nav_at_decision": current_nav,
-           "quantity": notional / float(price), "entry_price": float(price),
+           "quantity": qty, "entry_price": float(price), "constraints_applied": snap["applied"],
            "entry_date": order["fill_date"], "entry_source_export": order.get("fill_source_export"),
            "notional_at_entry": notional, "instrument": order.get("instrument"),
            "fees": fee, "slippage": slip, "funding": 0.0, "borrow": 0.0,

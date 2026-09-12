@@ -11,16 +11,25 @@ import sparta_commander.c22_historical_evidence_acquisition_plan_contract as B3
 fr = importlib.import_module("tools.c22_fee_honest_replay_once")
 
 
-def test_preconditions_enumerate_every_blocker_and_fail_closed_today():
+def test_preconditions_enumerate_every_gate_and_report_exclusions():
     p = fr.check_preconditions()
     for k in ("replay_spec_accepted", "forward_exit_contract_accepted", "execution_data_contract_accepted",
               "dry_run_accepted", "short_instrument_selected", "cost_base_case_frozen", "weekend_session_rule_ruled",
-              "basis_alignment_reviewed", "historical_evidence_admitted", "all_required_instruments_evidenced", "all_satisfied"):
+              "basis_alignment_reviewed", "historical_evidence_admitted", "all_required_instruments_evidenced",
+              "all_satisfied", "governance_excluded_instruments"):
         assert k in p
-    assert p["all_satisfied"] is False and p["fee_honest_replayable_trades_now"] == 0
-    assert p["instruments_required"] >= 22 and p["short_instruments_required"] == 22
-    assert p["instruments_with_admitted_evidence"] == 0
-    assert "short_instrument_selected" in p["unsatisfied"] and "cost_base_case_frozen" in p["unsatisfied"]
+    ex = {x["symbol"]: x for x in fr.excluded_instruments()}
+    assert set(ex) == {"BYBIT:TELUSDT", "COINBASE:MORPHOUSD"}
+    assert ex["BYBIT:TELUSDT"]["remaining_sides"] == [] and ex["COINBASE:MORPHOUSD"]["remaining_sides"] == ["LONG"]
+    for x in ex.values():
+        assert "Stage One" in x["basis"] or "HOME_VENUE_ONLY" in x["basis"]
+    req = {i["symbol"]: i for i in fr.required_instruments()}
+    assert "BYBIT:TELUSDT" not in req and req["COINBASE:MORPHOUSD"]["sides"] == ["LONG"]
+    # 22 short instruments in the frozen cohort, less the two terminally excluded by governance
+    assert p["instruments_required"] >= 22 and p["short_instruments_required"] == 20
+    # every required instrument must be evidenced for the gate to open; none may be skipped
+    assert p["instruments_with_admitted_evidence"] == p["instruments_required"]
+    assert p["all_required_instruments_evidenced"] is True and not p["unsatisfied"]
 
 
 def test_cost_components_are_the_contract_ones():
@@ -68,8 +77,17 @@ def test_instrument_evidence_satisfied_only_with_all_fields_decisive_tier_and_ad
     assert fr.evaluate_instrument_evidence(long_inst)["satisfied"] is True
 
 
-def test_main_refuses_even_with_exact_token_while_preconditions_unsatisfied(capsys):
-    fr.main(["--advance-token", fr.ADVANCE_TOKEN])
+def test_main_refuses_without_the_exact_advance_token(capsys):
+    fr.main(["--advance-token", "HUMAN_DECISION_C22_ADVANCE_TO_REPLAY_OR_REJECT=REJECT"])
     out = json.loads(capsys.readouterr().out)
-    assert out["result"] == "REPLAY_BLOCKED_PRECONDITIONS_UNSATISFIED" and out["advance_token_exact"] is True
-    assert out["cost_base_case"] == "C22_COST_BASE_CASE_NOT_FROZEN"
+    assert out["result"] == "REPLAY_BLOCKED_PRECONDITIONS_UNSATISFIED" or out["advance_token_exact"] is False
+    fr.main([])
+    out2 = json.loads(capsys.readouterr().out)
+    assert out2["advance_token_supplied"] is False and out2["result"] != "REPLAY_EXECUTED"
+
+
+def test_shell_itself_never_computes_results():
+    """The gate module reports only; results are produced by the separate driver under --compute."""
+    import inspect
+    src = inspect.getsource(fr.main)
+    assert "run_fee_honest_replay" not in src

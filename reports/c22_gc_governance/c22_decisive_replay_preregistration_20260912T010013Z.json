@@ -1,0 +1,1491 @@
+{
+  "artifact": "c22_decisive_replay_preregistration",
+  "assumption_register": [
+    {
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "field": "taker fee (Binance perps, Binance/Coinbase spot)",
+      "rule": "taker_bps = max(venue-observed first-party retail taker values); else global max across venues for the product class; no maker rebate / token discount / VIP / promotion; all fills treated as taker"
+    },
+    {
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "field": "slippage per side (non-Kraken fills)",
+      "value_bps": 25.0
+    },
+    {
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "field": "tick/lot/min rules",
+      "rule": "current values (GRAM tick reconstructed)"
+    },
+    {
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "field": "LEO daily borrow rate",
+      "value": 0.005573069999999999
+    },
+    {
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "field": "starting NAV",
+      "value": 10000.0
+    },
+    {
+      "class": "DERIVED_FROM_OBSERVED_DATA",
+      "field": "long capacity",
+      "rule": "1% of venue daily quote volume on the fill date"
+    }
+  ],
+  "assumption_selected_against_pnl": false,
+  "authorization": {
+    "operator_instruction": "resolve it then and do everything we have to do",
+    "performance_inspected_before_freeze": false,
+    "recorded_by": "session, present-day operator authorization; no historical token fabricated"
+  },
+  "benchmarks": {
+    "btc_buy_and_hold": "BINANCE:BTCUSDT export candle chain (CMC reference), same sessions, one taker fee each side",
+    "comparison_basis": "strategy is also run on export-candle prices (basis sensitivity) so null vs strategy is like-for-like; decisive strategy metrics use venue prices",
+    "matched_random_entry_null": {
+      "matching": "same decision dates, sides, hold lengths (sessions) as executed strategy trades; random symbol from the same export top-50; export-candle prices; same fee class per venue (global max where venue unobserved)",
+      "resamples": 500,
+      "seed": 20260911
+    },
+    "signal_off_control": "zero trades",
+    "zero_return_flat": "always flat"
+  },
+  "cost_base_case": {
+    "37bps_status": "SENSITIVITY_CASE_NOT_BASE_CASE",
+    "borrow_leo": {
+      "applied_daily_rate": 0.005573069999999999,
+      "assumption_daily_rate": 0.005573069999999999,
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "funding_provider_fee_note": "Bitfinex 15% fee applies to providers, not borrowers; not charged",
+      "instrument": "fLEO",
+      "observed_frr_daily_max": 0.0,
+      "rule": "daily borrow rate = max(observed FRR, assumption = max |8h perp funding rate| observed across the cohort in the window x 3)"
+    },
+    "capacity": {
+      "ASTER_USDT|2026-06-22": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 2556.9384
+      },
+      "CRVUSDT|2026-07-06": {
+        "ask_notional_0_2pct": 24347.98893,
+        "bid_notional_0_2pct": 32261.30922,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "CRVUSDT|2026-07-16": {
+        "ask_notional_0_2pct": 46402.19837,
+        "bid_notional_0_2pct": 27988.52746,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "GRAMUSDT|2026-07-06": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 275377.09809
+      },
+      "GT_USDT|2026-07-05": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 3156.75
+      },
+      "GT_USDT|2026-07-06": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 9237.216
+      },
+      "GT_USDT|2026-07-20": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 7921.104
+      },
+      "GT_USDT|2026-07-23": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 13.318
+      },
+      "IMXUSDT|2026-07-07": {
+        "ask_notional_0_2pct": 4789.7073,
+        "bid_notional_0_2pct": 13418.0748,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "IMXUSDT|2026-07-30": {
+        "ask_notional_0_2pct": 7698.3392,
+        "bid_notional_0_2pct": 5893.4743,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "INJUSDT|2026-07-12": {
+        "ask_notional_0_2pct": 56128.4286,
+        "bid_notional_0_2pct": 55289.0622,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "INJUSDT|2026-07-13": {
+        "ask_notional_0_2pct": 57105.9968,
+        "bid_notional_0_2pct": 62790.9434,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "INJUSDT|2026-07-17": {
+        "ask_notional_0_2pct": 77800.7659,
+        "bid_notional_0_2pct": 93545.1156,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "LINKUSDT|2026-07-16": {
+        "ask_notional_0_2pct": 348029.8728,
+        "bid_notional_0_2pct": 249581.17844,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "LINKUSDT|2026-07-18": {
+        "ask_notional_0_2pct": 304183.2237,
+        "bid_notional_0_2pct": 287645.85714,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "LINKUSDT|2026-07-20": {
+        "ask_notional_0_2pct": 315601.67868,
+        "bid_notional_0_2pct": 340688.89377,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "OKB-USDT-SWAP|2026-06-24": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 8054153.27
+      },
+      "PENDLEUSDT|2026-07-04": {
+        "ask_notional_0_2pct": 20754.057,
+        "bid_notional_0_2pct": 38724.2829,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "PENDLEUSDT|2026-07-06": {
+        "ask_notional_0_2pct": 16455.8238,
+        "bid_notional_0_2pct": 16513.4447,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "PENDLEUSDT|2026-07-10": {
+        "ask_notional_0_2pct": 33178.6119,
+        "bid_notional_0_2pct": 23916.7485,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "PF_KASUSD|2026-07-06": {
+        "ask_notional_0_05pct": 13046.656589999999,
+        "bid_notional_0_05pct": 12151.746879999999,
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "official analytics liquidity_005 (contracts) x best price"
+      },
+      "PF_SPXUSD|2026-06-29": {
+        "ask_notional_0_05pct": 4322.7888,
+        "bid_notional_0_05pct": 10169.543,
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "official analytics liquidity_005 (contracts) x best price"
+      },
+      "PF_SPXUSD|2026-07-04": {
+        "ask_notional_0_05pct": 10243.814400000001,
+        "bid_notional_0_05pct": 2239.2832000000003,
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "official analytics liquidity_005 (contracts) x best price"
+      },
+      "PF_SPXUSD|2026-07-06": {
+        "ask_notional_0_05pct": 9604.8786,
+        "bid_notional_0_05pct": 4042.3635999999997,
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "official analytics liquidity_005 (contracts) x best price"
+      },
+      "QNTUSDT|2026-06-21": {
+        "ask_notional_0_2pct": 21622.12,
+        "bid_notional_0_2pct": 5073.139,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "QNTUSDT|2026-06-22": {
+        "ask_notional_0_2pct": 14244.256,
+        "bid_notional_0_2pct": 4022.816,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "SOLUSDT|2026-07-03": {
+        "ask_notional_0_2pct": 3090772.4213,
+        "bid_notional_0_2pct": 3374874.0518,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "SOLUSDT|2026-07-05": {
+        "ask_notional_0_2pct": 4290461.7919,
+        "bid_notional_0_2pct": 3029645.3071,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "SOLUSDT|2026-07-07": {
+        "ask_notional_0_2pct": 3404581.2726,
+        "bid_notional_0_2pct": 3309474.9396,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "SUNUSDT|2026-07-07": {
+        "ask_notional_0_2pct": 10942.978276,
+        "bid_notional_0_2pct": 14313.438513,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "SUNUSDT|2026-07-09": {
+        "ask_notional_0_2pct": 9155.159161,
+        "bid_notional_0_2pct": 11413.720726,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-06-29": {
+        "ask_notional_0_2pct": 31377.8601,
+        "bid_notional_0_2pct": 22153.0255,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-01": {
+        "ask_notional_0_2pct": 38212.3373,
+        "bid_notional_0_2pct": 39452.1512,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-02": {
+        "ask_notional_0_2pct": 31736.7435,
+        "bid_notional_0_2pct": 29165.1405,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-05": {
+        "ask_notional_0_2pct": 35160.764,
+        "bid_notional_0_2pct": 34493.074,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-07": {
+        "ask_notional_0_2pct": 32469.2413,
+        "bid_notional_0_2pct": 137774.1231,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-09": {
+        "ask_notional_0_2pct": 27848.7637,
+        "bid_notional_0_2pct": 31142.0481,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-11": {
+        "ask_notional_0_2pct": 34540.1695,
+        "bid_notional_0_2pct": 50753.8449,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TIAUSDT|2026-07-13": {
+        "ask_notional_0_2pct": 42875.293,
+        "bid_notional_0_2pct": 38689.5286,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TRXUSDT|2026-07-07": {
+        "ask_notional_0_2pct": 336433.99363,
+        "bid_notional_0_2pct": 360795.36805,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TRXUSDT|2026-07-26": {
+        "ask_notional_0_2pct": 281594.82971,
+        "bid_notional_0_2pct": 262141.27025,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "TRXUSDT|2026-07-28": {
+        "ask_notional_0_2pct": 335341.32092,
+        "bid_notional_0_2pct": 369086.28953,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "VIRTUALUSDT|2026-07-13": {
+        "ask_notional_0_2pct": 63047.25709,
+        "bid_notional_0_2pct": 48094.83075,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "VIRTUALUSDT|2026-07-22": {
+        "ask_notional_0_2pct": 41227.66321,
+        "bid_notional_0_2pct": 67543.42887,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "ZECUSDT|2026-07-09": {
+        "ask_notional_0_2pct": 557106.51341,
+        "bid_notional_0_2pct": 481289.23922,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "ZECUSDT|2026-07-12": {
+        "ask_notional_0_2pct": 532912.86422,
+        "bid_notional_0_2pct": 1114656.20875,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "ZECUSDT|2026-07-14": {
+        "ask_notional_0_2pct": 648459.89138,
+        "bid_notional_0_2pct": 444921.67701,
+        "class": "OBSERVED_FIRST_PARTY",
+        "rule": "short entry hits bids; short exit hits asks"
+      },
+      "tLEOUSD|2026-07-16": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 261.9537
+      },
+      "tLEOUSD|2026-07-18": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 549.558974468
+      },
+      "tLEOUSD|2026-07-20": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "rule": "30-minute traded quote notional after the fill timestamp (trade-only venue)",
+        "traded_quote_notional_30min": 208.33794
+      }
+    },
+    "components": [
+      "entry_exchange_fee",
+      "exit_exchange_fee",
+      "entry_half_spread",
+      "exit_half_spread",
+      "entry_slippage",
+      "exit_slippage",
+      "funding_or_borrow_cost",
+      "exceptional_exit_cost",
+      "basis_adjustment_cost_if_applicable"
+    ],
+    "constraints": {
+      "LONG|BINANCE:AAVEUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "AAVEUSDT",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.001,
+          "min_notional": 5.0,
+          "min_qty": 0.001,
+          "tick_size": 0.01
+        },
+        "venue": "BINANCE_SPOT"
+      },
+      "LONG|BINANCE:DEXEUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "DEXEUSDT",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.01,
+          "min_notional": 5.0,
+          "min_qty": 0.01,
+          "tick_size": 0.001
+        },
+        "venue": "BINANCE_SPOT"
+      },
+      "LONG|BINANCE:JSTUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "JSTUSDT",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 1e-05
+        },
+        "venue": "BINANCE_SPOT"
+      },
+      "LONG|BINANCE:JUPUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "JUPUSDT",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.0001
+        },
+        "venue": "BINANCE_SPOT"
+      },
+      "LONG|BINANCE:ZECUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "ZECUSDT",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.001,
+          "min_notional": 5.0,
+          "min_qty": 0.001,
+          "tick_size": 0.01
+        },
+        "venue": "BINANCE_SPOT"
+      },
+      "LONG|COINBASE:AEROUSD": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "AERO-USD",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 1.0,
+          "min_qty": null,
+          "tick_size": 1e-05
+        },
+        "venue": "COINBASE_EXCHANGE"
+      },
+      "LONG|COINBASE:MORPHOUSD": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "MORPHO-USD",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 0.01,
+          "min_notional": 1.0,
+          "min_qty": null,
+          "tick_size": 0.0001
+        },
+        "venue": "COINBASE_EXCHANGE"
+      },
+      "LONG|KRAKEN:SPXUSD": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "SPXUSD",
+        "note": "current spot rules applied as frozen assumption",
+        "values": {
+          "lot_step": 1e-05,
+          "min_notional": 0.5,
+          "min_qty": 9.0,
+          "tick_size": 0.0001
+        },
+        "venue": "KRAKEN_SPOT"
+      },
+      "SHORT|BINANCE:AAVEUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "AAVEUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.01
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:CRVUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "CRVUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.0001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:IMXUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "IMXUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": 5.0,
+          "min_qty": 1.0,
+          "tick_size": 0.0001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:INJUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "INJUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:LINKUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "LINKUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.01,
+          "min_notional": 20.0,
+          "min_qty": 0.01,
+          "tick_size": 0.001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:PENDLEUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "PENDLEUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": 5.0,
+          "min_qty": 1.0,
+          "tick_size": 0.0001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:QNTUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "QNTUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.01
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:SOLUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "SOLUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.01,
+          "min_notional": 5.0,
+          "min_qty": 0.01,
+          "tick_size": 0.01
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:SUNUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "SUNUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": 5.0,
+          "min_qty": 1.0,
+          "tick_size": 1e-06
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:TIAUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "TIAUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": 5.0,
+          "min_qty": 1.0,
+          "tick_size": 0.0001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:TRXUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "TRXUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": 5.0,
+          "min_qty": 1.0,
+          "tick_size": 1e-05
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:VIRTUALUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "VIRTUALUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.0001
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BINANCE:ZECUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "ZECUSDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 0.001,
+          "min_notional": 5.0,
+          "min_qty": 0.001,
+          "tick_size": 0.01
+        },
+        "venue": "BINANCE"
+      },
+      "SHORT|BITFINEX:LEOUSD": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "tLEOUSD",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": null,
+          "min_notional": null,
+          "min_qty": 0.6,
+          "tick_size": null
+        },
+        "venue": "BITFINEX"
+      },
+      "SHORT|BYBIT:GRAMUSDT": {
+        "class": "DERIVED_FROM_OBSERVED_DATA",
+        "instrument": "GRAMUSDT",
+        "note": "tick reconstructed from Bybit notice effective 2026-08-11 (in-window tick 0.0001); lot/min current-only assumption",
+        "values": {
+          "lot_step": 0.1,
+          "min_notional": 5.0,
+          "min_qty": 0.1,
+          "tick_size": 0.0001
+        },
+        "venue": "BYBIT"
+      },
+      "SHORT|GATE:ASTERUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "ASTER_USDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": null,
+          "min_qty": 1.0,
+          "tick_size": 0.0001
+        },
+        "venue": "GATE"
+      },
+      "SHORT|GATE:GTUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "GT_USDT",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": null,
+          "min_qty": 1.0,
+          "tick_size": 0.001
+        },
+        "venue": "GATE"
+      },
+      "SHORT|KRAKEN:KASUSD": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "PF_KASUSD",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1,
+          "min_notional": null,
+          "min_qty": null,
+          "tick_size": 1e-05
+        },
+        "venue": "KRAKEN_FUTURES"
+      },
+      "SHORT|KRAKEN:SPXUSD": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "PF_SPXUSD",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1,
+          "min_notional": null,
+          "min_qty": null,
+          "tick_size": 0.0001
+        },
+        "venue": "KRAKEN_FUTURES"
+      },
+      "SHORT|OKX:OKBUSDT": {
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "instrument": "OKB-USDT-SWAP",
+        "note": "CURRENT_CONSTRAINT_ONLY applied as frozen assumption",
+        "values": {
+          "lot_step": 1.0,
+          "min_notional": null,
+          "min_qty": 1.0,
+          "tick_size": 0.01
+        },
+        "venue": "OKX"
+      }
+    },
+    "fees": {
+      "BINANCE": {
+        "basis": "no venue-observed value; global max of observed perp retail taker values (7.5 bps, Gate contract API)",
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "maker_bps_applied": null,
+        "stage4a_grade": "UNRESOLVED",
+        "taker_bps": 7.5
+      },
+      "BINANCE_SPOT": {
+        "basis": "no venue-observed value; global max of observed spot retail taker values (80.0 bps, Kraken Pro base tier)",
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "maker_bps_applied": null,
+        "taker_bps": 80.0
+      },
+      "BITFINEX": {
+        "basis": "max of venue-observed retail taker values [0.0]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "stage4a_grade": "T2_HISTORICAL_FEE_BRACKETED",
+        "taker_bps": 0.0
+      },
+      "BYBIT": {
+        "basis": "max of venue-observed retail taker values [5.5]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "stage4a_grade": "CURRENT_ONLY",
+        "taker_bps": 5.5
+      },
+      "COINBASE_EXCHANGE": {
+        "basis": "no venue-observed value; global max of observed spot retail taker values (80.0 bps, Kraken Pro base tier)",
+        "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+        "maker_bps_applied": null,
+        "taker_bps": 80.0
+      },
+      "GATE": {
+        "basis": "max of venue-observed retail taker values [5.0, 7.5]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "stage4a_grade": "UNRESOLVED(conflict)",
+        "taker_bps": 7.5
+      },
+      "KRAKEN_FUTURES": {
+        "basis": "max of venue-observed retail taker values [5.0]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "stage4a_grade": "T2_HISTORICAL_FEE_BRACKETED",
+        "taker_bps": 5.0
+      },
+      "KRAKEN_SPOT": {
+        "basis": "max of venue-observed spot retail taker values [80.0]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "taker_bps": 80.0
+      },
+      "OKX": {
+        "basis": "max of venue-observed retail taker values [5.0]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "stage4a_grade": "CURRENT_ONLY",
+        "taker_bps": 5.0
+      },
+      "OKX_SPOT": {
+        "basis": "max of venue-observed spot retail taker values [10.0]",
+        "class": "OBSERVED_FIRST_PARTY",
+        "maker_bps_applied": null,
+        "taker_bps": 10.0
+      },
+      "_rule": "taker_bps = max(venue-observed first-party retail taker values); else global max across venues for the product class; no maker rebate / token discount / VIP / promotion; all fills treated as taker",
+      "_sensitivities": {
+        "37bps_round_trip_convention": {
+          "class": "SENSITIVITY_ONLY",
+          "slippage_bps": 5.0,
+          "taker_bps": 13.5
+        },
+        "spot_low_observed": {
+          "basis": "OKX regular-user spot taker (lowest observed)",
+          "class": "SENSITIVITY_ONLY",
+          "spot_taker_bps": 10.0
+        }
+      }
+    },
+    "funding": {
+      "BINANCE:AAVEUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "AAVEUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/AAVE/BINANCE__AAVE__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010018Z.raw.json",
+            "raw_sha256": "f3d544405c3014be9599f3ce413d6bf657ab6c1405674027d3189e859989f6f7"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:CRVUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "CRVUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/CRV/BINANCE__CRV__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010019Z.raw.json",
+            "raw_sha256": "6308387618932ab727b01682d33fc9c28bdc0b7116a5ceb7502605a532d8422a"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:IMXUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 497,
+        "first": "2026-06-20",
+        "instrument": "IMXUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/IMX/BINANCE__IMX__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010019Z.raw.json",
+            "raw_sha256": "9abfd513c02a15b90c0a54bb8450a2bda338dfa14349d1914ac87c88e9fbd74f"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:INJUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "INJUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/INJ/BINANCE__INJ__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010020Z.raw.json",
+            "raw_sha256": "961b0d3541b7b743e133ddee62f35c38df7297889f9b9d82f1feb257b7c76d69"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:LINKUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "LINKUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/LINK/BINANCE__LINK__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010021Z.raw.json",
+            "raw_sha256": "0b251184610738181410fbe3e3d6e1caf1eedf2800aa4ce3e8027bd940c76336"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:PENDLEUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "PENDLEUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/PENDLE/BINANCE__PENDLE__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010021Z.raw.json",
+            "raw_sha256": "e1dc59d6655fdefe3ee675212d6c61707c626f6cea4e49dca67995e8b8f5d1f0"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:QNTUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "QNTUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/QNT/BINANCE__QNT__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010022Z.raw.json",
+            "raw_sha256": "82d393f029a6274a26c6e0ac2ddb1d3b96441eaae84fb95aec57247408bf6e48"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:SOLUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "SOLUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/SOL/BINANCE__SOL__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010022Z.raw.json",
+            "raw_sha256": "d71a2f8147c0cf1ce279c14dc8227c2a371761786187c57ea1e12361395499fb"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:SUNUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 497,
+        "first": "2026-06-20",
+        "instrument": "SUNUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/SUN/BINANCE__SUN__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010023Z.raw.json",
+            "raw_sha256": "9a8eb83af655d74798f17e88c41d49d9072fc5207d1bc408f694981a796f702e"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:TIAUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 497,
+        "first": "2026-06-20",
+        "instrument": "TIAUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/TIA/BINANCE__TIA__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010023Z.raw.json",
+            "raw_sha256": "06f0e2bdab6f8f3d29af5d2904ebcea064c3fcb151b6dffb7deec605677c94f2"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:TRXUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "TRXUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/TRX/BINANCE__TRX__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010024Z.raw.json",
+            "raw_sha256": "3e0b87a78193d1e49bc67064729153646d6f8246961edd821a1b15ee65476ad1"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:VIRTUALUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 497,
+        "first": "2026-06-20",
+        "instrument": "VIRTUALUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/VIRTUAL/BINANCE__VIRTUAL__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010025Z.raw.json",
+            "raw_sha256": "d1cbdabceae82e757462b0f0d2b87f730c3692ec8bf3a88ea55562a47bd90ed6"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BINANCE:ZECUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "ZECUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/ZEC/BINANCE__ZEC__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010025Z.raw.json",
+            "raw_sha256": "4126a476abad377d7597bb3db3e9a1d63ab4d5abca8f31fecd42e43066b86001"
+          }
+        ],
+        "venue": "BINANCE"
+      },
+      "BYBIT:GRAMUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 484,
+        "first": "2026-06-22",
+        "instrument": "GRAMUSDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://api.bybit.com/v5/market/funding/history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010026Z.raw.json",
+            "raw_sha256": "0aade150ecd1b9911a4483673369ba2a767b1bc4c8a655ca009be40c89d6fd1b"
+          },
+          {
+            "endpoint": "https://api.bybit.com/v5/market/funding/history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__stage5_funding_full_p01__20260912T010013Z__2026-09-12T010026Z.raw.json",
+            "raw_sha256": "4236b670e008f150dc39e823bd4b5abc3f611edeffbe9d26b528f90dee5916df"
+          },
+          {
+            "endpoint": "https://api.bybit.com/v5/market/funding/history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/BYBIT/GRAM/BYBIT__GRAM__stage5_funding_full_p02__20260912T010013Z__2026-09-12T010026Z.raw.json",
+            "raw_sha256": "183ab7b4e6e0d1875b9e4fd541ee8d92672c645872ddd37eb1441eef46bed105"
+          }
+        ],
+        "venue": "BYBIT"
+      },
+      "GATE:ASTERUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 498,
+        "first": "2026-06-20",
+        "instrument": "ASTER_USDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://api.gateio.ws/api/v4/futures/usdt/funding_rate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/GATE/ASTER/GATE__ASTER__stage5_funding_full__20260912T010013Z__2026-09-12T010027Z.raw.json",
+            "raw_sha256": "9fd69495d7eb5e6e7531b1d3f1a83e39e3b4610a968e58defe96bb7461cb3cca"
+          }
+        ],
+        "venue": "GATE"
+      },
+      "GATE:GTUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 249,
+        "first": "2026-06-20",
+        "instrument": "GT_USDT",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://api.gateio.ws/api/v4/futures/usdt/funding_rate",
+            "raw_path": "data/c22_short_instrument_evidence/raw/GATE/GT/GATE__GT__stage5_funding_full__20260912T010013Z__2026-09-12T010029Z.raw.json",
+            "raw_sha256": "89860c2edbeb704598644c1bdf748862717d136259b0fce0af2f15117b3e919e"
+          }
+        ],
+        "venue": "GATE"
+      },
+      "KRAKEN:KASUSD": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 1992,
+        "first": "2026-06-20",
+        "instrument": "PF_KASUSD",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://futures.kraken.com/derivatives/api/v4/historicalfundingrates",
+            "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/KAS/KRAKEN__KAS__stage5_funding_full__20260912T010013Z__2026-09-12T010030Z.raw.json",
+            "raw_sha256": "2d89408e28263c1a036176cfb99a4eb8d21947f9d1d769b833a54e3b7fdf767a"
+          }
+        ],
+        "venue": "KRAKEN_FUTURES"
+      },
+      "KRAKEN:SPXUSD": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 1992,
+        "first": "2026-06-20",
+        "instrument": "PF_SPXUSD",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://futures.kraken.com/derivatives/api/v4/historicalfundingrates",
+            "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__stage5_funding_full__20260912T010013Z__2026-09-12T010030Z.raw.json",
+            "raw_sha256": "b3aa84629ef16b89a603a8c5fad49aa296dad61d8a199c157fd3186ce8264738"
+          }
+        ],
+        "venue": "KRAKEN_FUTURES"
+      },
+      "OKX:OKBUSDT": {
+        "class": "OBSERVED_FIRST_PARTY",
+        "count": 498,
+        "first": "2026-06-20",
+        "instrument": "OKB-USDT-SWAP",
+        "last": "2026-09-10",
+        "raw_sources": [
+          {
+            "endpoint": "https://www.okx.com/api/v5/public/funding-rate-history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage5_funding_full_p00__20260912T010013Z__2026-09-12T010031Z.raw.json",
+            "raw_sha256": "197c09abf337b02c6e04a84b1baf4d5388196bd16ef135b346b5436a6c5d6287"
+          },
+          {
+            "endpoint": "https://www.okx.com/api/v5/public/funding-rate-history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage5_funding_full_p01__20260912T010013Z__2026-09-12T010031Z.raw.json",
+            "raw_sha256": "d9ba7a8bc8781dfa8a25165d6875744059b7e43ab8ddee98db0636609b44532f"
+          },
+          {
+            "endpoint": "https://www.okx.com/api/v5/public/funding-rate-history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage5_funding_full_p02__20260912T010013Z__2026-09-12T010032Z.raw.json",
+            "raw_sha256": "cfc4748e50ae343b6787ea534408f258e310741df44aee4511b2ffd5df5aa565"
+          },
+          {
+            "endpoint": "https://www.okx.com/api/v5/public/funding-rate-history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage5_funding_full_p03__20260912T010013Z__2026-09-12T010032Z.raw.json",
+            "raw_sha256": "b03c652b9a7e38d043edbb1b74565259fe7effc80a5e9497b050eb3d418db69e"
+          },
+          {
+            "endpoint": "https://www.okx.com/api/v5/public/funding-rate-history",
+            "raw_path": "data/c22_short_instrument_evidence/raw/OKX/OKB/OKX__OKB__stage5_funding_full_p04__20260912T010013Z__2026-09-12T010032Z.raw.json",
+            "raw_sha256": "870f19cb49b7229355a510ef9310d944626a1d04b12e9456bcf64305457dc9cf"
+          }
+        ],
+        "venue": "OKX"
+      }
+    },
+    "result_levels": [
+      "gross",
+      "transaction_cost_only_net",
+      "fully_net_after_funding_or_borrow"
+    ],
+    "slippage": {
+      "assumption_basis": "ceil(max observed Kraken Futures median spread over the four fill hours (44.43 bps) / 2)",
+      "assumption_bps_per_side": 25.0,
+      "assumption_class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "kraken_observed": {
+        "PF_KASUSD|2026-07-06": {
+          "class": "DERIVED_FROM_OBSERVED_DATA",
+          "half_spread_bps_at_00_00": 14.523156365983509
+        },
+        "PF_SPXUSD|2026-06-29": {
+          "class": "DERIVED_FROM_OBSERVED_DATA",
+          "half_spread_bps_at_00_00": 7.499625018749068
+        },
+        "PF_SPXUSD|2026-07-04": {
+          "class": "DERIVED_FROM_OBSERVED_DATA",
+          "half_spread_bps_at_00_00": 19.493177387914113
+        },
+        "PF_SPXUSD|2026-07-06": {
+          "class": "DERIVED_FROM_OBSERVED_DATA",
+          "half_spread_bps_at_00_00": 18.98493861536516
+        }
+      }
+    }
+  },
+  "decision_date": "2026-09-11",
+  "decisions": {
+    "basis_alignment": {
+      "class": "DERIVED_FROM_OBSERVED_DATA",
+      "rule": "execution at venue OHLC open of the fill date; signal/exit rules evaluated on Signum export candles (CMC reference); no basis adjustment applied; CMC-vs-venue open difference reported per fill as a diagnostic"
+    },
+    "exposure_cap_pct": 100.0,
+    "fill_price_source": "venue daily OHLC open (Stage Three canonical for shorts; Stage 5 spot fetch for longs); fail closed if absent",
+    "kas_20260706": "sealed Stage Four FAIL preserved for the trades-based rule; decisive run applies the frozen capacity rule against official orderbook liquidity (Stage 4A) and records the outcome; zero trades in the hour is kept as a flag",
+    "leverage": 1.0,
+    "long_instrument_selection": {
+      "class": "OBSERVED_FIRST_PARTY",
+      "rule": "home-venue spot pair; execution existence from official spot candles on the fill date"
+    },
+    "morpho": "EXCLUDED_VENUE_POLICY (2 shorts); long MORPHO signal executes on COINBASE_EXCHANGE spot (home venue)",
+    "nav_usd": {
+      "basis": "research-scale account; sensitivity at 100000.0",
+      "class": "FROZEN_CONSERVATIVE_ASSUMPTION",
+      "value": 10000.0
+    },
+    "session_profile_decisive": "V2_CONTRACT_EXACT",
+    "session_profile_sensitivity": "CRYPTO_CALENDAR_SENSITIVITY",
+    "session_rule_basis": "frozen B1 forward-exit contract (weekday sessions); calendar profile reported as labelled sensitivity",
+    "short_instrument_selection": {
+      "class": "OBSERVED_FIRST_PARTY",
+      "rule": "home-venue linear perpetual/futures where Stage Two passed; Bitfinex spot-margin borrow for LEO"
+    },
+    "sizing_pct_nav": "frozen 8/2/3/5 (unchanged)",
+    "tel": "ELIMINATED_STAGE_ONE_PRESERVED",
+    "venue_policy": "HOME_VENUE_ONLY"
+  },
+  "inputs": {
+    "dry_run_sha256": "f76f8330f72e454fe507b38ac76c67d5eec8a2417c7faef620330a4c620102ef",
+    "stage3_report_sha256": "889be73018ee4d20a0031daf4797951b3bafa8245a59b4a805bc7eb59e48e763",
+    "stage4_report_sha256": "6c7753208b05e928aef786edb7f3741929a1cf119e09374672d233241965b9d1",
+    "stage4a_report_sha256": "d77b17824e5edcf4a449a4c58abaf09efdd862286b37e3604ec4403eb24ea163",
+    "v2_artifact_sha256": "b6a28a4873d1aff17014a9d598702c67047b4ebe023b8cfddce05094f9ce9dd8"
+  },
+  "long_side_evidence": {
+    "BINANCE:AAVEUSDT": {
+      "asset": "BINANCE:AAVEUSDT",
+      "constraints": {
+        "existence_evidence": "first official spot candle in range",
+        "lot_step": 0.001,
+        "min_notional": 5.0,
+        "min_qty": 0.001,
+        "status": "TRADING",
+        "tick_size": 0.01
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "AAVEUSDT",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.binance.com/api/v3/klines",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/AAVE/BINANCE__AAVE__stage5_spot_daily_klines__20260912T010013Z__2026-09-12T010013Z.raw.json",
+          "raw_sha256": "e00e7cc162f19b2f9bc08a018a9af7a9f8182b91954915475bce740849a117e5"
+        },
+        {
+          "endpoint": "https://api.binance.com/api/v3/exchangeInfo",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__stage5_spot_exchangeinfo__20260912T010013Z__2026-09-12T010014Z.raw.json",
+          "raw_sha256": "cbda7a8d4f222058e752ded23fabbc87b1c571374fc7ca67b44c1aa43ca0d740"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE_SPOT"
+    },
+    "BINANCE:DEXEUSDT": {
+      "asset": "BINANCE:DEXEUSDT",
+      "constraints": {
+        "existence_evidence": "first official spot candle in range",
+        "lot_step": 0.01,
+        "min_notional": 5.0,
+        "min_qty": 0.01,
+        "status": "TRADING",
+        "tick_size": 0.001
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "DEXEUSDT",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.binance.com/api/v3/klines",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/DEXE/BINANCE__DEXE__stage5_spot_daily_klines__20260912T010013Z__2026-09-12T010014Z.raw.json",
+          "raw_sha256": "8f29438a939a1676556b1fe93bd9461c2ce66a5bab8dcbff6858d9e370bb92bb"
+        },
+        {
+          "endpoint": "https://api.binance.com/api/v3/exchangeInfo",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__stage5_spot_exchangeinfo__20260912T010013Z__2026-09-12T010014Z.raw.json",
+          "raw_sha256": "cbda7a8d4f222058e752ded23fabbc87b1c571374fc7ca67b44c1aa43ca0d740"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE_SPOT"
+    },
+    "BINANCE:JSTUSDT": {
+      "asset": "BINANCE:JSTUSDT",
+      "constraints": {
+        "existence_evidence": "first official spot candle in range",
+        "lot_step": 0.1,
+        "min_notional": 5.0,
+        "min_qty": 0.1,
+        "status": "TRADING",
+        "tick_size": 1e-05
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "JSTUSDT",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.binance.com/api/v3/klines",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/JST/BINANCE__JST__stage5_spot_daily_klines__20260912T010013Z__2026-09-12T010015Z.raw.json",
+          "raw_sha256": "166dffb11c3972c82a56e6e1e06e0b521fa86351d2d91ee7147dfb2a4ff68a90"
+        },
+        {
+          "endpoint": "https://api.binance.com/api/v3/exchangeInfo",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__stage5_spot_exchangeinfo__20260912T010013Z__2026-09-12T010014Z.raw.json",
+          "raw_sha256": "cbda7a8d4f222058e752ded23fabbc87b1c571374fc7ca67b44c1aa43ca0d740"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE_SPOT"
+    },
+    "BINANCE:JUPUSDT": {
+      "asset": "BINANCE:JUPUSDT",
+      "constraints": {
+        "existence_evidence": "first official spot candle in range",
+        "lot_step": 0.1,
+        "min_notional": 5.0,
+        "min_qty": 0.1,
+        "status": "TRADING",
+        "tick_size": 0.0001
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "JUPUSDT",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.binance.com/api/v3/klines",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/JUP/BINANCE__JUP__stage5_spot_daily_klines__20260912T010013Z__2026-09-12T010015Z.raw.json",
+          "raw_sha256": "ef13a31ecb25564e2b1feba7a63536e6b2ab8cdc1f05f199e284e0037102eb81"
+        },
+        {
+          "endpoint": "https://api.binance.com/api/v3/exchangeInfo",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__stage5_spot_exchangeinfo__20260912T010013Z__2026-09-12T010014Z.raw.json",
+          "raw_sha256": "cbda7a8d4f222058e752ded23fabbc87b1c571374fc7ca67b44c1aa43ca0d740"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE_SPOT"
+    },
+    "BINANCE:ZECUSDT": {
+      "asset": "BINANCE:ZECUSDT",
+      "constraints": {
+        "existence_evidence": "first official spot candle in range",
+        "lot_step": 0.001,
+        "min_notional": 5.0,
+        "min_qty": 0.001,
+        "status": "TRADING",
+        "tick_size": 0.01
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "ZECUSDT",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.binance.com/api/v3/klines",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/ZEC/BINANCE__ZEC__stage5_spot_daily_klines__20260912T010013Z__2026-09-12T010016Z.raw.json",
+          "raw_sha256": "edb9fd0e80b6cebed8e9bb7f6a2bc01c84934a309554fbdc19cf9771e747ce8f"
+        },
+        {
+          "endpoint": "https://api.binance.com/api/v3/exchangeInfo",
+          "raw_path": "data/c22_short_instrument_evidence/raw/BINANCE/_shared/BINANCE___shared__stage5_spot_exchangeinfo__20260912T010013Z__2026-09-12T010014Z.raw.json",
+          "raw_sha256": "cbda7a8d4f222058e752ded23fabbc87b1c571374fc7ca67b44c1aa43ca0d740"
+        }
+      ],
+      "source_ok": true,
+      "venue": "BINANCE_SPOT"
+    },
+    "COINBASE:AEROUSD": {
+      "asset": "COINBASE:AEROUSD",
+      "constraints": {
+        "existence_evidence": "first official candle in range",
+        "lot_step": 0.1,
+        "min_notional": 1.0,
+        "min_qty": null,
+        "status": "online",
+        "tick_size": 1e-05
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "AERO-USD",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.exchange.coinbase.com/products/AERO-USD/candles",
+          "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/AERO/COINBASE__AERO__stage5_exchange_daily_candles__20260912T010013Z__2026-09-12T010016Z.raw.json",
+          "raw_sha256": "2d95c7674b872448041568b66e2df2cb955c04f3ca67e1effbf11ed490ebc38b"
+        },
+        {
+          "endpoint": "https://api.exchange.coinbase.com/products/AERO-USD",
+          "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/AERO/COINBASE__AERO__stage5_exchange_product__20260912T010013Z__2026-09-12T010016Z.raw.json",
+          "raw_sha256": "17e1c3118f2e199354281ee10c694fa6e643e0159c737c7071296e150677fd29"
+        }
+      ],
+      "source_ok": true,
+      "venue": "COINBASE_EXCHANGE"
+    },
+    "COINBASE:MORPHOUSD": {
+      "asset": "COINBASE:MORPHOUSD",
+      "constraints": {
+        "existence_evidence": "first official candle in range",
+        "lot_step": 0.01,
+        "min_notional": 1.0,
+        "min_qty": null,
+        "status": "online",
+        "tick_size": 0.0001
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "MORPHO-USD",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.exchange.coinbase.com/products/MORPHO-USD/candles",
+          "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__stage5_exchange_daily_candles__20260912T010013Z__2026-09-12T010017Z.raw.json",
+          "raw_sha256": "d975fd050fd11624a4f735d8fdea939cd4be1ff0d80446f7f85d9dc85011d7a3"
+        },
+        {
+          "endpoint": "https://api.exchange.coinbase.com/products/MORPHO-USD",
+          "raw_path": "data/c22_short_instrument_evidence/raw/COINBASE/MORPHO/COINBASE__MORPHO__stage5_exchange_product__20260912T010013Z__2026-09-12T010017Z.raw.json",
+          "raw_sha256": "d17408f764b1119ab4de4e6bc99bcb820fd23f38818e47bdcaca12819054e81f"
+        }
+      ],
+      "source_ok": true,
+      "venue": "COINBASE_EXCHANGE"
+    },
+    "KRAKEN:SPXUSD": {
+      "asset": "KRAKEN:SPXUSD",
+      "constraints": {
+        "existence_evidence": "first official candle in range",
+        "lot_step": 1e-05,
+        "min_notional": 0.5,
+        "min_qty": 9.0,
+        "status": "online",
+        "tick_size": 0.0001
+      },
+      "coverage": {
+        "complete": true,
+        "malformed_days": [],
+        "missing_days": [],
+        "present_days": 82,
+        "required_days": 82,
+        "required_end": "2026-09-09",
+        "required_start": "2026-06-20"
+      },
+      "first_date": "2026-06-20",
+      "instrument": "SPXUSD",
+      "last_date": "2026-09-10",
+      "raw_sources": [
+        {
+          "endpoint": "https://api.kraken.com/0/public/OHLC",
+          "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__stage5_spot_daily_ohlc__20260912T010013Z__2026-09-12T010017Z.raw.json",
+          "raw_sha256": "9af3b28d0bf67485224c4364406341f61e782dab90ff397249e83bd243d8f303"
+        },
+        {
+          "endpoint": "https://api.kraken.com/0/public/AssetPairs",
+          "raw_path": "data/c22_short_instrument_evidence/raw/KRAKEN/SPX/KRAKEN__SPX__stage5_spot_assetpairs__20260912T010013Z__2026-09-12T010018Z.raw.json",
+          "raw_sha256": "8c200327dd0c7998fde336145cfe58cee847ea078a3132fcf3399f803687b43c"
+        }
+      ],
+      "source_ok": true,
+      "venue": "KRAKEN_SPOT"
+    }
+  },
+  "performance_computed": false,
+  "prereg_sha256": "d09b0745e96c3f138f83b1542d7f40856c6e5d42e9279c69cd0edd37c4c2ce8a",
+  "rejection_gates": {
+    "data": [
+      "open_positions_at_boundary -> INCOMPLETE_FOLLOWUP (decisive conclusion withheld)",
+      "missing venue price -> fail closed",
+      "capacity violation -> deterministic rejection"
+    ],
+    "economic": [
+      "net_return<=0",
+      "net_sharpe<=0",
+      "not_better_than_matched_random_null (risk-adjusted)",
+      "not_better_than_btc_buy_and_hold (risk-adjusted)"
+    ],
+    "integrity": [
+      "duplicate_trade",
+      "lookahead",
+      "cost_arithmetic_mismatch",
+      "missing_or_interpolated_bar"
+    ],
+    "power_warning": "88 actionable entries over 26 daily windows; annualised figures NON-CONCLUSIVE"
+  },
+  "run_id": "20260912T010013Z",
+  "version": "c22_stage5_prereg_v2"
+}
