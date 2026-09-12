@@ -4608,3 +4608,9 @@ into deep extraction even if the warning_labels list omits them.
 
 - **Lesson:** Once a block/stop/partial rule is live in the bot, the journal no longer contains the trades the rule would have blocked, so forward counterfactual scoring silently goes to n=0 and can never confirm or reject. The honest post-apply measure is realized dedup expectancy after the apply date vs the baseline frozen at apply time, with a pre-registered rollback threshold.
 - **How to apply:** mark applied rules APPLIED with the bot commit hash; judge them at n≥20 post-apply signals; rollback flag = mean R below baseline − 0.2R. Never leave an applied rule in SHADOW.
+
+## 2026-09-12 - LESSON_H1_AUTH6_001 - "No notional inflation" must fix the USD notional, not the coin count
+
+- **Lesson:** H1's locked preregistration fixed each symbol's COIN quantity at entry and accrued funding as `rate × q_coins × mark_t`. Over 5.67 years of price appreciation (BTC 7.5×, ETH 5.9×, SOL 25.5×) the USD funding base inflated while the return denominator stayed at C0, manufacturing +305% / Sharpe 10 from a carry whose true rate is ~0.16%/yr on SOL. The cash reconcile passed (9.3e-10) because the arithmetic was internally consistent — consistency is not realism.
+- **Why:** This is the G1 fake-yield failure in a new costume. The anti-inflation rule was written against *adding size*, not against *the same size becoming bigger in USD*.
+- **How to apply:** In any carry/funding preregistration state the invariant in the accounting currency: either rebalance coin quantity to a fixed USD notional at each accrual, or normalise the return by the *contemporaneous* notional, never by entry capital. Separately: model margin feasibility (GR8) — a book whose hedge leg would have been liquidated has recorded cashflows that could never have been collected, regardless of how clean the reconcile is.
