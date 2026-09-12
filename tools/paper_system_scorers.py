@@ -92,10 +92,26 @@ RECORD_KEYS = (
 #   GC ICT        : gc_paper_tracker/pipeline.py  stale_hours > 48 -> WATCH DATA_STALE
 STALE_HOURS_TRACKER = 48.0
 
-# Frozen-stack forward split. Operator instruction 2026-09-11: the 1m cache was refreshed
-# on 2026-09-11, forward rows are expected from 2026-09-12; rows at or before this date are
-# backfill (2020-02 .. 2025-10) and are reported separately, never scored.
-FROZEN_STACK_FORWARD_SPLIT = "2026-09-11"
+# Frozen-stack out-of-sample split (corrected 2026-09-12). The external 1m cache had stopped
+# at 2026-03-31, so the bot could not see any bar after that date; refreshing it on 2026-09-11
+# produced rows with entry dates from 2026-04 onward. Those entries were never available to the
+# bot while its parameters were locked, so they are genuine OUT-OF-SAMPLE evidence even though
+# they are not "forward from today". Rows at or before the old ceiling are backfill and are
+# reported separately, never scored. This is a data ceiling, not a registration date: it is
+# disclosed as such wherever the line is reported.
+FROZEN_STACK_FORWARD_SPLIT = "2026-03-31"
+FROZEN_STACK_SPLIT_BASIS = ("previous external 1m-cache ceiling; entries after it were "
+                            "unavailable to the bot under its locked parameters")
+# The "60-90 day clean paper run" in the source doc means days of the bot actually RUNNING
+# forward, not calendar days spanned by data it back-filled in one pass. The cache was
+# refreshed on 2026-09-11 and the first run over it was 2026-09-12, so the clean-run clock
+# starts there. Out-of-sample ROWS are still identified by FROZEN_STACK_FORWARD_SPLIT.
+FROZEN_STACK_OPERATION_START = "2026-09-12"
+
+# A paper line whose operator closure decision is recorded stops being an open question: the
+# scorer reports the recorded closure instead of re-deriving a live status, so a closed line
+# never reappears in the daily human queue.
+CLOSURE_DECISION_GLOBS = ("CLOSURE_DECISION_*.md",)
 
 # Frozen stack own thresholds (read from analytics/final_stack_operational_validation.py and
 # reports/final_frozen_architecture.md section 8 / 9 in the external project).
@@ -416,8 +432,42 @@ NQ_CRITERIA = "obsidian-trade-logger/reports/nq_phase12_paper_plan.md (section 5
 GC_CRITERIA = "obsidian-trade-logger/reports/observation_mode/gc_ict_observation_rules.md (review milestones + graduation criteria; gc_paper_tracker/spec.py LAUNCH_DATE)"
 
 
+def _recorded_closure(inputs: dict[str, Any]) -> dict[str, Any] | None:
+    """An operator closure decision recorded next to the tracker, if any.
+
+    A line the operator has closed is no longer an open question: it must not be
+    re-derived from a stale tracker, and it must not reappear in the daily human
+    queue. Returns {"path": str, "text": str} or None."""
+    for path_str in (inputs.get("closure_files") or []):
+        try:
+            text = Path(path_str).read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+        if text.strip():
+            return {"path": path_str, "text": text}
+    return None
+
+
+def _closed_record(line: str, criteria: str, inputs: dict[str, Any], as_of: str,
+                   closure: dict[str, Any]) -> dict[str, Any]:
+    first = next((ln.strip() for ln in closure["text"].splitlines()
+                  if ln.strip().startswith("**Decision")), "").strip("* ")
+    return _record(line=line, source_files=(inputs.get("source_files") or []) + [closure["path"]],
+                   launched=None, as_of=as_of, days_elapsed=None,
+                   window={"kind": "closed_by_operator", "end_or_min_n": None, "satisfied": True},
+                   sample={}, sign=SIGN_NONE, headline_metrics={}, own_gates=[],
+                   status=STATUS_REJECTED,
+                   reason=f"closed by recorded operator decision ({Path(closure['path']).name})"
+                          + (f": {first}" if first else ""),
+                   recommendation="Closed on record. No further action; the line is not re-scored.",
+                   criteria_file=criteria)
+
+
 def _score_futures_tracker(line: str, criteria: str, inputs: dict[str, Any], as_of: str,
                            default_launch: str, extra_note: str = "") -> dict[str, Any]:
+    closure = _recorded_closure(inputs)
+    if closure:
+        return _closed_record(line, criteria, inputs, as_of, closure)
     latest = inputs.get("latest")
     src = inputs.get("source_files") or []
     if not latest:
@@ -554,7 +604,10 @@ def score_frozen_stack(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
     fwd_skipped = [r for r in fwd if r.get("engine") == "skipped_by_d4"]
     sum_r = sum(_num(r.get("net_r"), 0.0) or 0.0 for r in fwd_exec)
     n_fwd = len(fwd_exec)
-    days = _days_between(split, as_of) or 0
+    # Out-of-sample span (evidence) vs clean-run days (the line's own gate clock).
+    oos_span_days = _days_between(split, as_of) or 0
+    days = _days_between(str(inputs.get("operation_start") or FROZEN_STACK_OPERATION_START),
+                         as_of) or 0
 
     def _engine_summary(subset: list[dict[str, str]]) -> dict[str, Any]:
         out: dict[str, Any] = {}
@@ -575,7 +628,9 @@ def score_frozen_stack(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
         gate("f1_clean_paper_run_days", f"{FROZEN_STACK_CLEAN_RUN_DAYS} days (section 9 states a range; "
              f"{FROZEN_STACK_CLEAN_RUN_DAYS_CONSERVATIVE} used as the conservative read)",
              float(days), GATE_PASS if window_ok else GATE_PENDING, True,
-             "counted from the forward split date; burn-in 30 days suppresses alerts before that"),
+             f"days of clean forward RUNNING since {FROZEN_STACK_OPERATION_START}; the "
+             f"{oos_span_days}-day span back to the {split} data ceiling is out-of-sample "
+             "evidence, not run time; burn-in 30 days suppresses alerts before that"),
         gate("f2_paper_equity_dd_within_envelope", f"> {FROZEN_STACK_DD_ENVELOPE_PCT}%", None,
              GATE_NOT_EVALUABLE, True,
              "trades CSV carries net_r only; equity-% drawdown comes from the operational validator, "
@@ -597,7 +652,9 @@ def score_frozen_stack(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
         blocked = f"paper bot state status {state_status!r}"
     elif load_errors:
         blocked = f"paper bot state reports load_errors for {sorted(load_errors)}"
-    wdesc = f"{n_fwd} forward executed rows, {days} days since {split}"
+    wdesc = (f"{n_fwd} out-of-sample executed rows after the {split} data ceiling "
+             f"({oos_span_days}-day span), {days} days of clean forward running since "
+             f"{FROZEN_STACK_OPERATION_START}")
     status, reason = decide(window["satisfied"], sign, gates, blocked_reason=blocked, window_desc=wdesc)
     if status == STATUS_SHADOW and n_fwd == 0:
         reason = (f"0 forward rows with entry_time > {split} (forward window not started; "
@@ -780,7 +837,8 @@ def load_nq_orb_inputs(ext_root: Path) -> dict[str, Any]:
     latest_p = d / "latest.json"
     srcs = [p for p in (latest_p, d / "latest.md", d / "trades.csv", d / "equity_curve.csv") if p.exists()]
     return {"latest": _read_json(latest_p) if latest_p.exists() else None,
-            "source_files": [str(p) for p in srcs]}
+            "source_files": [str(p) for p in srcs],
+            "closure_files": _closure_files(d)}
 
 
 def load_gc_ict_inputs(ext_root: Path) -> dict[str, Any]:
@@ -788,7 +846,19 @@ def load_gc_ict_inputs(ext_root: Path) -> dict[str, Any]:
     latest_p = d / "latest.json"
     srcs = [p for p in (latest_p, d / "latest.md", d / "alerts.csv") if p.exists()]
     return {"latest": _read_json(latest_p) if latest_p.exists() else None,
-            "source_files": [str(p) for p in srcs]}
+            "source_files": [str(p) for p in srcs],
+            "closure_files": _closure_files(d)}
+
+
+def _closure_files(d: Path) -> list[str]:
+    """Operator closure decisions recorded in a tracker's report folder."""
+    out: list[str] = []
+    for pattern in CLOSURE_DECISION_GLOBS:
+        try:
+            out.extend(sorted(str(p) for p in d.glob(pattern)))
+        except Exception:
+            pass
+    return out
 
 
 def load_frozen_stack_inputs(ext_root: Path) -> dict[str, Any]:

@@ -49,3 +49,15 @@ def test_confirmed_rule_enters_queue():
 def test_empty_inputs_do_not_crash():
     md = dg.build_digest(None, None, None, None, "2026-09-11")
     assert "none today" in md
+
+
+def test_line_closed_on_record_leaves_the_queue():
+    """Once the operator's closure is recorded, the line must stop being queued."""
+    sc = [{"line": "nq_orb_paper", "status": "REJECTED", "sign": "NONE",
+           "window": {"satisfied": True},
+           "reason": "closed by recorded operator decision (CLOSURE_DECISION_2026-09-11.md)"},
+          {"line": "other_line", "status": "REJECTED", "sign": "NEGATIVE",
+           "window": {"satisfied": True}, "reason": "own gate failed"}]
+    md = dg.build_digest(None, _ledger(), None, sc, "2026-09-12")
+    assert "record closure of nq_orb_paper" not in md
+    assert "record closure of other_line" in md

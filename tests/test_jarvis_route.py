@@ -1871,13 +1871,81 @@ def test_jarvis_step_34_voice_control_is_non_functional_span():
         assert tok not in low, f"voice preview must add no control: {tok}"
 
 
+# ── Clap-to-wake carve-out (2026-09-12) ─────────────────────────────────────
+# The opt-in "Clap to wake" control (commit 757411c6) needs getUserMedia + an
+# AudioContext analyser to hear a double clap. It was added AFTER the blanket
+# "no capture API tokens anywhere in the template" assertions below, so those
+# assertions now fail on a feature that is deliberately present.
+#
+# The assertions are retargeted, not dropped. What actually matters is enforced
+# more strictly than before, unconditionally across the WHOLE template:
+#   * MediaRecorder is still banned everywhere  -> no audio is ever recorded;
+#   * no network call may appear inside the clap block -> no audio leaves the page;
+#   * the block must be opt-in and must stop the stream when disarmed.
+# Only the token scan is narrowed, and only over the clap block, so the rest of
+# the template still cannot introduce a capture API.
+_CLAP_START = "    // Clap-to-wake (opt-in)."
+_CLAP_END = "  // Step 36: optional read-aloud"
+
+
+def _jarvis_clap_block() -> str:
+    """The clap-to-wake source, isolated. Fails loudly if the markers move."""
+    html = _jarvis_template_text()
+    start = html.index(_CLAP_START)
+    end = html.index(_CLAP_END, start)
+    return html[start:end]
+
+
+def _without_clap(text: str) -> str:
+    """`text` with the clap block removed (used by the capture-API token scans)."""
+    try:
+        block = _jarvis_clap_block()
+    except ValueError:
+        return text
+    return text.replace(block, "")
+
+
+def test_jarvis_clap_block_is_present_and_bounded():
+    block = _jarvis_clap_block()
+    assert "clapBtn" in block and len(block) < 12000
+
+
+def test_jarvis_clap_never_records_audio():
+    # The whole template, clap block included: recording stays banned outright.
+    assert "mediarecorder" not in _jarvis_template_text().lower()
+
+
+def test_jarvis_clap_makes_no_network_call():
+    low = _jarvis_clap_block().lower()
+    for tok in ("fetch(", "xmlhttprequest", "websocket", "http://", "https://",
+                "/api/jarvis/ask", "/api/jarvis/refresh", "formdata", "blob("):
+        assert tok not in low, f"clap wake must not send audio anywhere: {tok}"
+
+
+def test_jarvis_clap_is_opt_in_and_releases_the_mic():
+    block = _jarvis_clap_block()
+    # opt-in: the control starts Off and arming is an explicit click
+    assert "Clap to wake: Off" in block
+    assert "addEventListener('click'" in block or 'addEventListener("click"' in block
+    # disarming stops every track and closes the audio graph
+    assert "getTracks().forEach" in block and ".stop();" in block
+    assert "clapCtx.close()" in block
+    assert "clapStream = null" in block
+
+
+def test_jarvis_clap_stores_nothing():
+    low = _jarvis_clap_block().lower()
+    for tok in ("localstorage", "sessionstorage", "indexeddb", "document.cookie"):
+        assert tok not in low, f"clap wake must not persist: {tok}"
+
+
 def test_jarvis_step_34_no_microphone_or_audio_apis():
     # Step 35 intentionally adds browser SpeechRecognition (input-fill only) and
     # Step 36 intentionally adds browser SpeechSynthesis (read returned answers
     # aloud), so those tokens are now allowed. The dangerous raw-capture and
     # recorder APIs must still be absent: no raw mic capture, no recorder, no
     # audio graph, no media devices.
-    low = _jarvis_template_text().lower()
+    low = _without_clap(_jarvis_template_text()).lower()
     for tok in ("getusermedia", "mediarecorder",
                 "audiocontext", "navigator.mediadevices"):
         assert tok not in low, f"voice preview must not use audio API: {tok}"
@@ -1963,7 +2031,7 @@ def test_jarvis_step_35_uses_browser_speech_recognition_only():
 
 
 def test_jarvis_step_35_no_forbidden_audio_or_tts_apis():
-    low = _jarvis_template_text().lower()
+    low = _without_clap(_jarvis_template_text()).lower()
     # Step 36 intentionally adds browser SpeechSynthesis (read returned answers
     # aloud), so that token is now allowed. The dangerous raw-capture/recorder
     # APIs and external STT must still be absent.
@@ -2127,7 +2195,7 @@ def test_jarvis_step_36_no_external_tts_or_fetch_in_speak():
 
 
 def test_jarvis_step_36_no_recorder_or_capture_apis():
-    low = _jarvis_template_text().lower()
+    low = _without_clap(_jarvis_template_text()).lower()
     for tok in ("getusermedia", "mediarecorder", "audiocontext",
                 "navigator.mediadevices"):
         assert tok not in low, f"Step 36 must not use capture/recorder API: {tok}"
@@ -2265,8 +2333,8 @@ def test_jarvis_voicefix_v1_uses_permissions_api_not_capture():
     # The Permissions API reports mic grant state without capturing audio.
     assert "navigator.permissions" in voice
     assert "microphone" in voice
-    low = voice.lower()
-    # The capture / recorder / media-devices APIs must remain absent.
+    low = _without_clap(voice).lower()
+    # Outside the opt-in clap block the capture / recorder APIs stay absent.
     for tok in ("getusermedia", "mediarecorder", "audiocontext",
                 "navigator.mediadevices"):
         assert tok not in low, f"voice fix must not add capture API: {tok}"
@@ -2287,7 +2355,7 @@ def test_jarvis_voicefix_v1_granted_yet_blocked_points_to_os_level():
 
 
 def test_jarvis_voicefix_v1_no_capture_apis_in_template():
-    low = _jarvis_template_text().lower()
+    low = _without_clap(_jarvis_template_text()).lower()
     for tok in ("getusermedia", "mediarecorder", "audiocontext",
                 "navigator.mediadevices"):
         assert tok not in low, f"template must not use capture API: {tok}"
@@ -2376,7 +2444,10 @@ def test_jarvis_convo_preview_is_default():
 
 
 def test_jarvis_convo_post_helper_is_question_only_readonly():
-    post = _jarvis_func_body("jvPostQuestion(", "\n  // Read the LAST")
+    # End marker retargeted 2026-09-12: a speech-primer comment block was
+    # inserted between jvPostQuestion and the old "Read the LAST" anchor, so the
+    # extraction over-reached into unrelated code and tripped on its prose.
+    post = _jarvis_func_body("jvPostQuestion(", "\n  // Speak an INAUDIBLE")
     assert "/api/jarvis/ask" in post
     assert "JSON.stringify({question: q})" in post
     assert "/api/jarvis/refresh" not in post
@@ -2450,7 +2521,7 @@ def test_jarvis_convo_renderask_still_never_auto_speaks():
 
 
 def test_jarvis_convo_no_capture_or_storage_apis():
-    low = _jarvis_template_text().lower()
+    low = _without_clap(_jarvis_template_text()).lower()
     for tok in ("getusermedia", "mediarecorder", "audiocontext",
                 "navigator.mediadevices", "localstorage", "sessionstorage",
                 "indexeddb", "document.cookie"):

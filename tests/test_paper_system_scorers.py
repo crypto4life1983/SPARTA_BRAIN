@@ -415,3 +415,43 @@ def test_main_writes_only_under_report_dir(tmp_path, monkeypatch):
     assert pss.main(["--as-of", AS_OF, "--report-dir", str(rd)]) == 0
     assert len((rd / pss.HISTORY_JSONL).read_text(encoding="utf-8").splitlines()) == 2
     assert len(list(rd.glob("closure_recommendation_*.md"))) == 1
+
+
+# ── 2026-09-12: recorded closures and the corrected frozen-stack split ───────
+
+def test_recorded_closure_short_circuits_a_line(tmp_path):
+    """A line the operator has closed must report the closure, not a live status,
+    so it stops reappearing in the daily human queue."""
+    c = tmp_path / "CLOSURE_DECISION_2026-09-11.md"
+    c.write_text("# NQ ORB closure\n\n**Decision: CLOSED - REJECTED_BY_OWN_GRADUATION_CRITERIA.**\n",
+                 encoding="utf-8")
+    rec = pss._score_futures_tracker(
+        pss.LINE_NQ_ORB, pss.NQ_CRITERIA,
+        {"latest": {"status": "PAUSE", "tracker_state": {}}, "source_files": [],
+         "closure_files": [str(c)]},
+        "2026-09-12", "2026-05-13")
+    assert rec["status"] == pss.STATUS_REJECTED
+    assert "closed by recorded operator decision" in rec["reason"]
+    assert rec["window"]["satisfied"] is True
+    assert str(c) in rec["source_files"]
+
+
+def test_no_closure_file_still_scores_normally(tmp_path):
+    rec = pss._score_futures_tracker(
+        pss.LINE_GC_ICT, pss.GC_CRITERIA,
+        {"latest": None, "source_files": [], "closure_files": []},
+        "2026-09-12", "2026-06-14")
+    assert rec["status"] == pss.STATUS_NO_DATA
+
+
+def test_empty_closure_file_is_ignored(tmp_path):
+    c = tmp_path / "CLOSURE_DECISION_blank.md"
+    c.write_text("   \n", encoding="utf-8")
+    assert pss._recorded_closure({"closure_files": [str(c)]}) is None
+
+
+def test_frozen_stack_split_is_the_data_ceiling_not_today():
+    """The 1m cache had stopped at 2026-03-31; entries after it were unavailable to
+    the bot under locked parameters, so they are out-of-sample evidence."""
+    assert pss.FROZEN_STACK_FORWARD_SPLIT == "2026-03-31"
+    assert "ceiling" in pss.FROZEN_STACK_SPLIT_BASIS

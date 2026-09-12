@@ -119,7 +119,10 @@ def build_digest(learning: dict | None, ledger: dict | None, search: dict | None
                          f"{_f(ap.get('mean_R_after'))} vs baseline {_f(ap.get('baseline_mean_R'))} "
                          f"over {ap.get('n_after')} signals")
     for r in recs or []:
-        if r.get("status") == "REJECTED":
+        # A line already closed by a recorded operator decision needs nothing further:
+        # asking for its closure again would make it a permanent queue item.
+        already_closed = "closed by recorded operator decision" in str(r.get("reason", ""))
+        if r.get("status") == "REJECTED" and not already_closed:
             queue.append(f"record closure of {r.get('line')} (REJECTED by its own gates)")
         if r.get("status") == "BLOCKED":
             queue.append(f"unblock or retire {r.get('line')}: {str(r.get('reason', ''))[:80]}")
