@@ -517,7 +517,7 @@
               <div class="jv-sf-node is-blocked"><span class="ndot"></span><span class="nlbl">Real Strategy Intake</span><span class="nst">Blocked &middot; not started</span></div>
             </div>
             <div class="jv-sf-flow"></div>
-            <div class="jv-detail">Display-only snapshot of the Strategy Factory backbone state. The backbone build and the fake-only lane (fake dry walk, fake report renderer, fake lane closure) are <b>complete on paper</b>. The Crypto-D1 contract chain (Bundles 42&ndash;54) and the Strategy Candidate contract chain (Blocks 95&ndash;115) are also <b>complete on paper</b>, through <b>Block 115</b> (the Crypto-D1 Strategy Candidate Research Readiness Contract); the <b>SPARTA Overnight Research Autopilot Controller</b> (<b>Block 152</b>) is <b>complete and registered</b> &mdash; a research-only planner that authorizes nothing and triggers no auto-push. You are here: <b>Operator Review Before Real Strategy Intake</b> &mdash; current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. Current stage &mdash; <code>HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED</code>; next required action &mdash; <code>HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION</code>. Real strategy intake stays blocked; no live controller.</div>
+            <div class="jv-detail">Display-only snapshot of the Strategy Factory backbone state. The backbone build and the fake-only lane (fake dry walk, fake report renderer, fake lane closure) are <b>complete on paper</b>. The Crypto-D1 contract chain (Bundles 42&ndash;54) and the Strategy Candidate contract chain (Blocks 95&ndash;115) are also <b>complete on paper</b>, through <b>Block 115</b> (the Crypto-D1 Strategy Candidate Research Readiness Contract); the <b>SPARTA Overnight Research Autopilot Controller</b> (<b>Block 152</b>) is <b>complete and registered</b> &mdash; a research-only planner that authorizes nothing and triggers no auto-push. You are here: <b>Operator Review Before Real Strategy Intake</b> &mdash; current gate <code>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</code>. Current stage &mdash; <code>HUMAN_REVIEW_OF_COMPLETED_ROADMAP</code>; next required action &mdash; <code>HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION</code>. Real strategy intake stays blocked; no live controller.</div>
           </div>
 
           <!-- Pipeline (machine process) -->
@@ -626,10 +626,10 @@
             <div style="margin-top:12px;">
               <div class="jv-row"><span class="k">Current gate</span><span class="v"><span class="jv-led warn"></span>PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE</span></div>
               <div class="jv-row"><span class="k">Workflow stage</span><span class="v"><span class="jv-led"></span>Operator Review Before Real Strategy Intake <span class="jv-sf-here-in">&#x25C9; You are here</span></span></div>
-              <div class="jv-row"><span class="k">Current stage</span><span class="v"><span class="jv-led warn"></span>HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED</span></div>
+              <div class="jv-row"><span class="k">Current stage</span><span class="v"><span class="jv-led warn"></span>HUMAN_REVIEW_OF_COMPLETED_ROADMAP</span></div>
               <div class="jv-row"><span class="k">Latest completed paper gate</span><span class="v"><span class="jv-led ok"></span>Block 115 &middot; Crypto-D1 Strategy Candidate Research Readiness Contract</span></div>
               <div class="jv-row"><span class="k">Latest completed bundle</span><span class="v"><span class="jv-led ok"></span>Bundle 54 &middot; Crypto-D1 Research-Only Dry-Run Research Archive or Closure Contract</span></div>
-              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led ok"></span>Block 115 research readiness complete; awaiting human-controlled boundary decision before real_data_qa</span></div>
+              <div class="jv-row"><span class="k">Pipeline stage</span><span class="v"><span class="jv-led ok"></span>Block 115 research readiness complete; automation roadmap links L1&ndash;L6 complete as read-only designs; awaiting human review of the completed roadmap. real_data_qa and baseline_backtest stay BLOCKED</span></div>
               <div class="jv-row"><span class="k">Strategy Factory Backbone</span><span class="v"><span class="jv-led ok"></span>Complete</span></div>
               <div class="jv-row"><span class="k">Fake-only lane</span><span class="v"><span class="jv-led ok"></span>Complete (fake dry walk, fake report renderer, fake lane closure)</span></div>
               <div class="jv-row"><span class="k">Crypto-D1 Intake Reconciliation</span><span class="v"><span class="jv-led ok"></span>Complete</span></div>
@@ -646,8 +646,11 @@
               <div class="jv-row"><span class="k">Real Data QA Plan-Only Contract</span><span class="v"><span class="jv-led ok"></span>Block 171 &middot; Complete &middot; registered (research-only plan-only contract; drafts a plan -- text and scope only -- for a future real data QA step; authorizes nothing; executes nothing; no real_data_qa unlock)</span></div>
               <div class="jv-row"><span class="k">Real Data QA Plan Approval Decision Contract</span><span class="v"><span class="jv-led ok"></span>Block 172 &middot; Complete &middot; registered (research-only approval decision; records a human decision about the Block 171 Real Data QA plan-only contract; the highest grant APPROVE_PLAN_ONLY approves only the plan text/scope as a future candidate; authorizes nothing; executes nothing; no real_data_qa unlock)</span></div>
               <div class="jv-row"><span class="k">Real Data QA Boundary Final Decision Contract</span><span class="v"><span class="jv-led ok"></span>Block 174 &middot; Complete &middot; registered (research-only finalization; records one human decision after reviewing the Block 170 packet, Block 171 plan, and Block 172 plan approval decision; the highest grant AUTHORIZE_NEXT_READ_ONLY_REAL_DATA_QA_PREP_CONTRACT authorizes only drafting the next read-only preparation contract as a future candidate; authorizes nothing; executes nothing; no real_data_qa unlock)</span></div>
-              <div class="jv-row"><span class="k">Next required action</span><span class="v"><span class="jv-led warn"></span>HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION</span></div>
-              <div class="jv-row"><span class="k">Human-Controlled Real Data QA Boundary Decision</span><span class="v"><span class="jv-led warn"></span>Next &middot; awaiting human decision</span></div>
+              <div class="jv-row"><span class="k">Strategy Factory Automation Roadmap</span><span class="v"><span class="jv-led ok"></span>Links L1&ndash;L6 &middot; Complete (design only) &middot; registered (L4 scheduler is SPEC only &mdash; no scheduler built; L5 payloads only &mdash; nothing sent; L6 display model only &mdash; no runtime UI edit)</span></div>
+              <div class="jv-row"><span class="k">Fresh-Evidence Validation Design Contract</span><span class="v"><span class="jv-led ok"></span>Block 190 &middot; Complete &middot; registered (research-only; fresh-evidence accrual continues under the frozen Block 190 bars)</span></div>
+              <div class="jv-row"><span class="k">Next required action</span><span class="v"><span class="jv-led warn"></span>HUMAN_REVIEW_OF_COMPLETED_ROADMAP</span></div>
+              <div class="jv-row"><span class="k">Strategy Factory Roadmap Human Review</span><span class="v"><span class="jv-led warn"></span>Next &middot; awaiting human review</span></div>
+              <div class="jv-row"><span class="k">Human-Controlled Real Data QA Boundary Decision</span><span class="v"><span class="jv-led ok"></span>Block 174 &middot; Complete &middot; recorded</span></div>
               <div class="jv-row"><span class="k">Real Strategy Intake</span><span class="v"><span class="jv-led warn"></span>Blocked &middot; not started</span></div>
               <div class="jv-row"><span class="k">Real Data QA</span><span class="v"><span class="jv-led warn"></span>Blocked</span></div>
               <div class="jv-row"><span class="k">Baseline Backtest</span><span class="v"><span class="jv-led warn"></span>Blocked</span></div>
@@ -686,10 +689,25 @@
               real_data_qa. The
               current gate is
               PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE; the current
-              stage is HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED and
+              stage is HUMAN_REVIEW_OF_COMPLETED_ROADMAP and
               the next required
-              action is HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION &mdash;
-              a human-controlled boundary decision, not a build/run step, that unlocks nothing real. No real data
+              action is HUMAN_REVIEW_OF_COMPLETED_ROADMAP &mdash;
+              a human review of the completed Strategy Factory Automation Roadmap,
+              not a build/run step, that unlocks nothing real. The roadmap links
+              L1&ndash;L6 are complete as READ-ONLY DESIGNS: L1 intake-to-orchestrator
+              adapter, L2 unsigned lane-aware approval packet schema, L3 batch
+              approval (one human signature per fully enumerated chain; deviation
+              voids the batch), L4 research cycle scheduler SPEC only &mdash; no
+              scheduler was built, L5 result notification payloads only &mdash;
+              nothing is sent, and L6 dashboard/JARVIS sync display model only
+              &mdash; no runtime UI edit. The automated research paperwork/control
+              chain is complete; trading remains LOCKED. Four blocks stay pending,
+              each needing its own separate human approval: real dashboard/JARVIS
+              wiring, a manual-start notification transport, the actual scheduler
+              build under the L4 rules, and an umbrella Strategy Research
+              Orchestrator. Fresh-evidence accrual for Crypto-D1 continues in the
+              background under the frozen Block 190 bars, and
+              DO_NOT_PROMOTE_RESUME_POLICY_YET stays preserved. No real data
               has been acquired, fetched, loaded, inspected, validated, or computed, and
               no real strategy intake is unlocked &mdash; no data acquisition, data
               fetch, data inspection, QA, baseline, backtest, simulation,
@@ -986,8 +1004,8 @@
     // read-only planning step; authorizes nothing; no real_data_qa unlock);
     // current gate
     // PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE, current stage
-    // HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED, next action
-    // HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION. It carries
+    // HUMAN_REVIEW_OF_COMPLETED_ROADMAP, next action
+    // HUMAN_REVIEW_OF_COMPLETED_ROADMAP. It carries
     // no data-mf/data-cr hooks and is never re-labelled from a runtime payload.
 
     // Crypto-D1 Lane Monitor (DISPLAY-ONLY, dynamic). Renders the read-only

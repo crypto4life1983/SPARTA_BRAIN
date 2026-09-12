@@ -120,14 +120,14 @@ def test_block115_vocabulary_present():
         "Block 115",
         "Crypto-D1 Strategy Candidate Research Readiness Contract",
         # next machine step (human-controlled boundary decision)
-        "Human-Controlled Real Data QA Boundary Decision",
+        "Strategy Factory Roadmap Human Review",
         "Real Data QA",
         "Baseline Backtest",
         # gate
         "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
         # current stage + next required action (live backend truth)
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED",
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION",
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP",
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP",
         # Block 152 overnight research autopilot controller registered complete
         "SPARTA Overnight Research Autopilot Controller",
         "Block 152",
@@ -328,13 +328,13 @@ def test_current_run_reflects_block115_state():
         "PAUSE_AND_OPERATOR_REVIEW_BEFORE_REAL_STRATEGY_INTAKE",
         "Operator Review Before Real Strategy Intake",
         "Current stage",
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED",
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP",
         "Latest completed paper gate",
         "Block 115",
         "Block 115 &middot; Crypto-D1 Strategy Candidate Research Readiness Contract",
-        "Block 115 research readiness complete; awaiting human-controlled boundary decision before real_data_qa",
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION",
-        "Human-Controlled Real Data QA Boundary Decision",
+        "Block 115 research readiness complete; automation roadmap links L1&ndash;L6 complete as read-only designs; awaiting human review of the completed roadmap",
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP",
+        "Strategy Factory Roadmap Human Review",
         "Crypto-D1 Intake Reconciliation",
         # Block 152 overnight research autopilot controller registered complete
         "Overnight Research Autopilot Controller",
@@ -493,10 +493,10 @@ def test_static_fallback_matches_block152_backend_truth():
         pytest.skip(f"mission_flow_status backend not importable: {exc!r}")
     status = mf.get_mission_flow_status()
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["latest_completed_research_readiness_contract"] == (
         "Block 115 - Crypto-D1 Strategy Candidate Research Readiness Contract"
@@ -712,19 +712,22 @@ def test_static_panel_matches_block155_registered_backend_truth():
         "Packet"
     )
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the packet lane is COMPLETE and the boundary lane is still NEXT in backend
     pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
     assert pipe[
         "crypto_d1_real_data_qa_human_approval_packet"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
 
     block = _strategy_flow_block(_page())
     # the visible static panel shows Block 155 complete + registered
@@ -848,19 +851,22 @@ def test_static_panel_matches_block158_registered_backend_truth():
         "Block 158 - Crypto-D1 Human-Controlled Real Data QA Boundary Decision"
     )
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the decision-layer lane is COMPLETE and the boundary lane is still NEXT
     pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
     assert pipe[
         "crypto_d1_human_controlled_real_data_qa_boundary_decision_layer"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
     # the Block 155 packet completion is preserved alongside Block 158
     assert status["latest_completed_real_data_qa_human_approval_packet"] == (
         "Block 155 - Crypto-D1 Real Data QA Boundary Decision Human Approval "
@@ -965,19 +971,22 @@ def test_static_panel_matches_block161_registered_backend_truth():
         "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
     )
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the coverage layer is COMPLETE and the boundary lane is still NEXT
     pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
     assert pipe[
         "crypto_d1_pipeline_coverage_reconciliation_layer"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
     # the Block 158 boundary decision completion is preserved alongside Block 161
     assert status["latest_completed_real_data_qa_boundary_decision"] == (
         "Block 158 - Crypto-D1 Human-Controlled Real Data QA Boundary Decision"
@@ -1123,10 +1132,10 @@ def test_static_panel_matches_block162_163_registered_backend_truth():
         "Block 163 - Crypto-D1 External Human Trader Evidence Contract"
     )
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # both evidence side-lane contracts are COMPLETE in the machine pipeline and
     # the boundary lane is still NEXT in the backend
@@ -1137,9 +1146,12 @@ def test_static_panel_matches_block162_163_registered_backend_truth():
     assert pipe[
         "crypto_d1_external_human_trader_evidence_contract"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
     # the prior Block 161 completion is preserved alongside Blocks 162/163
     assert status["latest_completed_pipeline_coverage_reconciliation"] == (
         "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
@@ -1260,10 +1272,10 @@ def test_static_panel_matches_block166_registered_backend_truth():
         "latest_completed_real_data_qa_boundary_readiness_review"
     ] == ("Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review")
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the readiness review is COMPLETE in the machine pipeline and the boundary
     # lane is still NEXT in the backend
@@ -1271,9 +1283,12 @@ def test_static_panel_matches_block166_registered_backend_truth():
     assert pipe[
         "crypto_d1_real_data_qa_boundary_readiness_review"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
     # the prior Block 161/163 completions are preserved alongside Block 166
     assert status["latest_completed_pipeline_coverage_reconciliation"] == (
         "Block 161 - Crypto-D1 Pipeline Coverage Reconciliation"
@@ -1428,10 +1443,10 @@ def test_static_panel_matches_block170_171_registered_backend_truth():
         "latest_completed_real_data_qa_plan_only_contract"
     ] == ("Block 171 - Crypto-D1 Real Data QA Plan-Only Contract")
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     pipe = {s["id"]: s for s in mf.machine_pipeline_lane()}
     assert pipe[
@@ -1440,9 +1455,12 @@ def test_static_panel_matches_block170_171_registered_backend_truth():
     assert pipe[
         "crypto_d1_real_data_qa_plan_only_contract"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
 
     block = _strategy_flow_block(_page())
     assert block.count('data-debug="BLOCK_170_REGISTERED"') >= 2
@@ -1553,10 +1571,10 @@ def test_static_panel_matches_block172_registered_backend_truth():
         "latest_completed_real_data_qa_plan_approval_decision"
     ] == ("Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract")
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the approval decision is COMPLETE in the machine pipeline and the boundary
     # lane is still NEXT in the backend
@@ -1564,9 +1582,12 @@ def test_static_panel_matches_block172_registered_backend_truth():
     assert pipe[
         "crypto_d1_real_data_qa_plan_approval_decision"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
     # the prior Block 166 completion is preserved alongside Block 172
     assert status["latest_completed_real_data_qa_boundary_readiness_review"] == (
         "Block 166 - Crypto-D1 Real Data QA Boundary Readiness Review"
@@ -1688,10 +1709,10 @@ def test_static_panel_matches_block174_registered_backend_truth():
         "latest_completed_real_data_qa_boundary_final_decision"
     ] == ("Block 174 - Crypto-D1 Real Data QA Boundary Final Decision Contract")
     assert status["current_stage"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION_REQUIRED"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     assert status["next_required_action"] == (
-        "HUMAN_CONTROLLED_REAL_DATA_QA_BOUNDARY_DECISION"
+        "HUMAN_REVIEW_OF_COMPLETED_ROADMAP"
     )
     # the final decision is COMPLETE in the machine pipeline and the boundary lane
     # is still NEXT in the backend
@@ -1699,9 +1720,12 @@ def test_static_panel_matches_block174_registered_backend_truth():
     assert pipe[
         "crypto_d1_real_data_qa_boundary_final_decision"
     ]["state"] == mf.STATE_COMPLETE
+    # 2026-09-12: the backend advanced past the boundary-decision node (now
+    # BLOCKED) and the single NEXT node is the roadmap human review.
     assert pipe[
         "human_controlled_real_data_qa_boundary_decision"
-    ]["state"] == mf.STATE_NEXT
+    ]["state"] == mf.STATE_BLOCKED
+    assert pipe["strategy_factory_roadmap_human_review"]["state"] == mf.STATE_NEXT
     # the prior Block 172 completion is preserved alongside Block 174
     assert status["latest_completed_real_data_qa_plan_approval_decision"] == (
         "Block 172 - Crypto-D1 Real Data QA Plan Approval Decision Contract"
