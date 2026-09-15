@@ -1,26 +1,26 @@
 {
-  "as_of": "2026-09-12",
+  "as_of": "2026-09-15",
   "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
-  "generated_at": "2026-09-12T17:24:13",
+  "generated_at": "2026-09-15T14:59:23",
   "records": [
     {
-      "as_of": "2026-09-12",
+      "as_of": "2026-09-15",
       "criteria_file": "obsidian-trade-logger/reports/funding_carry_phase7_paper_plan.md (section 7 alerts, section 8 graduation criteria)",
-      "days_elapsed": 122,
+      "days_elapsed": 125,
       "headline_metrics": {
         "active_alert_codes": [],
-        "basis_pnl_total_usd": 0.41,
-        "cost_consumption_pct": 0.355,
-        "final_equity_usd": 10051.02,
-        "funding_pnl_total_usd": 98.97,
+        "basis_pnl_total_usd": -1.14,
+        "cost_consumption_pct": 0.3462,
+        "final_equity_usd": 10052.96,
+        "funding_pnl_total_usd": 102.46,
         "initial_capital_usd": 10000.0,
         "max_drawdown_pct": -0.001697,
         "n_position_changes": 5,
-        "net_pnl_usd": 51.02,
+        "net_pnl_usd": 52.96,
         "phase6b_full_sample_oos_cagr_pct_reference_only": 8.08,
-        "realized_annualized_return": 0.01534,
+        "realized_annualized_return": 0.01554,
         "report_age_days": 0,
-        "report_date": "2026-09-12",
+        "report_date": "2026-09-15",
         "stale_hours": 0.0,
         "strategy_label": "always_on_monthly",
         "total_simulated_costs_usd": 48.36,
@@ -43,7 +43,7 @@
           "note": "same-period Phase-6B estimate 0.022960457422345204 over 2026-05-13..2026-09-12 (122 days) from the locked config at baseline costs 10bps fee + 5bps slip; sealed artifact g2_same_period_estimate_20260912T162609Z.json sha256 0876d3820554a24e",
           "status": "FAIL",
           "threshold": "+/- 30% of same-period estimate 0.02296 (band 0.01607..0.02985)",
-          "value": 0.01534
+          "value": 0.01554
         },
         {
           "hard": true,
@@ -69,10 +69,10 @@
           "value": null
         }
       ],
-      "reason": "own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period",
-      "recommendation": "The pre-registered window for funding_carry_paper resolved without meeting its own criteria (own window satisfied (122/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period). Record the window read as resolved-negative in the trading decision record; the operator chooses between continue-tracking (with this read logged) or restart with a new fixed launch date. No mid-window strategy edit, no re-tuning, no rescue. plan section 8: 'If any of these is unmet, paper tracking continues without going live.' Observation only: no rule change, no strategy approval, no live-readiness claim.",
+      "reason": "own window satisfied (125/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period",
+      "recommendation": "The pre-registered window for funding_carry_paper resolved without meeting its own criteria (own window satisfied (125/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period). Record the window read as resolved-negative in the trading decision record; the operator chooses between continue-tracking (with this read logged) or restart with a new fixed launch date. No mid-window strategy edit, no re-tuning, no rescue. plan section 8: 'If any of these is unmet, paper tracking continues without going live.' Observation only: no rule change, no strategy approval, no live-readiness claim.",
       "sample": {
-        "n_days": 122,
+        "n_days": 125,
         "n_position_changes": 5
       },
       "sign": "POSITIVE",
@@ -89,7 +89,7 @@
       }
     },
     {
-      "as_of": "2026-09-12",
+      "as_of": "2026-09-15",
       "criteria_file": "obsidian-trade-logger/reports/nq_phase12_paper_plan.md (section 5 graduation criteria; section 4 alert thresholds; nq_paper_tracker/alerts.py)",
       "days_elapsed": null,
       "headline_metrics": {},
@@ -115,9 +115,9 @@
       }
     },
     {
-      "as_of": "2026-09-12",
+      "as_of": "2026-09-15",
       "criteria_file": "obsidian-trade-logger/reports/observation_mode/gc_ict_observation_rules.md (review milestones + graduation criteria; gc_paper_tracker/spec.py LAUNCH_DATE)",
-      "days_elapsed": 90,
+      "days_elapsed": 93,
       "headline_metrics": {
         "active_alert_codes": [],
         "avg_r": 1.0,
@@ -130,7 +130,7 @@
         "net_pnl_usd": 909.51,
         "paper_equity_usd": 50909.51,
         "report_age_days": 0,
-        "report_date": "2026-09-12",
+        "report_date": "2026-09-15",
         "spec_hash_match": true,
         "stale_hours": 24.0,
         "strategy_label": "GC_ICT_withtrend_$500",
@@ -147,7 +147,7 @@
           "name": "c1_trading_days",
           "status": "PASS",
           "threshold": ">= 60",
-          "value": 65.0
+          "value": 66.0
         },
         {
           "hard": true,
@@ -200,10 +200,10 @@
           "value": null
         }
       ],
-      "reason": "own window not yet satisfied (65/60 days, 2/40 trades); thin line: own rules doc expects ~2 years to reach 40 fired trades",
-      "recommendation": "gc_ict_paper stays in SHADOW (own window not yet satisfied (65/60 days, 2/40 trades); thin line: own rules doc expects ~2 years to reach 40 fired trades). Keep tracking; nothing to act on. own plan: 'If any mandatory criterion is unmet, paper tracking either continues or is restarted -- live capital is NOT considered.' Observation only: no rule change, no strategy approval, no live-readiness claim.",
+      "reason": "own window not yet satisfied (66/60 days, 2/40 trades); thin line: own rules doc expects ~2 years to reach 40 fired trades",
+      "recommendation": "gc_ict_paper stays in SHADOW (own window not yet satisfied (66/60 days, 2/40 trades); thin line: own rules doc expects ~2 years to reach 40 fired trades). Keep tracking; nothing to act on. own plan: 'If any mandatory criterion is unmet, paper tracking either continues or is restarted -- live capital is NOT considered.' Observation only: no rule change, no strategy approval, no live-readiness claim.",
       "sample": {
-        "n_days": 65,
+        "n_days": 66,
         "n_trades": 2
       },
       "sign": "POSITIVE",
@@ -223,11 +223,11 @@
       }
     },
     {
-      "as_of": "2026-09-12",
+      "as_of": "2026-09-15",
       "criteria_file": "obsidian-trade-logger/reports/final_frozen_architecture.md (section 8 alert table, section 9 checklist '60-90 day clean paper run') + analytics/final_stack_operational_validation.py (BURN_IN_DAYS=30, ALERT_DD_ENVELOPE_BREACH_PCT=-10, ALERT_D4_REPRODUCIBILITY_PCT=90)",
-      "days_elapsed": 0,
+      "days_elapsed": 3,
       "headline_metrics": {
-        "appended_rows_last_run": 18,
+        "appended_rows_last_run": 0,
         "backfill_not_scored": {
           "by_engine": {
             "baseline_breakout": {
@@ -267,7 +267,7 @@
         "forward_sum_net_r": -1.3877,
         "stack_label": "Donchian-ATR-3.0x + V2-BB-snapback-0.5x + D4-90d-pause",
         "state_age_days": 0,
-        "state_generated_at": "2026-09-12T11:30:20.393272+00:00",
+        "state_generated_at": "2026-09-15T11:30:18.564236+00:00",
         "state_status": "OK",
         "validator_d4_agreement_pct": 100.0,
         "validator_global_verdict": "DRIFT_WARNING"
@@ -278,10 +278,10 @@
         {
           "hard": true,
           "name": "f1_clean_paper_run_days",
-          "note": "days of clean forward RUNNING since 2026-09-12; the 165-day span back to the 2026-03-31 data ceiling is out-of-sample evidence, not run time; burn-in 30 days suppresses alerts before that",
+          "note": "days of clean forward RUNNING since 2026-09-12; the 168-day span back to the 2026-03-31 data ceiling is out-of-sample evidence, not run time; burn-in 30 days suppresses alerts before that",
           "status": "PENDING",
           "threshold": "60-90 days (section 9 states a range; 90 used as the conservative read)",
-          "value": 0.0
+          "value": 3.0
         },
         {
           "hard": true,
@@ -308,11 +308,11 @@
           "value": -0.3469
         }
       ],
-      "reason": "own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (165-day span), 0 days of clean forward running since 2026-09-12)",
-      "recommendation": "frozen_stack_paper_forward stays in SHADOW (own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (165-day span), 0 days of clean forward running since 2026-09-12)). Keep tracking; nothing to act on. own doc section 9: forward paper evidence accrues; nothing is tuned Observation only: no rule change, no strategy approval, no live-readiness claim.",
+      "reason": "own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (168-day span), 3 days of clean forward running since 2026-09-12)",
+      "recommendation": "frozen_stack_paper_forward stays in SHADOW (own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (168-day span), 3 days of clean forward running since 2026-09-12)). Keep tracking; nothing to act on. own doc section 9: forward paper evidence accrues; nothing is tuned Observation only: no rule change, no strategy approval, no live-readiness claim.",
       "sample": {
         "n_backfill_rows_excluded": 257,
-        "n_days": 0,
+        "n_days": 3,
         "n_trades": 4
       },
       "sign": "NEGATIVE",
@@ -329,7 +329,7 @@
       }
     },
     {
-      "as_of": "2026-09-12",
+      "as_of": "2026-09-15",
       "criteria_file": "paper_trading/weekly_rs_s21_forward_paper_harness/manifest.py (gate_thresholds) + OPERATIONS_CHECKLIST.md section 8 (12-week >= 15 closed, 24-week >= 35 closed) + cycle_runner.evaluate_gates",
       "days_elapsed": null,
       "headline_metrics": {
