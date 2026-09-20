@@ -1,0 +1,44 @@
+{
+  "also": [
+    "349 of 350 cycles were replayed bar-by-bar rather than lived forward, so per LESSON_S21_PAPER_002 this is a replayed window and can never satisfy gates written for lived-forward tracking",
+    "the harness refused an off-grid anchor (idx 1906) rather than snapping it, and refused a non-newer anchor; both guards behaved correctly"
+  ],
+  "artifact": "s21_replayed_oos_diagnostic",
+  "benchmark": {
+    "beats_benchmark": true,
+    "benchmark_return_over_dd": 3.3,
+    "equal_weight_hold_same_48_max_dd_pct": 51.3,
+    "equal_weight_hold_same_48_return_pct": 168.9,
+    "strategy_return_over_dd": 10.02
+  },
+  "fatal_caveat": "This window IS the era the 48-name universe was selected in, so the return is IN-SAMPLE and is not evidence of edge. Beating the benchmark in-sample is expected, not informative. The drawdown breach is the only finding that does not depend on sample.",
+  "gate_outcome": {
+    "12wk": "FAIL",
+    "24wk": "FAIL",
+    "kill_threshold_pct": 30.0,
+    "note": "the strategy made money and still failed, because it breached a drawdown limit it agreed to before the test",
+    "observed_pct": 31.88,
+    "reason": "MAX_DRAWDOWN_GE_KILL"
+  },
+  "label": "REPLAYED_DIAGNOSTIC_NOT_PAPER_EVIDENCE",
+  "result": {
+    "annualized_cost_drag_pct": 0.21,
+    "cagr_pct": 22.9,
+    "end_equity_usd": 419359.09,
+    "max_drawdown_pct": 31.88,
+    "start_cash_usd": 100000.0,
+    "total_return_pct": 319.4,
+    "win_rate_pct": 58.0
+  },
+  "run_date": "2026-09-19",
+  "verdict": "CLOSED_FAILED_OWN_DRAWDOWN_GATE",
+  "what_would_be_needed_instead": "a fresh universe selected by the sealed rules at a fresh launch date, then lived forward. That is new research, not a rescue of this vehicle.",
+  "why_this_window_ends_here": "EA was delisted 2026-08-04; the locked 48-name universe has no common calendar past that date, so the universe itself expired. All 48 series were truncated to the last date every name trades, which aligns the calendar with NO universe change, NO manifest edit and NO code change.",
+  "window": {
+    "closed_trades": 511,
+    "cycles": 350,
+    "first_signal": "2019-08-21",
+    "last_signal": "2026-08-03",
+    "years": 6.95
+  }
+}

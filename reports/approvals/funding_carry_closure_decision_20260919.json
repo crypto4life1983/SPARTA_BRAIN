@@ -1,0 +1,19 @@
+{
+  "artifact": "funding_carry_closure_decision",
+  "decided_by": "operator agreed to the session's recommendation",
+  "decision_date": "2026-09-19",
+  "grounds": [
+    "the line failed hard gate g2 (realized CAGR within +/-30% of the Phase-6B same-period estimate): simulator same-period 2.296%, realized 1.53%, accept band 1.607-2.985%, missed by 0.08 percentage points",
+    "the gate and its tolerance were pre-registered in the Phase 7 plan before the window opened",
+    "PRELAUNCH1 run after the fact shows the gate was close to unsatisfiable by construction: the +8.08% anchor it was written against sits at the 61st percentile of the strategy's own history, and only 15% of historical 90-day windows would have cleared the +/-30% band at all"
+  ],
+  "lesson_for_future_lines": "compute the same-period expectation BEFORE writing a gate against an anchor. The gate here was written against a full-sample figure nobody had converted to the intended window. PRELAUNCH1 (backtest/validation/prelaunch.py) now does this on demand.",
+  "verdict": "REJECTED_CLOSED",
+  "what_continues": "data collection continues (read-only, free) so the record stays complete. The FundingCarryPaperDaily task is left running.",
+  "what_this_does_not_do": [
+    "does not delete or alter any tracker artifact, funding archive or sealed estimate",
+    "does not reverse the Phase 6B research verdict",
+    "does not authorize a restart, a retune, or any change to the locked always_on_monthly config"
+  ],
+  "why_not_restart": "restarting with a new launch date to obtain a different answer is exactly the false-positive manufacturing the pre-registration framework exists to prevent. The failure is marginal and environmental, but the rule was agreed in advance and it is the rule."
+}

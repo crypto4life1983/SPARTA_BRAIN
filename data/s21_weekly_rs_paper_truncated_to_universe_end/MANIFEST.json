@@ -1,0 +1,300 @@
+{
+  "bars": 1907,
+  "calendar_aligned": true,
+  "cutoff_date": "2026-08-04",
+  "filename_suffix": "_truncated.csv",
+  "files": {
+    "ADI": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "6f6f0d3b51b72d473d60dac3823abacb53a7f37de77d55672a77442d87f21c98"
+    },
+    "AMAT": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "c4c04dbbc64a9287f6245e181a9694925041fa8b289192fa51d90fe394fd0b27"
+    },
+    "AMGN": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "7757784bc34b326e39ea649ff916220880cba3edfc2f67e1c471b46ff67e28ba"
+    },
+    "AVGO": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "d93fbd6628fd137a400ab654ac7d91416805e03c83f5eddc495504a6a6e4cbab"
+    },
+    "BA": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "e2dfb4c27a768727a24244becd3745a90c1e9c5ebc84f7212ccc7cc1c3ba5495"
+    },
+    "BKNG": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "dd8b825bd1bff2c2e4cb573852564cf6e66ecdc3e3541d0e2cec10684c149533"
+    },
+    "BLK": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "2570d2749f06ac5d2943515f98c4b63e5a4c76ab6e1857a35f28f9717407bc7b"
+    },
+    "BMY": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "f514b4f690401dc24662a60a4ada2556e407d2fff8c1900c8d8bb80958b8997d"
+    },
+    "C": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "8b0c5aa37f5380d94231122e6656d6a941833460b9519595ba5e3f31ac7c740a"
+    },
+    "CB": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "334d8d1472b4ec933047844157e9335685648f223e8e1b2e4072d5206af13b2a"
+    },
+    "CHTR": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "9ae822cf231909fd875d6606a62430d8a974eaa04584f2f572308544d8dc8be5"
+    },
+    "CI": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "453b4fce7fa3a0904fe49adef966d9f85ddfb0c250c9cf5d365936e7348dbb4f"
+    },
+    "CL": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "2dc20f8fedb72f354d4c8c39a3bbf6d57b51c6545a50330e5a6f794d18ef5cc3"
+    },
+    "CVS": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "3403e604c44e0877f702192958135306162ed8fec308bda9b2b98f784e784cc6"
+    },
+    "DE": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "72ee921f07cb2c525ae5d07a673e7433ea88121a5e20df567217387e99da6f42"
+    },
+    "EA": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "3c9fdb8e9bf154c2b18a6a87524653e5494bacc26023447dbf5f9d93ca083398"
+    },
+    "GILD": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "be3a814f5b65ce6e4f295db1b8c7c27d52182ed12796a0c26e750e524dd8b391"
+    },
+    "GIS": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "3963d2738232f3d90cd1f4dc4a805a46dfeefe6bfa3813d6bed04c8894b69855"
+    },
+    "GM": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "9870a57eaf4ada1d77641d814c6dd96663f7cc72076a04e00b4d412e5c825229"
+    },
+    "IBM": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "d1e4e1c3a0aa5c4959ecd1e51791d2656e965141134b518cd5996e7b17186122"
+    },
+    "INTC": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "e65fc94b69af256ed4fe252e9fb2ddc0748797d5adbaa768517b58f5e3408839"
+    },
+    "INTU": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "82611b0812ea2b17242166955f4082c820921c9f8cb870396c9c732884245204"
+    },
+    "ISRG": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "730e0f46a7244861c6622139e591686801561420ab1071df08048a5d3fa9e946"
+    },
+    "ITW": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "4f7fa18f0e091b4c133fbf55326e842d124a199ec2c731efe3f7817a7e2389f0"
+    },
+    "KMB": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "1e42e1be5fc8701fc745d3b3f223d8e4adc0b2573cf08532051f2bf103ebc41b"
+    },
+    "LMT": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "0b684e21bc5937c855ef48639e8177f9e20832796eb1b8da3fc15a06ec764ca4"
+    },
+    "MAR": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "69a5a8dc965818d855701d82f4e0e7a7dda4a6a581014b6943295ae4d038223b"
+    },
+    "MO": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "c27d541d5fa365a26ff5e556fc14c3f9fa0193f80453901ac86aec20c987f49d"
+    },
+    "MU": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "193e8dbc82521cb82c975ebfd50791a00af51a2eb48ac78ce28ddb7b61277945"
+    },
+    "NOW": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "8e4302d086c0a63f0a1b9d72509733b3bf7c1eb98132d1e521393b8a2fb15b68"
+    },
+    "PFE": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "15ac805e5e7f0d666b8ebc5842c4e90091dd44381281b3b89d1f0156b499f318"
+    },
+    "PSX": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "0ad0f273f5670415a0a11ffdab9909cc0cb7af3348ee1639712f9446307c8999"
+    },
+    "QCOM": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "1d614ed563582b5eb1105ecdcde6c95ecc82c929f2d7ea186c1ccbbe394afe37"
+    },
+    "ROST": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "b2e4332d61d23d61b4c7d0239d2ce662f9f5eeab45dcfa8a89d2e28b25ff7de2"
+    },
+    "RTX": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "772ad6d20f88c8ac3944ce91fc4fb08da619d2b5b3d4d7572d91dee8fadcf6c1"
+    },
+    "SBUX": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "752b21762b2d45071cd63bca74891dbe109070a35e1695be6a86921d30d4c733"
+    },
+    "SCHW": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "63f10d2a0764ddd53dbfb9904f7467d02f9fe393823fc3e85bf8614df3ded6c4"
+    },
+    "SPGI": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "de8e8d0b6e5cc70c234504ba5dcb9bf61dc2808d29d1c8e92b446061df184c15"
+    },
+    "STZ": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "f325dbd1e319c72e22bc556099f7182b70cd622e49aec3235ccd1aa8fc879036"
+    },
+    "SYK": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "fae2b628b59d05038aa2b734f722716d8560f71c41331259e4f9aa568b5e6329"
+    },
+    "T": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "3b0424f78eaa04bd9b1df4668068cef6a27b8a065a660b905055effd3ab789de"
+    },
+    "TGT": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "cf78b7201de3cc998e0a5b91439d5dee9c7c9305fcb6851d59f3c0e56326dc85"
+    },
+    "TJX": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "6a99ce86119e105470a8ab66009be7dcc01d91ee3973c4412d0b4140735b68f2"
+    },
+    "TXN": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "11abd537faab5748f9f55a474678666e7225b6e5e774535347950cc428bc5f78"
+    },
+    "UPS": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "34ba534443797d0c39d573c3ae394a89376b550f308e80863117dbe80299b172"
+    },
+    "USB": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "63a397020d669e4e652da2ad3fa8fb4984154080cfb5a4464a5cbca5f3f8a1f5"
+    },
+    "VLO": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "978d761d3950ff3d1bb7af3f655a240c0b65e7febef07308b2f909b797ac10bd"
+    },
+    "VZ": {
+      "first": "2019-01-02",
+      "last": "2026-08-04",
+      "rows": 1907,
+      "sha256": "e51381e6fc35ffb534823bf0c0d670b716e8e0f9a6f5f6d42c4e73904a83dc70"
+    }
+  },
+  "never_mutates_source": true,
+  "purpose": "calendar-aligned copy of the locked 48 truncated to the last date every name trades; EA was delisted 2026-08-04 so the universe expires there",
+  "source": "data/s21_weekly_rs_paper_refresh_20260911/raw",
+  "universe_size": 48
+}
