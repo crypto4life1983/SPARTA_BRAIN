@@ -148,3 +148,76 @@ def test_empty_input_is_safe():
     assert rep["counts"]["closed"] == 0 and rep["suggestions"] == []
     assert rep["mfe_capture"]["status"] == "MISSING"
     assert tjl.forbidden_words_found(tjl.render_markdown(rep)) == []
+
+
+# ── evidence split (pre / post the 2026-09-15 partial-bar fix) ──────────────
+
+def _split_rows():
+    """3 retired (pre-fix) + 2 valid (post-fix) closed trades."""
+    return [
+        _row(1, "binance", "BTCUSDT", "long", "D", "TREND_UP",
+             "2026-09-01", "2026-09-05", 2.0, outcome="TIMEOUT"),
+        _row(2, "binance", "ETHUSDT", "long", "E", "TREND_UP",
+             "2026-09-02", "2026-09-06", 3.0, outcome="WIN"),
+        _row(3, "kraken", "SOLUSDT", "short", "F", "TREND_DOWN",
+             "2026-09-14", "2026-09-18", -1.0, outcome="LOSS"),
+        _row(4, "binance", "ADAUSDT", "short", "F2", "TREND_DOWN",
+             "2026-09-16", "2026-09-19", -1.0, outcome="LOSS"),
+        _row(5, "binance", "BCHUSDT", "short", "F", "TREND_DOWN",
+             "2026-09-17", "2026-09-19", -1.0, outcome="LOSS"),
+    ]
+
+
+def test_evidence_split_partitions_on_the_cutoff():
+    rep = tjl.build_learning_report(_split_rows(), {}, as_of="2026-09-21")
+    ev = rep["evidence_split"]
+
+    assert ev["cutoff"] == tjl.EVIDENCE_VALID_FROM == "2026-09-15"
+    assert ev["cutoff_field"] == "open_date"
+    # 2026-09-14 is BEFORE the cutoff, 2026-09-16/17 are on/after it
+    assert ev["retired"]["closed"] == 3
+    assert ev["valid_forward"]["closed"] == 2
+    # the two buckets must account for every closed row, none dropped
+    assert ev["retired"]["closed"] + ev["valid_forward"]["closed"] == rep["counts"]["closed"]
+
+
+def test_evidence_split_keeps_headline_counts_untouched():
+    """The split must be additive: it never filters the headline numbers."""
+    rows = _split_rows()
+    rep = tjl.build_learning_report(rows, {}, as_of="2026-09-21")
+    assert rep["counts"]["closed"] == 5
+    assert rep["counts"]["sum_R_raw"] == pytest.approx(2.0)
+
+
+def test_evidence_split_reports_each_side_independently():
+    rep = tjl.build_learning_report(_split_rows(), {}, as_of="2026-09-21")
+    ev = rep["evidence_split"]
+
+    assert ev["retired"]["sum_R_raw"] == pytest.approx(4.0)
+    # the module rounds every R figure to 3dp via _r()
+    assert ev["retired"]["expectancy_R"] == pytest.approx(4.0 / 3, abs=5e-4)
+    assert ev["retired"]["outcome_WIN"] == 1
+    assert ev["retired"]["outcome_TIMEOUT_positive"] == 1
+
+    assert ev["valid_forward"]["sum_R_raw"] == pytest.approx(-2.0)
+    assert ev["valid_forward"]["expectancy_R"] == pytest.approx(-1.0)
+    assert ev["valid_forward"]["win_rate"] == pytest.approx(0.0)
+    assert ev["valid_forward"]["outcome_WIN"] == 0
+
+
+def test_evidence_split_handles_an_all_valid_book():
+    rows = [r for r in _split_rows() if r["open_date"] >= "2026-09-15"]
+    ev = tjl.build_learning_report(rows, {}, as_of="2026-09-21")["evidence_split"]
+    assert ev["retired"]["closed"] == 0
+    assert ev["retired"]["expectancy_R"] is None
+    assert ev["valid_forward"]["closed"] == 2
+    assert ev["retired_share_of_closed"] == pytest.approx(0.0)
+
+
+def test_evidence_split_renders_both_buckets_in_markdown():
+    rep = tjl.build_learning_report(_split_rows(), {}, as_of="2026-09-21")
+    md = tjl.render_markdown(rep)
+    assert "## Evidence split (cutoff 2026-09-15 on open_date)" in md
+    assert "| valid forward evidence |" in md
+    assert "| retired (pre-fix) |" in md
+    assert tjl.forbidden_words_found(md) == []

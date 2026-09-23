@@ -61,3 +61,65 @@ def test_line_closed_on_record_leaves_the_queue():
     md = dg.build_digest(None, _ledger(), None, sc, "2026-09-12")
     assert "record closure of nq_orb_paper" not in md
     assert "record closure of other_line" in md
+
+
+# ── evidence split (pre / post 2026-09-15 partial-bar fix) ──────────────────
+
+def _learning_with_split(valid_closed=2, retired_closed=42):
+    return {
+        "counts": {"closed": valid_closed + retired_closed, "distinct_signals_closed": 33,
+                   "sum_R_dedup_best": 5.74, "expectancy_R": 0.28, "win_rate": 0.432},
+        "suggestions": [],
+        "sample_quality": {"overall_label": "OK"},
+        "evidence_split": {
+            "cutoff": "2026-09-15",
+            "cutoff_field": "open_date",
+            "cutoff_reason": "partial-bar fix",
+            "valid_forward": {"closed": valid_closed, "distinct_signals_closed": valid_closed,
+                              "sum_R_raw": -2.034, "expectancy_R": -1.017, "win_rate": 0.0,
+                              "outcome_WIN": 0, "outcome_TIMEOUT_positive": 0},
+            "retired": {"closed": retired_closed, "distinct_signals_closed": 31,
+                        "sum_R_raw": 14.359, "expectancy_R": 0.342, "win_rate": 0.452,
+                        "outcome_WIN": 2, "outcome_TIMEOUT_positive": 17},
+            "retired_share_of_closed": 0.955,
+            "note": "headline counts cover ALL closed trades",
+        },
+    }
+
+
+def test_digest_shows_valid_forward_and_retired_buckets():
+    md = dg.build_digest(_learning_with_split(), _ledger(), None, _scorecard(), "2026-09-21")
+    assert "valid forward evidence (opened on/after 2026-09-15)" in md
+    assert "retired (opened before 2026-09-15" in md
+    # both buckets' numbers are present, so the retired record cannot be
+    # mistaken for the live one
+    assert "-1.017" in md and "0.342" in md
+    # the WIN vs profitable-TIMEOUT contrast that explains the retired edge
+    assert "2 WIN vs 17 profitable TIMEOUT" in md
+
+
+def test_digest_warns_when_valid_evidence_is_below_threshold():
+    md = dg.build_digest(_learning_with_split(valid_closed=2), _ledger(), None,
+                         _scorecard(), "2026-09-21")
+    assert "NOT a track record of the system now running" in md
+    assert f"< {dg.MIN_VALID_EVIDENCE}" in md
+
+
+def test_digest_drops_the_warning_once_enough_valid_evidence_exists():
+    md = dg.build_digest(_learning_with_split(valid_closed=dg.MIN_VALID_EVIDENCE),
+                         _ledger(), None, _scorecard(), "2026-09-21")
+    assert "valid forward evidence" in md
+    assert "NOT a track record of the system now running" not in md
+
+
+def test_digest_without_evidence_split_still_renders():
+    """An older latest.json has no evidence_split key; the digest must not break."""
+    learning = _learning_with_split()
+    learning.pop("evidence_split")
+    md = dg.build_digest(learning, _ledger(), None, _scorecard(), "2026-09-21")
+    assert "## 1." in md and "valid forward evidence" not in md
+    assert dg.forbidden_words_found(md) == []
+
+
+def test_evidence_split_lines_are_empty_for_missing_input():
+    assert dg._evidence_split_lines(None) == []

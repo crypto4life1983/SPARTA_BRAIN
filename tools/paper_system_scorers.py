@@ -112,6 +112,14 @@ FROZEN_STACK_OPERATION_START = "2026-09-12"
 # scorer reports the recorded closure instead of re-deriving a live status, so a closed line
 # never reappears in the daily human queue.
 CLOSURE_DECISION_GLOBS = ("CLOSURE_DECISION_*.md",)
+# A JSON artifact counts as a closure record only when its top-level "verdict" says so
+# (e.g. REJECTED_CLOSED, CLOSED_FAILED_OWN_DRAWDOWN_GATE). Diagnostics, estimates and
+# plans that happen to sit in the same folder never qualify.
+CLOSURE_JSON_GLOB = "*.json"
+CLOSURE_JSON_VERDICT_MARK = "CLOSED"
+# SPARTA-side folders where operator closure records for a line are committed.
+FC_SPARTA_CLOSURE_REL = ("reports", "approvals")
+S21_SPARTA_CLOSURE_REL = ("reports", "s21_weekly_rs_paper")
 
 # Frozen stack own thresholds (read from analytics/final_stack_operational_validation.py and
 # reports/final_frozen_architecture.md section 8 / 9 in the external project).
@@ -351,7 +359,10 @@ def _latest_g2_estimate(ext_root: Path | None = None):
 
 def score_funding_carry(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
     """inputs: {latest: dict|None, alerts_rows: list[dict]|None, phase8_report_present: bool|None,
-                source_files: list[str]}"""
+                source_files: list[str], closure_files: list[str] (optional)}"""
+    closure = _recorded_closure(inputs)
+    if closure:
+        return _closed_record(LINE_FUNDING_CARRY, FC_CRITERIA, inputs, as_of, closure)
     latest = inputs.get("latest")
     src = inputs.get("source_files") or []
     if not latest:
@@ -498,15 +509,35 @@ def _recorded_closure(inputs: dict[str, Any]) -> dict[str, Any] | None:
             text = Path(path_str).read_text(encoding="utf-8", errors="ignore")
         except Exception:
             continue
-        if text.strip():
-            return {"path": path_str, "text": text}
+        if not text.strip():
+            continue
+        if path_str.lower().endswith(".json"):
+            verdict = _closure_json_verdict(Path(path_str))
+            if not verdict:
+                continue
+            doc = _read_json(Path(path_str)) or {}
+            when = doc.get("decision_date") or doc.get("run_date") or doc.get("as_of") or ""
+            return {"path": path_str, "text": text,
+                    "summary": verdict + (f" ({when})" if when else "")}
+        return {"path": path_str, "text": text}
+    return None
+
+
+def _closure_json_verdict(path: Path) -> str | None:
+    """The verdict string of a JSON closure record, or None when the file is not one."""
+    doc = _read_json(path)
+    if not isinstance(doc, dict):
+        return None
+    verdict = doc.get("verdict")
+    if isinstance(verdict, str) and CLOSURE_JSON_VERDICT_MARK in verdict.upper():
+        return verdict
     return None
 
 
 def _closed_record(line: str, criteria: str, inputs: dict[str, Any], as_of: str,
                    closure: dict[str, Any]) -> dict[str, Any]:
-    first = next((ln.strip() for ln in closure["text"].splitlines()
-                  if ln.strip().startswith("**Decision")), "").strip("* ")
+    first = closure.get("summary") or next((ln.strip() for ln in closure["text"].splitlines()
+                                            if ln.strip().startswith("**Decision")), "").strip("* ")
     return _record(line=line, source_files=(inputs.get("source_files") or []) + [closure["path"]],
                    launched=None, as_of=as_of, days_elapsed=None,
                    window={"kind": "closed_by_operator", "end_or_min_n": None, "satisfied": True},
@@ -759,7 +790,11 @@ def _s21_weeks(state: dict[str, Any], R: int) -> float:
 def score_s21(inputs: dict[str, Any], as_of: str) -> dict[str, Any]:
     """inputs: {state: dict|None, gate_eval: dict|None (cycle_runner.evaluate_gates output),
                 thresholds: dict (manifest gate_thresholds), rebalance_days: int,
-                start_cash: float, manifest_status: dict, state_path: str, source_files: list[str]}"""
+                start_cash: float, manifest_status: dict, state_path: str, source_files: list[str],
+                closure_files: list[str] (optional)}"""
+    closure = _recorded_closure(inputs)
+    if closure:
+        return _closed_record(LINE_S21, S21_CRITERIA, inputs, as_of, closure)
     state = inputs.get("state")
     src = inputs.get("source_files") or []
     T = inputs.get("thresholds") or {}
@@ -876,8 +911,9 @@ def _recommendation_text(line: str, status: str, reason: str, own_doc_quote: str
 
 # ── loaders (read-only) ─────────────────────────────────────────────────────
 
-def load_funding_carry_inputs(ext_root: Path) -> dict[str, Any]:
+def load_funding_carry_inputs(ext_root: Path, sparta_root: Path | None = None) -> dict[str, Any]:
     d = ext_root / "reports" / "paper_funding_carry"
+    sp = Path(sparta_root) if sparta_root is not None else _REPO_ROOT
     latest_p, alerts_p = d / "latest.json", d / "alerts.csv"
     p8 = ext_root / "reports" / "funding_carry_phase8_basis_aware.md"
     latest = _read_json(latest_p) if latest_p.exists() else None
@@ -887,7 +923,8 @@ def load_funding_carry_inputs(ext_root: Path) -> dict[str, Any]:
             "alerts_rows": _read_csv(alerts_p) if alerts_p.exists() else None,
             "phase8_report_present": p8.exists(),
             "g2_same_period_estimate": g2,
-            "source_files": [str(p) for p in (latest_p, alerts_p, g2_p) if p is not None and p.exists()]}
+            "source_files": [str(p) for p in (latest_p, alerts_p, g2_p) if p is not None and p.exists()],
+            "closure_files": _closure_files(d) + _closure_files(sp.joinpath(*FC_SPARTA_CLOSURE_REL))}
 
 
 def load_nq_orb_inputs(ext_root: Path) -> dict[str, Any]:
@@ -916,6 +953,11 @@ def _closure_files(d: Path) -> list[str]:
             out.extend(sorted(str(p) for p in d.glob(pattern)))
         except Exception:
             pass
+    try:
+        out.extend(sorted(str(p) for p in d.glob(CLOSURE_JSON_GLOB)
+                          if p.is_file() and _closure_json_verdict(p)))
+    except Exception:
+        pass
     return out
 
 
@@ -956,14 +998,15 @@ def load_s21_inputs(sparta_root: Path) -> dict[str, Any]:
             manifest_status["evaluate_gates_error"] = f"{type(exc).__name__}: {exc}"
     return {"state": state, "gate_eval": gate_eval, "thresholds": thresholds, "rebalance_days": R,
             "start_cash": start_cash, "manifest_status": manifest_status, "state_path": str(state_p),
-            "source_files": [str(p) for p in (state_p, manifest_p) if p.exists()]}
+            "source_files": [str(p) for p in (state_p, manifest_p) if p.exists()],
+            "closure_files": _closure_files(sparta_root.joinpath(*S21_SPARTA_CLOSURE_REL))}
 
 
 def score_all(as_of: str, ext_root: Path | None = None, sparta_root: Path | None = None) -> list[dict[str, Any]]:
     ext = Path(ext_root) if ext_root is not None else external_root()
     sp = Path(sparta_root) if sparta_root is not None else _REPO_ROOT
     return [
-        score_funding_carry(load_funding_carry_inputs(ext), as_of),
+        score_funding_carry(load_funding_carry_inputs(ext, sp), as_of),
         score_nq_orb(load_nq_orb_inputs(ext), as_of),
         score_gc_ict(load_gc_ict_inputs(ext), as_of),
         score_frozen_stack(load_frozen_stack_inputs(ext), as_of),
@@ -1062,6 +1105,8 @@ def write_closure_recommendations(records: list[dict[str, Any]], report_dir: Pat
     for rec in records:
         if rec["status"] not in (STATUS_CONFIRMED, STATUS_REJECTED):
             continue
+        if (rec.get("window") or {}).get("kind") == "closed_by_operator":
+            continue  # already closed on record: a recommendation to close would be noise
         path = report_dir / f"closure_recommendation_{rec['line']}_{rec['as_of']}.md"
         if path.exists() or _prior_resolved(hist, rec["line"], rec["status"]):
             continue

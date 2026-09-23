@@ -66,6 +66,31 @@ STATUSES = ("PROPOSED", "SHADOW", "CONFIRMED", "APPLIED", "REJECTED", "RETIRED")
 APPLIED_MIN_N = 20
 APPLIED_REGRESSION_R = 0.2   # flag when post-apply mean R < baseline - 0.2R with n >= APPLIED_MIN_N
 
+# Trades opened before the partial-bar fix came from a bot reading a
+# still-forming candle; the operator retired that record from evidence
+# (obsidian-trade-logger/reports/observation_mode/system_b_benchmark_gate.md and
+# system_b_strategy_retirement_20260919.json). Kept in sync with
+# EVIDENCE_VALID_FROM in trade_journal_learning_report.py.
+EVIDENCE_VALID_FROM = "2026-09-15"
+
+# An applied rule needs SOMETHING to be judged against at n >= APPLIED_MIN_N.
+# When the only available baseline would be retired evidence, we refuse to
+# compute one and fall back to this absolute floor instead. Pre-registered
+# 2026-09-21, BEFORE the post-fix evidence existed, per
+# reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md:
+# rollback is recommended if mean R < 0.0 at n >= APPLIED_MIN_N. A positive
+# mean does NOT declare the rule working - it only means no rollback.
+ROLLBACK_ABS_MEAN_R = 0.0
+
+# Why an applied rule has (or lacks) an admissible baseline. These are distinct:
+# a legacy record froze a NUMBER from retired trades, while a new apply may
+# simply not have enough post-fix trades yet. Both fall back to the absolute
+# rollback rule, but only the first is a correctness problem.
+BASELINE_EMPIRICAL = "EMPIRICAL_POST_FIX"
+BASELINE_RETIRED = "NOT_EVALUABLE_RETIRED_EVIDENCE"
+BASELINE_INSUFFICIENT = "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE"
+BASELINE_NOT_EVALUABLE = (BASELINE_RETIRED, BASELINE_INSUFFICIENT)
+
 DEFAULT_THRESHOLDS = {
     "min_forward_signals": 20,
     "min_p_positive": 0.90,
@@ -348,13 +373,30 @@ def mark_applied(ledger: dict[str, Any], sid: str, as_of: str, trades: list[dict
     baseline (dedup-best mean R of everything closed on/before as_of) and switches the
     hypothesis to APPLIED. Counterfactual forward stats are kept as they were."""
     hyp = ledger["hypotheses"][sid]
-    before = [float(_pnl(t)) for t in _dedup_best_signals(trades)
-              if (_close_day(t) is not None and _close_day(t) <= date.fromisoformat(as_of))]
+    # The baseline may only be built from trades that are still admissible as
+    # evidence, i.e. opened on/after the partial-bar fix. Anything earlier is
+    # retired, and scoring valid forward evidence against a retired baseline
+    # produces a rollback verdict that says nothing about the rule.
+    cutoff = date.fromisoformat(as_of)
+    before = [
+        float(_pnl(t)) for t in _dedup_best_signals(trades)
+        if (_close_day(t) is not None and _close_day(t) <= cutoff
+            and str(t.get("open_date") or "") >= EVIDENCE_VALID_FROM)
+    ]
+    usable = len(before) >= APPLIED_MIN_N
     hyp["applied"] = {
         "applied_as_of": as_of,
         "note": note,
         "baseline_n": len(before),
-        "baseline_mean_R": _r(sum(before) / len(before)) if before else None,
+        "baseline_mean_R": _r(sum(before) / len(before)) if usable else None,
+        "baseline_status": BASELINE_EMPIRICAL if usable else BASELINE_INSUFFICIENT,
+        "baseline_valid_from": EVIDENCE_VALID_FROM,
+        "rollback_rule": (
+            f"mean R < baseline - {APPLIED_REGRESSION_R}R at n >= {APPLIED_MIN_N}"
+            if usable else
+            f"mean R < {ROLLBACK_ABS_MEAN_R}R at n >= {APPLIED_MIN_N} "
+            f"(absolute; no admissible baseline)"
+        ),
         "n_after": 0,
         "mean_R_after": None,
         "p_after_ge_baseline": None,
@@ -365,6 +407,27 @@ def mark_applied(ledger: dict[str, Any], sid: str, as_of: str, trades: list[dict
                            "note": f"{hyp.get('status')} -> APPLIED: {note or 'applied in paper bot'}"})
     hyp["status"] = "APPLIED"
     return hyp
+
+
+def _baseline_status(ap: dict[str, Any]) -> str:
+    """Effective baseline status, derived for records written before this field
+    existed.
+
+    A record applied before EVIDENCE_VALID_FROM froze its baseline from trades
+    that are now retired, whatever number it stored. Deriving the status here
+    annotates those records WITHOUT rewriting the pre-registered values they
+    carry - re-dating them and nulling the baseline is a separate, separately
+    approved migration (spec step 4, still pending)."""
+    stored = ap.get("baseline_status")
+    if stored:
+        return str(stored)
+    applied_as_of = str(ap.get("applied_as_of") or "")
+    if ap.get("baseline_mean_R") is not None and applied_as_of and applied_as_of < EVIDENCE_VALID_FROM:
+        # A number frozen from trades that are now retired: the correctness problem.
+        return BASELINE_RETIRED
+    if ap.get("baseline_mean_R") is None:
+        return BASELINE_INSUFFICIENT
+    return BASELINE_EMPIRICAL
 
 
 def _update_applied(hyp: dict[str, Any], trades: list[dict[str, Any]], as_of: str) -> None:
@@ -381,6 +444,18 @@ def _update_applied(hyp: dict[str, Any], trades: list[dict[str, Any]], as_of: st
         ap["regression_flag"] = bool(
             len(after) >= APPLIED_MIN_N and (sum(after) / len(after)) < float(base) - APPLIED_REGRESSION_R
         )
+    elif after:
+        # No admissible baseline: judge against the pre-registered absolute
+        # floor instead. p_after_ge_baseline stays None - there is no baseline
+        # to be "ge" than, and inventing one is the failure this avoids.
+        ap["regression_flag"] = bool(
+            len(after) >= APPLIED_MIN_N
+            and (sum(after) / len(after)) < ROLLBACK_ABS_MEAN_R
+        )
+    # Annotate (never overwrite) the baseline's provenance so both renderers
+    # can say whether the rollback rule in force rests on admissible evidence.
+    ap["baseline_status"] = _baseline_status(ap)
+    ap["baseline_is_retired_evidence"] = ap["baseline_status"] == BASELINE_RETIRED
     ap["last_eval_as_of"] = as_of
     hyp["applied"] = ap
 
@@ -538,6 +613,20 @@ def _next_threshold(hyp: dict[str, Any]) -> str:
     fwd = hyp["forward"]
     th = hyp.get("thresholds", DEFAULT_THRESHOLDS)
     min_n = th["min_forward_signals"]
+    if st == "APPLIED":
+        ap = hyp.get("applied") or {}
+        n_after = ap.get("n_after") or 0
+        rule = ap.get("rollback_rule")
+        if not rule:
+            rule = (
+                f"mean R < {ROLLBACK_ABS_MEAN_R}R at n >= {APPLIED_MIN_N}"
+                if ap.get("baseline_mean_R") is None else
+                f"mean R < baseline - {APPLIED_REGRESSION_R}R at n >= {APPLIED_MIN_N}"
+            )
+        warn = " ⚠ baseline is RETIRED evidence" if _baseline_status(ap) == BASELINE_RETIRED else ""
+        if n_after < APPLIED_MIN_N:
+            return f"rollback check at n>={APPLIED_MIN_N} (have {n_after}): {rule}{warn}"
+        return f"{rule}{warn}"
     if st == "PROPOSED":
         return "unknown kind: not evaluated"
     if st in ("REJECTED", "RETIRED"):
@@ -682,7 +771,14 @@ def _register_manual_entry() -> None:
                 "Reads trades.db read-only, freezes each suggestion's in-sample evidence, "
                 "computes counterfactual delta_R per deduplicated forward signal (block / "
                 "stop cap -1.5R / partial 2R / weekday flag), bootstraps p_positive "
-                "(2000 resamples, seed 42) and sets SHADOW / CONFIRMED / REJECTED."
+                "(2000 resamples, seed 42) and sets SHADOW / CONFIRMED / REJECTED. "
+                f"An APPLIED rule's baseline is built only from trades opened on/after "
+                f"the {EVIDENCE_VALID_FROM} partial-bar fix; with fewer than "
+                f"{APPLIED_MIN_N} such closes it stores no baseline and falls back to "
+                f"the pre-registered absolute rollback rule (mean R < "
+                f"{ROLLBACK_ABS_MEAN_R}R at n >= {APPLIED_MIN_N}). A baseline frozen "
+                "before that date is marked RETIRED in the report rather than silently "
+                "rewritten."
             ),
             when_to_use=(
                 "Daily, after the learning report. CONFIRMED = a recommendation for the "

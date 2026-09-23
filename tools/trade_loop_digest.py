@@ -21,6 +21,14 @@ LEDGER_PATH = _REPO_ROOT / "data" / "trade_hypothesis_ledger.json"
 OUT_NAME = "LOOP_STATUS.md"
 BANNER = "READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL · NO BROKER / NO ORDER"
 FORBIDDEN_WORDS = ("validated", "ready", "approved", "profitable strategy", "deploy")
+# Below this many admissible forward trades, the headline expectancy is carried
+# almost entirely by the retired pre-partial-bar-fix record, so the digest says
+# so explicitly. Matches MIN_SIGNALS in trade_journal_learning_report.py.
+MIN_VALID_EVIDENCE = 30
+# Mirrors APPLIED_MIN_N / EVIDENCE_VALID_FROM in trade_hypothesis_ledger.py;
+# used only for wording in section 2.
+MIN_APPLIED_N = 20
+EVIDENCE_VALID_FROM = "2026-09-15"
 
 
 def _load(path: Path) -> dict[str, Any] | list | None:
@@ -38,6 +46,35 @@ def _f(v: Any, nd: int = 3) -> str:
     return str(v)
 
 
+def _evidence_split_lines(ev: dict[str, Any] | None) -> list[str]:
+    """One-glance pre/post partial-bar-fix split for section 1.
+
+    The line above it counts every closed trade, including the ones the
+    operator retired from evidence. Without this, a voided record reads as a
+    live track record. Observation only."""
+    if not ev:
+        return []
+    v, rt = ev.get("valid_forward") or {}, ev.get("retired") or {}
+    lines = [
+        f"- **valid forward evidence (opened on/after {ev.get('cutoff')})**: "
+        f"closed {v.get('closed')} · sum R {_f(v.get('sum_R_raw'))} · "
+        f"expectancy {_f(v.get('expectancy_R'))} R · win rate {_f(v.get('win_rate'))}",
+        f"- retired (opened before {ev.get('cutoff')}, {ev.get('cutoff_field')}): "
+        f"closed {rt.get('closed')} · sum R {_f(rt.get('sum_R_raw'))} · "
+        f"expectancy {_f(rt.get('expectancy_R'))} R — "
+        f"{rt.get('outcome_WIN')} WIN vs {rt.get('outcome_TIMEOUT_positive')} "
+        f"profitable TIMEOUT",
+    ]
+    if (v.get("closed") or 0) < MIN_VALID_EVIDENCE:
+        lines.append(
+            f"- ⚠ the expectancy/win-rate on the line above is computed over ALL "
+            f"closed rows; only {v.get('closed')} of them are admissible forward "
+            f"evidence (< {MIN_VALID_EVIDENCE}), so it is NOT a track record of "
+            f"the system now running"
+        )
+    return lines
+
+
 def build_digest(learning: dict | None, ledger: dict | None, search: dict | None,
                  scorecard: dict | list | None, as_of: str) -> str:
     L = [f"# Trading loop status — {as_of}", "", BANNER, ""]
@@ -50,6 +87,7 @@ def build_digest(learning: dict | None, ledger: dict | None, search: dict | None
               f"sum R (dedup best) {_f(c.get('sum_R_dedup_best'))} · expectancy {_f(c.get('expectancy_R'))} R · "
               f"win rate {_f(c.get('win_rate'))} · sample label {learning.get('sample_quality', {}).get('overall_label', '-')}",
               f"- suggestions emitted: {len(learning.get('suggestions', []))} (all SUGGESTION_ONLY)"]
+        L += _evidence_split_lines(learning.get("evidence_split"))
     else:
         L.append("- learning report missing")
 
@@ -64,9 +102,18 @@ def build_digest(learning: dict | None, ledger: dict | None, search: dict | None
             if h.get("status") == "APPLIED":
                 ap = h.get("applied", {})
                 flag = " ⚠ regression" if ap.get("regression_flag") else ""
+                retired = ap.get("baseline_is_retired_evidence")
+                # Never print "vs base X" as if X were admissible evidence.
+                if ap.get("baseline_mean_R") is None:
+                    base_cell = "no admissible baseline"
+                elif retired:
+                    base_cell = f"vs ⚠RETIRED base {_f(ap.get('baseline_mean_R'))}"
+                else:
+                    base_cell = f"vs base {_f(ap.get('baseline_mean_R'))}"
+                nxt = ap.get("rollback_rule") or f"rollback check at n≥{MIN_APPLIED_N}"
                 L.append(f"| `{hid}` | APPLIED {ap.get('applied_as_of', '')} | {h.get('registered_as_of')} | "
-                         f"{ap.get('n_after', 0)} after | {_f(ap.get('mean_R_after'))} vs base {_f(ap.get('baseline_mean_R'))} | "
-                         f"{_f(ap.get('p_after_ge_baseline'))} | rollback check at n≥20{flag} |")
+                         f"{ap.get('n_after', 0)} after | {_f(ap.get('mean_R_after'))} {base_cell} | "
+                         f"{_f(ap.get('p_after_ge_baseline'))} | {nxt}{flag} |")
                 continue
             nxt = (f"n≥{th.get('min_forward_signals', '?')} & p≥{th.get('min_p_positive', '?')}"
                    if h.get("status") in ("SHADOW", "CONFIRMED") else "terminal")
@@ -75,6 +122,18 @@ def build_digest(learning: dict | None, ledger: dict | None, search: dict | None
         n_conf = sum(1 for h in hyps.values() if h.get("status") == "CONFIRMED")
         L += ["", f"CONFIRMED rules awaiting the operator: **{n_conf}**. A CONFIRMED rule is a recommendation "
               "to change the paper bot; nothing is applied by the loop."]
+        n_retired = sum(
+            1 for h in hyps.values()
+            if h.get("status") == "APPLIED"
+            and (h.get("applied") or {}).get("baseline_is_retired_evidence")
+        )
+        if n_retired:
+            L += ["", f"⚠ **{n_retired} APPLIED rule(s) are still scored against a baseline frozen from "
+                  f"retired pre-{EVIDENCE_VALID_FROM} evidence.** Their rollback check therefore compares "
+                  "admissible forward evidence against a record the operator has voided, and will produce a "
+                  f"verdict that says nothing about the rule once n reaches {MIN_APPLIED_N}. Re-dating those "
+                  "records is a pending operator decision (spec step 4): "
+                  "`reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md`."]
     else:
         L.append("- no hypotheses registered yet")
 

@@ -4614,3 +4614,104 @@ into deep extraction even if the warning_labels list omits them.
 - **Lesson:** H1's locked preregistration fixed each symbol's COIN quantity at entry and accrued funding as `rate × q_coins × mark_t`. Over 5.67 years of price appreciation (BTC 7.5×, ETH 5.9×, SOL 25.5×) the USD funding base inflated while the return denominator stayed at C0, manufacturing +305% / Sharpe 10 from a carry whose true rate is ~0.16%/yr on SOL. The cash reconcile passed (9.3e-10) because the arithmetic was internally consistent — consistency is not realism.
 - **Why:** This is the G1 fake-yield failure in a new costume. The anti-inflation rule was written against *adding size*, not against *the same size becoming bigger in USD*.
 - **How to apply:** In any carry/funding preregistration state the invariant in the accounting currency: either rebalance coin quantity to a fixed USD notional at each accrual, or normalise the return by the *contemporaneous* notional, never by entry capital. Separately: model margin feasibility (GR8) — a book whose hedge leg would have been liquidated has recorded cashflows that could never have been collected, regardless of how clean the reconcile is.
+
+- 2026-09-19T14:05:45 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T14:05:45 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T14:05:45 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+- 2026-09-19T14:05:52 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T14:05:52 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T14:05:52 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+- 2026-09-19T14:19:12 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T14:19:12 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T14:19:12 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+- 2026-09-19T14:27:14 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T14:27:14 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T14:27:14 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+- 2026-09-19T14:35:04 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T14:35:04 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T14:35:04 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+- 2026-09-19T15:20:24 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T15:20:24 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T15:20:24 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+- 2026-09-19T15:27:05 - No repeated issue was detected in parsed trade history; improve trade tagging before drawing stronger conclusions.
+
+- 2026-09-19T15:27:05 - Parsed history shows 0 loss(es) out of 2 trade(s); focus review on losing clusters, not isolated trades.
+
+- 2026-09-19T15:27:05 - Missing fields limit analysis quality: strategy, realized_r, expected_r should be logged for future trade reviews.
+
+
+## 2026-09-19 - LESSON_AUDIT_001 - A collection-time ImportError hides the whole suite, and untracked code is code that can vanish
+
+- **Lesson:** One orphan test (`test_strategy_lab_evidence_v2_contract.py`) importing a symbol that no longer existed aborted pytest at COLLECTION, so 8,000+ trading tests never ran and four real defects sat undetected. The missing symbol was authorized, shipped work (2026-05-14 v2 evidence schema) that existed only on a parked branch. The underlying reason it could disappear: **143/185 `tools/`, 61/64 `strategy_lab/`, 101/522 `sparta_commander/` and 301/861 `tests/` Python files are untracked** - a clean clone would not contain the regime tools, the conftest, or most of the trading test suite at all.
+- **Why:** A collection error is not one failing test, it is zero running tests, and the summary line still looks like a small number ("1 error"). Meanwhile working-tree-only code has no recovery path: nothing in git notices when it is lost, and the only surviving copy was a branch nobody was tracking.
+- **How to apply:** (a) treat any collection error as a suite-down incident, never as one test; (b) run the suite in chunks from the repo root - a single 8k-test process died silently, chunked runs completed and also stopped cross-file `sys.modules` pollution from manufacturing ~57 phantom "simulator refuses to run" failures; (c) before concluding a module is broken, check whether the symbol ever existed elsewhere in git (`git log -S <symbol> --all`); (d) commit research tooling, or accept that it can silently disappear.
+
+## 2026-09-19 - LESSON_AUDIT_002 - A data-rotation step and a hardcoded filename fail in opposite, non-obvious ways
+
+- **Lesson:** The shard-merge in `regime_shadow_fresh_data_update.py` renames inputs to `.superseded.<UTC>`; three regime tools hardcode the pre-merge names. `meta_rule` raised loudly. `regime_cross_asset_mode_classifier` had a `if not csv_path.exists()` branch that returned an `asset_coverage_warning` instead - so it ran "successfully" for ~4 months with every single asset x window cell empty.
+- **Why:** A graceful-degradation branch converts a hard break into a silent one. The layer kept reporting, just with nothing in it, and no alert fired.
+- **How to apply:** When a producer renames or rotates files, grep for every consumer of the old names with an AST scan, not a line regex - the stale path in `regime_market_mode_classifier.py` was split across two string literals and a line-based grep missed it entirely. And when substituting a rotated data file, prove equivalence on the actual bytes (date -> close, per window) BEFORE changing the code, so the fix is provably evidence-neutral rather than a quiet change to the evidence base.
+
+## 2026-09-19 - LESSON_AUDIT_003 - A risk gate read once per run is not a risk gate
+
+- **Lesson:** The daily kill switch looked healthy in the logs - it printed `idle` when the day was clean and `ACTIVE` when the day was down -2.03R, and the entry path does honour it. But it is a boolean snapshot taken at run start, and the exit pass that produces the day's losses runs later in the same pass. On 2026-09-19 the bot read "idle", closed two losses 17 seconds later taking the day past its -2.0R limit, and opened three fresh entries 3 seconds after that. The guard only reported ACTIVE on the next run, an hour later.
+- **Why:** Reading the log line by line makes the guard look correct, because the ordering failure is invisible unless you line up the timestamps of the idle message, the closes and the opens inside a single run. "The guard fired" and "the guard fired in time" are different claims.
+- **How to apply:** A limit that can be breached by events inside the same pass must be re-read at the point of use, not cached at entry to the pass. When auditing any gate, reconstruct one full run's timeline from the log rather than trusting that the gate's own messages are consistent - and check whether state the gate depends on is mutated later in that same run.
+
+
+## 2026-09-19 - LESSON_AUDIT_004 - A 200 response is not a healthy page, and a long-lived process is not running the code on disk
+
+- **Lesson:** `/control` returned HTTP 200 for days while its entire body said "Control panel unavailable (KeyError)". The cause was not a bug in the code on disk - that code ran fine when I called it directly - but a dashboard process from 2026-09-09 holding a pre-2026-09-12 copy of a lazily-imported module in `sys.modules`. Restarting fixed it outright.
+- **Why:** Routes that import inside the handler and catch their own exceptions produce exactly this shape: healthy status code, dead content, and an error string with the type name only (`type(_exc).__name__`) so there is nothing to grep a traceback for. Uptime checks and my own first probe both passed it.
+- **How to apply:** When auditing a web surface, scan rendered BODIES for error banners, not just status codes - and strip `<style>`/`<script>` first, or JS `catch (e) { "Failed to load" }` produces false positives (6 pages did). Before debugging a route that fails only in the running app, compare the process start time against the mtimes of the modules it imports; if the module is newer, restart before investigating anything else.
+
+## 2026-09-19 - LESSON_AUDIT_005 - Running the test suite mutates and deletes tracked Strategy Lab evidence
+
+- **Lesson:** A full suite run from the repo root rewrote 53 and **deleted 18** tracked files under `strategy_lab/data/` and `strategy_lab/reports/`, including `candidates.json` and the `evidence_packs/packs.json` files - the actual research evidence. My own read-only-looking diagnostic script did it too: calling `build_state_reconciliation_report()` without monkeypatching `REPORT_ROOT` writes real reports. `strategy_lab/data` was clean at session start, so every one of those changes came from this session. All 211 tracked files were restored and verified byte-identical to HEAD.
+- **Why:** These producers default their output roots to the real lab directories; only the tests that remember to monkeypatch `REPORT_ROOT`/`PACKS_FILE` are isolated. The conftest has an artifact-drift guard built for exactly this class, but it only watches `backtests/*f5*`, so a 71-file mutation sailed past it. With an auto-commit/auto-push automation running, mutated evidence can be published as if it were research output.
+- **How to apply:** Treat any call into `strategy_lab` as a potential writer - monkeypatch the output roots even in a throwaway diagnostic. Verify a restore with a content comparison that normalises line endings (`core.autocrlf=true` makes `git status` report 210 "modified" files that are byte-identical), never by reading `git status` alone. And widen the drift guard from `backtests/*f5*` to the whole tracked lab tree.
+
+
+## 2026-09-21 - LESSON_EVIDENCE_001 - Retiring a record from evidence is worthless if the daily report still publishes it as the headline
+
+- **Lesson:** The operator retired the pre-2026-09-15 book from evidence on 09-19, and two separate documents say so in plain language. But nothing changed in the pipeline: `LOOP_STATUS.md` kept printing `expectancy 0.280 R` computed over all 44 closed trades, 42 of them retired. The hypothesis ledger's `baseline 0.251` that four APPLIED rules are being judged against comes from the same voided record. A decision recorded in a report does not propagate to the code that generates the next report.
+- **Why:** Retirement was implemented as a *statement*, not as a field. Every consumer kept reading the same undifferentiated `counts` block, so the void record silently became the track record - and the more days passed, the more authoritative it looked.
+- **How to apply:** When a record is declared void, add the cutoff to the producing module as a named constant with the source documents cited in the comment, and emit the split as data (`evidence_split`) so every downstream consumer can see it. Report it ALONGSIDE the headline rather than filtering rows out - silently dropping data is the same error in the other direction, and it destroys the ability to audit what changed. Add the "< N valid" warning to the surface the human actually reads daily, not only to the deep report.
+
+## 2026-09-21 - LESSON_EVIDENCE_002 - Check the outcome mix before believing an expectancy
+
+- **Lesson:** The retired 42-trade book showed +0.342 R expectancy and a 0.452 win rate, which looks like a working system. The outcome mix says otherwise: **2 WINs and 17 profitable TIMEOUTs**. Almost none of the edge came from trades reaching their targets; it came from positions expiring at a favourable mark - precisely what a bot reading a three-hour-old candle would produce.
+- **How to apply:** Expectancy and win rate hide the mechanism. Always break the same sample down by outcome type (WIN / TIMEOUT-positive / LOSS) before treating a positive number as edge. A book whose profit is carried by timeouts rather than target hits is a book to distrust, regardless of what the aggregate says - so the evidence-split table now carries WIN and profitable-TIMEOUT columns for both buckets.
+
+
+## 2026-09-21 - LESSON_KILLSWITCH_001 - Read a limit where you act on it, and prove the re-read cannot be hoisted away
+
+- **Lesson:** The kill switch was correct everywhere except in *when* it was read. Fixing it turned out to need no change to the enforcement path at all, because `run_strategy` returns from the exit branch before the entry scan - so a single call never both closes and opens, and re-evaluating once per call is provably sufficient. Reading the control flow properly turned a feared invasive change into six lines in `main()`.
+- **Why:** The instinct on "the guard is stale" is to thread live state deeper into the callee. Checking whether the callee can actually observe both events first showed it cannot, which made the minimal fix the complete fix.
+- **How to apply:** Before threading state deeper, establish whether the function can observe both the mutation and the decision in one call. If it cannot, fix the caller. And pin the fix with a **source-level test** that asserts the re-read appears between the loop head and the call site - a behavioural test alone would still pass if someone later hoisted the call out of the loop for "efficiency", restoring the exact bug.
+
+## 2026-09-21 - LESSON_BASELINE_001 - Annotate a pre-registered record, never silently rewrite it
+
+- **Lesson:** Four APPLIED rules carry a baseline (0.2508 over n=31) frozen entirely from retired pre-2026-09-15 evidence, so their rollback check would fire at n=20 against a number that means nothing. The tempting fix - null the baseline and re-date the applies - rewrites a pre-registered artifact, which is its own governance failure. So the code was corrected for all *future* applies, the existing records were left byte-unchanged, and the report was made to say `vs ⚠RETIRED base 0.251` with a standing warning naming the pending decision.
+- **Why:** A correction to a pre-registered record is still a change to a pre-registered record. Doing it silently inside a "bug fix" is exactly how a falsifiable process quietly stops being falsifiable. Splitting the code fix (safe, no approval needed beyond the spec) from the data migration (needs its own yes) keeps both honest.
+- **How to apply:** When a pre-registered value turns out to rest on bad evidence: fix the generator, annotate the existing record with a derived status field, surface the annotation on the surface the human reads daily, and leave the original values for a separately-approved migration. Name three statuses, not two, when "invalid" has genuinely different causes - collapsing "built from retired data" into "not enough data" hides which one is a defect.
+
+- 2026-09-23 - A verified fix is not a durable fix until it is committed. The 09-19 shard resolver / conftest / evidence-v2 restore and the 09-21 kill-switch + ledger-baseline fixes all passed their tests and are running in production via the scheduled tasks, yet 4 days later every one of them is still an uncommitted working-tree diff (in two repos), while the obsidian repo took three unrelated commits on 09-22 around the dirty `trade_bot.py`. Audit checklist now includes `git status` on both repos for risk-guard files, not just "does the log show the guard firing".

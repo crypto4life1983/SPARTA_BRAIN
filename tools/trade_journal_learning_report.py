@@ -49,6 +49,23 @@ MIN_SIGNALS = 30
 STOP_BREACH_R = -1.2          # planned max loss is -1R; below this = breach
 PLANNED_MAX_LOSS_R = -1.0
 
+# Trades opened before the partial-bar fix were produced by a bot reading a
+# still-forming candle (effectively three-hour-old data), so the operator has
+# declared that record void as forward evidence. Sources, both in
+# obsidian-trade-logger/reports/observation_mode/:
+#   system_b_benchmark_gate.md            -- "Every closed trade here predates
+#     the partial-bar fix of 2026-09-15 ... a verdict on the record, not on the
+#     system now running."
+#   system_b_strategy_retirement_20260919.json -- "Every one of those trades
+#     predates the 2026-09-15 partial-bar fix and is retired from evidence."
+# Nothing is deleted or excluded from the headline counts; the split below is
+# reported ALONGSIDE them so a retired record is never read as forward evidence.
+EVIDENCE_VALID_FROM = "2026-09-15"
+EVIDENCE_VALID_FROM_REASON = (
+    "partial-bar fix; trades opened before this date were generated from a "
+    "still-forming candle and are retired from evidence"
+)
+
 STRATEGY_LABELS = {
     "D": "Donchian Breakout", "D2": "Donchian Breakout (loose)",
     "E": "EMA Cross", "E2": "EMA Cross (loose)",
@@ -179,6 +196,55 @@ def _counts(trades: list[dict[str, Any]], closed: list[dict[str, Any]]) -> dict[
         "note": (
             "raw rows overstate the sample: the bot mirrors signals on binance "
             "and kraken and the loose '2' variants often fire on the same bar"
+        ),
+    }
+
+
+def _evidence_side(closed: list[dict[str, Any]], valid: bool) -> dict[str, Any]:
+    """Aggregate one side of the evidence split (valid = on/after the cutoff)."""
+    rows = [
+        r for r in closed
+        if (str(r.get("open_date") or "") >= EVIDENCE_VALID_FROM) is valid
+    ]
+    vals = [v for v in (_pnl(r) for r in rows) if v is not None]
+    n = len(vals)
+    by_sig = {_signal_key(r) for r in rows}
+    wins = sum(1 for r in rows if str(r.get("outcome") or "").upper() == "WIN")
+    tmo = sum(
+        1 for r in rows
+        if str(r.get("outcome") or "").upper() == "TIMEOUT" and (_pnl(r) or 0.0) > 0
+    )
+    return {
+        "closed": len(rows),
+        "distinct_signals_closed": len(by_sig),
+        "sum_R_raw": _r(sum(vals)) if vals else None,
+        "expectancy_R": _r(sum(vals) / n) if n else None,
+        "win_rate": _r(sum(1 for v in vals if v > 0) / n) if n else None,
+        "outcome_WIN": wins,
+        "outcome_TIMEOUT_positive": tmo,
+    }
+
+
+def _evidence_split(closed: list[dict[str, Any]]) -> dict[str, Any]:
+    """Split closed trades at the partial-bar fix.
+
+    The headline counts cover every closed trade. This says how many of them
+    are still admissible as forward evidence, so a retired record cannot be
+    read as a live track record. Observation only; nothing is excluded or
+    deleted, and no conclusion is drawn here."""
+    valid = _evidence_side(closed, True)
+    retired = _evidence_side(closed, False)
+    total = valid["closed"] + retired["closed"]
+    return {
+        "cutoff": EVIDENCE_VALID_FROM,
+        "cutoff_field": "open_date",
+        "cutoff_reason": EVIDENCE_VALID_FROM_REASON,
+        "valid_forward": valid,
+        "retired": retired,
+        "retired_share_of_closed": _r(retired["closed"] / total) if total else None,
+        "note": (
+            "headline counts above cover ALL closed trades, including the "
+            "retired ones; read expectancy/win-rate against valid_forward"
         ),
     }
 
@@ -414,6 +480,7 @@ def build_learning_report(
         },
         "strategy_labels": dict(STRATEGY_LABELS),
         "counts": _counts(trades, closed),
+        "evidence_split": _evidence_split(closed),
         "by_strategy": by_strategy,
         "by_regime_x_direction": rxd,
         "by_alignment": _group(closed, _alignment),
@@ -450,6 +517,34 @@ def _table(title: str, groups: dict[str, dict[str, Any]], extra: tuple[str, ...]
     return lines
 
 
+def _render_evidence_split(ev: dict[str, Any] | None) -> list[str]:
+    """Render the pre/post partial-bar-fix evidence split."""
+    if not ev:
+        return []
+    v, rt = ev["valid_forward"], ev["retired"]
+    L = [
+        f"## Evidence split (cutoff {ev['cutoff']} on {ev['cutoff_field']})",
+        "",
+        f"_{ev['cutoff_reason']}._",
+        "",
+        "| bucket | closed | signals | sum R | expectancy R | win rate | WIN | profitable TIMEOUT |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for label, s in (("valid forward evidence", v), ("retired (pre-fix)", rt)):
+        L.append(
+            f"| {label} | {s['closed']} | {s['distinct_signals_closed']} | "
+            f"{_fmt(s['sum_R_raw'])} | {_fmt(s['expectancy_R'])} | "
+            f"{_fmt(s['win_rate'])} | {s['outcome_WIN']} | {s['outcome_TIMEOUT_positive']} |"
+        )
+    L += ["", f"- {ev['note']}"]
+    if ev.get("retired_share_of_closed") is not None:
+        L.append(
+            f"- retired share of closed rows: {_fmt(ev['retired_share_of_closed'])}"
+        )
+    L.append("")
+    return L
+
+
 def render_markdown(rep: dict[str, Any]) -> str:
     c = rep["counts"]
     sq = rep["sample_quality"]
@@ -472,6 +567,9 @@ def render_markdown(rep: dict[str, Any]) -> str:
         f"(dedup mean {_fmt(c['expectancy_R_dedup_mean'])}) · profit factor {_fmt(c['profit_factor'])}",
         f"- note: {c['note']}",
         "",
+    ]
+    L += _render_evidence_split(rep.get("evidence_split"))
+    L += [
         "## Breakdowns",
         "",
     ]
@@ -567,7 +665,10 @@ def _register_manual_entry() -> None:
             status="live",
             short_description=(
                 "Daily read-only learning pass over the real trade journal; "
-                "emits rule SUGGESTIONS only (never applied)."
+                "emits rule SUGGESTIONS only (never applied). Reports an "
+                f"evidence split at the {EVIDENCE_VALID_FROM} partial-bar fix "
+                "so the retired pre-fix record is never read as a live track "
+                "record."
             ),
             how_it_works=(
                 "Opens obsidian-trade-logger trades.db with sqlite mode=ro, "

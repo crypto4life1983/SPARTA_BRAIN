@@ -7,7 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from .anti_overfit_gate import ANTI_OVERFIT_ROOT
-from .backtest_wrapper import BACKTESTS_ROOT
+from .backtest_wrapper import (
+    BACKTESTS_ROOT,
+    REQUIRED_V2_STR_FIELDS,
+    SCHEMA_BACKTEST_V2,
+)
 from .paper_arena import PAPER_ARENA_FILE
 from .registry import get_candidate
 from .regime_score import REGIME_SCORES_ROOT
@@ -197,6 +201,40 @@ def get_latest_evidence_pack(candidate_id: str | None = None) -> dict[str, Any] 
     return max(matches, key=lambda item: str(item.get("created_at") or ""))
 
 
+def _compute_wfe_audit_eligible(candidate_id: str) -> bool:
+    """Return True iff the latest backtest record for ``candidate_id``
+    satisfies the ``strategy_lab.backtest.v2`` evidence contract.
+
+    The check is read-only on the existing on-disk backtest file plus
+    its sibling bar-returns CSV (if any). Old ``strategy_lab.backtest.v1``
+    records return False; they are not retroactively migrated.
+    """
+    bt_payload = _latest_json(BACKTESTS_ROOT, candidate_id)
+    if not bt_payload:
+        return False
+    result = _extract_block(bt_payload)
+    if not isinstance(result, dict):
+        return False
+    if str(result.get("schema_version") or "") != SCHEMA_BACKTEST_V2:
+        return False
+    for key in REQUIRED_V2_STR_FIELDS:
+        if not str(result.get(key) or ""):
+            return False
+    if str(result.get("timezone") or "") != "UTC":
+        return False
+    if not str(result.get("session") or ""):
+        return False
+    try:
+        if int(result.get("oos_bar_count") or 0) <= 0:
+            return False
+    except (TypeError, ValueError):
+        return False
+    window_metrics = result.get("window_metrics")
+    if not isinstance(window_metrics, list) or not window_metrics:
+        return False
+    return True
+
+
 @dataclass(slots=True)
 class EvidencePack:
     candidate_id: str
@@ -210,6 +248,7 @@ class EvidencePack:
     evidence_summary: dict[str, Any] = field(default_factory=dict)
     recommendation: str = "collect_more_evidence"
     created_at: str = field(default_factory=_utc_now)
+    wfe_audit_eligible: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -229,6 +268,7 @@ class EvidencePack:
             evidence_summary=dict(data.get("evidence_summary") or {}),
             recommendation=str(data.get("recommendation") or "collect_more_evidence"),
             created_at=str(data.get("created_at") or _utc_now()),
+            wfe_audit_eligible=bool(data.get("wfe_audit_eligible") or False),
         )
 
 
@@ -326,6 +366,7 @@ def build_evidence_pack(candidate_id: str) -> dict[str, Any]:
         missing_evidence=sorted(set(missing_evidence)),
         evidence_summary=evidence_summary,
         recommendation=recommendation,
+        wfe_audit_eligible=_compute_wfe_audit_eligible(str(candidate_id).strip()),
     )
 
     store = _load_store()
