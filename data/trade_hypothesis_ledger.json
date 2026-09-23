@@ -258,6 +258,51 @@
         "min_p_positive": 0.9
       }
     },
+    "unblock__TREND_DOWN_BLOCKS_LONG": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-23",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-23",
+          "note": "registered by operator from the blocked-entry ledger; hindsight record to date frozen as in-sample evidence; hindsight record 12 resolved, 6 GOOD / 6 BAD, net +6.20R: the one gate whose blocks may be costing money",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "unblock__TREND_DOWN_BLOCKS_LONG",
+      "kind": "unblock",
+      "params": {
+        "counted_reason": "TREND_DOWN_BLOCKS_LONG"
+      },
+      "registered_as_of": "2026-09-23",
+      "registered_evidence": {
+        "bad_blocks": 6,
+        "good_blocks": 6,
+        "mean_hyp_R": 0.517,
+        "n_resolved_blocks": 12,
+        "net_hyp_R": 6.2034,
+        "neutral_blocks": 0,
+        "source": "reports/observation_mode/missed_opportunity_outcomes.jsonl"
+      },
+      "registered_label": "HINDSIGHT_BLOCK_LEDGER",
+      "rule": "allow entries the paper bot currently blocks with reason TREND_DOWN_BLOCKS_LONG; scored on the bot's resolved blocked-entry ledger, delta_R = hypothetical R of the blocked entry (3 x ATR stop, 1R target)",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
     "unblock__TREND_UP_BLOCKS_SHORT": {
       "forward": {
         "bootstrap_p_positive": null,

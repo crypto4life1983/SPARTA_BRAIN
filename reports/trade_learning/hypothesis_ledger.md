@@ -4,7 +4,7 @@
 
 Every rule suggestion from the learning report is registered here as a hypothesis. Its in-sample evidence is frozen at registration; it is then scored only on PAPER trades that close strictly after that date (out-of-sample by construction), via a counterfactual delta_R = R(rule) − R(realized) per deduplicated signal. Mirrored exchange rows collapse to one signal (best-R row). Thresholds are pre-registered: CONFIRMED needs n >= 20 forward signals and bootstrap p_positive >= 0.9; REJECTED needs the same n and p_positive <= 0.5; otherwise SHADOW.
 
-Status counts: SHADOW 1, APPLIED 4
+Status counts: SHADOW 2, APPLIED 4
 
 | id | status | kind | registered | in-sample evidence (frozen) | fwd n (rows) | mean ΔR | sum ΔR | p_positive | next threshold |
 |---|---|---|---|---|---|---|---|---|---|
@@ -12,6 +12,7 @@ Status counts: SHADOW 1, APPLIED 4
 | enforce_hard_stop | **APPLIED** | stop_cap | 2026-09-11 | n_breaches=7 total_excess_loss_R=6.062 worst_ids=[46,47,15,16,13] | 0 (0) | - | 0.000 | - | rollback check at n>=20 (have 3): mean R < baseline - 0.2R at n >= 20 ⚠ baseline is RETIRED evidence |
 | partial_tp_or_trail_2R | **APPLIED** | partial_2R | 2026-09-11 | capture_ratio=0.598 mean_MFE_R=2.983 mean_realized_R=1.785 n=10 reached_2R_but_closed_below_1R=1 | 0 (0) | - | 0.000 | - | rollback check at n>=20 (have 3): mean R < baseline - 0.2R at n >= 20 ⚠ baseline is RETIRED evidence |
 | review_pause_D2 | **APPLIED** | block | 2026-09-11 | avg_R=-0.839 n=11 n_signals=9 sum_R=-9.230 win_rate=0.273 | 0 (0) | - | 0.000 | - | rollback check at n>=20 (have 3): mean R < baseline - 0.2R at n >= 20 ⚠ baseline is RETIRED evidence |
+| unblock__TREND_DOWN_BLOCKS_LONG | **SHADOW** | unblock | 2026-09-23 | bad_blocks=6 good_blocks=6 mean_hyp_R=0.517 n_resolved_blocks=12 net_hyp_R=6.203 neutral_blocks=0 source=reports/observation_mode/missed_opportunity_outcomes.jsonl | 0 (0) | - | 0.000 | - | need 20 forward signals (have 0) |
 | unblock__TREND_UP_BLOCKS_SHORT | **SHADOW** | unblock | 2026-09-23 | bad_blocks=0 good_blocks=3 mean_hyp_R=-0.902 n_resolved_blocks=3 net_hyp_R=-2.705 neutral_blocks=0 source=reports/observation_mode/missed_opportunity_outcomes.jsonl | 0 (0) | - | 0.000 | - | need 20 forward signals (have 0) |
 
 ## Rules
@@ -20,6 +21,7 @@ Status counts: SHADOW 1, APPLIED 4
 - **enforce_hard_stop** — enforce hard stop / investigate fills (losses beyond planned -1R) · params {"cap_R": -1.5} · last change 2026-09-11: SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)
 - **partial_tp_or_trail_2R** — add partial take-profit or trailing stop at 2R · params {"fraction": 0.5, "trigger_R": 2.0} · last change 2026-09-11: SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)
 - **review_pause_D2** — review/pause strategy D2 (Donchian Breakout (loose)) · params {"strategy": "D2"} · last change 2026-09-11: SHADOW -> APPLIED: applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)
+- **unblock__TREND_DOWN_BLOCKS_LONG** — allow entries the paper bot currently blocks with reason TREND_DOWN_BLOCKS_LONG; scored on the bot's resolved blocked-entry ledger, delta_R = hypothetical R of the blocked entry (3 x ATR stop, 1R target) · params {"counted_reason": "TREND_DOWN_BLOCKS_LONG"} · last change 2026-09-23: registered by operator from the blocked-entry ledger; hindsight record to date frozen as in-sample evidence; hindsight record 12 resolved, 6 GOOD / 6 BAD, net +6.20R: the one gate whose blocks may be costing money
 - **unblock__TREND_UP_BLOCKS_SHORT** — allow entries the paper bot currently blocks with reason TREND_UP_BLOCKS_SHORT; scored on the bot's resolved blocked-entry ledger, delta_R = hypothetical R of the blocked entry (3 x ATR stop, 1R target) · params {"counted_reason": "TREND_UP_BLOCKS_SHORT"} · last change 2026-09-23: registered by operator from the blocked-entry ledger; hindsight record to date frozen as in-sample evidence; 2026-09-15 dump: BTC/ETH/SOL/LINK breakdown shorts blocked in TREND_UP, all stopped by 09-18 with hindsight
 
 ## What a CONFIRMED rule means
