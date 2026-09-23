@@ -10,11 +10,13 @@
     "block_long_in_TREND_DOWN": {
       "applied": {
         "applied_as_of": "2026-09-11",
+        "baseline_is_retired_evidence": true,
         "baseline_mean_R": 0.2508,
         "baseline_n": 31,
-        "last_eval_as_of": "2026-09-11",
-        "mean_R_after": null,
-        "n_after": 0,
+        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
+        "last_eval_as_of": "2026-09-23",
+        "mean_R_after": -1.0163,
+        "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false
@@ -71,11 +73,13 @@
     "enforce_hard_stop": {
       "applied": {
         "applied_as_of": "2026-09-11",
+        "baseline_is_retired_evidence": true,
         "baseline_mean_R": 0.2508,
         "baseline_n": 31,
-        "last_eval_as_of": "2026-09-11",
-        "mean_R_after": null,
-        "n_after": 0,
+        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
+        "last_eval_as_of": "2026-09-23",
+        "mean_R_after": -1.0163,
+        "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false
@@ -134,11 +138,13 @@
     "partial_tp_or_trail_2R": {
       "applied": {
         "applied_as_of": "2026-09-11",
+        "baseline_is_retired_evidence": true,
         "baseline_mean_R": 0.2508,
         "baseline_n": 31,
-        "last_eval_as_of": "2026-09-11",
-        "mean_R_after": null,
-        "n_after": 0,
+        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
+        "last_eval_as_of": "2026-09-23",
+        "mean_R_after": -1.0163,
+        "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false
@@ -194,11 +200,13 @@
     "review_pause_D2": {
       "applied": {
         "applied_as_of": "2026-09-11",
+        "baseline_is_retired_evidence": true,
         "baseline_mean_R": 0.2508,
         "baseline_n": 31,
-        "last_eval_as_of": "2026-09-11",
-        "mean_R_after": null,
-        "n_after": 0,
+        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
+        "last_eval_as_of": "2026-09-23",
+        "mean_R_after": -1.0163,
+        "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false
@@ -249,9 +257,54 @@
         "min_forward_signals": 20,
         "min_p_positive": 0.9
       }
+    },
+    "unblock__TREND_UP_BLOCKS_SHORT": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-23",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-23",
+          "note": "registered by operator from the blocked-entry ledger; hindsight record to date frozen as in-sample evidence; 2026-09-15 dump: BTC/ETH/SOL/LINK breakdown shorts blocked in TREND_UP, all stopped by 09-18 with hindsight",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "unblock__TREND_UP_BLOCKS_SHORT",
+      "kind": "unblock",
+      "params": {
+        "counted_reason": "TREND_UP_BLOCKS_SHORT"
+      },
+      "registered_as_of": "2026-09-23",
+      "registered_evidence": {
+        "bad_blocks": 0,
+        "good_blocks": 3,
+        "mean_hyp_R": -0.9018,
+        "n_resolved_blocks": 3,
+        "net_hyp_R": -2.7053,
+        "neutral_blocks": 0,
+        "source": "reports/observation_mode/missed_opportunity_outcomes.jsonl"
+      },
+      "registered_label": "HINDSIGHT_BLOCK_LEDGER",
+      "rule": "allow entries the paper bot currently blocks with reason TREND_UP_BLOCKS_SHORT; scored on the bot's resolved blocked-entry ledger, delta_R = hypothetical R of the blocked entry (3 x ATR stop, 1R target)",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
     }
   },
-  "last_updated_as_of": "2026-09-11",
+  "last_updated_as_of": "2026-09-23",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",

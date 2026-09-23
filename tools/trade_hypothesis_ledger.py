@@ -104,6 +104,22 @@ STOP_CAP_R = -1.5           # enforce_hard_stop: kill at -1.5R
 PARTIAL_TRIGGER_R = 2.0     # partial_tp_or_trail_2R: take half at 2R
 PARTIAL_FRACTION = 0.5
 
+# ── "unblock" hypotheses (2026-09-23) ────────────────────────────────────────
+# The kinds above are scored on trades the bot TOOK. A gate that blocks an entry
+# leaves no trade to score, so the loop could never learn whether a block was
+# right. The bot keeps its own hindsight ledger of blocked entries
+# (reports/observation_mode/missed_opportunity_outcomes.jsonl, resolved weekly
+# by scripts/resolve_ledger_outcomes.py with a 3 x ATR hypothetical stop and a
+# 1R target). An "unblock__<COUNTED_REASON>" hypothesis is scored on those rows:
+# delta_R = the R the blocked entry would have made, so a CONFIRMED read means
+# "allowing these entries would have helped" and REJECTED means the gate was
+# right. Read-only; rows are only consumed once resolved, and only when their
+# signal date is strictly after registration.
+UNBLOCK_PREFIX = "unblock__"
+_REL_MISSED_OUTCOMES = ("reports", "observation_mode", "missed_opportunity_outcomes.jsonl")
+UNBLOCK_HYP_STOP_ATR_MULT = 3.0   # mirrors resolve_ledger_outcomes.HYP_STOP_ATR_MULT
+UNBLOCK_RESOLVED = ("GOOD_BLOCK", "BAD_BLOCK", "NEUTRAL_BLOCK")
+
 # Substring check, same semantics as the learning report (so "already" also
 # trips "ready": keep such words out of the render).
 FORBIDDEN_WORDS = ("validated", "ready", "approved", "profitable strategy", "deploy")
@@ -192,7 +208,145 @@ def kind_for_id(sid: str) -> tuple[str, dict[str, Any]]:
                 k, v = part.split("=", 1)
                 where[k] = v
         return ("block_where", {"where": where}) if where else ("unknown", {})
+    if sid.startswith(UNBLOCK_PREFIX):
+        reason = sid[len(UNBLOCK_PREFIX):].strip().upper()
+        return ("unblock", {"counted_reason": reason}) if reason else ("unknown", {})
     return "unknown", {}
+
+
+# ── missed-opportunity outcomes (blocked entries, resolved with hindsight) ───
+
+def missed_outcomes_path(ext_root: Path | None = None) -> Path:
+    root = Path(ext_root) if ext_root is not None else external_root()
+    return root.joinpath(*_REL_MISSED_OUTCOMES)
+
+
+def load_missed_outcomes(path: Path | None = None) -> list[dict[str, Any]]:
+    """Read the bot's resolved blocked-entry ledger. Read-only; a missing or
+    unreadable file is an empty list, never an error (the ledger still runs)."""
+    p = path if path is not None else missed_outcomes_path()
+    try:
+        text = p.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def outcome_r(row: dict[str, Any]) -> float | None:
+    """Hypothetical R of a blocked entry at its classification horizon: the
+    direction-adjusted close return divided by the hypothetical risk
+    (UNBLOCK_HYP_STOP_ATR_MULT x ATR / entry). Mirrors the bot's own
+    build_missed_opportunity_report._r_multiple so both reports agree."""
+    h = row.get("classification_horizon")
+    if h is None:
+        return None
+    dar = _coerce_float(row.get(f"dir_adjusted_return_{h}"))
+    atr = _coerce_float(row.get("atr"))
+    entry = _coerce_float(row.get("entry_candidate"))
+    if dar is None or atr is None or entry is None or entry <= 0:
+        return None
+    risk_frac = UNBLOCK_HYP_STOP_ATR_MULT * atr / entry
+    if risk_frac <= 0:
+        return None
+    return dar / risk_frac
+
+
+def _outcome_day(row: dict[str, Any]) -> date | None:
+    ts = str(row.get("ts_utc") or "")[:10]
+    try:
+        return date.fromisoformat(ts)
+    except ValueError:
+        return None
+
+
+def _outcome_rows_for(reason: str, outcomes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [o for o in outcomes
+            if str(o.get("counted_reason") or "").upper() == reason
+            and o.get("classification") in UNBLOCK_RESOLVED]
+
+
+def unblock_evidence(reason: str, outcomes: list[dict[str, Any]],
+                     up_to: str | None = None) -> dict[str, Any]:
+    """Frozen in-sample summary of a gate's resolved blocks (signal day <= up_to)."""
+    rows = _outcome_rows_for(reason, outcomes)
+    if up_to:
+        lim = date.fromisoformat(up_to)
+        rows = [o for o in rows if (_outcome_day(o) or lim) <= lim]
+    rs = [r for r in (outcome_r(o) for o in rows) if r is not None]
+    cls: dict[str, int] = defaultdict(int)
+    for o in rows:
+        cls[str(o.get("classification"))] += 1
+    return {"n_resolved_blocks": len(rows), "good_blocks": cls.get("GOOD_BLOCK", 0),
+            "bad_blocks": cls.get("BAD_BLOCK", 0), "neutral_blocks": cls.get("NEUTRAL_BLOCK", 0),
+            "net_hyp_R": _r(sum(rs)) if rs else 0.0,
+            "mean_hyp_R": _r(sum(rs) / len(rs)) if rs else None,
+            "source": "/".join(_REL_MISSED_OUTCOMES)}
+
+
+def register_unblock(ledger: dict[str, Any], reason: str, as_of: str,
+                     outcomes: list[dict[str, Any]], note: str = "") -> str | None:
+    """Register unblock__<REASON> as SHADOW with the gate's hindsight record up to
+    as_of frozen as in-sample evidence. Existing ids are left untouched. Returns
+    the id when newly registered, else None."""
+    reason = reason.strip().upper()
+    sid = f"{UNBLOCK_PREFIX}{reason}"
+    hyps = ledger.setdefault("hypotheses", {})
+    if not reason or sid in hyps:
+        return None
+    hyps[sid] = {
+        "id": sid,
+        "rule": (f"allow entries the paper bot currently blocks with reason {reason}; "
+                 "scored on the bot's resolved blocked-entry ledger, delta_R = hypothetical "
+                 "R of the blocked entry (3 x ATR stop, 1R target)"),
+        "kind": "unblock",
+        "params": {"counted_reason": reason},
+        "registered_as_of": as_of,
+        "registered_evidence": unblock_evidence(reason, outcomes, up_to=as_of),
+        "registered_label": "HINDSIGHT_BLOCK_LEDGER",
+        "status": "SHADOW",
+        "forward": {
+            "n_signals": 0, "n_rows": 0, "delta_R_sum": 0.0, "delta_R_mean": None,
+            "wins": 0, "losses": 0, "bootstrap_p_positive": None, "last_eval_as_of": None,
+            "trade_ids_evaluated": [], "signal_keys_evaluated": [], "samples": [],
+        },
+        "thresholds": dict(ledger.get("default_thresholds", DEFAULT_THRESHOLDS)),
+        "history": [{"as_of": as_of, "status": "SHADOW",
+                     "note": "registered by operator from the blocked-entry ledger; "
+                             "hindsight record to date frozen as in-sample evidence"
+                             + (f"; {note}" if note else "")}],
+    }
+    ledger["created_as_of"] = ledger.get("created_as_of") or as_of
+    return sid
+
+
+def _forward_unblock_candidates(hyp: dict[str, Any],
+                                outcomes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Resolved blocked entries for this gate whose signal day is strictly after
+    registration and that have not been scored yet."""
+    reg = date.fromisoformat(hyp["registered_as_of"])
+    done = set(hyp["forward"].get("signal_keys_evaluated", []))
+    reason = str(hyp.get("params", {}).get("counted_reason") or "").upper()
+    out: list[dict[str, Any]] = []
+    for o in _outcome_rows_for(reason, outcomes):
+        d = _outcome_day(o)
+        if d is None or d <= reg:
+            continue
+        key = str(o.get("candidate_id") or f"{o.get('ts_utc')}|{o.get('symbol')}|{o.get('strategy_id')}")
+        if key in done:
+            continue
+        out.append(o)
+    return sorted(out, key=lambda o: (str(o.get("ts_utc")), str(o.get("symbol")), str(o.get("strategy_id"))))
 
 
 # ── registration ────────────────────────────────────────────────────────────
@@ -523,10 +677,14 @@ def update_forward(
     trades: list[dict[str, Any]],
     excursions: dict[int, dict[str, Any]] | None,
     as_of: str,
+    outcomes: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Score every SHADOW/CONFIRMED hypothesis on new forward signals, then
-    apply its pre-registered thresholds. Deterministic. Returns a summary."""
+    apply its pre-registered thresholds. Deterministic. Returns a summary.
+    `outcomes` (the bot's resolved blocked-entry rows) feeds "unblock" kinds;
+    every other kind is scored on `trades` exactly as before."""
     excursions = excursions or {}
+    outcomes = outcomes or []
     summary: dict[str, Any] = {"as_of": as_of, "evaluated": {}, "status_changes": []}
     for sid in sorted(ledger.get("hypotheses", {})):
         hyp = ledger["hypotheses"][sid]
@@ -540,8 +698,30 @@ def update_forward(
         if hyp.get("status") not in ("SHADOW", "CONFIRMED"):
             continue
         fwd = hyp["forward"]
-        groups = _forward_candidates(hyp, trades)
         new_n = 0
+        if hyp.get("kind") == "unblock":
+            groups: dict[str, list[dict[str, Any]]] = {}
+            for o in _forward_unblock_candidates(hyp, outcomes):
+                delta = outcome_r(o)
+                if delta is None:
+                    continue  # unresolved return: re-scanned on later runs
+                key = str(o.get("candidate_id") or f"{o.get('ts_utc')}|{o.get('symbol')}|{o.get('strategy_id')}")
+                fwd["samples"].append({
+                    "signal": key,
+                    "trade_id": None,
+                    "row_ids": [],
+                    "close_date": str(o.get("ts_utc") or "")[:10],
+                    "pnl_r": None,
+                    "delta_R": _r(delta),
+                    "symbol": o.get("symbol"),
+                    "strategy": o.get("strategy_id"),
+                    "classification": o.get("classification"),
+                })
+                fwd["signal_keys_evaluated"].append(key)
+                fwd["n_rows"] += 1
+                new_n += 1
+        else:
+            groups = _forward_candidates(hyp, trades)
         for sig in sorted(groups):
             rows = groups[sig]
             # dedup_best: the best-R row represents the signal (tie → lowest id)
@@ -721,12 +901,17 @@ def run_cycle(
     as_of: str,
     ledger_path: Path = LEDGER_PATH,
     report_dir: Path = REPORT_DIR,
+    outcomes: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    """`outcomes=None` loads the bot's blocked-entry ledger from the external
+    project (read-only, empty when absent); pass a list to control it in tests."""
     ledger = load_ledger(ledger_path)
     if ledger.get("created_as_of") is None:
         ledger["created_as_of"] = as_of
     added = register_from_report(report, as_of, ledger)
-    summary = update_forward(ledger, trades, excursions, as_of)
+    if outcomes is None:
+        outcomes = load_missed_outcomes()
+    summary = update_forward(ledger, trades, excursions, as_of, outcomes=outcomes)
     save_ledger(ledger, ledger_path)
 
     md = render_markdown(ledger)
@@ -778,7 +963,12 @@ def _register_manual_entry() -> None:
                 f"the pre-registered absolute rollback rule (mean R < "
                 f"{ROLLBACK_ABS_MEAN_R}R at n >= {APPLIED_MIN_N}). A baseline frozen "
                 "before that date is marked RETIRED in the report rather than silently "
-                "rewritten."
+                "rewritten. 'unblock__<REASON>' hypotheses (2026-09-23) learn from entries "
+                "the bot did NOT take: they are scored on the bot's resolved blocked-entry "
+                "ledger (reports/observation_mode/missed_opportunity_outcomes.jsonl), "
+                "delta_R = hypothetical R of the blocked entry, so CONFIRMED means the gate "
+                "is costing money and REJECTED means it is earning its keep. Register with "
+                "--register-unblock REASON."
             ),
             when_to_use=(
                 "Daily, after the learning report. CONFIRMED = a recommendation for the "
@@ -802,6 +992,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="hypothesis ids the operator applied in the paper bot (Phase 4)")
     ap.add_argument("--applied-as-of", default=None, help="YYYY-MM-DD the rule went live in the paper bot")
     ap.add_argument("--note", default="", help="free text, e.g. the bot commit hash")
+    ap.add_argument("--register-unblock", nargs="*", default=None, metavar="COUNTED_REASON",
+                    help="register unblock__<REASON> hypotheses scored on the bot's resolved "
+                         "blocked-entry ledger (e.g. TREND_UP_BLOCKS_SHORT)")
     args = ap.parse_args(argv)
     db_path = external_root().joinpath(*_REL_TRADES_DB)
     if not db_path.exists():
@@ -809,6 +1002,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     as_of = datetime.now().strftime("%Y-%m-%d")  # local operator date
     trades, excursions = load_journal_ro(db_path)
+    if args.register_unblock:
+        ledger = load_ledger()
+        outcomes = load_missed_outcomes()
+        for reason in args.register_unblock:
+            sid = register_unblock(ledger, reason, as_of, outcomes, note=args.note)
+            if sid:
+                ev = ledger["hypotheses"][sid]["registered_evidence"]
+                print(f"REGISTERED {sid} as of {as_of}: frozen evidence {ev}")
+            else:
+                print(f"already registered or empty reason: {reason}")
+        save_ledger(ledger)
     if args.mark_applied:
         ledger = load_ledger()
         when = args.applied_as_of or as_of
@@ -836,6 +1040,7 @@ __all__ = [
     "evaluate_block", "evaluate_stop_cap", "evaluate_partial_2R", "evaluate_flag",
     "evaluate_hypothesis", "bootstrap_p_positive", "update_forward", "render_markdown",
     "forbidden_words_found", "run_cycle", "DEFAULT_THRESHOLDS", "FORBIDDEN_WORDS",
+    "load_missed_outcomes", "outcome_r", "unblock_evidence", "register_unblock",
 ]
 
 if __name__ == "__main__":

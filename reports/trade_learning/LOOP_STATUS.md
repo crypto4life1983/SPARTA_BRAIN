@@ -1,42 +1,48 @@
-# Trading loop status — 2026-09-15
+# Trading loop status — 2026-09-23
 
 READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL · NO BROKER / NO ORDER
 
 ## 1. Journal (paper bot) — what the last learning pass measured
 
-- closed rows 42 · distinct signals 31 · sum R (dedup best) 7.774 · expectancy 0.342 R · win rate 0.452 · sample label OK
+- closed rows 45 · distinct signals 34 · sum R (dedup best) 4.725 · expectancy 0.251 R · win rate 0.422 · sample label OK
 - suggestions emitted: 4 (all SUGGESTION_ONLY)
+- **valid forward evidence (opened on/after 2026-09-15)**: closed 3 · sum R -3.049 · expectancy -1.016 R · win rate 0.000
+- retired (opened before 2026-09-15, open_date): closed 42 · sum R 14.359 · expectancy 0.342 R — 2 WIN vs 17 profitable TIMEOUT
+- ⚠ the expectancy/win-rate on the line above is computed over ALL closed rows; only 3 of them are admissible forward evidence (< 30), so it is NOT a track record of the system now running
 
 ## 2. Hypotheses under forward test
 
 | id | status | registered | forward n | mean ΔR | p(>0) | next |
 |---|---|---|---|---|---|---|
-| `block_long_in_TREND_DOWN` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
-| `enforce_hard_stop` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
-| `partial_tp_or_trail_2R` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
-| `review_pause_D2` | APPLIED 2026-09-11 | 2026-09-11 | 0 after | - vs base 0.251 | - | rollback check at n≥20 |
+| `block_long_in_TREND_DOWN` | APPLIED 2026-09-11 | 2026-09-11 | 3 after | -1.016 vs ⚠RETIRED base 0.251 | - | rollback check at n≥20 |
+| `enforce_hard_stop` | APPLIED 2026-09-11 | 2026-09-11 | 3 after | -1.016 vs ⚠RETIRED base 0.251 | - | rollback check at n≥20 |
+| `partial_tp_or_trail_2R` | APPLIED 2026-09-11 | 2026-09-11 | 3 after | -1.016 vs ⚠RETIRED base 0.251 | - | rollback check at n≥20 |
+| `review_pause_D2` | APPLIED 2026-09-11 | 2026-09-11 | 3 after | -1.016 vs ⚠RETIRED base 0.251 | - | rollback check at n≥20 |
+| `unblock__TREND_UP_BLOCKS_SHORT` | SHADOW | 2026-09-23 | 0 | - | - | n≥20 & p≥0.9 |
 
 CONFIRMED rules awaiting the operator: **0**. A CONFIRMED rule is a recommendation to change the paper bot; nothing is applied by the loop.
 
+⚠ **4 APPLIED rule(s) are still scored against a baseline frozen from retired pre-2026-09-15 evidence.** Their rollback check therefore compares admissible forward evidence against a record the operator has voided, and will produce a verdict that says nothing about the rule once n reaches 20. Re-dating those records is a pending operator decision (spec step 4): `reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md`.
+
 ## 3. Rule search (bounded, multiple-testing corrected)
 
-- signals 31 · cells tested 15 · proposals this run: none survived correction
-  - most negative: hold_bucket=short (n=6, mean -0.722 R, p_adj 1.000)
-  - most negative: direction=short, strategy=D2 (n=8, mean -0.712 R, p_adj 0.652)
+- signals 34 · cells tested 15 · proposals this run: none survived correction
+  - most negative: hold_bucket=short (n=8, mean -0.795 R, p_adj 0.675)
+  - most negative: direction=short, strategy=D2 (n=8, mean -0.712 R, p_adj 0.945)
   - most negative: regime_at_open=TREND_DOWN, strategy=D2 (n=7, mean -0.619 R, p_adj 1.000)
 
 ## 4. Paper systems vs their own pre-registered gates
 
 | line | status | sign | window | reason |
 |---|---|---|---|---|
-| funding_carry_paper | REJECTED | POSITIVE | satisfied | own window satisfied (125/90 days); hard gate FAIL: g2_realized_cagr_within_30pct_of_phase6b_same_period |
+| funding_carry_paper | CONFIRMED | POSITIVE | satisfied | own window satisfied (133/90 days); sign POSITIVE; all 3 own gates PASS |
 | nq_orb_paper | REJECTED | NONE | satisfied | closed by recorded operator decision (CLOSURE_DECISION_2026-09-11.md): Decision (operator, 2026-09-11, recorde |
-| gc_ict_paper | SHADOW | POSITIVE | open | own window not yet satisfied (66/60 days, 2/40 trades); thin line: own rules doc expects ~2 years to reach 40  |
-| frozen_stack_paper_forward | SHADOW | NEGATIVE | open | own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (168-day span),  |
+| gc_ict_paper | SHADOW | POSITIVE | open | own window not yet satisfied (71/60 days, 3/40 trades); thin line: own rules doc expects ~2 years to reach 40  |
+| frozen_stack_paper_forward | SHADOW | NEGATIVE | open | own window not yet satisfied (4 out-of-sample executed rows after the 2026-03-31 data ceiling (176-day span),  |
 | s21_weekly_rs_paper | NO_DATA | NONE | open | no harness_state.json under runs/cycles_v2/ (C:\SPARTA_BRAIN\paper_trading\weekly_rs_s21_forward_paper_harness |
 
 ## 5. Decisions only a human can take
 
-- record closure of funding_carry_paper (REJECTED by its own gates)
+- none today — the loop is accumulating forward evidence
 
 Generated by tools/trade_loop_digest.py. Sources: latest.json, trade_hypothesis_ledger.json, rule_search.json, paper_systems_scorecard.json.
