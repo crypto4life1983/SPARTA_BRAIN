@@ -70,6 +70,56 @@
         "min_p_positive": 0.9
       }
     },
+    "blockwhere__strategy=D__direction=short": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-09-23",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-09-23",
+          "note": "registered from learning report; in-sample evidence frozen",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "blockwhere__strategy=D__direction=short",
+      "kind": "block_where",
+      "params": {
+        "where": {
+          "direction": "short",
+          "strategy": "D"
+        }
+      },
+      "registered_as_of": "2026-09-23",
+      "registered_evidence": {
+        "long_mean_R": 0.342,
+        "long_n": 57,
+        "long_p_pos": 0.987,
+        "post_hoc": true,
+        "short_2nd_half_mean_R": -0.387,
+        "short_mean_R": -0.019,
+        "short_n": 140,
+        "short_p_pos": 0.433,
+        "source": "reports/trade_learning/d_signal_slot_and_exit_study_2026-09-23.md"
+      },
+      "registered_label": "REPLAY_STUDY_2026-09-23_POST_HOC",
+      "rule": "block strict-D short entries (Donchian-20 breakdowns in TREND_DOWN); replay 2026-02-26..09-22 on the 42-symbol universe showed D shorts at mean -0.019R (n=140, p(mean>0)=0.43), -0.387R in the second half (n=54, p=0.001), vs D longs +0.342R (n=57, p=0.98); post-hoc cut, so forward test only",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
     "enforce_hard_stop": {
       "applied": {
         "applied_as_of": "2026-09-11",
