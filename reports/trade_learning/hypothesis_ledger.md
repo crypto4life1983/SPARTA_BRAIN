@@ -1,4 +1,4 @@
-# Trade Hypothesis Ledger — 2026-09-23
+# Trade Hypothesis Ledger — 2026-10-05
 
 **READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL · NO BROKER / NO ORDER**
 

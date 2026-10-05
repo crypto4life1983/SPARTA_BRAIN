@@ -120,6 +120,23 @@ _REL_MISSED_OUTCOMES = ("reports", "observation_mode", "missed_opportunity_outco
 UNBLOCK_HYP_STOP_ATR_MULT = 3.0   # mirrors resolve_ledger_outcomes.HYP_STOP_ATR_MULT
 UNBLOCK_RESOLVED = ("GOOD_BLOCK", "BAD_BLOCK", "NEUTRAL_BLOCK")
 
+# ── derived reason SLOT_OCCUPIED (2026-10-05) ────────────────────────────────
+# The bot's one-open-position-per-(exchange, strategy) cap hides gate-allowed
+# signals. Since 2026-09-24 the bot records each as a blocked-entry row with
+# reason "slot occupied by <SYM>" (data/blocked_entries.jsonl), but its
+# missed-opportunity ledger does not classify them, so the resolved outcome
+# rows for those signals carry passed_all_gates=True and no counted_reason.
+# Here, read-only, the two are joined on (symbol, strategy, direction, bar day)
+# and the matching outcome rows are tagged counted_reason=SLOT_OCCUPIED so that
+# unblock__SLOT_OCCUPIED can be registered and scored like any other gate. The
+# bot's 00:05 run on run_date evaluates the bar that closed on run_date - 1,
+# which is the outcome row's ts_utc day. Exchange is not in the outcome rows,
+# so binance/kraken duplicates collapse to one key. Rows that already have a
+# counted_reason are never re-tagged.
+SLOT_OCCUPIED_REASON = "SLOT_OCCUPIED"
+_REL_BLOCKED_ENTRIES = ("data", "blocked_entries.jsonl")
+_SLOT_OCCUPIED_PREFIX = "slot occupied"
+
 # Substring check, same semantics as the learning report (so "already" also
 # trips "ready": keep such words out of the render).
 FORBIDDEN_WORDS = ("validated", "ready", "approved", "profitable strategy", "deploy")
@@ -241,6 +258,74 @@ def load_missed_outcomes(path: Path | None = None) -> list[dict[str, Any]]:
         if isinstance(row, dict):
             rows.append(row)
     return rows
+
+
+def blocked_entries_path(ext_root: Path | None = None) -> Path:
+    root = Path(ext_root) if ext_root is not None else external_root()
+    return root.joinpath(*_REL_BLOCKED_ENTRIES)
+
+
+def load_slot_occupied_keys(path: Path | None = None) -> set[tuple[str, str, str, str]]:
+    """(symbol, strategy, direction, bar_day) for every 'slot occupied' row in the
+    bot's blocked-entry log, bar_day = run_date - 1 day. Read-only; a missing or
+    unreadable file, junk lines and rows without a run_date are skipped."""
+    p = path if path is not None else blocked_entries_path()
+    try:
+        text = p.read_text(encoding="utf-8")
+    except OSError:
+        return set()
+    keys: set[tuple[str, str, str, str]] = set()
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(row, dict):
+            continue
+        if not str(row.get("reason") or "").lower().startswith(_SLOT_OCCUPIED_PREFIX):
+            continue
+        try:
+            run_day = date.fromisoformat(str(row.get("run_date") or "")[:10])
+        except ValueError:
+            continue
+        bar_day = date.fromordinal(run_day.toordinal() - 1).isoformat()
+        keys.add((str(row.get("symbol") or "").upper(), str(row.get("strategy") or "").upper(),
+                  str(row.get("direction") or "").lower(), bar_day))
+    return keys
+
+
+def tag_slot_occupied(outcomes: list[dict[str, Any]],
+                      slot_keys: set[tuple[str, str, str, str]]) -> list[dict[str, Any]]:
+    """Copy of `outcomes` where rows that passed every gate, carry no
+    counted_reason and match a slot-occupied key get
+    counted_reason=SLOT_OCCUPIED (plus `derived_reason_source` for provenance).
+    Every other row is returned unchanged. Pure: inputs are not mutated."""
+    if not slot_keys:
+        return list(outcomes)
+    out: list[dict[str, Any]] = []
+    for o in outcomes:
+        if o.get("passed_all_gates") and not o.get("counted_reason"):
+            key = (str(o.get("symbol") or "").upper(), str(o.get("strategy_id") or "").upper(),
+                   str(o.get("direction") or "").lower(), str(o.get("ts_utc") or "")[:10])
+            if key in slot_keys:
+                tagged = dict(o)
+                tagged["counted_reason"] = SLOT_OCCUPIED_REASON
+                tagged["derived_reason_source"] = "/".join(_REL_BLOCKED_ENTRIES)
+                out.append(tagged)
+                continue
+        out.append(o)
+    return out
+
+
+def load_missed_outcomes_tagged(outcomes_path: Path | None = None,
+                                blocked_path: Path | None = None) -> list[dict[str, Any]]:
+    """The bot's resolved blocked-entry rows with the derived SLOT_OCCUPIED
+    reason applied. This is what the cycle and --register-unblock consume."""
+    return tag_slot_occupied(load_missed_outcomes(outcomes_path),
+                             load_slot_occupied_keys(blocked_path))
 
 
 def outcome_r(row: dict[str, Any]) -> float | None:
@@ -910,7 +995,7 @@ def run_cycle(
         ledger["created_as_of"] = as_of
     added = register_from_report(report, as_of, ledger)
     if outcomes is None:
-        outcomes = load_missed_outcomes()
+        outcomes = load_missed_outcomes_tagged()
     summary = update_forward(ledger, trades, excursions, as_of, outcomes=outcomes)
     save_ledger(ledger, ledger_path)
 
@@ -968,7 +1053,10 @@ def _register_manual_entry() -> None:
                 "ledger (reports/observation_mode/missed_opportunity_outcomes.jsonl), "
                 "delta_R = hypothetical R of the blocked entry, so CONFIRMED means the gate "
                 "is costing money and REJECTED means it is earning its keep. Register with "
-                "--register-unblock REASON."
+                "--register-unblock REASON. SLOT_OCCUPIED (2026-10-05) is a derived reason: "
+                "outcome rows that passed every gate are joined to the bot's 'slot occupied' "
+                "blocked-entry rows (data/blocked_entries.jsonl) on symbol/strategy/direction/"
+                "bar day, so the one-slot-per-strategy cap is scored like a gate."
             ),
             when_to_use=(
                 "Daily, after the learning report. CONFIRMED = a recommendation for the "
@@ -1004,7 +1092,7 @@ def main(argv: list[str] | None = None) -> int:
     trades, excursions = load_journal_ro(db_path)
     if args.register_unblock:
         ledger = load_ledger()
-        outcomes = load_missed_outcomes()
+        outcomes = load_missed_outcomes_tagged()
         for reason in args.register_unblock:
             sid = register_unblock(ledger, reason, as_of, outcomes, note=args.note)
             if sid:
@@ -1040,7 +1128,9 @@ __all__ = [
     "evaluate_block", "evaluate_stop_cap", "evaluate_partial_2R", "evaluate_flag",
     "evaluate_hypothesis", "bootstrap_p_positive", "update_forward", "render_markdown",
     "forbidden_words_found", "run_cycle", "DEFAULT_THRESHOLDS", "FORBIDDEN_WORDS",
-    "load_missed_outcomes", "outcome_r", "unblock_evidence", "register_unblock",
+    "load_missed_outcomes", "load_missed_outcomes_tagged", "load_slot_occupied_keys",
+    "tag_slot_occupied", "blocked_entries_path", "SLOT_OCCUPIED_REASON",
+    "outcome_r", "unblock_evidence", "register_unblock",
 ]
 
 if __name__ == "__main__":

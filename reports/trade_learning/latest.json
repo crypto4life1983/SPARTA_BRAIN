@@ -1,43 +1,43 @@
 {
-  "as_of": "2026-09-12",
+  "as_of": "2026-10-05",
   "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
   "by_alignment": {
     "ALIGNED": {
-      "avg_R": 0.483,
-      "n": 22,
-      "n_signals": 15,
-      "sum_R": 10.631,
-      "win_rate": 0.5
+      "avg_R": 0.358,
+      "n": 24,
+      "n_signals": 17,
+      "sum_R": 8.6,
+      "win_rate": 0.458
     },
     "COUNTER": {
-      "avg_R": -0.338,
+      "avg_R": -1.317,
       "n": 4,
       "n_signals": 4,
-      "sum_R": -1.352,
+      "sum_R": -5.269,
       "win_rate": 0.25
     },
     "NO_TREND_REGIME": {
-      "avg_R": 0.954,
-      "n": 11,
-      "n_signals": 10,
-      "sum_R": 10.498,
-      "win_rate": 0.545
+      "avg_R": 0.661,
+      "n": 12,
+      "n_signals": 11,
+      "sum_R": 7.928,
+      "win_rate": 0.5
     },
     "UNLABELED": {
-      "avg_R": -1.084,
+      "avg_R": -1.041,
       "n": 5,
       "n_signals": 2,
-      "sum_R": -5.418,
+      "sum_R": -5.206,
       "win_rate": 0.2
     }
   },
   "by_exchange": {
     "binance": {
-      "avg_R": 0.132,
-      "n": 27,
-      "n_signals": 23,
-      "sum_R": 3.562,
-      "win_rate": 0.37
+      "avg_R": -0.158,
+      "n": 30,
+      "n_signals": 26,
+      "sum_R": -4.744,
+      "win_rate": 0.333
     },
     "kraken": {
       "avg_R": 0.72,
@@ -49,17 +49,17 @@
   },
   "by_month": {
     "2026-05": {
-      "avg_R": -0.925,
+      "avg_R": -1.093,
       "n": 8,
       "n_signals": 5,
-      "sum_R": -7.403,
+      "sum_R": -8.743,
       "win_rate": 0.125
     },
     "2026-06": {
-      "avg_R": 1.807,
+      "avg_R": 1.546,
       "n": 15,
       "n_signals": 10,
-      "sum_R": 27.109,
+      "sum_R": 23.192,
       "win_rate": 0.8
     },
     "2026-07": {
@@ -77,26 +77,26 @@
       "win_rate": 0.25
     },
     "2026-09": {
-      "avg_R": 0.797,
-      "n": 5,
-      "n_signals": 5,
-      "sum_R": 3.986,
-      "win_rate": 0.6
+      "avg_R": 0.117,
+      "n": 8,
+      "n_signals": 8,
+      "sum_R": 0.937,
+      "win_rate": 0.375
     }
   },
   "by_outcome": {
     "LOSS": {
-      "avg_R": -1.222,
-      "n": 20,
-      "n_signals": 14,
-      "sum_R": -24.437,
+      "avg_R": -1.433,
+      "n": 23,
+      "n_signals": 17,
+      "sum_R": -32.955,
       "win_rate": 0.0
     },
     "TIMEOUT": {
-      "avg_R": 1.613,
+      "avg_R": 1.624,
       "n": 20,
       "n_signals": 15,
-      "sum_R": 32.264,
+      "sum_R": 32.476,
       "win_rate": 0.85
     },
     "WIN": {
@@ -126,10 +126,10 @@
     },
     "NONE|long": {
       "alignment": "UNLABELED",
-      "avg_R": 0.126,
+      "avg_R": 0.338,
       "n": 1,
       "n_signals": 1,
-      "sum_R": 0.126,
+      "sum_R": 0.338,
       "win_rate": 1.0
     },
     "NONE|short": {
@@ -142,35 +142,35 @@
     },
     "RANGE|long": {
       "alignment": "NO_TREND_REGIME",
-      "avg_R": -0.088,
+      "avg_R": -0.398,
       "n": 5,
       "n_signals": 5,
-      "sum_R": -0.439,
+      "sum_R": -1.991,
       "win_rate": 0.2
     },
     "RANGE|short": {
       "alignment": "NO_TREND_REGIME",
-      "avg_R": 2.434,
-      "n": 4,
-      "n_signals": 3,
-      "sum_R": 9.735,
-      "win_rate": 1.0
+      "avg_R": 1.743,
+      "n": 5,
+      "n_signals": 4,
+      "sum_R": 8.717,
+      "win_rate": 0.8
     },
     "TREND_DOWN|long": {
       "alignment": "COUNTER",
-      "avg_R": -0.338,
+      "avg_R": -1.317,
       "n": 4,
       "n_signals": 4,
-      "sum_R": -1.352,
+      "sum_R": -5.269,
       "win_rate": 0.25
     },
     "TREND_DOWN|short": {
       "alignment": "ALIGNED",
-      "avg_R": 0.321,
-      "n": 17,
-      "n_signals": 10,
-      "sum_R": 5.453,
-      "win_rate": 0.471
+      "avg_R": 0.18,
+      "n": 19,
+      "n_signals": 12,
+      "sum_R": 3.422,
+      "win_rate": 0.421
     },
     "TREND_UP|long": {
       "alignment": "ALIGNED",
@@ -183,11 +183,11 @@
   },
   "by_strategy": {
     "D": {
-      "avg_R": 1.142,
-      "n": 6,
-      "n_signals": 6,
-      "sum_R": 6.854,
-      "win_rate": 0.667
+      "avg_R": 0.834,
+      "n": 7,
+      "n_signals": 7,
+      "sum_R": 5.839,
+      "win_rate": 0.571
     },
     "D2": {
       "avg_R": -0.839,
@@ -211,24 +211,24 @@
       "win_rate": 1.0
     },
     "F": {
-      "avg_R": 2.574,
-      "n": 3,
-      "n_signals": 3,
-      "sum_R": 7.722,
-      "win_rate": 1.0
+      "avg_R": 1.676,
+      "n": 4,
+      "n_signals": 4,
+      "sum_R": 6.704,
+      "win_rate": 0.75
     },
     "F2": {
-      "avg_R": -0.108,
-      "n": 10,
-      "n_signals": 7,
-      "sum_R": -1.082,
-      "win_rate": 0.3
+      "avg_R": -0.191,
+      "n": 11,
+      "n_signals": 8,
+      "sum_R": -2.098,
+      "win_rate": 0.273
     },
     "G": {
-      "avg_R": -0.304,
+      "avg_R": -1.055,
       "n": 7,
       "n_signals": 7,
-      "sum_R": -2.129,
+      "sum_R": -7.386,
       "win_rate": 0.286
     }
   },
@@ -248,10 +248,10 @@
       "win_rate": 0.833
     },
     "Sat": {
-      "avg_R": 0.034,
+      "avg_R": -0.29,
       "n": 5,
       "n_signals": 5,
-      "sum_R": 0.171,
+      "sum_R": -1.451,
       "win_rate": 0.2
     },
     "Sun": {
@@ -262,49 +262,74 @@
       "win_rate": 1.0
     },
     "Thu": {
-      "avg_R": -0.014,
-      "n": 6,
-      "n_signals": 6,
-      "sum_R": -0.087,
-      "win_rate": 0.667
+      "avg_R": -0.394,
+      "n": 7,
+      "n_signals": 7,
+      "sum_R": -2.761,
+      "win_rate": 0.571
     },
     "Tue": {
-      "avg_R": -0.593,
+      "avg_R": -0.867,
       "n": 8,
       "n_signals": 5,
-      "sum_R": -4.742,
+      "sum_R": -6.933,
       "win_rate": 0.125
     },
     "Wed": {
-      "avg_R": 0.796,
-      "n": 7,
-      "n_signals": 6,
-      "sum_R": 5.575,
-      "win_rate": 0.571
+      "avg_R": 0.417,
+      "n": 9,
+      "n_signals": 8,
+      "sum_R": 3.756,
+      "win_rate": 0.444
     }
   },
   "counts": {
-    "closed": 42,
+    "closed": 45,
     "dedup_key": "open_date+symbol+direction",
-    "distinct_signals_all_rows": 31,
-    "distinct_signals_closed": 31,
-    "expectancy_R": 0.342,
-    "expectancy_R_dedup_mean": 0.218,
+    "distinct_signals_all_rows": 40,
+    "distinct_signals_closed": 34,
+    "expectancy_R": 0.135,
+    "expectancy_R_dedup_mean": -0.045,
     "note": "raw rows overstate the sample: the bot mirrors signals on binance and kraken and the loose '2' variants often fire on the same bar",
-    "open": 0,
-    "profit_factor": 1.551,
-    "rows": 42,
-    "sum_R_dedup_best": 7.774,
-    "sum_R_dedup_mean": 6.761,
-    "sum_R_raw": 14.359,
-    "win_rate": 0.452
+    "open": 6,
+    "profit_factor": 1.175,
+    "rows": 51,
+    "sum_R_dedup_best": -0.532,
+    "sum_R_dedup_mean": -1.545,
+    "sum_R_raw": 6.053,
+    "win_rate": 0.422
+  },
+  "evidence_split": {
+    "cutoff": "2026-09-15",
+    "cutoff_field": "open_date",
+    "cutoff_reason": "partial-bar fix; trades opened before this date were generated from a still-forming candle and are retired from evidence",
+    "note": "headline counts above cover ALL closed trades, including the retired ones; read expectancy/win-rate against valid_forward",
+    "retired": {
+      "closed": 42,
+      "distinct_signals_closed": 31,
+      "expectancy_R": 0.217,
+      "outcome_TIMEOUT_positive": 17,
+      "outcome_WIN": 2,
+      "sum_R_raw": 9.102,
+      "win_rate": 0.452
+    },
+    "retired_share_of_closed": 0.933,
+    "valid_forward": {
+      "closed": 3,
+      "distinct_signals_closed": 3,
+      "expectancy_R": -1.016,
+      "outcome_TIMEOUT_positive": 0,
+      "outcome_WIN": 0,
+      "sum_R_raw": -3.049,
+      "win_rate": 0.0
+    }
   },
   "holding": {
     "by_outcome": {
       "LOSS": {
         "max_days": 20.0,
-        "mean_days": 11.9,
-        "n": 20
+        "mean_days": 10.83,
+        "n": 23
       },
       "TIMEOUT": {
         "max_days": 21.0,
@@ -318,13 +343,13 @@
       }
     },
     "n_timeout": 20,
-    "timeout_share": 0.476
+    "timeout_share": 0.444
   },
   "mfe_capture": {
-    "capture_ratio": 0.598,
+    "capture_ratio": 0.578,
     "mean_MFE_R": 2.983,
     "mean_r_given_back_from_peak": 0.747,
-    "mean_realized_R": 1.785,
+    "mean_realized_R": 1.724,
     "n": 10,
     "reached_2R_but_closed_below_1R": 1,
     "status": "OK"
@@ -337,15 +362,15 @@
     "rules_applied": false
   },
   "sample_quality": {
-    "dedup_signals": 31,
+    "dedup_signals": 34,
     "min_signals": 30,
     "note": "every conclusion below threshold is PRELIMINARY",
     "overall_label": "OK",
     "overall_sample_ok": true,
     "per_strategy": {
       "D": {
-        "closed": 6,
-        "closed_signals": 6,
+        "closed": 7,
+        "closed_signals": 7,
         "label": "PRELIMINARY",
         "min_required": 20
       },
@@ -368,14 +393,14 @@
         "min_required": 20
       },
       "F": {
-        "closed": 3,
-        "closed_signals": 3,
+        "closed": 4,
+        "closed_signals": 4,
         "label": "PRELIMINARY",
         "min_required": 20
       },
       "F2": {
-        "closed": 10,
-        "closed_signals": 7,
+        "closed": 11,
+        "closed_signals": 8,
         "label": "PRELIMINARY",
         "min_required": 20
       },
@@ -404,6 +429,26 @@
         "symbol": "XRPUSDT"
       },
       {
+        "close_price": 1.2217,
+        "direction": "long",
+        "id": 33,
+        "open_date": "2026-06-02",
+        "pnl_r": -2.184,
+        "sl": 1.2547000000000001,
+        "strategy": "G",
+        "symbol": "XRPUSDT"
+      },
+      {
+        "close_price": 1.1375,
+        "direction": "long",
+        "id": 34,
+        "open_date": "2026-06-04",
+        "pnl_r": -2.176,
+        "sl": 1.16686,
+        "strategy": "G",
+        "symbol": "XRPUSDT"
+      },
+      {
         "close_price": 0.839,
         "direction": "short",
         "id": 47,
@@ -412,6 +457,16 @@
         "sl": 0.8125910947500417,
         "strategy": "F2",
         "symbol": "DOTUSDT"
+      },
+      {
+        "close_price": 1.0144,
+        "direction": "long",
+        "id": 35,
+        "open_date": "2026-06-06",
+        "pnl_r": -1.501,
+        "sl": 1.0385,
+        "strategy": "G",
+        "symbol": "XRPUSDT"
       },
       {
         "close_price": 1.49059,
@@ -462,12 +517,22 @@
         "sl": 8.184824932575918,
         "strategy": "F2",
         "symbol": "LINKUSDT"
+      },
+      {
+        "close_price": 1.3021,
+        "direction": "long",
+        "id": 29,
+        "open_date": "2026-05-23",
+        "pnl_r": -1.26,
+        "sl": 1.30804,
+        "strategy": "G",
+        "symbol": "XRPUSDT"
       }
     ],
-    "n_breaches": 7,
+    "n_breaches": 11,
     "planned_max_loss_R": -1.0,
     "threshold_R": -1.2,
-    "total_excess_loss_R": 6.062
+    "total_excess_loss_R": 9.183
   },
   "strategy_labels": {
     "D": "Donchian Breakout",
@@ -482,10 +547,10 @@
     {
       "caveat": "observation only; not applied",
       "evidence": {
-        "avg_R": -0.338,
+        "avg_R": -1.317,
         "n": 4,
         "n_signals": 4,
-        "sum_R": -1.352,
+        "sum_R": -5.269,
         "win_rate": 0.25
       },
       "id": "block_long_in_TREND_DOWN",
@@ -497,14 +562,14 @@
     {
       "caveat": "observation only; not applied",
       "evidence": {
-        "n_breaches": 7,
-        "total_excess_loss_R": 6.062,
+        "n_breaches": 11,
+        "total_excess_loss_R": 9.183,
         "worst_ids": [
           46,
+          33,
+          34,
           47,
-          15,
-          16,
-          13
+          35
         ]
       },
       "id": "enforce_hard_stop",
@@ -516,9 +581,9 @@
     {
       "caveat": "observation only; not applied",
       "evidence": {
-        "capture_ratio": 0.598,
+        "capture_ratio": 0.578,
         "mean_MFE_R": 2.983,
-        "mean_realized_R": 1.785,
+        "mean_realized_R": 1.724,
         "n": 10,
         "reached_2R_but_closed_below_1R": 1
       },
