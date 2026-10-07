@@ -13,8 +13,8 @@
         "baseline_is_retired_evidence": false,
         "baseline_mean_R": null,
         "baseline_n": 0,
-        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
-        "last_eval_as_of": "2026-10-05",
+        "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
+        "last_eval_as_of": "2026-10-07",
         "mean_R_after": -1.0163,
         "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -22,11 +22,11 @@
         "regression_flag": false,
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
+          "applied_as_of": "2026-09-11",
           "baseline_mean_R": 0.2508,
           "baseline_n": 31,
-          "applied_as_of": "2026-09-11",
-          "voided_as_of": "2026-10-05",
-          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)"
+          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)",
+          "voided_as_of": "2026-10-05"
         }
       },
       "forward": {
@@ -55,8 +55,13 @@
         },
         {
           "as_of": "2026-10-05",
+          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003",
+          "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-07",
           "status": "APPLIED",
-          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003"
+          "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed."
         }
       ],
       "id": "block_long_in_TREND_DOWN",
@@ -88,7 +93,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-05",
+        "last_eval_as_of": "2026-10-07",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -139,8 +144,8 @@
         "baseline_is_retired_evidence": false,
         "baseline_mean_R": null,
         "baseline_n": 0,
-        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
-        "last_eval_as_of": "2026-10-05",
+        "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
+        "last_eval_as_of": "2026-10-07",
         "mean_R_after": -1.0163,
         "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -148,11 +153,11 @@
         "regression_flag": false,
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
+          "applied_as_of": "2026-09-11",
           "baseline_mean_R": 0.2508,
           "baseline_n": 31,
-          "applied_as_of": "2026-09-11",
-          "voided_as_of": "2026-10-05",
-          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)"
+          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)",
+          "voided_as_of": "2026-10-05"
         }
       },
       "forward": {
@@ -181,8 +186,13 @@
         },
         {
           "as_of": "2026-10-05",
+          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003",
+          "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-07",
           "status": "APPLIED",
-          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003"
+          "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed."
         }
       ],
       "id": "enforce_hard_stop",
@@ -217,8 +227,8 @@
         "baseline_is_retired_evidence": false,
         "baseline_mean_R": null,
         "baseline_n": 0,
-        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
-        "last_eval_as_of": "2026-10-05",
+        "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
+        "last_eval_as_of": "2026-10-07",
         "mean_R_after": -1.0163,
         "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -226,11 +236,11 @@
         "regression_flag": false,
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
+          "applied_as_of": "2026-09-11",
           "baseline_mean_R": 0.2508,
           "baseline_n": 31,
-          "applied_as_of": "2026-09-11",
-          "voided_as_of": "2026-10-05",
-          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)"
+          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)",
+          "voided_as_of": "2026-10-05"
         }
       },
       "forward": {
@@ -259,8 +269,13 @@
         },
         {
           "as_of": "2026-10-05",
+          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003",
+          "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-07",
           "status": "APPLIED",
-          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003"
+          "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed."
         }
       ],
       "id": "partial_tp_or_trail_2R",
@@ -292,8 +307,8 @@
         "baseline_is_retired_evidence": false,
         "baseline_mean_R": null,
         "baseline_n": 0,
-        "baseline_status": "NOT_EVALUABLE_RETIRED_EVIDENCE",
-        "last_eval_as_of": "2026-10-05",
+        "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
+        "last_eval_as_of": "2026-10-07",
         "mean_R_after": -1.0163,
         "n_after": 3,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -301,11 +316,11 @@
         "regression_flag": false,
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
+          "applied_as_of": "2026-09-11",
           "baseline_mean_R": 0.2508,
           "baseline_n": 31,
-          "applied_as_of": "2026-09-11",
-          "voided_as_of": "2026-10-05",
-          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)"
+          "reason": "frozen from pre-2026-09-15 partial-bar evidence (retired)",
+          "voided_as_of": "2026-10-05"
         }
       },
       "forward": {
@@ -334,8 +349,13 @@
         },
         {
           "as_of": "2026-10-05",
+          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003",
+          "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-07",
           "status": "APPLIED",
-          "note": "spec step 4 migration (operator-approved 2026-10-05): applied_as_of re-dated 2026-09-11 -> 2026-09-15 (partial-bar fix); retired baseline 0.2508 (n=31) voided; rollback judged by the absolute rule mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21) per reports/trade_learning/spec_killswitch_and_ledger_baseline_2026-09-21.md; backup trade_hypothesis_ledger.pre_step4_migration_20261005T184855.json; sha_before 4dcb08781fcc1003"
+          "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed."
         }
       ],
       "id": "review_pause_D2",
@@ -365,7 +385,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-05",
+        "last_eval_as_of": "2026-10-07",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -410,7 +430,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-05",
+        "last_eval_as_of": "2026-10-07",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -451,7 +471,7 @@
       }
     }
   },
-  "last_updated_as_of": "2026-10-05",
+  "last_updated_as_of": "2026-10-07",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",

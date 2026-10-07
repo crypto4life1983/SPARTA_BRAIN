@@ -44,7 +44,11 @@ def migrate(ledger: dict, today: str, sha_before: str, backup: str) -> list[str]
         ap["applied_as_of"] = NEW_DATE
         ap["baseline_mean_R"] = None
         ap["baseline_n"] = 0
-        ap["baseline_status"] = "NOT_EVALUABLE_RETIRED_EVIDENCE"
+        # A voided (null) baseline is "insufficient post-fix sample", not
+        # "retired": the RETIRED status means the record still carries a number
+        # frozen from retired trades, and the digest warns on it. (Corrected
+        # 2026-10-07 after the first migration stored the RETIRED string.)
+        ap["baseline_status"] = "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE"
         ap["baseline_is_retired_evidence"] = False
         ap["p_after_ge_baseline"] = None
         ap["rollback_rule"] = RULE
