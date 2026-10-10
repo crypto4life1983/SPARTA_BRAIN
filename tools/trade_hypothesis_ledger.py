@@ -52,6 +52,7 @@ from tools.trade_journal_learning_report import (  # noqa: E402  (reuse, never m
     build_learning_report,
     load_journal_ro,
 )
+from tools import trade_timeout_hindsight as tth  # noqa: E402  (resolver for extend_timeout kinds)
 
 LEDGER_PATH = _REPO_ROOT / "data" / "trade_hypothesis_ledger.json"
 REPORT_DIR = _REPO_ROOT / "reports" / "trade_learning"
@@ -136,6 +137,17 @@ UNBLOCK_RESOLVED = ("GOOD_BLOCK", "BAD_BLOCK", "NEUTRAL_BLOCK")
 SLOT_OCCUPIED_REASON = "SLOT_OCCUPIED"
 _REL_BLOCKED_ENTRIES = ("data", "blocked_entries.jsonl")
 _SLOT_OCCUPIED_PREFIX = "slot occupied"
+
+# ── "extend_timeout__<H>" hypotheses (2026-10-10) ────────────────────────────
+# The bot closes at 20 days held when neither stop nor target was hit. Whether a
+# longer hold would have helped cannot be read from the journal: the trade is
+# gone. tools/trade_timeout_hindsight.py walks the daily bars the bot never saw
+# (read-only Binance klines, cached in data/timeout_hindsight.jsonl) with the
+# trade's own stop and tp1 until day H, so delta_R = R(held to H) - R(realized)
+# per TIMEOUT trade. Approximation, documented there: one full exit at stop,
+# tp1 or the day-H close; no partials, no breakeven trail. A row is consumed
+# only once resolved, only for TIMEOUT closes strictly after registration.
+EXTEND_TIMEOUT_PREFIX = "extend_timeout__"
 
 # Substring check, same semantics as the learning report (so "already" also
 # trips "ready": keep such words out of the render).
@@ -228,6 +240,11 @@ def kind_for_id(sid: str) -> tuple[str, dict[str, Any]]:
     if sid.startswith(UNBLOCK_PREFIX):
         reason = sid[len(UNBLOCK_PREFIX):].strip().upper()
         return ("unblock", {"counted_reason": reason}) if reason else ("unknown", {})
+    if sid.startswith(EXTEND_TIMEOUT_PREFIX):
+        days = sid[len(EXTEND_TIMEOUT_PREFIX):].strip()
+        if days.isdigit() and int(days) > tth.BOT_TIMEOUT_DAYS:
+            return "extend_timeout", {"horizon_days": int(days)}
+        return "unknown", {}
     return "unknown", {}
 
 
@@ -434,6 +451,104 @@ def _forward_unblock_candidates(hyp: dict[str, Any],
     return sorted(out, key=lambda o: (str(o.get("ts_utc")), str(o.get("symbol")), str(o.get("strategy_id"))))
 
 
+# ── extend_timeout: hindsight rows for TIMEOUT closes ────────────────────────
+
+def _hindsight_index(rows: list[dict[str, Any]] | None) -> dict[tuple[int, int], dict[str, Any]]:
+    return tth.index_hindsight(list(rows or []))
+
+
+def extend_timeout_horizons(ledger: dict[str, Any]) -> list[int]:
+    out = set()
+    for h in ledger.get("hypotheses", {}).values():
+        if h.get("kind") == "extend_timeout" and h.get("status") in ("SHADOW", "CONFIRMED"):
+            d = h.get("params", {}).get("horizon_days")
+            if d:
+                out.add(int(d))
+    return sorted(out)
+
+
+def load_hindsight_rows(ledger: dict[str, Any], trades: list[dict[str, Any]], as_of: str,
+                        refresh: bool = True) -> list[dict[str, Any]]:
+    """The resolver's cache; refreshed (read-only network) only when an active
+    extend_timeout hypothesis exists. Never raises: a failed refresh falls back
+    to whatever is cached."""
+    horizons = extend_timeout_horizons(ledger)
+    if not horizons:
+        return []
+    if refresh:
+        try:
+            return tth.refresh(trades, horizons, as_of)
+        except Exception as exc:  # noqa: BLE001 - observation only, never break the cycle
+            print(f"[timeout-hindsight] refresh skipped: {type(exc).__name__}: {exc}")
+    return tth.load_hindsight()
+
+
+def extend_timeout_evidence(horizon_days: int, trades: list[dict[str, Any]],
+                            hindsight: list[dict[str, Any]], up_to: str | None = None) -> dict[str, Any]:
+    """Frozen in-sample summary: TIMEOUT closes opened on/after the partial-bar
+    fix and closed on/before up_to, as resolved by the hindsight rows."""
+    idx = _hindsight_index(hindsight)
+    lim = date.fromisoformat(up_to) if up_to else None
+    valid = date.fromisoformat(EVIDENCE_VALID_FROM)
+    sel: list[dict[str, Any]] = []
+    for t in trades:
+        if str(t.get("outcome") or "").upper() != "TIMEOUT":
+            continue
+        od, cd = _parse_dt(t.get("open_date")), _close_day(t)
+        if od is None or cd is None or od.date() < valid or (lim and cd > lim):
+            continue
+        r = idx.get((int(t.get("id") or -1), int(horizon_days)))
+        if r is None:
+            # a timeout the resolver has not reached yet still counts as in-sample
+            r = {"trade_id": int(t.get("id") or -1), "horizon_days": int(horizon_days), "resolved": False}
+        r = dict(r)
+        sim, v = _coerce_float(r.get("sim_pnl_r")), _pnl(t)
+        r["delta_R"] = _r(sim - v) if (r.get("resolved") and sim is not None and v is not None) else None
+        sel.append(r)
+    return {"n_timeouts": len(sel), **{k: v for k, v in tth.summarize(sel, horizon_days).items()
+                                       if k not in ("n_timeouts", "horizon_days")},
+            "evidence_from": EVIDENCE_VALID_FROM}
+
+
+def register_extend_timeout(ledger: dict[str, Any], horizon_days: int, as_of: str,
+                            trades: list[dict[str, Any]], hindsight: list[dict[str, Any]],
+                            note: str = "") -> str | None:
+    """Register extend_timeout__<H> as SHADOW with the post-fix TIMEOUT record
+    up to as_of frozen as in-sample evidence. Existing ids are left untouched."""
+    try:
+        h = int(horizon_days)
+    except (TypeError, ValueError):
+        return None
+    sid = f"{EXTEND_TIMEOUT_PREFIX}{h}"
+    hyps = ledger.setdefault("hypotheses", {})
+    if h <= tth.BOT_TIMEOUT_DAYS or sid in hyps:
+        return None
+    hyps[sid] = {
+        "id": sid,
+        "rule": (f"hold TIMEOUT closes to {h} days instead of {tth.BOT_TIMEOUT_DAYS}, same stop and tp1; "
+                 "scored on daily bars after the close (tools/trade_timeout_hindsight.py), "
+                 f"delta_R = R(held to day {h}: stop, tp1 or that day's close) - R(realized)"),
+        "kind": "extend_timeout",
+        "params": {"horizon_days": h},
+        "registered_as_of": as_of,
+        "registered_evidence": extend_timeout_evidence(h, trades, hindsight, up_to=as_of),
+        "registered_label": "HINDSIGHT_TIMEOUT_BARS",
+        "status": "SHADOW",
+        "forward": {
+            "n_signals": 0, "n_rows": 0, "delta_R_sum": 0.0, "delta_R_mean": None,
+            "wins": 0, "losses": 0, "bootstrap_p_positive": None, "last_eval_as_of": None,
+            "trade_ids_evaluated": [], "signal_keys_evaluated": [], "samples": [],
+        },
+        "thresholds": dict(ledger.get("default_thresholds", DEFAULT_THRESHOLDS)),
+        "history": [{"as_of": as_of, "status": "SHADOW",
+                     "note": "registered by operator; post-fix TIMEOUT closes to date frozen as "
+                             "in-sample evidence (single-exit approximation, no partials)"
+                             + (f"; {note}" if note else "")}],
+    }
+    ledger["created_as_of"] = ledger.get("created_as_of") or as_of
+    return sid
+
+
 # ── registration ────────────────────────────────────────────────────────────
 
 def register_from_report(report: dict[str, Any], as_of: str, ledger: dict[str, Any]) -> list[str]:
@@ -575,10 +690,29 @@ def evaluate_block_where(hyp: dict[str, Any], trade: dict[str, Any]) -> float | 
     return -v
 
 
+def evaluate_extend_timeout(hyp: dict[str, Any], trade: dict[str, Any],
+                            hindsight: dict[str, Any] | None) -> float | None:
+    """delta_R = R(held to horizon) - R(realized) for a TIMEOUT close, from the
+    resolver's row for (trade, horizon). None until resolved."""
+    v = _pnl(trade)
+    if v is None or str(trade.get("outcome") or "").upper() != "TIMEOUT":
+        return None
+    if not hindsight or not hindsight.get("resolved"):
+        return None
+    want = int(hyp.get("params", {}).get("horizon_days") or 0)
+    if int(hindsight.get("horizon_days") or -1) != want or int(hindsight.get("trade_id") or -1) != int(trade.get("id") or -2):
+        return None
+    sim = _coerce_float(hindsight.get("sim_pnl_r"))
+    return None if sim is None else sim - v
+
+
 def evaluate_hypothesis(
-    hyp: dict[str, Any], trade: dict[str, Any], excursion: dict[str, Any] | None = None
+    hyp: dict[str, Any], trade: dict[str, Any], excursion: dict[str, Any] | None = None,
+    hindsight: dict[str, Any] | None = None,
 ) -> float | None:
     kind = hyp.get("kind")
+    if kind == "extend_timeout":
+        return evaluate_extend_timeout(hyp, trade, hindsight)
     if kind == "block":
         return evaluate_block(hyp, trade)
     if kind == "block_where":
@@ -763,13 +897,16 @@ def update_forward(
     excursions: dict[int, dict[str, Any]] | None,
     as_of: str,
     outcomes: list[dict[str, Any]] | None = None,
+    hindsight: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Score every SHADOW/CONFIRMED hypothesis on new forward signals, then
     apply its pre-registered thresholds. Deterministic. Returns a summary.
     `outcomes` (the bot's resolved blocked-entry rows) feeds "unblock" kinds;
+    `hindsight` (the timeout resolver's rows) feeds "extend_timeout" kinds;
     every other kind is scored on `trades` exactly as before."""
     excursions = excursions or {}
     outcomes = outcomes or []
+    hidx = _hindsight_index(hindsight)
     summary: dict[str, Any] = {"as_of": as_of, "evaluated": {}, "status_changes": []}
     for sid in sorted(ledger.get("hypotheses", {})):
         hyp = ledger["hypotheses"][sid]
@@ -812,7 +949,8 @@ def update_forward(
             # dedup_best: the best-R row represents the signal (tie → lowest id)
             best = max(rows, key=lambda r: (_pnl(r), -int(r.get("id") or 0)))
             ex = excursions.get(best.get("id"))
-            delta = evaluate_hypothesis(hyp, best, ex)
+            hs = hidx.get((int(best.get("id") or -1), int(hyp.get("params", {}).get("horizon_days") or 0)))
+            delta = evaluate_hypothesis(hyp, best, ex, hs)
             if delta is None:
                 continue  # rule does not apply (yet); re-scanned on later runs
             fwd["samples"].append({
@@ -987,16 +1125,21 @@ def run_cycle(
     ledger_path: Path = LEDGER_PATH,
     report_dir: Path = REPORT_DIR,
     outcomes: list[dict[str, Any]] | None = None,
+    hindsight: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """`outcomes=None` loads the bot's blocked-entry ledger from the external
-    project (read-only, empty when absent); pass a list to control it in tests."""
+    project (read-only, empty when absent); pass a list to control it in tests.
+    `hindsight=None` refreshes the timeout resolver's cache (read-only network,
+    only when an extend_timeout hypothesis is active); pass a list in tests."""
     ledger = load_ledger(ledger_path)
     if ledger.get("created_as_of") is None:
         ledger["created_as_of"] = as_of
     added = register_from_report(report, as_of, ledger)
     if outcomes is None:
         outcomes = load_missed_outcomes_tagged()
-    summary = update_forward(ledger, trades, excursions, as_of, outcomes=outcomes)
+    if hindsight is None:
+        hindsight = load_hindsight_rows(ledger, trades, as_of)
+    summary = update_forward(ledger, trades, excursions, as_of, outcomes=outcomes, hindsight=hindsight)
     save_ledger(ledger, ledger_path)
 
     md = render_markdown(ledger)
@@ -1056,7 +1199,12 @@ def _register_manual_entry() -> None:
                 "--register-unblock REASON. SLOT_OCCUPIED (2026-10-05) is a derived reason: "
                 "outcome rows that passed every gate are joined to the bot's 'slot occupied' "
                 "blocked-entry rows (data/blocked_entries.jsonl) on symbol/strategy/direction/"
-                "bar day, so the one-slot-per-strategy cap is scored like a gate."
+                "bar day, so the one-slot-per-strategy cap is scored like a gate. "
+                "'extend_timeout__<DAYS>' hypotheses (2026-10-10) ask whether holding a "
+                "TIMEOUT close longer would have helped: tools/trade_timeout_hindsight.py "
+                "walks read-only Binance daily bars after the close with the trade's own "
+                "stop and tp1 to day DAYS (cache data/timeout_hindsight.jsonl), delta_R = "
+                "R(held) - R(realized). Register with --register-extend-timeout DAYS."
             ),
             when_to_use=(
                 "Daily, after the learning report. CONFIRMED = a recommendation for the "
@@ -1083,6 +1231,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--register-unblock", nargs="*", default=None, metavar="COUNTED_REASON",
                     help="register unblock__<REASON> hypotheses scored on the bot's resolved "
                          "blocked-entry ledger (e.g. TREND_UP_BLOCKS_SHORT)")
+    ap.add_argument("--register-extend-timeout", nargs="*", type=int, default=None, metavar="DAYS",
+                    help="register extend_timeout__<DAYS> hypotheses scored on daily bars after "
+                         "each TIMEOUT close (resolver: tools/trade_timeout_hindsight.py)")
     args = ap.parse_args(argv)
     db_path = external_root().joinpath(*_REL_TRADES_DB)
     if not db_path.exists():
@@ -1100,6 +1251,18 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"REGISTERED {sid} as of {as_of}: frozen evidence {ev}")
             else:
                 print(f"already registered or empty reason: {reason}")
+        save_ledger(ledger)
+    if args.register_extend_timeout:
+        ledger = load_ledger()
+        horizons = sorted({int(d) for d in args.register_extend_timeout if int(d) > tth.BOT_TIMEOUT_DAYS})
+        hindsight = tth.refresh(trades, horizons, as_of) if horizons else []
+        for days in args.register_extend_timeout:
+            sid = register_extend_timeout(ledger, days, as_of, trades, hindsight, note=args.note)
+            if sid:
+                ev = ledger["hypotheses"][sid]["registered_evidence"]
+                print(f"REGISTERED {sid} as of {as_of}: frozen evidence {ev}")
+            else:
+                print(f"already registered or horizon <= {tth.BOT_TIMEOUT_DAYS}: {days}")
         save_ledger(ledger)
     if args.mark_applied:
         ledger = load_ledger()
@@ -1131,6 +1294,8 @@ __all__ = [
     "load_missed_outcomes", "load_missed_outcomes_tagged", "load_slot_occupied_keys",
     "tag_slot_occupied", "blocked_entries_path", "SLOT_OCCUPIED_REASON",
     "outcome_r", "unblock_evidence", "register_unblock",
+    "EXTEND_TIMEOUT_PREFIX", "evaluate_extend_timeout", "extend_timeout_evidence",
+    "register_extend_timeout", "extend_timeout_horizons", "load_hindsight_rows",
 ]
 
 if __name__ == "__main__":

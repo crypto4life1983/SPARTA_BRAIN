@@ -14,9 +14,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-07",
-        "mean_R_after": -1.0163,
-        "n_after": 3,
+        "last_eval_as_of": "2026-10-10",
+        "mean_R_after": -0.4392,
+        "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -88,12 +88,59 @@
         "min_p_positive": 0.9
       }
     },
+    "blockwhere__hold_bucket=short": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-10-10",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-10-10",
+          "note": "registered from learning report; in-sample evidence frozen",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "blockwhere__hold_bucket=short",
+      "kind": "block_where",
+      "params": {
+        "where": {
+          "hold_bucket": "short"
+        }
+      },
+      "registered_as_of": "2026-10-10",
+      "registered_evidence": {
+        "cells_tested": 16,
+        "mean_R": -1.3759,
+        "n_signals": 8,
+        "p_adj": 0.048,
+        "p_raw": 0.003,
+        "sum_R": -11.007,
+        "win_rate": 0.0
+      },
+      "registered_label": "PRELIMINARY",
+      "rule": "block entries where hold_bucket=short",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
     "blockwhere__strategy=D__direction=short": {
       "forward": {
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-07",
+        "last_eval_as_of": "2026-10-10",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -145,9 +192,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-07",
-        "mean_R_after": -1.0163,
-        "n_after": 3,
+        "last_eval_as_of": "2026-10-10",
+        "mean_R_after": -0.4392,
+        "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -221,6 +268,53 @@
         "min_p_positive": 0.9
       }
     },
+    "extend_timeout__40": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-10-10",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-10-10",
+          "note": "registered by operator; post-fix TIMEOUT closes to date frozen as in-sample evidence (single-exit approximation, no partials); operator go 2026-10-10 after three flat 20-day timeouts (SOL -0.33R, BTC +0.08R, AVAX +0.18R) closed 10-09/10; those three are in-sample, forward n starts with the next TIMEOUT close",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "extend_timeout__40",
+      "kind": "extend_timeout",
+      "params": {
+        "horizon_days": 40
+      },
+      "registered_as_of": "2026-10-10",
+      "registered_evidence": {
+        "evidence_from": "2026-09-15",
+        "mean_delta_R": null,
+        "n_resolved": 0,
+        "n_timeouts": 3,
+        "source": "binance_api_v3_klines_1d",
+        "still_open_at_horizon": 0,
+        "sum_delta_R": 0.0,
+        "would_hit_stop": 0,
+        "would_hit_target": 0
+      },
+      "registered_label": "HINDSIGHT_TIMEOUT_BARS",
+      "rule": "hold TIMEOUT closes to 40 days instead of 20, same stop and tp1; scored on daily bars after the close (tools/trade_timeout_hindsight.py), delta_R = R(held to day 40: stop, tp1 or that day's close) - R(realized)",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
     "partial_tp_or_trail_2R": {
       "applied": {
         "applied_as_of": "2026-09-15",
@@ -228,9 +322,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-07",
-        "mean_R_after": -1.0163,
-        "n_after": 3,
+        "last_eval_as_of": "2026-10-10",
+        "mean_R_after": -0.4392,
+        "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -308,9 +402,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-07",
-        "mean_R_after": -1.0163,
-        "n_after": 3,
+        "last_eval_as_of": "2026-10-10",
+        "mean_R_after": -0.4392,
+        "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -385,7 +479,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-07",
+        "last_eval_as_of": "2026-10-10",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -430,7 +524,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-07",
+        "last_eval_as_of": "2026-10-10",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -475,7 +569,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-07",
+        "last_eval_as_of": "2026-10-10",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -516,7 +610,7 @@
       }
     }
   },
-  "last_updated_as_of": "2026-10-07",
+  "last_updated_as_of": "2026-10-10",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",
