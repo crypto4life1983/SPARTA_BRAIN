@@ -105,6 +105,17 @@ STOP_CAP_R = -1.5           # enforce_hard_stop: kill at -1.5R
 PARTIAL_TRIGGER_R = 2.0     # partial_tp_or_trail_2R: take half at 2R
 PARTIAL_FRACTION = 0.5
 
+# ── "partial_tp_or_trail_<X>R" hypotheses (2026-10-11) ───────────────────────
+# The 2R partial above is APPLIED in the bot since 2026-09-15. On 2026-10-09/10
+# three trades reached +1.08R, +1.32R and +1.58R, never 2R, and timed out flat.
+# A generic trigger lets the same evaluator ask "half off at X R, breakeven on
+# the rest" for any X > 0: delta_R = (X/2 + max(realized R, 0)/2) - realized R
+# on trades whose excursion row shows max_favorable_R >= X. Same documented
+# approximation as partial_2R; realized R already embeds the bot's live 2R
+# partial where it fired. Scored from excursion rows the bot already keeps, so
+# a forward sample arrives with every close, not only with timeouts.
+PARTIAL_PREFIX = "partial_tp_or_trail_"
+
 # ── "unblock" hypotheses (2026-09-23) ────────────────────────────────────────
 # The kinds above are scored on trades the bot TOOK. A gate that blocks an entry
 # leaves no trade to score, so the loop could never learn whether a block was
@@ -222,6 +233,11 @@ def kind_for_id(sid: str) -> tuple[str, dict[str, Any]]:
         return "stop_cap", {"cap_R": STOP_CAP_R}
     if sid == "partial_tp_or_trail_2R":
         return "partial_2R", {"trigger_R": PARTIAL_TRIGGER_R, "fraction": PARTIAL_FRACTION}
+    if sid.startswith(PARTIAL_PREFIX) and sid.endswith("R"):
+        trig = _parse_trigger(sid[len(PARTIAL_PREFIX):-1])
+        if trig is not None:
+            return "partial", {"trigger_R": trig, "fraction": PARTIAL_FRACTION}
+        return "unknown", {}
     if sid.startswith("flag_"):
         wd = sid[len("flag_"):]
         if wd.startswith("weekday_"):
@@ -549,6 +565,89 @@ def register_extend_timeout(ledger: dict[str, Any], horizon_days: int, as_of: st
     return sid
 
 
+# ── partial_tp_or_trail_<X>R (generic trigger) ──────────────────────────────
+
+def _parse_trigger(text: str) -> float | None:
+    """'1' → 1.0, '1.5' → 1.5; anything non-positive or non-numeric → None."""
+    try:
+        v = float(str(text).strip())
+    except (TypeError, ValueError):
+        return None
+    return v if v > 0 and v == v and v != float("inf") else None
+
+
+def partial_id(trigger_R: float) -> str:
+    return f"{PARTIAL_PREFIX}{float(trigger_R):g}R"
+
+
+def partial_evidence(trigger_R: float, trades: list[dict[str, Any]],
+                     excursions: dict[int, dict[str, Any]] | None,
+                     up_to: str | None = None) -> dict[str, Any]:
+    """Frozen in-sample summary, per trade row (mirrors not collapsed): closed
+    trades opened on/after the partial-bar fix and closed on/before up_to; the
+    rule applies to those whose excursion row reached the trigger."""
+    excursions = excursions or {}
+    lim = date.fromisoformat(up_to) if up_to else None
+    valid = date.fromisoformat(EVIDENCE_VALID_FROM)
+    probe = {"params": {"trigger_R": float(trigger_R), "fraction": PARTIAL_FRACTION}}
+    n_closed = n_ex = 0
+    deltas: list[float] = []
+    for t in trades:
+        od, cd = _parse_dt(t.get("open_date")), _close_day(t)
+        if od is None or cd is None or _pnl(t) is None or od.date() < valid or (lim and cd > lim):
+            continue
+        n_closed += 1
+        ex = excursions.get(t.get("id"))
+        if ex:
+            n_ex += 1
+        d = evaluate_partial_2R(probe, t, ex)
+        if d is not None:
+            deltas.append(d)
+    return {"n_closed": n_closed, "n_with_excursion": n_ex, "n_reached_trigger": len(deltas),
+            "sum_delta_R": _r(sum(deltas)), "mean_delta_R": _r(sum(deltas) / len(deltas)) if deltas else None,
+            "evidence_from": EVIDENCE_VALID_FROM}
+
+
+def register_partial(ledger: dict[str, Any], trigger_R: float, as_of: str,
+                     trades: list[dict[str, Any]], excursions: dict[int, dict[str, Any]] | None,
+                     note: str = "") -> str | None:
+    """Register partial_tp_or_trail_<X>R as SHADOW with the post-fix record up to
+    as_of frozen as in-sample evidence. Existing ids (incl. the APPLIED 2R one)
+    are left untouched."""
+    trig = _parse_trigger(trigger_R)
+    if trig is None:
+        return None
+    sid = partial_id(trig)
+    hyps = ledger.setdefault("hypotheses", {})
+    if sid in hyps:
+        return None
+    kind, params = kind_for_id(sid)
+    hyps[sid] = {
+        "id": sid,
+        "rule": (f"take {PARTIAL_FRACTION:g} of the position at +{trig:g}R and move the stop to breakeven "
+                 f"on the rest; scored from the trade's excursion row (max_favorable_R >= {trig:g}), "
+                 f"delta_R = ({trig:g}*{PARTIAL_FRACTION:g} + {1 - PARTIAL_FRACTION:g}*max(R, 0)) - R(realized)"),
+        "kind": kind,
+        "params": params,
+        "registered_as_of": as_of,
+        "registered_evidence": partial_evidence(trig, trades, excursions, up_to=as_of),
+        "registered_label": "EXCURSION_ROWS",
+        "status": "SHADOW",
+        "forward": {
+            "n_signals": 0, "n_rows": 0, "delta_R_sum": 0.0, "delta_R_mean": None,
+            "wins": 0, "losses": 0, "bootstrap_p_positive": None, "last_eval_as_of": None,
+            "trade_ids_evaluated": [], "signal_keys_evaluated": [], "samples": [],
+        },
+        "thresholds": dict(ledger.get("default_thresholds", DEFAULT_THRESHOLDS)),
+        "history": [{"as_of": as_of, "status": "SHADOW",
+                     "note": "registered by operator; post-fix closes to date frozen as in-sample "
+                             "evidence per trade row (runner half approximated as max(R,0)/2)"
+                             + (f"; {note}" if note else "")}],
+    }
+    ledger["created_as_of"] = ledger.get("created_as_of") or as_of
+    return sid
+
+
 # ── registration ────────────────────────────────────────────────────────────
 
 def register_from_report(report: dict[str, Any], as_of: str, ledger: dict[str, Any]) -> list[str]:
@@ -719,7 +818,7 @@ def evaluate_hypothesis(
         return evaluate_block_where(hyp, trade)
     if kind == "stop_cap":
         return evaluate_stop_cap(hyp, trade)
-    if kind == "partial_2R":
+    if kind in ("partial_2R", "partial"):
         return evaluate_partial_2R(hyp, trade, excursion)
     if kind == "flag":
         return evaluate_flag(hyp, trade)
@@ -1204,7 +1303,10 @@ def _register_manual_entry() -> None:
                 "TIMEOUT close longer would have helped: tools/trade_timeout_hindsight.py "
                 "walks read-only Binance daily bars after the close with the trade's own "
                 "stop and tp1 to day DAYS (cache data/timeout_hindsight.jsonl), delta_R = "
-                "R(held) - R(realized). Register with --register-extend-timeout DAYS."
+                "R(held) - R(realized). Register with --register-extend-timeout DAYS. "
+                "'partial_tp_or_trail_<X>R' hypotheses (2026-10-11) generalise the applied 2R "
+                "partial to any trigger X, scored from the bot's own excursion rows "
+                "(max_favorable_R >= X); register with --register-partial X."
             ),
             when_to_use=(
                 "Daily, after the learning report. CONFIRMED = a recommendation for the "
@@ -1234,6 +1336,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--register-extend-timeout", nargs="*", type=int, default=None, metavar="DAYS",
                     help="register extend_timeout__<DAYS> hypotheses scored on daily bars after "
                          "each TIMEOUT close (resolver: tools/trade_timeout_hindsight.py)")
+    ap.add_argument("--register-partial", nargs="*", type=float, default=None, metavar="TRIGGER_R",
+                    help="register partial_tp_or_trail_<X>R hypotheses (half off at X R, breakeven "
+                         "on the rest) scored from the bot's excursion rows")
     args = ap.parse_args(argv)
     db_path = external_root().joinpath(*_REL_TRADES_DB)
     if not db_path.exists():
@@ -1263,6 +1368,16 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"REGISTERED {sid} as of {as_of}: frozen evidence {ev}")
             else:
                 print(f"already registered or horizon <= {tth.BOT_TIMEOUT_DAYS}: {days}")
+        save_ledger(ledger)
+    if args.register_partial:
+        ledger = load_ledger()
+        for trig in args.register_partial:
+            sid = register_partial(ledger, trig, as_of, trades, excursions, note=args.note)
+            if sid:
+                ev = ledger["hypotheses"][sid]["registered_evidence"]
+                print(f"REGISTERED {sid} as of {as_of}: frozen evidence {ev}")
+            else:
+                print(f"already registered or bad trigger: {trig}")
         save_ledger(ledger)
     if args.mark_applied:
         ledger = load_ledger()
@@ -1296,6 +1411,7 @@ __all__ = [
     "outcome_r", "unblock_evidence", "register_unblock",
     "EXTEND_TIMEOUT_PREFIX", "evaluate_extend_timeout", "extend_timeout_evidence",
     "register_extend_timeout", "extend_timeout_horizons", "load_hindsight_rows",
+    "PARTIAL_PREFIX", "partial_id", "partial_evidence", "register_partial",
 ]
 
 if __name__ == "__main__":

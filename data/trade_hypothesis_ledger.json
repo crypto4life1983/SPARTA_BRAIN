@@ -14,7 +14,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "mean_R_after": -0.4392,
         "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -93,7 +93,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -140,7 +140,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -192,7 +192,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "mean_R_after": -0.4392,
         "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -273,7 +273,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -315,6 +315,51 @@
         "min_p_positive": 0.9
       }
     },
+    "partial_tp_or_trail_1R": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-10-11",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-10-11",
+          "note": "registered by operator; post-fix closes to date frozen as in-sample evidence per trade row (runner half approximated as max(R,0)/2); operator go 2026-10-11 after the 10-09/10 timeouts reached +1.08/+1.32/+1.58R MFE and gave it back; the applied 2R partial never fired on them",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "partial_tp_or_trail_1R",
+      "kind": "partial",
+      "params": {
+        "fraction": 0.5,
+        "trigger_R": 1.0
+      },
+      "registered_as_of": "2026-10-11",
+      "registered_evidence": {
+        "evidence_from": "2026-09-15",
+        "mean_delta_R": 0.4719,
+        "n_closed": 8,
+        "n_reached_trigger": 4,
+        "n_with_excursion": 5,
+        "sum_delta_R": 1.8875
+      },
+      "registered_label": "EXCURSION_ROWS",
+      "rule": "take 0.5 of the position at +1R and move the stop to breakeven on the rest; scored from the trade's excursion row (max_favorable_R >= 1), delta_R = (1*0.5 + 0.5*max(R, 0)) - R(realized)",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
     "partial_tp_or_trail_2R": {
       "applied": {
         "applied_as_of": "2026-09-15",
@@ -322,7 +367,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "mean_R_after": -0.4392,
         "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -402,7 +447,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "mean_R_after": -0.4392,
         "n_after": 8,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -479,7 +524,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -524,7 +569,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -569,7 +614,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-10",
+        "last_eval_as_of": "2026-10-11",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -610,7 +655,7 @@
       }
     }
   },
-  "last_updated_as_of": "2026-10-10",
+  "last_updated_as_of": "2026-10-11",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",
