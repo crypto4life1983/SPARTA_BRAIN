@@ -341,7 +341,7 @@
         "last_eval_as_of": "2026-10-14",
         "mean_R_after": null,
         "n_after": 0,
-        "note": "applied in obsidian-trade-logger 63ecd30: D/E/D2/E2 half off at 1R + breakeven (PARTIAL_R 1.0); G keeps 2R (range stop, sizing gap); F ladder unchanged; operator go 2026-10-14",
+        "note": "applied in obsidian-trade-logger 63ecd30: D/E/D2/E2 half off at 1R + breakeven (PARTIAL_R 1.0); G keeps 2R (range stop, sizing gap); F ladder unchanged; operator go 2026-10-14 | 26ef50d same day: trades.sl_dist_orig stored at open, G joins the 1R trigger (scope now all manage_de strategies)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute; no admissible baseline)"
@@ -383,6 +383,11 @@
         {
           "as_of": "2026-10-14",
           "note": "SHADOW -> APPLIED: applied in obsidian-trade-logger 63ecd30: D/E/D2/E2 half off at 1R + breakeven (PARTIAL_R 1.0); G keeps 2R (range stop, sizing gap); F ladder unchanged; operator go 2026-10-14",
+          "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-14",
+          "note": "scope widened to G (bot 26ef50d); F ladder still unchanged",
           "status": "APPLIED"
         }
       ],
@@ -470,6 +475,11 @@
           "as_of": "2026-10-14",
           "note": "superseded for D/E/D2/E2 by partial_tp_or_trail_1R (bot 63ecd30); still live for G; status and frozen evidence unchanged",
           "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-14",
+          "note": "superseded for G as well (bot 26ef50d: original stop distance stored, post-partial sizing correct for the range stop); status and frozen evidence unchanged",
+          "status": "APPLIED"
         }
       ],
       "id": "partial_tp_or_trail_2R",
@@ -492,8 +502,8 @@
       "superseded": {
         "as_of": "2026-10-14",
         "by": "partial_tp_or_trail_1R",
-        "note": "obsidian-trade-logger 63ecd30: PARTIAL_R 2.0 -> 1.0, PARTIAL_R_RANGE 2.0 for G",
-        "scope": "D/E/D2/E2 (atr-stop strategies); the 2R trigger stays live for G only"
+        "note": "obsidian-trade-logger 63ecd30: PARTIAL_R 2.0 -> 1.0, PARTIAL_R_RANGE 2.0 for G; 26ef50d: trades.sl_dist_orig stored at open, G joins the 1R trigger",
+        "scope": "all manage_de strategies (D/E/D2/E2 and G); the 2R trigger is no longer live anywhere"
       },
       "thresholds": {
         "max_p_positive_reject": 0.5,
