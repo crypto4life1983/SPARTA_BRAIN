@@ -196,3 +196,24 @@ def test_rendered_ledger_warns_about_a_retired_baseline():
     md = thl.render_markdown(ledger)
     assert "RETIRED" in md
     assert thl.forbidden_words_found(md) == []
+
+
+# ── per-rule rollback procedure (2026-10-18) ────────────────────────────────
+
+
+def test_next_threshold_names_the_per_rule_procedure_when_present():
+    ledger = _ledger_with_one()
+    thl.mark_applied(ledger, "block_long_in_TREND_DOWN", "2026-09-15", [])
+    hyp = ledger["hypotheses"]["block_long_in_TREND_DOWN"]
+    assert "per-rule verdict" not in thl._next_threshold(hyp)
+    hyp["applied"]["rollback_procedure"] = {
+        "as_of": "2026-10-18",
+        "verdict_rule": "KEEP until unblock__TREND_DOWN_BLOCKS_LONG is CONFIRMED",
+        "spec": "reports/trade_learning/spec_rollback_procedure_2026-10-18.md",
+    }
+    cell = thl._next_threshold(hyp)
+    assert "rollback check at n>=20 (have 0)" in cell
+    assert "per-rule verdict: reports/trade_learning/spec_rollback_procedure_2026-10-18.md" in cell
+    md = thl.render_markdown(ledger)
+    assert "spec_rollback_procedure_2026-10-18.md" in md
+    assert thl.forbidden_words_found(md) == []

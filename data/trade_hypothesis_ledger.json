@@ -14,12 +14,19 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-14",
-        "mean_R_after": -0.4513,
-        "n_after": 10,
+        "last_eval_as_of": "2026-10-18",
+        "mean_R_after": -0.5526,
+        "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
+        "rollback_procedure": {
+          "as_of": "2026-10-18",
+          "evidence_source": "reports/observation_mode/missed_opportunity_outcomes.jsonl, counted_reason=TREND_DOWN_BLOCKS_LONG, via the unblock__TREND_DOWN_BLOCKS_LONG forward score",
+          "spec": "reports/trade_learning/spec_rollback_procedure_2026-10-18.md",
+          "verdict_rule": "KEEP until its counterfactual twin unblock__TREND_DOWN_BLOCKS_LONG reaches CONFIRMED on its own pre-registered bar (n >= 20 forward resolved blocks, p_positive >= 0.9); REJECTED on the twin keeps the block indefinitely; otherwise re-review at the next 10 closes.",
+          "written_at_sample": "n=12 post-fix closes, sum -6.63R, mean -0.55R (disclosed; trigger unchanged)"
+        },
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
           "applied_as_of": "2026-09-11",
@@ -62,6 +69,11 @@
           "as_of": "2026-10-07",
           "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed.",
           "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-18",
+          "note": "per-rule rollback procedure recorded (reports/trade_learning/spec_rollback_procedure_2026-10-18.md); trigger, thresholds and frozen evidence unchanged",
+          "status": "APPLIED"
         }
       ],
       "id": "block_long_in_TREND_DOWN",
@@ -91,12 +103,12 @@
     "blockwhere__hold_bucket=short": {
       "forward": {
         "bootstrap_p_positive": null,
-        "delta_R_mean": 1.013,
-        "delta_R_sum": 1.013,
-        "last_eval_as_of": "2026-10-14",
+        "delta_R_mean": 1.011,
+        "delta_R_sum": 2.022,
+        "last_eval_as_of": "2026-10-18",
         "losses": 0,
-        "n_rows": 1,
-        "n_signals": 1,
+        "n_rows": 2,
+        "n_signals": 2,
         "samples": [
           {
             "close_date": "2026-10-14",
@@ -107,15 +119,27 @@
             ],
             "signal": "2026-10-10|ATOMUSDT|long",
             "trade_id": 64
+          },
+          {
+            "close_date": "2026-10-18",
+            "delta_R": 1.009,
+            "pnl_r": -1.009,
+            "row_ids": [
+              66
+            ],
+            "signal": "2026-10-14|OPUSDT|long",
+            "trade_id": 66
           }
         ],
         "signal_keys_evaluated": [
-          "2026-10-10|ATOMUSDT|long"
+          "2026-10-10|ATOMUSDT|long",
+          "2026-10-14|OPUSDT|long"
         ],
         "trade_ids_evaluated": [
-          64
+          64,
+          66
         ],
-        "wins": 1
+        "wins": 2
       },
       "history": [
         {
@@ -155,7 +179,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-14",
+        "last_eval_as_of": "2026-10-18",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -207,12 +231,19 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-14",
-        "mean_R_after": -0.4513,
-        "n_after": 10,
+        "last_eval_as_of": "2026-10-18",
+        "mean_R_after": -0.5526,
+        "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
+        "rollback_procedure": {
+          "as_of": "2026-10-18",
+          "evidence_source": "post-fix closes with outcome LOSS; hindsight re-run to the original exit without the cap (method of tools/trade_timeout_hindsight.py)",
+          "spec": "reports/trade_learning/spec_rollback_procedure_2026-10-18.md",
+          "verdict_rule": "KEEP. Risk control, not an edge claim: the system-wide mean-R trigger does not apply. Rollback only if, at n >= 20 post-fix stop-outs, a no-cap hindsight re-run shows sum delta_R > 0 with p_positive >= 0.9 AND at least one realized loss would have exceeded -1.5R without the cap. Any post-fix close below -1.5R with the cap on is a bug to fix, not a rollback.",
+          "written_at_sample": "n=12 post-fix closes, sum -6.63R, mean -0.55R (disclosed; trigger unchanged)"
+        },
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
           "applied_as_of": "2026-09-11",
@@ -255,6 +286,11 @@
           "as_of": "2026-10-07",
           "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed.",
           "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-18",
+          "note": "per-rule rollback procedure recorded (reports/trade_learning/spec_rollback_procedure_2026-10-18.md); trigger, thresholds and frozen evidence unchanged",
+          "status": "APPLIED"
         }
       ],
       "id": "enforce_hard_stop",
@@ -286,15 +322,30 @@
     "extend_timeout__40": {
       "forward": {
         "bootstrap_p_positive": null,
-        "delta_R_mean": null,
-        "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-14",
-        "losses": 0,
-        "n_rows": 0,
-        "n_signals": 0,
-        "samples": [],
-        "signal_keys_evaluated": [],
-        "trade_ids_evaluated": [],
+        "delta_R_mean": -1.0322,
+        "delta_R_sum": -1.0322,
+        "last_eval_as_of": "2026-10-18",
+        "losses": 1,
+        "n_rows": 1,
+        "n_signals": 1,
+        "samples": [
+          {
+            "close_date": "2026-10-13",
+            "delta_R": -1.0322,
+            "pnl_r": 0.014,
+            "row_ids": [
+              63
+            ],
+            "signal": "2026-09-23|COMPUSDT|long",
+            "trade_id": 63
+          }
+        ],
+        "signal_keys_evaluated": [
+          "2026-09-23|COMPUSDT|long"
+        ],
+        "trade_ids_evaluated": [
+          63
+        ],
         "wins": 0
       },
       "history": [
@@ -338,12 +389,19 @@
         "baseline_n": 10,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
         "baseline_valid_from": "2026-09-15",
-        "last_eval_as_of": "2026-10-14",
-        "mean_R_after": null,
-        "n_after": 0,
+        "last_eval_as_of": "2026-10-18",
+        "mean_R_after": -1.059,
+        "n_after": 2,
         "note": "applied in obsidian-trade-logger 63ecd30: D/E/D2/E2 half off at 1R + breakeven (PARTIAL_R 1.0); G keeps 2R (range stop, sizing gap); F ladder unchanged; operator go 2026-10-14 | 26ef50d same day: trades.sl_dist_orig stored at open, G joins the 1R trigger (scope now all manage_de strategies)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
+        "rollback_procedure": {
+          "as_of": "2026-10-18",
+          "evidence_source": "this ledger's forward score for partial_tp_or_trail_1R (trade_excursions.max_favorable_R)",
+          "spec": "reports/trade_learning/spec_rollback_procedure_2026-10-18.md",
+          "verdict_rule": "Judged on its own forward delta_R (excursion-based counterfactual vs realized), not on mean R. Rollback only if at n >= 20 closes after 2026-10-14 the forward delta_R has mean < 0 with p_positive <= 0.5. A positive delta_R does not declare the rule working; it only means no rollback.",
+          "written_at_sample": "n=12 post-fix closes, sum -6.63R, mean -0.55R (disclosed; trigger unchanged)"
+        },
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute; no admissible baseline)"
       },
       "forward": {
@@ -389,6 +447,11 @@
           "as_of": "2026-10-14",
           "note": "scope widened to G (bot 26ef50d); F ladder still unchanged",
           "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-18",
+          "note": "per-rule rollback procedure recorded (reports/trade_learning/spec_rollback_procedure_2026-10-18.md); trigger, thresholds and frozen evidence unchanged",
+          "status": "APPLIED"
         }
       ],
       "id": "partial_tp_or_trail_1R",
@@ -422,12 +485,19 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-14",
-        "mean_R_after": -0.4513,
-        "n_after": 10,
+        "last_eval_as_of": "2026-10-18",
+        "mean_R_after": -0.5526,
+        "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
+        "rollback_procedure": {
+          "as_of": "2026-10-18",
+          "evidence_source": "none (superseded)",
+          "spec": "reports/trade_learning/spec_rollback_procedure_2026-10-18.md",
+          "verdict_rule": "N/A - superseded 2026-10-14 for every manage_de strategy (bot 63ecd30, 26ef50d); no live 2R trigger exists to roll back. Record kept for history.",
+          "written_at_sample": "n=12 post-fix closes, sum -6.63R, mean -0.55R (disclosed; trigger unchanged)"
+        },
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
           "applied_as_of": "2026-09-11",
@@ -480,6 +550,11 @@
           "as_of": "2026-10-14",
           "note": "superseded for G as well (bot 26ef50d: original stop distance stored, post-partial sizing correct for the range stop); status and frozen evidence unchanged",
           "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-18",
+          "note": "per-rule rollback procedure recorded (reports/trade_learning/spec_rollback_procedure_2026-10-18.md); trigger, thresholds and frozen evidence unchanged",
+          "status": "APPLIED"
         }
       ],
       "id": "partial_tp_or_trail_2R",
@@ -518,12 +593,19 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-14",
-        "mean_R_after": -0.4513,
-        "n_after": 10,
+        "last_eval_as_of": "2026-10-18",
+        "mean_R_after": -0.5526,
+        "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
+        "rollback_procedure": {
+          "as_of": "2026-10-18",
+          "evidence_source": "obsidian-trade-logger logs/live_signals.log '[ALLOCATION COUNTERFACTUAL] ... Exp D2' lines (resolver not built yet)",
+          "spec": "reports/trade_learning/spec_rollback_procedure_2026-10-18.md",
+          "verdict_rule": "KEEP. D2 entries are refused by the allocation quarantine and do not reach missed_opportunity_outcomes.jsonl (checked 2026-10-18: no D2 rows); they exist only as '[ALLOCATION COUNTERFACTUAL] ... D2 ... would have opened' bot-log lines. Rollback only once those lines are resolved like regime blocks (hyp stop/target, 20-day horizon) and show mean hyp R > 0 with p_positive >= 0.9 at n >= 20. No number is invented in the meantime.",
+          "written_at_sample": "n=12 post-fix closes, sum -6.63R, mean -0.55R (disclosed; trigger unchanged)"
+        },
         "rollback_rule": "mean R < 0.0R at n >= 20 (absolute, pre-registered 2026-09-21)",
         "voided_baseline": {
           "applied_as_of": "2026-09-11",
@@ -566,6 +648,11 @@
           "as_of": "2026-10-07",
           "note": "baseline_status corrected RETIRED -> INSUFFICIENT_POST_FIX_SAMPLE: the baseline is void (null), not a retired number; the digest warned on the RETIRED string. No other field changed.",
           "status": "APPLIED"
+        },
+        {
+          "as_of": "2026-10-18",
+          "note": "per-rule rollback procedure recorded (reports/trade_learning/spec_rollback_procedure_2026-10-18.md); trigger, thresholds and frozen evidence unchanged",
+          "status": "APPLIED"
         }
       ],
       "id": "review_pause_D2",
@@ -595,7 +682,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": -0.1645,
         "delta_R_sum": -0.6581,
-        "last_eval_as_of": "2026-10-14",
+        "last_eval_as_of": "2026-10-18",
         "losses": 2,
         "n_rows": 4,
         "n_signals": 4,
@@ -690,7 +777,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-14",
+        "last_eval_as_of": "2026-10-18",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -735,7 +822,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": 0.0628,
         "delta_R_sum": 0.1885,
-        "last_eval_as_of": "2026-10-14",
+        "last_eval_as_of": "2026-10-18",
         "losses": 1,
         "n_rows": 3,
         "n_signals": 3,
@@ -814,7 +901,7 @@
       }
     }
   },
-  "last_updated_as_of": "2026-10-14",
+  "last_updated_as_of": "2026-10-18",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",

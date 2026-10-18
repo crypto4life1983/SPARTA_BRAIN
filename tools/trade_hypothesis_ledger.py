@@ -1126,6 +1126,11 @@ def _next_threshold(hyp: dict[str, Any]) -> str:
                 f"mean R < baseline - {APPLIED_REGRESSION_R}R at n >= {APPLIED_MIN_N}"
             )
         warn = " ⚠ baseline is RETIRED evidence" if _baseline_status(ap) == BASELINE_RETIRED else ""
+        # 2026-10-18: the absolute trigger is system-wide; what to do about THIS
+        # rule when it fires is decided per rule, in advance, in a spec file.
+        proc = ap.get("rollback_procedure") or {}
+        if proc.get("spec"):
+            warn += f" · per-rule verdict: {proc['spec']}"
         if n_after < APPLIED_MIN_N:
             return f"rollback check at n>={APPLIED_MIN_N} (have {n_after}): {rule}{warn}"
         return f"{rule}{warn}"
