@@ -32,6 +32,14 @@ CONTEXT_FIELDS = (
     "breakout_distance",
     "candle_body_strength",
     "rejection_reason",
+    # 2026-10-20 entry-bar feature vector (bot _entry_features); None when unknown
+    "range_pct",
+    "atr_expansion",
+    "volume_ratio",
+    "range_position",
+    "donchian_width_pct",
+    "ema20_dist_atr",
+    "ema200_dist_atr",
 )
 
 TRADE_REFERENCE_FIELDS = (
