@@ -156,6 +156,20 @@ belongs in the shadow book, where it is, and this result is a reason **not** to 
 bar. A pre-registered promotion criterion for the pair is reasonable; it should be no looser than the
 ledger's own (n >= 20 closed pairs, p >= 0.9 on the paired difference).
 
+**Resolution (same day, after exchanging results with the bot-side session).** Restricted to this
+replay's window (2024-01-25 onward) the other panel's kept-minus-all is +0.036R with a block-bootstrap
+95% CI of [-0.020, +0.078], no longer excluding zero; its full-body shorts are -0.024R (n=168) against
++0.183R here, a sign disagreement on that cell. Its +0.046 headline rests on 2021-2023. Construction
+differences named there: ungated D/E, 2R partial, gross R versus regime-gated D/E/F/F2, 1R partial,
+net. Decision taken (operator delegated it): no live change; the filter stays in the shadow pair; a
+**pre-registered promotion criterion** is written in that study's Part 4 and accepted as-is. It is
+stricter than the bar proposed above in two ways: at least 10 closed divergence episodes on top of
+20 closed baseline trades (identical trades contribute zero, so without the episode floor a handful
+of skipped losers would pass), and an evidence window strictly after 2026-10-14. A pass is a
+recommendation to the operator, never a switch; a fail closes the question and the pair is not
+re-registered with a new threshold. Counts at the time of writing: 7 shadow trades per candidate,
+0 closed, one divergence (ZIL).
+
 Nothing in the bot was changed. Nothing was registered. Outputs: `reports/trade_learning/replay_2026-10-20/report.json`
 (all tables), `progress.log`; `signals.json` (every signal with its three simulated exits) is written
 there too and left uncommitted for size.
