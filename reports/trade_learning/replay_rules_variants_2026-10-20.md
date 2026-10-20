@@ -127,6 +127,35 @@ applied on sight. E is already live and fires about once a week across the unive
 - **Not a strategy question:** the 3× exposure from D/F/F2 and the one-slot draw. Both are about
   how much of each outcome the bot takes, not whether the outcome is good.
 
+## 7. Cross-check against the bot-side study of the same day (added 2026-10-20, later)
+
+A separate session working in the bot repo answered the same question on a different panel
+(`reports/exit_structure_study_2026-10-11.md` Part 4: 3,656 D/E signals over six years, gross R,
+uncommitted in that repo). The two studies agree on the main points without having seen each other:
+no fault to fix; the loss is correlated variance across symbols (there, 22% of 12-signal windows sum
+to -6.6R or worse against 1.3% if trades were independent); long-only fails out of sample; no live
+change.
+
+They disagree on one candidate. That study finds that skipping entries whose signal bar is a full
+body (body >= 0.805 of range) adds +0.046R per signal with a 95% CI of [+0.011, +0.081], and that
+filter is already the pre-registered shadow pair `cand_2326d78c832e` / `cand_4568eae650d3`
+(2026-10-14). The same filter on this replay's 2,593 dedup trades (signal-bar body from the same
+daily bars):
+
+| 42-symbol replay, dedup | n | mean R |
+|---|---|---|
+| kept (body <= 0.805) | 2015 | +0.071 |
+| removed (full body) | 578 | +0.088 |
+| kept minus all, bootstrap 5–95% | | -0.004 [-0.059, +0.051] |
+
+Here the filter removes trades that did slightly *better*, and the removed set is positive in three
+of five half-years; full-body shorts are the single best cell in the panel (+0.183R, n=341). So the
+full-body effect does not replicate on the wider, shorter panel. Both findings are in-sample on
+different data, which is exactly the situation the shadow pair exists to settle. Reading: the filter
+belongs in the shadow book, where it is, and this result is a reason **not** to lower its promotion
+bar. A pre-registered promotion criterion for the pair is reasonable; it should be no looser than the
+ledger's own (n >= 20 closed pairs, p >= 0.9 on the paired difference).
+
 Nothing in the bot was changed. Nothing was registered. Outputs: `reports/trade_learning/replay_2026-10-20/report.json`
 (all tables), `progress.log`; `signals.json` (every signal with its three simulated exits) is written
 there too and left uncommitted for size.
