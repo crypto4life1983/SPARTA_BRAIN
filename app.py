@@ -7212,6 +7212,22 @@ def _trade_ledger_empty_payload(status: str, *, errors: list[str]) -> dict:
     }
 
 
+@app.get("/trade-loop", response_class=HTMLResponse)
+async def page_trade_loop(request: Request):
+    """SPARTA Trade Loop (2026-10-20) — read-only render of the self-improving loop's
+    reports: digest, ledger + replay priors, calibration, exit pairs, replay studies."""
+    try:
+        from tools import trade_loop_page as _tlp
+        payload = _tlp.load_payload()
+    except Exception as exc:  # noqa: BLE001 - fail-closed render
+        payload = {"status": "ERROR", "banner": "READ ONLY · OBSERVATION ONLY",
+                   "generated_at": "", "sections": [], "errors": [f"{type(exc).__name__}: {exc}"]}
+    return templates.TemplateResponse(
+        "trade_loop.html",
+        {"request": request, "page": "trade_loop", "payload": payload},
+    )
+
+
 @app.get("/trade-ledger", response_class=HTMLResponse)
 async def page_trade_ledger(request: Request):
     """SPARTA Trade Decision Ledger v1 — read-only normalized viewer."""

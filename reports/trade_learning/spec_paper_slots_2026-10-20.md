@@ -24,10 +24,18 @@ pair's two floors) is waiting on that 2.4. `SLOT OCCUPIED` has been logged 132 t
 the gate allows the signal and the book has no room. The 09-23 replay already showed 389 of 414
 allowed D signals skipped at one slot.
 
-Three slots per strategy triples the evidence rate at zero real cost: the book is paper, and the
-2026-10-20 replay puts the pool's expectancy at +0.075R per dedup trade over 2.7 years, so the extra
-trades are drawn from the same distribution the book already trades. This is not a profit claim;
-the pool also lost -0.12R/trade for six months in 2025. It is an evidence-rate claim.
+Three slots per strategy multiplies the evidence rate by about 2.7 at zero real cost (replay
+one-slot model with the coordinator's per-symbol lock: 152 trades at +0.151R over the window vs
+406 trades at +0.117R with three slots; 1.1 vs 3.0 a week). The book is paper, and the extra
+trades are drawn from the same pool the book already trades. This is not a profit claim; the
+pool lost -0.12R/trade for six months in 2025. It is an evidence-rate claim.
+
+**Status update 2026-10-20 (evening): BUILT, awaiting the operator's test run and commit.**
+`scripts/db.py` (`get_open_trades`, `get_trade`), `scripts/trade_bot.py` (`run_strategy` split into
+`_manage_open_position` per position + `_scan_new_entries` up to the free slots, `max_slots`
+parameter, config key read in `main()`), `tests/test_paper_slots_2026_10_20.py` (8 tests),
+`config/live_config.json` (gitignored, local) set to 3. In-memory smoke of all scenarios passed
+under the SPARTA venv; the bot repo's own pytest run and the commit are the operator's `!` block.
 
 ## Smallest safe change (bot repo)
 

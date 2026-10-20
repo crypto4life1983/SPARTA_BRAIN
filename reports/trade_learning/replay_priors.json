@@ -1,0 +1,232 @@
+{
+ "as_of": "2026-10-20",
+ "source": "replay_2026-10-20",
+ "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
+ "replay_trades": 2593,
+ "replay_blocked": 2149,
+ "not_taken_by_one_slot": 2487,
+ "priors": {
+  "block_long_in_TREND_DOWN": {
+   "n": 0,
+   "rule": "block where {'direction': 'long', 'regime_at_open': 'TREND_DOWN'}",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "blockwhere__hold_bucket=short": {
+   "n": 449,
+   "prior_delta_R_mean": 0.68,
+   "sum": 305.16,
+   "p_pos": 1.0,
+   "by_period": {
+    "2024-11-01..2025-05-01": {
+     "n": 121,
+     "mean": 0.441
+    },
+    "2025-05-01..2025-11-01": {
+     "n": 135,
+     "mean": 0.81
+    },
+    "2025-11-01..2026-05-01": {
+     "n": 82,
+     "mean": 0.899
+    },
+    "2026-05-01..2026-09-15": {
+     "n": 85,
+     "mean": 0.586
+    },
+    "2026-09-15..2027-01-01": {
+     "n": 26,
+     "mean": 0.728
+    }
+   },
+   "stable": true,
+   "rule": "block where {'hold_bucket': 'short'}",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "blockwhere__strategy=D__direction=short": {
+   "n": 509,
+   "prior_delta_R_mean": -0.034,
+   "sum": -17.25,
+   "p_pos": 0.215,
+   "by_period": {
+    "2024-11-01..2025-05-01": {
+     "n": 104,
+     "mean": -0.168
+    },
+    "2025-05-01..2025-11-01": {
+     "n": 138,
+     "mean": 0.177
+    },
+    "2025-11-01..2026-05-01": {
+     "n": 172,
+     "mean": -0.061
+    },
+    "2026-05-01..2026-09-15": {
+     "n": 90,
+     "mean": -0.209
+    },
+    "2026-09-15..2027-01-01": {
+     "n": 5,
+     "mean": 1.035
+    }
+   },
+   "stable": false,
+   "rule": "block where {'direction': 'short', 'strategy': 'D'}",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "enforce_hard_stop": {
+   "n": 0,
+   "note": "replay never breaches the cap",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "extend_timeout__40": {
+   "n": 1160,
+   "prior_delta_R_mean": 0.002,
+   "sum": 2.49,
+   "p_pos": 0.55,
+   "by_period": {
+    "2024-11-01..2025-05-01": {
+     "n": 250,
+     "mean": -0.013
+    },
+    "2025-05-01..2025-11-01": {
+     "n": 332,
+     "mean": 0.025
+    },
+    "2025-11-01..2026-05-01": {
+     "n": 341,
+     "mean": 0.041
+    },
+    "2026-05-01..2026-09-15": {
+     "n": 220,
+     "mean": -0.021
+    },
+    "2026-09-15..2027-01-01": {
+     "n": 17,
+     "mean": -0.701
+    }
+   },
+   "stable": false,
+   "rule": "hold 40 days instead of 20 on 20-day timeouts",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "partial_tp_or_trail_1R": {
+   "n": 0,
+   "note": "replay exits embed the live partial rule",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "partial_tp_or_trail_2R": {
+   "n": 0,
+   "note": "replay exits embed the live partial rule",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "review_pause_D2": {
+   "n": 0,
+   "rule": "block where {'strategy': 'D2'}",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "unblock__SLOT_OCCUPIED": {
+   "n": 2487,
+   "prior_delta_R_mean": 0.074,
+   "sum": 183.38,
+   "p_pos": 0.999,
+   "by_period": {
+    "2024-11-01..2025-05-01": {
+     "n": 582,
+     "mean": 0.215
+    },
+    "2025-05-01..2025-11-01": {
+     "n": 799,
+     "mean": -0.133
+    },
+    "2025-11-01..2026-05-01": {
+     "n": 571,
+     "mean": 0.105
+    },
+    "2026-05-01..2026-09-15": {
+     "n": 431,
+     "mean": 0.283
+    },
+    "2026-09-15..2027-01-01": {
+     "n": 104,
+     "mean": -0.166
+    }
+   },
+   "stable": false,
+   "rule": "take signals refused for SLOT_OCCUPIED",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "unblock__TREND_DOWN_BLOCKS_LONG": {
+   "n": 964,
+   "prior_delta_R_mean": 0.218,
+   "sum": 210.16,
+   "p_pos": 1.0,
+   "by_period": {
+    "2024-11-01..2025-05-01": {
+     "n": 171,
+     "mean": 0.711
+    },
+    "2025-05-01..2025-11-01": {
+     "n": 184,
+     "mean": 0.616
+    },
+    "2025-11-01..2026-05-01": {
+     "n": 323,
+     "mean": -0.262
+    },
+    "2026-05-01..2026-09-15": {
+     "n": 264,
+     "mean": 0.126
+    },
+    "2026-09-15..2027-01-01": {
+     "n": 22,
+     "mean": 1.209
+    }
+   },
+   "stable": false,
+   "rule": "take signals refused for TREND_DOWN_BLOCKS_LONG",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  },
+  "unblock__TREND_UP_BLOCKS_SHORT": {
+   "n": 298,
+   "prior_delta_R_mean": -0.073,
+   "sum": -21.77,
+   "p_pos": 0.066,
+   "by_period": {
+    "2024-11-01..2025-05-01": {
+     "n": 128,
+     "mean": -0.016
+    },
+    "2025-05-01..2025-11-01": {
+     "n": 120,
+     "mean": -0.254
+    },
+    "2025-11-01..2026-05-01": {
+     "n": 19,
+     "mean": 0.74
+    },
+    "2026-05-01..2026-09-15": {
+     "n": 19,
+     "mean": 0.367
+    },
+    "2026-09-15..2027-01-01": {
+     "n": 12,
+     "mean": -0.859
+    }
+   },
+   "stable": false,
+   "rule": "take signals refused for TREND_UP_BLOCKS_SHORT",
+   "computed_as_of": "2026-10-20",
+   "source": "replay_2026-10-20"
+  }
+ }
+}

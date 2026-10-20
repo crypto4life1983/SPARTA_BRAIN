@@ -161,6 +161,38 @@ def sim_f(bars, i, sig, timeout, rungs=(1.618, 2.618, 4.236)):
     return None
 
 
+def _signal_features(sub: pd.DataFrame, sig: dict) -> dict:
+    """The same entry-bar buckets the live loop derives from the bot's context log
+    (tools/trade_features.py), computed here from the replay's own bars, plus the raw
+    values. Lets every feature-cell hypothesis get a replay prior."""
+    try:
+        from tools.trade_features import features_from_record
+    except ImportError:
+        sys.path.insert(0, r"C:\SPARTA_BRAIN")
+        from tools.trade_features import features_from_record
+    last = sub.iloc[-1]
+    rng_ = float(last["high"] - last["low"])
+    atr = float(sig.get("atr14") or 0.0)
+    prev_atr = float(sub["atr14"].iloc[-4:-1].mean()) if len(sub) >= 4 else None
+    vol_prev = float(sub["volume"].iloc[-21:-1].mean()) if "volume" in sub and len(sub) >= 21 else None
+    try:
+        from scripts.regime_detector import _price_position_in_range
+        pos = _price_position_in_range(sub)
+    except Exception:
+        pos = None
+    rec = {
+        "candle_body_strength": (abs(float(last["close"] - last["open"])) / rng_) if rng_ > 0 else None,
+        "atr_expansion": (atr / prev_atr) if (atr and prev_atr) else None,
+        "volume_ratio": (float(last["volume"]) / vol_prev) if (vol_prev and "volume" in last) else None,
+        "range_position": pos,
+        "ema20_dist_atr": ((float(last["close"]) - float(last["ema20"])) / atr) if atr and last["ema20"] == last["ema20"] else None,
+        "ema200_dist_atr": ((float(last["close"]) - float(last["ema200"])) / atr) if atr and last["ema200"] == last["ema200"] else None,
+    }
+    out = features_from_record(rec)
+    out["raw"] = {k: (None if v is None or v != v else round(float(v), 4)) for k, v in rec.items()}
+    return out
+
+
 # ── scan ─────────────────────────────────────────────────────────────────────
 def scan():
     signals = []
@@ -200,15 +232,17 @@ def scan():
                 rec = dict(sym=sym, strat=strat, base=base, i=t, date=dates[t],
                            direction=sig["direction"], entry=float(sig["entry"]), sl=float(sig["sl"]),
                            tp1=float(sig["tp1"]), regime=regime, allowed=bool(allowed), reason=reason,
-                           confirm=confirm)
+                           confirm=confirm, features=_signal_features(sub, sig))
+                # Every signal is simulated, allowed or not: blocked ones are what the
+                # ledger's unblock hypotheses are about (tools/replay_prior.py).
+                f = sim_f if strat in ("F", "F2") else sim_de
+                rec["res_base"] = f(bars, t, sig, 20)
+                rec["res_to40"] = f(bars, t, sig, 40)
+                rec["res_f1r"] = sim_f(bars, t, sig, 20, rungs=(1.0, 2.618, 4.236)) if strat in ("F", "F2") else rec["res_base"]
+                for key in ("res_base", "res_to40", "res_f1r"):
+                    if rec[key] is not None:
+                        rec[key]["exit_date"] = dates[rec[key]["exit_i"]]
                 if allowed:
-                    f = sim_f if strat in ("F", "F2") else sim_de
-                    rec["res_base"] = f(bars, t, sig, 20)
-                    rec["res_to40"] = f(bars, t, sig, 40)
-                    rec["res_f1r"] = sim_f(bars, t, sig, 20, rungs=(1.0, 2.618, 4.236)) if strat in ("F", "F2") else rec["res_base"]
-                    for key in ("res_base", "res_to40", "res_f1r"):
-                        if rec[key] is not None:
-                            rec[key]["exit_date"] = dates[rec[key]["exit_i"]]
                     n_sig += 1
                 signals.append(rec)
         log(f"{k+1:2d}/{len(SYMBOLS)} {sym}: bars {len(df)}, allowed signals {n_sig}, {time.time()-t0:.0f}s")
@@ -238,23 +272,33 @@ def paired(a, b):
                 p_pos=round(float((boots > 0).mean()), 3))
 
 
-def one_slot(sigs, key):
-    """The bot's reality: one open position per strategy; first allowed signal of the day in
-    config symbol order wins; the slot frees the day after the exit."""
+def one_slot(sigs, key, slots: int = 1):
+    """The bot's reality on one exchange: `slots` positions per strategy (1 until
+    2026-10-20, config paper_slots_per_strategy after), first allowed signals of the day
+    in config symbol order win, a slot frees the day after the exit, AND the coordinator's
+    one-position-per-symbol rule: a symbol held by any strategy is not opened by another
+    (config/trade_coordinator_config.json max_open_trades_per_symbol = 1; the first
+    2026-10-20 run of this model lacked that rule and over-counted D/F/F2 triplets)."""
     order = {s: i for i, s in enumerate(SYMBOLS)}
+    by_day: dict[str, list] = {}
+    for x in sigs:
+        by_day.setdefault(x["date"], []).append(x)
+    open_pos: list[tuple] = []     # (strat, sym, exit_date or "9999", sig, res)
     taken = []
-    for strat in STRATS:
-        busy_until = ""
-        for s in sorted((x for x in sigs if x["strat"] == strat), key=lambda x: (x["date"], order[x["sym"]])):
-            if s["date"] <= busy_until:
-                continue
-            r = s.get(key)
-            if r is None:                       # still open at data end: blocks the slot, no R
-                busy_until = "9999"
-                taken.append((s, None))
-                continue
-            busy_until = r["exit_date"]
-            taken.append((s, r))
+    for d in sorted(by_day):
+        open_pos = [p for p in open_pos if p[2] >= d]          # frees the day after exit_date
+        held_syms = {p[1] for p in open_pos}
+        for strat in STRATS:
+            n_open = sum(1 for p in open_pos if p[0] == strat)
+            for s in sorted((x for x in by_day[d] if x["strat"] == strat), key=lambda x: order[x["sym"]]):
+                if n_open >= slots or s["sym"] in held_syms:
+                    continue
+                r = s.get(key)
+                exit_d = r["exit_date"] if r is not None else "9999"
+                open_pos.append((strat, s["sym"], exit_d, s, r))
+                held_syms.add(s["sym"])
+                n_open += 1
+                taken.append((s, r))
     return taken
 
 

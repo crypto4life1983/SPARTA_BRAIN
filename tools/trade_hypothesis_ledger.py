@@ -164,6 +164,30 @@ EXTEND_TIMEOUT_PREFIX = "extend_timeout__"
 # trips "ready": keep such words out of the render).
 FORBIDDEN_WORDS = ("validated", "ready", "approved", "profitable strategy", "deploy")
 
+# 2026-10-20: entry-bar feature buckets usable in block_where cells, and the replay prior
+# file written by tools/replay_prior.py (rendered as a column; never used for promotion).
+from tools import trade_features as _trade_features  # noqa: E402
+FEATURE_FIELDS = _trade_features.FEATURE_FIELDS
+REPLAY_PRIORS_NAME = "replay_priors.json"
+
+
+def load_replay_priors(report_dir: Path | None = None) -> dict[str, Any]:
+    p = (report_dir or REPORT_DIR) / REPLAY_PRIORS_NAME
+    if not p.exists():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data.get("priors", data) if isinstance(data, dict) else {}
+
+
+def _fmt_prior(pr: dict[str, Any] | None) -> str:
+    if not pr or pr.get("n") in (None, 0):
+        return "-" if not pr or not pr.get("note") else f"n/a ({pr['note']})"
+    stab = {True: "stable", False: "unstable", None: "stability n/a"}.get(pr.get("stable"), "")
+    return (f"Δ{pr['prior_delta_R_mean']:+.3f} n={pr['n']} p={pr.get('p_pos', '-')} {stab}").strip()
+
 POSTURE = {
     "mode": "READ_ONLY_OBSERVATION",
     "broker": "NONE",
@@ -762,6 +786,9 @@ def trade_field(trade: dict[str, Any], field: str) -> str | None:
     """Derived/normalised trade attributes used by generic cell rules."""
     if field == "weekday":
         return _weekday(trade)
+    if field in FEATURE_FIELDS:
+        # 2026-10-20: entry-bar buckets from the bot's context log (tools/trade_features.py)
+        return _trade_features.trade_bucket(trade, field)
     if field == "hold_bucket":
         d = _days_between(trade.get("open_date"), trade.get("close_date"))
         if d is None:
@@ -1146,6 +1173,7 @@ def _next_threshold(hyp: dict[str, Any]) -> str:
 
 
 def render_markdown(ledger: dict[str, Any]) -> str:
+    _priors = load_replay_priors()
     hyps = ledger.get("hypotheses", {})
     counts: dict[str, int] = defaultdict(int)
     for h in hyps.values():
@@ -1168,8 +1196,8 @@ def render_markdown(ledger: dict[str, Any]) -> str:
         "Status counts: " + (", ".join(f"{s} {counts[s]}" for s in STATUSES if counts[s]) or "none"),
         "",
         "| id | status | kind | registered | in-sample evidence (frozen) | fwd n (rows) | "
-        "mean ΔR | sum ΔR | p_positive | next threshold |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "mean ΔR | sum ΔR | p_positive | replay prior | next threshold |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for sid in sorted(hyps):
         h = hyps[sid]
@@ -1178,7 +1206,7 @@ def render_markdown(ledger: dict[str, Any]) -> str:
             f"| {sid} | **{h['status']}** | {h['kind']} | {h['registered_as_of']} | "
             f"{_evidence_line(h.get('registered_evidence', {}))} | "
             f"{f['n_signals']} ({f['n_rows']}) | {_fmt(f['delta_R_mean'])} | "
-            f"{_fmt(f['delta_R_sum'])} | {_fmt(f['bootstrap_p_positive'])} | {_next_threshold(h)} |"
+            f"{_fmt(f['delta_R_sum'])} | {_fmt(f['bootstrap_p_positive'])} | {_fmt_prior(_priors.get(sid))} | {_next_threshold(h)} |"
         )
     if not hyps:
         L.append("| - | - | - | - | no hypotheses registered | - | - | - | - | - |")

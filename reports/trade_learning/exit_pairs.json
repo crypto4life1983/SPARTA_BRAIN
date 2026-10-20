@@ -1,0 +1,124 @@
+{
+ "as_of": "2026-10-20",
+ "banner": "READ ONLY \u00b7 OBSERVATION ONLY \u00b7 NO LIVE READINESS CLAIM \u00b7 NO STRATEGY APPROVAL \u00b7 NO BROKER / NO ORDER",
+ "entries_closed": 46,
+ "entries_with_2plus_exits": 7,
+ "pairs": {
+  "F-D": {
+   "all": {
+    "n": 0
+   },
+   "retired_pre_fix": {
+    "n": 0
+   },
+   "post_fix": {
+    "n": 0
+   }
+  },
+  "F2-D": {
+   "all": {
+    "n": 0
+   },
+   "retired_pre_fix": {
+    "n": 0
+   },
+   "post_fix": {
+    "n": 0
+   }
+  },
+  "F2-F": {
+   "all": {
+    "n": 0
+   },
+   "retired_pre_fix": {
+    "n": 0
+   },
+   "post_fix": {
+    "n": 0
+   }
+  },
+  "F-E": {
+   "all": {
+    "n": 1,
+    "mean_delta_R": -0.659,
+    "sum_delta_R": -0.66,
+    "p_positive": 0.0,
+    "a_mean_R": 2.699,
+    "b_mean_R": 3.358,
+    "a_wins": 0,
+    "b_wins": 1
+   },
+   "retired_pre_fix": {
+    "n": 1,
+    "mean_delta_R": -0.659,
+    "sum_delta_R": -0.66,
+    "p_positive": 0.0,
+    "a_mean_R": 2.699,
+    "b_mean_R": 3.358,
+    "a_wins": 0,
+    "b_wins": 1
+   },
+   "post_fix": {
+    "n": 0
+   }
+  },
+  "F2-E": {
+   "all": {
+    "n": 1,
+    "mean_delta_R": -1.119,
+    "sum_delta_R": -1.12,
+    "p_positive": 0.0,
+    "a_mean_R": 2.487,
+    "b_mean_R": 3.606,
+    "a_wins": 0,
+    "b_wins": 1
+   },
+   "retired_pre_fix": {
+    "n": 1,
+    "mean_delta_R": -1.119,
+    "sum_delta_R": -1.12,
+    "p_positive": 0.0,
+    "a_mean_R": 2.487,
+    "b_mean_R": 3.606,
+    "a_wins": 0,
+    "b_wins": 1
+   },
+   "post_fix": {
+    "n": 0
+   }
+  },
+  "F2-D2": {
+   "all": {
+    "n": 4,
+    "mean_delta_R": 0.0,
+    "sum_delta_R": 0.0,
+    "p_positive": 0.0,
+    "a_mean_R": -1.22,
+    "b_mean_R": -1.22,
+    "a_wins": 0,
+    "b_wins": 0
+   },
+   "retired_pre_fix": {
+    "n": 4,
+    "mean_delta_R": 0.0,
+    "sum_delta_R": 0.0,
+    "p_positive": 0.0,
+    "a_mean_R": -1.22,
+    "b_mean_R": -1.22,
+    "a_wins": 0,
+    "b_wins": 0
+   },
+   "post_fix": {
+    "n": 0
+   }
+  }
+ },
+ "best_of_bias": {
+  "all": {
+   "n_entries": 0
+  },
+  "post_fix": {
+   "n_entries": 0
+  }
+ }
+}

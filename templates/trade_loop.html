@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}SPARTA Trade Loop{% endblock %}
+
+{% block content %}
+<style>
+  .lp-wrap { color:#e6edf3; padding: 8px 0 32px; }
+  .lp-h1 { font-size:1.35rem; margin:0 0 4px; }
+  .lp-sub { color:#8b949e; font-size:.84rem; margin:0 0 12px; }
+  .lp-banner { background:#0d1f1a; border:1px solid #1f5a3a; color:#3fb950; border-radius:8px;
+               padding:10px 12px; margin:10px 0 16px; font-size:.8rem; font-weight:600; }
+  .lp-nav { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .lp-nav a { color:#58a6ff; font-size:.78rem; border:1px solid #30363d; border-radius:6px;
+              padding:4px 8px; text-decoration:none; background:#161b22; }
+  .lp-section { background:#0d1117; border:1px solid #30363d; border-radius:8px;
+                padding:14px 16px; margin:14px 0; overflow:auto; }
+  .lp-section > h2 { font-size:1.05rem; color:#58a6ff; margin:0 0 4px; }
+  .lp-meta { color:#8b949e; font-size:.7rem; margin:0 0 10px; }
+  .lp-md { font-size:.8rem; line-height:1.45; }
+  .lp-md h1 { font-size:1rem; color:#e6edf3; margin:12px 0 6px; }
+  .lp-md h2 { font-size:.92rem; color:#79c0ff; margin:12px 0 6px; }
+  .lp-md h3 { font-size:.85rem; color:#79c0ff; margin:10px 0 4px; }
+  .lp-md table { border-collapse:collapse; margin:6px 0 10px; font-size:.72rem; }
+  .lp-md th, .lp-md td { border-bottom:1px solid #21262d; padding:3px 7px; text-align:left; vertical-align:top; }
+  .lp-md th { color:#8b949e; white-space:nowrap; }
+  .lp-md code { background:#161b22; padding:0 3px; border-radius:3px; }
+  .lp-md pre { background:#161b22; padding:8px; border-radius:6px; overflow:auto; }
+  .lp-md ul { padding-left:18px; }
+  .lp-error { color:#ff7b72; background:#1f1313; border:1px solid #6e2e2e; padding:8px; border-radius:6px; font-size:.78rem; }
+  .lp-missing { color:#d29922; font-size:.78rem; }
+</style>
+
+<div class="lp-wrap">
+  <h1 class="lp-h1">SPARTA Trade Loop</h1>
+  <p class="lp-sub">The self-improving paper-trading loop, as it stands this morning: status digest,
+    hypothesis ledger with replay priors, calibration of the loop itself, the paired exit experiment,
+    and the replay studies. Read-only render of reports/trade_learning.</p>
+  <div class="lp-banner">{{ payload.banner }}</div>
+
+  <div class="lp-nav">
+    {% for s in payload.sections %}<a href="#{{ s.key }}">{{ s.title }}</a>{% endfor %}
+  </div>
+
+  {% if payload.errors %}
+  <div class="lp-error">{% for e in payload.errors %}{{ e }}<br>{% endfor %}</div>
+  {% endif %}
+
+  {% for s in payload.sections %}
+  <div class="lp-section" id="{{ s.key }}">
+    <h2>{{ s.title }}</h2>
+    <p class="lp-meta">{{ s.path }}{% if s.mtime %} · updated {{ s.mtime }}{% endif %}</p>
+    {% if s.html %}<div class="lp-md">{{ s.html | safe }}</div>
+    {% else %}<p class="lp-missing">not generated yet ({{ s.note }})</p>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

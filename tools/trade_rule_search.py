@@ -58,6 +58,14 @@ CUTS: tuple[tuple[str, ...], ...] = (
     ("exchange",),
     ("weekday",),
     ("hold_bucket",),
+    # 2026-10-20: entry-bar feature buckets from the bot's context log (tools/trade_features.py);
+    # single-field cuts only, every extra cell costs Bonferroni power
+    ("body_bucket",),
+    ("atr_expansion_bucket",),
+    ("volume_bucket",),
+    ("range_pos_bucket",),
+    ("ema20_dist_bucket",),
+    ("ema200_side",),
 )
 MIN_CELL_SIGNALS = 5
 P_ADJ_MAX = 0.10

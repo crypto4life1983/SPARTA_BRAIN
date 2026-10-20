@@ -57,9 +57,13 @@ By half-year: +0.216 (2024-11..25-05), **-0.118** (2025-05..11), +0.103 (2025-11
 window and swing by a tenth of an R per trade from one half-year to the next. The current phase is
 the second losing phase in the window; the first lasted six months.
 
-What the one-slot bot captures of that pool (binance only): n=157 over the whole window, +9.6R,
-mean +0.061R, p=0.74. That is roughly +5R a year with ±10R swings. **This is the realistic
-expectation of the bot as built: about zero, with losing half-years that look exactly like now.**
+What the one-slot bot captures of that pool (binance only, one position per strategy AND the
+coordinator's one position per symbol, see the correction in section 4): n=152 over the whole
+window, +23.0R, mean +0.151R, p=0.94, about 1.1 trades a week. With three slots per strategy
+(the 2026-10-20 config change) the same model takes 406 trades, +47.4R, mean +0.117R, 3.0 a
+week: 2.7x the evidence at a slightly lower per-trade mean. Post-fix the one-slot model took 7
+closed trades for -3.2R. **This is the realistic expectation of the bot as built: a small positive
+drift with losing half-years that look exactly like now.**
 
 ## 2. Why it is losing now
 
@@ -95,12 +99,16 @@ forward on the bot's own timeouts and will answer on its own; this is the in-sam
 
 ## 4. Two facts about the design that no parameter changes
 
-**D, F and F2 are one entry with three exits.** F fired on the same bar as D in 1541 of 1665 F
-signals (93%); F2 in 1541 of 2327 (66%). The bot's four live strategies are, in practice, one
-Donchian breakout held three times with different exits, and the three exits are equivalent on
-history (D +0.047, F +0.080, F2 +0.064 per dedup trade). The post-fix journal shows it: XRP, OP and
-ENJ each appear as D, F and F2 rows. Every loss is taken three times. Reducing that is a design
-decision, not a backtest question; the backtest only says the three exits do not differ.
+**D, F and F2 are one entry with three exits, but the live book takes only one of them.**
+F fired on the same bar as D in 1541 of 1665 F signals (93%); F2 in 1541 of 2327 (66%), and the
+three exits are equivalent on history (D +0.047, F +0.080, F2 +0.064 per dedup trade). The first
+version of this report said the journal holds every such entry three times; that was wrong and is
+corrected here (same day). The bot's coordinator enforces one open position per symbol
+(`config/trade_coordinator_config.json`, `max_open_trades_per_symbol: 1`; 119 `COORDINATOR BLOCKED
+... duplicate_symbol_exposure` lines in the bot log), so when D opens XRP, F and F2 are refused on
+XRP. The pool numbers above count the three strategies separately; the one-slot model now includes
+the per-symbol lock. Consequence for the loop: the "free paired exit experiment" does not exist in
+the live journal (tools/trade_exit_pairs.py finds no D/F pairs post-fix), only in the replay.
 
 **One slot per strategy makes the book a near-random draw from the pool.** The slot takes the first
 symbol in config order and then sits in it for up to 20 days while the pool produces 15 allowed

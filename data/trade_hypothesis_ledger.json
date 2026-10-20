@@ -14,7 +14,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "mean_R_after": -0.5526,
         "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -105,7 +105,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": 1.011,
         "delta_R_sum": 2.022,
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "losses": 0,
         "n_rows": 2,
         "n_signals": 2,
@@ -179,7 +179,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -231,7 +231,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "mean_R_after": -0.5526,
         "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -324,7 +324,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": -1.0322,
         "delta_R_sum": -1.0322,
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "losses": 1,
         "n_rows": 1,
         "n_signals": 1,
@@ -389,7 +389,7 @@
         "baseline_n": 10,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
         "baseline_valid_from": "2026-09-15",
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "mean_R_after": -1.059,
         "n_after": 2,
         "note": "applied in obsidian-trade-logger 63ecd30: D/E/D2/E2 half off at 1R + breakeven (PARTIAL_R 1.0); G keeps 2R (range stop, sizing gap); F ladder unchanged; operator go 2026-10-14 | 26ef50d same day: trades.sl_dist_orig stored at open, G joins the 1R trigger (scope now all manage_de strategies)",
@@ -485,7 +485,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "mean_R_after": -0.5526,
         "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -593,7 +593,7 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "mean_R_after": -0.5526,
         "n_after": 12,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
@@ -679,13 +679,13 @@
     },
     "unblock__SLOT_OCCUPIED": {
       "forward": {
-        "bootstrap_p_positive": null,
-        "delta_R_mean": -0.1645,
-        "delta_R_sum": -0.6581,
-        "last_eval_as_of": "2026-10-18",
-        "losses": 2,
-        "n_rows": 4,
-        "n_signals": 4,
+        "bootstrap_p_positive": 0.293,
+        "delta_R_mean": -0.065,
+        "delta_R_sum": -0.5854,
+        "last_eval_as_of": "2026-10-20",
+        "losses": 3,
+        "n_rows": 9,
+        "n_signals": 9,
         "samples": [
           {
             "classification": "GOOD_BLOCK",
@@ -730,16 +730,76 @@
             "strategy": "D",
             "symbol": "TRXUSDT",
             "trade_id": null
+          },
+          {
+            "classification": "GOOD_BLOCK",
+            "close_date": "2026-10-12",
+            "delta_R": -0.5045,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "1e2adc592595434fa5f03b31ea3c6786",
+            "strategy": "D",
+            "symbol": "TRXUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "NEUTRAL_BLOCK",
+            "close_date": "2026-10-16",
+            "delta_R": 0.0952,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "6510cec37656467cb61e86d7e3c93641",
+            "strategy": "D",
+            "symbol": "KAVAUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "BAD_BLOCK",
+            "close_date": "2026-10-16",
+            "delta_R": 0.3059,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "d5483002396745339a81779a6f4d5bc8",
+            "strategy": "D",
+            "symbol": "ZILUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "NEUTRAL_BLOCK",
+            "close_date": "2026-10-17",
+            "delta_R": 0.1193,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "87129703777648c4b85162d34ecac40c",
+            "strategy": "D",
+            "symbol": "ZILUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "NEUTRAL_BLOCK",
+            "close_date": "2026-10-18",
+            "delta_R": 0.0568,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "d266e8936df54088a33b1924ae5b8a8b",
+            "strategy": "E",
+            "symbol": "ZILUSDT",
+            "trade_id": null
           }
         ],
         "signal_keys_evaluated": [
+          "1e2adc592595434fa5f03b31ea3c6786",
           "5a09919d921247128df698311e02fd80",
+          "6510cec37656467cb61e86d7e3c93641",
           "81c9e3d529d54e78a0813ab9fbe3116b",
           "83f0da2ed6aa4a2ba78522be4a6d0846",
+          "87129703777648c4b85162d34ecac40c",
+          "d266e8936df54088a33b1924ae5b8a8b",
+          "d5483002396745339a81779a6f4d5bc8",
           "fd3ce3e76e2b4f3889fc2f3308017a50"
         ],
         "trade_ids_evaluated": [],
-        "wins": 2
+        "wins": 6
       },
       "history": [
         {
@@ -777,7 +837,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-18",
+        "last_eval_as_of": "2026-10-20",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -819,13 +879,13 @@
     },
     "unblock__TREND_UP_BLOCKS_SHORT": {
       "forward": {
-        "bootstrap_p_positive": null,
-        "delta_R_mean": 0.0628,
-        "delta_R_sum": 0.1885,
-        "last_eval_as_of": "2026-10-18",
-        "losses": 1,
-        "n_rows": 3,
-        "n_signals": 3,
+        "bootstrap_p_positive": 0.9535,
+        "delta_R_mean": 0.0594,
+        "delta_R_sum": 0.4753,
+        "last_eval_as_of": "2026-10-20",
+        "losses": 3,
+        "n_rows": 8,
+        "n_signals": 8,
         "samples": [
           {
             "classification": "NEUTRAL_BLOCK",
@@ -859,15 +919,75 @@
             "strategy": "D",
             "symbol": "ZECUSDT",
             "trade_id": null
+          },
+          {
+            "classification": "NEUTRAL_BLOCK",
+            "close_date": "2026-10-12",
+            "delta_R": 0.0817,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "e31a1f39580742d6acce7ab7e8277cae",
+            "strategy": "D",
+            "symbol": "HBARUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "NEUTRAL_BLOCK",
+            "close_date": "2026-10-12",
+            "delta_R": -0.0915,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "70e0734e773c4a0b963cd616235b42d7",
+            "strategy": "D",
+            "symbol": "UNIUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "NEUTRAL_BLOCK",
+            "close_date": "2026-10-14",
+            "delta_R": -0.0472,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "8fe4f157d2b84d42919d4bad1829ff75",
+            "strategy": "D",
+            "symbol": "LTCUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "BAD_BLOCK",
+            "close_date": "2026-10-14",
+            "delta_R": 0.1768,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "bf0bd4baaad648bea7986ed93f1d15ea",
+            "strategy": "D",
+            "symbol": "THETAUSDT",
+            "trade_id": null
+          },
+          {
+            "classification": "BAD_BLOCK",
+            "close_date": "2026-10-15",
+            "delta_R": 0.167,
+            "pnl_r": null,
+            "row_ids": [],
+            "signal": "038aa00b7ec0465a83fe1e7c9ffa990a",
+            "strategy": "D",
+            "symbol": "COMPUSDT",
+            "trade_id": null
           }
         ],
         "signal_keys_evaluated": [
+          "038aa00b7ec0465a83fe1e7c9ffa990a",
+          "70e0734e773c4a0b963cd616235b42d7",
           "87829c7793114c7ebed20fd15dd24ca3",
+          "8fe4f157d2b84d42919d4bad1829ff75",
           "8ffc3e4eee3744d0b6ef25dbdf0e007e",
-          "cbe7e1f1c15644e28df841436143a6eb"
+          "bf0bd4baaad648bea7986ed93f1d15ea",
+          "cbe7e1f1c15644e28df841436143a6eb",
+          "e31a1f39580742d6acce7ab7e8277cae"
         ],
         "trade_ids_evaluated": [],
-        "wins": 2
+        "wins": 5
       },
       "history": [
         {
@@ -901,7 +1021,7 @@
       }
     }
   },
-  "last_updated_as_of": "2026-10-18",
+  "last_updated_as_of": "2026-10-20",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",
