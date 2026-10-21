@@ -28,6 +28,7 @@ SECTIONS: tuple[tuple[str, str, str], ...] = (
     ("rule_search", "Rule search (multiple-testing corrected)", "rule_search.md"),
     ("replay_variants", "Replay study: rules + 4 variants (2026-10-20)", "replay_rules_variants_2026-10-20.md"),
     ("replay_portfolio", "Replay study: portfolio-level rules (2026-10-20)", "replay_portfolio_rules_2026-10-20.md"),
+    ("replay_bounce", "Replay study: support-bounce entries the bot does not take (2026-10-21)", "replay_bounce_2026-10-21.md"),
     ("rollback_spec", "Pre-registered rollback procedure (2026-10-18)", "spec_rollback_procedure_2026-10-18.md"),
     ("slots_spec", "Spec: paper slots per strategy (2026-10-20)", "spec_paper_slots_2026-10-20.md"),
 )
