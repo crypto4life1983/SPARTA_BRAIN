@@ -271,11 +271,12 @@ def kind_for_id(sid: str) -> tuple[str, dict[str, Any]]:
         # generic cell block emitted by tools/trade_rule_search.py:
         # blockwhere__<field>=<value>__<field>=<value>  (fields: strategy, direction,
         # regime_at_open, exchange, weekday, hold_bucket)
-        where: dict[str, str] = {}
+        where: dict[str, Any] = {}
         for part in sid[len("blockwhere__"):].split("__"):
             if "=" in part:
                 k, v = part.split("=", 1)
-                where[k] = v
+                # 2026-10-26: "a|b" = block when the field is any of these values
+                where[k] = v.split("|") if "|" in v else v
         return ("block_where", {"where": where}) if where else ("unknown", {})
     if sid.startswith(UNBLOCK_PREFIX):
         reason = sid[len(UNBLOCK_PREFIX):].strip().upper()
@@ -811,9 +812,51 @@ def evaluate_block_where(hyp: dict[str, Any], trade: dict[str, Any]) -> float | 
         return None
     for field, want in where.items():
         got = trade_field(trade, field)
-        if got is None or str(got) != str(want):
+        if got is None or not where_matches(got, want):
             return None
     return -v
+
+
+def where_matches(got: Any, want: Any) -> bool:
+    """A block_where cell value is a single value or a list of values (any of)."""
+    if isinstance(want, (list, tuple, set)):
+        return str(got) in {str(w) for w in want}
+    return str(got) == str(want)
+
+
+def where_sid(where: dict[str, Any]) -> str:
+    return "blockwhere__" + "__".join(
+        f"{f}={'|'.join(str(x) for x in v) if isinstance(v, (list, tuple)) else v}" for f, v in where.items())
+
+
+def register_block_where(ledger: dict[str, Any], where: dict[str, Any], as_of: str,
+                         evidence: dict[str, Any], label: str, note: str = "") -> str | None:
+    """Register a generic cell block as SHADOW with the given frozen evidence (for example a
+    replay prior). Existing ids are left untouched. Returns the id when newly registered."""
+    sid = where_sid(where)
+    hyps = ledger.setdefault("hypotheses", {})
+    if not where or sid in hyps:
+        return None
+    desc = ", ".join(f"{f} in {'|'.join(map(str, v))}" if isinstance(v, (list, tuple)) else f"{f}={v}" for f, v in where.items())
+    hyps[sid] = {
+        "id": sid,
+        "rule": f"block entries where {desc}",
+        "kind": "block_where",
+        "params": {"where": {f: (list(v) if isinstance(v, (list, tuple)) else v) for f, v in where.items()}},
+        "registered_as_of": as_of,
+        "registered_evidence": dict(evidence),
+        "registered_label": label,
+        "status": "SHADOW",
+        "forward": {
+            "n_signals": 0, "n_rows": 0, "delta_R_sum": 0.0, "delta_R_mean": None,
+            "wins": 0, "losses": 0, "bootstrap_p_positive": None, "last_eval_as_of": None,
+            "trade_ids_evaluated": [], "signal_keys_evaluated": [], "samples": [],
+        },
+        "thresholds": dict(ledger.get("default_thresholds", DEFAULT_THRESHOLDS)),
+        "history": [{"as_of": as_of, "status": "SHADOW",
+                     "note": "registered by operator; evidence frozen at registration" + (f"; {note}" if note else "")}],
+    }
+    return sid
 
 
 def evaluate_extend_timeout(hyp: dict[str, Any], trade: dict[str, Any],

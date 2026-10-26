@@ -23,6 +23,7 @@ SECTIONS: tuple[tuple[str, str, str], ...] = (
     ("status", "Loop status (nightly digest)", "LOOP_STATUS.md"),
     ("ledger", "Hypothesis ledger (forward scores + replay priors)", "hypothesis_ledger.md"),
     ("calibration", "Calibration of the loop itself", "ledger_calibration.md"),
+    ("loss_diagnosis", "Why the book is losing and what was applied (2026-10-26)", "loss_diagnosis_2026-10-26.md"),
     ("priors", "Replay priors per hypothesis", "replay_priors.md"),
     ("exit_pairs", "Paired exit experiment (D/F/F2)", "exit_pairs.md"),
     ("rule_search", "Rule search (multiple-testing corrected)", "rule_search.md"),

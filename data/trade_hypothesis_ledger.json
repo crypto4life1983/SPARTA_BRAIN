@@ -14,9 +14,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-20",
-        "mean_R_after": -0.5526,
-        "n_after": 12,
+        "last_eval_as_of": "2026-10-26",
+        "mean_R_after": -0.5878,
+        "n_after": 13,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -104,11 +104,11 @@
       "forward": {
         "bootstrap_p_positive": null,
         "delta_R_mean": 1.011,
-        "delta_R_sum": 2.022,
-        "last_eval_as_of": "2026-10-20",
+        "delta_R_sum": 3.033,
+        "last_eval_as_of": "2026-10-26",
         "losses": 0,
-        "n_rows": 2,
-        "n_signals": 2,
+        "n_rows": 3,
+        "n_signals": 3,
         "samples": [
           {
             "close_date": "2026-10-14",
@@ -129,17 +129,29 @@
             ],
             "signal": "2026-10-14|OPUSDT|long",
             "trade_id": 66
+          },
+          {
+            "close_date": "2026-10-26",
+            "delta_R": 1.011,
+            "pnl_r": -1.011,
+            "row_ids": [
+              72
+            ],
+            "signal": "2026-10-21|COMPUSDT|long",
+            "trade_id": 72
           }
         ],
         "signal_keys_evaluated": [
           "2026-10-10|ATOMUSDT|long",
-          "2026-10-14|OPUSDT|long"
+          "2026-10-14|OPUSDT|long",
+          "2026-10-21|COMPUSDT|long"
         ],
         "trade_ids_evaluated": [
           64,
-          66
+          66,
+          72
         ],
-        "wins": 2
+        "wins": 3
       },
       "history": [
         {
@@ -179,7 +191,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-20",
+        "last_eval_as_of": "2026-10-26",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -224,6 +236,91 @@
         "min_p_positive": 0.9
       }
     },
+    "blockwhere__volume_bucket=low|normal": {
+      "forward": {
+        "bootstrap_p_positive": null,
+        "delta_R_mean": null,
+        "delta_R_sum": 0.0,
+        "last_eval_as_of": "2026-10-26",
+        "losses": 0,
+        "n_rows": 0,
+        "n_signals": 0,
+        "samples": [],
+        "signal_keys_evaluated": [],
+        "trade_ids_evaluated": [],
+        "wins": 0
+      },
+      "history": [
+        {
+          "as_of": "2026-10-26",
+          "note": "registered by operator; evidence frozen at registration; operator 2026-10-26 ('find why, find a solution, apply it with my approval'); applied NOTHING live: this is the only cell the replay supports and it is shadow-scored forward; needs the bot's volume_ratio field (patched 2026-10-26)",
+          "status": "SHADOW"
+        }
+      ],
+      "id": "blockwhere__volume_bucket=low|normal",
+      "kind": "block_where",
+      "params": {
+        "where": {
+          "volume_bucket": [
+            "low",
+            "normal"
+          ]
+        }
+      },
+      "registered_as_of": "2026-10-26",
+      "registered_evidence": {
+        "bonferroni_bar": 0.9982,
+        "by_period": {
+          "2024-11-01..2025-05-01": {
+            "blocked_mean": 0.14,
+            "kept_mean": 0.289,
+            "n_blocked": 295,
+            "n_kept": 311
+          },
+          "2025-05-01..2025-11-01": {
+            "blocked_mean": -0.326,
+            "kept_mean": 0.137,
+            "n_blocked": 457,
+            "n_kept": 373
+          },
+          "2025-11-01..2026-05-01": {
+            "blocked_mean": 0.104,
+            "kept_mean": 0.101,
+            "n_blocked": 406,
+            "n_kept": 189
+          },
+          "2026-05-01..2026-09-15": {
+            "blocked_mean": 0.368,
+            "kept_mean": 0.036,
+            "n_blocked": 301,
+            "n_kept": 154
+          },
+          "2026-09-15..2027-01-01": {
+            "blocked_mean": -0.337,
+            "kept_mean": -0.083,
+            "n_blocked": 31,
+            "n_kept": 76
+          }
+        },
+        "cells_scanned": 28,
+        "delta_kept_minus_blocked": 0.121,
+        "mean_R_blocked": 0.023,
+        "mean_R_kept": 0.145,
+        "n_blocked": 1490,
+        "n_kept": 1103,
+        "p_kept_better": 0.996,
+        "source": "replay_2026-10-20 (42 symbols, 2024-01..2026-10-19, dedup, live rules)",
+        "verdict_at_registration": "best cell of a 28-cell post-hoc scan; short of the Bonferroni bar and the post-fix half-year sign flips; SHADOW only"
+      },
+      "registered_label": "REPLAY_PRIOR_ONLY",
+      "rule": "block entries where volume_bucket in low|normal",
+      "status": "SHADOW",
+      "thresholds": {
+        "max_p_positive_reject": 0.5,
+        "min_forward_signals": 20,
+        "min_p_positive": 0.9
+      }
+    },
     "enforce_hard_stop": {
       "applied": {
         "applied_as_of": "2026-09-15",
@@ -231,9 +328,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-20",
-        "mean_R_after": -0.5526,
-        "n_after": 12,
+        "last_eval_as_of": "2026-10-26",
+        "mean_R_after": -0.5878,
+        "n_after": 13,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -324,7 +421,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": -1.0322,
         "delta_R_sum": -1.0322,
-        "last_eval_as_of": "2026-10-20",
+        "last_eval_as_of": "2026-10-26",
         "losses": 1,
         "n_rows": 1,
         "n_signals": 1,
@@ -389,9 +486,9 @@
         "baseline_n": 10,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
         "baseline_valid_from": "2026-09-15",
-        "last_eval_as_of": "2026-10-20",
-        "mean_R_after": -1.059,
-        "n_after": 2,
+        "last_eval_as_of": "2026-10-26",
+        "mean_R_after": -1.043,
+        "n_after": 3,
         "note": "applied in obsidian-trade-logger 63ecd30: D/E/D2/E2 half off at 1R + breakeven (PARTIAL_R 1.0); G keeps 2R (range stop, sizing gap); F ladder unchanged; operator go 2026-10-14 | 26ef50d same day: trades.sl_dist_orig stored at open, G joins the 1R trigger (scope now all manage_de strategies)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -485,9 +582,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-20",
-        "mean_R_after": -0.5526,
-        "n_after": 12,
+        "last_eval_as_of": "2026-10-26",
+        "mean_R_after": -0.5878,
+        "n_after": 13,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -593,9 +690,9 @@
         "baseline_mean_R": null,
         "baseline_n": 0,
         "baseline_status": "NOT_EVALUABLE_INSUFFICIENT_POST_FIX_SAMPLE",
-        "last_eval_as_of": "2026-10-20",
-        "mean_R_after": -0.5526,
-        "n_after": 12,
+        "last_eval_as_of": "2026-10-26",
+        "mean_R_after": -0.5878,
+        "n_after": 13,
         "note": "applied in obsidian-trade-logger commit c9a8f7b (bar-aware stops, regime fail-closed, 2R partial, D2 watch)",
         "p_after_ge_baseline": null,
         "regression_flag": false,
@@ -682,7 +779,7 @@
         "bootstrap_p_positive": 0.293,
         "delta_R_mean": -0.065,
         "delta_R_sum": -0.5854,
-        "last_eval_as_of": "2026-10-20",
+        "last_eval_as_of": "2026-10-26",
         "losses": 3,
         "n_rows": 9,
         "n_signals": 9,
@@ -837,7 +934,7 @@
         "bootstrap_p_positive": null,
         "delta_R_mean": null,
         "delta_R_sum": 0.0,
-        "last_eval_as_of": "2026-10-20",
+        "last_eval_as_of": "2026-10-26",
         "losses": 0,
         "n_rows": 0,
         "n_signals": 0,
@@ -882,7 +979,7 @@
         "bootstrap_p_positive": 0.9535,
         "delta_R_mean": 0.0594,
         "delta_R_sum": 0.4753,
-        "last_eval_as_of": "2026-10-20",
+        "last_eval_as_of": "2026-10-26",
         "losses": 3,
         "n_rows": 8,
         "n_signals": 8,
@@ -1021,7 +1118,7 @@
       }
     }
   },
-  "last_updated_as_of": "2026-10-20",
+  "last_updated_as_of": "2026-10-26",
   "posture": {
     "broker": "NONE",
     "confirmed_means": "recommendation for the operator; nothing applied automatically",

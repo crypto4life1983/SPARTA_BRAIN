@@ -114,7 +114,7 @@ def prior_for(hyp: dict[str, Any], taken: list[dict[str, Any]], blocked: list[di
             {"strategy": p["strategy"]} if "strategy" in p else {"direction": p.get("direction"), "regime_at_open": p.get("regime")})
         if "exchange" in where and str(where["exchange"]).lower() != "binance":
             return {"n": 0, "note": "replay is binance only"}
-        sel = [s for s in taken if all(str(signal_field(s, f)) == str(v) for f, v in where.items() if f != "exchange")]
+        sel = [s for s in taken if all(thl.where_matches(signal_field(s, f), v) for f, v in where.items() if f != "exchange")]
         return _stats([-s["res_base"]["R"] for s in sel], [s["date"] for s in sel]) | {"rule": f"block where {where}"}
     if kind == "unblock":
         reason = str(p.get("counted_reason") or "")
@@ -202,7 +202,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--run-dir", default=None, help="replay run directory (default: newest replay_* under reports/trade_learning)")
     ap.add_argument("--as-of", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     a = ap.parse_args(argv)
-    run_dir = Path(a.run_dir) if a.run_dir else sorted(REPORT_DIR.glob("replay_*/"))[-1]
+    run_dir = Path(a.run_dir) if a.run_dir else sorted(REPORT_DIR.glob("replay_[0-9]*/"))[-1]   # dated engine runs only (not replay_bounce_*)
     ledger = thl.load_ledger()
     res = build(ledger, load_signals(run_dir), a.as_of, run_dir.name)
     (REPORT_DIR / thl.REPLAY_PRIORS_NAME).write_text(json.dumps(res, indent=1), encoding="utf-8")

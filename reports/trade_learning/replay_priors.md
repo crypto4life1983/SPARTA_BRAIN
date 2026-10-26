@@ -1,4 +1,4 @@
-# Replay priors for the hypothesis ledger — 2026-10-20
+# Replay priors for the hypothesis ledger — 2026-10-26
 
 **READ ONLY · OBSERVATION ONLY · NO LIVE READINESS CLAIM · NO STRATEGY APPROVAL · NO BROKER / NO ORDER**
 
@@ -9,6 +9,7 @@ An in-sample prior per hypothesis from the replay of the bot's own code (replay_
 | block_long_in_TREND_DOWN | - | 0 | - | - | - |  |
 | blockwhere__hold_bucket=short | +0.680 | 449 | 1.0 | yes | 2024-11 +0.44 (n=121), 2025-05 +0.81 (n=135), 2025-11 +0.90 (n=82), 2026-05 +0.59 (n=85), 2026-09 +0.73 (n=26) | block where {'hold_bucket': 'short'} |
 | blockwhere__strategy=D__direction=short | -0.034 | 509 | 0.215 | no | 2024-11 -0.17 (n=104), 2025-05 +0.18 (n=138), 2025-11 -0.06 (n=172), 2026-05 -0.21 (n=90), 2026-09 +1.03 (n=5) | block where {'direction': 'short', 'strategy': 'D'} |
+| blockwhere__volume_bucket=low|normal | -0.023 | 1490 | 0.218 | no | 2024-11 -0.14 (n=295), 2025-05 +0.33 (n=457), 2025-11 -0.10 (n=406), 2026-05 -0.37 (n=301), 2026-09 +0.34 (n=31) | block where {'volume_bucket': ['low', 'normal']} |
 | enforce_hard_stop | - | 0 | - | - | - | replay never breaches the cap |
 | extend_timeout__40 | +0.002 | 1160 | 0.55 | no | 2024-11 -0.01 (n=250), 2025-05 +0.03 (n=332), 2025-11 +0.04 (n=341), 2026-05 -0.02 (n=220), 2026-09 -0.70 (n=17) | hold 40 days instead of 20 on 20-day timeouts |
 | partial_tp_or_trail_1R | - | 0 | - | - | - | replay exits embed the live partial rule |
